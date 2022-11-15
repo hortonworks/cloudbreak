@@ -1,24 +1,24 @@
 package com.sequenceiq.cloudbreak.validation;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HueWorkaroundValidatorServiceTest {
 
     private HueWorkaroundValidatorService underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         underTest = new HueWorkaroundValidatorService();
     }
@@ -32,7 +32,7 @@ public class HueWorkaroundValidatorServiceTest {
     public void validateBlueprintRequestWhenHueIsPresentedAndHueHostgroupIsTooLongMustThrowException() {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateForBlueprintRequest(Set.of("master123456")));
-        Assert.assertEquals("Hue does not support CDP Data Hubs where hostgroup name is longer than 7 characters. "
+        assertEquals("Hue does not support CDP Data Hubs where hostgroup name is longer than 7 characters. "
                         + "Please retry creating the template by shortening the hostgroup name: master123456  under 7 characters.",
                 badRequestException.getMessage());
     }
@@ -42,7 +42,7 @@ public class HueWorkaroundValidatorServiceTest {
         String stackName = "iamveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylong";
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateForStackRequest(Set.of("master"), stackName));
-        Assert.assertEquals("Your Data Hub contains Hue. Hue does not support CDP Data Hubs where Data Hub name is longer than 20 characters. "
+        assertEquals("Your Data Hub contains Hue. Hue does not support CDP Data Hubs where Data Hub name is longer than 20 characters. "
                         + "Please retry creating Data Hub using a Data Hub name that is shorter than 20 characters.",
                 badRequestException.getMessage());
     }
@@ -53,7 +53,7 @@ public class HueWorkaroundValidatorServiceTest {
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateForStackRequest(Set.of("master123456"), stackName));
-        Assert.assertEquals("Hue does not support CDP Data Hubs where hostgroup name is longer than 7 characters. "
+        assertEquals("Hue does not support CDP Data Hubs where hostgroup name is longer than 7 characters. "
                         + "Please retry creating the template by shortening the hostgroup name: master123456  under 7 characters.",
                 badRequestException.getMessage());
     }
@@ -71,7 +71,7 @@ public class HueWorkaroundValidatorServiceTest {
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateForEnvironmentDomainName(Set.of("master"), endpointName));
-        Assert.assertEquals("Your Data Hub contains Hue. Hue does not support CDP Data Hubs where the fully qualified domain name of a "
+        assertEquals("Your Data Hub contains Hue. Hue does not support CDP Data Hubs where the fully qualified domain name of a "
                         + "VM is longer than 63 characters. Generated hostname: "
                         + "thisisfine.thisisfinethisisfinethisisfinethisisfinethisisfinethisisfinethisisfinethisisfine. "
                         + "Please retry creating Data Hub using a Data Hub name that is shorter than 20 characters and a"

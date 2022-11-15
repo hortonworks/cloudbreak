@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.common.tx;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ public class HibernateStatementStatisticsTest {
 
         String log = underTest.constructLogline();
 
-        assertEquals("Number of executed queries does not match", 2, underTest.getQueryCount());
+        assertEquals(2, underTest.getQueryCount(), "Number of executed queries does not match");
         assertThat(log, containsString("preparing 1 JDBC statements"));
         assertThat(log, containsString("executing 2 JDBC statements"));
     }

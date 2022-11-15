@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.validation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -7,9 +10,8 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -17,7 +19,7 @@ public class ChoiceValidatorTest {
 
     private static Validator validator;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
@@ -27,21 +29,21 @@ public class ChoiceValidatorTest {
     public void passSimple1() {
         DummyClass dummyObject = new DummyClass(1);
         Set<ConstraintViolation<DummyClass>> violations = validator.validate(dummyObject);
-        Assert.assertTrue(violations.isEmpty());
+        assertTrue(violations.isEmpty());
     }
 
     @Test
     public void passSimple2() {
         DummyClass dummyObject = new DummyClass(2);
         Set<ConstraintViolation<DummyClass>> violations = validator.validate(dummyObject);
-        Assert.assertTrue(violations.isEmpty());
+        assertTrue(violations.isEmpty());
     }
 
     @Test
     public void failSimple3() {
         DummyClass dummyObject = new DummyClass(3);
         Set<ConstraintViolation<DummyClass>> violations = validator.validate(dummyObject);
-        Assert.assertFalse(violations.isEmpty());
+        assertFalse(violations.isEmpty());
     }
 
     static class DummyClass {

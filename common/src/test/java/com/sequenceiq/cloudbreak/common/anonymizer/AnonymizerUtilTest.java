@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.common.anonymizer;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AnonymizerUtilTest {
 
@@ -11,20 +12,20 @@ public class AnonymizerUtilTest {
 
     @Test
     public void testNullInput() {
-        Assert.assertNull(anonymize(null));
+        assertNull(anonymize(null));
     }
 
     @Test
     public void testHidePasswordSingleQuote() {
         String testData = " DC=hortonworks,DC=com '--ldap-manager-password=2#KQ01DLbUdljJ!AVs' --ldap-sync-usern' sd dsds '";
-        Assert.assertEquals(" DC=hortonworks,DC=com '--ldap-manager-password=" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
+        assertEquals(" DC=hortonworks,DC=com '--ldap-manager-password=" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
                 anonymize(testData));
     }
 
     @Test
     public void testCapitalHidePasswordSingleQuote() {
         String testData = " DC=hortonworks,DC=com '--ldap-manager-PASSWORD=2#KQ01DLbUdljJ!AVs' --ldap-sync-usern' sd dsds '";
-        Assert.assertEquals(" DC=hortonworks,DC=com '--ldap-manager-PASSWORD=" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
+        assertEquals(" DC=hortonworks,DC=com '--ldap-manager-PASSWORD=" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
                 anonymize(testData));
     }
 
@@ -103,41 +104,41 @@ public class AnonymizerUtilTest {
                 + "export \"test6_secret\":\"****\"\n"
                 + "export \"test6_key\":\"****\"\n"
                 + "export \"test6_credential\":\"****\"\n";
-        Assert.assertEquals(expected, anonymize(testData));
+        assertEquals(expected, anonymize(testData));
     }
 
     @Test
     public void testHidePasswordDoubleQuote() {
         String testData = " DC=hortonworks,DC=com \"--ldap-manager-password=2#KQ01DLbUdljJ!AVs\" --ldap-sync-usern\" sd dsds \"";
-        Assert.assertEquals(" DC=hortonworks,DC=com \"--ldap-manager-password=" + REPLACEMENT + "\" --ldap-sync-usern\" sd dsds \"",
+        assertEquals(" DC=hortonworks,DC=com \"--ldap-manager-password=" + REPLACEMENT + "\" --ldap-sync-usern\" sd dsds \"",
                 anonymize(testData));
     }
 
     @Test
     public void testCapitalHidePasswordDoubleQuote() {
         String testData = " DC=hortonworks,DC=com \"--ldap-manager-PASSWORD=2#KQ01DLbUdljJ!AVs\" --ldap-sync-usern\" sd dsds \"";
-        Assert.assertEquals(" DC=hortonworks,DC=com \"--ldap-manager-PASSWORD=" + REPLACEMENT + "\" --ldap-sync-usern\" sd dsds \"",
+        assertEquals(" DC=hortonworks,DC=com \"--ldap-manager-PASSWORD=" + REPLACEMENT + "\" --ldap-sync-usern\" sd dsds \"",
                 anonymize(testData));
     }
 
     @Test
     public void testHidePasswordNoQuotes() {
         String testData = " DC=hortonworks,DC=com --ldap-manager-password=2#KQ01DLbUdljJ!AVs --ldap-sync-usern' sd dsds '";
-        Assert.assertEquals(" DC=hortonworks,DC=com --ldap-manager-password=" + REPLACEMENT + " --ldap-sync-usern' sd dsds '",
+        assertEquals(" DC=hortonworks,DC=com --ldap-manager-password=" + REPLACEMENT + " --ldap-sync-usern' sd dsds '",
                 anonymize(testData));
     }
 
     @Test
     public void testCapitalHidePasswordNoQuotes() {
         String testData = " DC=hortonworks,DC=com --ldap-manager-PASSWORD=2#KQ01DLbUdljJ!AVs --ldap-sync-usern' sd dsds '";
-        Assert.assertEquals(" DC=hortonworks,DC=com --ldap-manager-PASSWORD=" + REPLACEMENT + " --ldap-sync-usern' sd dsds '",
+        assertEquals(" DC=hortonworks,DC=com --ldap-manager-PASSWORD=" + REPLACEMENT + " --ldap-sync-usern' sd dsds '",
                 anonymize(testData));
     }
 
     @Test
     public void testCapitalHidePasswordEqualsSingleQuotes() {
         String testData = " DC=hortonworks,DC=com --ldap-manager-PASSWORD='2#KQ01DLbUdljJ!AVs' --ldap-sync-usern' sd dsds '";
-        Assert.assertEquals(" DC=hortonworks,DC=com --ldap-manager-PASSWORD='" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
+        assertEquals(" DC=hortonworks,DC=com --ldap-manager-PASSWORD='" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
                 anonymize(testData));
     }
 
@@ -145,7 +146,7 @@ public class AnonymizerUtilTest {
     public void testHideInJson() {
         String testData = "username\":\"admin\",\"external_ranger_admin_password\":\"rangerpassword123\"}}},"
                 + "{\"admin-properties\":{\"properties\":{\"db_root_user\":\"rangerroot\",\"db_root_password\":\"rangerpass\",\"db_host\":\"localhost\"}}}";
-        Assert.assertEquals("username\":\"admin\",\"external_ranger_admin_password\":\"" + REPLACEMENT + "\"}}},"
+        assertEquals("username\":\"admin\",\"external_ranger_admin_password\":\"" + REPLACEMENT + "\"}}},"
                         + "{\"admin-properties\":{\"properties\":{\"db_root_user\":\"rangerroot\",\"db_root_password\":\""
                         + REPLACEMENT + "\",\"db_host\":\"localhost\"}}}",
                 anonymize(testData));
@@ -155,7 +156,7 @@ public class AnonymizerUtilTest {
     public void testAwsKeybasedJson() {
         String testData = "{\"cloudPlatform\":\"AWS\",\"description\":\"\",\"name\":\"anyad\",\"parameters\":{\"selector\":\"key-based\","
                 + "\"secretKey\":\"dontshowup\",\"accessKey\":\"dontshowup\"}}";
-        Assert.assertEquals("{\"cloudPlatform\":\"AWS\",\"description\":\"\",\"name\":\"anyad\",\"parameters\":{\"selector\":\"key-based\","
+        assertEquals("{\"cloudPlatform\":\"AWS\",\"description\":\"\",\"name\":\"anyad\",\"parameters\":{\"selector\":\"key-based\","
                         + "\"secretKey\":\"" + REPLACEMENT + "\",\"accessKey\":\"" + REPLACEMENT + "\"}}",
                 anonymize(testData));
     }
@@ -166,7 +167,7 @@ public class AnonymizerUtilTest {
                 + "\"core-site\":{\"fs.AbstractFileSystem.wasbs.impl\":\"org.apache.hadoop.fs.azure.Wasbs\",\"fs.AbstractFileSystem.wasb.impl\""
                 + ":\"org.apache.hadoop.fs.azure.Wasbs\",\"fs.azure.account.key.mmolnar.blob.core.windows.net\":\"dontshowup\","
                 + "\"fs.azure.selfthrottling.read.factor\":\"1.0\",\"fs.azure.selfthrottling.write.factor\":\"1.0\"}}";
-        Assert.assertEquals("{\"hive-site\":{\"hive.metastore.warehouse.dir\":\"wasb://asdf/mmolnar-v/apps/hive/warehouse\"},"
+        assertEquals("{\"hive-site\":{\"hive.metastore.warehouse.dir\":\"wasb://asdf/mmolnar-v/apps/hive/warehouse\"},"
                         + "\"core-site\":{\"fs.AbstractFileSystem.wasbs.impl\":\"org.apache.hadoop.fs.azure.Wasbs\",\"fs.AbstractFileSystem.wasb.impl\""
                         + ":\"org.apache.hadoop.fs.azure.Wasbs\",\"fs.azure.account.key.mmolnar.blob.core.windows.net\":\"" + REPLACEMENT + "\","
                         + "\"fs.azure.selfthrottling.read.factor\":\"1.0\",\"fs.azure.selfthrottling.write.factor\":\"1.0\"}}",
@@ -176,7 +177,7 @@ public class AnonymizerUtilTest {
     @Test
     public void testLdapPassword() {
         String testData = "ambari-server sync-ldap --all --ldap-sync-admin-name cloudbreak --ldap-sync-admin-password thisismypassword";
-        Assert.assertEquals("ambari-server sync-ldap --all --ldap-sync-admin-name cloudbreak --ldap-sync-admin-password " + REPLACEMENT,
+        assertEquals("ambari-server sync-ldap --all --ldap-sync-admin-name cloudbreak --ldap-sync-admin-password " + REPLACEMENT,
                 anonymize(testData));
     }
 
@@ -190,70 +191,70 @@ public class AnonymizerUtilTest {
                 + "        \"name\": \"hive-hive_metastore_database_password\",\n"
                 + "        \"value\": \"" + REPLACEMENT + "\"\n"
                 + "      },";
-        Assert.assertEquals(expectedData, anonymize(testData));
+        assertEquals(expectedData, anonymize(testData));
     }
 
     @Test
     public void testCmTemplatePasswordOneLine() {
         String testData = "{\"name\": \"hive-hive_metastore_database_password\",\"value\": \"Horton01\"},";
         String expectedData = "{\"name\": \"hive-hive_metastore_database_password\",\"value\": \"" + REPLACEMENT + "\"},";
-        Assert.assertEquals(expectedData, anonymize(testData));
+        assertEquals(expectedData, anonymize(testData));
 
     }
 
     @Test
     public void testHideSecretInJson() {
         String testData = "{\"name\":\"gateway_master_secret\",\"value\":\"7hiihnuqtlthgp57o6otvf04im\",\"ref\":null,\"variable\":null,\"autoConfig\":null}";
-        Assert.assertEquals("{\"name\":\"gateway_master_secret\",\"value\":\"" + REPLACEMENT + "\",\"ref\":null,\"variable\":null,\"autoConfig\":null}",
+        assertEquals("{\"name\":\"gateway_master_secret\",\"value\":\"" + REPLACEMENT + "\",\"ref\":null,\"variable\":null,\"autoConfig\":null}",
                 anonymize(testData));
     }
 
     @Test
     public void testHideAzureDbArmTemplateSecretsInJson() {
         String testData = "{\"type\": \"securestring\",\"defaultValue\" : \"7hiihnuqtlthgp57o6otvf04im\",\"minLength\"1}";
-        Assert.assertEquals("{\"type\": \"securestring\",\"defaultValue\" : \"" + REPLACEMENT + "\",\"minLength\"1}",
+        assertEquals("{\"type\": \"securestring\",\"defaultValue\" : \"" + REPLACEMENT + "\",\"minLength\"1}",
                 anonymize(testData));
     }
 
     @Test
     public void testHideSecretSingleQuote() {
         String testData = " DC=hortonworks,DC=com '--ldap-manager-secret=2#KQ01DLbUdljJ!AVs' --ldap-sync-usern' sd dsds '";
-        Assert.assertEquals(" DC=hortonworks,DC=com '--ldap-manager-secret=" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
+        assertEquals(" DC=hortonworks,DC=com '--ldap-manager-secret=" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
                 anonymize(testData));
     }
 
     @Test
     public void testCapitalHideSecretSingleQuote() {
         String testData = " DC=hortonworks,DC=com '--ldap-manager-SECRET=2#KQ01DLbUdljJ!AVs' --ldap-sync-usern' sd dsds '";
-        Assert.assertEquals(" DC=hortonworks,DC=com '--ldap-manager-SECRET=" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
+        assertEquals(" DC=hortonworks,DC=com '--ldap-manager-SECRET=" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
                 anonymize(testData));
     }
 
     @Test
     public void testHideSecretDoubleQuote() {
         String testData = " DC=hortonworks,DC=com \"--ldap-manager-secret=2#KQ01DLbUdljJ!AVs\" --ldap-sync-usern\" sd dsds \"";
-        Assert.assertEquals(" DC=hortonworks,DC=com \"--ldap-manager-secret=" + REPLACEMENT + "\" --ldap-sync-usern\" sd dsds \"",
+        assertEquals(" DC=hortonworks,DC=com \"--ldap-manager-secret=" + REPLACEMENT + "\" --ldap-sync-usern\" sd dsds \"",
                 anonymize(testData));
     }
 
     @Test
     public void testCapitalHideSecretDoubleQuote() {
         String testData = " DC=hortonworks,DC=com \"--ldap-manager-SECRET=2#KQ01DLbUdljJ!AVs\" --ldap-sync-usern\" sd dsds \"";
-        Assert.assertEquals(" DC=hortonworks,DC=com \"--ldap-manager-SECRET=" + REPLACEMENT + "\" --ldap-sync-usern\" sd dsds \"",
+        assertEquals(" DC=hortonworks,DC=com \"--ldap-manager-SECRET=" + REPLACEMENT + "\" --ldap-sync-usern\" sd dsds \"",
                 anonymize(testData));
     }
 
     @Test
     public void testHideSecretNoQuotes() {
         String testData = " DC=hortonworks,DC=com --ldap-manager-secret=2#KQ01DLbUdljJ!AVs --ldap-sync-usern' sd dsds '";
-        Assert.assertEquals(" DC=hortonworks,DC=com --ldap-manager-secret=" + REPLACEMENT + " --ldap-sync-usern' sd dsds '",
+        assertEquals(" DC=hortonworks,DC=com --ldap-manager-secret=" + REPLACEMENT + " --ldap-sync-usern' sd dsds '",
                 anonymize(testData));
     }
 
     @Test
     public void testCapitalHideSecretNoQuotes() {
         String testData = " DC=hortonworks,DC=com --ldap-manager-SECRET=2#KQ01DLbUdljJ!AVs --ldap-sync-usern' sd dsds '";
-        Assert.assertEquals(" DC=hortonworks,DC=com --ldap-manager-SECRET=" + REPLACEMENT + " --ldap-sync-usern' sd dsds '",
+        assertEquals(" DC=hortonworks,DC=com --ldap-manager-SECRET=" + REPLACEMENT + " --ldap-sync-usern' sd dsds '",
                 anonymize(testData));
     }
 
@@ -261,7 +262,7 @@ public class AnonymizerUtilTest {
     public void testFreeIpaLdapModifyPassword() {
         String testData = "ldapmodify x -D 'cn=directory manager' -w 'Cloudera01' -h localhost";
         String expectedData = "ldapmodify x -D 'cn=directory manager' -w '" + REPLACEMENT + "' -h localhost";
-        Assert.assertEquals(expectedData, anonymize(testData));
+        assertEquals(expectedData, anonymize(testData));
     }
 
     @Test
@@ -271,7 +272,7 @@ public class AnonymizerUtilTest {
                 "X-Frame-Options: DENY, Content-Security-Policy: frame-ancestors 'none', Cache-Control: no-cache]";
         String expectedData = "IPASESSION: MagBearerToken=" + REPLACEMENT + ", Set-Cookie: ipa_session=MagBearerToken=" + REPLACEMENT +
                 ";path=/ipa;httponly;secure;, X-Frame-Options: DENY, Content-Security-Policy: frame-ancestors 'none', Cache-Control: no-cache]";
-        Assert.assertEquals(expectedData, anonymize(testData));
+        assertEquals(expectedData, anonymize(testData));
     }
 
     @Test
@@ -288,6 +289,6 @@ public class AnonymizerUtilTest {
                 "\\\"alma\\\",\\\"tenantId\\\":\\\"tenant\\\"," +
                 "\\\"appBased\\\":{\\\"accessKey\\\":\\\"alma\\\",\\\"secretKey\\\":\\\"****\"}}," +
                 "\\\"gcp\\\":null,\\\"yarn\\\":null,\\\"mock\\\":null,\\\"govCloud\\\":false}\"}}";
-        Assert.assertEquals(expectedData, anonymize(testData));
+        assertEquals(expectedData, anonymize(testData));
     }
 }

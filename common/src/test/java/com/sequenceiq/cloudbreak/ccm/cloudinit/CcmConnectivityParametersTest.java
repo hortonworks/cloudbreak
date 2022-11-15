@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.ccm.cloudinit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CcmConnectivityParametersTest {
 
