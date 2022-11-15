@@ -4,8 +4,8 @@ import static com.sequenceiq.authorization.utils.AuthorizationMessageUtilsServic
 import static com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService.INSUFFICIENT_RIGHTS_TEMPLATE;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
