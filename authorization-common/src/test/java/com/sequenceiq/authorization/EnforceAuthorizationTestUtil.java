@@ -1,7 +1,7 @@
 package com.sequenceiq.authorization;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -66,6 +66,6 @@ public class EnforceAuthorizationTestUtil {
                 .map(validatorFunction)
                 .flatMap(Collection::stream)
                 .collect(toList());
-        assertTrue(Joiner.on(System.lineSeparator()).join(validationErrors), validationErrors.isEmpty());
+        assertTrue(validationErrors.isEmpty(), Joiner.on(System.lineSeparator()).join(validationErrors));
     }
 }

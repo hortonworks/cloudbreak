@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
@@ -26,7 +26,7 @@ import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRightOnAll;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ResourceCrnListAuthorizationFactoryTest {
 
     private static final AuthorizationResourceAction ACTION = AuthorizationResourceAction.EDIT_CREDENTIAL;

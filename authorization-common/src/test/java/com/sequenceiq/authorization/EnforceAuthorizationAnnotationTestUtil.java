@@ -4,7 +4,7 @@ import static com.sequenceiq.authorization.EnforceAuthorizationAnnotationTestUti
 import static com.sequenceiq.authorization.EnforceAuthorizationAnnotationTestUtil.GenericType.set;
 import static com.sequenceiq.authorization.EnforceAuthorizationTestUtil.validateMethodByFunction;
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -86,8 +86,8 @@ public class EnforceAuthorizationAnnotationTestUtil {
                 .collect(Collectors.toSet());
         Set<String> controllersWithoutAnnotation = Sets.difference(controllersClasses, classesWithControllerAnnotation);
 
-        assertTrue("These classes are missing @Controller annotation: " + Joiner.on(",").join(controllersWithoutAnnotation),
-                controllersWithoutAnnotation.isEmpty());
+        assertTrue(controllersWithoutAnnotation.isEmpty(),
+                "These classes are missing @Controller annotation: " + Joiner.on(",").join(controllersWithoutAnnotation));
     }
 
     public static void testIfControllerMethodsHaveProperAuthorizationAnnotation() {
