@@ -251,6 +251,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
 import com.sequenceiq.thunderhead.model.AltusToken;
+import com.sequenceiq.thunderhead.service.MockUmsService;
 import com.sequenceiq.thunderhead.util.CrnHelper;
 import com.sequenceiq.thunderhead.util.IniUtil;
 import com.sequenceiq.thunderhead.util.JsonUtil;
@@ -268,7 +269,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockUserManagementService.class);
 
-    private static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
+    private static final MacSigner SIGNATURE_VERIFIER = new MacSigner(MockUmsService.MAC_SIGNER_SECRET_KEY);
 
     private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
 
