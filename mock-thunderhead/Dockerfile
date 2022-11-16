@@ -10,6 +10,7 @@ ENV VERSION ${VERSION}
 WORKDIR /
 
 # install the cloudbreak app
-ADD ${REPO_URL}/com/sequenceiq/mock-thunderhead/$VERSION/mock-thunderhead-$VERSION.jar /mock-thunderhead.jar
+# ADD ${REPO_URL}/com/sequenceiq/mock-thunderhead/$VERSION/mock-thunderhead-$VERSION.jar /mock-thunderhead.jar
+ADD ./mock-thunderhead.jar /mock-thunderhead.jar
 
 CMD (java -jar /mock-thunderhead.jar) & JAVAPID=$!; trap "kill $JAVAPID; wait $JAVAPID" INT TERM; wait $JAVAPID

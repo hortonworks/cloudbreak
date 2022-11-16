@@ -1,23 +1,12 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-
 import javax.inject.Inject;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
 
-import org.glassfish.jersey.SslConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.polling.nginx.NginxCertListenerTask;
@@ -52,21 +41,22 @@ public class TlsSetupService {
 
     public void setupTls(StackDtoDelegate stack, InstanceMetadataView gwInstance) throws CloudbreakException {
         try {
-            SavingX509TrustManager x509TrustManager = new SavingX509TrustManager();
-            TrustManager[] trustManagers = {x509TrustManager};
-            SSLContext sslContext = SslConfigurator.newInstance().createSSLContext();
-            sslContext.init(null, trustManagers, new SecureRandom());
-            Client client = RestClientUtil.createClient(sslContext, false);
+//            SavingX509TrustManager x509TrustManager = new SavingX509TrustManager();
+//            TrustManager[] trustManagers = {x509TrustManager};
+//            SSLContext sslContext = SslConfigurator.newInstance().createSSLContext();
+//            sslContext.init(null, trustManagers, new SecureRandom());
+//            Client client = RestClientUtil.createClient(sslContext, false);
             Integer gatewayPort = stack.getGatewayPort();
             String ip = gatewayConfigService.getGatewayIp(stack.getSecurityConfig(), gwInstance);
             LOGGER.debug("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
-            nginxPollerService.pollWithAbsoluteTimeout(
-                    nginxCertListenerTask, new NginxPollerObject(client, ip, gatewayPort, x509TrustManager),
-                    POLLING_INTERVAL, TEN_MIN, MAX_FAILURE);
-            WebTarget nginxTarget = client.target(String.format("https://%s:%d", ip, gatewayPort));
-            nginxTarget.path("/").request().get().close();
-            X509Certificate[] chain = x509TrustManager.getChain();
-            String serverCert = PkiUtil.convert(chain[0]);
+//            nginxPollerService.pollWithAbsoluteTimeout(
+//                    nginxCertListenerTask, new NginxPollerObject(client, ip, gatewayPort, x509TrustManager),
+//                    POLLING_INTERVAL, TEN_MIN, MAX_FAILURE);
+//            WebTarget nginxTarget = client.target(String.format("https://%s:%d", ip, gatewayPort));
+//            nginxTarget.path("/").request().get().close();
+//            X509Certificate[] chain = x509TrustManager.getChain();
+//            String serverCert = PkiUtil.convert(chain[0]);
+            String serverCert = "";
             String serverCertBase64 = BaseEncoding.base64().encode(serverCert.getBytes());
             instanceMetaDataService.updateServerCert(gwInstance.getId(), serverCertBase64);
         } catch (Exception e) {
