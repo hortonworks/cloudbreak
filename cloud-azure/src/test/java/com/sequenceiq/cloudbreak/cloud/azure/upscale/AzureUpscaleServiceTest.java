@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -15,14 +15,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
@@ -56,7 +55,7 @@ import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureUpscaleServiceTest {
 
     private static final Map<String, Object> PARAMETERS = Collections.emptyMap();
@@ -105,7 +104,7 @@ public class AzureUpscaleServiceTest {
     @Mock
     private AzureCloudResourceService azureCloudResourceService;
 
-    @Before
+    @BeforeEach
     public void before() {
         when(azureUtils.getStackName(any(CloudContext.class))).thenReturn(STACK_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), eq(stack))).thenReturn(RESOURCE_GROUP);
@@ -177,7 +176,7 @@ public class AzureUpscaleServiceTest {
                 .thenThrow(cloudException);
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
-        QuotaExceededException quotaExceededException = Assertions.assertThrows(QuotaExceededException.class, () -> {
+        QuotaExceededException quotaExceededException = assertThrows(QuotaExceededException.class, () -> {
             underTest.upscale(ac, stack, resources, azureStackView, client,
                     adjustmentTypeWithThreshold);
         });

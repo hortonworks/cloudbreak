@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceIdProviderService;
 
@@ -27,7 +29,7 @@ public class AzureResourceIdProviderServiceTest {
 
         String actual = underTest.generateImageId(SUBSCRIPTION_ID, RESOURCE_GROUP, IMAGE_NAME);
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -36,7 +38,7 @@ public class AzureResourceIdProviderServiceTest {
 
         String actual = underTest.generateDeploymentId(SUBSCRIPTION_ID, RESOURCE_GROUP, DEPLOYMENT_NAME);
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -46,36 +48,60 @@ public class AzureResourceIdProviderServiceTest {
 
         String actual = underTest.generateNetworkLinkId(SUBSCRIPTION_ID, RESOURCE_GROUP, SERVICE_ID, NETWORK_ID);
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGenerateImageIdShouldThrowExceptionWhenSubscriptionIdIsNull() {
-        underTest.generateImageId(null, RESOURCE_GROUP, IMAGE_NAME);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            underTest.generateImageId(null, RESOURCE_GROUP, IMAGE_NAME);
+        });
+
+        assertEquals("Subscription id must not be null or empty.", exception.getMessage());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGenerateImageIdShouldThrowExceptionWhenResourceGroupIsNull() {
-        underTest.generateImageId(SUBSCRIPTION_ID, null, IMAGE_NAME);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            underTest.generateImageId(SUBSCRIPTION_ID, null, IMAGE_NAME);
+        });
+
+        assertEquals("Resource group must not be null or empty.", exception.getMessage());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGenerateImageIdShouldThrowExceptionWhenTheImageNameIsNull() {
-        underTest.generateImageId(SUBSCRIPTION_ID, RESOURCE_GROUP, null);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            underTest.generateImageId(SUBSCRIPTION_ID, RESOURCE_GROUP, null);
+        });
+
+        assertEquals("Image name must not be null or empty.", exception.getMessage());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGenerateDnsZoneDeploymentIdShouldThrowExceptionWhenSubscriptionIdIsNull() {
-        underTest.generateImageId(null, RESOURCE_GROUP, IMAGE_NAME);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            underTest.generateImageId(null, RESOURCE_GROUP, IMAGE_NAME);
+        });
+
+        assertEquals("Subscription id must not be null or empty.", exception.getMessage());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGenerateDnsZoneDeploymentIdShouldThrowExceptionWhenResourceGroupIsNull() {
-        underTest.generateImageId(SUBSCRIPTION_ID, null, IMAGE_NAME);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            underTest.generateImageId(SUBSCRIPTION_ID, null, IMAGE_NAME);
+        });
+
+        assertEquals("Resource group must not be null or empty.", exception.getMessage());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGenerateDnsZoneDeploymentIdShouldThrowExceptionWhenDeploymentIdIsNull() {
-        underTest.generateImageId(SUBSCRIPTION_ID, RESOURCE_GROUP, null);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            underTest.generateImageId(SUBSCRIPTION_ID, RESOURCE_GROUP, null);
+        });
+
+        assertEquals("Image name must not be null or empty.", exception.getMessage());
     }
 }

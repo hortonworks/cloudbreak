@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,12 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -40,7 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(Parameterized.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureStackViewProviderTest {
 
     private static final String STACK_NAME = "Test Cluster";
@@ -56,12 +57,6 @@ public class AzureStackViewProviderTest {
     private static final String GROUP_NAME = "group-1";
 
     private static final String IMAGE_NAME = "image-name";
-
-    @Parameterized.Parameter
-    public boolean marketplaceImage;
-
-    @Parameterized.Parameter(1)
-    public String imageId;
 
     @InjectMocks
     private AzureStackViewProvider underTest;
@@ -81,30 +76,29 @@ public class AzureStackViewProviderTest {
     @Mock
     private AzureImageFormatValidator azureImageFormatValidator;
 
-    @Before
+    @BeforeEach
     public void before() {
-        initMocks(this);
         ReflectionTestUtils.setField(underTest, "stackNamePrefixLength", 255);
     }
 
-    @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {true, null}, {false, "id"}
         });
     }
 
-    @Test
-    public void testGetAzureStackShouldReturnsANewAzureStackView() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testGetAzureStackShouldReturnsANewAzureStackView(boolean marketplaceImage, String imageId) {
         CloudCredential cloudCredential = createCloudCredential();
         AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
         Image imageModel = new Image(IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
 
         Network network = mock(Network.class);
-        AzureImage image = new AzureImage("id", "name", true);
-        when(azureStorage.getCustomImage(any(), any(), any(), any())).thenReturn(image);
         List<Group> groups = createScaledGroups();
+        AzureImage image = new AzureImage("id", "name", true);
+        lenient().when(azureStorage.getCustomImage(any(), any(), any(), any())).thenReturn(image);
         when(cloudStack.getGroups()).thenReturn(groups);
         when(cloudStack.getParameters()).thenReturn(Collections.emptyMap());
         when(cloudStack.getNetwork()).thenReturn(network);

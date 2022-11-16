@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -26,7 +26,7 @@ public class AzureNetworkViewTest {
 
     private AzureNetworkView underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
 

@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureVirtualMachineTypeProvider;
@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureAcceleratedNetworkValidatorTest {
 
     @Mock
@@ -38,7 +38,7 @@ public class AzureAcceleratedNetworkValidatorTest {
 
         Map<String, Boolean> actual = underTest.validate(azureStackView);
 
-        actual.forEach((key, value) -> Assert.assertTrue(value));
+        actual.forEach((key, value) -> Assertions.assertTrue(value));
     }
 
     @Test
@@ -48,7 +48,7 @@ public class AzureAcceleratedNetworkValidatorTest {
 
         Map<String, Boolean> actual = underTest.validate(azureStackView);
 
-        actual.forEach((key, value) -> Assert.assertFalse(value));
+        actual.forEach((key, value) -> Assertions.assertFalse(value));
     }
 
     @Test
@@ -58,7 +58,7 @@ public class AzureAcceleratedNetworkValidatorTest {
 
         Map<String, Boolean> actual = underTest.validate(azureStackView);
 
-        actual.forEach((key, value) -> Assert.assertFalse(value));
+        actual.forEach((key, value) -> Assertions.assertFalse(value));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class AzureAcceleratedNetworkValidatorTest {
 
         Map<String, Boolean> actual = underTest.validate(azureStackView);
 
-        actual.forEach((key, value) -> Assert.assertFalse(value));
+        actual.forEach((key, value) -> Assertions.assertFalse(value));
     }
 
     private Set<String> getSupportedVmTypes() throws IOException {
