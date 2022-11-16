@@ -27,4 +27,12 @@ RUN ( unzip consumption.jar schema/* -d / ) || \
 COPY bootstrap/start_consumption_app.sh /
 COPY bootstrap/wait_for_consumption_api.sh /
 
+# Add OpenSSL provider to Java security policy file (FIPS enabled mode only).
+# - insert a line: fips.provider.1=OpenSSL
+# - increase the index for other fips.provider lines.
+RUN JAVA_SECURITY_POLICY_FILE=$JAVA_HOME/conf/security/java.security \
+&& for I in {20..1}; do J=$((I+1)); sed -i "s/fips.provider.$I=/fips.provider.$J=/" $JAVA_SECURITY_POLICY_FILE; done \
+&& N=$(grep -m 1 -n "^fips\.provider\.[[:digit:]]=" $JAVA_SECURITY_POLICY_FILE | cut -d: -f1) \
+&& sed -i "$N i fips.provider.1=OpenSSL" $JAVA_SECURITY_POLICY_FILE
+
 ENTRYPOINT ["/start_consumption_app.sh"]
