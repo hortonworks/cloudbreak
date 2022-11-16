@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.AbstractValidateRdsUpgradeEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeOnCloudProviderRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradePushSaltStatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeTriggerRequest;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -95,6 +97,16 @@ class ValidateRdsUpgradeActionsTest {
         verifyBackupRestoreAction(ValidateRdsUpgradeBackupValidationResult.class);
     }
 
+    @Test
+    public void testShouldValidateOnCloudProvider() throws Exception {
+        AbstractAction action = (AbstractAction) underTest.validateUpgradeOnCloudProvider();
+        ValidateRdsUpgradeBackupValidationResult triggerEvent = new ValidateRdsUpgradeBackupValidationResult(STACK_ID);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true);
+
+        verify(validateRdsUpgradeService).validateOnCloudProvider(STACK_ID);
+        verifyBackupRestoreAction(ValidateRdsUpgradeOnCloudProviderRequest.class);
+    }
+
     private void mockAndTriggerRdsUpgradeAction(AbstractAction action, AbstractValidateRdsUpgradeEvent triggerEvent,
             boolean shouldRunDataBackupRestore) throws Exception {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
@@ -109,7 +121,9 @@ class ValidateRdsUpgradeActionsTest {
         ValidateRdsUpgradeContext context =  new ValidateRdsUpgradeContext(new FlowParameters(FLOW_ID, FLOW_ID, null), stack, cluster);
 
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
-        testSupport.doExecute(context, triggerEvent, new HashMap<>());
+        Map<Object, Object> variables = new HashMap<>();
+        variables.put("TARGET_MAJOR_VERSION", TARGET_MAJOR_VERSION);
+        testSupport.doExecute(context, triggerEvent, variables);
     }
 
     private void verifyBackupRestoreAction(Object expectedEvent) {

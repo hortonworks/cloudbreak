@@ -1,8 +1,10 @@
 package com.sequenceiq.redbeams.controller.v4.databaseserver;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -368,6 +370,39 @@ public class DatabaseServerV4ControllerTest {
         UpgradeDatabaseRequest actualUpgradeDatabaseRequest = upgradeDatabaseRequestArgumentCaptor.getValue();
         assertEquals(actualUpgradeDatabaseRequest.getTargetMajorVersion(), TargetMajorVersion.VERSION_11);
         assertEquals(response.getCurrentVersion(), actualResponse.getCurrentVersion());
+    }
+
+    @Test
+    public void testValidateUpgrade() throws Exception {
+        // GIVEN
+        UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
+        request.setUpgradeTargetMajorVersion(UpgradeTargetMajorVersion.VERSION_11);
+        UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
+        UpgradeDatabaseResponse upgradeDatabaseResponse = new UpgradeDatabaseResponse("reason", MajorVersion.VERSION_11);
+        when(upgradeDatabaseServerV4RequestConverter.convert(request)).thenReturn(upgradeDatabaseRequest);
+        when(redbeamsUpgradeService.validateUpgradeDatabaseServer(SERVER_CRN, upgradeDatabaseRequest))
+                .thenReturn(upgradeDatabaseResponse);
+        UpgradeDatabaseServerV4Response response = new UpgradeDatabaseServerV4Response();
+        when(upgradeDatabaseServerV4ResponseConverter.convert(upgradeDatabaseResponse)).thenReturn(response);
+        // WHEN
+        UpgradeDatabaseServerV4Response actualResult = underTest.validateUpgrade(SERVER_CRN, request);
+        // THEN
+        assertEquals(actualResult, response);
+    }
+
+    @Test
+    public void testValidateUpgradeThrowsException() {
+        // GIVEN
+        UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
+        request.setUpgradeTargetMajorVersion(UpgradeTargetMajorVersion.VERSION_11);
+        UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
+        when(upgradeDatabaseServerV4RequestConverter.convert(request)).thenReturn(upgradeDatabaseRequest);
+        RuntimeException exception = new RuntimeException("exception");
+        doThrow(exception).when(redbeamsUpgradeService).validateUpgradeDatabaseServer(SERVER_CRN, upgradeDatabaseRequest);
+        // WHEN
+        Exception actualException = assertThrows(Exception.class, () -> underTest.validateUpgrade(SERVER_CRN, request));
+        // THEN
+        assertEquals(exception, actualException);
     }
 
     private UpgradeDatabaseRequest getUpgradeDatabaseRequest() {

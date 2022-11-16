@@ -93,6 +93,22 @@ public interface ResourceConnector {
             throws Exception;
 
     /**
+     * Validates that the upgrade of a database stack on a cloud platform is possible. The stack consists of the following resources:
+     * - a single database server instance
+     * - depending on the platform, other associated, required resources (e.g., a DB subnet group for RDS)
+     * <br>
+     * This method validates the database stack upgrade on the cloud platform and throws Exception in case of any validation error.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platfrom
+     * @param targetMajorVersion   target major version of the database
+     * @throws Exception in case of any error
+     */
+    void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
+            TargetMajorVersion targetMajorVersion) throws Exception;
+
+    /**
      * Upgrades a database stack on a cloud platform. The stack consists of the following resources:
      * - a single database server instance
      * - depending on the platform, other associated, required resources (e.g., a DB subnet group for RDS)

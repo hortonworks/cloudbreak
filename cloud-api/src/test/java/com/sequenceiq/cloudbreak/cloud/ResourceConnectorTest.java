@@ -54,6 +54,11 @@ class ResourceConnectorTest {
         }
 
         @Override
+        public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
+                TargetMajorVersion targetMajorVersion) {
+        }
+
+        @Override
         public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
                 PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) {
         }

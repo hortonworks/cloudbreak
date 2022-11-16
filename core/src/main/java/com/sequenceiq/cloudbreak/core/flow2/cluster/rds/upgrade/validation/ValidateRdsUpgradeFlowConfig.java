@@ -5,12 +5,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validatio
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeEvent.VALIDATE_RDS_UPGRADE_BACKUP_VALIDATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeEvent.VALIDATE_RDS_UPGRADE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeEvent.VALIDATE_RDS_UPGRADE_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeEvent.VALIDATE_RDS_UPGRADE_ON_CLOUDPROVIDER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeEvent.VALIDATE_RDS_UPGRADE_PUSH_SALT_STATES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeState.VALIDATE_RDS_UPGRADE_BACKUP_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeState.VALIDATE_RDS_UPGRADE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeState.VALIDATE_RDS_UPGRADE_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeState.VALIDATE_RDS_UPGRADE_ON_CLOUDPROVIDER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeState.VALIDATE_RDS_UPGRADE_PUSH_SALT_STATES_STATE;
 
 import java.util.List;
@@ -36,8 +38,12 @@ public class ValidateRdsUpgradeFlowConfig
                     .event(VALIDATE_RDS_UPGRADE_PUSH_SALT_STATES_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(VALIDATE_RDS_UPGRADE_BACKUP_VALIDATION_STATE).to(VALIDATE_RDS_UPGRADE_FINISHED_STATE)
+                    .from(VALIDATE_RDS_UPGRADE_BACKUP_VALIDATION_STATE).to(VALIDATE_RDS_UPGRADE_ON_CLOUDPROVIDER_STATE)
                     .event(VALIDATE_RDS_UPGRADE_BACKUP_VALIDATION_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(VALIDATE_RDS_UPGRADE_ON_CLOUDPROVIDER_STATE).to(VALIDATE_RDS_UPGRADE_FINISHED_STATE)
+                    .event(VALIDATE_RDS_UPGRADE_ON_CLOUDPROVIDER_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(VALIDATE_RDS_UPGRADE_FINISHED_STATE).to(FINAL_STATE)
