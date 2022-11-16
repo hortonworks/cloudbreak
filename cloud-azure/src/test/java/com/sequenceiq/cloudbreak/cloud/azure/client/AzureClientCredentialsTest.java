@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -17,12 +18,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.UserInfo;
@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
+@ExtendWith(MockitoExtension.class)
 public class AzureClientCredentialsTest {
 
     private static final String TENANT_ID = "1";
@@ -57,9 +58,6 @@ public class AzureClientCredentialsTest {
     private static final String REFRESH_TOKEN = "someRefreshToken";
 
     private static final LogLevel LOG_LEVEL = LogLevel.BASIC;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private AzureCredentialView credentialView;
@@ -81,16 +79,14 @@ public class AzureClientCredentialsTest {
 
     private AuthenticationResult authenticationResult;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         when(credentialView.codeGrantFlow()).thenReturn(true);
         when(credentialView.getTenantId()).thenReturn(TENANT_ID);
         when(credentialView.getAccessKey()).thenReturn(ACCESS_KEY);
         when(credentialView.getSecretKey()).thenReturn(SECRET_KEY);
         when(credentialView.getName()).thenReturn(CREDENTIAL_NAME);
         when(credentialView.getSubscriptionId()).thenReturn(SUBSCRIPTION_ID);
-        when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()))).thenReturn(cbRefreshTokenClient);
         authenticationResult = new AuthenticationResult("type", ACCESS_TOKEN, REFRESH_TOKEN, 123456789L, "1", mock(UserInfo.class), true);
     }
 
@@ -116,6 +112,7 @@ public class AzureClientCredentialsTest {
     public void testGetRefreshTokenWhenBothRefreshTokenAndAuthenticationResultIsObtainableThenExpectedRefreshTokenReturns() {
         when(credentialView.getRefreshToken()).thenReturn(REFRESH_TOKEN);
         when(cbRefreshTokenClient.refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(authenticationResult);
+        when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()))).thenReturn(cbRefreshTokenClient);
 
         Optional<String> result = new AzureClientCredentials(credentialView, LOG_LEVEL,
                 cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor)
@@ -170,29 +167,20 @@ public class AzureClientCredentialsTest {
     public void testInstanceCreationWhenUnableToRefreshTokenThenCloudConnectorExceptionComes() {
         when(credentialView.getRefreshToken()).thenReturn(REFRESH_TOKEN);
         when(cbRefreshTokenClient.refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(null);
+        when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()))).thenReturn(cbRefreshTokenClient);
 
-        thrown.expect(CloudConnectorException.class);
-        thrown.expectMessage(String.format("New token couldn't be obtain with refresh token for credential: %s", CREDENTIAL_NAME));
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> {
+            new AzureClientCredentials(credentialView, LOG_LEVEL, cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor);
+        });
 
-        new AzureClientCredentials(credentialView, LOG_LEVEL, cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor);
-
-        verify(credentialView, times(1)).getTenantId();
-        verify(credentialView, times(1)).getAccessKey();
-        verify(credentialView, times(1)).getSecretKey();
-        verify(credentialView, times(1)).getAppReplyUrl();
-        verify(credentialView, times(1)).getRefreshToken();
-        verify(credentialView, times(2)).codeGrantFlow();
-        verify(credentialView, times(1)).getSubscriptionId();
-        verify(credentialView, times(1)).getAuthorizationCode();
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
-        verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()));
+        assertEquals(String.format("New token couldn't be obtain with refresh token for credential: %s", CREDENTIAL_NAME), exception.getMessage());
     }
 
     @Test
     public void testGetAzureAgainstSubscriptionId() {
         when(credentialView.getRefreshToken()).thenReturn(REFRESH_TOKEN);
         when(cbRefreshTokenClient.refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(authenticationResult);
+        when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()))).thenReturn(cbRefreshTokenClient);
 
         Azure result = new AzureClientCredentials(credentialView, LOG_LEVEL,
                 cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getAzure();

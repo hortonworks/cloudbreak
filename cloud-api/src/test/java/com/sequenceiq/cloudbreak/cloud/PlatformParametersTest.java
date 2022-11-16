@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -28,7 +28,7 @@ public class PlatformParametersTest {
 
     private TestPlatformParameters underTest = new TestPlatformParameters();
 
-    @Before
+    @BeforeEach
     public void before() {
         underTest = new TestPlatformParameters();
     }
@@ -36,9 +36,9 @@ public class PlatformParametersTest {
     @Test
     public void getRegionByNameIfValueNotConfigured() {
         DiskTypes diskTypes = underTest.diskTypes();
-        Assert.assertEquals(1L, diskTypes.displayNames().entrySet().size());
-        Assert.assertEquals(1L, diskTypes.diskMapping().entrySet().size());
-        Assert.assertEquals("testDiskType", diskTypes.defaultType().value());
+        Assertions.assertEquals(1L, diskTypes.displayNames().entrySet().size());
+        Assertions.assertEquals(1L, diskTypes.diskMapping().entrySet().size());
+        Assertions.assertEquals("testDiskType", diskTypes.defaultType().value());
     }
 
     static class TestPlatformParameters implements PlatformParameters {

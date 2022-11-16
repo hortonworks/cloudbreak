@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -25,13 +26,11 @@ import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Lists;
 import com.microsoft.azure.CloudException;
@@ -66,7 +65,7 @@ import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureNetworkConnectorTest {
 
     private static final String ENV_NAME = "testEnv";
@@ -96,9 +95,6 @@ public class AzureNetworkConnectorTest {
     private static final String NETWORK_ID = "networkId";
 
     private static final String NETWORK_RG = "networkRg";
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private AzureNetworkConnector underTest;
@@ -262,16 +258,20 @@ public class AzureNetworkConnectorTest {
         verify(azureClient).deleteResourceGroup(RESOURCE_GROUP);
     }
 
-    @Test(expected = CloudConnectorException.class)
+    @Test
     public void testDeleteNetworkWithSubnetsShouldThrowAnExceptionWhenTheStackDeletionFailed() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(false, false);
 
         when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
         when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
-        when(azureUtils.convertToCloudConnectorException(any(CloudException.class), anyString())).thenReturn(new CloudConnectorException(""));
+        when(azureUtils.convertToCloudConnectorException(any(CloudException.class), anyString())).thenReturn(new CloudConnectorException("text"));
         doThrow(createCloudException()).when(azureClient).deleteTemplateDeployment(RESOURCE_GROUP, STACK);
 
-        underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> {
+            underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+        });
+
+        assertEquals("text", exception.getMessage());
     }
 
     @Test
@@ -338,12 +338,13 @@ public class AzureNetworkConnectorTest {
         when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(azureNetwork);
         when(azureNetwork.addressSpaces()).thenReturn(List.of());
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Network could not be fetched from Azure with Resource Group name: " +
-                "resourceGroupName and VNET id: vnet-1. Please make sure that the name of the VNET is " +
-                "correct and is present in the Resource Group specified.");
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            underTest.getNetworkCidr(network, credential);
+        });
 
-        underTest.getNetworkCidr(network, credential);
+        assertEquals("Network could not be fetched from Azure with Resource Group name: " +
+                "resourceGroupName and VNET id: vnet-1. Please make sure that the name of the VNET is " +
+                "correct and is present in the Resource Group specified.", exception.getMessage());
     }
 
     @Test
@@ -380,11 +381,13 @@ public class AzureNetworkConnectorTest {
         when(azureUtils.getCustomNetworkId(network)).thenReturn(networkId);
         when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(null);
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Network could not be fetched from Azure with Resource Group name: resourceGroupName and" +
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            underTest.getNetworkCidr(network, credential);
+        });
+
+        assertEquals("Network could not be fetched from Azure with Resource Group name: resourceGroupName and" +
                 " VNET id: vnet-1. Please make sure that the name of the VNET is correct and is present in the" +
-                " Resource Group specified.");
-        underTest.getNetworkCidr(network, credential);
+                " Resource Group specified.", exception.getMessage());
     }
 
     @Test

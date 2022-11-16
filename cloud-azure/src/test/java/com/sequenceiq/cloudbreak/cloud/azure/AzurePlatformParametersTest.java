@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.security.SecureRandom;
 import java.util.Map;
 
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 
 import com.google.common.collect.Maps;
@@ -42,7 +42,7 @@ public class AzurePlatformParametersTest {
     @InjectMocks
     private AzurePlatformParameters underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

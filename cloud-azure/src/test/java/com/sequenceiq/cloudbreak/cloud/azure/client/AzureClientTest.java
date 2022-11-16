@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -130,7 +130,7 @@ class AzureClientTest {
 
         underTest.attachDiskToVm(disk, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
-        Assert.assertEquals(CachingTypes.NONE, captor.getValue());
+        Assertions.assertEquals(CachingTypes.NONE, captor.getValue());
     }
 
     @Test
@@ -155,7 +155,7 @@ class AzureClientTest {
 
         underTest.attachDiskToVm(disk, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
-        Assert.assertEquals(CachingTypes.READ_ONLY, captor.getValue());
+        Assertions.assertEquals(CachingTypes.READ_ONLY, captor.getValue());
     }
 
     @Test
@@ -180,7 +180,7 @@ class AzureClientTest {
 
         underTest.attachDiskToVm(disk, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
-        Assert.assertEquals(CachingTypes.READ_ONLY, captor.getValue());
+        Assertions.assertEquals(CachingTypes.READ_ONLY, captor.getValue());
     }
 
     @Test
@@ -212,11 +212,11 @@ class AzureClientTest {
                 .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY))));
 
 
-        Assert.assertTrue(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "100"));
-        Assert.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "200"));
-        Assert.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "300"));
-        Assert.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "400"));
-        Assert.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "dummy"));
+        Assertions.assertTrue(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "100"));
+        Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "200"));
+        Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "300"));
+        Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "400"));
+        Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "dummy"));
     }
 
     @Test

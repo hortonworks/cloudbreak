@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
@@ -13,12 +13,12 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -36,7 +36,7 @@ import com.sequenceiq.common.model.PrivateEndpointType;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureNetworkTemplateBuilderTest {
 
     private static final String ENV_NAME = "testEnv";
@@ -57,7 +57,7 @@ public class AzureNetworkTemplateBuilderTest {
     @Mock
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    @Before
+    @BeforeEach
     public void before() throws IOException, TemplateException {
         FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
         factoryBean.setPreferFileSystemAccess(false);

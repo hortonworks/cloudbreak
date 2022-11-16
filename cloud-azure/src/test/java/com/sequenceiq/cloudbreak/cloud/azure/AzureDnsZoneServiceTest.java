@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_DNS_ZONE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -12,12 +14,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.resources.Subscription;
@@ -29,7 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureDnsZoneServiceTest {
 
     private static final Long STACK_ID = 12L;
@@ -65,7 +67,7 @@ public class AzureDnsZoneServiceTest {
     @Mock
     private AzureClient client;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(STACK_ID)
@@ -76,10 +78,6 @@ public class AzureDnsZoneServiceTest {
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "", "account");
         ac = new AuthenticatedContext(cloudContext, cloudCredential);
 
-        when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
-        when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
-        when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
-        when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
         when(azurePrivateEndpointServicesProvider.getCdpManagedDnsZones(any()))
                 .thenReturn(List.of(AzurePrivateDnsZoneServiceEnum.STORAGE, AzurePrivateDnsZoneServiceEnum.POSTGRES));
     }
@@ -88,6 +86,7 @@ public class AzureDnsZoneServiceTest {
     public void testCheckOrCreateWhenAllResourceExists() {
 
         when(client.checkIfDnsZonesDeployed(any(), any())).thenReturn(true);
+
         underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
 
         verify(azureResourcePersistenceHelperService, times(0)).persistCloudResource(any(), any(), any(), any());
@@ -100,7 +99,10 @@ public class AzureDnsZoneServiceTest {
 
     @Test
     public void testCheckOrCreateWhenDnsZoneResourceNotExistsButRequested() {
-
+        when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
+        when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
+        when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
+        when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
         when(client.checkIfDnsZonesDeployed(any(), any())).thenReturn(false);
         when(azureResourcePersistenceHelperService.isRequested(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(true);
 
@@ -115,7 +117,10 @@ public class AzureDnsZoneServiceTest {
 
     @Test
     public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedButAlreadyCreatedInDatabase() {
-
+        when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
+        when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
+        when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
+        when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
         when(client.checkIfDnsZonesDeployed(any(), any())).thenReturn(false);
         when(azureResourcePersistenceHelperService.isRequested(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
         when(azureResourcePersistenceHelperService.isCreated(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(true);
@@ -131,7 +136,10 @@ public class AzureDnsZoneServiceTest {
 
     @Test
     public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedAndNotCreatedInDatabase() {
-
+        when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
+        when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
+        when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
+        when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
         when(client.checkIfDnsZonesDeployed(any(), any())).thenReturn(false);
         when(azureResourcePersistenceHelperService.isRequested(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
         when(azureResourcePersistenceHelperService.isCreated(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
@@ -145,15 +153,22 @@ public class AzureDnsZoneServiceTest {
         verify(azureResourceDeploymentHelperService, times(0)).pollForCreation(any(), any());
     }
 
-    @Test(expected = CloudConnectorException.class)
+    @Test
     public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedAndNotCreatedInDatabaseAndError() {
-
+        when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
+        when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
+        when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
+        when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
         when(client.checkIfDnsZonesDeployed(any(), any())).thenReturn(false);
         when(azureResourcePersistenceHelperService.isRequested(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
         when(azureResourcePersistenceHelperService.isCreated(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
-        doThrow(new CloudConnectorException("", null)).when(azureResourceDeploymentHelperService).deployTemplate(any(), any());
+        doThrow(new CloudConnectorException("some message", null)).when(azureResourceDeploymentHelperService).deployTemplate(any(), any());
 
-        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> {
+            underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
+        });
+
+        assertEquals("some message", exception.getMessage());
 
         verify(azureResourcePersistenceHelperService, times(1)).persistCloudResource(any(), any(), any(), any());
         verify(azureResourcePersistenceHelperService, times(0)).updateCloudResource(any(), any(), any(), any(), any());

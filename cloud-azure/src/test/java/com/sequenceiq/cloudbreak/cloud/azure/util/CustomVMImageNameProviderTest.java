@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.regex.Pattern;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 
 public class CustomVMImageNameProviderTest {
@@ -18,7 +18,7 @@ public class CustomVMImageNameProviderTest {
     @InjectMocks
     private CustomVMImageNameProvider underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -30,8 +30,8 @@ public class CustomVMImageNameProviderTest {
 
         String actual = underTest.getImageNameWithRegion(region, vhdName);
 
-        Assert.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
-        Assert.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6a.vhd-westus", actual);
+        Assertions.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
+        Assertions.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6a.vhd-westus", actual);
     }
 
     @Test
@@ -41,8 +41,8 @@ public class CustomVMImageNameProviderTest {
 
         String actual = underTest.getImageNameWithRegion(region, vhdName);
 
-        Assert.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
-        Assert.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6a.v-southeastasia", actual);
+        Assertions.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
+        Assertions.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6a.v-southeastasia", actual);
     }
 
     @Test
@@ -52,8 +52,8 @@ public class CustomVMImageNameProviderTest {
 
         String actual = underTest.getImageNameWithRegion(region, vhdName);
 
-        Assert.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
-        Assert.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6aa.-southeastasia", actual);
+        Assertions.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
+        Assertions.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6aa.-southeastasia", actual);
     }
 
     @Test
@@ -63,8 +63,8 @@ public class CustomVMImageNameProviderTest {
 
         String actual = underTest.getImageNameWithRegion(region, vhdName);
 
-        Assert.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
-        Assert.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6aa--southeastasia", actual);
+        Assertions.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
+        Assertions.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6aa--southeastasia", actual);
     }
 
     @Test
@@ -74,8 +74,8 @@ public class CustomVMImageNameProviderTest {
 
         String actual = underTest.getImageNameWithRegion(region, vhdName);
 
-        Assert.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
-        Assert.assertEquals("cb-hdp-26-1907121707-osDisk123.cc5baaaa-717e-4551-b7ae-aaaa03c72a6-southeastasia", actual);
+        Assertions.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
+        Assertions.assertEquals("cb-hdp-26-1907121707-osDisk123.cc5baaaa-717e-4551-b7ae-aaaa03c72a6-southeastasia", actual);
     }
 
     @Test
