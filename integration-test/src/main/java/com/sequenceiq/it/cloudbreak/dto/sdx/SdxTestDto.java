@@ -4,6 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -178,6 +179,14 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
                 InstanceUtil.getInstanceStatusMapForStatus(getResponse().getStackV4Response(), InstanceStatus.SERVICES_HEALTHY));
         return awaitForInstance(instanceStatusMap);
+    }
+
+    public SdxTestDto awaitForEntitlementChange(int minutesTillWait) {
+        Log.await(LOGGER, "Waiting for CDP_CENTRAL_COMPUTE_MONITORING entitlement has been set then applied on the account...");
+        getTestContext().waitingFor(Duration.ofMinutes(minutesTillWait), "Waiting for CDP_CENTRAL_COMPUTE_MONITORING account entitlement" +
+                " change has been interrupted");
+        Log.await(LOGGER, "Wait is done on the CDP_CENTRAL_COMPUTE_MONITORING entitlement has been set then applied on the account!");
+        return this;
     }
 
     public SdxTestDto awaitForDeletedInstancesOnProvider() {

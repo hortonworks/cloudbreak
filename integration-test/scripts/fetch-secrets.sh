@@ -2,9 +2,9 @@
 
 set -ex
 
-: ${SECRET_VERSION:="e556a55296e349f993d324680baa3350"}
+: ${SECRET_VERSION:="679d624e51a547cfaed9218c62ff447a"}
 : ${USER_JSON_LOCATION:="./src/main/resources/ums-users/api-credentials.json"}
-: ${USER_JSON_SECRET:="real-ums-users-dev"}
+: ${USER_JSON_SECRET:="l0-aws-ums-users-dev"}
 
 init-secret-parameters() {
     echo "Setting up UMS users secret parameters based on environment variables..."
