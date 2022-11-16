@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -12,13 +13,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentExportResult;
@@ -46,7 +47,7 @@ import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureResourceConnectorTest {
 
     private static final AdjustmentType ADJUSTMENT_TYPE = AdjustmentType.EXACT;
@@ -124,7 +125,7 @@ public class AzureResourceConnectorTest {
 
     private Image imageModel;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         DeploymentExportResult deploymentExportResult = mock(DeploymentExportResult.class);
         Group group = mock(Group.class);
@@ -136,19 +137,19 @@ public class AzureResourceConnectorTest {
         AzureImage image = new AzureImage("id", "name", true);
         imageModel = new Image(IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
 
-        when(stack.getGroups()).thenReturn(groups);
-        when(stack.getNetwork()).thenReturn(network);
-        when(stack.getImage()).thenReturn(imageModel);
-        when(ac.getCloudContext()).thenReturn(cloudContext);
-        when(ac.getParameter(AzureClient.class)).thenReturn(client);
-        when(ac.getCloudCredential()).thenReturn(new CloudCredential("aCredentialId", "aCredentialName", "account"));
-        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
-        when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(image);
-        when(deployment.exportTemplate()).thenReturn(deploymentExportResult);
-        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack)).thenReturn(RESOURCE_GROUP_NAME);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(instances);
-        when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME)).thenReturn(instances);
-        when(azureStackViewProvider.getAzureStack(any(), eq(stack), eq(client), eq(ac))).thenReturn(azureStackView);
+        lenient().when(stack.getGroups()).thenReturn(groups);
+        lenient().when(stack.getNetwork()).thenReturn(network);
+        lenient().when(stack.getImage()).thenReturn(imageModel);
+        lenient().when(ac.getCloudContext()).thenReturn(cloudContext);
+        lenient().when(ac.getParameter(AzureClient.class)).thenReturn(client);
+        lenient().when(ac.getCloudCredential()).thenReturn(new CloudCredential("aCredentialId", "aCredentialName", "account"));
+        lenient().when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        lenient().when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(image);
+        lenient().when(deployment.exportTemplate()).thenReturn(deploymentExportResult);
+        lenient().when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack)).thenReturn(RESOURCE_GROUP_NAME);
+        lenient().when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(instances);
+        lenient().when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME)).thenReturn(instances);
+        lenient().when(azureStackViewProvider.getAzureStack(any(), eq(stack), eq(client), eq(ac))).thenReturn(azureStackView);
     }
 
     @Test
@@ -221,7 +222,7 @@ public class AzureResourceConnectorTest {
     @Test
     public void testLaunchLoadBalancerHandlesGracefully() throws Exception {
         List<CloudResourceStatus> cloudResourceStatuses = underTest.launchLoadBalancers(ac, stack, notifier);
-        Assert.assertEquals(0, cloudResourceStatuses.size());
+        Assertions.assertEquals(0, cloudResourceStatuses.size());
     }
 
     @Test
@@ -231,7 +232,7 @@ public class AzureResourceConnectorTest {
                 .thenReturn(List.of(new CloudResourceStatus(instances.get(0), ResourceStatus.DELETED)));
         List<CloudResourceStatus> statuses = underTest.terminate(ac, stack, new ArrayList<>(instances));
         for (CloudResourceStatus status : statuses) {
-            Assert.assertEquals(ResourceStatus.DELETED, status.getStatus());
+            Assertions.assertEquals(ResourceStatus.DELETED, status.getStatus());
         }
     }
 

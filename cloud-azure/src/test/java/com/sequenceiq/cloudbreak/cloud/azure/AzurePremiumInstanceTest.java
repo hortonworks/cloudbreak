@@ -2,31 +2,21 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.Arrays;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
 
-@RunWith(Parameterized.class)
+@ExtendWith(MockitoExtension.class)
 public class AzurePremiumInstanceTest {
 
     @InjectMocks
     private final AzurePremiumValidatorService underTest = new AzurePremiumValidatorService();
 
-    private final String instanceType;
-
-    private final boolean premiumInstance;
-
-    public AzurePremiumInstanceTest(String instanceType, boolean premiumInstance) {
-        this.instanceType = instanceType;
-        this.premiumInstance = premiumInstance;
-    }
-
-    @Parameters(name = "{index}: instanceType is premium({0})={1}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"Standard_A4", false},
@@ -182,8 +172,9 @@ public class AzurePremiumInstanceTest {
         });
     }
 
-    @Test
-    public void testPremiumInstanceWhichDependsOnThePremiumVariable() {
-        Assert.assertEquals(premiumInstance, underTest.validPremiumConfiguration(instanceType));
+    @ParameterizedTest(name = "{index}: instanceType is premium({0})={1}")
+    @MethodSource("data")
+    public void testPremiumInstanceWhichDependsOnThePremiumVariable(String instanceType, boolean premiumInstance) {
+        Assertions.assertEquals(premiumInstance, underTest.validPremiumConfiguration(instanceType));
     }
 }

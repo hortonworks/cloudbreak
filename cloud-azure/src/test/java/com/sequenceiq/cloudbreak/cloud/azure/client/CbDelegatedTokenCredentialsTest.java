@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.azure.client;
 import static java.lang.String.format;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.DAYS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,13 +26,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationException;
@@ -41,6 +41,7 @@ import com.microsoft.aad.adal4j.UserInfo;
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 
+@ExtendWith(MockitoExtension.class)
 public class CbDelegatedTokenCredentialsTest {
 
     private static final String HTTPS = "https";
@@ -77,9 +78,6 @@ public class CbDelegatedTokenCredentialsTest {
 
     private static final long PAST_DATE = 0L;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Mock
     private ApplicationTokenCredentials applicationTokenCredentials;
 
@@ -103,9 +101,8 @@ public class CbDelegatedTokenCredentialsTest {
 
     private Map<String, AuthenticationResult> tokens;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         tokens = new LinkedHashMap<>();
         tokens.put(RESOURCE, new AuthenticationResult("type", ACCESS_TOKEN, REFRESH_TOKEN, FUTURE_DATE, "1", userInfo,
                 MULTIPLE_RESOURCE_REFRESH_TOKEN));
@@ -113,16 +110,16 @@ public class CbDelegatedTokenCredentialsTest {
                 "managementEndpointUrl", MANAGEMENT_ENDPOINT_URL));
         when(applicationTokenCredentials.environment()).thenReturn(defaultAzureEnvironment);
         when(applicationTokenCredentials.domain()).thenReturn(TEST_DOMAIN);
-        when(applicationTokenCredentials.clientId()).thenReturn(CLIENT_ID);
     }
 
     @Test
     public void testAcquireNewAccessTokenWhenNoAuthorizationCodeThenExceptionComes() throws IOException {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("You must acquire an authorization code by redirecting to the authentication URL");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, tokens, CLIENT_SECRET, authenticationContextProvider,
+                    cbRefreshTokenClientProvider).acquireNewAccessToken(RESOURCE);
+        });
 
-        new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, tokens, CLIENT_SECRET, authenticationContextProvider,
-                cbRefreshTokenClientProvider).acquireNewAccessToken(RESOURCE);
+        assertEquals("You must acquire an authorization code by redirecting to the authentication URL", exception.getMessage());
 
         verify(applicationTokenCredentials, times(0)).clientId();
         verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
@@ -147,11 +144,13 @@ public class CbDelegatedTokenCredentialsTest {
 
     @Test
     public void testGetTokenWhenNoTokenAndAuthCodeProvidedThenIllegalArgumentExceptionComes() throws IOException {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("You must acquire an authorization code by redirecting to the authentication URL");
 
-        new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, Collections.emptyMap(), CLIENT_SECRET, authenticationContextProvider,
-                cbRefreshTokenClientProvider).getToken(RESOURCE);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, Collections.emptyMap(), CLIENT_SECRET, authenticationContextProvider,
+                    cbRefreshTokenClientProvider).getToken(RESOURCE);
+        });
+
+        assertEquals("You must acquire an authorization code by redirecting to the authentication URL", exception.getMessage());
 
         verify(applicationTokenCredentials, times(0)).clientId();
         verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
@@ -171,14 +170,15 @@ public class CbDelegatedTokenCredentialsTest {
         var underTest = new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, authenticationContextProvider, cbRefreshTokenClientProvider);
         underTest.setAuthorizationCode(AUTHORIZATION_CODE);
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("'authority' should use the 'https' scheme");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            underTest.getToken(RESOURCE);
+        });
 
-        underTest.getToken(RESOURCE);
+        assertEquals("'authority' should use the 'https' scheme", exception.getMessage());
 
         verify(applicationTokenCredentials, times(0)).clientId();
         verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
+        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", format(TEST_AD_ENDPOINT, HTTP))));
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(eq(authorityUrl), eq(false), any(ExecutorService.class));
@@ -186,18 +186,18 @@ public class CbDelegatedTokenCredentialsTest {
 
     @Test
     public void testGetTokenWhenNoSecretProvidedThenAuthenticationExceptionComes() throws IOException {
-        String authorityUrl = format("%s/%s", format(TEST_AD_ENDPOINT, HTTP), TEST_DOMAIN);
+        String authorityUrl = format("%s/%s", format(TEST_AD_ENDPOINT, HTTPS), TEST_DOMAIN);
         var underTest = new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, authenticationContextProvider, cbRefreshTokenClientProvider);
         underTest.setAuthorizationCode(AUTHORIZATION_CODE);
 
-        thrown.expect(AuthenticationException.class);
-        thrown.expectMessage("Please provide either a non-null secret.");
+        AuthenticationException exception = assertThrows(AuthenticationException.class, () -> {
+            underTest.getToken(RESOURCE);
+        });
 
-        underTest.getToken(RESOURCE);
+        assertEquals("Please provide either a non-null secret.", exception.getMessage());
 
         verify(applicationTokenCredentials, times(0)).clientId();
         verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
-        verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(eq(format("%s/", DEFAULT_TEST_AD_ENDPOINT)));
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(anyString(), anyBoolean(), any(ExecutorService.class));
         verify(cbRefreshTokenClient, times(0)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(authenticationContextProvider, times(1)).getAuthenticationContext(eq(authorityUrl), eq(false), any(ExecutorService.class));
@@ -220,7 +220,7 @@ public class CbDelegatedTokenCredentialsTest {
         String result = new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, AUTHORIZATION_CODE, CLIENT_SECRET,
                 authenticationContextProvider, cbRefreshTokenClientProvider).getToken(RESOURCE);
 
-        Assert.assertNotEquals(ACCESS_TOKEN, result);
+        Assertions.assertNotEquals(ACCESS_TOKEN, result);
         assertEquals(customAccessToken, result);
 
         verify(futureAuthenticationResult, times(1)).get();
@@ -246,12 +246,12 @@ public class CbDelegatedTokenCredentialsTest {
                 .thenReturn(futureAuthenticationResult);
         doThrow(new ExecutionException("some execution failure", new RuntimeException())).when(futureAuthenticationResult).get();
 
-        thrown.expect(IOException.class);
-        thrown.expectMessage("some execution failure");
+        IOException exception = assertThrows(IOException.class, () -> {
+            new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, AUTHORIZATION_CODE, CLIENT_SECRET,
+                    authenticationContextProvider, cbRefreshTokenClientProvider).acquireNewAccessToken(RESOURCE);
+        });
 
-
-        new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, AUTHORIZATION_CODE, CLIENT_SECRET,
-                authenticationContextProvider, cbRefreshTokenClientProvider).acquireNewAccessToken(RESOURCE);
+        assertEquals("some execution failure", exception.getMessage());
 
         verify(futureAuthenticationResult, times(1)).get();
         verify(applicationTokenCredentials, times(1)).clientId();
@@ -276,12 +276,12 @@ public class CbDelegatedTokenCredentialsTest {
                 .thenReturn(futureAuthenticationResult);
         doThrow(new InterruptedException("some interrupted me!")).when(futureAuthenticationResult).get();
 
-        thrown.expect(IOException.class);
-        thrown.expectMessage("some interrupted me!");
+        IOException exception = assertThrows(IOException.class, () -> {
+            new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, AUTHORIZATION_CODE, CLIENT_SECRET,
+                    authenticationContextProvider, cbRefreshTokenClientProvider).acquireNewAccessToken(RESOURCE);
+        });
 
-
-        new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, AUTHORIZATION_CODE, CLIENT_SECRET,
-                authenticationContextProvider, cbRefreshTokenClientProvider).acquireNewAccessToken(RESOURCE);
+        assertEquals("some interrupted me!", exception.getMessage());
 
         verify(futureAuthenticationResult, times(1)).get();
         verify(applicationTokenCredentials, times(1)).clientId();
@@ -398,12 +398,13 @@ public class CbDelegatedTokenCredentialsTest {
                 MULTIPLE_RESOURCE_REFRESH_TOKEN);
         when(applicationTokenCredentials.clientId()).thenReturn(CLIENT_ID);
 
-        thrown.expect(AuthenticationException.class);
-        thrown.expectMessage("Could not obtain refresh token.");
+        AuthenticationException exception = assertThrows(AuthenticationException.class, () -> {
+            new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, tokens, CLIENT_SECRET, authenticationContextProvider,
+                    cbRefreshTokenClientProvider)
+                    .getToken(customResource);
+        });
 
-        new CbDelegatedTokenCredentials(applicationTokenCredentials, REDIRECT_URL, tokens, CLIENT_SECRET, authenticationContextProvider,
-                cbRefreshTokenClientProvider)
-                .getToken(customResource);
+        assertEquals("Could not obtain refresh token.", exception.getMessage());
 
         verify(futureAuthenticationResult, times(0)).get();
         verify(applicationTokenCredentials, times(1)).clientId();

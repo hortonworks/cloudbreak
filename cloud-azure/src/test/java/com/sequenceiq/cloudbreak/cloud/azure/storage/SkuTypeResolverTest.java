@@ -1,37 +1,29 @@
 package com.sequenceiq.cloudbreak.cloud.azure.storage;
 
-import static org.junit.runners.Parameterized.Parameters;
-
 import java.util.Arrays;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.microsoft.azure.management.storage.StorageAccountSkuType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 
-@RunWith(Parameterized.class)
+@ExtendWith(MockitoExtension.class)
 public class SkuTypeResolverTest {
 
-    private SkuTypeResolver underTest;
+    private SkuTypeResolver underTest = new SkuTypeResolver();
 
-    private DiskTypeSkuPair pair;
-
-    public SkuTypeResolverTest(DiskTypeSkuPair pair) {
-        this.pair = pair;
-        underTest = new SkuTypeResolver();
-    }
-
-    @Test
-    public void testResolving() {
+    @ParameterizedTest(name = "{index}: ({0})={1}")
+    @MethodSource("data")
+    public void testResolving(DiskTypeSkuPair pair) {
         StorageAccountSkuType result = underTest.resolveFromAzureDiskType(pair.getAzureDiskType());
 
-        Assert.assertEquals(pair.getExpectedStorageAccountSkuType().name(), result.name());
+        Assertions.assertEquals(pair.getExpectedStorageAccountSkuType().name(), result.name());
     }
 
-    @Parameters(name = "{index}: ({0})={1}")
     public static Iterable<DiskTypeSkuPair> data() {
         return Arrays.asList(DiskTypeSkuPair.values());
     }

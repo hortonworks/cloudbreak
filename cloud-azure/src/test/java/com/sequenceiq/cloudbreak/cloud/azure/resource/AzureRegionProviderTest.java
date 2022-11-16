@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureRegionProviderTest {
 
     private static final String ENABLED_REGIONS_FILE = "enabled-regions";
@@ -37,7 +37,7 @@ public class AzureRegionProviderTest {
 
     private String testRegionsJson;
 
-    @Before
+    @BeforeEach
     public void before() throws IOException {
         ReflectionTestUtils.setField(underTest, "armZoneParameterDefault", "North Europe");
         testRegionsJson = getTestRegions();
@@ -53,7 +53,7 @@ public class AzureRegionProviderTest {
 
         assertRegionNames(actual, azureRegions);
         assertCoordinates(actual);
-        Assert.assertEquals("North Europe", actual.getDefaultRegion());
+        Assertions.assertEquals("North Europe", actual.getDefaultRegion());
     }
 
     @Test
@@ -64,7 +64,7 @@ public class AzureRegionProviderTest {
         CloudRegions actual = underTest.regions(null, azureRegions, List.of());
 
         assertRegionNames(actual, supportedAzureRegions);
-        Assert.assertEquals("North Europe", actual.getDefaultRegion());
+        Assertions.assertEquals("North Europe", actual.getDefaultRegion());
     }
 
     private String getTestRegions() throws IOException {
@@ -80,7 +80,7 @@ public class AzureRegionProviderTest {
     }
 
     private void assertRegionNames(CloudRegions actual, Collection<Region> azureRegions) {
-        Assert.assertTrue(azureRegions.stream()
+        Assertions.assertTrue(azureRegions.stream()
                 .allMatch(region -> actual.getCloudRegions().keySet()
                         .stream().map(com.sequenceiq.cloudbreak.cloud.model.Region::getRegionName)
                         .collect(Collectors.toSet())
@@ -89,7 +89,7 @@ public class AzureRegionProviderTest {
 
     private void assertCoordinates(CloudRegions actual) throws IOException {
         RegionCoordinateSpecifications regionCoordinateSpecifications = getRegionsFromFile();
-        Assert.assertTrue(actual.getCoordinates().values().stream()
+        Assertions.assertTrue(actual.getCoordinates().values().stream()
                 .allMatch(coordinate -> regionCoordinateSpecifications.getItems().stream()
                         .anyMatch(region -> region.getLatitude().equals(coordinate.getLatitude().toString()) &&
                                 region.getLongitude().equals(coordinate.getLongitude().toString()))));

@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,14 +16,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
@@ -46,7 +47,7 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureIDBrokerObjectStorageValidatorTest {
 
     private static final CloudStorageCdpService SERVICE_1 = CloudStorageCdpService.ZEPPELIN_NOTEBOOK;
@@ -135,24 +136,24 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Spy
     private Identity assumer;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        when(client.getIdentityById(LOG_IDENTITY)).thenReturn(logger);
-        when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(assumer);
-        when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
-        when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
-        when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(resourceGroup);
-        when(client.getStorageAccount(any(), any())).thenReturn(Optional.of(storageAccount));
-        when(storageAccount.isHnsEnabled()).thenReturn(Boolean.TRUE);
-        when(resourceGroup.id()).thenReturn(RESOURCE_GROUP_ID);
+        lenient().when(client.getIdentityById(LOG_IDENTITY)).thenReturn(logger);
+        lenient().when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(assumer);
+        lenient().when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
+        lenient().when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
+        lenient().when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(resourceGroup);
+        lenient().when(client.getStorageAccount(any(), any())).thenReturn(Optional.of(storageAccount));
+        lenient().when(storageAccount.isHnsEnabled()).thenReturn(Boolean.TRUE);
+        lenient().when(resourceGroup.id()).thenReturn(RESOURCE_GROUP_ID);
         AdlsGen2Config adlsGen2Config = new AdlsGen2Config("abfs://", ABFS_FILESYSTEM_NAME, ABFS_STORAGE_ACCOUNT_NAME, false);
-        when(adlsGen2ConfigGenerator.generateStorageConfig(anyString())).thenReturn(adlsGen2Config);
-        when(logger.id()).thenReturn(LOG_IDENTITY);
-        when(logger.principalId()).thenReturn(LOG_IDENTITY_PRINCIPAL_ID);
-        when(assumer.id()).thenReturn(ASSUMER_IDENTITY);
-        when(assumer.principalId()).thenReturn(ASSUMER_IDENTITY_PRINCIPAL_ID);
-        when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString())).thenReturn(Optional.of(ABFS_STORAGE_ACCOUNT_ID));
-        when(entitlementService.isDatalakeBackupRestorePrechecksEnabled(any())).thenReturn(true);
+        lenient().when(adlsGen2ConfigGenerator.generateStorageConfig(anyString())).thenReturn(adlsGen2Config);
+        lenient().when(logger.id()).thenReturn(LOG_IDENTITY);
+        lenient().when(logger.principalId()).thenReturn(LOG_IDENTITY_PRINCIPAL_ID);
+        lenient().when(assumer.id()).thenReturn(ASSUMER_IDENTITY);
+        lenient().when(assumer.principalId()).thenReturn(ASSUMER_IDENTITY_PRINCIPAL_ID);
+        lenient().when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString())).thenReturn(Optional.of(ABFS_STORAGE_ACCOUNT_ID));
+        lenient().when(entitlementService.isDatalakeBackupRestorePrechecksEnabled(any())).thenReturn(true);
     }
 
     @Test
@@ -482,8 +483,8 @@ public class AzureIDBrokerObjectStorageValidatorTest {
 
         RoleASsignmentBuilder(AzureClient client) {
             roleAssignmentsPagedList = Mockito.spy(PagedList.class);
-            when(client.listRoleAssignments()).thenReturn(roleAssignmentsPagedList);
-            when(client.listRoleAssignmentsByScopeInner(any())).thenReturn(roleAssignmentsPagedList);
+            lenient().when(client.listRoleAssignments()).thenReturn(roleAssignmentsPagedList);
+            lenient().when(client.listRoleAssignmentsByScopeInner(any())).thenReturn(roleAssignmentsPagedList);
         }
 
         RoleASsignmentBuilder withAssignment(String principalId, String scope) {
