@@ -16,7 +16,7 @@ public class SecurityGroupSeparator {
             return Set.of();
         }
         return Arrays.stream(securityGroup.split(","))
-                .map(e -> e.trim())
+                .map(String::trim)
                 .collect(Collectors.toSet());
     }
 

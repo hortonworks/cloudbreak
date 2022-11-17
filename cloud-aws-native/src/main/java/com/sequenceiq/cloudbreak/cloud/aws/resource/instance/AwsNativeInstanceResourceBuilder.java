@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
+import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCloudStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -79,6 +80,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Inject
     private VolumeBuilderUtil volumeBuilderUtil;
+
+    @Inject
+    private SecurityGroupBuilderUtil securityGroupBuilderUtil;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -119,7 +123,6 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             LOGGER.info("Create new instance with name: {}", cloudResource.getName());
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
                     com.amazonaws.services.ec2.model.ResourceType.Instance);
-            String securityGroupId = getSecurityGroupId(context, group);
             tagSpecification.withTags(
                     new Tag().withKey("Name").withValue(cloudResource.getName()),
                     new Tag().withKey("instanceGroup").withValue(group.getName())
@@ -128,7 +131,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     .withInstanceType(instanceTemplate.getFlavor())
                     .withImageId(cloudStack.getImage().getImageName())
                     .withSubnetId(cloudInstance.getSubnetId())
-                    .withSecurityGroupIds(singletonList(securityGroupId))
+                    .withSecurityGroupIds(securityGroupBuilderUtil.getSecurityGroupIds(context, group))
                     .withEbsOptimized(isEbsOptimized(instanceTemplate))
                     .withTagSpecifications(tagSpecification)
                     .withIamInstanceProfile(getIamInstanceProfile(group))
@@ -162,34 +165,11 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                 modifyInstanceAttributeRequest.setInstanceType(instance.getTemplate().getFlavor());
                 amazonEc2Client.modifyInstanceAttribute(modifyInstanceAttributeRequest);
             } else {
-                LOGGER.info("Instance with name: {} ({}), using the same type what was requested: {}", awsInstance.getInstanceId(),
-                        requestedInstanceType);
+                LOGGER.info("Instance ID {} using the same type what was requested: {}", awsInstance.getInstanceId(), requestedInstanceType);
             }
 
         }
         return List.of();
-    }
-
-    String getSecurityGroupId(AwsContext context, Group group) {
-        List<CloudResource> groupResources = context.getGroupResources(group.getName());
-        String securityGroupId = null;
-        if (groupResources != null) {
-            securityGroupId = groupResources.stream()
-                    .filter(g -> g.getType() == ResourceType.AWS_SECURITY_GROUP && group.getName().equals(g.getGroup()))
-                    .findFirst()
-                    .map(CloudResource::getReference)
-                    .orElse(null);
-            LOGGER.debug("Selected security group id from CloudResource: {}", securityGroupId);
-        }
-        if (StringUtils.isEmpty(securityGroupId)) {
-            securityGroupId = group.getSecurity().getCloudSecurityId();
-            LOGGER.debug("Selected security group id from group's security domain: {}", securityGroupId);
-        }
-        if (StringUtils.isEmpty(securityGroupId)) {
-            LOGGER.debug("Cannot determine the security group, so it will be created in the default sec group");
-        }
-        LOGGER.info("Security group id: {}", securityGroupId);
-        return securityGroupId;
     }
 
     Collection<BlockDeviceMapping> blocks(Group group, CloudStack cloudStack, AuthenticatedContext ac) {
