@@ -91,6 +91,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final String INSTANCE_REFERENCE_URI = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s/instances/%s";
 
+    private static final String MACHINETYPE_URL = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s";
+
     @Inject
     private CustomGcpDiskEncryptionCreatorService customGcpDiskEncryptionCreatorService;
 
@@ -133,8 +135,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         listOfDisks.forEach(disk -> customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk));
 
         Instance instance = new Instance();
-        instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
-                projectId, location, template.getFlavor()));
+        instance.setMachineType(String.format(MACHINETYPE_URL, projectId, location, template.getFlavor()));
         instance.setDescription(description());
         instance.setName(buildableResource.get(0).getName());
         Optional<CloudFileSystemView> cloudFileSystemView = group.getIdentity();
@@ -359,6 +360,30 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public CloudVmInstanceStatus stop(GcpContext context, AuthenticatedContext auth, CloudInstance instance) {
         return stopStart(context, auth, instance, true);
+    }
+
+    @Override
+    public CloudResource update(GcpContext context, CloudResource resource, CloudInstance cloudInstance,
+        AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+        String projectId = gcpStackUtil.getProjectId(auth.getCloudCredential());
+        String availabilityZone = cloudInstance.getAvailabilityZone();
+        Compute compute = context.getCompute();
+        String instanceId = cloudInstance.getInstanceId();
+        try {
+            LOGGER.info("Gcp operations are preparing: instanceId: {}, projectId: {}, availabilityZone: {}", instanceId, projectId, availabilityZone);
+            Get get = compute.instances().get(projectId, availabilityZone, instanceId);
+            Instance gcpInstance = get.execute();
+            gcpInstance.setMachineType(String.format(MACHINETYPE_URL,
+                    projectId, availabilityZone, cloudInstance.getTemplate().getFlavor()));
+            Compute.Instances.Update update = compute.instances().update(projectId, availabilityZone, gcpInstance.getName(), gcpInstance);
+            Operation operation = update.execute();
+            LOGGER.debug("Operation with {} successfully inited on {} instance.", operation.getName(), cloudInstance.getInstanceId());
+            return createOperationAwareCloudResource(resource, operation);
+        } catch (TokenResponseException e) {
+            throw gcpStackUtil.getMissingServiceAccountKeyError(e, context.getProjectId());
+        } catch (IOException e) {
+            throw new GcpResourceException(String.format("An error occurred while stopping the vm '%s'", instanceId), e);
+        }
     }
 
     @Override
