@@ -363,23 +363,8 @@ public class SshJClientActions extends SshJClient {
         return checkMonitoringStatus(testDto, instanceIps, verifyMetricNames, acceptableNokNames);
     }
 
-    /**
-     * Creating new pre-warmed images with Common Monitoring is still in progress. So in the meantime we can install the latest version on the VMs manually.
-     *
-     * @param instanceGroups An instance group is a collection of virtual machine (VM) instances that you can manage as a single entity.
-     * @param hostGroupNames A host group logically grouped hosts regardless of any features that they might or might not have in common.
-     *                          For example: hosts do not have to have the same architecture, configuration, or storage.
-     */
-    private void updateMonitoring(List<String> instanceIps) {
-        instanceIps.stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip,
-                        "sudo yum update --disablerepo=* --enablerepo=cdp-infra-tools --assumeyes --skip-broken > /dev/null 2>&1")));
-    }
-
     public <T extends CloudbreakTestDto> T checkMonitoringStatus(T testDto, List<String> instanceIps, List<String> verifyMetricNames,
             List<String> acceptableNokNames) {
-
-        updateMonitoring(instanceIps);
 
         String monitoringStatusCommand = format("sudo cdp-doctor monitoring status -m %s --format json", StringUtils.join(verifyMetricNames, ","));
         Map<String, Pair<Integer, String>> monitoringStatusReportByIp = instanceIps.stream()
@@ -507,7 +492,6 @@ public class SshJClientActions extends SshJClient {
     }
 
     public <T extends CloudbreakTestDto> T checkFilesystemFreeBytesGeneratedMetric(T testDto, List<String> instanceIps) {
-        updateMonitoring(instanceIps);
         List<String> initialSuccessCount = checkRequestSignerSuccessCount(instanceIps);
         int successCountByIp = initialSuccessCount.toArray().length;
         createHugheFilesForFilesystemFreeBytesMetric(instanceIps);
