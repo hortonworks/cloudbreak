@@ -170,6 +170,9 @@ public class FlowService {
 
     public FlowCheckResponse getFlowState(String flowId) {
         List<FlowLogWithoutPayload> allByFlowIdOrderByCreatedDesc = flowLogDBService.findAllWithoutPayloadByFlowIdOrderByCreatedDesc(flowId);
+        if (allByFlowIdOrderByCreatedDesc.isEmpty()) {
+            throw new NotFoundException(String.format("Flow '%s' not found.", flowId));
+        }
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowId(flowId);
         flowCheckResponse.setHasActiveFlow(!completed("Flow", flowId, List.of(), allByFlowIdOrderByCreatedDesc));
