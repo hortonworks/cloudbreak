@@ -66,7 +66,6 @@ import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
-import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -930,15 +929,12 @@ public class UmsClient {
      */
     private UserManagementBlockingStub newStub() {
         String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
-        Set<ClientInterceptor> clientInterceptors = Sets.newHashSet(
-                GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcTimeoutSec()),
-                new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),
-                new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
-        if (umsClientConfig.isTracingEnabled()) {
-            clientInterceptors.add(GrpcUtil.getTracingInterceptor(tracer));
-        }
         return UserManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(clientInterceptors.toArray(new ClientInterceptor[0]));
+                .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcTimeoutSec()),
+                        GrpcUtil.getTracingInterceptor(tracer),
+                        new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),
+                        new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
     }
 
     /**
