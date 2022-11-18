@@ -3,14 +3,12 @@ package com.sequenceiq.cloudbreak.auth.altus;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewGrpc;
 import com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto;
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
@@ -18,7 +16,6 @@ import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
-import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -90,13 +87,11 @@ public class PersonalResourceViewClient {
      */
     private PersonalResourceViewGrpc.PersonalResourceViewBlockingStub newStub() {
         String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
-        Set<ClientInterceptor> clientInterceptors = Sets.newHashSet(
+        return PersonalResourceViewGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
+                GrpcUtil.getTracingInterceptor(tracer),
                 new AltusMetadataInterceptor(requestId, actorCrn),
-                new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
-        if (umsClientConfig.isTracingEnabled()) {
-            clientInterceptors.add(GrpcUtil.getTracingInterceptor(tracer));
-        }
-        return PersonalResourceViewGrpc.newBlockingStub(channel).withInterceptors(clientInterceptors.toArray(new ClientInterceptor[0]));
+                new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName())
+        );
     }
 }
