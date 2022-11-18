@@ -47,6 +47,8 @@ public class ImageEntity {
     @Column(name = "image_date")
     private String date;
 
+    private String ldapAgentVersion;
+
     public String getImageName() {
         return imageName;
     }
@@ -127,6 +129,14 @@ public class ImageEntity {
         this.date = date;
     }
 
+    public String getLdapAgentVersion() {
+        return ldapAgentVersion;
+    }
+
+    public void setLdapAgentVersion(String ldapAgentVersion) {
+        this.ldapAgentVersion = ldapAgentVersion;
+    }
+
     @Override
     public String toString() {
         return "ImageEntity{" +
@@ -139,6 +149,7 @@ public class ImageEntity {
                 ", imageId='" + imageId + '\'' +
                 ", imageCatalogName='" + imageCatalogName + '\'' +
                 ", date='" + date + '\'' +
+                ", ldapAgentVersion='" + ldapAgentVersion + '\'' +
                 '}';
     }
 
@@ -163,11 +174,12 @@ public class ImageEntity {
                 && Objects.equals(imageCatalogUrl, that.imageCatalogUrl)
                 && Objects.equals(imageId, that.imageId)
                 && Objects.equals(imageCatalogName, that.imageCatalogName)
+                && Objects.equals(ldapAgentVersion, that.ldapAgentVersion)
                 && Objects.equals(date, that.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, imageName, userdata, os, osType, imageCatalogUrl, imageId, imageCatalogName, date);
+        return Objects.hash(id, imageName, userdata, os, osType, imageCatalogUrl, imageId, imageCatalogName, date, ldapAgentVersion);
     }
 }
