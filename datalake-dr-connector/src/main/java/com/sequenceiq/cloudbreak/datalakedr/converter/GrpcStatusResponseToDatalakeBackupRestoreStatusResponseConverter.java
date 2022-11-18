@@ -9,8 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse.State;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 
 @Component
@@ -18,39 +26,41 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter {
 
     static final String FAILED_STATE = "FAILED";
 
+    static final String VALIDATION_FAILED = "VALIDATION_FAILED";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.class);
 
-    public DatalakeBackupStatusResponse convert(datalakeDRProto.BackupDatalakeResponse response) {
+    public DatalakeBackupStatusResponse convert(BackupDatalakeResponse response) {
         return new DatalakeBackupStatusResponse(response.getBackupId(),
-                DatalakeBackupStatusResponse.State.valueOf(response.getOverallState()),
+                State.valueOf(response.getOverallState()),
                 Optional.ofNullable(parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()))
         );
     }
 
-    public DatalakeRestoreStatusResponse convert(datalakeDRProto.RestoreDatalakeResponse response) {
+    public DatalakeRestoreStatusResponse convert(RestoreDatalakeResponse response) {
         return new DatalakeRestoreStatusResponse(response.getBackupId(), response.getRestoreId(),
-                DatalakeRestoreStatusResponse.State.valueOf(response.getOverallState()),
+                State.valueOf(response.getOverallState()),
                 Optional.ofNullable(parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()))
         );
     }
 
-    public DatalakeBackupStatusResponse convert(datalakeDRProto.BackupDatalakeStatusResponse response) {
+    public DatalakeBackupStatusResponse convert(BackupDatalakeStatusResponse response) {
         return new DatalakeBackupStatusResponse(response.getBackupId(),
-            DatalakeBackupStatusResponse.State.valueOf(response.getOverallState()),
-            Optional.ofNullable(parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()))
+                State.valueOf(response.getOverallState()),
+                Optional.ofNullable(parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()))
         );
     }
 
-    public DatalakeRestoreStatusResponse convert(datalakeDRProto.RestoreDatalakeStatusResponse response) {
+    public DatalakeRestoreStatusResponse convert(RestoreDatalakeStatusResponse response) {
         return new DatalakeRestoreStatusResponse(response.getBackupId(), response.getRestoreId(),
-                DatalakeRestoreStatusResponse.State.valueOf(response.getOverallState()),
-            Optional.ofNullable(parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()))
+                State.valueOf(response.getOverallState()),
+                Optional.ofNullable(parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()))
         );
     }
 
-    private String parseFailuresFromOperationsStates(datalakeDRProto.InternalBackupRestoreState operationStates, String legacyFailureReason) {
+    private String parseFailuresFromOperationsStates(InternalBackupRestoreState operationStates, String legacyFailureReason) {
         String failure;
-        if (operationStates != null && operationStates != datalakeDRProto.InternalBackupRestoreState.getDefaultInstance()) {
+        if (operationStates != null && !operationStates.equals(InternalBackupRestoreState.getDefaultInstance())) {
             StringBuilder failureStringBuilder = new StringBuilder();
             getFailure(OperationEnum.STOP_SERVICES.description(), operationStates.getAdminOperations().getStopServices())
                     .ifPresent(failureStringBuilder::append);
@@ -58,6 +68,10 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter {
                     .ifPresent(failureStringBuilder::append);
             parseHbaseFailure(operationStates.getHbase(), failureStringBuilder);
             parseSolrFailure(operationStates.getSolr(), failureStringBuilder);
+            getFailure(OperationEnum.STORAGE_PERMISSION_VALIDATION.description(), operationStates.getAdminOperations().getPrecheckStoragePermission())
+                    .ifPresent(failureStringBuilder::append);
+            getFailure(OperationEnum.RANGER_AUDIT_COLLECTION_VALIDATION.description(), operationStates.getAdminOperations().getPrecheckRangerAuditValidation())
+                    .ifPresent(failureStringBuilder::append);
             getFailure(OperationEnum.DATABASE.description(), operationStates.getDatabase().getDatabase())
                     .ifPresent(failureStringBuilder::append);
 
@@ -73,9 +87,9 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter {
         return failure;
     }
 
-    private void parseHbaseFailure(datalakeDRProto.HbaseBackupRestoreState hbase, StringBuilder failureString) {
+    private void parseHbaseFailure(HbaseBackupRestoreState hbase, StringBuilder failureString) {
         if (hbase != null) {
-            List<datalakeDRProto.BackupRestoreOperationStatus> allFailureReasons = List.of(
+            List<BackupRestoreOperationStatus> allFailureReasons = List.of(
                     hbase.getAtlasJanusTable(),
                     hbase.getAtlasEntityAuditEventTable()
             );
@@ -91,9 +105,9 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter {
         }
     }
 
-    private void parseSolrFailure(datalakeDRProto.SolrBackupRestoreState solr, StringBuilder failureString) {
+    private void parseSolrFailure(SolrBackupRestoreState solr, StringBuilder failureString) {
         if (solr != null) {
-            List<datalakeDRProto.BackupRestoreOperationStatus> allFailureReasons = List.of(
+            List<BackupRestoreOperationStatus> allFailureReasons = List.of(
                     solr.getEdgeIndexCollection(),
                     solr.getFulltextIndexCollection(),
                     solr.getRangerAuditsCollection(),
@@ -112,7 +126,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter {
                 getFailure(OperationEnum.SOLR_VERTEX_INDEX.description(), solr.getVertexIndexCollection())
                         .ifPresent(failureString::append);
             }
-            List<datalakeDRProto.BackupRestoreOperationStatus> allDeleteFailureReasons = List.of(
+            List<BackupRestoreOperationStatus> allDeleteFailureReasons = List.of(
                     solr.getEdgeIndexCollectionDelete(),
                     solr.getFulltextIndexCollectionDelete(),
                     solr.getRangerAuditsCollectionDelete(),
@@ -134,17 +148,17 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter {
         }
     }
 
-    private Optional<String> getFailure(String operationName, datalakeDRProto.BackupRestoreOperationStatus status) {
-        if (status != null && FAILED_STATE.equals(status.getStatus())) {
+    private Optional<String> getFailure(String operationName, BackupRestoreOperationStatus status) {
+        if (status != null && (FAILED_STATE.equals(status.getStatus()) || VALIDATION_FAILED.equals(status.getStatus()))) {
             return Optional.of(operationName + ": " + status.getFailureReason() + ", ");
         }
         return Optional.empty();
     }
 
-    private boolean areAllFailuresTheSame(List<datalakeDRProto.BackupRestoreOperationStatus> statuses) {
+    private boolean areAllFailuresTheSame(List<BackupRestoreOperationStatus> statuses) {
         return statuses.stream()
                 .filter(Objects::nonNull)
-                .map(datalakeDRProto.BackupRestoreOperationStatus::getFailureReason)
+                .map(BackupRestoreOperationStatus::getFailureReason)
                 .allMatch(failureReason -> statuses.get(0).getFailureReason().equals(failureReason));
     }
 }
