@@ -1,6 +1,8 @@
 package com.sequenceiq.redbeams.flow.redbeams.upgrade.handler;
 
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -12,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -23,6 +26,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsUpgradeFailedEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerSuccess;
+import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 import reactor.bus.Event;
@@ -40,6 +44,9 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
 
     @Inject
     private PersistenceNotifier persistenceNotifier;
+
+    @Inject
+    private DBResourceService dbResourceService;
 
     @Override
     public String selector() {
@@ -63,10 +70,11 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
         CloudContext cloudContext = request.getCloudContext();
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+        List<CloudResource> cloudResources = dbResourceService.getAllAsCloudResource(request.getResourceId());
         Selectable response;
         try {
             TargetMajorVersion targetMajorVersion = request.getTargetMajorVersion();
-            connector.resources().upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, targetMajorVersion);
+            connector.resources().upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, targetMajorVersion, cloudResources);
             DBStack dbStack = dbStackService.getById(request.getResourceId());
             dbStack.setMajorVersion(targetMajorVersion.convertToMajorVersion());
             dbStackService.save(dbStack);

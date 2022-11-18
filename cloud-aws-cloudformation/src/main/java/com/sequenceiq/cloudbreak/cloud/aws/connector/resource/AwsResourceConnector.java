@@ -132,9 +132,9 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Override
     public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) {
+            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) {
         LOGGER.debug("Starting the upgrade of database server to {}", targetMajorVersion);
-        awsRdsUpgradeService.upgrade(authenticatedContext, stack, targetMajorVersion);
+        awsRdsUpgradeService.upgrade(authenticatedContext, stack, targetMajorVersion, persistenceNotifier, resources);
     }
 
     private boolean deployingToSameVPC(AwsNetworkView awsNetworkView, boolean existingVPC) {
