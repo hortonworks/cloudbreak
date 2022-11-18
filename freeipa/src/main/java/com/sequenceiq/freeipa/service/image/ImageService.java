@@ -51,9 +51,6 @@ public class ImageService {
     @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
 
-    @Value("${info.app.version:}")
-    private String freeIpaVersion;
-
     public ImageEntity create(Stack stack, ImageSettingsRequest imageRequest) {
         Pair<ImageWrapper, String> imageWrapperAndNamePair = fetchImageWrapperAndName(stack, imageRequest);
         ImageEntity imageEntity = createImageEntity(stack, imageWrapperAndNamePair);
@@ -67,7 +64,6 @@ public class ImageService {
         imageEntity.setImageName(imageWrapperAndNamePair.getRight());
         imageEntity.setImageCatalogUrl(imageWrapper.getCatalogUrl());
         imageEntity.setImageCatalogName(imageWrapper.getCatalogName());
-        imageEntity.setDate(imageWrapper.getImage().getDate());
         return imageEntity;
     }
 
@@ -117,6 +113,7 @@ public class ImageService {
         imageEntity.setImageCatalogUrl(imageWrapper.getCatalogUrl());
         imageEntity.setImageCatalogName(imageWrapper.getCatalogName());
         imageEntity.setDate(imageWrapper.getImage().getDate());
+        imageEntity.setLdapAgentVersion(imageConverter.extractLdapAgentVersion(imageWrapper.getImage()));
         return imageEntity;
     }
 

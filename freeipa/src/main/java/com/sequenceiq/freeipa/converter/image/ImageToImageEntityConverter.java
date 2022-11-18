@@ -13,6 +13,12 @@ public class ImageToImageEntityConverter {
         imageEntity.setImageId(source.getUuid());
         imageEntity.setOs(source.getOs());
         imageEntity.setOsType(source.getOsType());
+        imageEntity.setDate(source.getDate());
+        imageEntity.setLdapAgentVersion(extractLdapAgentVersion(source));
         return imageEntity;
+    }
+
+    public String extractLdapAgentVersion(Image image) {
+        return image.getPackageVersions() == null ? null : image.getPackageVersions().get("freeipa-ldap-agent");
     }
 }

@@ -21,12 +21,12 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.util.ReflectionUtils;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
+import com.sequenceiq.freeipa.converter.image.ImageToImageEntityConverter;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -52,8 +52,6 @@ public class ImageServiceTest {
 
     private static final String IMAGE_UUID = "UUID";
 
-    private static final String FREEIPA_VERSION = "2.49.0";
-
     @Mock
     private ImageProviderFactory imageProviderFactory;
 
@@ -71,6 +69,9 @@ public class ImageServiceTest {
 
     @Mock
     private Image image;
+
+    @Mock
+    private ImageToImageEntityConverter imageConverter;
 
     @Captor
     private ArgumentCaptor<ImageSettingsRequest> imageSettingsRequestCaptor;
@@ -122,6 +123,7 @@ public class ImageServiceTest {
         when(imageRepository.getByStack(stack)).thenReturn(new ImageEntity());
         when(image.getUuid()).thenReturn(IMAGE_UUID);
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
+        when(imageConverter.extractLdapAgentVersion(image)).thenReturn("1.2.3");
 
         ImageEntity imageEntity = underTest.changeImage(stack, imageRequest);
 
@@ -129,6 +131,28 @@ public class ImageServiceTest {
         assertEquals(IMAGE_CATALOG_URL, imageEntity.getImageCatalogUrl());
         assertEquals(IMAGE_CATALOG, imageEntity.getImageCatalogName());
         assertEquals(IMAGE_UUID, imageEntity.getImageId());
+        assertEquals("1.2.3", imageEntity.getLdapAgentVersion());
+    }
+
+    @Test
+    public void testImageCreate() {
+        Stack stack = new Stack();
+        stack.setCloudPlatform(DEFAULT_PLATFORM);
+        stack.setRegion(DEFAULT_REGION);
+        ImageSettingsRequest imageRequest = new ImageSettingsRequest();
+        when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
+        when(imageProvider.getImage(imageRequest, stack.getRegion(), stack.getCloudPlatform()))
+                .thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
+        when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
+        when(imageConverter.convert(image)).thenReturn(new ImageEntity());
+
+        ImageEntity imageEntity = underTest.create(stack, imageRequest);
+
+        assertEquals(stack, imageEntity.getStack());
+        assertEquals(EXISTING_ID, imageEntity.getImageName());
+        assertEquals(IMAGE_CATALOG_URL, imageEntity.getImageCatalogUrl());
+        assertEquals(IMAGE_CATALOG, imageEntity.getImageCatalogName());
     }
 
     @Test
@@ -156,9 +180,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    void testGenerateForStack() throws NoSuchFieldException {
-        ReflectionUtils.setField(ImageService.class.getDeclaredField("freeIpaVersion"), underTest, FREEIPA_VERSION);
-
+    void testGenerateForStack() {
         Stack stack = new Stack();
         stack.setRegion(DEFAULT_REGION);
         stack.setCloudPlatform(DEFAULT_PLATFORM);

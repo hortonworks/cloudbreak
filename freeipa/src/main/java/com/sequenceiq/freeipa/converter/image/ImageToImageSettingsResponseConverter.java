@@ -14,6 +14,7 @@ public class ImageToImageSettingsResponseConverter implements Converter<ImageEnt
         response.setCatalog(source.getImageCatalogUrl());
         response.setId(source.getImageId());
         response.setOs(source.getOs());
+        response.setLdapAgentVersion(source.getLdapAgentVersion());
         return response;
     }
 }
