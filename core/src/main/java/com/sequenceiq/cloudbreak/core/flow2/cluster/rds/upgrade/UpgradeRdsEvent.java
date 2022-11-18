@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateVersionResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -19,6 +20,7 @@ public enum UpgradeRdsEvent implements FlowEvent {
     UPGRADE_RDS_START_SERVICES_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsStartServicesResult.class)),
 
     UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsInstallPostgresPackagesResult.class)),
+    UPGRADE_RDS_VERSION_UPDATE_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsUpdateVersionResult.class)),
     UPGRADE_RDS_FAILED_EVENT(EventSelectorUtil.selector(UpgradeRdsFailedEvent.class)),
 
     FINALIZED_EVENT("UPGRADE_RDS_FINALIZED_EVENT"),
