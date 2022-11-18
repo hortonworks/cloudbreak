@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateVersionRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateVersionResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -136,12 +138,27 @@ public class UpgradeRdsActions {
         };
     }
 
-    @Bean(name = "UPGRADE_RDS_FINISHED_STATE")
-    public Action<?, ?> upgradeRdsFinished() {
+    @Bean(name = "UPGRADE_RDS_VERSION_UPDATE_STATE")
+    public Action<?, ?> updateRsdVersion() {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsInstallPostgresPackagesResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsInstallPostgresPackagesResult payload, Map<Object, Object> variables) {
-                upgradeRdsService.rdsUpgradeFinished(payload.getResourceId(), context.getClusterId(), payload.getVersion());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(UpgradeRdsContext context) {
+                return new UpgradeRdsUpdateVersionRequest(context.getStackId(), context.getVersion());
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_RDS_FINISHED_STATE")
+    public Action<?, ?> upgradeRdsFinished() {
+        return new AbstractUpgradeRdsAction<>(UpgradeRdsUpdateVersionResult.class) {
+            @Override
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsUpdateVersionResult payload, Map<Object, Object> variables) {
+                upgradeRdsService.rdsUpgradeFinished(payload.getResourceId(), context.getClusterId());
                 sendEvent(context);
             }
 

@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
-import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -107,14 +106,13 @@ public class UpgradeRdsService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_INSTALL_PG_FAILED, version, exception);
     }
 
-    public void rdsUpgradeFinished(Long stackId, Long clusterId, TargetMajorVersion targetMajorVersion) {
+    public void rdsUpgradeFinished(Long stackId, Long clusterId) {
         String statusReason = "RDS upgrade finished";
         LOGGER.debug(statusReason);
         InMemoryStateStore.deleteStack(stackId);
         InMemoryStateStore.deleteCluster(clusterId);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, statusReason);
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_FINISHED);
-        stackUpdater.updateExternalDatabaseEngineVersion(stackId, targetMajorVersion.getMajorVersion());
     }
 
     public void rdsUpgradeFailed(Long stackId, Long clusterId, Exception exception) {

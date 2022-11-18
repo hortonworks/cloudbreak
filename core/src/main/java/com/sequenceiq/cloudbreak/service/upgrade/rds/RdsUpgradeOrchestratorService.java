@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.rds;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,8 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -27,6 +30,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
@@ -84,6 +88,9 @@ public class RdsUpgradeOrchestratorService {
 
     @Inject
     private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
+
+    @Inject
+    private PostgresConfigService postgresConfigService;
 
     @Value("${cb.db.env.upgrade.rds.backuprestore.validationratio}")
     private double backupValidationRatio;
@@ -158,6 +165,21 @@ public class RdsUpgradeOrchestratorService {
         String volumeWithLargestFreeSpace = getVolumeWithLargestFreeSpace(stackDto);
         validateDbBackupSpace(stackDto, volumeWithLargestFreeSpace);
         updateRdsUpgradePillar(stackDto, volumeWithLargestFreeSpace);
+    }
+
+    public void updateDatabaseEngineVersion(Long stackId, String databaseEngineVersion) {
+        LOGGER.debug("Updating the database engine version to {}", databaseEngineVersion);
+        StackDto stackDto = stackDtoService.getById(stackId);
+        Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto);
+        try {
+            hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar),
+                    new ClusterDeletionBasedExitCriteriaModel(stackDto.getId(), stackDto.getCluster().getId()), createStateParams(stackDto, null, true));
+        } catch (Exception e) {
+            String errorMessage = "Failed to update database engine version in Salt pillar.";
+            LOGGER.error(errorMessage, e);
+            throw new CloudbreakServiceException(errorMessage, e);
+        }
     }
 
     private void updateRdsUpgradePillar(StackDto stackDto, String rdsBackupLocation) throws CloudbreakOrchestratorException {
