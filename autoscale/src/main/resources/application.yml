@@ -16,7 +16,7 @@ management:
     web:
       base-path: "/"
       exposure:
-        include: info,health,prometheus,metrics
+        include: info,health,prometheus
       path-mapping:
         prometheus: metrics
   endpoint:
@@ -28,7 +28,6 @@ management:
     prometheus:
       enabled: true
     health:
-      show-details: always
       probes:
         enabled: true
   metrics:
