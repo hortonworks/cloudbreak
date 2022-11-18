@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -50,6 +51,9 @@ public class AwsRdsTerminateService {
     @Inject
     @Qualifier("DefaultRetryService")
     private Retry retryService;
+
+    @Inject
+    private AwsRdsParameterGroupService awsRdsParameterGroupService;
 
     /**
      * Terminates a database server (stack).
@@ -89,7 +93,9 @@ public class AwsRdsTerminateService {
         }
 
         CloudContext cloudContext = ac.getCloudContext();
-        resources.forEach(r -> persistenceNotifier.notifyDeletion(r, cloudContext));
+        AmazonRdsClient rdsClient = awsClient.createRdsClient(credentialView, regionName);
+        awsRdsParameterGroupService.removeFormerParamGroups(rdsClient, stack.getDatabaseServer(), resources);
+        resources.forEach(resource -> persistenceNotifier.notifyDeletion(resource, cloudContext));
 
         // FIXME
         return List.of();

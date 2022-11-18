@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsState.AVAILABLE;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -11,11 +13,14 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsParameterGroupService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsInfo;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.Version;
 
 @Service
@@ -32,7 +37,11 @@ public class AwsRdsUpgradeService {
     @Inject
     private AwsRdsUpgradeValidatorService awsRdsUpgradeValidatorService;
 
-    public void upgrade(AuthenticatedContext ac, DatabaseStack dbStack, Version targetMajorVersion) {
+    @Inject
+    private AwsRdsParameterGroupService awsRdsParameterGroupService;
+
+    public void upgrade(AuthenticatedContext ac, DatabaseStack dbStack, Version targetMajorVersion, PersistenceNotifier persistenceNotifier,
+            List<CloudResource> cloudResources) {
         DatabaseServer databaseServer = dbStack.getDatabaseServer();
         String dbInstanceIdentifier = databaseServer.getServerId();
         LOGGER.debug("Starting the upgrade of RDS {} to target major version of {}", dbInstanceIdentifier, targetMajorVersion);
@@ -41,8 +50,10 @@ public class AwsRdsUpgradeService {
         RdsInfo rdsInfo = getRdsInfo(dbInstanceIdentifier, rdsClient);
         if (awsRdsUpgradeValidatorService.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)) {
             awsRdsUpgradeValidatorService.validateRdsIsAvailableOrUpgrading(rdsInfo);
-            upgradeRdsIfNotUpgradingAlready(targetMajorVersion, databaseServer, rdsClient, rdsInfo);
+            upgradeRdsIfNotUpgradingAlready(ac, targetMajorVersion, databaseServer, rdsClient, rdsInfo, persistenceNotifier);
             waitForRdsUpgrade(ac, databaseServer, rdsClient);
+            List<CloudResource> removedResources = awsRdsParameterGroupService.removeFormerParamGroups(rdsClient, dbStack.getDatabaseServer(), cloudResources);
+            removedResources.forEach(resource -> persistenceNotifier.notifyDeletion(resource, ac.getCloudContext()));
         }
         LOGGER.debug("RDS upgrade done for DB: {}", dbInstanceIdentifier);
     }
@@ -51,10 +62,12 @@ public class AwsRdsUpgradeService {
         return awsRdsUpgradeSteps.getRdsInfo(rdsClient, dbInstanceIdentifier);
     }
 
-    private void upgradeRdsIfNotUpgradingAlready(Version targetMajorVersion, DatabaseServer databaseServer, AmazonRdsClient rdsClient, RdsInfo rdsInfo) {
+    private void upgradeRdsIfNotUpgradingAlready(AuthenticatedContext ac, Version targetMajorVersion, DatabaseServer databaseServer, AmazonRdsClient rdsClient,
+            RdsInfo rdsInfo, PersistenceNotifier persistenceNotifier) {
         if (AVAILABLE == rdsInfo.getRdsState()) {
             LOGGER.debug("RDS {} is in available state, calling upgrade.", databaseServer.getServerId());
-            awsRdsUpgradeSteps.upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
+            List<CloudResource> newResources = awsRdsUpgradeSteps.upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
+            newResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext()));
         } else {
             LOGGER.debug("RDS {} is already upgrading, proceeding to wait for upgrade", databaseServer.getServerId());
         }
@@ -69,5 +82,4 @@ public class AwsRdsUpgradeService {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         return awsClient.createRdsClient(credentialView, regionName);
     }
-
 }
