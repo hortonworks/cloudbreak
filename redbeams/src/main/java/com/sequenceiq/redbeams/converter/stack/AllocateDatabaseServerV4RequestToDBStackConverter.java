@@ -158,6 +158,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private SslConfig getSslConfig(AllocateDatabaseServerV4Request source, DBStack dbStack) {
         SslConfig sslConfig = new SslConfig();
         if (sslEnabled && source.getSslConfig() != null && SslMode.isEnabled(source.getSslConfig().getSslMode())) {
+            LOGGER.info("SSL is enabled and has been requested. Setting up SslConfig for DBStack.");
             String cloudPlatform = dbStack.getCloudPlatform();
             String region = dbStack.getRegion();
             // TODO Determine the highest available SSL cert version for GCP; update sslCertificateActiveVersion during provisioning
@@ -173,80 +174,77 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
                 // This is possible for cloud platforms where SSL is supported, but the certs are not pre-registered in CB; see e.g. GCP
                 certs = Collections.emptySet();
                 cloudProviderIdentifier = null;
-            } else if (numberOfCerts == 1 || !CloudPlatform.AZURE.equals(source.getCloudPlatform())) {
-                SslCertificateEntry cert = databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndVersion(cloudPlatform, region, maxVersion);
-                validateCert(cloudPlatform, maxVersion, cert);
-                certs = Collections.singleton(cert.getCertPem());
-                cloudProviderIdentifier = cert.getCloudProviderIdentifier();
             } else {
-                // In Azure and for > 1 certs, include both the most recent cert and the preceding one
+                // For >= 1 certs, always include all of them
                 Set<SslCertificateEntry> certsTemp =
-                        databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegionAndVersions(cloudPlatform, region, maxVersion - 1, maxVersion)
+                        databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(cloudPlatform, region)
                                 .stream()
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
-                validateNonNullCertsCount(cloudPlatform, maxVersion, certsTemp);
-                findAndValidateCertByVersion(cloudPlatform, maxVersion - 1, certsTemp);
-                cloudProviderIdentifier = findAndValidateCertByVersion(cloudPlatform, maxVersion, certsTemp).getCloudProviderIdentifier();
+                validateNonNullCertsCount(cloudPlatform, region, numberOfCerts, certsTemp);
+                for (int i = maxVersion - numberOfCerts + 1; i < maxVersion; i++) {
+                    findAndValidateCertByVersion(cloudPlatform, region, i, certsTemp);
+                }
+                cloudProviderIdentifier = findAndValidateCertByVersion(cloudPlatform, region, maxVersion, certsTemp).getCloudProviderIdentifier();
                 certs = certsTemp
                         .stream()
                         .map(SslCertificateEntry::getCertPem)
                         .collect(Collectors.toSet());
-                validateUniqueCertsCount(cloudPlatform, maxVersion, certs);
+                validateUniqueCertsCount(cloudPlatform, region, numberOfCerts, certs);
             }
             sslConfig.setSslCertificates(certs);
             sslConfig.setSslCertificateActiveCloudProviderIdentifier(cloudProviderIdentifier);
 
             sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
+            LOGGER.info("Finished setting up SslConfig: {}", sslConfig);
+        } else {
+            LOGGER.info("SSL is not enabled or has not been requested. Skipping SslConfig setup for DBStack.");
         }
         return sslConfig;
     }
 
-    private void validateCert(String cloudPlatform, int versionExpected, SslCertificateEntry cert) {
+    private void validateCert(String cloudPlatform, String region, int versionExpected, SslCertificateEntry cert) {
         if (cert == null) {
             throw new IllegalStateException(
-                    String.format("Could not find SSL certificate version %d for cloud platform \"%s\"", versionExpected, cloudPlatform));
-        }
-
-        int version = cert.getVersion();
-        if (version != versionExpected) {
-            throw new IllegalStateException(String.format("SSL certificate version mismatch for cloud platform \"%s\": expected=%d, actual=%d", cloudPlatform,
-                    versionExpected, version));
+                    String.format("Could not find SSL certificate version %d for cloud platform \"%s\" and region \"%s\"", versionExpected, cloudPlatform,
+                            region));
         }
 
         if (Strings.isNullOrEmpty(cert.getCloudProviderIdentifier())) {
             throw new IllegalStateException(
-                    String.format("Blank CloudProviderIdentifier in SSL certificate version %d for cloud platform \"%s\"", versionExpected, cloudPlatform));
+                    String.format("Blank CloudProviderIdentifier in SSL certificate version %d for cloud platform \"%s\" and region \"%s\"", versionExpected,
+                            cloudPlatform, region));
         }
 
         if (Strings.isNullOrEmpty(cert.getCertPem())) {
-            throw new IllegalStateException(String.format("Blank PEM in SSL certificate version %d for cloud platform \"%s\"", versionExpected, cloudPlatform));
+            throw new IllegalStateException(String.format("Blank PEM in SSL certificate version %d for cloud platform \"%s\" and region \"%s\"", versionExpected,
+                    cloudPlatform, region));
         }
     }
 
-    private void validateNonNullCertsCount(String cloudPlatform, int maxVersion, Set<SslCertificateEntry> certs) {
-        if (certs.size() != 2) {
-            throw new IllegalStateException(
-                    String.format("Could not find SSL certificate(s) when requesting versions [%d, %d] for cloud platform \"%s\": " +
-                            "expected 2 certificates, got %d", maxVersion - 1, maxVersion, cloudPlatform, certs.size()));
+    private void validateNonNullCertsCount(String cloudPlatform, String region, int numberOfCertsExpected, Set<SslCertificateEntry> certs) {
+        validateCountInternal(cloudPlatform, region, numberOfCertsExpected, certs.size(),
+                "SSL certificate count mismatch for cloud platform \"%s\" and region \"%s\": expected=%d, actual=%d");
+    }
+
+    private void validateCountInternal(String cloudPlatform, String region, int countExpected, int countActual, String errorMsg) {
+        if (countActual != countExpected) {
+            throw new IllegalStateException(String.format(errorMsg, cloudPlatform, region, countExpected, countActual));
         }
     }
 
-    private SslCertificateEntry findAndValidateCertByVersion(String cloudPlatform, int version, Set<SslCertificateEntry> certs) {
+    private SslCertificateEntry findAndValidateCertByVersion(String cloudPlatform, String region, int version, Set<SslCertificateEntry> certs) {
         SslCertificateEntry result = certs.stream()
                 .filter(c -> c.getVersion() == version)
                 .findFirst()
                 .orElse(null);
-        validateCert(cloudPlatform, version, result);
+        validateCert(cloudPlatform, region, version, result);
         return result;
     }
 
-    private void validateUniqueCertsCount(String cloudPlatform, int maxVersion, Set<String> certs) {
-        if (certs.size() != 2) {
-            throw new IllegalStateException(
-                    String.format("Received duplicated SSL certificate PEM when requesting versions [%d, %d] for cloud platform \"%s\"",
-                            maxVersion - 1, maxVersion, cloudPlatform));
-        }
+    private void validateUniqueCertsCount(String cloudPlatform, String region, int numberOfCertsExpected, Set<String> certs) {
+        validateCountInternal(cloudPlatform, region, numberOfCertsExpected, certs.size(),
+                "Duplicated SSL certificate PEM for cloud platform \"%s\" and region \"%s\". Unique count: expected=%d, actual=%d");
     }
 
     private Json getTags(DBStack dbStack, AllocateDatabaseServerV4Request dbRequest, DetailedEnvironmentResponse environment) {
@@ -284,6 +282,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
             throw new RedbeamsException("Environment does not contain region");
         }
         dbStack.setRegion(environment.getLocation().getName());
+        LOGGER.debug("Region is {}", dbStack.getRegion());
     }
 
     private CloudPlatform updateCloudPlatformAndRelatedFields(AllocateDatabaseServerV4Request request, DBStack dbStack, String cloudPlatformEnvironment) {
