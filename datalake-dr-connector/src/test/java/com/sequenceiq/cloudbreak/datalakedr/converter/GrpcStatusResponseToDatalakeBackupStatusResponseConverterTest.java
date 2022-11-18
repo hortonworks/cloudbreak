@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.datalakedr.converter;
 
 import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.FAILED_STATE;
+import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.VALIDATION_FAILED_STATE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,6 +18,10 @@ public class GrpcStatusResponseToDatalakeBackupStatusResponseConverterTest {
     private static final String FAILURE_REASON = "Failed operation";
 
     private static final String FAILURE_REASON2 = "A different failure message.";
+
+    private static final String FAILURE_REASON_PRECHECK_AUDIT = "Precheck on audit failed";
+
+    private static final String FAILURE_REASON_PRECHECK_STORAGE = "Precheck on storage failed";
 
     private GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter underTest;
 
@@ -52,7 +58,9 @@ public class GrpcStatusResponseToDatalakeBackupStatusResponseConverterTest {
         datalakeDRProto.AdminOperationsBackupRestoreState.Builder adminBuilder =
             datalakeDRProto.AdminOperationsBackupRestoreState.newBuilder()
                 .setStopServices(createStatus(FAILED_STATE, FAILURE_REASON))
-                .setStartServices(createStatus(FAILED_STATE, FAILURE_REASON2));
+                .setStartServices(createStatus(FAILED_STATE, FAILURE_REASON2))
+                .setPrecheckRangerAuditValidation(createStatus(VALIDATION_FAILED_STATE, FAILURE_REASON_PRECHECK_AUDIT))
+                .setPrecheckStoragePermission(createStatus(VALIDATION_FAILED_STATE, FAILURE_REASON_PRECHECK_STORAGE));
         datalakeDRProto.InternalBackupRestoreState.Builder stateBuilder =
             datalakeDRProto.InternalBackupRestoreState.newBuilder()
                 .setAdminOperations(adminBuilder);
@@ -61,12 +69,14 @@ public class GrpcStatusResponseToDatalakeBackupStatusResponseConverterTest {
                 .setOverallState(FAILED_STATE)
                 .setOperationStates(stateBuilder);
 
-        String expectedFailure =
-                getFailureString(OperationEnum.STOP_SERVICES.description(), FAILURE_REASON) + ", " +
-                getFailureString(OperationEnum.START_SERVICES.description(), FAILURE_REASON2);
         DatalakeBackupStatusResponse response = underTest.convert(builder.build());
         assertEquals(DatalakeBackupStatusResponse.State.FAILED, response.getState());
-        assertEquals(expectedFailure, response.getFailureReason());
+
+        Assertions.assertThat(response.getFailureReason()).contains(FAILURE_REASON);
+        Assertions.assertThat(response.getFailureReason()).contains(FAILURE_REASON2);
+        Assertions.assertThat(response.getFailureReason()).contains(FAILURE_REASON_PRECHECK_AUDIT);
+        Assertions.assertThat(response.getFailureReason()).contains(FAILURE_REASON_PRECHECK_STORAGE);
+
         assert response.isComplete();
     }
 

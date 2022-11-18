@@ -17,7 +17,8 @@ public enum OperationEnum {
     SOLR_FULLTEXT_INDEX_DELETE("Solr delete fulltext_index"),
     SOLR_RANGER_AUDITS_DELETE("Solr delete ranger_audits"),
     SOLR_VERTEX_INDEX_DELETE("Solr delete vertex_index"),
-    DATABASE("Database");
+    DATABASE("Database"),
+    PRE_CHECK("Precheck");
 
     private final String description;
 
