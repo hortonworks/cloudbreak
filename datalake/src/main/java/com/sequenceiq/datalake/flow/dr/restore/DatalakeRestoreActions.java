@@ -116,7 +116,7 @@ public class DatalakeRestoreActions {
                 variables.put(BACKUP_ID, restoreStatusResponse.getBackupId());
                 variables.put(OPERATION_ID, restoreStatusResponse.getRestoreId());
                 payload.getDrStatus().setOperationId(restoreStatusResponse.getRestoreId());
-                if (!restoreStatusResponse.failed()) {
+                if (!restoreStatusResponse.isFailed()) {
                     sendEvent(context, DatalakeDatabaseRestoreStartEvent.from(payload, context.getSdxId(), restoreStatusResponse.getBackupId(),
                             restoreStatusResponse.getRestoreId()));
                 } else {
