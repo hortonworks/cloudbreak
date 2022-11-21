@@ -39,7 +39,7 @@ public class AwsComputeResourceService {
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, List<CloudResource> instances, List<CloudResource> networkResources) {
         LOGGER.info("Build AWS compute resources for launch with adjustment type and threshold: {}", adjustmentTypeWithThreshold);
         CloudContext cloudContext = ac.getCloudContext();
-        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), true);
         context.addNetworkResources(networkResources);
         LOGGER.info("Added AWS network resources to resource builder context for launch: {}", networkResources);
         awsContextService.addInstancesToContext(instances, context, stack.getGroups());
@@ -53,7 +53,7 @@ public class AwsComputeResourceService {
         LOGGER.info("Build AWS compute resources for upscale with adjustment type and threshold: {}. Groups with new instances: {}",
                 adjustmentTypeWithThreshold, groupsWithNewInstances);
         CloudContext cloudContext = ac.getCloudContext();
-        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), true);
         context.addNetworkResources(networkResources);
         LOGGER.info("Added AWS network resources to resource builder context for upscale: {}", networkResources);
 
@@ -72,7 +72,7 @@ public class AwsComputeResourceService {
 
     public List<CloudResourceStatus> deleteComputeResources(AuthenticatedContext ac, CloudStack stack, List<CloudResource> cloudResources) {
         CloudContext cloudContext = ac.getCloudContext();
-        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), true);
 
         return computeResourceService.deleteResources(context, ac, cloudResources, false);
     }

@@ -33,10 +33,10 @@ public abstract class AbstractInstanceConnector implements InstanceConnector {
         Platform platform = cloudContext.getPlatform();
 
         //context
-        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, ac, null, resources, false);
+        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, ac, null, false);
 
         //compute
-        return computeResourceService.stopInstances(context, ac, resources, vms);
+        return computeResourceService.stopInstances(context, ac, vms);
     }
 
     @Override
@@ -45,10 +45,10 @@ public abstract class AbstractInstanceConnector implements InstanceConnector {
         Platform platform = cloudContext.getPlatform();
 
         //context
-        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, ac, null, resources, true);
+        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, ac, null, true);
 
         //compute
-        return computeResourceService.startInstances(context, ac, resources, vms);
+        return computeResourceService.startInstances(context, ac, vms);
     }
 
 }

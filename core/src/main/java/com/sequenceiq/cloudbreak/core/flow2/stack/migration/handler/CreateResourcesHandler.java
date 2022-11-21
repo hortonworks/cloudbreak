@@ -57,7 +57,7 @@ public class CreateResourcesHandler implements CloudPlatformEventHandler<CreateR
             CloudStack cloudStack = request.getCloudStack();
             AuthenticatedContext ac = awsAuthenticator.authenticate(cloudContext, cloudCredential);
             Network network = cloudStack.getNetwork();
-            AwsContext awsContext = awsContextBuilder.contextInit(cloudContext, ac, network, List.of(), true);
+            AwsContext awsContext = awsContextBuilder.contextInit(cloudContext, ac, network, true);
             for (ResourceRecreator resourceRecreator : resourceRecreators) {
                 resourceRecreator.recreate(request, awsContext, ac);
             }

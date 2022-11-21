@@ -77,7 +77,7 @@ public class AzureComputeResourceService {
     }
 
     private AzureContext initContext(AuthenticatedContext ac, CloudStack cloudStack) {
-        AzureContext context = contextBuilder.contextInit(ac.getCloudContext(), ac, cloudStack.getNetwork(), null, true);
+        AzureContext context = contextBuilder.contextInit(ac.getCloudContext(), ac, cloudStack.getNetwork(), true);
         String stackCrn = cloudStack.getParameters().getOrDefault(PlatformParametersConsts.RESOURCE_CRN_PARAMETER, "");
         if (stackCrn.isEmpty()) {
             LOGGER.warn("Stack crn is not set in CloudStack, it can cause errors during infrastructure creation!");

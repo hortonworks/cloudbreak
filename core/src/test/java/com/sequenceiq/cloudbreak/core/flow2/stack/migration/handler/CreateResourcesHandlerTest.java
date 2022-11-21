@@ -5,8 +5,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,7 +74,7 @@ public class CreateResourcesHandlerTest {
 
         when(cloudStack.getNetwork()).thenReturn(network);
         when(awsAuthenticator.authenticate(cloudContext, cloudCredential)).thenReturn(ac);
-        when(awsContextBuilder.contextInit(cloudContext, ac, network, List.of(), true)).thenReturn(awsContext);
+        when(awsContextBuilder.contextInit(cloudContext, ac, network, true)).thenReturn(awsContext);
 
         underTest.accept(event);
 
@@ -94,7 +92,7 @@ public class CreateResourcesHandlerTest {
         when(cloudStack.getNetwork()).thenReturn(network);
         when(awsAuthenticator.authenticate(cloudContext, cloudCredential)).thenReturn(ac);
         RuntimeException value = new RuntimeException();
-        when(awsContextBuilder.contextInit(cloudContext, ac, network, List.of(), true)).thenThrow(value);
+        when(awsContextBuilder.contextInit(cloudContext, ac, network, true)).thenThrow(value);
 
         underTest.accept(event);
 

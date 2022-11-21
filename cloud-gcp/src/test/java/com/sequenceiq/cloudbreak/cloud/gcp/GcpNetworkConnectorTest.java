@@ -121,7 +121,6 @@ public class GcpNetworkConnectorTest {
                 any(CloudContext.class),
                 any(AuthenticatedContext.class),
                 any(Network.class),
-                any(),
                 anyBoolean()))
                 .thenReturn(gcpContext);
 
@@ -194,7 +193,6 @@ public class GcpNetworkConnectorTest {
                 any(CloudContext.class),
                 any(AuthenticatedContext.class),
                 any(Network.class),
-                any(),
                 anyBoolean()))
                 .thenReturn(gcpContext);
 
@@ -276,7 +274,6 @@ public class GcpNetworkConnectorTest {
                 any(CloudContext.class),
                 any(AuthenticatedContext.class),
                 any(Network.class),
-                any(),
                 anyBoolean()))
                 .thenReturn(gcpContext);
 
@@ -361,7 +358,6 @@ public class GcpNetworkConnectorTest {
                 any(CloudContext.class),
                 any(AuthenticatedContext.class),
                 any(Network.class),
-                any(),
                 anyBoolean()))
                 .thenReturn(gcpContext);
 
@@ -432,7 +428,6 @@ public class GcpNetworkConnectorTest {
                 any(CloudContext.class),
                 any(AuthenticatedContext.class),
                 any(Network.class),
-                any(),
                 anyBoolean()))
                 .thenReturn(gcpContext);
 

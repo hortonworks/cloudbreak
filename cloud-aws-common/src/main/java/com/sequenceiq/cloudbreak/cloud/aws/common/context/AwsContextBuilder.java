@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.context;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
@@ -10,7 +8,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalanc
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -23,7 +20,7 @@ public class AwsContextBuilder implements ResourceContextBuilder<AwsContext> {
     private static final int PARALLEL_RESOURCE_REQUEST = 30;
 
     @Override
-    public AwsContext contextInit(CloudContext context, AuthenticatedContext auth, Network network, List<CloudResource> resources, boolean build) {
+    public AwsContext contextInit(CloudContext context, AuthenticatedContext auth, Network network, boolean build) {
         Location location = context.getLocation();
         AuthenticatedContextView authenticatedContextView = new AuthenticatedContextView(auth);
         AmazonEc2Client amazonEC2Client = authenticatedContextView.getAmazonEC2Client();
