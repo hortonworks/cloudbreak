@@ -24,8 +24,6 @@ class EntitlementServiceTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
-    private static final String ACTOR_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID();
-
     private static final String ENTITLEMENT_FOO = "FOO";
 
     private static final String ENTITLEMENT_BAR = "BAR";
@@ -153,6 +151,9 @@ class EntitlementServiceTest {
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true},
 
+                {"CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionDatahubEnabled, false},
+                {"CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionDatahubEnabled, true},
+
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, false},
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, true},
 
@@ -266,7 +267,6 @@ class EntitlementServiceTest {
         assertThat(underTest.getEntitlements(ACCOUNT_ID)).containsExactly(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
     }
 
-    @SuppressWarnings("unchecked")
     private void setUpUmsClient(String entitlement, boolean entitled) {
         Account.Builder builder = Account.newBuilder();
         if (entitled) {

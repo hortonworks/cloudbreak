@@ -25,6 +25,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZUR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
@@ -392,8 +393,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.azure.marketplace.images.only.enable}")
     private boolean enableAzureMarketplaceImagesOnly;
 
-    @Value("${auth.mock.cloudidentitymappinng.enable}")
-    private boolean enableCloudIdentityMappinng;
+    @Value("${auth.mock.cloudidentitymapping.enable}")
+    private boolean enableCloudIdentityMapping;
 
     @Value("${auth.mock.upgrade.internalrepo.enable}")
     private boolean enableInternalRepositoryForUpgrade;
@@ -409,6 +410,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.database.wire.encryption.enable}")
     private boolean enableDatabaseWireEncryption;
+
+    @Value("${auth.mock.database.wire.encryption.datahub.enable}")
+    private boolean enableDatabaseWireEncryptionDatahub;
 
     @Value("${auth.mock.datalake.loadbalancer.enable}")
     private boolean datalakeLoadBalancerEnabled;
@@ -508,14 +512,14 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private String cbLicense;
 
-    private AltusCredential telemetyPublisherCredential;
+    private AltusCredential telemetryPublisherCredential;
 
     private AltusCredential fluentCredential;
 
     private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
 
     @Value("${auth.mock.event-generation.expiration-minutes:10}")
-    private long eventGenerationExirationMinutes;
+    private long eventGenerationExpirationMinutes;
 
     private LoadingCache<String, GetEventGenerationIdsResponse> eventGenerationIdsCache;
 
@@ -603,10 +607,10 @@ public class MockUserManagementService extends UserManagementImplBase {
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
-        telemetyPublisherCredential = getAltusCredential(databusTpCredentialFile, databusTpCredentialProfile);
+        telemetryPublisherCredential = getAltusCredential(databusTpCredentialFile, databusTpCredentialProfile);
         fluentCredential = getAltusCredential(databusFluentCredentialFile, databusFluentCredentialProfile);
         eventGenerationIdsCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(eventGenerationExirationMinutes, TimeUnit.MINUTES)
+                .expireAfterWrite(eventGenerationExpirationMinutes, TimeUnit.MINUTES)
                 .build(new CacheLoader<>() {
                     @Override
                     public GetEventGenerationIdsResponse load(String key) {
@@ -649,9 +653,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     public void getUser(GetUserRequest request, StreamObserver<GetUserResponse> responseObserver) {
         LOGGER.info("Get user: {}", request.getUserIdOrCrn());
         String userIdOrCrn = request.getUserIdOrCrn();
-        String[] splittedCrn = userIdOrCrn.split(":");
-        String userName = splittedCrn[6];
-        String accountId = splittedCrn[4];
+        String[] splitCrn = userIdOrCrn.split(":");
+        String userName = splitCrn[6];
+        String accountId = splitCrn[4];
         accountUsers.computeIfAbsent(accountId, key -> newSetFromMap(new ConcurrentHashMap<>())).add(userName);
         responseObserver.onNext(
                 GetUserResponse.newBuilder()
@@ -677,9 +681,9 @@ public class MockUserManagementService extends UserManagementImplBase {
             responseObserver.onNext(userBuilder.build());
         } else {
             String userIdOrCrn = request.getUserIdOrCrn(0);
-            String[] splittedCrn = userIdOrCrn.split(":");
-            String userName = splittedCrn[6];
-            String accountId = splittedCrn[4];
+            String[] splitCrn = userIdOrCrn.split(":");
+            String userName = splitCrn[6];
+            String accountId = splitCrn[4];
             responseObserver.onNext(
                     userBuilder
                             .addUser(createUser(accountId, userName))
@@ -772,7 +776,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<ListWorkloadAdministrationGroupsForMemberResponse> responseObserver) {
         String memberCrn = request.getMemberCrn();
         String accountId = Crn.fromString(memberCrn).getAccountId();
-        LOGGER.info("List workload administration groups for member: {}, accountid: {}", memberCrn, accountId);
+        LOGGER.info("List workload administration groups for member: {}, accountId: {}", memberCrn, accountId);
         Set<String> groups = mockGroupManagementService.getOrCreateWorkloadGroups(accountId).stream().map(Group::getGroupName).collect(Collectors.toSet());
         ListWorkloadAdministrationGroupsForMemberResponse.Builder responseBuilder = ListWorkloadAdministrationGroupsForMemberResponse.newBuilder();
         responseBuilder.addAllWorkloadAdministrationGroupName(groups);
@@ -802,12 +806,12 @@ public class MockUserManagementService extends UserManagementImplBase {
             responseObserver.onNext(ListMachineUsersResponse.newBuilder().build());
         } else {
             String machineUserIdOrCrn = request.getMachineUserNameOrCrn(0);
-            String[] splittedCrn = machineUserIdOrCrn.split(":");
+            String[] splitCrn = machineUserIdOrCrn.split(":");
             String userName;
             String accountId = request.getAccountId();
             String crnString;
-            if (splittedCrn.length > 1) {
-                userName = splittedCrn[6];
+            if (splitCrn.length > 1) {
+                userName = splitCrn[6];
                 crnString = machineUserIdOrCrn;
             } else {
                 userName = machineUserIdOrCrn;
@@ -903,7 +907,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableAzureMarketplaceImagesOnly) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_IMAGE_MARKETPLACE_ONLY));
         }
-        if (enableCloudIdentityMappinng) {
+        if (enableCloudIdentityMapping) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_IDENTITY_MAPPING));
         }
         if (enableInternalRepositoryForUpgrade) {
@@ -920,6 +924,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDatabaseWireEncryption) {
             builder.addEntitlements(createEntitlement(CDP_CB_DATABASE_WIRE_ENCRYPTION));
+        }
+        if (enableDatabaseWireEncryptionDatahub) {
+            builder.addEntitlements(createEntitlement(CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB));
         }
         if (datalakeLoadBalancerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_DATA_LAKE_LOAD_BALANCER));
@@ -1147,15 +1154,15 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void verifyInteractiveUserSessionToken(VerifyInteractiveUserSessionTokenRequest request,
             StreamObserver<VerifyInteractiveUserSessionTokenResponse> responseObserver) {
-        LOGGER.trace("Verify interative user session token: {}", request.getSessionToken());
+        LOGGER.trace("Verify interactive user session token: {}", request.getSessionToken());
         String sessionToken = request.getSessionToken();
         Jwt token = decodeAndVerify(sessionToken, SIGNATURE_VERIFIER);
         AltusToken introspectResponse = jsonUtil.toObject(token.getClaims(), AltusToken.class);
         String userIdOrCrn = introspectResponse.getSub();
-        String[] splittedCrn = userIdOrCrn.split(":");
+        String[] splitCrn = userIdOrCrn.split(":");
         responseObserver.onNext(
                 VerifyInteractiveUserSessionTokenResponse.newBuilder()
-                        .setAccountId(splittedCrn[4])
+                        .setAccountId(splitCrn[4])
                         .setAccountType(AccountType.REGULAR)
                         .setUserCrn(userIdOrCrn)
                         .build());
@@ -1207,7 +1214,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<GetAssigneeAuthorizationInformationResponse> responseObserver) {
         LOGGER.info("Get assignee authorization information for crn: {}", request.getAssigneeCrn());
         responseObserver.onNext(GetAssigneeAuthorizationInformationResponse.newBuilder()
-                .setResourceAssignment(0, createResourceAssigment(request.getAssigneeCrn()))
+                .setResourceAssignment(0, createResourceAssignment(request.getAssigneeCrn()))
                 .build());
         responseObserver.onCompleted();
     }
@@ -1217,7 +1224,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<ListResourceAssigneesResponse> responseObserver) {
         LOGGER.info("List resource assignees for resource: {}", request.getResourceCrn());
         responseObserver.onNext(ListResourceAssigneesResponse.newBuilder()
-                .setResourceAssignee(0, createResourceAssignee(request.getResourceCrn()))
+                .setResourceAssignee(0, createResourceAssignee())
                 .build());
         responseObserver.onCompleted();
     }
@@ -1237,7 +1244,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         String accessKeyId;
         String privateKey;
         AltusCredential altusCredential = AccessKeyType.Value.UNSET.equals(request.getType())
-                ? telemetyPublisherCredential : fluentCredential;
+                ? telemetryPublisherCredential : fluentCredential;
         if (altusCredential != null) {
             accessKeyId = altusCredential.getAccessKey();
             privateKey = new String(altusCredential.getPrivateKey());
@@ -1498,14 +1505,14 @@ public class MockUserManagementService extends UserManagementImplBase {
                 .build();
     }
 
-    private ResourceAssignee createResourceAssignee(String resourceCrn) {
+    private ResourceAssignee createResourceAssignee() {
         return ResourceAssignee.newBuilder()
                 .setAssigneeCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
                 .setResourceRoleCrn("crn:altus:iam:us-west-1:altus:resourceRole:WorkspaceManager")
                 .build();
     }
 
-    private ResourceAssignment createResourceAssigment(String assigneeCrn) {
+    private ResourceAssignment createResourceAssignment(String assigneeCrn) {
         String resourceCrn = mockCrnService.createCrn(assigneeCrn, CrnResourceDescriptor.CREDENTIAL, Crn.fromString(assigneeCrn).getAccountId()).toString();
         return ResourceAssignment.newBuilder()
                 .setResourceCrn(resourceCrn)

@@ -24,6 +24,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZUR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
@@ -375,6 +376,10 @@ public class EntitlementService {
 
     public boolean databaseWireEncryptionEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_DATABASE_WIRE_ENCRYPTION);
+    }
+
+    public boolean databaseWireEncryptionDatahubEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB);
     }
 
     public boolean datalakeLoadBalancerEnabled(String accountId) {
