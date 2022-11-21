@@ -70,7 +70,7 @@ public class AzureCloudResourceServiceTest {
     private Deployment deployment;
 
     @Test
-    public void getListWithKnownSuccededCloudResource() {
+    public void getListWithKnownSucceededCloudResource() {
         TargetResource t = new TargetResource();
         t.withResourceType(MICROSOFT_COMPUTE_VIRTUAL_MACHINES);
         t.withResourceName(VM_NAME);

@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureResourceType.PRIVATE_DNS_ZONE_GROUP;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureResourceType.PRIVATE_ENDPOINT;
 import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.DB_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.DELETED;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DNS_ZONE_GROUP;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +56,6 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -63,8 +65,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 class AzureDatabaseResourceServiceTest {
 
     private static final String RESOURCE_GROUP_NAME = "resource group name";
-
-    private static final Long STACK_ID = 1L;
 
     private static final String STACK_NAME = "aStack";
 
@@ -93,9 +93,6 @@ class AzureDatabaseResourceServiceTest {
 
     @Mock
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
-
-    @Mock
-    private PersistenceRetriever persistenceRetriever;
 
     @Mock
     private Deployment deployment;
@@ -208,35 +205,79 @@ class AzureDatabaseResourceServiceTest {
 
         CloudResource dbResource = buildResource(AZURE_DATABASE);
         CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
+        CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
+        List<CloudResource> cloudResourceList = List.of(peResource, dzgResource, dbResource);
 
-        when(cloudContext.getId()).thenReturn(STACK_ID);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
-        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(peResource, dbResource));
-        when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(AZURE_DATABASE, CommonStatus.CREATED, STACK_ID))
-                .thenReturn(Optional.of(dbResource));
-        when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(AZURE_PRIVATE_ENDPOINT, CommonStatus.CREATED, STACK_ID))
-                .thenReturn(Optional.of(peResource));
-
+        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(cloudResourceList);
+        when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes()).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT, AZURE_DNS_ZONE_GROUP));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
 
-        victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11);
+        victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
 
         verify(azureUtils).getStackName(eq(cloudContext));
-        verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
-        verify(azureUtils).deletePrivateEndpoint(client, RESOURCE_REFERENCE, false);
-        InOrder inOrder = inOrder(persistenceRetriever);
-        inOrder.verify(persistenceRetriever).retrieveFirstByTypeAndStatusForStack(AZURE_DATABASE, CommonStatus.CREATED, STACK_ID);
-        inOrder.verify(persistenceRetriever).retrieveFirstByTypeAndStatusForStack(AZURE_PRIVATE_ENDPOINT, CommonStatus.CREATED, STACK_ID);
+
+        InOrder inOrder = inOrder(azureUtils);
+        inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
+        inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
+        inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
+
+        inOrder = inOrder(persistenceNotifier);
+        inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(peResource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(dzgResource, cloudContext);
+
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
         verify(azureTemplateBuilder).build(eq(cloudContext), databaseStackArgumentCaptor.capture());
         assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
+        verify(persistenceNotifier).notifyAllocations(cloudResourceList, cloudContext);
+    }
+
+    @Test
+    void shouldUpgradeDatabaseAndDeleteAllResourcesWhenUpgradeDatabaseServerAndMultiplePrivateEndpointResourcesExist() {
+        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
+        DatabaseStack databaseStack = mock(DatabaseStack.class);
+        DatabaseServer databaseServer = buildDatabaseServer();
+
+        CloudResource dbResource = buildResource(AZURE_DATABASE);
+        CloudResource pe1Resource = buildResource(AZURE_PRIVATE_ENDPOINT, "pe1");
+        CloudResource pe2Resource = buildResource(AZURE_PRIVATE_ENDPOINT, "pe2");
+        CloudResource pe3Resource = buildResource(AZURE_PRIVATE_ENDPOINT, "pe3");
+        CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
+        List<CloudResource> cloudResourceList = List.of(pe1Resource, pe2Resource, pe3Resource, dzgResource, dbResource);
+        List<CloudResource> expectedCloudResourceList = List.of(pe3Resource, dzgResource, dbResource);
+
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(expectedCloudResourceList);
+        when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes()).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT, AZURE_DNS_ZONE_GROUP));
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+
+        victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
+
+        verify(azureUtils).getStackName(eq(cloudContext));
+
+        InOrder inOrder = inOrder(azureUtils);
+        inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
+        inOrder.verify(azureUtils, times(3)).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
+        inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
+
         inOrder = inOrder(persistenceNotifier);
-        inOrder.verify(persistenceNotifier).notifyUpdate(dbResource, cloudContext);
-        inOrder.verify(persistenceNotifier, times(2)).notifyUpdate(peResource, cloudContext);
-        inOrder.verify(persistenceNotifier).notifyUpdate(dbResource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(pe1Resource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(pe2Resource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(pe3Resource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(dzgResource, cloudContext);
+
+        verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
+        ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        verify(azureTemplateBuilder).build(eq(cloudContext), databaseStackArgumentCaptor.capture());
+        assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
+        verify(persistenceNotifier).notifyAllocations(expectedCloudResourceList, cloudContext);
     }
 
     @Test
@@ -244,32 +285,27 @@ class AzureDatabaseResourceServiceTest {
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
         DatabaseStack databaseStack = mock(DatabaseStack.class);
         CloudResource dbResource = buildResource(AZURE_DATABASE);
+        List<CloudResource> cloudResourceList = List.of(dbResource);
         DatabaseServer databaseServer = buildDatabaseServer();
 
-        when(cloudContext.getId()).thenReturn(STACK_ID);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(dbResource));
-        when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(AZURE_DATABASE, CommonStatus.CREATED, STACK_ID))
-                .thenReturn(Optional.of(dbResource));
-        when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(AZURE_PRIVATE_ENDPOINT, CommonStatus.CREATED, STACK_ID))
-                .thenReturn(Optional.empty());
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
 
-        victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11);
+        victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
 
         verify(azureUtils).getStackName(eq(cloudContext));
         verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
-        verify(azureUtils, never()).deletePrivateEndpoint(client, RESOURCE_REFERENCE, false);
-        InOrder inOrder = inOrder(persistenceRetriever);
-        inOrder.verify(persistenceRetriever).retrieveFirstByTypeAndStatusForStack(AZURE_DATABASE, CommonStatus.CREATED, STACK_ID);
-        inOrder.verify(persistenceRetriever).retrieveFirstByTypeAndStatusForStack(AZURE_PRIVATE_ENDPOINT, CommonStatus.CREATED, STACK_ID);
+        verify(azureUtils, never()).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
+
+        verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
         verify(azureTemplateBuilder).build(eq(cloudContext), databaseStackArgumentCaptor.capture());
         assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
-        verify(persistenceNotifier, times(2)).notifyUpdate(dbResource, cloudContext);
+        verify(persistenceNotifier).notifyAllocations(List.of(dbResource), cloudContext);
     }
 
     @Test
@@ -277,63 +313,58 @@ class AzureDatabaseResourceServiceTest {
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
         DatabaseStack databaseStack = mock(DatabaseStack.class);
         CloudResource dbResource = buildResource(AZURE_DATABASE);
+        CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
+        CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
+        List<CloudResource> cloudResourceList = List.of(peResource, dzgResource, dbResource);
 
-        when(cloudContext.getId()).thenReturn(STACK_ID);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(dbResource));
-        when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(AZURE_DATABASE, CommonStatus.CREATED, STACK_ID))
-                .thenReturn(Optional.of(dbResource));
-        when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(AZURE_PRIVATE_ENDPOINT, CommonStatus.CREATED, STACK_ID))
-                .thenReturn(Optional.empty());
 
         doThrow(new RuntimeException("delete failed")).when(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
-                () -> victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11));
+                () -> victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
 
         assertEquals("Error in upgrading database stack aStack: delete failed", exception.getMessage());
         verify(azureUtils).getStackName(eq(cloudContext));
         verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
         verify(azureUtils, never()).deletePrivateEndpoint(client, RESOURCE_REFERENCE, false);
-        InOrder inOrder = inOrder(persistenceRetriever);
-        inOrder.verify(persistenceRetriever).retrieveFirstByTypeAndStatusForStack(AZURE_DATABASE, CommonStatus.CREATED, STACK_ID);
-        inOrder.verify(persistenceRetriever).retrieveFirstByTypeAndStatusForStack(AZURE_PRIVATE_ENDPOINT, CommonStatus.CREATED, STACK_ID);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         verify(azureTemplateBuilder, never()).build(eq(cloudContext), any(DatabaseStack.class));
-        verify(persistenceNotifier, times(1)).notifyUpdate(dbResource, cloudContext);
+        verify(persistenceNotifier, times(1)).notifyAllocations(List.of(dbResource), cloudContext);
     }
 
-//    @Test
-//    void shouldReturnExceptionWhenUpgradeDatabaseServerDbResourceIsNotFound() {
-//        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-//        DatabaseStack databaseStack = mock(DatabaseStack.class);
-//
-//        when(cloudContext.getId()).thenReturn(STACK_ID);
-//        when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(AZURE_DATABASE, CommonStatus.CREATED, STACK_ID)).thenReturn(Optional.empty());
-//        when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(AZURE_PRIVATE_ENDPOINT, CommonStatus.CREATED, STACK_ID)).thenReturn(Optional.empty());
-//
-//        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
-//                () -> victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11));
-//
-//        assertEquals("Azure database server cloud resource does not exist for stack 1!", exception.getMessage());
-//        verify(azureUtils, never()).getStackName(eq(cloudContext));
-//        verify(azureUtils, never()).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
-//        verify(azureUtils, never()).deletePrivateEndpoint(client, RESOURCE_REFERENCE, false);
-//        verify(azureResourceGroupMetadataProvider, never()).getResourceGroupName(cloudContext, databaseStack);
-//        verify(azureTemplateBuilder, never()).build(eq(cloudContext), any(DatabaseStack.class));
-//
-//        InOrder inOrder = inOrder(persistenceRetriever);
-//        inOrder.verify(persistenceRetriever).retrieveFirstByTypeAndStatusForStack(AZURE_DATABASE, CommonStatus.CREATED, STACK_ID);
-//        inOrder.verify(persistenceRetriever).retrieveFirstByTypeAndStatusForStack(AZURE_PRIVATE_ENDPOINT, CommonStatus.CREATED, STACK_ID);
-//    }
+    @Test
+    void shouldReturnExceptionWhenUpgradeDatabaseServerDbResourceIsNotFound() {
+        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
+        DatabaseStack databaseStack = mock(DatabaseStack.class);
+
+        CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
+        CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
+        List<CloudResource> cloudResourceList = List.of(peResource, dzgResource);
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
+                () -> victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
+
+        assertEquals("Azure database server cloud resource does not exist for stack, please contact Cloudera support!", exception.getMessage());
+        verify(azureUtils).getStackName(eq(cloudContext));
+        verify(azureUtils, never()).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
+        verify(azureUtils, never()).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
+        verify(azureTemplateBuilder, never()).build(eq(cloudContext), any(DatabaseStack.class));
+    }
 
     private CloudResource buildResource(ResourceType resourceType) {
+        return buildResource(resourceType, "name");
+    }
+
+    private CloudResource buildResource(ResourceType resourceType, String name) {
         return CloudResource.builder()
                 .withType(resourceType)
                 .withReference(RESOURCE_REFERENCE)
-                .withName("name")
+                .withName(name)
                 .withStatus(CommonStatus.CREATED)
                 .withParams(Map.of())
                 .build();

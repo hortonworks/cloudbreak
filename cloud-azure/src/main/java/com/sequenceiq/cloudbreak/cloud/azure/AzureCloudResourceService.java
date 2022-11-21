@@ -53,6 +53,11 @@ public class AzureCloudResourceService {
                 .collect(Collectors.toList());
     }
 
+    public List<ResourceType> getPrivateEndpointRdsResourceTypes() {
+        return List.of(ResourceType.AZURE_DNS_ZONE_GROUP,
+                ResourceType.AZURE_PRIVATE_ENDPOINT);
+    }
+
     public List<CloudResource> getDeploymentCloudResources(Deployment templateDeployment) {
         PagedList<DeploymentOperation> operations = templateDeployment.deploymentOperations().list();
         List<CloudResource> resourceList = operations.stream()
