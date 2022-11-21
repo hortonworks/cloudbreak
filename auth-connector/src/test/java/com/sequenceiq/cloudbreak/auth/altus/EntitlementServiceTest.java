@@ -43,9 +43,6 @@ class EntitlementServiceTest {
                 {"CDP_AZURE", (EntitlementCheckFunction) EntitlementService::azureEnabled, false},
                 {"CDP_AZURE", (EntitlementCheckFunction) EntitlementService::azureEnabled, true},
 
-                {"CDP_GCP", (EntitlementCheckFunction) EntitlementService::gcpEnabled, false},
-                {"CDP_GCP", (EntitlementCheckFunction) EntitlementService::gcpEnabled, true},
-
                 {"AUDIT_ARCHIVING_GCP", (EntitlementCheckFunction) EntitlementService::gcpAuditEnabled, false},
                 {"AUDIT_ARCHIVING_GCP", (EntitlementCheckFunction) EntitlementService::gcpAuditEnabled, true},
 
