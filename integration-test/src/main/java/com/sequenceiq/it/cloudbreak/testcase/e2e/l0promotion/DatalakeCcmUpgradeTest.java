@@ -53,10 +53,10 @@ public class DatalakeCcmUpgradeTest extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running environment and freeipa connected via CCM" +
-                    "there is a running sdx connected via CCM",
-            when = "CCM upgrade called to the environment",
-            then = "environment and sdx ccm upgrade is successful")
+            given = "there is a running environment and freeipa connected via CCMv1" +
+                    "there is a running sdx connected via CCMv1",
+            when = "CCMv2 upgrade called to the environment",
+            then = "environment and sdx CCMv2 upgrade is successful")
     public void testCcmUpgrade(TestContext testContext) {
         givenSdx(testContext)
                 .when(sdxTestClient.createInternal())
