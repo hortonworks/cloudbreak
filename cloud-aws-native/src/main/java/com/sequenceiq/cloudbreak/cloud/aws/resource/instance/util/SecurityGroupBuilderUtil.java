@@ -8,9 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -29,10 +31,12 @@ import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsNetworkService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
@@ -194,5 +198,26 @@ public class SecurityGroupBuilderUtil {
             LOGGER.debug("Egress creation skipped: {}, prefix list size: {}, vpc cidrs size: {}",
                     outboundInternetTraffic, prefixListIds.size(), vpcCidrs.size());
         }
+    }
+
+    public List<String> getSecurityGroupIds(AwsContext context, Group group) {
+        List<CloudResource> groupResources = context.getGroupResources(group.getName());
+        List<String> securityGroupIds = null;
+        if (groupResources != null) {
+            securityGroupIds = groupResources.stream()
+                    .filter(g -> g.getType() == ResourceType.AWS_SECURITY_GROUP && group.getName().equals(g.getGroup()))
+                    .map(CloudResource::getReference)
+                    .collect(Collectors.toList());
+            LOGGER.debug("Selected security group IDs from CloudResource: {}", securityGroupIds);
+        }
+        if (CollectionUtils.isEmpty(securityGroupIds)) {
+            securityGroupIds = group.getSecurity().getCloudSecurityIds();
+            LOGGER.debug("Selected security group ID from group's security domain: {}", securityGroupIds);
+        }
+        if (CollectionUtils.isEmpty(securityGroupIds)) {
+            LOGGER.debug("Cannot determine the security group, so it will be created in the default security group");
+        }
+        LOGGER.info("Security group IDs: {}", securityGroupIds);
+        return securityGroupIds;
     }
 }

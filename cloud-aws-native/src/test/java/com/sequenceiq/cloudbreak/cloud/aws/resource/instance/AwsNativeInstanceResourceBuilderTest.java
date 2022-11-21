@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
+import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -53,7 +54,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-public class AwsNativeInstanceResourceBuilderTest {
+class AwsNativeInstanceResourceBuilderTest {
 
     @InjectMocks
     private AwsNativeInstanceResourceBuilder underTest;
@@ -66,6 +67,9 @@ public class AwsNativeInstanceResourceBuilderTest {
 
     @Mock
     private AwsTaggingService awsTaggingService;
+
+    @Mock
+    private SecurityGroupBuilderUtil securityGroupBuilderUtil;
 
     @Mock
     private AuthenticatedContext ac;
@@ -98,7 +102,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     private InstanceTemplate instanceTemplate;
 
     @Test
-    public void testBuildWhenBuildableResorucesAreEmpty() throws Exception {
+    void testBuildWhenBuildableResorucesAreEmpty() throws Exception {
         long privateId = 0;
         CloudConnectorException actual = Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.emptyList(), cloudStack));
@@ -106,7 +110,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testBuildWhenInstanceNoExist() throws Exception {
+    void testBuildWhenInstanceNoExist() throws Exception {
         RunInstancesResult runInstancesResult = mock(RunInstancesResult.class);
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
         Instance instance = new Instance().withInstanceId("instanceId");
@@ -114,15 +118,6 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
-                .withGroup("groupName")
-                .withParams(emptyMap())
-                .build();
-
-        CloudResource securityGroupCloudResource = CloudResource.builder()
-                .withName("name")
-                .withType(ResourceType.AWS_SECURITY_GROUP)
-                .withStatus(CommonStatus.CREATED)
-                .withReference("sg-id")
                 .withGroup("groupName")
                 .withParams(emptyMap())
                 .build();
@@ -141,7 +136,7 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(image.getImageName()).thenReturn("img-name");
         when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
-        when(awsContext.getGroupResources("groupName")).thenReturn(List.of(securityGroupCloudResource));
+        when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
 
         ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
@@ -152,7 +147,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testBuildWhenInstanceExistAndRunning() throws Exception {
+    void testBuildWhenInstanceExistAndRunning() throws Exception {
         CloudResource cloudResource = CloudResource.builder()
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
@@ -170,7 +165,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testBuildWhenInstanceExistAndNotRunningButNotTerminated() throws Exception {
+    void testBuildWhenInstanceExistAndNotRunningButNotTerminated() throws Exception {
         CloudResource cloudResource = CloudResource.builder()
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
@@ -189,7 +184,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testBuildWhenInstanceExistButTerminated() throws Exception {
+    void testBuildWhenInstanceExistButTerminated() throws Exception {
         RunInstancesResult runInstancesResult = mock(RunInstancesResult.class);
         InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
@@ -200,15 +195,6 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
-                .withGroup("groupName")
-                .withParams(emptyMap())
-                .build();
-
-        CloudResource securityGroupCloudResource = CloudResource.builder()
-                .withName("name")
-                .withType(ResourceType.AWS_SECURITY_GROUP)
-                .withStatus(CommonStatus.CREATED)
-                .withReference("sg-id")
                 .withGroup("groupName")
                 .withParams(emptyMap())
                 .build();
@@ -227,14 +213,13 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         when(group.getName()).thenReturn("groupName");
-        when(awsContext.getGroupResources("groupName")).thenReturn(List.of(securityGroupCloudResource));
 
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         Assertions.assertEquals(actual.get(0).getInstanceId(), "instanceId");
     }
 
     @Test
-    public void testIsFinishedWhenCreationAllMatchRunning() {
+    void testIsFinishedWhenCreationAllMatchRunning() {
         CloudResource cloudResource = createInstanceResource();
         Instance instance1 = new Instance().withInstanceId("instanceId1")
                 .withState(new InstanceState().withCode(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE));
@@ -250,7 +235,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testIsFinishedWhenCreationOneRunningAndOneOther() {
+    void testIsFinishedWhenCreationOneRunningAndOneOther() {
         CloudResource cloudResource = createInstanceResource();
         Instance instance1 = new Instance().withInstanceId("instanceId1")
                 .withState(new InstanceState().withCode(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE));
@@ -266,7 +251,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testIsFinishedWhenCreationAndNotFoundException() {
+    void testIsFinishedWhenCreationAndNotFoundException() {
         CloudResource cloudResource = createInstanceResource();
         when(awsContext.isBuild()).thenReturn(true);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
@@ -278,7 +263,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testIsFinishedWhenTerminationAllMatchTerminated() {
+    void testIsFinishedWhenTerminationAllMatchTerminated() {
         CloudResource cloudResource = createInstanceResource();
         Instance instance1 = new Instance().withInstanceId("instanceId1")
                 .withState(new InstanceState().withCode(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE));
@@ -294,7 +279,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testIsFinishedWhenTerminationAndOneTerminatedAndOneOther() {
+    void testIsFinishedWhenTerminationAndOneTerminatedAndOneOther() {
         CloudResource cloudResource = createInstanceResource();
         Instance instance1 = new Instance().withInstanceId("instanceId1")
                 .withState(new InstanceState().withCode(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE));
@@ -310,7 +295,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testIsFinishedWhenTerminationAndNotFoundException() {
+    void testIsFinishedWhenTerminationAndNotFoundException() {
         CloudResource cloudResource = createInstanceResource();
         when(awsContext.isBuild()).thenReturn(false);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
@@ -322,7 +307,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testIsFinishedWhenTerminationAndOtherException() {
+    void testIsFinishedWhenTerminationAndOtherException() {
         CloudResource cloudResource = createInstanceResource();
         when(awsContext.isBuild()).thenReturn(false);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
@@ -334,7 +319,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testIsFinishedWhenTheInstanceIdIsEmptyOnTheResourceShouldReturnAsFinished() {
+    void testIsFinishedWhenTheInstanceIdIsEmptyOnTheResourceShouldReturnAsFinished() {
         CloudResource cloudResource = CloudResource.builder()
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
@@ -349,7 +334,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testBlocksWhenEphemeralNull() {
+    void testBlocksWhenEphemeralNull() {
         BlockDeviceMapping root = new BlockDeviceMapping();
         when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(volumeBuilderUtil.getEphemeral(any())).thenReturn(null);
@@ -359,7 +344,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testBlocksWhenEphemeralBlockDeviceMappingsListIsEmpty() {
+    void testBlocksWhenEphemeralBlockDeviceMappingsListIsEmpty() {
         BlockDeviceMapping root = new BlockDeviceMapping();
         when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(volumeBuilderUtil.getEphemeral(any())).thenReturn(new ArrayList<>());
@@ -369,7 +354,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testBlocksWhenEphemeralBlockDeviceMappingsListIsNotEmpty() {
+    void testBlocksWhenEphemeralBlockDeviceMappingsListIsNotEmpty() {
         BlockDeviceMapping root = new BlockDeviceMapping();
         BlockDeviceMapping ephemeralBlockDevice1 = new BlockDeviceMapping()
                 .withDeviceName("/dev/xvdb")
@@ -382,28 +367,6 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(volumeBuilderUtil.getRootVolume(any(AwsInstanceView.class), eq(group), eq(cloudStack), eq(ac))).thenReturn(root);
         Collection<BlockDeviceMapping> actual = underTest.blocks(group, cloudStack, ac);
         Assertions.assertEquals(3, actual.size());
-    }
-
-    @Test
-    public void testGetSecurityGroupIdWhenHasMoreThanOneSecurityGroupButNeedToSelectTheSecond() {
-
-        CloudResource secGroupResource1 = getSecurityGroupResourceBuilder().withGroup("groupName1").withReference("ref1").build();
-        CloudResource secGroupResource2 = getSecurityGroupResourceBuilder().withGroup("groupName2").withReference("ref2").build();
-
-        when(group.getName()).thenReturn("groupName2");
-        when(awsContext.getGroupResources("groupName2")).thenReturn(List.of(secGroupResource1, secGroupResource2));
-        String actual = underTest.getSecurityGroupId(awsContext, group);
-        Assertions.assertEquals("ref2", actual);
-    }
-
-    private CloudResource.Builder getSecurityGroupResourceBuilder() {
-        return CloudResource.builder()
-                .withName("name")
-                .withType(ResourceType.AWS_SECURITY_GROUP)
-                .withStatus(CommonStatus.CREATED)
-                .withReference("sg-id")
-                .withGroup("groupName")
-                .withParams(emptyMap());
     }
 
     private CloudResource createInstanceResource() {
