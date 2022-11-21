@@ -450,7 +450,7 @@ public class SdxBackupRestoreService {
                     return AttemptResults.justContinue();
                 } else {
                     LOGGER.info("Backup for datalake {} complete with status {}", sdxCluster.getClusterName(), response.getState());
-                    if (response.getState() == DatalakeBackupStatusResponse.State.FAILED) {
+                    if (response.isFailed()) {
                         return sdxFullDrFailed(sdxCluster, response.getFailureReason(), pollingMessage);
                     } else {
                         return sdxFullDrSucceeded(sdxCluster, response);
@@ -525,7 +525,7 @@ public class SdxBackupRestoreService {
                     return AttemptResults.justContinue();
                 } else {
                     LOGGER.info("Restore for datalake {} complete with status {}", sdxCluster.getClusterName(), response.getState());
-                    if (response.getState() == DatalakeBackupStatusResponse.State.FAILED) {
+                    if (response.isFailed()) {
                         return sdxFullDrFailed(sdxCluster, response.getFailureReason(), pollingMessage);
                     } else {
                         return sdxFullDrSucceeded(sdxCluster, response);
