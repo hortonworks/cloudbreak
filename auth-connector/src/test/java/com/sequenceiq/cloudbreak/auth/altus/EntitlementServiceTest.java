@@ -249,6 +249,9 @@ class EntitlementServiceTest {
 
                 {"CDP_AZURE_IMAGE_MARKETPLACE_ONLY", (EntitlementCheckFunction) EntitlementService::azureOnlyMarketplaceImagesEnabled, false},
                 {"CDP_AZURE_IMAGE_MARKETPLACE_ONLY", (EntitlementCheckFunction) EntitlementService::azureOnlyMarketplaceImagesEnabled, true},
+
+                {"WORKLOAD_IAM_USERSYNC_ROUTING", (EntitlementCheckFunction) EntitlementService::isWiamUsersyncRoutingEnabled, false},
+                {"WORKLOAD_IAM_USERSYNC_ROUTING", (EntitlementCheckFunction) EntitlementService::isWiamUsersyncRoutingEnabled, true},
         };
     }
 

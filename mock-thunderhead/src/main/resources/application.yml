@@ -102,7 +102,9 @@ auth:
     targeted.upscale.enable: true
     e2e.test.only.enable: true
     saas.enable: false
-    workloadiam.sync.enable: false
+    workloadiam.sync:
+      routing.enable: false
+      enable: false
     saas.sdx.integration.enable: true
     salt.rotatepassword.enable: true
     postgres.upgrade.embedded.enable: true

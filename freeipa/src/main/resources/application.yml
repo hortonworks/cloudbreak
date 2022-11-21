@@ -343,3 +343,7 @@ authdistributor:
 
 ccmRevertJob:
   activationInMinutes: 5
+
+wiam:
+  host: localhost
+  port: 8982
