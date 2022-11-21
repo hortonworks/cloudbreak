@@ -401,6 +401,11 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         return ORDER;
     }
 
+    @Override
+    public boolean isInstanceBuilder() {
+        return true;
+    }
+
     private Collection<AttachedDisk> getBootDiskList(List<CloudResource> resources, String projectId, String zone) {
         Collection<AttachedDisk> listOfDisks = new ArrayList<>();
         for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_DISK)) {

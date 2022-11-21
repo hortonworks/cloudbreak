@@ -4,8 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,7 +62,6 @@ public class GcpContextBuilderTest {
                 context,
                 auth,
                 mock(Network.class),
-                new ArrayList<>(),
                 true);
         Assert.assertEquals("ProjectId", gcpContext.getProjectId());
         Assert.assertEquals(true, gcpContext.getNoPublicIp());

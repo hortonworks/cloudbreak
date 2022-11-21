@@ -176,7 +176,7 @@ public class AwsUpscaleService {
         if (entitlementService.isUnboundEliminationSupported(accountId) && entitlementService.targetedUpscaleSupported(accountId)) {
             result = Stream.of("running", "stopped");
         }
-        LOGGER.info("Allowed instance states in the scaled group: {}", result);
+        LOGGER.info("Allowed instance states in the scaled group: {}", result.collect(Collectors.joining(",")));
         return result;
     }
 

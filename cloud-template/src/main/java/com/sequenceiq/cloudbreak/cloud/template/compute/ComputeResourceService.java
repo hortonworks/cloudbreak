@@ -120,18 +120,16 @@ public class ComputeResourceService {
         return new ResourceBuilder(ctx, auth).updateResources(ctx, auth, cloudResource, stack);
     }
 
-    public List<CloudVmInstanceStatus> stopInstances(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, List<CloudInstance> cloudInstances) {
-        return stopStart(context, auth, resources, cloudInstances);
+    public List<CloudVmInstanceStatus> stopInstances(ResourceBuilderContext context, AuthenticatedContext auth, List<CloudInstance> cloudInstances) {
+        return stopStart(context, auth, cloudInstances);
     }
 
-    public List<CloudVmInstanceStatus> startInstances(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, List<CloudInstance> cloudInstances) {
-        return stopStart(context, auth, resources, cloudInstances);
+    public List<CloudVmInstanceStatus> startInstances(ResourceBuilderContext context, AuthenticatedContext auth, List<CloudInstance> cloudInstances) {
+        return stopStart(context, auth, cloudInstances);
     }
 
     private List<CloudVmInstanceStatus> stopStart(ResourceBuilderContext context,
-            AuthenticatedContext auth, List<CloudResource> resources, List<CloudInstance> instances) {
+            AuthenticatedContext auth, List<CloudInstance> instances) {
         List<CloudVmInstanceStatus> results = new ArrayList<>();
         Variant variant = auth.getCloudContext().getVariant();
         List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(variant);
@@ -139,16 +137,17 @@ public class ComputeResourceService {
             Collections.reverse(builders);
         }
 
-        for (ComputeResourceBuilder<ResourceBuilderContext> builder : builders) {
+        List<ComputeResourceBuilder<ResourceBuilderContext>> instanceBuilders =
+                builders.stream().filter(ComputeResourceBuilder::isInstanceBuilder).collect(Collectors.toList());
+
+        for (ComputeResourceBuilder<ResourceBuilderContext> builder : instanceBuilders) {
             LOGGER.debug("The builder for the resource of {} is executed", builder.resourceType());
-            List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
-            List<CloudInstance> allInstances = getCloudInstances(resourceList, instances);
 
             Integer stopStartBatchSize = resourceBuilders.getStopStartBatchSize(auth.getCloudContext().getVariant());
-            if (!allInstances.isEmpty()) {
-                LOGGER.debug("Split {} instances to {} chunks to execute the stop/start operation parallel", allInstances.size(), stopStartBatchSize);
+            if (!instances.isEmpty()) {
+                LOGGER.debug("Split {} instances to {} chunks to execute the stop/start operation parallel", instances.size(), stopStartBatchSize);
                 AtomicInteger counter = new AtomicInteger();
-                Collection<List<CloudInstance>> instancesChunks = allInstances.stream()
+                Collection<List<CloudInstance>> instancesChunks = instances.stream()
                         .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / stopStartBatchSize)).values();
 
                 Collection<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
@@ -166,8 +165,7 @@ public class ComputeResourceService {
                     LOGGER.debug("There are {} success operation. Instance statuses: {}", instancesStatuses.size(), instancesStatuses);
                     List<CloudVmInstanceStatus> allVmStatuses = instancesStatuses.stream().flatMap(Collection::stream).collect(Collectors.toList());
                     List<CloudInstance> checkInstances = allVmStatuses.stream().map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
-                    PollTask<List<CloudVmInstanceStatus>> pollTask = resourcePollTaskFactory
-                            .newPollComputeStatusTask(builder, auth, context, checkInstances);
+                    PollTask<List<CloudVmInstanceStatus>> pollTask = resourcePollTaskFactory.newPollComputeStatusTask(builder, auth, context, checkInstances);
                     try {
                         List<CloudVmInstanceStatus> statuses = syncVMPollingScheduler.schedule(pollTask);
                         results.addAll(statuses);
@@ -244,22 +242,6 @@ public class ComputeResourceService {
         return filtered;
     }
 
-    private List<CloudInstance> getCloudInstances(List<CloudResource> cloudResource, List<CloudInstance> instances) {
-        List<CloudInstance> result = new ArrayList<>();
-        for (CloudResource resource : cloudResource) {
-            for (CloudInstance instance : instances) {
-                if (instance.getInstanceId().equalsIgnoreCase(resource.getName())) {
-                    LOGGER.debug("Instance found by name: {}", resource.getName());
-                    result.add(instance);
-                } else if (instance.getInstanceId().equalsIgnoreCase(resource.getReference())) {
-                    LOGGER.debug("Instance found by reference: {}", resource.getReference());
-                    result.add(instance);
-                }
-            }
-        }
-        return result;
-    }
-
     private List<CloudResourceStatus> flatList(Iterable<List<CloudResourceStatus>> lists) {
         List<CloudResourceStatus> result = new ArrayList<>();
         for (List<CloudResourceStatus> list : lists) {
@@ -332,7 +314,7 @@ public class ComputeResourceService {
         }
 
         public List<CloudResourceStatus> updateResources(ResourceBuilderContext ctx, AuthenticatedContext auth,
-            List<CloudResource> computeResources, CloudStack cloudStack) {
+                List<CloudResource> computeResources, CloudStack cloudStack) {
             List<CloudResourceStatus> results = new ArrayList<>();
             Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
             Variant variant = auth.getCloudContext().getVariant();

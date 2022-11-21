@@ -98,7 +98,7 @@ public class AwsNativeResourceConnectorTest {
     public void testUpscale() throws QuotaExceededException {
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(contextBuilders.get(any())).thenReturn(resourceContextBuilder);
-        when(resourceContextBuilder.contextInit(any(), any(), any(), any(), anyBoolean())).thenReturn(awsContext);
+        when(resourceContextBuilder.contextInit(any(), any(), any(), anyBoolean())).thenReturn(awsContext);
         when(networkResourceService.getNetworkResources(any(), any())).thenReturn(Collections.emptyList());
         when(commonAwsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(elasticLoadBalancingClient);
         when(cloudContext.getLocation()).thenReturn(Location.location(Region.region(REGION_NAME), AvailabilityZone.availabilityZone(AZ)));
@@ -113,7 +113,7 @@ public class AwsNativeResourceConnectorTest {
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getId()).thenReturn(0L);
         when(contextBuilders.get(any())).thenReturn(resourceContextBuilder);
-        when(resourceContextBuilder.contextInit(any(), any(), any(), any(), anyBoolean())).thenReturn(awsContext);
+        when(resourceContextBuilder.contextInit(any(), any(), any(), anyBoolean())).thenReturn(awsContext);
         when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, 0L))
                 .thenReturn(Collections.emptyList());
 

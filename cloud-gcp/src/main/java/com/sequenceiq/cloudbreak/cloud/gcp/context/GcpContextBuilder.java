@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.context;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -13,7 +11,6 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpConstants;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -32,7 +29,7 @@ public class GcpContextBuilder implements ResourceContextBuilder<GcpContext> {
     private GcpStackUtil gcpStackUtil;
 
     @Override
-    public GcpContext contextInit(CloudContext context, AuthenticatedContext auth, Network network, List<CloudResource> resources, boolean build) {
+    public GcpContext contextInit(CloudContext context, AuthenticatedContext auth, Network network, boolean build) {
         CloudCredential credential = auth.getCloudCredential();
         String projectId = gcpStackUtil.getProjectId(credential);
         String serviceAccountId = gcpStackUtil.getServiceAccountId(credential);

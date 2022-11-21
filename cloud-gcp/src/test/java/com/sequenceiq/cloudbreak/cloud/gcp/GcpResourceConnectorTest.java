@@ -121,7 +121,6 @@ public class GcpResourceConnectorTest {
                 any(CloudContext.class),
                 any(AuthenticatedContext.class),
                 any(Network.class),
-                anyList(),
                 anyBoolean())).thenReturn(resourceBuilderContext);
 
         when(loadBalancerResourceService.buildResources(
@@ -209,7 +208,6 @@ public class GcpResourceConnectorTest {
                 any(CloudContext.class),
                 any(AuthenticatedContext.class),
                 any(Network.class),
-                anyList(),
                 anyBoolean())).thenReturn(resourceBuilderContext);
         when(networkResourceService.getNetworkResources(any(Variant.class), anyList())).thenReturn(new ArrayList<>());
         doNothing().when(resourceBuilderContext).addNetworkResources(anyCollection());

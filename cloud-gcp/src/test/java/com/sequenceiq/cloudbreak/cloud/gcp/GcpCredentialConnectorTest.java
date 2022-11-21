@@ -105,7 +105,7 @@ public class GcpCredentialConnectorTest {
     public void testForNullExceptionOnVerifyPermissionCheck() throws IOException {
         AuthenticatedContext authContext = createAuthContext();
         String expectionReasonMessage = "exception message";
-        when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
+        when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, false)).thenReturn(context);
         doThrow(new BadRequestException(expectionReasonMessage)).when(gcpCredentialVerifier).preCheckOfGooglePermission(context);
 
         CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
@@ -123,7 +123,7 @@ public class GcpCredentialConnectorTest {
     @Test
     public void testPassingVerifyPermissionCheck() {
         AuthenticatedContext authContext = createAuthContext();
-        when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
+        when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, false)).thenReturn(context);
 
         CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
@@ -139,7 +139,7 @@ public class GcpCredentialConnectorTest {
     @Test
     public void testForFailedStatusBecauseMissingPrjId() throws InvalidGcpContextException {
         final AuthenticatedContext authContext = createAuthContext();
-        when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
+        when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, false)).thenReturn(context);
         doThrow(new NullPointerException()).when(gcpCredentialVerifier).checkGcpContextValidity(context);
 
         CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
@@ -156,7 +156,7 @@ public class GcpCredentialConnectorTest {
     @Test
     public void testForFailedStatusBecauseMissingServiceAccId() throws InvalidGcpContextException {
         final AuthenticatedContext authContext = createAuthContext();
-        when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
+        when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, false)).thenReturn(context);
         doThrow(new NullPointerException()).when(gcpCredentialVerifier).checkGcpContextValidity(context);
 
         CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
@@ -173,7 +173,7 @@ public class GcpCredentialConnectorTest {
     @Test
     public void testForFailedStatusBecauseMissingCompute() throws IOException {
         final AuthenticatedContext authContext = createAuthContext();
-        when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
+        when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, false)).thenReturn(context);
         doThrow(new NullPointerException()).when(gcpCredentialVerifier).preCheckOfGooglePermission(context);
 
         CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);

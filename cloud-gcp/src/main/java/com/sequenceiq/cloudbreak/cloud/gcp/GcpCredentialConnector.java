@@ -48,7 +48,7 @@ public class GcpCredentialConnector implements CredentialConnector {
     public CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext, CredentialVerificationContext credentialVerificationContext) {
         LOGGER.debug("Verify credential: {}", authenticatedContext.getCloudCredential());
         gcpCredentialFactory.prepareCredential(authenticatedContext.getCloudCredential());
-        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, null, false);
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, false);
         try {
             gcpCredentialVerifier.checkGcpContextValidity(gcpContext);
             gcpCredentialVerifier.preCheckOfGooglePermission(gcpContext);

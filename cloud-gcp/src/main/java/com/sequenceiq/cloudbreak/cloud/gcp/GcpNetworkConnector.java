@@ -105,7 +105,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         CloudContext cloudContext = getCloudContext(networkCreationRequest);
         AuthenticatedContext auth = new AuthenticatedContext(cloudContext, networkCreationRequest.getCloudCredential());
         Network network = buildNetworkForCreation(networkCreationRequest);
-        GcpContext context = contextBuilders.contextInit(cloudContext, auth, network, null, true);
+        GcpContext context = contextBuilders.contextInit(cloudContext, auth, network, true);
 
         try {
             CloudResource networkResource = createNetwork(context, auth, network);
@@ -128,7 +128,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         CloudContext cloudContext = getCloudContext(networkDeletionRequest);
         AuthenticatedContext auth = new AuthenticatedContext(cloudContext, networkDeletionRequest.getCloudCredential());
         Network network = buildNetworkForDeletion(networkDeletionRequest);
-        GcpContext context = contextBuilders.contextInit(cloudContext, auth, network, null, true);
+        GcpContext context = contextBuilders.contextInit(cloudContext, auth, network, true);
 
         try {
             for (String subnetId : networkDeletionRequest.getSubnetIds()) {

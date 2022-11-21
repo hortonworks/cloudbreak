@@ -150,4 +150,8 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
      */
     ResourceType resourceType();
 
+    default boolean isInstanceBuilder() {
+        return false;
+    }
+
 }
