@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
@@ -150,7 +151,8 @@ public class DistroXUpgradeAvailabilityService {
 
     private List<ImageInfoV4Response> filterCandidates(String accountId, Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
         BlueprintUpgradeOption upgradeOption = stack.getCluster().getBlueprint().getBlueprintUpgradeOption();
-        if (upgradeOption != BlueprintUpgradeOption.GA) {
+        ResourceStatus resourceStatus = stack.getCluster().getBlueprint().getStatus();
+        if (ResourceStatus.USER_MANAGED != resourceStatus && upgradeOption != BlueprintUpgradeOption.GA) {
             LOGGER.debug("Running filtering logic as upgrade option is {}, not GA", upgradeOption);
             filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, stack.getName(), upgradeV4Response);
         }

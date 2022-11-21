@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -136,5 +137,9 @@ public class BlueprintUtils {
 
     public boolean isSharedServiceReadyBlueprint(Blueprint blueprint) {
         return blueprint.getTags() != null && blueprint.getTags().getMap().containsKey("shared_services_ready");
+    }
+
+    public BlueprintUpgradeOption getBlueprintUpgradeOptionForGA() {
+        return BlueprintUpgradeOption.GA;
     }
 }
