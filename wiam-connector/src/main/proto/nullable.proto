@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package nullable;
+
+option java_package = "com.cloudera.thunderhead.service";
+option java_outer_classname = "NullableScalarTypeProto";
+option go_package = "com/cloudera/cdp/protobuf";
+
+// Wrappers for primitive (non-message) types. These types are useful
+// for embedding primitives in the nullable type and for places
+// where we need to distinguish between the absence of a primitive
+// typed field and its default value.
+
+message DoubleValue {
+  double value = 1;
+}
+
+message FloatValue {
+  float value = 1;
+}
+
+message Int64Value {
+  int64 value = 1;
+}
+
+message UInt64Value {
+  uint64 value = 1;
+}
+
+message Int32Value {
+  int32 value = 1;
+}
+
+message UInt32Value {
+  uint32 value = 1;
+}
+
+message BoolValue {
+  bool value = 1;
+}
+
+message StringValue {
+  string value = 1;
+}
+
+message BytesValue {
+  bytes value = 1;
+}

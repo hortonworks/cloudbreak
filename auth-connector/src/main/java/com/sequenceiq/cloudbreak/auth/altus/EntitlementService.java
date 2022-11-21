@@ -115,6 +115,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.SDX_CONFIGU
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_USERSYNC_ROUTING;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -606,6 +607,10 @@ public class EntitlementService {
 
     public boolean isTargetingSubnetsForEndpointAccessGatewayEnabled(String accountId) {
         return isEntitlementRegistered(accountId, TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY);
+    }
+
+    public boolean isWiamUsersyncRoutingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, WORKLOAD_IAM_USERSYNC_ROUTING);
     }
 
     public List<String> getEntitlements(String accountId) {

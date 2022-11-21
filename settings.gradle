@@ -81,4 +81,5 @@ include 'cloud-consumption'
 include 'cloud-consumption-api'
 include 'auth-distributor-connector'
 include 'sdx-connector'
+include 'wiam-connector'
 

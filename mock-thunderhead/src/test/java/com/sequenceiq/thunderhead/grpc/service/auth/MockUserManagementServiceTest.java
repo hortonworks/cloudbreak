@@ -293,6 +293,9 @@ public class MockUserManagementServiceTest {
                 {"enableWorkloadIamSync false", "enableWorkloadIamSync", false, "WORKLOAD_IAM_SYNC", false},
                 {"enableWorkloadIamSync true", "enableWorkloadIamSync", true, "WORKLOAD_IAM_SYNC", true},
 
+                {"enableWorkloadIamSyncRouting false", "enableWorkloadIamSyncRouting", false, "WORKLOAD_IAM_USERSYNC_ROUTING", false},
+                {"enableWorkloadIamSyncRouting true", "enableWorkloadIamSyncRouting", true, "WORKLOAD_IAM_USERSYNC_ROUTING", true},
+
                 {"enableUsersyncEnforceGroupMemberLimit false", "enableUsersyncEnforceGroupMemberLimit", false,
                         "CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", false},
                 {"enableUsersyncEnforceGroupMemberLimit true", "enableUsersyncEnforceGroupMemberLimit", true,

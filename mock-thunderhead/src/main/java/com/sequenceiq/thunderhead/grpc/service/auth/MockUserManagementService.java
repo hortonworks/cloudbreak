@@ -110,6 +110,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_USERSYNC_ROUTING;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -492,6 +493,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.workloadiam.sync.enable}")
     private boolean enableWorkloadIamSync;
+
+    @Value("${auth.mock.workloadiam.sync.routing.enable}")
+    private boolean enableWorkloadIamSyncRouting;
 
     @Value("${auth.mock.postgres.upgrade.embedded.enable}")
     private boolean enablePostgresUpgradeEmbedded;
@@ -1052,6 +1056,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableWorkloadIamSync) {
             builder.addEntitlements(createEntitlement(WORKLOAD_IAM_SYNC));
+        }
+        if (enableWorkloadIamSyncRouting) {
+            builder.addEntitlements(createEntitlement(WORKLOAD_IAM_USERSYNC_ROUTING));
         }
         if (enableSdxSaasIntegration) {
             builder.addEntitlements(createEntitlement(CDP_SAAS_SDX_INTEGRATION));
