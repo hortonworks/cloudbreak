@@ -37,7 +37,7 @@ auth:
     azure.marketplace.images.only.enable: false
     azure.single.resourcegroup.enable: true
     azure.single.resourcegroup.dedicated.storage.account.enable: true
-    cloudidentitymappinng.enable: true
+    cloudidentitymapping.enable: true
     microdutysdx.enable: true
     upgrade.internalrepo.enable: true
     hbase.cloudstorage.enable: false
@@ -55,6 +55,7 @@ auth:
       backup.restore.permission.checks.enabled: true
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
+    database.wire.encryption.datahub.enable: false
     datahub:
       runtime.upgrade.enable: true
       os.upgrade.enable: true

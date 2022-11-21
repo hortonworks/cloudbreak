@@ -1,6 +1,7 @@
 package com.sequenceiq.thunderhead.grpc.service.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -13,13 +14,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.migrationsupport.rules.ExpectedExceptionSupport;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -43,7 +41,6 @@ import com.sequenceiq.thunderhead.util.JsonUtil;
 import io.grpc.StatusRuntimeException;
 import io.grpc.internal.testing.StreamRecorder;
 
-@ExtendWith(ExpectedExceptionSupport.class)
 @ExtendWith(MockitoExtension.class)
 public class MockUserManagementServiceTest {
 
@@ -52,9 +49,6 @@ public class MockUserManagementServiceTest {
     private static final String SAMPLE_SSH_PUBLIC_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGHA5cmj5+agIalPxw85jFrrZcSh3dl06ukeqKu6JVQm nobody@example.com";
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private MockCrnService mockCrnService;
@@ -92,11 +86,10 @@ public class MockUserManagementServiceTest {
     public void testSetLicenseShouldEmptyStringWhenTheFileIsNotExists() {
         ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", "/etc/license");
 
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("The license file could not be found on path: '/etc/license'. " +
-                "Please place your CM license file in your '<cbd_path>/etc' folder. By default the name of the file should be 'license.txt'.");
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.init());
 
-        underTest.init();
+        assertThat(illegalStateException).hasMessage("The license file could not be found on path: '/etc/license'. " +
+                "Please place your CM license file in your '<cbd_path>/etc' folder. By default the name of the file should be 'license.txt'.");
     }
 
     @Test
@@ -223,8 +216,8 @@ public class MockUserManagementServiceTest {
                 {"enableAzureSingleResourceGroupDedicatedStorageAccount true", "enableAzureSingleResourceGroupDedicatedStorageAccount", true,
                         "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", true},
 
-                {"enableCloudIdentityMappinng false", "enableCloudIdentityMappinng", false, "CDP_CLOUD_IDENTITY_MAPPING", false},
-                {"enableCloudIdentityMappinng true", "enableCloudIdentityMappinng", true, "CDP_CLOUD_IDENTITY_MAPPING", true},
+                {"enableCloudIdentityMapping false", "enableCloudIdentityMapping", false, "CDP_CLOUD_IDENTITY_MAPPING", false},
+                {"enableCloudIdentityMapping true", "enableCloudIdentityMapping", true, "CDP_CLOUD_IDENTITY_MAPPING", true},
 
                 {"enableInternalRepositoryForUpgrade false", "enableInternalRepositoryForUpgrade", false, "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE", false},
                 {"enableInternalRepositoryForUpgrade true", "enableInternalRepositoryForUpgrade", true, "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE", true},
@@ -237,6 +230,9 @@ public class MockUserManagementServiceTest {
 
                 {"enableDatabaseWireEncryption false", "enableDatabaseWireEncryption", false, "CDP_CB_DATABASE_WIRE_ENCRYPTION", false},
                 {"enableDatabaseWireEncryption true", "enableDatabaseWireEncryption", true, "CDP_CB_DATABASE_WIRE_ENCRYPTION", true},
+
+                {"enableDatabaseWireEncryptionDatahub false", "enableDatabaseWireEncryptionDatahub", false, "CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", false},
+                {"enableDatabaseWireEncryptionDatahub true", "enableDatabaseWireEncryptionDatahub", true, "CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", true},
 
                 {"datalakeLoadBalancerEnabled false", "datalakeLoadBalancerEnabled", false, "CDP_DATA_LAKE_LOAD_BALANCER", false},
                 {"datalakeLoadBalancerEnabled true", "datalakeLoadBalancerEnabled", true, "CDP_DATA_LAKE_LOAD_BALANCER", true},
@@ -361,10 +357,9 @@ public class MockUserManagementServiceTest {
                 .setAccountId("altus")
                 .build();
 
-        expectedException.expect(StatusRuntimeException.class);
-        expectedException.expectMessage("INVALID_ARGUMENT");
+        StatusRuntimeException statusRuntimeException = assertThrows(StatusRuntimeException.class, () -> underTest.getAccount(req, null));
 
-        underTest.getAccount(req, null);
+        assertThat(statusRuntimeException).hasMessage("INVALID_ARGUMENT: This operation cannot be used with internal account id");
     }
 
     @Test
