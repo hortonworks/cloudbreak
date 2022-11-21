@@ -29,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
@@ -461,6 +462,32 @@ public class DistroXUpgradeAvailabilityServiceTest {
         response.setUpgradeCandidates(List.of(image1, image2, image3));
         response.setCurrent(current);
         stack.getCluster().getBlueprint().setBlueprintUpgradeOption(BlueprintUpgradeOption.GA);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
+        when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
+
+        UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
+
+        verify(entitlementService, times(1)).datahubRuntimeUpgradeEnabled(ACCOUNT_ID);
+        assertEquals(3, result.getUpgradeCandidates().size());
+        assertTrue(result.getUpgradeCandidates().stream().anyMatch(img -> img.getCreated() == 2L && "7.1.0".equals(img.getComponentVersions().getCdp())));
+    }
+
+    @Test
+    @DisplayName("this test simulates that a Data Hub blueprint upgrade option is not checked for custom "
+            + " blueprints and there 3 image candidates for upgrade")
+    public void testCheckForUpgradeWhenDataHubUpgradeIsNotGaAndOneMaintenanceUpgradeCandidateIsAvaiable() {
+        Cluster datalakeCluster = TestUtil.cluster();
+        datalakeCluster.setRangerRazEnabled(false);
+        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Response response = new UpgradeV4Response();
+        ImageInfoV4Response current = createImageResponse(1L, "7.1.0");
+        ImageInfoV4Response image1 = createImageResponse(2L, "7.1.0");
+        ImageInfoV4Response image2 = createImageResponse(8L, "7.2.0");
+        ImageInfoV4Response image3 = createImageResponse(6L, "7.3.0");
+        response.setUpgradeCandidates(List.of(image1, image2, image3));
+        response.setCurrent(current);
+        stack.getCluster().getBlueprint().setStatus(ResourceStatus.USER_MANAGED);
+        stack.getCluster().getBlueprint().setBlueprintUpgradeOption(BlueprintUpgradeOption.OS_UPGRADE_DISABLED);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
 

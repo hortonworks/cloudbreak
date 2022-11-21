@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -58,7 +59,8 @@ public class UpgradePreconditionService {
                 .stream()
                 .filter(stackDto -> BlueprintUpgradeOption.GA != Optional.ofNullable(stackDto.getBlueprint())
                         .map(Blueprint::getBlueprintUpgradeOption)
-                        .orElse(null))
+                        .orElse(null) && ResourceStatus.USER_MANAGED != Optional.ofNullable(stackDto.getBlueprint())
+                        .map(Blueprint::getStatus).orElse(null))
                 .map(StackDtoDelegate::getName)
                 .sorted()
                 .collect(Collectors.joining(","));
