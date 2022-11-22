@@ -69,8 +69,9 @@ public class ClusterUpgradeAvailabilityService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, boolean replaceVms, InternalUpgradeSettings internalUpgradeSettings) {
-        UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents, internalUpgradeSettings);
+    public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, boolean replaceVms, InternalUpgradeSettings internalUpgradeSettings,
+            boolean getAllImages) {
+        UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents, internalUpgradeSettings, getAllImages);
         upgradeOptions.setReplaceVms(replaceVms);
         if (StringUtils.isEmpty(upgradeOptions.getReason())) {
             if (!stack.getStatus().isAvailable()) {
@@ -135,7 +136,7 @@ public class ClusterUpgradeAvailabilityService {
         return upgradeCandidates;
     }
 
-    public UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents, InternalUpgradeSettings internalUpgradeSettings) {
+    public UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents, InternalUpgradeSettings internalUpgradeSettings, boolean getAllImages) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         UpgradeV4Response upgradeOptions = new UpgradeV4Response();
         try {
@@ -145,7 +146,7 @@ public class ClusterUpgradeAvailabilityService {
             Image image = imageCatalogService
                     .getImage(workspaceId, currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), currentImage.getImageId())
                     .getImage();
-            ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack, internalUpgradeSettings);
+            ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack, internalUpgradeSettings, getAllImages);
             ImageFilterResult imageFilterResult = filterImages(accountId, workspaceId, currentImage.getImageCatalogName(), imageFilterParams);
             LOGGER.info(String.format("%d possible image found for stack upgrade.", imageFilterResult.getImages().size()));
             upgradeOptions = createResponse(image, imageFilterResult, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());

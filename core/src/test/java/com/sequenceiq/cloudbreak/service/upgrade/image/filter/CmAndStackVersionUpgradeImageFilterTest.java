@@ -114,7 +114,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
 
     private ImageFilterParams createImageFilterParams(boolean lockComponents) {
         return new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L, new InternalUpgradeSettings(false, true,
-                true), imageCatalogPlatform("AWS"), null, null);
+                true), imageCatalogPlatform("AWS"), null, null, false);
     }
 
     private void assertLockedCommon(ImageFilterResult actual) {

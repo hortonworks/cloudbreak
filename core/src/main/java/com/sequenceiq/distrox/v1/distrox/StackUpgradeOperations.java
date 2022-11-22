@@ -120,8 +120,9 @@ public class StackUpgradeOperations {
                                 stackInstanceCount.getInstanceCount(), upgradeNodeCountLimit));
             }
         }
+        boolean getAllImages = request.getImageId() != null;
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
-                request.getInternalUpgradeSettings());
+                request.getInternalUpgradeSettings(), getAllImages);
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
         }

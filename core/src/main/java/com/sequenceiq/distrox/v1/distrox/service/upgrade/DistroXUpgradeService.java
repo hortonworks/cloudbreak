@@ -103,8 +103,9 @@ public class DistroXUpgradeService {
         LOGGER.info("DH Runtime Upgrade entitlement: {}", dataHubRuntimeUpgradeEnabled);
         boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(accountId);
         LOGGER.info("DH OS Upgrade entitlement: {}", dataHubOsUpgradeEntitled);
+        boolean getAllImages = imageId != null;
         UpgradeV4Response upgradeOptions = clusterUpgradeAvailabilityService.checkForUpgrades(stack, true,
-                new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled, dataHubOsUpgradeEntitled));
+                new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled, dataHubOsUpgradeEntitled), getAllImages);
         if (upgradeOptions.getUpgradeCandidates().isEmpty()) {
             throw new BadRequestException("There is no available image for upgrade.");
         }

@@ -93,7 +93,8 @@ public class ClusterUpgradeImageFilterTest {
         String errorMessage = "There are no available image";
         ImageFilterResult imageFilterResult = new ImageFilterResult(Collections.emptyList(), errorMessage);
         when(blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams, ACCOUNT_ID)).thenReturn(new BlueprintValidationResult(true));
-        when(imageCatalogService.getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform()))
+        when(imageCatalogService
+                .getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform(), imageFilterParams.isGetAllImages()))
                 .thenReturn(imageFilterResult);
 
         ImageFilterResult actual = underTest.filter(ACCOUNT_ID, WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
@@ -110,7 +111,8 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult imageFilterResult = new ImageFilterResult(images, EMPTY_REASON);
         ImageFilterResult otherImageFilterResult = new ImageFilterResult(otherImages, EMPTY_REASON);
         when(blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams, ACCOUNT_ID)).thenReturn(new BlueprintValidationResult(true));
-        when(imageCatalogService.getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform()))
+        when(imageCatalogService
+                .getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform(), imageFilterParams.isGetAllImages()))
                 .thenReturn(imageFilterResult);
         when(imageFilterUpgradeService.filterImages(imageFilterResult, imageFilterParams)).thenReturn(otherImageFilterResult);
 
@@ -122,7 +124,7 @@ public class ClusterUpgradeImageFilterTest {
     private ImageFilterParams createImageFilterParams() {
         return new ImageFilterParams(image, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION);
+                CLOUD_PLATFORM, REGION, false);
     }
 
 }
