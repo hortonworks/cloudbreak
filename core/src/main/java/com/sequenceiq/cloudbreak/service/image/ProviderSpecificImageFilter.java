@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public class ProviderSpecificImageFilter {
                 .map(platform -> filterImages(platform.name(), imageList))
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
-        return List.copyOf(uniqueImages);
+        return new ArrayList<>(uniqueImages);
     }
 
     private List<Image> filterImages(String cloudPlatform, List<Image> imageList) {
