@@ -533,6 +533,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             saveHostsPillar(stack, exitModel, gatewayTargets, sc);
             saveCustomPillars(saltConfig, exitModel, gatewayTargets, sc);
+            runSyncAll(sc, gatewayTargets, allNodes, exitModel);
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
