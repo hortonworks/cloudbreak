@@ -33,7 +33,7 @@ public class DatalakeBackupStatusResponse {
         return state != State.IN_PROGRESS && state != State.STARTED;
     }
 
-    public boolean failed() {
+    public boolean isFailed() {
         return state.equals(State.FAILED) || state.equals(State.VALIDATION_FAILED);
     }
 

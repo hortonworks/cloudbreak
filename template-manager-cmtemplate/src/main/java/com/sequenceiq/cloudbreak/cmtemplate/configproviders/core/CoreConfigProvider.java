@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -45,6 +46,9 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     @Inject
     private S3ConfigProvider s3ConfigProvider;
+
+    @Inject
+    private AdlsGen2ConfigProvider adlsConfigProvider;
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -62,6 +66,8 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
         StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
         s3ConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);
+        adlsConfigProvider.populateServiceConfigs(source, hdfsCoreSiteSafetyValveValue, templateProcessor.getStackVersion());
+
         hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD, "true"));
 
         if (!hdfsCoreSiteSafetyValveValue.toString().isEmpty()) {

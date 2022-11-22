@@ -76,7 +76,7 @@ public class DatalakeBackupValidationActions {
                         sdxBackupRestoreService.triggerDatalakeBackupValidation(payload.getResourceId(), payload.getBackupLocation(), payload.getUserId());
                 variables.put(BACKUP_ID, backupStatusResponse.getBackupId());
                 payload.getDrStatus().setOperationId(backupStatusResponse.getBackupId());
-                if (!backupStatusResponse.failed()) {
+                if (!backupStatusResponse.isFailed()) {
                     sendEvent(context, DATALAKE_BACKUP_VALIDATION_IN_PROGRESS_EVENT.event(), payload);
                 } else {
                     LOGGER.error("Failed to initiate backup validation for cluster {}.", sdxCluster.getClusterName());
