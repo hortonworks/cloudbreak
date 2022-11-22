@@ -4,19 +4,25 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.not;
 
+import java.util.Map;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryOnceTestListener;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotUtil;
@@ -27,6 +33,9 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractE2ETest.class);
 
+    @Value("${integrationtest.azure.resourcegroup.name:}")
+    private String resourceGroupName;
+
     @Inject
     private SpotUtil spotUtil;
 
@@ -35,6 +44,9 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     @Inject
     private TagsUtil tagsUtil;
+
+    @Inject
+    private AzureCloudFunctionality azureCloudFunctionality;
 
     @Override
     protected void setupTest(ITestResult testResult) {
@@ -95,4 +107,22 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         return testContext.getCloudProvider().getBaseLocationForPreTermination();
     }
 
+    /**
+     * Creating new temporary Azure resource group for E2E tests.
+     */
+    @BeforeMethod
+    public void createResourceGroup(Object[] data) {
+        TestContext testContext = (TestContext) data[0];
+        String cloudProvider = commonCloudProperties().getCloudProvider();
+
+        if (CloudPlatform.AZURE.name().equalsIgnoreCase(cloudProvider)) {
+            Map<String, String> tags = Map.of("owner", testContext.getActingUserOwnerTag(),
+                    "creation-timestamp", testContext.getCreationTimestampTag());
+            ResourceGroup temporaryResourceGroup = azureCloudFunctionality.createResourceGroup(resourceGroupName, tags);
+            LOGGER.info("The temporary single resource group '{}' for E2E tests has been provisioned with status '{}' before test has been started!",
+                    temporaryResourceGroup.name(), temporaryResourceGroup.provisioningState());
+        } else {
+            LOGGER.info("Cloud provider is '{}' for E2E tests. So do not need to check then create E2E test resource group for Azure.", cloudProvider);
+        }
+    }
 }
