@@ -846,7 +846,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogProvider.getImageCatalogMetaData(defaultCatalogUrl).getRuntimeVersions();
     }
 
-    public ImageFilterResult getImageFilterResult(Long workspaceId, String imageCatalogName, ImageCatalogPlatform imageCatalogPlatform)
+    public ImageFilterResult getImageFilterResult(Long workspaceId, String imageCatalogName, ImageCatalogPlatform imageCatalogPlatform, boolean getAllImages)
             throws CloudbreakImageCatalogException {
         ImageCatalog imageCatalog = getImageCatalogByName(workspaceId, imageCatalogName);
         if (isCustomImageCatalog(imageCatalog)) {
@@ -854,7 +854,11 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             return new ImageFilterResult(statedImages.getImages().getCdhImages());
         } else {
             CloudbreakImageCatalogV3 v3ImageCatalog = imageCatalogProvider.getImageCatalogV3(imageCatalog.getImageCatalogUrl());
-            return imageCatalogServiceProxy.getImageFilterResult(v3ImageCatalog);
+            if (getAllImages) {
+                return new ImageFilterResult(v3ImageCatalog.getImages().getCdhImages());
+            } else {
+                return imageCatalogServiceProxy.getImageFilterResult(v3ImageCatalog);
+            }
         }
     }
 }

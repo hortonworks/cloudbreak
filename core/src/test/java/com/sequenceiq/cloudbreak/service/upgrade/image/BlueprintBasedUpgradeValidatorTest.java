@@ -84,7 +84,7 @@ class BlueprintBasedUpgradeValidatorTest {
     private ImageFilterParams createImageFilterParams(String blueprintName, StackType stackType) {
         Blueprint blueprint = new Blueprint();
         blueprint.setName(blueprintName);
-        return new ImageFilterParams(null, true, null, stackType, blueprint, null, new InternalUpgradeSettings(true, true, true), null, null, null);
+        return new ImageFilterParams(null, true, null, stackType, blueprint, null, new InternalUpgradeSettings(true, true, true), null, null, null, false);
     }
 
 }
