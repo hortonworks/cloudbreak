@@ -43,14 +43,14 @@
         "recoveryMode": "MANUAL",
         "template": {
           "aws": {},
-          "instanceType": "m5.4xlarge",
+          "instanceType": "r5d.4xlarge",
           "rootVolume": {
             "size": 150
           },
           "attachedVolumes": [{
-            "size": 500,
-            "count": 1,
-            "type": "gp2"
+            "size": 300,
+            "count": 2,
+            "type": "ephemeral"
           }],
           "cloudPlatform": "AWS"
         },
@@ -87,7 +87,7 @@
               "strategy" : "PARTITION"
             }
           },
-          "instanceType": "m5.4xlarge",
+          "instanceType": "r5d.4xlarge",
           "rootVolume": {
             "size": 150
           },
