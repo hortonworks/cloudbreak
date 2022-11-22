@@ -65,6 +65,9 @@ To launch the Integration Test application you should execute the `com.sequencei
 ## Run E2E Tests on your local machine
 You should have a running [Cloudbreak](https://github.com/hortonworks/cloudbreak) before start testing, and after a successful build, you should have the `integration-test.jar` file at `integration-test/build/libs/`.
 
+> **Note:**
+> For Azure E2E tests a new resource group at Azure subscription is createing before test run. The new Azure resource group name should be set at `integrationtest.azure.resourcegroup.name` application parameter or environment variable.
+
 ### Run a selected E2E test in Terminal
 1. Create your own and separate test folder on your local machine, for example `~/integration-test`
 2. Create your own `aplication.yml` file there
