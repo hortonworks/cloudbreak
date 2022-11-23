@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
 import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
@@ -164,7 +165,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         for (CloudResource resource : requestedResources) {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
             VolumeSetAttributes volumeSet = getVolumeSetAttributes(resource);
-            DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, 1);
+            DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, getDeviceOffset(instance));
             futures.addAll(volumeSet.getVolumes().stream()
                     .map(volume -> intermediateBuilderExecutor.submit(() -> {
                         Disk result = client.getDiskByName(resourceGroupName, volume.getId());
@@ -195,6 +196,14 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 })
                 .map(copyResourceWithNewStatus(CommonStatus.CREATED))
                 .collect(toList());
+    }
+
+    private int getDeviceOffset(CloudInstance instance) {
+        Object resourceDiskAttachedObject = instance.getParameters().get(AzureInstanceTemplate.RESOURCE_DISK_ATTACHED);
+        if (resourceDiskAttachedObject == null) {
+            return 1;
+        }
+        return instance.getParameter(AzureInstanceTemplate.RESOURCE_DISK_ATTACHED, Boolean.class) ? 1 : 0;
     }
 
     private String getDiskEncryptionSetId(Group group) {

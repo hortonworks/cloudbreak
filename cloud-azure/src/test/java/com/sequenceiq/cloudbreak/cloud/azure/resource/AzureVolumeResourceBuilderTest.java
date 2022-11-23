@@ -163,6 +163,7 @@ public class AzureVolumeResourceBuilderTest {
         when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(group.getReferenceInstanceConfiguration()).thenReturn(cloudInstance);
         when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
+        when(cloudInstance.getParameter(AzureInstanceTemplate.RESOURCE_DISK_ATTACHED, Boolean.class)).thenReturn(true);
         when(instanceTemplate.getVolumes()).thenReturn(List.of(volumeTemplate));
 
         when(auth.getCloudContext()).thenReturn(cloudContext);

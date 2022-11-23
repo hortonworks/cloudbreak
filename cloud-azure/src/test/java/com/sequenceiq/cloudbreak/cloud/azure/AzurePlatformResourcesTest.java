@@ -78,7 +78,7 @@ class AzurePlatformResourcesTest {
     }
 
     @Test
-    void testVirtualMachinesWhenInstanceTypeShouldBeFilteredOut() {
+    void testVirtualMachinesWhenInstanceTypeHasZeroResourceDiskMustBePresented() {
         Region region = Region.region("westeruope");
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
         VirtualMachineSize d2sTypeWithoutResourceDisk = createVirtualMachineSize("Standard_D2s_v4", 0);
@@ -91,17 +91,11 @@ class AzurePlatformResourcesTest {
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of());
 
-        Set<VirtualMachineSize> vmTypeWithoutResourceDisk = Set.of(d2sTypeWithoutResourceDisk, e64sVmTypeWithoutResourceDisk);
         assertNotNull(actual);
         assertNotNull(actual.getCloudVmResponses());
         assertFalse(actual.getCloudVmResponses().isEmpty());
         assertNotNull(actual.getCloudVmResponses().get(region.value()));
-        assertEquals(virtualMachineSizes.size() - vmTypeWithoutResourceDisk.size(), actual.getCloudVmResponses().get(region.value()).size());
-        boolean resultContainsVmTypesWithoutResourceDisk = actual.getCloudVmResponses()
-                .get(region.value())
-                .stream()
-                .anyMatch(cloudVMResponse -> vmTypeWithoutResourceDisk.stream().anyMatch(vmSize -> vmSize.name().equals(cloudVMResponse.value())));
-        assertFalse(resultContainsVmTypesWithoutResourceDisk);
+        assertEquals(virtualMachineSizes.size(), actual.getCloudVmResponses().get(region.value()).size());
     }
 
     @Test
