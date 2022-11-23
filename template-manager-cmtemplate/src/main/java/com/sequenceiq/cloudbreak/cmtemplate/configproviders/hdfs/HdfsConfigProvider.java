@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -22,11 +23,16 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
     @Inject
     private S3ConfigProvider s3ConfigProvider;
 
+    @Inject
+    private AdlsGen2ConfigProvider adlsConfigProvider;
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
 
         s3ConfigProvider.getServiceConfigs(templatePreparationObject, hdfsCoreSiteSafetyValveValue);
+
+        adlsConfigProvider.populateServiceConfigs(templatePreparationObject, hdfsCoreSiteSafetyValveValue, templateProcessor.getStackVersion());
 
         return hdfsCoreSiteSafetyValveValue.toString().isEmpty() ? List.of()
                 : List.of(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));

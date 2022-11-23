@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.datalakedr.converter;
 
 import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.FAILED_STATE;
+import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.VALIDATION_FAILED_STATE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -16,6 +17,8 @@ public class GrpcStatusResponseToDatalakeBackupStatusResponseConverterTest {
     private static final String FAILURE_REASON = "Failed operation";
 
     private static final String FAILURE_REASON2 = "A different failure message.";
+
+    private static final String PRECHECKS_FAILED_REASON = "Precheck Failed";
 
     private GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter underTest;
 
@@ -450,6 +453,38 @@ public class GrpcStatusResponseToDatalakeBackupStatusResponseConverterTest {
         assertEquals(DatalakeRestoreStatusResponse.State.FAILED, response.getState());
         assertEquals(FAILURE_REASON, response.getFailureReason());
         assert response.isComplete();
+    }
+
+    @Test
+    public void testPreCheckBackupFailed() {
+        datalakeDRProto.BackupDatalakeResponse.Builder builder =
+                datalakeDRProto.BackupDatalakeResponse.newBuilder()
+                        .setOverallState(VALIDATION_FAILED_STATE)
+                        .setFailureReason(PRECHECKS_FAILED_REASON);
+        DatalakeBackupStatusResponse response = underTest.convert(builder.build());
+        assertEquals(DatalakeBackupStatusResponse.State.VALIDATION_FAILED, response.getState());
+        assertEquals(PRECHECKS_FAILED_REASON, response.getFailureReason());
+    }
+
+    @Test
+    public void testPreCheckRestoreFailed() {
+        datalakeDRProto.RestoreDatalakeResponse.Builder builder =
+                datalakeDRProto.RestoreDatalakeResponse.newBuilder()
+                        .setOverallState(VALIDATION_FAILED_STATE)
+                        .setFailureReason(PRECHECKS_FAILED_REASON);
+        DatalakeRestoreStatusResponse response = underTest.convert(builder.build());
+        assertEquals(DatalakeBackupStatusResponse.State.VALIDATION_FAILED, response.getState());
+        assertEquals(PRECHECKS_FAILED_REASON, response.getFailureReason());
+    }
+
+    @Test
+    public void testPrecheckBackupSuccess() {
+        datalakeDRProto.RestoreDatalakeResponse.Builder builder =
+                datalakeDRProto.RestoreDatalakeResponse.newBuilder()
+                        .setOverallState("SUCCESSFUL");
+        DatalakeRestoreStatusResponse response = underTest.convert(builder.build());
+        assertEquals(DatalakeBackupStatusResponse.State.SUCCESSFUL, response.getState());
+
     }
 
     private datalakeDRProto.BackupRestoreOperationStatus.Builder createStatus(String status, String failureReason) {
