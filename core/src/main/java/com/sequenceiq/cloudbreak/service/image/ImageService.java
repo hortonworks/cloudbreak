@@ -28,6 +28,8 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -87,6 +89,9 @@ public class ImageService {
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProviderService.getImage(stackId);
@@ -222,10 +227,7 @@ public class ImageService {
         String translatedRegion = cloudPlatformConnectors.getDefault(platform(cloudPlatform.toUpperCase())).regionToDisplayName(region);
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
-            Optional<String> imageNameOpt = findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion);
-            if (imageNameOpt.isEmpty()) {
-                imageNameOpt = findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion);
-            }
+            Optional<String> imageNameOpt = findImageForRegion(translatedRegion, imagesByRegion);
             if (imageNameOpt.isPresent()) {
                 return imageNameOpt.get();
             }
@@ -236,6 +238,19 @@ public class ImageService {
         String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
                 imgFromCatalog, platformString);
         throw new CloudbreakImageNotFoundException(msg);
+    }
+
+    private Optional<String> findImageForRegion(String translatedRegion, Map<String, String> imagesByRegion) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        if (entitlementService.azureMarketplaceImagesEnabled(accountId)) {
+            return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
+                    .or(() -> findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion));
+
+        } else {
+            return findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion)
+                    .or(() -> findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion));
+
+        }
     }
 
     private <T> Optional<T> findStringKeyWithEqualsIgnoreCase(String key, Map<String, T> map) {
