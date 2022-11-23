@@ -125,7 +125,7 @@ public interface ResourceConnector {
      * @throws Exception in case of any error
      */
     void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
-            TargetMajorVersion targetMajorVersion) throws Exception;
+            TargetMajorVersion targetMajorVersion, List<CloudResource> resources) throws Exception;
 
     /**
      * Invoked to check whether the resources have already reached a StatusGroup.PERMANENT state.

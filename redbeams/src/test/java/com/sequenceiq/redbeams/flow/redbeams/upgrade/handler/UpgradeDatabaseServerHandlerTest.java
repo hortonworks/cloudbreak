@@ -28,6 +28,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerRequest;
+import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +60,9 @@ public class UpgradeDatabaseServerHandlerTest {
 
     @Mock
     private ResourceConnector resourceConnector;
+
+    @Mock
+    private DBResourceService dbResourceService;
 
     @InjectMocks
     private UpgradeDatabaseServerHandler underTest;

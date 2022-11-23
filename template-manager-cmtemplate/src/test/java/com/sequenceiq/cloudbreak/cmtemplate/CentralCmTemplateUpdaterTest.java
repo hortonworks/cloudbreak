@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.StubDfsConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseCloudStorageServiceConfigProvider;
@@ -108,6 +109,9 @@ public class CentralCmTemplateUpdaterTest {
     private S3ConfigProvider s3ConfigProvider;
 
     @Mock
+    private AdlsGen2ConfigProvider adlsConfigProvider;
+
+    @Mock
     private GeneralClusterConfigs generalClusterConfigs;
 
     @Mock
@@ -129,6 +133,7 @@ public class CentralCmTemplateUpdaterTest {
         when(templatePreparationObject.getHostgroupViews()).thenReturn(toHostgroupViews(getHostgroupMappings()));
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
+        doNothing().when(adlsConfigProvider).populateServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class), anyString());
         RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.HIVE);
         when(templatePreparationObject.getRdsConfigs()).thenReturn(Set.of(rdsConfig));
         when(templatePreparationObject.getRdsConfig(DatabaseType.HIVE)).thenReturn(rdsConfig);

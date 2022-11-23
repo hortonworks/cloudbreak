@@ -11,6 +11,7 @@ import com.amazonaws.services.rds.model.CreateDBParameterGroupRequest;
 import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DBParameterGroup;
 import com.amazonaws.services.rds.model.DBParameterGroupNotFoundException;
+import com.amazonaws.services.rds.model.DeleteDBParameterGroupRequest;
 import com.amazonaws.services.rds.model.DescribeCertificatesRequest;
 import com.amazonaws.services.rds.model.DescribeCertificatesResult;
 import com.amazonaws.services.rds.model.DescribeDBEngineVersionsRequest;
@@ -19,6 +20,7 @@ import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.amazonaws.services.rds.model.DescribeDBParameterGroupsRequest;
 import com.amazonaws.services.rds.model.DescribeDBParameterGroupsResult;
+import com.amazonaws.services.rds.model.InvalidDBParameterGroupStateException;
 import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
 import com.amazonaws.services.rds.model.ModifyDBParameterGroupRequest;
 import com.amazonaws.services.rds.model.ModifyDBParameterGroupResult;
@@ -27,6 +29,7 @@ import com.amazonaws.services.rds.model.StartDBInstanceRequest;
 import com.amazonaws.services.rds.model.StopDBInstanceRequest;
 import com.amazonaws.services.rds.waiters.AmazonRDSWaiters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 public class AmazonRdsClient extends AmazonClient {
 
@@ -89,6 +92,20 @@ public class AmazonRdsClient extends AmazonClient {
                 .withParameters(parameters);
 
         return client.modifyDBParameterGroup(modifyDBParameterGroupRequest);
+    }
+
+    public void deleteParameterGroup(String dbParameterGroupName) {
+        DeleteDBParameterGroupRequest deleteDBParameterGroupRequest = new DeleteDBParameterGroupRequest().withDBParameterGroupName(dbParameterGroupName);
+        try {
+            client.deleteDBParameterGroup(deleteDBParameterGroupRequest);
+        } catch (DBParameterGroupNotFoundException e) {
+            LOGGER.debug("ParameterGroup with {} name does not exist", dbParameterGroupName);
+        } catch (InvalidDBParameterGroupStateException e) {
+            String msg = String.format("The DB parameter group [%s] is in use or is in an invalid state. If you are attempting to delete the parameter group," +
+                    " you can't delete it when the parameter group is in this state.", dbParameterGroupName);
+            LOGGER.error(msg);
+            throw new CloudConnectorException(msg, e);
+        }
     }
 
     public DBInstance stopDBInstance(StopDBInstanceRequest stopDBInstanceRequest) {

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -14,12 +13,9 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
-import com.amazonaws.services.rds.model.Parameter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbParameterGroupView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.common.database.Version;
 
 @Service
@@ -35,9 +31,6 @@ public class AwsRdsUpgradeOperations {
 
     @Inject
     private AwsRdsUpgradeWaitOperations awsRdsUpgradeWaitOperations;
-
-    @Inject
-    private AwsRdsCustomParameterSupplier awsRdsCustomParameterSupplier;
 
     public DescribeDBInstancesResult describeRds(AmazonRdsClient rdsClient, String dbInstanceIdentifier) {
         DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest().withDBInstanceIdentifier(dbInstanceIdentifier);
@@ -85,33 +78,4 @@ public class AwsRdsUpgradeOperations {
         awsRdsUpgradeWaitOperations.waitUntilUpgradeStarts(rdsClient, describeDBInstancesRequest);
         awsRdsUpgradeWaitOperations.waitUntilUpgradeFinishes(ac, rdsClient, describeDBInstancesRequest);
     }
-
-    public String createParameterGroupWithCustomSettings(AmazonRdsClient rdsClient, DatabaseServer databaseServer, RdsEngineVersion upgradeTargetVersion) {
-        AwsRdsDbParameterGroupView awsRdsDbParameterGroupView = new AwsRdsDbParameterGroupView(databaseServer, awsRdsVersionOperations);
-        String dbParameterGroupName = String.format("%s-v%s", awsRdsDbParameterGroupView.getDBParameterGroupName(), upgradeTargetVersion.getMajorVersion());
-        String dbParameterGroupFamily = awsRdsVersionOperations.getDBParameterGroupFamily(databaseServer.getEngine(), upgradeTargetVersion.getVersion());
-        String serverId = databaseServer.getServerId();
-        String dbParameterGroupDescription = String.format("DB parameter group for %s", serverId);
-
-        createParameterGroupIfNeeded(rdsClient, dbParameterGroupName, dbParameterGroupFamily, dbParameterGroupDescription);
-        changeParameterInGroup(rdsClient, dbParameterGroupName);
-        return dbParameterGroupName;
-    }
-
-    private void changeParameterInGroup(AmazonRdsClient rdsClient, String dbParameterGroupName) {
-        List<Parameter> parametersToChange = awsRdsCustomParameterSupplier.getParametersToChange();
-        rdsClient.changeParameterInGroup(dbParameterGroupName, parametersToChange);
-        LOGGER.debug("Changed RDS parameters in parameters group. Parameter group name: {}. parameters: {}", dbParameterGroupName, parametersToChange);
-    }
-
-    private void createParameterGroupIfNeeded(AmazonRdsClient rdsClient, String dbParameterGroupName, String dbParameterGroupFamily, String
-            dbParameterGroupDescription) {
-        if (!rdsClient.isDbParameterGroupPresent(dbParameterGroupName)) {
-            LOGGER.debug("Creating a custom parameter group for RDS. DbParameterGroupName: {}, family: {}", dbParameterGroupName, dbParameterGroupFamily);
-            rdsClient.createParameterGroup(dbParameterGroupFamily, dbParameterGroupName, dbParameterGroupDescription);
-        } else {
-            LOGGER.debug("Custom parameter group with name {} already exists", dbParameterGroupName);
-        }
-    }
-
 }
