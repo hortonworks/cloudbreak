@@ -53,7 +53,7 @@ public class AwsRdsUpgradeService {
             upgradeRdsIfNotUpgradingAlready(ac, targetMajorVersion, databaseServer, rdsClient, rdsInfo, persistenceNotifier);
             waitForRdsUpgrade(ac, databaseServer, rdsClient);
             List<CloudResource> removedResources = awsRdsParameterGroupService.removeFormerParamGroups(rdsClient, dbStack.getDatabaseServer(), cloudResources);
-            removedResources.forEach(resource -> persistenceNotifier.notifyDeletion(resource, ac.getCloudContext()));
+            persistenceNotifier.notifyDeletions(removedResources, ac.getCloudContext());
         }
         LOGGER.debug("RDS upgrade done for DB: {}", dbInstanceIdentifier);
     }
@@ -67,7 +67,7 @@ public class AwsRdsUpgradeService {
         if (AVAILABLE == rdsInfo.getRdsState()) {
             LOGGER.debug("RDS {} is in available state, calling upgrade.", databaseServer.getServerId());
             List<CloudResource> newResources = awsRdsUpgradeSteps.upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
-            newResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext()));
+            persistenceNotifier.notifyAllocations(newResources, ac.getCloudContext());
         } else {
             LOGGER.debug("RDS {} is already upgrading, proceeding to wait for upgrade", databaseServer.getServerId());
         }
