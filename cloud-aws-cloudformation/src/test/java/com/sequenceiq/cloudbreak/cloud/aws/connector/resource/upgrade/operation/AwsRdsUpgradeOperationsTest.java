@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -15,7 +14,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,13 +31,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
-import com.amazonaws.services.rds.model.Parameter;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.common.database.Version;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,10 +43,6 @@ public class AwsRdsUpgradeOperationsTest {
     private static final String DB_INSTANCE_IDENTIFIER = "dbInstanceIdentifier";
 
     private static final String DB_PARAMETER_GROUP_NAME = "dbParameterGroupName";
-
-    private static final String DB_SERVER_ID = "dbServerId";
-
-    private static final String PARAMETER_GROUP_FAMILY = "parameterGroupFamily";
 
     private static final String TARGET_VERSION = "targetVersion";
 
@@ -189,37 +180,4 @@ public class AwsRdsUpgradeOperationsTest {
 
         verify(awsRdsUpgradeWaitOperations, never()).waitUntilUpgradeFinishes(any(), any(), any());
     }
-
-    @Test
-    void testCreateParameterGroupWithCustomSettings() {
-        DatabaseServer databaseServer = mock(DatabaseServer.class);
-        when(databaseServer.getServerId()).thenReturn(DB_SERVER_ID);
-        when(databaseServer.getEngine()).thenReturn(DatabaseEngine.POSTGRESQL);
-        when(awsRdsVersionOperations.getDBParameterGroupFamily(DatabaseEngine.POSTGRESQL, "highestVersion")).thenReturn(PARAMETER_GROUP_FAMILY);
-        String dbParameterGroupName = "dpg-" + DB_SERVER_ID + "-vhighestVersion";
-        when(rdsClient.isDbParameterGroupPresent(dbParameterGroupName)).thenReturn(false);
-        List<Parameter> customParameterList = List.of(new Parameter());
-        when(awsRdsCustomParameterSupplier.getParametersToChange()).thenReturn(customParameterList);
-
-        underTest.createParameterGroupWithCustomSettings(rdsClient, databaseServer, new RdsEngineVersion("highestVersion"));
-
-        verify(rdsClient).createParameterGroup(PARAMETER_GROUP_FAMILY, dbParameterGroupName, "DB parameter group for " + DB_SERVER_ID);
-        verify(rdsClient).changeParameterInGroup(dbParameterGroupName, customParameterList);
-    }
-
-    @Test
-    void testCreateParameterGroupWithCustomSettingsWhenParameterGroupIsFound() {
-        DatabaseServer databaseServer = mock(DatabaseServer.class);
-        when(databaseServer.getServerId()).thenReturn(DB_SERVER_ID);
-        when(databaseServer.getEngine()).thenReturn(DatabaseEngine.POSTGRESQL);
-        when(awsRdsVersionOperations.getDBParameterGroupFamily(DatabaseEngine.POSTGRESQL, "highestVersion")).thenReturn(PARAMETER_GROUP_FAMILY);
-        String dbParameterGroupName = "dpg-" + DB_SERVER_ID + "-vhighestVersion";
-        when(rdsClient.isDbParameterGroupPresent(dbParameterGroupName)).thenReturn(true);
-
-        underTest.createParameterGroupWithCustomSettings(rdsClient, databaseServer, new RdsEngineVersion("highestVersion"));
-
-        verify(rdsClient, never()).createParameterGroup(anyString(), anyString(), anyString());
-        verify(rdsClient).changeParameterInGroup(eq(dbParameterGroupName), any());
-    }
-
 }

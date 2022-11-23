@@ -241,7 +241,7 @@ public class AzureResourceConnectorTest {
         DatabaseStack databaseStack = mock(DatabaseStack.class);
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
 
-        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11);
+        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, List.of());
         verify(azureDatabaseResourceService, times(1))
                 .upgradeDatabaseServer(eq(ac), eq(databaseStack), eq(persistenceNotifier), eq(TargetMajorVersion.VERSION_11));
     }

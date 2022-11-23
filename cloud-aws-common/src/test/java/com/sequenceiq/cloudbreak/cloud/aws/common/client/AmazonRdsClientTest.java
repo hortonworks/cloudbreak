@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,11 +21,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.Certificate;
 import com.amazonaws.services.rds.model.CreateDBParameterGroupRequest;
+import com.amazonaws.services.rds.model.DBParameterGroupNotFoundException;
+import com.amazonaws.services.rds.model.DeleteDBParameterGroupRequest;
 import com.amazonaws.services.rds.model.DescribeCertificatesRequest;
 import com.amazonaws.services.rds.model.DescribeCertificatesResult;
+import com.amazonaws.services.rds.model.InvalidDBParameterGroupStateException;
 import com.amazonaws.services.rds.model.ModifyDBParameterGroupRequest;
 import com.amazonaws.services.rds.model.Parameter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 @ExtendWith(MockitoExtension.class)
 class AmazonRdsClientTest {
@@ -111,4 +117,25 @@ class AmazonRdsClientTest {
         assertEquals(DB_INSTANCE_IDENTIFIER, request.getDBParameterGroupName());
     }
 
+    @Test
+    void testDeleteParameterGroup() {
+        underTest.deleteParameterGroup("paramGroup");
+        ArgumentCaptor<DeleteDBParameterGroupRequest> requestCaptor = ArgumentCaptor.forClass(DeleteDBParameterGroupRequest.class);
+        verify(client).deleteDBParameterGroup(requestCaptor.capture());
+        assertEquals("paramGroup", requestCaptor.getValue().getDBParameterGroupName());
+    }
+
+    @Test
+    void testDeleteParameterGroupWhenNotFound() {
+        when(client.deleteDBParameterGroup(any(DeleteDBParameterGroupRequest.class))).thenThrow(new DBParameterGroupNotFoundException("errorMsg"));
+        underTest.deleteParameterGroup("paramGroup");
+    }
+
+    @Test
+    void testDeleteParameterGroupWhenInvalidDBParameterGroupState() {
+        InvalidDBParameterGroupStateException invalidGroupStateException = new InvalidDBParameterGroupStateException("errorMsg");
+        when(client.deleteDBParameterGroup(any(DeleteDBParameterGroupRequest.class))).thenThrow(invalidGroupStateException);
+        CloudConnectorException actualException = assertThrows(CloudConnectorException.class, () -> underTest.deleteParameterGroup("paramGroup"));
+        assertEquals(invalidGroupStateException, actualException.getCause());
+    }
 }

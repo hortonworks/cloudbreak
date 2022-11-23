@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsParameterGroupService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeOperations;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsEngineVersion;
@@ -20,8 +23,10 @@ import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsInstanceStatusesToRdsStateConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsState;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.common.database.Version;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class AwsRdsUpgradeSteps {
@@ -36,6 +41,9 @@ public class AwsRdsUpgradeSteps {
 
     @Inject
     private RdsInstanceStatusesToRdsStateConverter rdsInstanceStatusesToRdsStateConverter;
+
+    @Inject
+    private AwsRdsParameterGroupService awsRdsParameterGroupService;
 
     public RdsInfo getRdsInfo(AmazonRdsClient rdsClient, String dbInstanceIdentifier) {
         LOGGER.debug("Started to retrieve RDS info for upgrade, dbInstanceIdentifier: {}", dbInstanceIdentifier);
@@ -55,16 +63,20 @@ public class AwsRdsUpgradeSteps {
         return rdsInfo;
     }
 
-    public void upgradeRds(AmazonRdsClient rdsClient, DatabaseServer databaseServer, RdsInfo rdsInfo, Version targetMajorVersion) {
+    public List<CloudResource> upgradeRds(AuthenticatedContext ac, AmazonRdsClient rdsClient, DatabaseServer databaseServer, RdsInfo rdsInfo,
+            Version targetMajorVersion) {
         RdsEngineVersion currentRdsVersion = rdsInfo.getRdsEngineVersion();
         RdsEngineVersion upgradeTargetVersion = awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentRdsVersion);
         String dbParameterGroupName;
+        List<CloudResource> cloudResources = new ArrayList<>();
         if (isCustomParameterGroupNeeded(databaseServer)) {
-            dbParameterGroupName = awsRdsUpgradeOperations.createParameterGroupWithCustomSettings(rdsClient, databaseServer, upgradeTargetVersion);
+            dbParameterGroupName = awsRdsParameterGroupService.createParameterGroupWithCustomSettings(rdsClient, databaseServer, upgradeTargetVersion);
+            cloudResources.add(createParamGroupResource(ac, dbParameterGroupName));
         } else {
             dbParameterGroupName = null;
         }
         awsRdsUpgradeOperations.upgradeRds(rdsClient, upgradeTargetVersion, databaseServer.getServerId(), dbParameterGroupName);
+        return cloudResources;
     }
 
     public void waitForUpgrade(AuthenticatedContext ac, AmazonRdsClient rdsClient, DatabaseServer databaseServer) {
@@ -73,5 +85,13 @@ public class AwsRdsUpgradeSteps {
 
     private boolean isCustomParameterGroupNeeded(DatabaseServer databaseServer) {
         return databaseServer.isUseSslEnforcement();
+    }
+
+    private CloudResource createParamGroupResource(AuthenticatedContext ac, String dbParameterGroupName) {
+        return new CloudResource.Builder()
+                .withType(ResourceType.RDS_DB_PARAMETER_GROUP)
+                .withName(dbParameterGroupName)
+                .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
+                .build();
     }
 }
