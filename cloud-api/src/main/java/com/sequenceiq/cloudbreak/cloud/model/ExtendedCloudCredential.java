@@ -16,6 +16,8 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     private final List<String> entitlements;
 
+    private final CloudCredential cloudCredential;
+
     public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description,
         String userCrn, String accountId, List<String> entitlements) {
         super(cloudCredential.getId(), cloudCredential.getName(), accountId, cloudCredential.isVerifyPermissions());
@@ -28,6 +30,7 @@ public class ExtendedCloudCredential extends CloudCredential {
         this.userCrn = userCrn;
         this.accountId = accountId;
         this.entitlements = entitlements;
+        this.cloudCredential = cloudCredential;
     }
 
     public String getDescription() {
@@ -48,6 +51,10 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     public List<String> getEntitlements() {
         return entitlements;
+    }
+
+    public CloudCredential getCloudCredential() {
+        return cloudCredential;
     }
 
     // Must not reveal any secrets, hence not including DynamicModel.toString()!

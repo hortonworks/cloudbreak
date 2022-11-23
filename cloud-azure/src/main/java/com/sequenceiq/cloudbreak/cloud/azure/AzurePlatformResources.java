@@ -244,23 +244,23 @@ public class AzurePlatformResources implements PlatformResources {
         VmType defaultVmType = null;
         Set<String> vmTypesWithoutResourceDisks = new HashSet<>();
         for (VirtualMachineSize virtualMachineSize : vmTypes) {
+            float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
+            VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder().withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
+            for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
+                if (volumeParameterType.in(MAGNETIC, SSD)) {
+                    volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount(), maxDiskSize);
+                }
+            }
             if (virtualMachineSize.resourceDiskSizeInMB() != NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE) {
-                float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
-                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder().withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
-
-                for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
-                    if (volumeParameterType.in(MAGNETIC, SSD)) {
-                        volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount(), maxDiskSize);
-                    }
-                }
-
-                VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
-                types.add(vmType);
-                if (virtualMachineSize.name().equals(armVmDefault)) {
-                    defaultVmType = vmType;
-                }
+                builder.withResourceDiskAttached(true);
             } else {
-                vmTypesWithoutResourceDisks.add(virtualMachineSize.name());
+                builder.withResourceDiskAttached(false);
+            }
+
+            VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
+            types.add(vmType);
+            if (virtualMachineSize.name().equals(armVmDefault)) {
+                defaultVmType = vmType;
             }
         }
         LOGGER.debug("The following Azure VM types have been filtered out, because there is no resource disk available with them: {}",

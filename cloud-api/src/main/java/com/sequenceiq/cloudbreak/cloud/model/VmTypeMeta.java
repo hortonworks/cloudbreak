@@ -9,6 +9,8 @@ public class VmTypeMeta {
 
     public static final String MEMORY = "Memory";
 
+    public static final String RESOURCE_DISK_ATTACHED = "ResourceDiskAttached";
+
     public static final String MAXIMUM_PERSISTENT_DISKS_SIZE_GB = "maximumPersistentDisksSizeGb";
 
     public static final String PRICE = "Price";
@@ -79,6 +81,11 @@ public class VmTypeMeta {
     public Float getMemoryInGb() {
         Object memoryAsObject = properties.get(MEMORY);
         return memoryAsObject != null ? Float.valueOf(memoryAsObject.toString()) : null;
+    }
+
+    public Boolean getResourceDiskAttached() {
+        Object resourceDiskAttached = properties.get(RESOURCE_DISK_ATTACHED);
+        return resourceDiskAttached != null ? Boolean.valueOf(resourceDiskAttached.toString()) : Boolean.TRUE;
     }
 
     public void setProperties(Map<String, Object> properties) {
@@ -197,6 +204,11 @@ public class VmTypeMeta {
 
         public VmTypeMetaBuilder withPrice(Double price) {
             properties.put(PRICE, price.toString());
+            return this;
+        }
+
+        public VmTypeMetaBuilder withResourceDiskAttached(Boolean resourceDiskAttached) {
+            properties.put(RESOURCE_DISK_ATTACHED, resourceDiskAttached);
             return this;
         }
 
