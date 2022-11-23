@@ -8,6 +8,7 @@ import com.sequenceiq.redbeams.flow.redbeams.common.FillInMemoryStateStoreRestar
 public enum RedbeamsStartState implements FlowState {
     INIT_STATE,
     REDBEAMS_START_FAILED_STATE,
+    CERT_ROTATE_STATE,
     START_DATABASE_SERVER_STATE,
     REDBEAMS_START_FINISHED_STATE,
     FINAL_STATE;

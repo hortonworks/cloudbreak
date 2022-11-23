@@ -21,7 +21,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent;
-import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerSuccess;
+import com.sequenceiq.redbeams.flow.redbeams.start.event.CertRotateInRedbeamsSuccess;
 import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
@@ -60,7 +60,7 @@ public class StartDatabaseServerFinishedActionTest {
         Optional<DBStack> dbStackOptional = Optional.of(dbStack);
         when(dbStackStatusUpdater.updateStatus(RESOURCE_ID, DetailedDBStackStatus.STARTED)).thenReturn(dbStackOptional);
 
-        StartDatabaseServerSuccess event = new StartDatabaseServerSuccess(RESOURCE_ID);
+        CertRotateInRedbeamsSuccess event = new CertRotateInRedbeamsSuccess(RESOURCE_ID);
 
         victim.prepareExecution(event, null);
 
