@@ -12,6 +12,12 @@ public class ImageTestUtil {
 
     public static final String PLATFORM = "AZURE";
 
+    public static final String INVALID_PLATFORM = "AAAZURE";
+
+    public static final String REGION = "West US 2";
+
+    public static final String DEFAULT_REGION = "default";
+
     private ImageTestUtil() {
     }
 
