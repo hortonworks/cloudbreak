@@ -97,12 +97,13 @@ public class AltusMachineUserService {
     }
 
     public Optional<AltusCredential> generateMonitoringMachineUser(StackView stack, Telemetry telemetry, CdpAccessKeyType cdpAccessKeyType) {
-        if (isAnyMonitoringFeatureSupported(telemetry)) {
+        String accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
+        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> altusIAMService.generateMonitoringMachineUserWithAccessKey(new MachineUserRequest()
                                     .setName(getMonitoringMachineUserName(stack))
-                                    .setAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId())
+                                    .setAccountId(accountId)
                                     .setActorCrn(ThreadBasedUserCrnProvider.getUserCrn())
                                     .setCdpAccessKeyType(cdpAccessKeyType),
                             telemetry.isUseSharedAltusCredentialEnabled()));
@@ -124,14 +125,15 @@ public class AltusMachineUserService {
     }
 
     public void clearMonitoringMachineUser(StackView stack, ClusterView cluster, Telemetry telemetry) {
-        if (isAnyMonitoringFeatureSupported(telemetry) || isMonitoringCredentialAvailable(cluster)) {
+        String accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
+        if (entitlementService.isComputeMonitoringEnabled(accountId) || isMonitoringCredentialAvailable(cluster)) {
             String machineUserName = getMonitoringMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> altusIAMService.clearMachineUser(
                             machineUserName,
                             ThreadBasedUserCrnProvider.getUserCrn(),
-                            Crn.fromString(stack.getResourceCrn()).getAccountId()));
+                            accountId));
         }
     }
 
