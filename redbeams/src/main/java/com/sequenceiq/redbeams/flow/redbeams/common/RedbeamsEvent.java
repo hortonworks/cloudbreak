@@ -72,7 +72,7 @@ public class RedbeamsEvent implements IdempotentEvent<RedbeamsEvent> {
     }
 
     public String toString() {
-        return selector;
+        return selector();
     }
 
     @Override
