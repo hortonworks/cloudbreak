@@ -1,17 +1,21 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage.MARKETPLACE_REGION;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +44,11 @@ class AzureImageFilterTest {
 
     private static final String INVALID_MARKETPLACE_IMAGE_NAME = "cloudera:cdp-7_2:runtime-7_2:1.0.2103081333:latest";
 
-    private static final String AN_AZURE_REGION = "West US 2";
+    private static final String AN_AZURE_REGION = "West US";
+
+    private static final String ANOTHER_AZURE_REGION = "West US 2";
+
+    private static final String THIRD_AZURE_REGION = "West US 3";
 
     private static final String AN_AZURE_IMAGE_NAME = "https://cldrwestus2.blob.core.windows.net/images/cb-cdh-7215-100000000.vhd";
 
@@ -74,11 +82,15 @@ class AzureImageFilterTest {
 
         List<Image> filteredImages = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.filterImages(imageList));
         Set<String> filteredImageUuids = filteredImages.stream().map(Image::getUuid).collect(Collectors.toSet());
-        Assertions.assertTrue(filteredImageUuids.contains("1"));
-        Assertions.assertTrue(filteredImageUuids.contains("2"));
-        Assertions.assertTrue(filteredImageUuids.contains("3"));
-        Assertions.assertFalse(filteredImageUuids.contains("4"));
-        Assertions.assertFalse(filteredImageUuids.contains("5"));
+        Set<String> regionSet = getRegionSet(filteredImages);
+        assertEquals(1, regionSet.size());
+        assertEquals("default", regionSet.stream().findFirst().get());
+
+        assertTrue(filteredImageUuids.contains("1"));
+        assertTrue(filteredImageUuids.contains("2"));
+        assertTrue(filteredImageUuids.contains("3"));
+        assertFalse(filteredImageUuids.contains("4"));
+        assertFalse(filteredImageUuids.contains("5"));
     }
 
     @Test
@@ -88,11 +100,24 @@ class AzureImageFilterTest {
 
         List<Image> filteredImages = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.filterImages(imageList));
         Set<String> filteredImageUuids = filteredImages.stream().map(Image::getUuid).collect(Collectors.toSet());
-        Assertions.assertTrue(filteredImageUuids.contains("1"));
-        Assertions.assertTrue(filteredImageUuids.contains("2"));
-        Assertions.assertTrue(filteredImageUuids.contains("3"));
-        Assertions.assertTrue(filteredImageUuids.contains("4"));
-        Assertions.assertTrue(filteredImageUuids.contains("5"));
+        Set<String> regionSet = getRegionSet(filteredImages);
+
+        assertEquals(4, regionSet.size());
+        assertTrue(regionSet.containsAll(List.of(AN_AZURE_REGION, ANOTHER_AZURE_REGION, THIRD_AZURE_REGION, MARKETPLACE_REGION)));
+        assertTrue(filteredImageUuids.contains("1"));
+        assertTrue(filteredImageUuids.contains("2"));
+        assertTrue(filteredImageUuids.contains("3"));
+        assertTrue(filteredImageUuids.contains("4"));
+        assertTrue(filteredImageUuids.contains("5"));
+    }
+
+    private Set<String> getRegionSet(List<Image> filteredImages) {
+        return filteredImages.stream().map(Image::getImageSetsByProvider)
+                .map(i -> i.get(CloudConstants.AZURE.toLowerCase()))
+                .filter(Objects::nonNull)
+                .map(Map::keySet)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
     private Image getMarketplaceImage() {
@@ -110,6 +135,8 @@ class AzureImageFilterTest {
         Map<String, String> regionImageIdMap = new HashMap<>();
         regionImageIdMap.put(MARKETPLACE_REGION, VALID_MARKETPLACE_IMAGE_NAME);
         regionImageIdMap.put(AN_AZURE_REGION, AN_AZURE_REGION);
+        regionImageIdMap.put(ANOTHER_AZURE_REGION, ANOTHER_AZURE_REGION);
+        regionImageIdMap.put(THIRD_AZURE_REGION, THIRD_AZURE_REGION);
         imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(), regionImageIdMap);
 
         regionImageIdMap = new HashMap<>();

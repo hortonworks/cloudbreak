@@ -163,16 +163,20 @@ public class ImageService {
         Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(platformString, imgFromCatalog.getImageSetsByProvider());
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
-            return findStringKeyWithEqualsIgnoreCase(region, imagesByRegion)
-                    .or(() -> findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion))
-                    .orElseThrow(() -> new ImageNotFoundException(
-                            String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                                    imgFromCatalog, platformString, region)));
+            return selectImageByRegion(platformString, region, imgFromCatalog, imagesByRegion);
         } else {
             String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
                     imgFromCatalog, platformString);
             throw new ImageNotFoundException(msg);
         }
+    }
+
+    private String selectImageByRegion(String platformString, String region, Image imgFromCatalog, Map<String, String> imagesByRegion) {
+        return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
+                .or(() -> findStringKeyWithEqualsIgnoreCase(region, imagesByRegion))
+                .orElseThrow(() -> new ImageNotFoundException(
+                        String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
+                                imgFromCatalog, platformString, region)));
     }
 
     private <T> Optional<T> findStringKeyWithEqualsIgnoreCase(String key, Map<String, T> map) {

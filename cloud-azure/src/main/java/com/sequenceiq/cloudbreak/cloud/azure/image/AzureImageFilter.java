@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarke
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -37,6 +38,7 @@ public class AzureImageFilter implements ImageFilter {
             List<Image> filteredImageList = imageList.stream()
                     .filter(image -> image.getImageSetsByProvider().containsKey(AZURE.name().toLowerCase()))
                     .filter(this::checkIfMarketplaceImage)
+                    .map(this::removeNonMarketplaceRegions)
                     .collect(Collectors.toList());
             LOGGER.debug("After filtering, the following image ids remained available for selection: {}", getImageIds(filteredImageList));
             return filteredImageList;
@@ -60,5 +62,14 @@ public class AzureImageFilter implements ImageFilter {
                 .map(azureMarketplaceImageProviderService::hasMarketplaceFormat)
                 .findFirst()
                 .orElse(false);
+    }
+
+    private Image removeNonMarketplaceRegions(Image image) {
+        Map<String, Map<String, String>> filteredMap = image.getImageSetsByProvider().entrySet()
+                .stream()
+                .filter(i -> i.getValue().containsKey(MARKETPLACE_REGION))
+                .collect(Collectors.toMap(Map.Entry::getKey, i -> Map.of(MARKETPLACE_REGION, i.getValue().get(MARKETPLACE_REGION))));
+
+        return new Image(image, filteredMap);
     }
 }

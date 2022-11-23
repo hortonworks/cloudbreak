@@ -222,20 +222,19 @@ public class ImageService {
         String translatedRegion = cloudPlatformConnectors.getDefault(platform(cloudPlatform.toUpperCase())).regionToDisplayName(region);
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
-            Optional<String> imageNameOpt = findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion);
-            if (imageNameOpt.isEmpty()) {
-                imageNameOpt = findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion);
-            }
-            if (imageNameOpt.isPresent()) {
-                return imageNameOpt.get();
-            }
-            String msg = String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                    imgFromCatalog, platformString, translatedRegion);
-            throw new CloudbreakImageNotFoundException(msg);
+            return selectImageByRegion(translatedRegion, imagesByRegion, platformString.nameToLowerCase());
         }
         String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
                 imgFromCatalog, platformString);
         throw new CloudbreakImageNotFoundException(msg);
+    }
+
+    private String selectImageByRegion(String translatedRegion, Map<String, String> imagesByRegion, String platform) throws CloudbreakImageNotFoundException {
+            return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
+                    .or(() -> findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion))
+                    .orElseThrow(() -> new CloudbreakImageNotFoundException(
+                            String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
+                                    imagesByRegion, platform, translatedRegion)));
     }
 
     private <T> Optional<T> findStringKeyWithEqualsIgnoreCase(String key, Map<String, T> map) {
