@@ -1,10 +1,9 @@
 # Flow
 
 Cloudbreak Flow engine is responsible for manage the different execution flows of Cloudbreak's microservices using the Spring StateMachine project and
-Reactor events.
+async event handling.
 
 * Spring StateMachine: https://projects.spring.io/spring-statemachine/ Version: 1.0.1.RELEASE
-* Project Reactor: https://projectreactor.io/docs Version: 2.0.7.RELEASE
 
 If you would like to use the Flow engine in your application, you must implement the following interfaces:
 - [`ApplicationFlowInformation`](flow/src/main/java/com/sequenceiq/flow/core/ApplicationFlowInformation.java)
