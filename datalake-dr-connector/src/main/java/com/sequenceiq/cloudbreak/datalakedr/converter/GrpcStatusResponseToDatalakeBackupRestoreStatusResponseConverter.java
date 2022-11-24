@@ -20,6 +20,7 @@ import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatala
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 
 @Component
@@ -29,36 +30,58 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter {
 
     static final String VALIDATION_FAILED_STATE = "VALIDATION_FAILED";
 
+    static final String SUCCESSFUL_STATUS = "SUCCESSFUL";
+
     private static final Set<String> FAILED_STATES = Set.of(FAILED_STATE, VALIDATION_FAILED_STATE);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.class);
 
     public DatalakeBackupStatusResponse convert(BackupDatalakeResponse response) {
         return new DatalakeBackupStatusResponse(response.getBackupId(),
-                DatalakeBackupStatusResponse.State.valueOf(response.getOverallState()),
-                Optional.ofNullable(parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()))
-        );
+                DatalakeOperationStatus.State.valueOf(response.getOverallState()),
+                List.of(), "", parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()));
     }
 
     public DatalakeRestoreStatusResponse convert(RestoreDatalakeResponse response) {
         return new DatalakeRestoreStatusResponse(response.getBackupId(), response.getRestoreId(),
                 DatalakeRestoreStatusResponse.State.valueOf(response.getOverallState()),
-                Optional.ofNullable(parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()))
+                parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason())
         );
     }
 
     public DatalakeBackupStatusResponse convert(BackupDatalakeStatusResponse response) {
+        List<String> contents = new LinkedList<>();
+        InternalBackupRestoreState operationStates = response.getOperationStates();
+        SolrBackupRestoreState solrState = operationStates.getSolr();
+        HbaseBackupRestoreState hbaseState = operationStates.getHbase();
+
+        if (solrState.getRangerAuditsCollection().getStatus().equals(SUCCESSFUL_STATUS)) {
+            contents.add("RANGER_AUDITS");
+        }
+        if (operationStates.getDatabase().getDatabase().getStatus().equals(SUCCESSFUL_STATUS)) {
+            contents.add("RANGER_PERMISSIONS");
+            contents.add("HMS_METADATA");
+        }
+        if (hbaseState.getAtlasEntityAuditEventTable().getStatus().equals(SUCCESSFUL_STATUS)
+                && hbaseState.getAtlasJanusTable().getStatus().equals(SUCCESSFUL_STATUS)) {
+            contents.add("ATLAS_METADATA");
+        }
+        if (solrState.getFulltextIndexCollection().getStatus().equals(SUCCESSFUL_STATUS)
+                && solrState.getVertexIndexCollection().getStatus().equals(SUCCESSFUL_STATUS)
+                && solrState.getEdgeIndexCollection().getStatus().equals(SUCCESSFUL_STATUS)) {
+            contents.add("ATLAS_INDEXES");
+        }
         return new DatalakeBackupStatusResponse(response.getBackupId(),
-            DatalakeBackupStatusResponse.State.valueOf(response.getOverallState()),
-            Optional.ofNullable(parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()))
-        );
+                DatalakeOperationStatus.State.valueOf(response.getOverallState()),
+                contents,
+                response.getStartTimestamp(),
+                parseFailuresFromOperationsStates(operationStates, response.getFailureReason()));
     }
 
     public DatalakeRestoreStatusResponse convert(RestoreDatalakeStatusResponse response) {
         return new DatalakeRestoreStatusResponse(response.getBackupId(), response.getRestoreId(),
-                DatalakeRestoreStatusResponse.State.valueOf(response.getOverallState()),
-            Optional.ofNullable(parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()))
-        );
+                DatalakeOperationStatus.State.valueOf(response.getOverallState()),
+                parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()));
     }
 
     private String parseFailuresFromOperationsStates(InternalBackupRestoreState operationStates, String legacyFailureReason) {

@@ -195,6 +195,11 @@ public class ModelDescriptions {
 
     public static final String TARGET_MAJOR_VERSION = "The database major version to upgrade to";
 
+    public static final String BACKUP_INCLUDED_DATA =
+            "Data included in the backup (RANGER_PERMISSIONS, HMS_METADATA, RANGER_AUDITS, ATLAS_METADATA, ATLAS_INDEXES)";
+
+    public static final String BACKUP_TIMESTAMP = "When backup was made (start of the backup procedure)";
+
     private ModelDescriptions() {
     }
 }

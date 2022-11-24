@@ -1,5 +1,7 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -20,13 +22,18 @@ public class SdxBackupStatusResponse {
     @ApiModelProperty(ModelDescriptions.OPERATION_STATUS_REASON)
     private String reason;
 
-    public SdxBackupStatusResponse() {
-    }
+    @ApiModelProperty(ModelDescriptions.BACKUP_INCLUDED_DATA)
+    private List<String> includedData;
 
-    public SdxBackupStatusResponse(String operationId, String status, String reason) {
+    @ApiModelProperty(ModelDescriptions.BACKUP_TIMESTAMP)
+    private String timestamp;
+
+    public SdxBackupStatusResponse(String operationId, String status, String reason, List<String> includedData, String timestamp) {
         this.operationId = operationId;
         this.status = status;
         this.reason = reason;
+        this.includedData = includedData;
+        this.timestamp = timestamp;
     }
 
     public String getOperationId() {
@@ -43,6 +50,14 @@ public class SdxBackupStatusResponse {
 
     public void setOperationId(String operationId) {
         this.operationId = operationId;
+    }
+
+    public List<String> getIncludedData() {
+        return includedData;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
     }
 
     @Override
