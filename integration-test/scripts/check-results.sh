@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #please don't add this property to Jenkins
-#this value changed 2022.08.24 from 4.2 to 4.5
-: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="4.5GB"}
+#this value changed 2022.11.24 from 4.5 to 4.6 (new test was added: DistroXUpgradeTests.testDistroXOsUpgradeByUpgradeSets)
+: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="4.6GB"}
 
 status_code=0
 
