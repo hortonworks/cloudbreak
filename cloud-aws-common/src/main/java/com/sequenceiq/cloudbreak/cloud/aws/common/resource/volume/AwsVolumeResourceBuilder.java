@@ -299,9 +299,9 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     @Override
-    public CloudResource update(AwsContext context, CloudResource cloudResource, CloudInstance instance,
-            AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
-        return null;
+    public List<CloudResource> update(AwsContext context, CloudInstance instance, long privateId,
+            AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
+        return List.of();
     }
 
     private Long getEphemeralCount(Group group) {

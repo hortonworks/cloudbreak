@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 
 public abstract class AbstractGcpComputeBuilder extends AbstractGcpResourceBuilder implements ComputeResourceBuilder<GcpContext> {
@@ -34,8 +35,8 @@ public abstract class AbstractGcpComputeBuilder extends AbstractGcpResourceBuild
     }
 
     @Override
-    public CloudResource update(GcpContext context, CloudResource cloudResource, CloudInstance instance,
-            AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
-        return null;
+    public List<CloudResource> update(GcpContext context, CloudInstance instance, long privateId,
+            AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
+        return List.of();
     }
 }

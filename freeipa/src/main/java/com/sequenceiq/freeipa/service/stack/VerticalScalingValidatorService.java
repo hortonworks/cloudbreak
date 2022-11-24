@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -72,7 +71,6 @@ public class VerticalScalingValidatorService {
         String requestedInstanceType = verticalScaleV4Request.getTemplate().getInstanceType();
         if (instanceGroupOptional.isPresent()) {
             String availabilityZone = stack.getAvailabilityZone();
-            String region = stack.getRegion();
             String currentInstanceType = instanceGroupOptional.get().getTemplate().getInstanceType();
             Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
             ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
@@ -83,8 +81,8 @@ public class VerticalScalingValidatorService {
                     CdpResourceType.DEFAULT,
                     Maps.newHashMap());
             verticalScaleInstanceProvider.validInstanceTypeForVerticalScaling(
-                    getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
-                    getInstance(region, availabilityZone, requestedInstanceType, allVmTypes)
+                    getInstance(availabilityZone, currentInstanceType, allVmTypes),
+                    getInstance(availabilityZone, requestedInstanceType, allVmTypes)
             );
         } else {
             throw new BadRequestException(String.format("Define a group which exists in FreeIpa. It can be [%s].",
@@ -96,15 +94,11 @@ public class VerticalScalingValidatorService {
         }
     }
 
-    private Optional<VmType> getInstance(String region, String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
-        return allVmTypes.getCloudVmResponses().get(getZone(region, availabilityZone))
+    private Optional<VmType> getInstance(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
+        return allVmTypes.getCloudVmResponses().get(availabilityZone)
                 .stream()
                 .filter(e -> e.getValue().equals(currentInstanceType))
                 .findFirst();
-    }
-
-    private String getZone(String region, String availabilityZone) {
-        return Strings.isNullOrEmpty(availabilityZone) ? region : availabilityZone;
     }
 
     private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(VerticalScaleRequest verticalScaleV4Request) {

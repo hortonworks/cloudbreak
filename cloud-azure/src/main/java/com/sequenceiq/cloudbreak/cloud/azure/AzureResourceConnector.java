@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSi
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureUpscaleService;
-import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureVerticalScaleService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -74,9 +73,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
     @Inject
     private AzureUpscaleService azureUpscaleService;
-
-    @Inject
-    private AzureVerticalScaleService azureVerticalScaleService;
 
     @Inject
     private AzureStackViewProvider azureStackViewProvider;
@@ -314,12 +310,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources)
-            throws QuotaExceededException {
-        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-        AzureStackView azureStackView = azureStackViewProvider
-                .getAzureStack(new AzureCredentialView(authenticatedContext.getCloudCredential()), stack, client, authenticatedContext);
-        return azureVerticalScaleService.verticalScale(authenticatedContext, stack, resources, azureStackView, client);
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
+        return new ArrayList<>();
     }
 
     @Override
