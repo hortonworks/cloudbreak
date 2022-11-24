@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
@@ -47,6 +50,9 @@ public class ImageService {
 
     @Inject
     private ImageRevisionReaderService imageRevisionReaderService;
+
+    @Inject
+    private Clock clock;
 
     @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
@@ -226,5 +232,12 @@ public class ImageService {
                 source.getPackageVersions(),
                 true
         );
+    }
+
+    public List<ImageEntity> getImagesOfAliveStacks(Integer thresholdInDays) {
+        final LocalDateTime thresholdDate = clock.getCurrentLocalDateTime()
+                .minusDays(Optional.ofNullable(thresholdInDays).orElse(0));
+        final long thresholdTimestamp = Timestamp.valueOf(thresholdDate).getTime();
+        return imageRepository.findImagesOfAliveStacks(thresholdTimestamp);
     }
 }

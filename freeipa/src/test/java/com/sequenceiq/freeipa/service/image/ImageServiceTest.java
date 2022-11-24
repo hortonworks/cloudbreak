@@ -8,6 +8,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
@@ -56,6 +59,8 @@ public class ImageServiceTest {
 
     private static final String IMAGE_UUID = "UUID";
 
+    private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
+
     @Mock
     private ImageProviderFactory imageProviderFactory;
 
@@ -67,6 +72,9 @@ public class ImageServiceTest {
 
     @Mock
     private ImageRevisionReaderService imageRevisionReaderService;
+
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private ImageService underTest;
@@ -221,5 +229,25 @@ public class ImageServiceTest {
         assertThat(result.getImages().getFreeipaImages())
                 .containsExactly(image);
         assertThat(result.getVersions()).isNull();
+    }
+
+    @Test
+    void getImagesOfAliveStacksWithNoThresholdShouldCallRepositoryWithCurrentTimestamp() {
+        when(clock.getCurrentLocalDateTime()).thenReturn(MOCK_NOW);
+
+        underTest.getImagesOfAliveStacks(null);
+
+        verify(imageRepository).findImagesOfAliveStacks(Timestamp.valueOf(MOCK_NOW).getTime());
+    }
+
+    @Test
+    void getImagesOfAliveStacksWithThresholdShouldCallRepositoryWithModifiedTimestamp() {
+        final int thresholdInDays = 180;
+        final LocalDateTime thresholdTime = MOCK_NOW.minusDays(thresholdInDays);
+        when(clock.getCurrentLocalDateTime()).thenReturn(MOCK_NOW);
+
+        underTest.getImagesOfAliveStacks(thresholdInDays);
+
+        verify(imageRepository).findImagesOfAliveStacks(Timestamp.valueOf(thresholdTime).getTime());
     }
 }
