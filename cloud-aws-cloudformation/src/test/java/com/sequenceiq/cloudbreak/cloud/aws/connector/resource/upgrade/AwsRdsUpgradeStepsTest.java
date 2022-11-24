@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsParameterGroupService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeOperations;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsEngineVersion;
@@ -31,8 +32,11 @@ import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsInstanceStatusesToRdsStateConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsState;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.database.Version;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,6 +74,9 @@ public class AwsRdsUpgradeStepsTest {
     @Mock
     private DatabaseServer databaseServer;
 
+    @Mock
+    private AwsRdsParameterGroupService awsRdsParameterGroupService;
+
     private final Version targetMajorVersion = () -> "majorVersion";
 
     @Test
@@ -104,9 +111,15 @@ public class AwsRdsUpgradeStepsTest {
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
         when(databaseServer.isUseSslEnforcement()).thenReturn(true);
         when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
-        when(awsRdsUpgradeOperations.createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion)).thenReturn(DB_PARAMETER_GROUP_NAME);
+        when(awsRdsParameterGroupService.createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion)).thenReturn(DB_PARAMETER_GROUP_NAME);
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        Location location = mock(Location.class);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(location.getAvailabilityZone()).thenReturn(AvailabilityZone.availabilityZone("az"));
 
-        underTest.upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
+        underTest.upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
 
         verify(awsRdsUpgradeOperations).upgradeRds(rdsClient, targetVersion, DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME);
     }
@@ -119,9 +132,9 @@ public class AwsRdsUpgradeStepsTest {
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
         when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
 
-        underTest.upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
+        underTest.upgradeRds(null, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
 
-        verify(awsRdsUpgradeOperations, never()).createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion);
+        verify(awsRdsParameterGroupService, never()).createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion);
         verify(awsRdsUpgradeOperations).upgradeRds(rdsClient, targetVersion, DB_INSTANCE_IDENTIFIER, null);
     }
 
@@ -132,10 +145,10 @@ public class AwsRdsUpgradeStepsTest {
         when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenThrow(CloudConnectorException.class);
 
         Assertions.assertThrows(CloudConnectorException.class, () ->
-                underTest.upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion)
+                underTest.upgradeRds(null, rdsClient, databaseServer, rdsInfo, targetMajorVersion)
         );
 
-        verify(awsRdsUpgradeOperations, never()).createParameterGroupWithCustomSettings(any(), any(), any());
+        verify(awsRdsParameterGroupService, never()).createParameterGroupWithCustomSettings(any(), any(), any());
         verify(awsRdsUpgradeOperations, never()).upgradeRds(any(), any(), anyString(), any());
     }
 
@@ -146,10 +159,10 @@ public class AwsRdsUpgradeStepsTest {
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, currentVersion);
         when(databaseServer.isUseSslEnforcement()).thenReturn(true);
         when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
-        when(awsRdsUpgradeOperations.createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion)).thenThrow(RuntimeException.class);
+        when(awsRdsParameterGroupService.createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion)).thenThrow(RuntimeException.class);
 
         Assertions.assertThrows(RuntimeException.class, () ->
-                underTest.upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion)
+                underTest.upgradeRds(null, rdsClient, databaseServer, rdsInfo, targetMajorVersion)
         );
 
         verify(awsRdsUpgradeOperations, never()).upgradeRds(any(), any(), anyString(), any());
