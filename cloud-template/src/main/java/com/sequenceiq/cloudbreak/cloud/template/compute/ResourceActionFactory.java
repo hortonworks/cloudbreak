@@ -43,7 +43,9 @@ public class ResourceActionFactory {
     public ResourceUpdateCallable buildUpdateCallable(ResourceUpdateCallablePayload payload) {
         return new ResourceUpdateCallable(
                 payload,
+                resourceBuilders,
                 syncPollingScheduler,
-                resourcePollTaskFactory);
+                resourcePollTaskFactory,
+                persistenceNotifier);
     }
 }

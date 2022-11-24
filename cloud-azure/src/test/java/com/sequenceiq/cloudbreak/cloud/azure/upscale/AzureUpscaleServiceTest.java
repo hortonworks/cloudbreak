@@ -4,10 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -51,7 +49,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -107,9 +104,6 @@ public class AzureUpscaleServiceTest {
     @Mock
     private AzureCloudResourceService azureCloudResourceService;
 
-    @Mock
-    private AzureScaleUtilService azureScaleUtilService;
-
     @BeforeEach
     public void before() {
         when(azureUtils.getStackName(any(CloudContext.class))).thenReturn(STACK_NAME);
@@ -133,9 +127,8 @@ public class AzureUpscaleServiceTest {
         List<CloudResource> newInstances = List.of(newInstance);
         when(azureCloudResourceService.getDeploymentCloudResources(templateDeployment)).thenReturn(newInstances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
+
         when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
-        when(azureScaleUtilService.getArmTemplate(anyList(), anyString())).thenReturn(template);
-        when(azureScaleUtilService.azureCloudResourceService()).thenReturn(azureCloudResourceService);
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
         List<CloudResourceStatus> actual = underTest.upscale(ac, stack, resources, azureStackView, client,
@@ -157,7 +150,7 @@ public class AzureUpscaleServiceTest {
     }
 
     @Test
-    public void testUpscaleButQuotaIssueHappen() throws QuotaExceededException {
+    public void testUpscaleButQuotaIssueHappen() {
         CloudContext cloudContext = createCloudContext();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
@@ -179,9 +172,8 @@ public class AzureUpscaleServiceTest {
                 "azure-supportability/per-vm-quota-requests");
         cloudError.details().add(quotaError);
         CloudException cloudException = new CloudException("", null, cloudError);
-        when(azureScaleUtilService.getArmTemplate(anyList(), anyString())).thenThrow(cloudException);
-        doThrow(new QuotaExceededException(200, 24, 600, "QuotaExceeded", new BadRequestException("")))
-                .when(azureScaleUtilService).checkIfQuotaLimitIssued(cloudException);
+        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
+                .thenThrow(cloudException);
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
         QuotaExceededException quotaExceededException = assertThrows(QuotaExceededException.class, () -> {
@@ -205,7 +197,6 @@ public class AzureUpscaleServiceTest {
         List<CloudResource> resources = List.of(detachedVolumeSet, alreadyCreatedVolumeSet, notReattachableVolumeSet, template);
         List<Group> scaledGroups = createScaledGroups();
 
-        when(azureScaleUtilService.azureCloudResourceService()).thenReturn(azureCloudResourceService);
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
         when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
                 .thenReturn(templateDeployment);

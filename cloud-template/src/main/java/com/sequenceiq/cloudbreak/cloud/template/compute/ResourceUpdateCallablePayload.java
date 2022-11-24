@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
 public class ResourceUpdateCallablePayload {
 
-    private final CloudResource resource;
+    private final List<CloudInstance> instances;
 
-    private final CloudInstance cloudInstance;
+    private final Group group;
 
     private final ResourceBuilderContext context;
 
@@ -19,20 +20,21 @@ public class ResourceUpdateCallablePayload {
 
     private final CloudStack cloudStack;
 
-    private final ComputeResourceBuilder<ResourceBuilderContext> builder;
-
-    public ResourceUpdateCallablePayload(CloudResource resource, CloudInstance cloudInstance, ResourceBuilderContext context,
-        AuthenticatedContext auth, CloudStack cloudStack, ComputeResourceBuilder<ResourceBuilderContext> builder) {
-        this.resource = resource;
-        this.cloudInstance = cloudInstance;
+    public ResourceUpdateCallablePayload(List<CloudInstance> instances, Group group,
+        ResourceBuilderContext context, AuthenticatedContext auth, CloudStack cloudStack) {
+        this.instances = instances;
+        this.group = group;
         this.context = context;
         this.auth = auth;
         this.cloudStack = cloudStack;
-        this.builder = builder;
     }
 
-    public CloudResource getCloudResource() {
-        return resource;
+    public List<CloudInstance> getInstances() {
+        return instances;
+    }
+
+    public Group getGroup() {
+        return group;
     }
 
     public ResourceBuilderContext getContext() {
@@ -47,11 +49,4 @@ public class ResourceUpdateCallablePayload {
         return cloudStack;
     }
 
-    public CloudInstance getCloudInstance() {
-        return cloudInstance;
-    }
-
-    public ComputeResourceBuilder<ResourceBuilderContext> getBuilder() {
-        return builder;
-    }
 }
