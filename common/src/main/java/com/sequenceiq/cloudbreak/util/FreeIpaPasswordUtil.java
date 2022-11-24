@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.RandomStringUtils;
-
 public class FreeIpaPasswordUtil {
 
     private static final int PWD_PREFIX_LENGTH = 3;
@@ -18,10 +16,10 @@ public class FreeIpaPasswordUtil {
     }
 
     public static String generatePassword() {
-        String upperCaseLetters = RandomStringUtils.randomAlphabetic(PWD_PART_LENGTH).toUpperCase();
-        String lowerCaseLetters = RandomStringUtils.randomAlphabetic(PWD_PART_LENGTH).toLowerCase();
-        String pwdPrefix = RandomStringUtils.randomAlphabetic(PWD_PREFIX_LENGTH);
-        String numbers = RandomStringUtils.randomNumeric(PWD_PART_LENGTH);
+        String upperCaseLetters = PasswordUtil.getRandomAlphabetic(PWD_PART_LENGTH).toUpperCase();
+        String lowerCaseLetters = PasswordUtil.getRandomAlphabetic(PWD_PART_LENGTH).toLowerCase();
+        String pwdPrefix = PasswordUtil.getRandomAlphabetic(PWD_PREFIX_LENGTH);
+        String numbers = PasswordUtil.getRandomNumeric(PWD_PART_LENGTH);
         String raw = upperCaseLetters.concat(lowerCaseLetters).concat(numbers).concat(SPECIAL_CHARS);
         List<String> list = Arrays.asList(raw.split(""));
         Collections.shuffle(list);
