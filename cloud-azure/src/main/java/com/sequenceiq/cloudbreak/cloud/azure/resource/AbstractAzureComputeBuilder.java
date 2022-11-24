@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 
 public abstract class AbstractAzureComputeBuilder extends AbstractAzureResourceBuilder implements ComputeResourceBuilder<AzureContext> {
@@ -34,8 +33,8 @@ public abstract class AbstractAzureComputeBuilder extends AbstractAzureResourceB
     }
 
     @Override
-    public List<CloudResource> update(AzureContext context, CloudInstance instance, long privateId,
-            AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
-        return List.of();
+    public CloudResource update(AzureContext context, CloudResource cloudResource, CloudInstance instance,
+            AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+        return null;
     }
 }
