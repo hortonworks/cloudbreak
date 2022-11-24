@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.datalakedr;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.converter.DatalakeDataInfoJsonToObjectConverter;
 import com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
@@ -217,9 +219,9 @@ public class DatalakeDrClient {
         );
     }
 
-    public DatalakeBackupStatusResponse getRestoreStatusByRestoreId(String datalakeName, String restoreId, String actorCrn) {
+    public DatalakeRestoreStatusResponse getRestoreStatusByRestoreId(String datalakeName, String restoreId, String actorCrn) {
         if (!datalakeDrConfig.isConfigured()) {
-            return missingConnectorResponseOnBackup();
+            return missingConnectorResponseOnRestore();
         }
 
         checkNotNull(datalakeName);
@@ -355,15 +357,14 @@ public class DatalakeDrClient {
 
     private DatalakeBackupStatusResponse missingConnectorResponseOnBackup() {
         return new DatalakeBackupStatusResponse(UUID.randomUUID().toString(),
-                DatalakeBackupStatusResponse.State.FAILED,
-                Optional.of(NO_CONNECTOR_ERROR)
+                DatalakeOperationStatus.State.FAILED,
+                List.of(), "", NO_CONNECTOR_ERROR
         );
     }
 
     private DatalakeRestoreStatusResponse missingConnectorResponseOnRestore() {
         return new DatalakeRestoreStatusResponse(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                DatalakeBackupStatusResponse.State.FAILED,
-                Optional.of(NO_CONNECTOR_ERROR)
-        );
+                DatalakeOperationStatus.State.FAILED,
+                NO_CONNECTOR_ERROR);
     }
 }

@@ -103,10 +103,10 @@ public class DatalakeBackupActions {
                 variables.put(BACKUP_ID, backupStatusResponse.getBackupId());
                 variables.put(OPERATION_ID, backupStatusResponse.getBackupId());
                 payload.getDrStatus().setOperationId(backupStatusResponse.getBackupId());
-                if (!backupStatusResponse.isFailed()) {
-                    sendEvent(context, DatalakeDatabaseBackupStartEvent.from(payload, backupStatusResponse.getBackupId()));
-                } else {
+                if (backupStatusResponse.getState().isFailed()) {
                     sendEvent(context, DATALAKE_BACKUP_FAILED_EVENT.event(), payload);
+                } else {
+                    sendEvent(context, DatalakeDatabaseBackupStartEvent.from(payload, backupStatusResponse.getBackupId()));
                 }
             }
 

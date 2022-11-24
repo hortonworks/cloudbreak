@@ -1,40 +1,27 @@
 package com.sequenceiq.cloudbreak.datalakedr.model;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
-public class DatalakeBackupStatusResponse {
-
-    public static final String NO_FAILURES = "No failure messages found";
-
-    public enum State {
-        STARTED,
-        IN_PROGRESS,
-        SUCCESSFUL,
-        VALIDATION_SUCCESSFUL,
-        VALIDATION_FAILED,
-        FAILED,
-        CANCELLED
-    }
+public class DatalakeBackupStatusResponse implements DatalakeOperationStatus {
 
     private final State state;
 
     private final String backupId;
 
+    private final List<String> includedData;
+
+    private final String timestamp;
+
     private final Optional<String> failureReason;
 
-    public DatalakeBackupStatusResponse(String backupId, State state, Optional<String> failureReason) {
+    public DatalakeBackupStatusResponse(String backupId, State state, List<String> includedData, String timestamp, String failureReason) {
         this.backupId = backupId;
         this.state = state;
-        this.failureReason = failureReason.isPresent() && "null".equals(failureReason.get())
-            ? Optional.empty() : failureReason;
-    }
-
-    public boolean isComplete() {
-        return state != State.IN_PROGRESS && state != State.STARTED;
-    }
-
-    public boolean isFailed() {
-        return state.equals(State.FAILED) || state.equals(State.VALIDATION_FAILED);
+        this.includedData = includedData;
+        this.timestamp = timestamp;
+        this.failureReason = Optional.ofNullable(failureReason).filter(Predicate.not("null"::equals));
     }
 
     public State getState() {
@@ -47,5 +34,13 @@ public class DatalakeBackupStatusResponse {
 
     public String getBackupId() {
         return backupId;
+    }
+
+    public List<String> getIncludedData() {
+        return includedData;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
     }
 }
