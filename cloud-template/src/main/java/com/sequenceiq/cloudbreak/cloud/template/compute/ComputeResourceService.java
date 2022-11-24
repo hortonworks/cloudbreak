@@ -325,8 +325,6 @@ public class ComputeResourceService {
                     Optional<CloudInstance> instance = cloudStack.getGroups()
                             .stream()
                             .flatMap(g -> g.getInstances().stream())
-                            .collect(Collectors.toList())
-                            .stream()
                             .filter(e -> getInstanceId(cloudResource).equals(e.getInstanceId()))
                             .findFirst();
                     if (instance.isPresent()) {

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -64,10 +65,10 @@ public class FreeIpaVerticalScaleService {
             CloudConnector connector) throws Exception {
         CloudStack cloudStack = request.getCloudStack();
         try {
-            return connector.resources().update(ac, cloudStack, request.getResourceList());
+            return connector.resources().update(ac, cloudStack, request.getResourceList(), UpdateType.VERTICAL_SCALE);
         } catch (Exception e) {
             LOGGER.info("Exception occured on update process retrying the operation. Error was: {}", e.getMessage(), e);
-            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack);
+            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, UpdateType.VERTICAL_SCALE);
         }
     }
 
@@ -75,7 +76,8 @@ public class FreeIpaVerticalScaleService {
             FreeIpaVerticalScaleRequest request,
             CloudConnector connector,
             AuthenticatedContext ac,
-            CloudStack cloudStack) throws Exception {
-        return connector.resources().update(ac, cloudStack, request.getResourceList());
+            CloudStack cloudStack,
+            UpdateType type) throws Exception {
+        return connector.resources().update(ac, cloudStack, request.getResourceList(), type);
     }
 }

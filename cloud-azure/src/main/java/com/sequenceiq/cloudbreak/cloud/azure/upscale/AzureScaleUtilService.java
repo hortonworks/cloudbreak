@@ -113,10 +113,6 @@ public class AzureScaleUtilService {
         azureTerminationHelperService.downscale(ac, stack, newCloudInstances, resources, allRemovableResource);
     }
 
-    public AzureCloudResourceService azureCloudResourceService() {
-        return azureCloudResourceService;
-    }
-
     public CloudResource getArmTemplate(List<CloudResource> resources, String stackName) {
         return resources.stream().filter(r -> r.getType() == ResourceType.ARM_TEMPLATE).findFirst()
                 .orElseThrow(() -> new CloudConnectorException(String.format("Arm Template not found for: %s  ", stackName)));

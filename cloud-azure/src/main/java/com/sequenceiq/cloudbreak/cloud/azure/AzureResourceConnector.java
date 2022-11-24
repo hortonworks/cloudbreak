@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDatabaseResourceService;
@@ -314,12 +315,16 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources)
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type)
             throws QuotaExceededException {
-        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-        AzureStackView azureStackView = azureStackViewProvider
-                .getAzureStack(new AzureCredentialView(authenticatedContext.getCloudCredential()), stack, client, authenticatedContext);
-        return azureVerticalScaleService.verticalScale(authenticatedContext, stack, resources, azureStackView, client);
+        LOGGER.info("The update method which will be followed is {}.", type);
+        if (type.equals(UpdateType.VERTICAL_SCALE)) {
+            AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+            AzureStackView azureStackView = azureStackViewProvider
+                    .getAzureStack(new AzureCredentialView(authenticatedContext.getCloudCredential()), stack, client, authenticatedContext);
+            return azureVerticalScaleService.verticalScale(authenticatedContext, stack, resources, azureStackView, client);
+        }
+        return List.of();
     }
 
     @Override

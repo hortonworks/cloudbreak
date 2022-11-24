@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -66,6 +67,9 @@ public class AzureUpscaleService {
     @Inject
     private AzureScaleUtilService azureScaleUtilService;
 
+    @Inject
+    private AzureCloudResourceService azureCloudResourceService;
+
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, AzureStackView azureStackView,
             AzureClient client, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws QuotaExceededException {
         CloudContext cloudContext = ac.getCloudContext();
@@ -86,20 +90,19 @@ public class AzureUpscaleService {
                     azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
             LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
 
-            templateResources.addAll(azureScaleUtilService.azureCloudResourceService().getDeploymentCloudResources(templateDeployment));
-            newInstances.addAll(azureScaleUtilService.azureCloudResourceService()
-                    .getInstanceCloudResources(stackName, templateResources, scaledGroups, resourceGroupName));
+            templateResources.addAll(azureCloudResourceService.getDeploymentCloudResources(templateDeployment));
+            newInstances.addAll(azureCloudResourceService.getInstanceCloudResources(stackName, templateResources,
+                    scaledGroups, resourceGroupName));
             if (!newInstances.isEmpty()) {
-                osDiskResources.addAll(azureScaleUtilService.azureCloudResourceService().getAttachedOsDiskResources(newInstances, resourceGroupName, client));
+                osDiskResources.addAll(azureCloudResourceService.getAttachedOsDiskResources(newInstances, resourceGroupName, client));
             } else {
                 LOGGER.warn("Skipping OS disk collection as there was no VM instance found amongst cloud resources for {}!", stackName);
             }
 
-            azureScaleUtilService.azureCloudResourceService()
-                    .saveCloudResources(resourceNotifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
+            azureCloudResourceService.saveCloudResources(resourceNotifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
 
             List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources, newInstances);
-            List<CloudResource> networkResources = azureScaleUtilService.azureCloudResourceService().getNetworkResources(resources);
+            List<CloudResource> networkResources = azureCloudResourceService.getNetworkResources(resources);
 
             azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources,
                     adjustmentTypeWithThreshold);
