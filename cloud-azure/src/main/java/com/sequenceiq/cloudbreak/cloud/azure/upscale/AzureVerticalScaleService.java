@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -45,7 +44,6 @@ public class AzureVerticalScaleService {
             AzureClient client) throws QuotaExceededException {
         CloudContext cloudContext = ac.getCloudContext();
         String stackName = azureUtils.getStackName(cloudContext);
-        DateTime preDeploymentTime = DateTime.now();
         try {
             CloudResource armTemplate = azureScaleUtilService.getArmTemplate(resources, stackName);
 
@@ -56,21 +54,17 @@ public class AzureVerticalScaleService {
             return List.of(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));
         } catch (Retry.ActionFailedException e) {
             LOGGER.error("Retry.ActionFailedException happened", e);
-            azureScaleUtilService.rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw azureUtils.convertToCloudConnectorException(e.getCause(), "Stack upscale");
         } catch (CloudException e) {
             LOGGER.error("CloudException happened", e);
-            azureScaleUtilService.rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             azureScaleUtilService.checkIfQuotaLimitIssued(e);
             throw azureUtils.convertToCloudConnectorException(e, "Stack upscale");
         } catch (RolledbackResourcesException e) {
             LOGGER.error("RolledbackResourcesException happened", e);
-            azureScaleUtilService.rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure, infrastructure was rolled back with resources: %s, %s",
                     stackName, e.getMessage()), e);
         } catch (Exception e) {
             LOGGER.error("Exception happened", e);
-            azureScaleUtilService.rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure, infrastructure was rolled back: %s, %s", stackName,
                     e.getMessage()), e);
         }
