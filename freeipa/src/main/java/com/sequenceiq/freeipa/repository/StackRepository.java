@@ -24,7 +24,6 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
-import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 
 @Transactional(REQUIRED)
@@ -139,9 +138,6 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
             " WHERE s.accountId = :accountId AND s.terminated = -1 AND s.resourceCrn IN (:resourceCrns)")
     List<ResourceCrnAndNameView> findNamesByResourceCrnAndAccountId(@Param("resourceCrns") Collection<String> resourceCrns,
             @Param("accountId") String accountId);
-
-    @Query("SELECT i FROM Stack s JOIN s.image i WHERE (s.terminated = -1 OR s.terminated >= :thresholdTimestamp)")
-    List<ImageEntity> findImagesOfAliveStacks(@Param("thresholdTimestamp") long thresholdTimestamp);
 
     @Query("SELECT new com.sequenceiq.cloudbreak.common.event.PayloadContext(s.resourceCrn, s.environmentCrn, s.cloudPlatform) " +
             "FROM Stack s " +
