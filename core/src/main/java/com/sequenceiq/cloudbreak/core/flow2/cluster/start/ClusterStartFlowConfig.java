@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.start;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_DB_CERT_ROTATION_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_DB_CERT_ROTATION_FINISH_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_PILLAR_CONFIG_UPDATE_FAILED_EVENT;
@@ -10,6 +12,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEve
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.DNS_UPDATE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_DB_CERT_ROTATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_STARTING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_FINISHED_STATE;
@@ -34,9 +37,13 @@ public class ClusterStartFlowConfig extends StackStatusFinalizerAbstractFlowConf
 
     private static final List<Transition<ClusterStartState, ClusterStartEvent>> TRANSITIONS =
             new Builder<ClusterStartState, ClusterStartEvent>()
-                    .from(INIT_STATE).to(CLUSTER_START_UPDATE_PILLAR_CONFIG_STATE)
+                    .from(INIT_STATE).to(CLUSTER_DB_CERT_ROTATION_STATE)
                     .event(CLUSTER_START_EVENT)
                     .noFailureEvent()
+
+                    .from(CLUSTER_DB_CERT_ROTATION_STATE).to(CLUSTER_START_UPDATE_PILLAR_CONFIG_STATE)
+                    .event(CLUSTER_DB_CERT_ROTATION_FINISH_EVENT)
+                    .failureEvent(CLUSTER_DB_CERT_ROTATION_FAILED_EVENT)
 
                     .from(CLUSTER_START_UPDATE_PILLAR_CONFIG_STATE).to(UPDATING_DNS_IN_PEM_STATE)
                     .event(CLUSTER_START_PILLAR_CONFIG_UPDATE_FINISHED_EVENT)
