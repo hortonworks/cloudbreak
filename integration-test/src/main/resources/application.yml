@@ -174,7 +174,7 @@ integrationtest:
     region: West US 2
     location: West US 2
     verticalScale:
-      supported: true
+      supported: false
       datalake:
         group: master
         instanceType: Standard_D8s_v3
@@ -246,7 +246,7 @@ integrationtest:
     region: europe-west2
     location: europe-west2
     verticalScale:
-      supported: true
+      supported: false
       datalake:
         group: master
         instanceType: n1-standard-16
