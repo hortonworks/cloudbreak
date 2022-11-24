@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
@@ -43,20 +44,24 @@ public class AwsUpdateService {
     @Inject
     private AwsLaunchTemplateUpdateService awsLaunchTemplateUpdateService;
 
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
         ArrayList<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
+        LOGGER.info("The update method which will be followed is {}.", type);
         if (!resources.isEmpty()) {
-            if (resources.stream().anyMatch(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
-                    && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE)))) {
-                List<CloudResource> launchConfigurationResources = resources.stream()
-                        .filter(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
-                                && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE))).collect(Collectors.toList());
+            if (type.equals(UpdateType.IMAGE_UPDATE)) {
+                if (resources.stream().anyMatch(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
+                        && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE)))) {
+                    List<CloudResource> launchConfigurationResources = resources.stream()
+                            .filter(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
+                                    && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE))).collect(Collectors.toList());
 
-                CloudResource cfResource = getCloudFormationStack(resources);
-                awsImageUpdateService.updateImage(authenticatedContext, stack, cfResource);
+                    CloudResource cfResource = getCloudFormationStack(resources);
+                    awsImageUpdateService.updateImage(authenticatedContext, stack, cfResource);
 
-                launchConfigurationResources.forEach(cloudResource -> cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, ResourceStatus.UPDATED)));
-            } else {
+                    launchConfigurationResources.forEach(cloudResource ->
+                            cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, ResourceStatus.UPDATED)));
+                }
+            } else if (type.equals(UpdateType.VERTICAL_SCALE)) {
                 updateWithVerticalScaling(authenticatedContext, stack, resources);
             }
         }

@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
@@ -267,7 +268,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) throws Exception {
+    public List<CloudResourceStatus> update(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, UpdateType type) throws Exception {
         LOGGER.info("Update stack with resources: {}", resources);
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();

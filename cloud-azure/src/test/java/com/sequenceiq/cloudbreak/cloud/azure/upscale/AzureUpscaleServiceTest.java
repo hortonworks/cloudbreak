@@ -135,7 +135,6 @@ public class AzureUpscaleServiceTest {
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
         when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
         when(azureScaleUtilService.getArmTemplate(anyList(), anyString())).thenReturn(template);
-        when(azureScaleUtilService.azureCloudResourceService()).thenReturn(azureCloudResourceService);
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
         List<CloudResourceStatus> actual = underTest.upscale(ac, stack, resources, azureStackView, client,
@@ -205,7 +204,6 @@ public class AzureUpscaleServiceTest {
         List<CloudResource> resources = List.of(detachedVolumeSet, alreadyCreatedVolumeSet, notReattachableVolumeSet, template);
         List<Group> scaledGroups = createScaledGroups();
 
-        when(azureScaleUtilService.azureCloudResourceService()).thenReturn(azureCloudResourceService);
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
         when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
                 .thenReturn(templateDeployment);

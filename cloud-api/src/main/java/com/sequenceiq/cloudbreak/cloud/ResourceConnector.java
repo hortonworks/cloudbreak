@@ -236,7 +236,8 @@ public interface ResourceConnector {
      * @return the status of updated resources
      * @throws Exception in case of any error
      */
-    List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception;
+    List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type)
+            throws Exception;
 
     /**
      * Update yser data for the cluster instances which contains parameters for user-data scricpt run during intsances' bootstrap.
