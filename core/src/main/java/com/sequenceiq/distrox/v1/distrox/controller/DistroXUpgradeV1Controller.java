@@ -123,7 +123,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
         InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(true,
                 upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn),
                 upgradeAvailabilityService.isOsUpgradeEnabledByUserCrn(initiatorUserCrn),
-                Boolean.TRUE.equals(rollingUpgradeEnabled));
+                Boolean.TRUE.equals(rollingUpgradeEnabled) || Boolean.TRUE.equals(distroxUpgradeRequest.getRollingUpgradeEnabled()));
         UpgradeV4Request request = upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings);
         return upgradeCluster(clusterName, request, nameOrCrn, false);
     }
@@ -137,7 +137,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
         InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(true,
                 upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn),
                 upgradeAvailabilityService.isOsUpgradeEnabledByUserCrn(initiatorUserCrn),
-                Boolean.TRUE.equals(rollingUpgradeEnabled));
+                Boolean.TRUE.equals(rollingUpgradeEnabled) || Boolean.TRUE.equals(distroxUpgradeRequest.getRollingUpgradeEnabled()));
         UpgradeV4Request request = upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings);
         return upgradeCluster(clusterCrn, request, nameOrCrn, false);
     }
@@ -164,7 +164,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
         boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(accountId);
         boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(accountId);
         UpgradeV4Request request = upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled,
-                dataHubOsUpgradeEntitled));
+                dataHubOsUpgradeEntitled, Boolean.TRUE.equals(distroxUpgradeRequest.getRollingUpgradeEnabled())));
         return upgradeCluster(clusterNameOrCrn, request, nameOrCrn, upgradePreparation);
     }
 

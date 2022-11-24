@@ -15,6 +15,8 @@ public class DistroXUpgradeV1Request {
 
     private Boolean dryRun;
 
+    private Boolean rollingUpgradeEnabled;
+
     private DistroXUpgradeShowAvailableImages showAvailableImages;
 
     private DistroXUpgradeReplaceVms replaceVms;
@@ -53,6 +55,14 @@ public class DistroXUpgradeV1Request {
 
     public void setDryRun(Boolean dryRun) {
         this.dryRun = dryRun;
+    }
+
+    public Boolean getRollingUpgradeEnabled() {
+        return rollingUpgradeEnabled;
+    }
+
+    public void setRollingUpgradeEnabled(Boolean rollingUpgradeEnabled) {
+        this.rollingUpgradeEnabled = rollingUpgradeEnabled;
     }
 
     public DistroXUpgradeShowAvailableImages getShowAvailableImages() {
