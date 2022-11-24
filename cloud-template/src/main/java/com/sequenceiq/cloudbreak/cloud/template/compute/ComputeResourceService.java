@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -104,18 +106,18 @@ public class ComputeResourceService {
                 Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(deletionCallable);
                 futures.add(future);
                 if (isRequestFull(futures.size(), context)) {
-                    results.addAll(flatList(waitForRequests(futures).get(FutureResult.SUCCESS)));
+                    results.addAll(getBuilderResults(futures));
                 }
             }
             // wait for builder type to finish before starting the next one
-            results.addAll(flatList(waitForRequests(futures).get(FutureResult.SUCCESS)));
+            results.addAll(getBuilderResults(futures));
         }
         return results;
     }
 
-    public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack, List<CloudResource> computeResources) {
+    public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack, List<CloudResource> cloudResource) {
         LOGGER.info("Update compute resources.");
-        return new ResourceBuilder(ctx, auth).updateResources(auth, stack, stack.getGroups(), computeResources);
+        return new ResourceBuilder(ctx, auth).updateResources(ctx, auth, cloudResource, stack);
     }
 
     public List<CloudVmInstanceStatus> stopInstances(ResourceBuilderContext context, AuthenticatedContext auth, List<CloudInstance> cloudInstances) {
@@ -256,6 +258,10 @@ public class ComputeResourceService {
         return fullNodeCount;
     }
 
+    private List<CloudResourceStatus> getBuilderResults(Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures) {
+        return flatList(waitForRequests(futures).get(FutureResult.SUCCESS));
+    }
+
     private class ResourceBuilder {
 
         private final ResourceBuilderContext ctx;
@@ -307,36 +313,41 @@ public class ComputeResourceService {
             return results;
         }
 
-        public List<CloudResourceStatus> updateResources(AuthenticatedContext auth, CloudStack cloudStack, Iterable<Group> groups,
-            List<CloudResource> computeResources) {
+        public List<CloudResourceStatus> updateResources(ResourceBuilderContext ctx, AuthenticatedContext auth,
+                List<CloudResource> computeResources, CloudStack cloudStack) {
             List<CloudResourceStatus> results = new ArrayList<>();
             Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
-            for (Group group : getOrderedCopy(groups)) {
-                List<CloudInstance> instances = group.getInstances();
-
-                Integer createBatchSize = resourceBuilders.getCreateBatchSize(auth.getCloudContext().getVariant());
-                LOGGER.debug("Split the instances to {} chunks to execute the operation in parallel", createBatchSize);
-                AtomicInteger counter = new AtomicInteger();
-                Collection<List<CloudInstance>> instancesChunks = instances.stream()
-                        .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / createBatchSize)).values();
-
-                for (List<CloudInstance> instancesChunk : instancesChunks) {
-                    LOGGER.debug("Submit the create operation thread with {} instances", instancesChunk.size());
-                    ResourceUpdateCallablePayload updateCallablePayload = new ResourceUpdateCallablePayload(instancesChunk, group, ctx, auth, cloudStack);
-                    ResourceUpdateCallable updateCallable = resourceActionFactory.buildUpdateCallable(updateCallablePayload);
-                    Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(updateCallable);
-                    futures.add(future);
+            Variant variant = auth.getCloudContext().getVariant();
+            List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(variant);
+            for (ComputeResourceBuilder<ResourceBuilderContext> builder : Lists.reverse(builders)) {
+                List<CloudResource> resourceList = getResources(builder.resourceType(), computeResources);
+                for (CloudResource cloudResource : resourceList) {
+                    Optional<CloudInstance> instance = cloudStack.getGroups()
+                            .stream()
+                            .flatMap(g -> g.getInstances().stream())
+                            .collect(Collectors.toList())
+                            .stream()
+                            .filter(e -> getInstanceId(cloudResource).equals(e.getInstanceId()))
+                            .findFirst();
+                    if (instance.isPresent()) {
+                        ResourceUpdateCallablePayload resourceUpdateCallablePayload
+                                = new ResourceUpdateCallablePayload(cloudResource, instance.get(), ctx, auth, cloudStack, builder);
+                        ResourceUpdateCallable updateCallable = resourceActionFactory.buildUpdateCallable(resourceUpdateCallablePayload);
+                        Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(updateCallable);
+                        futures.add(future);
+                        if (isRequestFull(futures.size(), ctx)) {
+                            results.addAll(getBuilderResults(futures));
+                        }
+                    }
                 }
-
-                if (!futures.isEmpty()) {
-                    LOGGER.debug("Wait for all {} creation threads to finish", futures.size());
-                    List<List<CloudResourceStatus>> cloudResourceStatusChunks = waitForRequests(futures).get(FutureResult.SUCCESS);
-                    List<CloudResourceStatus> resourceStatuses = waitForResourceCreations(cloudResourceStatusChunks);
-                    // TODO needs rollback
-                    results.addAll(filterResourceStatuses(resourceStatuses, ResourceStatus.CREATED));
-                }
+                // wait for builder type to finish before starting the next one
+                results.addAll(getBuilderResults(futures));
             }
             return results;
+        }
+
+        private String getInstanceId(CloudResource cloudResource) {
+            return Strings.isNullOrEmpty(cloudResource.getInstanceId()) ? cloudResource.getName() : cloudResource.getInstanceId();
         }
 
         private List<CloudResourceStatus> waitForResourceCreations(List<List<CloudResourceStatus>> cloudResourceStatusChunks) {

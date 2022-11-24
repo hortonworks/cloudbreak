@@ -153,8 +153,8 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     }
 
     @Override
-    public List<CloudResource> update(AwsContext context, CloudInstance instance, long privateId,
-        AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
+    public CloudResource update(AwsContext context, CloudResource cloudResource, CloudInstance instance,
+        AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
         Optional<Instance> existedOpt = resourceById(amazonEc2Client, instance.getInstanceId());
         Instance awsInstance;
@@ -173,7 +173,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             }
 
         }
-        return List.of();
+        return null;
     }
 
     Collection<BlockDeviceMapping> blocks(Group group, CloudStack cloudStack, AuthenticatedContext ac) {

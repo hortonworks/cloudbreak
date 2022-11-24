@@ -87,7 +87,7 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
     List<CloudResource> build(C context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception;
 
-    List<CloudResource> update(C context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
+    CloudResource update(C context, CloudResource resource, CloudInstance instance, AuthenticatedContext auth,
             CloudStack cloudStack) throws Exception;
 
     /**
