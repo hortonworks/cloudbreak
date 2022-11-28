@@ -1381,6 +1381,15 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public FlowIdentifier updateSalt(SdxCluster sdxCluster) {
-        return sdxReactorFlowManager.triggerSaltUpdate(sdxCluster);
+        SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(sdxCluster);
+        DatalakeStatusEnum status = sdxStatus.getStatus();
+        if (status.isStopState() || status.isDeleteInProgressOrCompleted()) {
+            String message = String.format("SaltStack update cannot be initiated as datalake '%s' is currently in '%s' state.",
+                    sdxCluster.getName(), status);
+            LOGGER.info(message);
+            throw new BadRequestException(message);
+        } else {
+            return sdxReactorFlowManager.triggerSaltUpdate(sdxCluster);
+        }
     }
 }

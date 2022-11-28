@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -19,6 +20,8 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -218,5 +221,37 @@ public class ClusterCommonServiceTest {
         update.setHostGroupAdjustment(new HostGroupAdjustmentV4Request());
         assertThrows(RuntimeException.class, () -> underTest.put("crn", update));
         verify(environmentService).checkEnvironmentStatus(stackView, EnvironmentStatus.upscalable());
+    }
+
+    @Test
+    public void testSaltUpdate() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackView stack = mock(StackView.class);
+        when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
+        when(clusterOperationService.updateSalt(STACK_ID)).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
+
+        FlowIdentifier flowIdentifier = underTest.updateSalt(nameOrCrn, ACCOUNT_ID);
+
+        verify(clusterOperationService, times(1)).updateSalt(STACK_ID);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("1", flowIdentifier.getPollableId());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"STOPPED", "STOP_IN_PROGRESS", "STOP_REQUESTED", "DELETE_COMPLETED",
+            "DELETE_FAILED", "DELETE_IN_PROGRESS", "DELETED_ON_PROVIDER_SIDE", "PRE_DELETE_IN_PROGRESS"}, mode = EnumSource.Mode.INCLUDE)
+    public void testSaltUpdateThrowsBadRequestWhenStackNotAvailable(Status status) {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackView stack = mock(StackView.class);
+        when(stack.getStatus()).thenReturn(status);
+        when(stack.getName()).thenReturn("stack-name");
+        when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () ->  underTest.updateSalt(nameOrCrn, ACCOUNT_ID));
+
+        verifyNoInteractions(clusterOperationService);
+        assertEquals(String.format("SaltStack update cannot be initiated as stack 'stack-name' is currently in '%s' state.", status), ex.getMessage());
     }
 }
