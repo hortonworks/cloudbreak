@@ -34,9 +34,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
-import com.sequenceiq.consumption.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.consumption.domain.Consumption;
-import com.sequenceiq.consumption.dto.Credential;
 import com.sequenceiq.consumption.dto.StorageConsumptionResult;
 import com.sequenceiq.consumption.flow.consumption.ConsumptionContext;
 import com.sequenceiq.consumption.flow.consumption.storage.event.SendStorageConsumptionEvent;
@@ -73,13 +71,7 @@ public class StorageConsumptionCollectionHandlerTest {
     private CredentialService credentialService;
 
     @Mock
-    private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Mock
     private EnvironmentService environmentService;
-
-    @Mock
-    private Credential credential;
 
     @Mock
     private CloudCredential cloudCredential;
@@ -128,8 +120,7 @@ public class StorageConsumptionCollectionHandlerTest {
         assertEquals(SEND_CONSUMPTION_EVENT_EVENT.selector(), result.selector());
 
         verify(environmentService).getByCrn(ENV_CRN);
-        verify(credentialService).getCredentialByEnvCrn(ENV_CRN);
-        verify(credentialConverter).convert(credential);
+        verify(credentialService).getCloudCredentialByEnvCrn(ENV_CRN);
         verify(awsS3ConsumptionCalculator).calculate(requestCaptor.capture());
         assertEquals(VALID_BUCKET_NAME, requestCaptor.getValue().getCloudObjectIds().stream().findFirst().get());
         assertEquals(cloudCredential, requestCaptor.getValue().getCredential());
@@ -168,8 +159,7 @@ public class StorageConsumptionCollectionHandlerTest {
         assertEquals(ex, result.getException());
 
         verify(environmentService).getByCrn(ENV_CRN);
-        verify(credentialService).getCredentialByEnvCrn(ENV_CRN);
-        verify(credentialConverter).convert(credential);
+        verify(credentialService).getCloudCredentialByEnvCrn(ENV_CRN);
 
         verify(awsS3ConsumptionCalculator).calculate(requestCaptor.capture());
         assertEquals(VALID_BUCKET_NAME, requestCaptor.getValue().getCloudObjectIds().stream().findFirst().get());
@@ -183,7 +173,7 @@ public class StorageConsumptionCollectionHandlerTest {
         consumption.setEnvironmentCrn(ENV_CRN);
         ConsumptionContext context = new ConsumptionContext(null, consumption);
         CloudbreakServiceException ex = new CloudbreakServiceException("error");
-        when(credentialService.getCredentialByEnvCrn(ENV_CRN)).thenThrow(ex);
+        when(credentialService.getCloudCredentialByEnvCrn(ENV_CRN)).thenThrow(ex);
 
         StorageConsumptionCollectionFailureEvent result = (StorageConsumptionCollectionFailureEvent)
                 underTest.doAccept(new HandlerEvent<>(new Event<>(new StorageConsumptionCollectionHandlerEvent(
@@ -194,7 +184,7 @@ public class StorageConsumptionCollectionHandlerTest {
         assertEquals(ID, result.getResourceId());
         assertEquals(ex, result.getException());
 
-        verify(credentialService).getCredentialByEnvCrn(ENV_CRN);
+        verify(credentialService).getCloudCredentialByEnvCrn(ENV_CRN);
     }
 
     @Test
@@ -236,8 +226,7 @@ public class StorageConsumptionCollectionHandlerTest {
     }
 
     private void mockCredentialServices() {
-        when(credentialService.getCredentialByEnvCrn(ENV_CRN)).thenReturn(credential);
-        when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
+        when(credentialService.getCloudCredentialByEnvCrn(ENV_CRN)).thenReturn(cloudCredential);
     }
 
     private StorageConsumptionCollectionHandlerEvent createInputEvent(ConsumptionType consumptionType) {

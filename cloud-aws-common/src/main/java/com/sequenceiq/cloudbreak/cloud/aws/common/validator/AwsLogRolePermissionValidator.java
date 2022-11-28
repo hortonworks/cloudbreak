@@ -40,8 +40,8 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
     @Inject
     private LocationHelper locationHelper;
 
-    public void validateLog(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
-            CloudS3View cloudFileSystem, String logsLocationBase, ValidationResultBuilder validationResultBuilder) {
+    public void validateLog(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile, CloudS3View cloudFileSystem, String logsLocationBase,
+            boolean skipOrgPolicyDecisions, ValidationResultBuilder validationResultBuilder) {
         if (Strings.isNullOrEmpty(logsLocationBase)) {
             return;
         }
@@ -52,19 +52,18 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
                 Map.entry("${LOGS_BUCKET}", locationHelper.parseS3BucketName(logsLocationBase))
         );
         Policy logPolicy = awsIamService.getPolicy("aws-cdp-log-policy.json", logReplacements);
-        validate(iam, instanceProfile, cloudFileSystem, logsLocationBase, validationResultBuilder, logPolicy);
+        validate(iam, instanceProfile, cloudFileSystem, logsLocationBase, validationResultBuilder, logPolicy, skipOrgPolicyDecisions);
     }
 
-    public void
-    validateBackup(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
-            CloudS3View cloudFileSystem, String backupLocationBase, ValidationResultBuilder validationResultBuilder) {
+    public void validateBackup(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
+            CloudS3View cloudFileSystem, String backupLocationBase, boolean skipOrgPolicyDecisions, ValidationResultBuilder validationResultBuilder) {
         Map<String, String> backupReplacements = getBackupPolicyJsonReplacements(cloudFileSystem, backupLocationBase);
         Policy restorePolicy = awsIamService.getPolicy(getRestorePolicy(), backupReplacements);
-        validate(iam, instanceProfile, cloudFileSystem, backupLocationBase, validationResultBuilder, restorePolicy);
+        validate(iam, instanceProfile, cloudFileSystem, backupLocationBase, validationResultBuilder, restorePolicy, skipOrgPolicyDecisions);
     }
 
     public void validate(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
-            CloudS3View cloudFileSystem, String locationBase, ValidationResultBuilder validationResultBuilder, Policy policy) {
+            CloudS3View cloudFileSystem, String locationBase, ValidationResultBuilder validationResultBuilder, Policy policy, boolean skipOrgPolicyDecisions) {
         SortedSet<String> failedActions = new TreeSet<>();
         SortedSet<String> warnings = new TreeSet<>();
         if (locationBase == null) {
@@ -79,7 +78,7 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
                 policies.stream().forEach(p -> LOGGER.info("Policies being validated {}", p.toJson()));
                 List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam,
                         role, policies);
-                failedActions.addAll(getFailedActions(role, evaluationResults));
+                failedActions.addAll(getFailedActions(role, evaluationResults, skipOrgPolicyDecisions));
                 warnings.addAll(getWarnings(role, evaluationResults));
             } catch (AmazonIdentityManagementException e) {
                 // Only log the error and keep processing. Failed actions won't be added, but
@@ -106,6 +105,13 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
                             "Missing policies:%n%s",
                     String.join(", ", instanceProfile.getArn()),
                     String.join("\n", failedActions));
+
+            if (validationErrorMessage.contains(AbstractAwsSimulatePolicyValidator.DENIED_BY_ORGANIZATION_RULE)) {
+                validationErrorMessage = validationErrorMessage.concat(
+                        "\nPlease note SCPs with global condition keys and whitelisted accounts are not supported in the AWS Policy Simulator " +
+                                "and may cause validation to fail. Please check the SCPs! You can skip organizational policy related errors at  " +
+                                "credential settings, but please note that this may hide valid errors!");
+            }
 
             LOGGER.info(validationErrorMessage);
             validationResultBuilder.error(validationErrorMessage);

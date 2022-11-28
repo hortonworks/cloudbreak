@@ -27,9 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StorageSizeRequest;
 import com.sequenceiq.cloudbreak.cloud.model.StorageSizeResponse;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ResourceType;
-import com.sequenceiq.consumption.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.consumption.domain.Consumption;
-import com.sequenceiq.consumption.dto.Credential;
 import com.sequenceiq.consumption.dto.StorageConsumptionResult;
 import com.sequenceiq.consumption.flow.consumption.storage.event.SendStorageConsumptionEvent;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionFailureEvent;
@@ -55,9 +53,6 @@ public class StorageConsumptionCollectionHandler  extends AbstractStorageOperati
     private DatahubService datahubService;
 
     @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Override
@@ -70,8 +65,7 @@ public class StorageConsumptionCollectionHandler  extends AbstractStorageOperati
 
         LOGGER.debug("Storage consumption collection started. resourceCrn: '{}'", resourceCrn);
         try {
-            Credential credential = credentialService.getCredentialByEnvCrn(environmentCrn);
-            CloudCredential cloudCredential = credentialConverter.convert(credential);
+            CloudCredential cloudCredential = credentialService.getCloudCredentialByEnvCrn(environmentCrn);
             DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(environmentCrn);
             LOGGER.debug("Getting credential for environment with CRN '{}'.", environmentCrn);
             String cloudPlatform = consumption.getConsumptionType().getStorageService().cloudPlatformName();

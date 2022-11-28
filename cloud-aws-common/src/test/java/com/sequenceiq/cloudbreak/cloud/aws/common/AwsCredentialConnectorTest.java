@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialViewProvider
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponses;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialSettings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
@@ -76,7 +77,7 @@ public class AwsCredentialConnectorTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(credential.isVerifyPermissions()).thenReturn(true);
+        when(credential.getCredentialSettings()).thenReturn(new CloudCredentialSettings(true, false));
         when(authenticatedContext.getCloudCredential()).thenReturn(credential);
         when(awsCredentialViewProvider.createAwsCredentialView(credential)).thenReturn(credentialView);
     }

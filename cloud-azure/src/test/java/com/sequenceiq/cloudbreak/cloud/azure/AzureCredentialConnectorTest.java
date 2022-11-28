@@ -134,7 +134,7 @@ public class AzureCredentialConnectorTest {
         azureParams.put("codeGrantFlowBased", codeGrantFlowParams);
         parameters.put("azure", azureParams);
 
-        CloudCredential cloudCredential = new CloudCredential("anId", "aName", parameters, "acc", false);
+        CloudCredential cloudCredential = new CloudCredential("anId", "aName", parameters, "acc");
         when(appCreationCommand.getRedirectURL(DEPLOYMENT_ADDRESS)).thenReturn(redirectUrl);
 
         Map<String, String> result = underTest.initCodeGrantFlow(TEST_CLOUD_CONTEXT, cloudCredential);

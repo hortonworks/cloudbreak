@@ -12,14 +12,13 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.FileSystemType;
-import com.sequenceiq.datalake.entity.Credential;
-import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.datalake.service.validation.converter.CredentialResponseToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class CloudStorageLocationValidator {
 
-    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+    private final CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter;
 
     private final SecretService secretService;
 
@@ -27,10 +26,10 @@ public class CloudStorageLocationValidator {
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public CloudStorageLocationValidator(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
+    public CloudStorageLocationValidator(CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter,
             SecretService secretService, CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
+        this.credentialResponseToCloudCredentialConverter = credentialResponseToCloudCredentialConverter;
         this.secretService = secretService;
         this.cloudProviderServicesV4Endopint = cloudProviderServicesV4Endopint;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
@@ -38,8 +37,7 @@ public class CloudStorageLocationValidator {
 
     public void validate(String storageLocation, FileSystemType fileSystemType, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder) {
         String bucketName = getBucketName(fileSystemType, storageLocation);
-        Credential credential = getCredential(environment);
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+        CloudCredential cloudCredential = credentialResponseToCloudCredentialConverter.convert(environment.getCredential());
         ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
         ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -65,12 +63,4 @@ public class CloudStorageLocationValidator {
                 .build();
     }
 
-    private Credential getCredential(DetailedEnvironmentResponse environment) {
-        return new Credential(
-                environment.getCloudPlatform(),
-                environment.getCredential().getName(),
-                secretService.getByResponse(environment.getCredential().getAttributes()),
-                environment.getCredential().getCrn(),
-                environment.getAccountId());
-    }
 }

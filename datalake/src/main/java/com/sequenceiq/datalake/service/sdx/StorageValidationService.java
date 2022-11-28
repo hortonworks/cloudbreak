@@ -24,11 +24,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
@@ -37,6 +35,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
+import com.sequenceiq.datalake.service.validation.converter.CredentialResponseToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -45,9 +44,6 @@ import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 public class StorageValidationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageValidationService.class);
-
-    @Inject
-    private SecretService secretService;
 
     @Inject
     private CloudStorageManifester cloudStorageManifester;
@@ -73,12 +69,13 @@ public class StorageValidationService {
     @Inject
     private EnvironmentService environmentService;
 
+    @Inject
+    private CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter;
+
     public ObjectStorageValidateResponse validateObjectStorage(String credentialCrn, SdxCloudStorageRequest sdxCloudStorageRequest, String blueprintName,
             String clusterName, String dataAccessRole, String rangerAuditRole) {
         CredentialResponse credentialResponse = environmentClientService.getCredentialByCrn(credentialCrn);
-        String attributes = secretService.getByResponse(credentialResponse.getAttributes());
-        CloudCredential cloudCredential = new CloudCredential(credentialResponse.getCrn(), credentialResponse.getName(), new Json(attributes).getMap(),
-                credentialResponse.getAccountId(), credentialResponse.isVerifyPermissions());
+        CloudCredential cloudCredential = credentialResponseToCloudCredentialConverter.convert(credentialResponse);
         CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initSdxCloudStorageRequest(credentialResponse.getCloudPlatform(),
                 blueprintName, clusterName, sdxCloudStorageRequest);
         AccountMappingBase accountMapping = new AccountMappingBase();

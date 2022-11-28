@@ -13,7 +13,7 @@ public class CloudCredential extends DynamicModel {
 
     private String name;
 
-    private boolean verifyPermissions;
+    private CloudCredentialSettings credentialSettings;
 
     private String accountId;
 
@@ -21,18 +21,22 @@ public class CloudCredential extends DynamicModel {
     }
 
     public CloudCredential(String id, String name, String account) {
-        this(id, name, new HashMap<>(), account, false);
+        this(id, name, new HashMap<>(), account, new CloudCredentialSettings());
     }
 
-    public CloudCredential(String id, String name, String account, boolean verifyPermissions) {
-        this(id, name, new HashMap<>(), account, verifyPermissions);
+    public CloudCredential(String id, String name, String account, CloudCredentialSettings credentialSettings) {
+        this(id, name, new HashMap<>(), account, credentialSettings);
     }
 
-    public CloudCredential(String id, String name, Map<String, Object> parameters, String acountId, boolean verifyPermissions) {
+    public CloudCredential(String id, String name, Map<String, Object> parameters, String accountId) {
+        this(id, name, parameters, accountId, new CloudCredentialSettings());
+    }
+
+    public CloudCredential(String id, String name, Map<String, Object> parameters, String acountId, CloudCredentialSettings credentialSettings) {
         super(parameters);
         this.id = id;
         this.name = name;
-        this.verifyPermissions = verifyPermissions;
+        this.credentialSettings = credentialSettings;
         this.accountId = acountId;
     }
 
@@ -52,12 +56,12 @@ public class CloudCredential extends DynamicModel {
         this.name = name;
     }
 
-    public boolean isVerifyPermissions() {
-        return verifyPermissions;
+    public CloudCredentialSettings getCredentialSettings() {
+        return credentialSettings;
     }
 
-    public void setVerifyPermissions(boolean verifyPermissions) {
-        this.verifyPermissions = verifyPermissions;
+    public void setCredentialSettings(CloudCredentialSettings credentialSettings) {
+        this.credentialSettings = credentialSettings;
     }
 
     public String getAccountId() {
@@ -74,7 +78,7 @@ public class CloudCredential extends DynamicModel {
         final StringBuilder sb = new StringBuilder("CloudCredential{");
         sb.append("id='").append(id).append('\'');
         sb.append(", name='").append(name).append('\'');
-        sb.append(", verifyPermissions=").append(verifyPermissions);
+        sb.append(", credentialSettings=").append(credentialSettings);
         sb.append('}');
         return sb.toString();
     }

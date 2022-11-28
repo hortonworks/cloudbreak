@@ -3,13 +3,18 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,11 +24,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.services.identitymanagement.model.EvaluationResult;
+import com.amazonaws.services.identitymanagement.model.OrganizationsDecisionDetail;
+import com.amazonaws.services.identitymanagement.model.Role;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
@@ -37,6 +50,9 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
 
     @Mock
     private LocationHelper locationHelper;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private AwsDataAccessRolePermissionValidator awsDataAccessRolePermissionValidator;
@@ -234,5 +250,28 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
         policies = getValidator().getPolicyFiles(BackupOperationType.RESTORE);
         assertEquals(1, policies.size());
         assertTrue(policies.contains(getValidator().getRestorePolicy()));
+    }
+
+    @Test
+    void testValidateShouldAppendOrgPolicyRelatedErrorMessageWhenRequired() {
+        AmazonIdentityManagementClient amazonIdentityManagementClient = mock(AmazonIdentityManagementClient.class);
+        CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.LOG);
+        StorageLocationBase storageLocationBase = new StorageLocationBase();
+        storageLocationBase.setValue("storageLocationBase");
+        cloudFileSystem.setLocations(List.of(storageLocationBase));
+        cloudFileSystem.setAccountMapping(new AccountMappingBase());
+        ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        when(awsIamService.getValidRoles(eq(amazonIdentityManagementClient), any(), any()))
+                .thenReturn(Set.of(new Role().withArn("arn:aws:iam::123456890:role/role")));
+        when(awsIamService.validateRolePolicies(eq(amazonIdentityManagementClient), any(), any())).thenReturn(
+                List.of(new EvaluationResult().withOrganizationsDecisionDetail(
+                        new OrganizationsDecisionDetail().withAllowedByOrganizations(false)).withEvalDecision("deny")));
+        getValidator().validate(amazonIdentityManagementClient, cloudFileSystem, null, "accountId", BackupOperationType.NONE,
+                resultBuilder, false);
+
+        verify(awsIamService, times(1)).validateRolePolicies(eq(amazonIdentityManagementClient), any(), any());
+        ValidationResult result = resultBuilder.build();
+        assertTrue(result.hasError());
+        assertTrue(result.getFormattedErrors().contains("Please note SCPs with global condition keys and whitelisted accounts are not supported"));
     }
 }

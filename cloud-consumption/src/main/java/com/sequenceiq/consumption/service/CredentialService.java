@@ -9,11 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.consumption.dto.Credential;
+import com.sequenceiq.consumption.converter.CredentialResponseToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
@@ -26,22 +25,15 @@ public class CredentialService {
     private CredentialEndpoint credentialEndpoint;
 
     @Inject
-    private SecretService secretService;
-
-    @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public Credential getCredentialByEnvCrn(String envCrn) {
+    @Inject
+    private CredentialResponseToCloudCredentialConverter credentialConverter;
+
+    public CloudCredential getCloudCredentialByEnvCrn(String envCrn) {
         try {
             CredentialResponse credentialResponse = credentialEndpoint.getByEnvironmentCrn(envCrn);
-            SecretResponse secretResponse = credentialResponse.getAttributes();
-            String attributes = secretService.getByResponse(secretResponse);
-            return new Credential(
-                    credentialResponse.getCloudPlatform(),
-                    credentialResponse.getName(),
-                    attributes,
-                    credentialResponse.getCrn(),
-                    credentialResponse.getAccountId());
+            return credentialConverter.convert(credentialResponse);
         } catch (WebApplicationException e) {
             try (Response response = e.getResponse()) {
                 if (Response.Status.NOT_FOUND.getStatusCode() == response.getStatus()) {

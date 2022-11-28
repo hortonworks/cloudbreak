@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
-import com.sequenceiq.consumption.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.consumption.converter.CredentialResponseToCloudCredentialConverter;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.flow.consumption.ConsumptionContext;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors;
@@ -36,7 +36,7 @@ public class AbstractStorageConsumptionCollectionActionTest {
     private CredentialService credentialService;
 
     @Mock
-    private CredentialToCloudCredentialConverter credentialConverter;
+    private CredentialResponseToCloudCredentialConverter credentialConverter;
 
     @InjectMocks
     private TestAction underTest;

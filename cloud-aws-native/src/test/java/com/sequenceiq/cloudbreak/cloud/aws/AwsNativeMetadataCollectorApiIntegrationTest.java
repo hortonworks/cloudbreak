@@ -122,7 +122,7 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
                 .build();
         Map<String, Object> credentialParams = Map.of("aws",
                 Map.of("keyBased", Map.of("accessKey", awsAccessKey, "secretKey", awsSecretKey)));
-        CloudCredential credential = new CloudCredential("id", "alma", credentialParams, "acc", false);
+        CloudCredential credential = new CloudCredential("id", "alma", credentialParams, "acc");
         authenticatedContext = awsAuthenticator.authenticate(context, credential);
     }
 

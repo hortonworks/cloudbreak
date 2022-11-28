@@ -52,6 +52,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValida
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.domain.CredentialSettings;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.v1.converter.CreateCredentialRequestToCredentialConverter;
@@ -217,7 +218,7 @@ public class CredentialService extends AbstractCredentialService implements Comp
         credential.setType(type);
         if (type == AUDIT) {
             // Permission verification is disabled due to CB-9955
-            credential.setVerifyPermissions(false);
+            credential.setCredentialSettings(new CredentialSettings(false, false));
         }
         return create(credential, accountId, creatorUserCrn);
     }

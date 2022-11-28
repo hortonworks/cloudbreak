@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -64,8 +65,8 @@ public class Credential implements Serializable, AuthResource, AccountAwareResou
     @Column
     private String verificationStatusText;
 
-    @Column
-    private boolean verifyPermissions;
+    @Embedded
+    private CredentialSettings credentialSettings;
 
     @Convert(converter = CredentialTypeConverter.class)
     private CredentialType type;
@@ -202,12 +203,12 @@ public class Credential implements Serializable, AuthResource, AccountAwareResou
         this.type = type;
     }
 
-    public boolean isVerifyPermissions() {
-        return verifyPermissions;
+    public CredentialSettings getCredentialSettings() {
+        return credentialSettings;
     }
 
-    public void setVerifyPermissions(boolean verifyPermissions) {
-        this.verifyPermissions = verifyPermissions;
+    public void setCredentialSettings(CredentialSettings credentialSettings) {
+        this.credentialSettings = credentialSettings;
     }
 
     @Override
@@ -223,7 +224,7 @@ public class Credential implements Serializable, AuthResource, AccountAwareResou
                 ", creator='" + creator + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", verificationStatusText='" + verificationStatusText + '\'' +
-                ", verifyPermissions=" + verifyPermissions +
+                ", credentialSettings=" + credentialSettings +
                 ", type=" + type +
                 ", created=" + created +
                 '}';

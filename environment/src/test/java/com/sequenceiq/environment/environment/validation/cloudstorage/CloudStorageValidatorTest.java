@@ -30,6 +30,7 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +47,9 @@ public class CloudStorageValidatorTest {
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @Mock
+    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @InjectMocks
     private CloudStorageValidator underTest;

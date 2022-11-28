@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +76,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidatorTest {
     }
 
     @Test
-    public void testGetFailedActions() {
+    public void testGetFailedActionsWhenSkipOrgPolicyDecisionsIsFalse() {
         Role role = new Role().withArn("testRole");
         EvaluationResult allowEvalResult = new EvaluationResult()
                 .withEvalActionName("doAction")
@@ -90,12 +92,10 @@ public abstract class AwsIDBrokerMappedRolePermissionValidatorTest {
                 .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(false))
                 .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny);
 
-        assertThat(getValidator().getFailedActions(role,
-                Collections.emptyList())).isEqualTo(Collections.emptySortedSet());
+        assertThat(getValidator().getFailedActions(role, Collections.emptyList(), false)).isEqualTo(Collections.emptySortedSet());
 
         List<EvaluationResult> allowEvalResults = Collections.singletonList(allowEvalResult);
-        assertThat(getValidator().getFailedActions(role,
-                allowEvalResults)).isEqualTo(Collections.emptySortedSet());
+        assertThat(getValidator().getFailedActions(role, allowEvalResults, false)).isEqualTo(Collections.emptySortedSet());
 
         SortedSet<String> expectedFailedActions = new TreeSet<>();
         expectedFailedActions.add(String.format("%s:%s:%s", role.getArn(),
@@ -103,12 +103,81 @@ public abstract class AwsIDBrokerMappedRolePermissionValidatorTest {
         expectedFailedActions.add(String.format("%s:%s:%s", role.getArn(),
                 denyEvalResult.getEvalActionName(), denyEvalResult.getEvalResourceName() + " -> Denied by Organization Rule"));
         List<EvaluationResult> denyEvalResults = List.of(denyEvalResult, denyOrganizationsDecisionEvalResult);
-        assertThat(getValidator().getFailedActions(role, denyEvalResults))
-                .isEqualTo(expectedFailedActions);
+        assertThat(getValidator().getFailedActions(role, denyEvalResults, false)) .isEqualTo(expectedFailedActions);
 
         List<EvaluationResult> multipleEvalResults = Arrays.asList(denyEvalResult,
                 allowEvalResult, denyEvalResult, denyEvalResult, denyOrganizationsDecisionEvalResult, allowEvalResult);
-        assertThat(getValidator().getFailedActions(role, multipleEvalResults))
-                .isEqualTo(expectedFailedActions);
+        assertThat(getValidator().getFailedActions(role, multipleEvalResults, false)).isEqualTo(expectedFailedActions);
+    }
+
+    @Test
+    public void testGetFailedActionsWhenSkipOrgPolicyDecisionsIsTrue() {
+        Role role = new Role().withArn("testRole");
+        EvaluationResult denyEvalResult = new EvaluationResult()
+                .withEvalActionName("doAction")
+                .withEvalResourceName("badResource")
+                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny);
+        EvaluationResult denyOrganizationsDecisionEvalResult = new EvaluationResult()
+                .withEvalActionName("doAction")
+                .withEvalResourceName("badResource")
+                .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(false))
+                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny);
+
+        List<EvaluationResult> denyOrganizationResultOnly = List.of(denyOrganizationsDecisionEvalResult);
+        assertThat(getValidator().getFailedActions(role, denyOrganizationResultOnly, true)) .isEmpty();
+
+        SortedSet<String> expectedFailedActions = new TreeSet<>();
+        expectedFailedActions.add(String.format("%s:%s:%s", role.getArn(),
+                denyEvalResult.getEvalActionName(), denyEvalResult.getEvalResourceName()));
+        List<EvaluationResult> denyEvalResults = List.of(denyEvalResult, denyOrganizationsDecisionEvalResult);
+        assertThat(getValidator().getFailedActions(role, denyEvalResults, true)) .isEqualTo(expectedFailedActions);
+    }
+
+    @Test
+    public void testShouldSkipOrgPolicyDeny() {
+        EvaluationResult denyEvalResultWithoutOrgDetails = new EvaluationResult()
+                .withEvalActionName("doAction")
+                .withEvalResourceName("badResource")
+                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny);
+        EvaluationResult denyEvalResultWithOrgDetailsAllow = new EvaluationResult()
+                .withEvalActionName("doAction")
+                .withEvalResourceName("badResource")
+                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny)
+                .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true));
+        EvaluationResult denyEvalResultWithOrgDetailsDeny = new EvaluationResult()
+                .withEvalActionName("doAction")
+                .withEvalResourceName("badResource")
+                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny)
+                .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(false));
+        assertFalse(getValidator().shouldSkipOrgPolicyDeny(denyEvalResultWithoutOrgDetails, false));
+        assertFalse(getValidator().shouldSkipOrgPolicyDeny(denyEvalResultWithOrgDetailsAllow, false));
+        assertFalse(getValidator().shouldSkipOrgPolicyDeny(denyEvalResultWithOrgDetailsDeny, false));
+        assertFalse(getValidator().shouldSkipOrgPolicyDeny(denyEvalResultWithoutOrgDetails, true));
+        assertFalse(getValidator().shouldSkipOrgPolicyDeny(denyEvalResultWithOrgDetailsAllow, true));
+        assertTrue(getValidator().shouldSkipOrgPolicyDeny(denyEvalResultWithOrgDetailsDeny, true));
+    }
+
+    @Test
+    public void testShouldCheckValidationResult() {
+        EvaluationResult denyEvalResultWithoutOrgDetails = new EvaluationResult()
+                .withEvalActionName("doAction")
+                .withEvalResourceName("badResource")
+                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny);
+        EvaluationResult denyEvalResultWithOrgDetailsAllow = new EvaluationResult()
+                .withEvalActionName("doAction")
+                .withEvalResourceName("badResource")
+                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny)
+                .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true));
+        EvaluationResult denyEvalResultWithOrgDetailsDeny = new EvaluationResult()
+                .withEvalActionName("doAction")
+                .withEvalResourceName("badResource")
+                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny)
+                .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(false));
+        assertTrue(getValidator().shouldCheckEvaluationResult(denyEvalResultWithoutOrgDetails, false));
+        assertTrue(getValidator().shouldCheckEvaluationResult(denyEvalResultWithOrgDetailsAllow, false));
+        assertTrue(getValidator().shouldCheckEvaluationResult(denyEvalResultWithOrgDetailsDeny, false));
+        assertTrue(getValidator().shouldCheckEvaluationResult(denyEvalResultWithoutOrgDetails, true));
+        assertTrue(getValidator().shouldCheckEvaluationResult(denyEvalResultWithOrgDetailsAllow, true));
+        assertFalse(getValidator().shouldCheckEvaluationResult(denyEvalResultWithOrgDetailsDeny, true));
     }
 }

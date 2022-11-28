@@ -106,9 +106,7 @@ public class GCPLoadBalancerMetadataCollectorTest {
                 .withUserName("")
                 .build();
 
-        CloudCredential cloudCredential =
-                new CloudCredential("1", "gcp-cred", Collections.singletonMap("projectId", "gcp-cred"),
-                        "acc", false);
+        CloudCredential cloudCredential = new CloudCredential("1", "gcp-cred", Collections.singletonMap("projectId", "gcp-cred"), "acc");
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
 
         when(gcpStackUtil.getProjectId(any())).thenReturn("gcp-cred");

@@ -64,7 +64,10 @@ public class CredentialToCredentialV1ResponseConverter {
         CredentialResponse response = new CredentialResponse();
         response.setCloudPlatform(source.getCloudPlatform());
         response.setName(source.getName());
-        response.setVerifyPermissions(source.isVerifyPermissions());
+        if (source.getCredentialSettings() != null) {
+            response.setVerifyPermissions(source.getCredentialSettings().isVerifyPermissions());
+            response.setSkipOrgPolicyDecisions(source.getCredentialSettings().isSkipOrgPolicyDecisions());
+        }
         response.setVerificationStatusText(source.getVerificationStatusText());
         if (source.getAttributes() != null) {
             convertAttributes(source, response);

@@ -136,8 +136,7 @@ class AwsInstanceConnectorTest {
                 .withLocation(Location.location(Region.region("region")))
                 .withAccountId("account")
                 .build();
-        CloudCredential credential = new CloudCredential("id", "alma",
-                Map.of("accessKey", "ac", "secretKey", "secret"), "acc", false);
+        CloudCredential credential = new CloudCredential("id", "alma", Map.of("accessKey", "ac", "secretKey", "secret"), "acc");
         authenticatedContext = awsAuthenticator.authenticate(context, credential);
 
         StopInstancesResult stopInstancesResult = new StopInstancesResult();

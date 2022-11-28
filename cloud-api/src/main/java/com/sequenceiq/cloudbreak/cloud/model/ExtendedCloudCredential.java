@@ -20,7 +20,7 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description,
         String userCrn, String accountId, List<String> entitlements) {
-        super(cloudCredential.getId(), cloudCredential.getName(), accountId, cloudCredential.isVerifyPermissions());
+        super(cloudCredential.getId(), cloudCredential.getName(), accountId, cloudCredential.getCredentialSettings());
         Map<String, Object> parameters = cloudCredential.getParameters();
         for (Entry<String, Object> parameter : parameters.entrySet()) {
             putParameter(parameter.getKey(), parameter.getValue());

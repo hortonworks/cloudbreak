@@ -25,8 +25,7 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.FileSystemType;
-import com.sequenceiq.datalake.entity.Credential;
-import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.datalake.service.validation.converter.CredentialResponseToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
@@ -51,7 +50,7 @@ public class CloudStorageLocationValidatorTest {
     private static final CloudCredential CLOUD_CREDENTIAL = new CloudCredential("id", "name", "account");
 
     @Mock
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+    private CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter;
 
     @Mock
     private SecretService secretService;
@@ -77,7 +76,7 @@ public class CloudStorageLocationValidatorTest {
         when(environment.getLocation()).thenReturn(locationResponse);
         when(environment.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(environment.getCredential()).thenReturn(new CredentialResponse());
-        when(credentialToCloudCredentialConverter.convert(any(Credential.class))).thenReturn(CLOUD_CREDENTIAL);
+        when(credentialResponseToCloudCredentialConverter.convert(any(CredentialResponse.class))).thenReturn(CLOUD_CREDENTIAL);
     }
 
     @Test

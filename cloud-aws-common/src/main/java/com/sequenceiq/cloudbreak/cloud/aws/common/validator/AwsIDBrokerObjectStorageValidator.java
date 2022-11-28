@@ -67,45 +67,49 @@ public class AwsIDBrokerObjectStorageValidator {
                     cloudFileSystem.getCloudIdentityType(), resultBuilder);
             if (instanceProfile != null) {
                 CloudIdentityType cloudIdentityType = cloudFileSystem.getCloudIdentityType();
+                boolean skipOrgPolicyDecisions = validationRequest.getCredential().getCredentialSettings().isSkipOrgPolicyDecisions();
                 if (CloudIdentityType.ID_BROKER.equals(cloudIdentityType)) {
-                    validateIDBroker(validationRequest, iam, instanceProfile, cloudFileSystem, accountId, resultBuilder);
+                    validateIDBroker(validationRequest, iam, instanceProfile, cloudFileSystem, accountId, skipOrgPolicyDecisions, resultBuilder);
                 } else if (CloudIdentityType.LOG.equals(cloudIdentityType)) {
-                    validateLocation(validationRequest, iam, instanceProfile, cloudFileSystem, accountId, resultBuilder);
+                    validateLocation(validationRequest, iam, instanceProfile, cloudFileSystem, accountId, skipOrgPolicyDecisions, resultBuilder);
                 }
             }
         }
         return resultBuilder.build();
     }
 
-    private void validateIDBroker(ObjectStorageValidateRequest validationRequest,
-            AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
-            CloudS3View cloudFileSystem, String accountId, ValidationResultBuilder resultBuilder) {
+    private void validateIDBroker(ObjectStorageValidateRequest validationRequest, AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
+            CloudS3View cloudFileSystem, String accountId, boolean skipOrgPolicyDecisions, ValidationResultBuilder resultBuilder) {
         LOGGER.info("Permission validation on IBBroker role: {} for operation: {}",
                 instanceProfile.getInstanceProfileName(), validationRequest.getBackupOperationType().name());
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, cloudFileSystem.getCloudIdentityType(), resultBuilder);
         Set<Role> allMappedRoles = getAllMappedRoles(iam, cloudFileSystem, resultBuilder);
         awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, allMappedRoles, resultBuilder);
         awsDataAccessRolePermissionValidator.validate(iam, cloudFileSystem, validationRequest.getBackupLocationBase(),
-                accountId, validationRequest.getBackupOperationType(), resultBuilder);
+                accountId, validationRequest.getBackupOperationType(), resultBuilder, skipOrgPolicyDecisions);
         awsRangerAuditRolePermissionValidator.validate(iam, cloudFileSystem, validationRequest.getBackupLocationBase(),
-                accountId, validationRequest.getBackupOperationType(), resultBuilder);
+                accountId, validationRequest.getBackupOperationType(), resultBuilder, skipOrgPolicyDecisions);
     }
 
     private void validateLocation(ObjectStorageValidateRequest validationRequest, AmazonIdentityManagementClient iam,
-            InstanceProfile instanceProfile, CloudS3View cloudFileSystem,
-            String accountId, ValidationResultBuilder resultBuilder) {
+            InstanceProfile instanceProfile, CloudS3View cloudFileSystem, String accountId, boolean skipOrgPolicyDecisions,
+            ValidationResultBuilder resultBuilder) {
         LOGGER.info("Permission validation on Role: {} for operation: {}",
                 instanceProfile.getInstanceProfileName(), validationRequest.getBackupOperationType().name());
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, cloudFileSystem.getCloudIdentityType(), resultBuilder);
-        awsLogRolePermissionValidator.validateLog(iam, instanceProfile, cloudFileSystem, validationRequest.getLogsLocationBase(), resultBuilder);
+        awsLogRolePermissionValidator.validateLog(iam, instanceProfile, cloudFileSystem, validationRequest.getLogsLocationBase(), skipOrgPolicyDecisions,
+                resultBuilder);
         if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId) &&
                 BackupOperationType.isRestore(validationRequest.getBackupOperationType())) {
             LOGGER.info("Permission validation on backup location: {}", validationRequest.getBackupLocationBase());
-            awsLogRolePermissionValidator.validateBackup(iam, instanceProfile, cloudFileSystem,
-                    Strings.isNullOrEmpty(validationRequest.getBackupLocationBase()) ? validationRequest.getLogsLocationBase()
-                            : validationRequest.getBackupLocationBase(),
-                    resultBuilder);
+            awsLogRolePermissionValidator.validateBackup(iam, instanceProfile, cloudFileSystem, backupLocationBase(validationRequest),
+                    skipOrgPolicyDecisions, resultBuilder);
         }
+    }
+
+    private static String backupLocationBase(ObjectStorageValidateRequest validationRequest) {
+        return Strings.isNullOrEmpty(validationRequest.getBackupLocationBase()) ? validationRequest.getLogsLocationBase()
+                : validationRequest.getBackupLocationBase();
     }
 
     private Set<Role> getAllMappedRoles(AmazonIdentityManagementClient iam, CloudFileSystemView cloudFileSystemView,
