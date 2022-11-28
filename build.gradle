@@ -22,7 +22,7 @@ plugins {
   id "com.github.spotbugs" version "5.0.13"
   id "com.adarshr.test-logger" version "2.1.1"
   id "nebula.blacklist" version "3.1.0"
-//  id 'nebula.lint' version '17.2.3'
+  id 'nebula.lint' version '17.7.1'
 }
 
 def cmPrivateRepoUser = System.getenv("CM_PRIVATE_REPO_USER") ?: "$defaultCmPrivateRepoUser"
@@ -51,6 +51,10 @@ allprojects {
   apply plugin: 'idea'
   apply plugin: 'eclipse'
   apply plugin: 'nebula.blacklist'
+  apply plugin :"nebula.lint"
+  gradleLint {
+    rules=['unused-dependency']
+  }
 
   group = 'com.sequenceiq'
 
