@@ -25,26 +25,40 @@ import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 
 public abstract class AbstractAwsSimulatePolicyValidator {
 
+    public static final String DENIED_BY_ORGANIZATION_RULE = " -> Denied by Organization Rule";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAwsSimulatePolicyValidator.class);
 
     @Inject
     private LocationHelper locationHelper;
 
-    SortedSet<String> getFailedActions(Role role, List<EvaluationResult> evaluationResults) {
+    SortedSet<String> getFailedActions(Role role, List<EvaluationResult> evaluationResults, boolean skipOrgPolicyDecisions) {
+        LOGGER.debug("Collect policy simulation results, skipOrgPolicyDecisions: {}", skipOrgPolicyDecisions);
         return evaluationResults.stream()
                 .filter(this::isEvaluationFailed)
+                .filter(evaluationResult -> shouldCheckEvaluationResult(evaluationResult, skipOrgPolicyDecisions))
                 .peek(evaluationResult -> LOGGER.debug("Aws EvaluationResult for the failed policy simulation: {}", evaluationResult))
                 .map(evaluationResult -> {
                     OrganizationsDecisionDetail organizationsDecisionDetail = evaluationResult.getOrganizationsDecisionDetail();
                     if (organizationsDecisionDetail != null && !organizationsDecisionDetail.getAllowedByOrganizations()) {
                         return String.format("%s:%s:%s", role.getArn(),
-                                evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName() + " -> Denied by Organization Rule");
+                                evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName() + DENIED_BY_ORGANIZATION_RULE);
                     } else {
                         return String.format("%s:%s:%s", role.getArn(),
                                 evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName());
                     }
                 })
                 .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    boolean shouldCheckEvaluationResult(EvaluationResult evaluationResult, boolean skipOrgPolicyDecisions) {
+        return !skipOrgPolicyDecisions || !shouldSkipOrgPolicyDeny(evaluationResult, skipOrgPolicyDecisions);
+    }
+
+    boolean shouldSkipOrgPolicyDeny(EvaluationResult evaluationResult, boolean skipOrgPolicyDecisions) {
+        return skipOrgPolicyDecisions
+                && evaluationResult.getOrganizationsDecisionDetail() != null
+                && !evaluationResult.getOrganizationsDecisionDetail().getAllowedByOrganizations();
     }
 
     SortedSet<String> getWarnings(Role role, List<EvaluationResult> evaluationResults) {

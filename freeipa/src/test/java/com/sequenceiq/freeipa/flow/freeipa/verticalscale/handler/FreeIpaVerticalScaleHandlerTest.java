@@ -72,8 +72,7 @@ public class FreeIpaVerticalScaleHandlerTest {
                 .withAccountId("account")
                 .build();
 
-        CloudCredential credential = new CloudCredential("id", "alma",
-                Map.of("accessKey", "ac", "secretKey", "secret"), "acc", false);
+        CloudCredential credential = new CloudCredential("id", "alma", Map.of("accessKey", "ac", "secretKey", "secret"), "acc");
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
@@ -129,8 +128,7 @@ public class FreeIpaVerticalScaleHandlerTest {
                 .withAccountId("account")
                 .build();
 
-        CloudCredential credential = new CloudCredential("id", "alma",
-                Map.of("accessKey", "ac", "secretKey", "secret"), "acc", false);
+        CloudCredential credential = new CloudCredential("id", "alma", Map.of("accessKey", "ac", "secretKey", "secret"), "acc");
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 

@@ -26,14 +26,12 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidate
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.telemetry.base.LoggingBase;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import com.sequenceiq.datalake.entity.Credential;
-import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.datalake.service.validation.converter.CredentialResponseToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -44,23 +42,20 @@ public class CloudStorageValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudStorageValidator.class);
 
-    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+    private final CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter;
 
     private final EntitlementService entitlementService;
-
-    private final SecretService secretService;
 
     private final CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public CloudStorageValidator(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
-            EntitlementService entitlementService, SecretService secretService,
+    public CloudStorageValidator(CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter,
+            EntitlementService entitlementService,
             CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
+        this.credentialResponseToCloudCredentialConverter = credentialResponseToCloudCredentialConverter;
         this.entitlementService = entitlementService;
-        this.secretService = secretService;
         this.cloudProviderServicesV4Endpoint = cloudProviderServicesV4Endpoint;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
@@ -82,8 +77,7 @@ public class CloudStorageValidator {
 
         LOGGER.info("Validating cloudStorageRequest: {}", JsonUtil.writeValueAsStringSilent(cloudStorageRequest));
         if (cloudStorageRequest != null) {
-            Credential credential = getCredential(environment);
-            CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+            CloudCredential cloudCredential = credentialResponseToCloudCredentialConverter.convert(environment.getCredential());
 
             ObjectStorageValidateRequest request = createObjectStorageValidateRequest(cloudCredential, cloudStorageRequest, environment);
             ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -112,8 +106,7 @@ public class CloudStorageValidator {
             ValidationResult.ValidationResultBuilder validationResultBuilder) {
         String backupLocation = !Strings.isNullOrEmpty(customBackupLocation) ? customBackupLocation : getBackupLocationBase(environment);
         LOGGER.info("Validating backup Location: {}", backupLocation);
-        Credential credential = getCredential(environment);
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+        CloudCredential cloudCredential = credentialResponseToCloudCredentialConverter.convert(environment.getCredential());
         List<StorageLocationBase> locations = cloudStorageRequest.getLocations();
         ObjectStorageValidateRequest request = createBackupLocationValidateRequest(cloudCredential, backupOperationType, cloudStorageRequest,
                 environment, backupLocation);
@@ -188,11 +181,4 @@ public class CloudStorageValidator {
                 .orElse(getLogsLocationBase(environment));
     }
 
-    private Credential getCredential(DetailedEnvironmentResponse environment) {
-        return new Credential(environment.getCloudPlatform(),
-                environment.getCredential().getName(),
-                secretService.getByResponse(environment.getCredential().getAttributes()),
-                environment.getCredential().getCrn(),
-                environment.getCredential().getAccountId());
-    }
 }

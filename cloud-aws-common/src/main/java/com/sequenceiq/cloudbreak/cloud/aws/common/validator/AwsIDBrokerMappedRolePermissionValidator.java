@@ -81,7 +81,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
      * @param validationResultBuilder builder for any errors encountered
      */
     public void validate(AmazonIdentityManagementClient iam, CloudS3View cloudFileSystem, String backupLocation, String accountId,
-            BackupOperationType backupOperationType, ValidationResultBuilder validationResultBuilder) {
+            BackupOperationType backupOperationType, ValidationResultBuilder validationResultBuilder, boolean skipOrgPolicyDecisions) {
         AccountMappingBase accountMappings = cloudFileSystem.getAccountMapping();
         if (accountMappings != null) {
             SortedSet<String> roleArns = getRoleArnsForUsers(getUsers(), accountMappings.getUserMappings());
@@ -103,7 +103,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
                             Lists.newArrayList(getLocations(cloudFileSystem.getLocations()), backupLocation));
                     policies.stream().forEach(p -> LOGGER.info("Policies being validated {}", p.toJson()));
                     List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, role, policies);
-                    failedActions.addAll(getFailedActions(role, evaluationResults));
+                    failedActions.addAll(getFailedActions(role, evaluationResults, skipOrgPolicyDecisions));
                     warnings.addAll(getWarnings(role, evaluationResults));
                 } catch (AmazonIdentityManagementException e) {
                     // Only log the error and keep processing. Failed actions won't be added, but
@@ -127,6 +127,13 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
                                 "Missing policies (chunked):%n%s",
                         String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
                         String.join("\n", failedActions.stream().limit(MAX_SIZE).collect(Collectors.toSet())));
+
+                if (validationErrorMessage.contains(AbstractAwsSimulatePolicyValidator.DENIED_BY_ORGANIZATION_RULE)) {
+                    validationErrorMessage = validationErrorMessage.concat(
+                            "\nPlease note SCPs with global condition keys and whitelisted accounts are not supported in the AWS Policy Simulator " +
+                                    "and may cause validation to fail. Please check the SCPs! You can skip organizational policy related errors at  " +
+                                    "credential settings, but please note that this may hide valid errors!");
+                }
 
                 String fullErrorMessage = String.format("Data Access Role (%s) is not set up correctly. Missing policies:%n%s",
                         String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),

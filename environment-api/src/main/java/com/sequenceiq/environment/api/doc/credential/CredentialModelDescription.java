@@ -25,6 +25,7 @@ public class CredentialModelDescription {
     public static final String ATTRIBUTES = "provider specific attributes of the credential";
     public static final String VERIFICATION_STATUS_TEXT = "verification status text for credential, if empty then there is no verification issue";
     public static final String VERIFY_PERMISSIONS = "verify credential permissions";
+    public static final String SKIP_ORG_POLICY_DECISIONS = "skip organization policy decisions during cloud storage validation";
     public static final String AWS_ROLE_ARN = "the role ARN of the credential";
     public static final String CREATED = "creation time of the credential in long";
 

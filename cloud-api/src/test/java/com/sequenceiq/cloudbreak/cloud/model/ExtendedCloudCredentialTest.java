@@ -27,7 +27,7 @@ class ExtendedCloudCredentialTest {
         when(cloudCredential.getParameters()).thenReturn(parameters);
         when(cloudCredential.getId()).thenReturn("id");
         when(cloudCredential.getName()).thenReturn("name");
-        when(cloudCredential.isVerifyPermissions()).thenReturn(true);
+        when(cloudCredential.getCredentialSettings()).thenReturn(new CloudCredentialSettings(true, false));
 
         ExtendedCloudCredential underTest = new ExtendedCloudCredential(cloudCredential, "AWS",
                 "myCred", "myUser", "accountId", new ArrayList<>());

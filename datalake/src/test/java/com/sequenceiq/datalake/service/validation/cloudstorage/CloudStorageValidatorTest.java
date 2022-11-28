@@ -27,10 +27,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
-import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.datalake.service.validation.converter.CredentialResponseToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -51,10 +50,7 @@ public class CloudStorageValidatorTest {
     private DetailedEnvironmentResponse environment;
 
     @Mock
-    private SecretService secretService;
-
-    @Mock
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+    private CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter;
 
     @Mock
     private CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
@@ -98,11 +94,10 @@ public class CloudStorageValidatorTest {
     public void validateEnvironmentRequestCloudStorageValidation() {
         when(environment.getCloudStorageValidation()).thenReturn(CloudStorageValidation.ENABLED);
         when(environment.getCredential()).thenReturn(new CredentialResponse());
-        when(secretService.getByResponse(any())).thenReturn("secret");
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
-                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
+        when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
         when(entitlementService.cloudStorageValidationEnabled(any())).thenReturn(true);
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
@@ -114,11 +109,10 @@ public class CloudStorageValidatorTest {
     public void validateBackupLocation() {
         when(environment.getCredential()).thenReturn(new CredentialResponse());
         when(environment.getBackupLocation()).thenReturn(BACKUP_LOCATION);
-        when(secretService.getByResponse(any())).thenReturn("secret");
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
-                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
+        when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
 
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
@@ -131,11 +125,10 @@ public class CloudStorageValidatorTest {
     public void validateCustomBackupLocation() {
         ArgumentCaptor<ObjectStorageValidateRequest> captor = ArgumentCaptor.forClass(ObjectStorageValidateRequest.class);
         when(environment.getCredential()).thenReturn(new CredentialResponse());
-        when(secretService.getByResponse(any())).thenReturn("secret");
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
-                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
+        when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
 
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
@@ -154,8 +147,8 @@ public class CloudStorageValidatorTest {
         when(environment.getBackupLocation()).thenReturn(BACKUP_LOCATION);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
-                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
+        when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
 
         ObjectStorageValidateResponse objectStorageValidateResponse = new ObjectStorageValidateResponse();
         objectStorageValidateResponse.setStatus(ResponseStatus.ERROR);
@@ -181,8 +174,8 @@ public class CloudStorageValidatorTest {
         when(environment.getCloudPlatform()).thenReturn("AWS");
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
-                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
+        when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
 
         ObjectStorageValidateResponse objectStorageValidateResponse = new ObjectStorageValidateResponse();
         objectStorageValidateResponse.setStatus(ResponseStatus.ERROR);

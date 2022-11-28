@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.domain.CredentialSettings;
 import com.sequenceiq.environment.credential.v1.converter.aws.AwsCredentialV1ParametersToAwsCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.azure.AzureCredentialRequestParametersToAzureCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.gcp.GcpCredentialV1ParametersToGcpCredentialAttributesConverter;
@@ -48,7 +49,7 @@ public class EditCredentialRequestToCredentialConverter {
         credential.setDescription(editCredentialRequest.getDescription());
         credential.setCloudPlatform(editCredentialRequest.getCloudPlatform());
         credential.setVerificationStatusText(editCredentialRequest.getVerificationStatusText());
-        credential.setVerifyPermissions(editCredentialRequest.isVerifyPermissions());
+        credential.setCredentialSettings(new CredentialSettings(editCredentialRequest.isVerifyPermissions(), editCredentialRequest.isSkipOrgPolicyDecisions()));
         convertAttributes(editCredentialRequest, credential, originalCredential);
         if (editCredentialRequest.getAws() != null) {
             credential.setGovCloud(editCredentialRequest.getAws().getGovCloud());

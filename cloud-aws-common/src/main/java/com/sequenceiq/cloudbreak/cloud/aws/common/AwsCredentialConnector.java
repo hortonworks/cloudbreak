@@ -251,7 +251,7 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     private CloudCredentialStatus verifyCredentialsPermission(CloudCredential cloudCredential, AwsCredentialView awsCredential,
             CloudCredentialStatus credentialStatus) {
-        if (cloudCredential.isVerifyPermissions()) {
+        if (cloudCredential.getCredentialSettings().isVerifyPermissions()) {
             try {
                 String environmentMinimalPoliciesJson = awsPlatformParameters.getEnvironmentMinimalPoliciesJson()
                         .get(getPolicyType(new AwsCredentialView(cloudCredential).isGovernmentCloudEnabled()));

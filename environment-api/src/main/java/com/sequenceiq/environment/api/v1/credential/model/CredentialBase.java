@@ -57,6 +57,9 @@ public abstract class CredentialBase implements Serializable {
     @ApiModelProperty(CredentialModelDescription.VERIFY_PERMISSIONS)
     private boolean verifyPermissions;
 
+    @ApiModelProperty(CredentialModelDescription.SKIP_ORG_POLICY_DECISIONS)
+    private boolean skipOrgPolicyDecisions;
+
     public MockParameters getMock() {
         return mock;
     }
@@ -121,6 +124,14 @@ public abstract class CredentialBase implements Serializable {
         this.verifyPermissions = verifyPermissions;
     }
 
+    public boolean isSkipOrgPolicyDecisions() {
+        return skipOrgPolicyDecisions;
+    }
+
+    public void setSkipOrgPolicyDecisions(boolean skipOrgPolicyDecisions) {
+        this.skipOrgPolicyDecisions = skipOrgPolicyDecisions;
+    }
+
     @Override
     public String toString() {
         return "CredentialBase{" +
@@ -132,6 +143,7 @@ public abstract class CredentialBase implements Serializable {
                 ", description='" + description + '\'' +
                 ", verificationStatusText='" + verificationStatusText + '\'' +
                 ", verifyPermissions=" + verifyPermissions +
+                ", skipOrgPolicyDecisions=" + skipOrgPolicyDecisions +
                 '}';
     }
 }
