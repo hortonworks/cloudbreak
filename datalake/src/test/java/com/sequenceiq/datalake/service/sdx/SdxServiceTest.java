@@ -29,6 +29,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -51,6 +52,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -1735,6 +1737,9 @@ class SdxServiceTest {
     @Test
     public void testUpdateSalt() {
         SdxCluster sdxCluster = getSdxCluster();
+        SdxStatusEntity sdxStatus = new SdxStatusEntity();
+        sdxStatus.setStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatus);
         when(sdxReactorFlowManager.triggerSaltUpdate(sdxCluster)).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         FlowIdentifier flowIdentifier = underTest.updateSalt(sdxCluster);
@@ -1742,5 +1747,20 @@ class SdxServiceTest {
         verify(sdxReactorFlowManager, times(1)).triggerSaltUpdate(sdxCluster);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = DatalakeStatusEnum.class, names = {"STOPPED", "STOP_IN_PROGRESS", "EXTERNAL_DATABASE_DELETION_IN_PROGRESS", "STACK_DELETED",
+            "STACK_DELETION_IN_PROGRESS", "DELETE_REQUESTED", "DELETED", "DELETE_FAILED"}, mode = EnumSource.Mode.INCLUDE)
+    public void testUpdateSaltThrowsBadRequestWhenDatalakeNotAvailable(DatalakeStatusEnum status) {
+        SdxCluster sdxCluster = getSdxCluster();
+        SdxStatusEntity sdxStatus = new SdxStatusEntity();
+        sdxStatus.setStatus(status);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatus);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> underTest.updateSalt(sdxCluster));
+
+        verifyNoInteractions(sdxReactorFlowManager);
+        assertEquals(String.format("SaltStack update cannot be initiated as datalake 'sdx-cluster-name' is currently in '%s' state.", status), ex.getMessage());
     }
 }
