@@ -2,6 +2,8 @@ import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 
 buildscript {
+  apply from: 'dependencies.gradle'
+
   repositories {
     maven { url = "$repoMirrorUrl" }
     maven { url = "$repoUrl" }
