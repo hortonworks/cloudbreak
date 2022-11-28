@@ -33,7 +33,8 @@
         "autoscaling:DetachInstances",
         "autoscaling:DeleteAutoScalingGroup",
         "rds:StopDBInstance",
-        "rds:StartDBInstance"
+        "rds:StartDBInstance",
+        "rds:RebootDBInstance"
       ],
       "Resource": "*",
       "Condition": {
