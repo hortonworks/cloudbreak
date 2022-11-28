@@ -189,8 +189,17 @@ public class SaltConnector implements Closeable {
         if ("state.show_sls".equals(fun)) {
             form.param("full_return", "True");
         }
-        form = addExtraArguments(clientType, form, arg);
-
+        if (arg != null) {
+            if (clientType.equals(SaltClientType.LOCAL) || clientType.equals(SaltClientType.LOCAL_ASYNC)) {
+                for (String a : arg) {
+                    form.param("arg", a);
+                }
+            } else {
+                for (int i = 0; i < arg.length - 1; i += 2) {
+                    form.param(arg[i], arg[i + 1]);
+                }
+            }
+        }
         Response response = endpointInvocation(SaltEndpoint.SALT_RUN.getContextPath(), toJson(form.asMap()).getBytes())
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
@@ -234,26 +243,6 @@ public class SaltConnector implements Closeable {
         LOGGER.debug("Executing salt upload with permission. targets: {}, path: {}, fileName: {}, permission: {}", targets, path, fileName, permission);
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, permission, content);
         return getGenericResponses(targets, path, fileName, content, distributeResponse);
-    }
-
-    private Form addExtraArguments(SaltClientType clientType, Form form, String[] arg) {
-        if (arg != null) {
-            if (clientType.equals(SaltClientType.LOCAL) || clientType.equals(SaltClientType.LOCAL_ASYNC)) {
-                for (String a : arg) {
-                    form.param("arg", a);
-                }
-                // This is needed because of a bug in Saltstack 3005.1, which will be only fixed in 3006.x
-                // see details at: https://github.com/saltstack/salt/issues/62624
-                if (arg.length < 2) {
-                    form.param("arg", "s3005fix=true");
-                }
-            } else {
-                for (int i = 0; i < arg.length - 1; i += 2) {
-                    form.param(arg[i], arg[i + 1]);
-                }
-            }
-        }
-        return form;
     }
 
     private GenericResponses getGenericResponses(Iterable<String> targets, String path, String fileName, byte[] content, Response distributeResponse)
