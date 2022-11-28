@@ -46,6 +46,11 @@ RANGERGROUP="$5"
 CLOSECONNECTIONS="$6"
 DATABASENAMES="${@: 7}"
 
+# Root directory for local postgres dump.
+BACKUPS_DIR="/var/tmp/"
+# Directory for the current postgres dump.
+DATE_DIR=${BACKUPS_DIR}/$(date '+%Y-%m-%dT%H:%M:%SZ')
+
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 {% if postgresql.ssl_enabled == True %}
 export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
@@ -53,6 +58,10 @@ export PGSSLMODE=verify-full
 {%- endif %}
 
 errorExit() {
+  if [ -d "$DATE_DIR" ]; then
+    rm -rf -v "$DATE_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
+    doLog "Removed directory $DATE_DIR"
+  fi
   doLog "ERROR $1"
   exit 1
 }
@@ -164,8 +173,6 @@ backup_database_for_service() {
 }
 
 run_backup() {
-  BACKUPS_DIR="/var/tmp/"
-  DATE_DIR=${BACKUPS_DIR}/$(date '+%Y-%m-%dT%H:%M:%SZ')
   mkdir -p "$DATE_DIR" || error_exit "Could not create local directory for backups."
 
   doLog "INFO Conditional variable for closing connections to database during backup is set to ${CLOSECONNECTIONS}"
