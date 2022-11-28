@@ -40,8 +40,9 @@ import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringAuthConfig;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.CdpCredential;
@@ -66,7 +67,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private final DataBusEndpointProvider dataBusEndpointProvider;
 
-    private final MonitoringConfigService monitoringConfigService;
+    private final MonitoringUrlResolver monitoringUrlResolver;
 
     private final ComponentConfigProviderService componentConfigProviderService;
 
@@ -74,14 +75,15 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             VmLogsService vmLogsService,
             EntitlementService entitlementService,
             DataBusEndpointProvider dataBusEndpointProvider,
-            MonitoringConfigService monitoringConfigService,
+            MonitoringConfiguration monitoringConfiguration,
             ComponentConfigProviderService componentConfigProviderService,
             @Value("${info.app.version:}") String version) {
         this.altusMachineUserService = altusMachineUserService;
         this.vmLogsService = vmLogsService;
         this.entitlementService = entitlementService;
         this.dataBusEndpointProvider = dataBusEndpointProvider;
-        this.monitoringConfigService = monitoringConfigService;
+        this.monitoringUrlResolver = new MonitoringUrlResolver(
+                monitoringConfiguration.getRemoteWriteUrl(), monitoringConfiguration.getPaasRemoteWriteUrl());
         this.componentConfigProviderService = componentConfigProviderService;
         this.version = version;
     }
@@ -140,7 +142,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         Telemetry telemetry = telemetryContext.getTelemetry();
         NodeStatusContext nodeStatusContext = telemetryContext.getNodeStatusContext();
         builder.withClusterType(MonitoringClusterType.CLOUDERA_MANAGER);
-        if (entitlementService.isComputeMonitoringEnabled(accountId) && telemetry.isComputeMonitoringEnabled()) {
+        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
             builder.enabled();
             MonitoringCredential credential = getOrRefreshMonitoringCredential(stack, accountId, telemetry, monitoringCredential, cdpAccessKeyType);
             builder.withCredential(credential);
@@ -153,14 +155,17 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
                 builder.withCmAutoTls(cluster.getAutoTlsEnabled());
             }
             builder.withCmAuth(cmAuthConfig);
+            if (telemetry.isComputeMonitoringEnabled()) {
+                LOGGER.info("Configuring monitoring url: {}", telemetry.getMonitoring().getRemoteWriteUrl());
+                builder.withRemoteWriteUrl(telemetry.getMonitoring().getRemoteWriteUrl());
+            } else {
+                builder.withRemoteWriteUrl(monitoringUrlResolver.resolve(accountId, entitlementService.isCdpSaasEnabled(accountId)));
+            }
         }
         if (entitlementService.isCdpSaasEnabled(accountId)) {
             builder.withServiceType(MonitoringServiceType.SAAS);
         }
         builder.withSharedPassword(nodeStatusContext.getPassword());
-        if (telemetry.getMonitoring() != null) {
-            builder.withRemoteWriteUrl(telemetry.getMonitoring().getRemoteWriteUrl());
-        }
         return builder.build();
     }
 
@@ -236,7 +241,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private MonitoringCredential getOrRefreshMonitoringCredential(StackView stack, String accountId, Telemetry telemetry, MonitoringCredential credential,
             CdpAccessKeyType cdpAccessKeyType) {
-        return getAltusCredential(accountId, telemetry, credential, "Monitoring", altusMachineUserService::isAnyMonitoringFeatureSupported,
+        return getAltusCredential(accountId, telemetry, credential, "Monitoring", t -> entitlementService.isComputeMonitoringEnabled(accountId),
                 () -> {
                     Optional<AltusCredential> altusCredential = altusMachineUserService.generateMonitoringMachineUser(stack, telemetry, cdpAccessKeyType);
                     return altusMachineUserService.storeMonitoringCredential(altusCredential, stack, cdpAccessKeyType);

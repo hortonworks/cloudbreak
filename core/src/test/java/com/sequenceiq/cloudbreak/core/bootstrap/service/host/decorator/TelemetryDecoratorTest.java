@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
@@ -49,7 +49,7 @@ public class TelemetryDecoratorTest {
     private TelemetryDecorator underTest;
 
     @Mock
-    private MonitoringConfigService monitoringConfigService;
+    private MonitoringConfiguration monitoringConfiguration;
 
     @Mock
     private AltusMachineUserService altusMachineUserService;
@@ -79,7 +79,7 @@ public class TelemetryDecoratorTest {
     public void setUp() {
         initMocks();
         underTest = new TelemetryDecorator(altusMachineUserService, vmLogsService, entitlementService,
-                dataBusEndpointProvider, monitoringConfigService, componentConfigProviderService, "1.0.0");
+                dataBusEndpointProvider, monitoringConfiguration, componentConfigProviderService, "1.0.0");
     }
 
     @Test

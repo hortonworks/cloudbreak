@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -33,23 +34,19 @@ import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParame
 @Component
 public class TelemetryApiConverter {
 
-    private static final String ACCOUNT_ID_TEMPLATE = "$accountid";
-
     private final boolean clusterLogsCollection;
 
     private final boolean useSharedAltusCredential;
 
-    private final String monitoringEndpointConfig;
-
-    private final String monitoringPaasEndpointConfig;
+    private final MonitoringUrlResolver monitoringUrlResolver;
 
     private final EntitlementService entitlementService;
 
     public TelemetryApiConverter(TelemetryConfiguration configuration, EntitlementService entitlementService) {
         this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
         this.entitlementService = entitlementService;
-        this.monitoringEndpointConfig = configuration.getMonitoringConfiguration().getRemoteWriteUrl();
-        this.monitoringPaasEndpointConfig = configuration.getMonitoringConfiguration().getPaasRemoteWriteUrl();
+        this.monitoringUrlResolver = new MonitoringUrlResolver(
+                configuration.getMonitoringConfiguration().getRemoteWriteUrl(), configuration.getMonitoringConfiguration().getPaasRemoteWriteUrl());
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
     }
 
@@ -155,13 +152,10 @@ public class TelemetryApiConverter {
     private EnvironmentMonitoring createMonitoringFromRequest(MonitoringRequest monitoringRequest, String accountId) {
         EnvironmentMonitoring monitoring = new EnvironmentMonitoring();
         if (entitlementService.isComputeMonitoringEnabled(accountId)) {
-            String unformattedMonitoringEndpoint = getUnformattedMonitoringEndpoint(accountId);
-            if (monitoringRequest != null) {
-                String preEndpoint = StringUtils.isNotBlank(monitoringRequest.getRemoteWriteUrl())
-                        ? monitoringRequest.getRemoteWriteUrl() : unformattedMonitoringEndpoint;
-                monitoring.setRemoteWriteUrl(replaceAccountId(preEndpoint, accountId));
+            if (monitoringRequest != null && StringUtils.isNotBlank(monitoringRequest.getRemoteWriteUrl())) {
+                monitoring.setRemoteWriteUrl(monitoringUrlResolver.resolve(accountId, monitoringRequest.getRemoteWriteUrl()));
             } else {
-                monitoring.setRemoteWriteUrl(replaceAccountId(unformattedMonitoringEndpoint, accountId));
+                monitoring.setRemoteWriteUrl(monitoringUrlResolver.resolve(accountId, entitlementService.isCdpSaasEnabled(accountId)));
             }
         }
         return monitoring;
@@ -321,17 +315,5 @@ public class TelemetryApiConverter {
             gcsCloudStorageV1Parameters.setServiceAccountEmail(gcs.getServiceAccountEmail());
         }
         return gcsCloudStorageV1Parameters;
-    }
-
-    private String replaceAccountId(String endpoint, String accountId) {
-        if (StringUtils.isNoneBlank(endpoint, accountId)) {
-            endpoint = endpoint.replace(ACCOUNT_ID_TEMPLATE, accountId);
-        }
-        return endpoint;
-    }
-
-    private String getUnformattedMonitoringEndpoint(String accountId) {
-        return entitlementService.isCdpSaasEnabled(accountId) || StringUtils.isBlank(monitoringPaasEndpointConfig)
-                ? monitoringEndpointConfig : monitoringPaasEndpointConfig;
     }
 }
