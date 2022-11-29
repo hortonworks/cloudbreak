@@ -163,7 +163,9 @@ public class AwsUpscaleService {
             List<com.amazonaws.services.ec2.model.Instance> instancesForGroup =
                     awsMetadataCollector.collectInstancesForGroup(ac, amazonASClient, amazonEC2Client, cloudFormationClient, group.getName());
             for (com.amazonaws.services.ec2.model.Instance i : instancesForGroup) {
-                if (getAllowedInstanceStates(ac.getCloudCredential().getAccountId()).noneMatch(state -> state.equalsIgnoreCase(i.getState().getName()))) {
+                List<String> allowedInstanceStates = getAllowedInstanceStates(ac.getCloudCredential().getAccountId());
+                LOGGER.info("Allowed instance states in the scaled group: {}", allowedInstanceStates);
+                if (allowedInstanceStates.stream().noneMatch(state -> state.equalsIgnoreCase(i.getState().getName()))) {
                     throw new RuntimeException(String.format("Instance (%s) in the group (%s) is not running (%s).",
                             i.getInstanceId(), group.getName(), i.getState().getName()));
                 }
@@ -171,13 +173,12 @@ public class AwsUpscaleService {
         }
     }
 
-    private Stream<String> getAllowedInstanceStates(String accountId) {
-        Stream<String> result = Stream.of("running");
+    private List<String> getAllowedInstanceStates(String accountId) {
         if (entitlementService.isUnboundEliminationSupported(accountId) && entitlementService.targetedUpscaleSupported(accountId)) {
-            result = Stream.of("running", "stopped");
+            return List.of("running", "stopped");
+        } else {
+            return List.of("running");
         }
-        LOGGER.info("Allowed instance states in the scaled group: {}", result.collect(Collectors.joining(",")));
-        return result;
     }
 
     private void sendASGUpdateFailedMessage(AmazonAutoScalingClient amazonASClient, Map<String, Group> desiredAutoscalingGroupsByName,
