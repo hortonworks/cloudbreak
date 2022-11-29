@@ -2,6 +2,8 @@ package com.sequenceiq.redbeams.flow.redbeams.start.handler;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -13,11 +15,15 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.CertRotateInRedbeamsRequest;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.CertRotateInRedbeamsSuccess;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerFailed;
+import com.sequenceiq.redbeams.service.stack.DBStackUpdater;
 
 @Component
 public class CertRotateInRedbeamsHandler extends ExceptionCatcherEventHandler<CertRotateInRedbeamsRequest> {
 
     private static final Logger LOGGER = getLogger(CertRotateInRedbeamsHandler.class);
+
+    @Inject
+    private DBStackUpdater dbStackUpdater;
 
     @Override
     public String selector() {
@@ -34,7 +40,7 @@ public class CertRotateInRedbeamsHandler extends ExceptionCatcherEventHandler<Ce
     protected Selectable doAccept(HandlerEvent<CertRotateInRedbeamsRequest> event) {
         LOGGER.debug("CERT rotation has been started");
         CertRotateInRedbeamsRequest data = event.getData();
-        LOGGER.debug("Skeleton of cert rotation in RedBeams");
+        dbStackUpdater.updateSslConfig(data.getResourceId());
         return new CertRotateInRedbeamsSuccess(data.getResourceId());
     }
 }
