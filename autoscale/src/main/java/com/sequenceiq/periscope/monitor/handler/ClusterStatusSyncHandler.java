@@ -69,8 +69,8 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         DependentHostGroupsV4Response dependentHostGroupsResponse = dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(cluster.getStackCrn(),
                 policyHostGroups);
 
-        boolean cmAvailable = cmCommunicator.isClusterManagerRunning(cluster);
-        boolean clusterAvailable = determineClusterAvailability(cluster, stackResponse, dependentHostGroupsResponse, policyHostGroups) && cmAvailable;
+        boolean clusterAvailable = determineClusterAvailability(cluster, stackResponse, dependentHostGroupsResponse, policyHostGroups) &&
+                cmCommunicator.isClusterManagerRunning(cluster);
 
         LOGGER.info("Computed clusterAvailable: {}", clusterAvailable);
         LOGGER.info("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", stackResponse, cluster.getStackCrn(), clusterAvailable);

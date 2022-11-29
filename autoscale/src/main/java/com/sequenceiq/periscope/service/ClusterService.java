@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
@@ -30,6 +31,7 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
+import com.sequenceiq.periscope.domain.ScalingTrigger;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.domain.UpdateFailedDetails;
 import com.sequenceiq.periscope.model.MonitoredStack;
@@ -62,6 +64,9 @@ public class ClusterService {
 
     @Inject
     private SecurityConfigService securityConfigService;
+
+    @Inject
+    private ScalingTriggerService scalingTriggerService;
 
     @Inject
     private CloudbreakMessagesService messagesService;
@@ -168,6 +173,9 @@ public class ClusterService {
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
         LoggingUtils.buildMdcContext(cluster);
+        Set<Long> scalingTriggerIdsForCluster = scalingTriggerService.findAllForCluster(clusterId)
+                .stream().map(ScalingTrigger::getId).collect(Collectors.toSet());
+        scalingTriggerService.deleteScalingTriggers(scalingTriggerIdsForCluster);
         clusterRepository.delete(cluster);
         calculateClusterStateMetrics();
     }

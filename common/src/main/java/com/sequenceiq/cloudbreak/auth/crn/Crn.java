@@ -376,6 +376,7 @@ public class Crn {
         ACCOUNT_TAG("accountTag"),
         ACCOUNT_TELEMETRY("accountTelemetry"),
         DATAHUB_AUTOSCALE_CONFIG("datahubAutoscaleConfig"),
+        DATAHUB_AUTOSCALE_TRIGGER("datahubAutoscaleTrigger"),
         PROXY_CONIFG("proxyConfig"),
         SERVICE("service"),
         AGENT("agent"),
