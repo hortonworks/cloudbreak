@@ -131,7 +131,7 @@ dependencyManagement {
         dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
         dependency group: 'javax.xml.bind',                name: 'jaxb-api',                       version: '2.3.0'
         dependency group: 'com.sun.xml.bind',              name: 'jaxb-impl',                      version: '2.3.0'
-        dependency group: 'org.glassfish.jaxb',            name: 'jaxb-runtime',                   version: '2.3.0'
+        dependency group: 'org.glassfish.jaxb',            name: 'jaxb-runtime',                   version: '4.0.1'
         dependency group: 'org.springframework',           name: 'spring-context-support',         version: springFrameworkVersion
         dependency group: 'com.zaxxer',                    name: 'HikariCP',                       version: '3.2.0'
 
