@@ -458,9 +458,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (gcpProperties.getBaseimage().getImageId() == null || gcpProperties.getBaseimage().getImageId().isEmpty()) {
-            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.GCP.name(), false);
-            gcpProperties.getBaseimage().setImageId(imageId);
-            return imageId;
+            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.GCP.name(), false);
         } else {
             return getLatestBaseImageID();
         }
