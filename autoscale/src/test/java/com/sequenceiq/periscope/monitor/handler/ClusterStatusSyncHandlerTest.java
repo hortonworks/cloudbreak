@@ -266,7 +266,6 @@ class ClusterStatusSyncHandlerTest {
                 Set.of("gateway1"), InstanceStatus.SERVICES_UNHEALTHY));
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
-        when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -283,7 +282,6 @@ class ClusterStatusSyncHandlerTest {
                 Set.of("master", "gateway1"), InstanceStatus.SERVICES_UNHEALTHY));
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
-        when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -351,7 +349,6 @@ class ClusterStatusSyncHandlerTest {
                 "gateway1"), InstanceStatus.SERVICES_HEALTHY));
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
-        when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -368,7 +365,6 @@ class ClusterStatusSyncHandlerTest {
                 "gateway1"), InstanceStatus.SERVICES_HEALTHY));
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
-        when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 

@@ -64,6 +64,9 @@ public class ClusterService {
     private SecurityConfigService securityConfigService;
 
     @Inject
+    private ScalingActivityService scalingActivityService;
+
+    @Inject
     private CloudbreakMessagesService messagesService;
 
     @Inject
@@ -168,8 +171,13 @@ public class ClusterService {
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
         LoggingUtils.buildMdcContext(cluster);
+        clearScalingActivityForCluster(clusterId);
         clusterRepository.delete(cluster);
         calculateClusterStateMetrics();
+    }
+
+    private void clearScalingActivityForCluster(Long clusterId) {
+        scalingActivityService.deleteScalingActivityForCluster(clusterId);
     }
 
     public Cluster updateScalingConfiguration(Long clusterId, ScalingConfigurationRequest scalingConfiguration) {

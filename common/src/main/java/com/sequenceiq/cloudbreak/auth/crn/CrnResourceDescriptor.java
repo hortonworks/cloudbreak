@@ -38,6 +38,7 @@ public enum CrnResourceDescriptor {
     DATALAKE(Crn.ResourceType.DATALAKE, Crn.Service.DATALAKE),
     // periscope (autoscale) service
     ALERT(Crn.ResourceType.DATAHUB_AUTOSCALE_CONFIG, Crn.Service.AUTOSCALE),
+    SCALING_ACTIVITY(Crn.ResourceType.DATAHUB_AUTOSCALE_ACTIVITY, Crn.Service.AUTOSCALE),
     // DFX service
     DFX_INTERIM(Crn.ResourceType.ENVIRONMENT, Crn.Service.DF),
     DFX(Crn.ResourceType.SERVICE, Crn.Service.DF),
