@@ -41,7 +41,9 @@ import com.sequenceiq.cloudbreak.telemetry.context.NodeStatusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
@@ -95,6 +97,9 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
 
     @Inject
     private TelemetryFeatureService telemetryFeatureService;
+
+    @Inject
+    private MonitoringConfiguration monitoringConfiguration;
 
     @Override
     public Map<String, SaltPillarProperties> createTelemetryConfigs(Long stackId, Set<TelemetryComponentType> components) {
@@ -152,15 +157,19 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             } catch (IOException e) {
                 throw new CloudbreakServiceException(e);
             }
+            if (telemetry.isComputeMonitoringEnabled()) {
+                builder.withRemoteWriteUrl(telemetry.getMonitoring().getRemoteWriteUrl());
+            } else {
+                MonitoringUrlResolver monitoringUrlResolver = new MonitoringUrlResolver(
+                        monitoringConfiguration.getRemoteWriteUrl(), monitoringConfiguration.getPaasRemoteWriteUrl());
+                builder.withRemoteWriteUrl(monitoringUrlResolver.resolve(stack.getAccountId(), entitlementService.isCdpSaasEnabled(stack.getAccountId())));
+            }
         }
         if (entitlementService.isCdpSaasEnabled(stack.getAccountId())) {
             builder.withServiceType(MonitoringServiceType.SAAS);
         }
         builder.withClusterType(MonitoringClusterType.FREEIPA);
         builder.withSharedPassword(nodeStatusContext.getPassword());
-        if (telemetry.getMonitoring() != null) {
-            builder.withRemoteWriteUrl(telemetry.getMonitoring().getRemoteWriteUrl());
-        }
         return builder.build();
     }
 
