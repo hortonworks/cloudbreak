@@ -248,9 +248,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (mockProperties.getBaseimage().getRedhat7().getImageId() == null || mockProperties.getBaseimage().getRedhat7().getImageId().isEmpty()) {
-            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.MOCK.name(), false);
-            mockProperties.getBaseimage().getRedhat7().setImageId(imageId);
-            return imageId;
+            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.MOCK.name(), false);
         } else {
             return getLatestBaseImageID();
         }

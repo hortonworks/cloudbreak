@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
@@ -52,8 +53,8 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
 
         testContext
                 .given(sdx, SdxTestDto.class)
-                .withCloudStorage()
-                .withExternalDatabase(sdxDatabaseRequest)
+                    .withCloudStorage()
+                    .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
@@ -76,6 +77,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
         String stack = resourcePropertyProvider().getName();
         String masterInstanceGroup = "master";
         String idbrokerInstanceGroup = "idbroker";
+        CloudProvider cloudProvider = testContext.getCloudProvider();
         AtomicReference<String> selectedImageID = new AtomicReference<>();
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
@@ -84,21 +86,31 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
         testContext
                 .given(imageCatalog, ImageCatalogTestDto.class)
                 .when((tc, dto, client) -> {
-                    selectedImageID.set(testContext.getCloudProvider().getLatestBaseImageID(tc, dto, client));
+                    selectedImageID.set(cloudProvider.getLatestBaseImageID(tc, dto, client));
                     return dto;
                 })
                 .given(imageSettings, ImageSettingsTestDto.class)
+                    .withImageCatalog(cloudProvider.getImageCatalogName())
+                    .withImageId(selectedImageID.get())
                 .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class).withBlueprintName(getDefaultSDXBlueprintName()).withValidateBlueprint(Boolean.FALSE)
-                .withClouderaManager(clouderaManager)
-                .given(masterInstanceGroup, InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
-                .given(idbrokerInstanceGroup, InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1)
-                .given(stack, StackTestDto.class).withCluster(cluster).withImageSettings(imageSettings)
-                .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
+                .given(cluster, ClusterTestDto.class)
+                    .withBlueprintName(getDefaultSDXBlueprintName())
+                    .withValidateBlueprint(Boolean.FALSE)
+                    .withClouderaManager(clouderaManager)
+                .given(masterInstanceGroup, InstanceGroupTestDto.class)
+                    .withHostGroup(MASTER)
+                    .withNodeCount(1)
+                .given(idbrokerInstanceGroup, InstanceGroupTestDto.class)
+                    .withHostGroup(IDBROKER)
+                    .withNodeCount(1)
+                .given(stack, StackTestDto.class)
+                    .withCluster(cluster)
+                    .withImageSettings(imageSettings)
+                    .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withDatabase(sdxDatabaseRequest)
-                .withCloudStorage(getCloudStorageRequest(testContext))
-                .withStackRequest(key(cluster), key(stack))
+                    .withDatabase(sdxDatabaseRequest)
+                    .withCloudStorage(getCloudStorageRequest(testContext))
+                    .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()

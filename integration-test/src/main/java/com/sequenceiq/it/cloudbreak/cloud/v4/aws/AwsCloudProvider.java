@@ -408,9 +408,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
-            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), getGovCloud());
-            awsProperties.getBaseimage().setImageId(imageId);
-            return imageId;
+            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), getGovCloud());
         } else {
             return getLatestBaseImageID();
         }

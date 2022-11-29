@@ -424,9 +424,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (azureProperties.getBaseimage().getImageId() == null || azureProperties.getBaseimage().getImageId().isEmpty()) {
-            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AZURE.name(), false);
-            azureProperties.getBaseimage().setImageId(imageId);
-            return imageId;
+            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AZURE.name(), false);
         } else {
             return getLatestBaseImageID();
         }

@@ -241,9 +241,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (yarnProperties.getBaseimage().getImageId() == null || yarnProperties.getBaseimage().getImageId().isEmpty()) {
-            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.YARN.name(), false);
-            yarnProperties.getBaseimage().setImageId(imageId);
-            return imageId;
+            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.YARN.name(), false);
         } else {
             return getLatestBaseImageID();
         }
