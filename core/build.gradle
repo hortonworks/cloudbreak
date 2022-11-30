@@ -145,7 +145,6 @@ dependencyManagement {
     dependency (group: 'io.swagger',                        name: 'swagger-jersey2-jaxrs',       version: swaggerVersion) {
       exclude 'org.yaml:snakeyaml'
     }
-    dependency group: 'javax.mail',                         name: 'mail',                        version: '1.5.0-b01'
     dependency group: 'dnsjava',                            name: 'dnsjava',                     version: '2.1.7'
 
     dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: '1.2.0.RELEASE'
@@ -196,7 +195,6 @@ dependencies {
   implementation group: 'net.jcip',                           name: 'jcip-annotations'
   implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2'
 
-  implementation group: 'javax.mail',                         name: 'mail'
   implementation group: 'dnsjava',                            name: 'dnsjava'
 
   implementation group: 'io.springfox',                       name: 'springfox-boot-starter'
