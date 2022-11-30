@@ -19,10 +19,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 public class KnoxServiceConfigProviderTest {
 
@@ -62,7 +62,7 @@ public class KnoxServiceConfigProviderTest {
         CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", blueprintTextProcessor);
-        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getConnectionPassword()).thenReturn("pw");
         when(rdsConfig.getConnectionUserName()).thenReturn("usr");
         when(rdsConfig.getType()).thenReturn(DatabaseType.KNOX_GATEWAY.name());
@@ -70,7 +70,7 @@ public class KnoxServiceConfigProviderTest {
         TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withRdsSslCertificateFilePath("file://path")
-                .withRdsConfigs(Set.of(rdsConfig))
+                .withRdsViews(Set.of(rdsConfig))
                 .withProductDetails(new ClouderaManagerRepo().withVersion(cmVersion),
                         List.of(new ClouderaManagerProduct()
                                 .withVersion(cdhVersion)

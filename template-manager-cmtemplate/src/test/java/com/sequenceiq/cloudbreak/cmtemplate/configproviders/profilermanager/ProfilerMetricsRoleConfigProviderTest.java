@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
+import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -71,7 +73,11 @@ public class ProfilerMetricsRoleConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
         return Builder.builder().withHostgroupViews(Set.of(master, worker))
-                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_METRIC))).build();
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_METRIC))
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
+                .build();
     }
 
     @Test
@@ -83,7 +89,10 @@ public class ProfilerMetricsRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, gateway))
-                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_METRIC)))
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_METRIC))
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
                 .build();
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs =

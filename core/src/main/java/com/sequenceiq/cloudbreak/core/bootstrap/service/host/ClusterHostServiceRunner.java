@@ -113,6 +113,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
+import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -244,6 +245,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private NameserverPillarDecorator nameserverPillarDecorator;
+
+    @Inject
+    private RdsViewProvider rdsViewProvider;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto, Map<String, String> candidateAddresses) {
         try {
@@ -568,7 +572,7 @@ public class ClusterHostServiceRunner {
         if (clouderaManagerRdsConfig == null) {
             throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stackDto");
         }
-        RdsView rdsView = new RdsView(clouderaManagerRdsConfig);
+        RdsView rdsView = rdsViewProvider.getRdsView(clouderaManagerRdsConfig);
         servicePillar.put("cloudera-manager-database",
                 new SaltPillarProperties("/cloudera-manager/database.sls", singletonMap("cloudera-manager", singletonMap("database", rdsView))));
     }

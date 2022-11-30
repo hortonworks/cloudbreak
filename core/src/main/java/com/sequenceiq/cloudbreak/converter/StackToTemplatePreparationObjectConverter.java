@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -85,6 +86,8 @@ import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
+import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.GatewayView;
@@ -193,6 +196,9 @@ public class StackToTemplatePreparationObjectConverter {
     @Inject
     private CustomConfigurationsService customConfigurationsService;
 
+    @Inject
+    private RdsViewProvider rdsViewProvider;
+
     public TemplatePreparationObject convert(StackDtoDelegate source) {
         try {
             Map<String, Collection<ClusterExposedServiceView>> views = serviceEndpointCollector
@@ -228,11 +234,16 @@ public class StackToTemplatePreparationObjectConverter {
 
             BlueprintView blueprintView = blueprintViewProvider.getBlueprintView(source.getBlueprint());
             Optional<String> version = Optional.ofNullable(blueprintView.getVersion());
+            String sslCertsFilePath = dbCertificateProvider.getSslCertsFilePath();
+            Set<RdsConfigWithoutCluster> rdsConfigWithoutClusters = postgresConfigService.createRdsConfigIfNeeded(source);
+            Set<RdsView> rdsViews = rdsConfigWithoutClusters.stream()
+                    .map(e -> rdsViewProvider.getRdsView(e, sslCertsFilePath))
+                    .collect(Collectors.toSet());
 
             Builder builder = Builder.builder()
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
-                    .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source))
-                    .withRdsSslCertificateFilePath(dbCertificateProvider.getSslCertsFilePath())
+                    .withRdsViews(rdsViews)
+                    .withRdsSslCertificateFilePath(sslCertsFilePath)
                     .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed(version))
                     .withIdBroker(idbroker)
                     .withCustomConfigurationsView(getCustomConfigurationsView(source.getStack(), cluster))

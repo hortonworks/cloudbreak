@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -68,7 +70,10 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
         return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withHostgroupViews(Set.of(master, worker))
-                .withRdsConfigs(Set.of(rdsConfig))
+                .withRdsViews(Set.of(rdsConfig)
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
                 .build();
     }
 

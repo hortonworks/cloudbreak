@@ -75,6 +75,8 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
+import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -213,6 +215,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Mock
     private StackV4RequestToGatewayConverter stackV4RequestToGatewayConverter;
 
+    @Mock
+    private RdsViewProvider rdsViewProvider;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -268,7 +273,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(source);
 
-        assertTrue(result.getRdsConfigs().isEmpty());
+        assertTrue(result.getRdsViews().isEmpty());
     }
 
     @Test
@@ -277,14 +282,17 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(cluster.getDatabases()).thenReturn(rdsConfigNames);
         int i = 0;
         Set<RdsConfigWithoutCluster> rdsConfigs = new HashSet<>();
+        RdsViewProvider realRdsViewProvider = new RdsViewProvider();
         for (String rdsConfigName : rdsConfigNames) {
             RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.values()[i++]);
             rdsConfigs.add(rdsConfig);
+            RdsView rdsView = realRdsViewProvider.getRdsView(rdsConfig);
+            when(rdsViewProvider.getRdsView(rdsConfig)).thenReturn(rdsView);
             when(rdsConfig.getName()).thenReturn(rdsConfigName);
         }
         when(rdsConfigWithoutClusterService.findAllByNamesAndWorkspaceId(rdsConfigNames, workspace)).thenReturn(rdsConfigs);
         TemplatePreparationObject result = underTest.convert(source);
-        assertEquals(rdsConfigNames.size(), result.getRdsConfigs().size());
+        assertEquals(rdsConfigNames.size(), result.getRdsViews().size());
     }
 
     @Test

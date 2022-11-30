@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 public class TemplatePreparationObject {
@@ -54,7 +54,7 @@ public class TemplatePreparationObject {
 
     private final BlueprintView blueprintView;
 
-    private final Map<String, RdsConfigWithoutCluster> rdsConfigs;
+    private final Map<String, RdsView> rdsViews;
 
     private final String rdsSslCertificateFilePath;
 
@@ -96,7 +96,7 @@ public class TemplatePreparationObject {
 
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
-        rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
+        rdsViews = builder.rdsViews.stream().collect(Collectors.toMap(
                 rdsConfig -> rdsConfig.getType().toLowerCase(),
                 Function.identity()
         ));
@@ -139,12 +139,12 @@ public class TemplatePreparationObject {
         return customConfigurationsView;
     }
 
-    public Set<RdsConfigWithoutCluster> getRdsConfigs() {
-        return Set.copyOf(rdsConfigs.values());
+    public Set<RdsView> getRdsViews() {
+        return Set.copyOf(rdsViews.values());
     }
 
-    public RdsConfigWithoutCluster getRdsConfig(DatabaseType type) {
-        return rdsConfigs.get(type.name().toLowerCase());
+    public RdsView getRdsView(DatabaseType type) {
+        return rdsViews.get(type.name().toLowerCase());
     }
 
     public String getRdsSslCertificateFilePath() {
@@ -235,7 +235,7 @@ public class TemplatePreparationObject {
 
         private CloudPlatform cloudPlatform;
 
-        private Set<RdsConfigWithoutCluster> rdsConfigs = new HashSet<>();
+        private Set<RdsView> rdsViews = new HashSet<>();
 
         private String rdsSslCertificateFilePath;
 
@@ -290,8 +290,8 @@ public class TemplatePreparationObject {
             return this;
         }
 
-        public Builder withRdsConfigs(Set<RdsConfigWithoutCluster> rdsConfigs) {
-            this.rdsConfigs = rdsConfigs;
+        public Builder withRdsViews(Set<RdsView> rdsViews) {
+            this.rdsViews = rdsViews;
             return this;
         }
 

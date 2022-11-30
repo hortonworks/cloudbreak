@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
+import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
@@ -56,6 +57,8 @@ import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
+import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -117,6 +120,9 @@ public class CentralCmTemplateUpdaterTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private RdsViewProvider rdsViewProvider;
+
     private ClouderaManagerRepo clouderaManagerRepo;
 
     @Before
@@ -135,8 +141,9 @@ public class CentralCmTemplateUpdaterTest {
         doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
         doNothing().when(adlsConfigProvider).populateServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class), anyString());
         RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.HIVE);
-        when(templatePreparationObject.getRdsConfigs()).thenReturn(Set.of(rdsConfig));
-        when(templatePreparationObject.getRdsConfig(DatabaseType.HIVE)).thenReturn(rdsConfig);
+        RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
+        when(templatePreparationObject.getRdsViews()).thenReturn(Set.of(rdsView));
+        when(templatePreparationObject.getRdsView(DatabaseType.HIVE)).thenReturn(rdsView);
         when(templatePreparationObject.getCustomConfigurationsView()).thenReturn(Optional.of(customConfigurationsView));
 
         List<StorageLocationView> locations = new ArrayList<>();

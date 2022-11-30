@@ -22,11 +22,11 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 public class HueConfigProviderTest {
 
@@ -100,13 +100,17 @@ public class HueConfigProviderTest {
     public void getServiceConfigVariables() {
         BlueprintView blueprintView = getMockBlueprintView("7.2.0", "7.1.0");
 
-        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(HUE);
+        when(rdsConfig.getHost()).thenReturn(HOST);
+        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
+        when(rdsConfig.getPort()).thenReturn(PORT);
+        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
         TemplatePreparationObject tpo = new Builder()
-                .withRdsConfigs(Set.of(rdsConfig))
+                .withRdsViews(Set.of(rdsConfig))
                 .withBlueprintView(blueprintView)
                 .build();
 
@@ -126,11 +130,19 @@ public class HueConfigProviderTest {
     public void getServiceConfigVariablesWhenKnoxConfiguredToExternalDomain() {
         BlueprintView blueprintView = getMockBlueprintView("7.0.1", "7.0.1");
 
-        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        when(rdsConfig.getHost()).thenReturn(HOST);
+        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
+        when(rdsConfig.getPort()).thenReturn(PORT);
+        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
+        when(rdsConfig.getHost()).thenReturn(HOST);
+        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
+        when(rdsConfig.getPort()).thenReturn(PORT);
+        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
 
         String expectedExternalFQDN = "myaddress.cloudera.site";
         String expectedInternalFQDN = "private-gateway.cloudera.site";
@@ -143,7 +155,7 @@ public class HueConfigProviderTest {
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withGateway(new Gateway(), "", new HashSet<>())
                 .withBlueprintView(blueprintView)
-                .withRdsConfigs(Set.of(rdsConfig))
+                .withRdsViews(Set.of(rdsConfig))
                 .build();
 
         List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
@@ -176,11 +188,15 @@ public class HueConfigProviderTest {
 
         when(blueprintView.getProcessor()).thenReturn(templateProcessor);
 
-        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        when(rdsConfig.getHost()).thenReturn(HOST);
+        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
+        when(rdsConfig.getPort()).thenReturn(PORT);
+        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
 
         String expectedExternalFQDN = "myaddress.cloudera.site";
         String expectedInternalFQDN = "private-gateway.cloudera.site";
@@ -193,7 +209,7 @@ public class HueConfigProviderTest {
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withGateway(new Gateway(), "", new HashSet<>())
                 .withBlueprintView(blueprintView)
-                .withRdsConfigs(Set.of(rdsConfig))
+                .withRdsViews(Set.of(rdsConfig))
                 .build();
 
         List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
@@ -230,12 +246,12 @@ public class HueConfigProviderTest {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
-        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
+        TemplatePreparationObject tpo = new Builder().withRdsViews(Set.of(rdsConfig)).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
         assertThat(result).isTrue();
@@ -247,12 +263,12 @@ public class HueConfigProviderTest {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
-        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
+        TemplatePreparationObject tpo = new Builder().withRdsViews(Set.of(rdsConfig)).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
         assertThat(result).isFalse();
@@ -274,11 +290,15 @@ public class HueConfigProviderTest {
     public void getProxyHostsWhenLoadBalancerConfigured() {
         BlueprintView blueprintView = getMockBlueprintView("7.0.1", "7.0.1");
 
-        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        when(rdsConfig.getHost()).thenReturn(HOST);
+        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
+        when(rdsConfig.getPort()).thenReturn(PORT);
+        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
 
         String expectedExternalFQDN = "myaddress.cloudera.site";
         String expectedLBFQDN = "loadbalancer-gateway.cloudera.site";
@@ -292,7 +312,7 @@ public class HueConfigProviderTest {
             .withGeneralClusterConfigs(generalClusterConfigs)
             .withGateway(new Gateway(), "", new HashSet<>())
             .withBlueprintView(blueprintView)
-            .withRdsConfigs(Set.of(rdsConfig))
+            .withRdsViews(Set.of(rdsConfig))
             .build();
 
         List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
@@ -311,8 +331,12 @@ public class HueConfigProviderTest {
     public void getProxyHostsWhenLoadBalancerConfiguredPost710() {
         BlueprintView blueprintView = getMockBlueprintView("7.2.0", "7.1.0");
 
-        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(HUE);
+        when(rdsConfig.getHost()).thenReturn(HOST);
+        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
+        when(rdsConfig.getPort()).thenReturn(PORT);
+        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
@@ -329,7 +353,7 @@ public class HueConfigProviderTest {
             .withGeneralClusterConfigs(generalClusterConfigs)
             .withGateway(new Gateway(), "", new HashSet<>())
             .withBlueprintView(blueprintView)
-            .withRdsConfigs(Set.of(rdsConfig))
+            .withRdsViews(Set.of(rdsConfig))
             .build();
 
         List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
