@@ -13,9 +13,12 @@ public class ModifyProxyFlowChainTriggerEvent extends StackEvent {
 
     private final String operationId;
 
-    public ModifyProxyFlowChainTriggerEvent(String selector, Long stackId, String operationId) {
+    private final String previousProxyConfigCrn;
+
+    public ModifyProxyFlowChainTriggerEvent(String selector, Long stackId, String operationId, String previousProxyConfigCrn) {
         super(selector, stackId);
         this.operationId = operationId;
+        this.previousProxyConfigCrn = previousProxyConfigCrn;
     }
 
     @JsonCreator
@@ -23,25 +26,32 @@ public class ModifyProxyFlowChainTriggerEvent extends StackEvent {
             @JsonProperty("selector") String selector,
             @JsonProperty("operationId") String operationId,
             @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("previousProxyConfigCrn") String previousProxyConfigCrn,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.operationId = operationId;
+        this.previousProxyConfigCrn = previousProxyConfigCrn;
     }
 
     public String getOperationId() {
         return operationId;
     }
 
+    public String getPreviousProxyConfigCrn() {
+        return previousProxyConfigCrn;
+    }
+
     @Override
     public boolean equalsEvent(StackEvent other) {
         return isClassAndEqualsEvent(ModifyProxyFlowChainTriggerEvent.class, other,
-                event -> Objects.equals(operationId, event.operationId));
+                event -> Objects.equals(operationId, event.operationId) && Objects.equals(previousProxyConfigCrn, event.previousProxyConfigCrn));
     }
 
     @Override
     public String toString() {
         return "ModifyProxyFlowChainTriggerEvent{" +
                 "operationId='" + operationId + '\'' +
+                "previousProxyConfigCrn='" + previousProxyConfigCrn + '\'' +
                 "} " + super.toString();
     }
 }

@@ -169,7 +169,7 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @Test
     public void testUpdateUserDataFailsInChain() throws Exception {
-        doThrow(new BadRequestException()).when(userDataService).regenerateUserData(STACK_ID);
+        doThrow(new BadRequestException()).when(userDataService).regenerateUserDataForCcmUpgrade(STACK_ID);
         testFlow(CALLED_ONCE_TILL_GENERATE_USERDATA, true, false);
     }
 
@@ -234,7 +234,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         inOrder.verify(upgradeCcmService, times(expected[i++])).removeMina(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMinaState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMina(STACK_ID);
-        inOrder.verify(userDataService, times(expected[i++])).regenerateUserData(STACK_ID);
+        inOrder.verify(userDataService, times(expected[i++])).regenerateUserDataForCcmUpgrade(STACK_ID);
         inOrder.verify(resourcesApi, times(expected[i++])).updateUserData(any(), any(), any(), eq(USER_DATA_MAP));
     }
 

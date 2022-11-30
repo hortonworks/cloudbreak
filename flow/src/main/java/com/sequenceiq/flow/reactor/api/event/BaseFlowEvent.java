@@ -35,7 +35,7 @@ public class BaseFlowEvent implements IdempotentEvent<BaseFlowEvent>, ResourceCr
         this.selector = selector;
         this.resourceId = resourceId;
         this.resourceCrn = resourceCrn;
-        this.accepted = accepted;
+        this.accepted = Objects.requireNonNullElse(accepted, new Promise<>());
     }
 
     @Override

@@ -30,6 +30,8 @@ class ProxyModificationOnFreeipaHandlerTest {
 
     private static final String CRN = "crn";
 
+    private static final String PREV_PROXY_CRN = "prev-proxy-crn";
+
     @Mock
     private FreeIpaPollerService freeIpaPollerService;
 
@@ -45,25 +47,39 @@ class ProxyModificationOnFreeipaHandlerTest {
     @Mock
     private ProxyConfig proxyConfig;
 
+    @Mock
+    private ProxyConfig previousProxyConfig;
+
     private EnvProxyModificationDefaultEvent event;
 
     @BeforeEach
     void setUp() {
-        event = new EnvProxyModificationDefaultEvent(SELECTOR, environmentDto, proxyConfig);
+        event = EnvProxyModificationDefaultEvent.builder()
+                .withSelector(SELECTOR)
+                .withEnvironmentDto(environmentDto)
+                .withProxyConfig(proxyConfig)
+                .withPreviousProxyConfig(previousProxyConfig)
+                .build();
         lenient().when(environmentDto.getId()).thenReturn(ENV_ID);
         lenient().when(environmentDto.getResourceCrn()).thenReturn(CRN);
+        lenient().when(previousProxyConfig.getResourceCrn()).thenReturn(PREV_PROXY_CRN);
     }
 
     @Test
     void failure() {
         RuntimeException cause = new RuntimeException("cause");
-        doThrow(cause).when(freeIpaPollerService).waitForModifyProxyConfig(ENV_ID, CRN);
+        doThrow(cause).when(freeIpaPollerService).waitForModifyProxyConfig(ENV_ID, CRN, PREV_PROXY_CRN);
         Event<EnvProxyModificationDefaultEvent> wrappedEvent = Event.wrap(event);
 
         underTest.accept(wrappedEvent);
 
-        EnvProxyModificationFailedEvent failedEvent = new EnvProxyModificationFailedEvent(
-                event.getEnvironmentDto(), event.getProxyConfig(), EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED, cause);
+        EnvProxyModificationFailedEvent failedEvent = EnvProxyModificationFailedEvent.builder()
+                .withEnvironmentDto(event.getEnvironmentDto())
+                .withProxyConfig(event.getProxyConfig())
+                .withPreviousProxyConfig(event.getPreviousProxyConfig())
+                .withEnvironmentStatus(EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED)
+                .withException(cause)
+                .build();
         verify(eventSender).sendEvent(failedEvent, wrappedEvent.getHeaders());
     }
 
@@ -73,8 +89,12 @@ class ProxyModificationOnFreeipaHandlerTest {
 
         underTest.accept(wrappedEvent);
 
-        EnvProxyModificationDefaultEvent defaultEvent = new EnvProxyModificationDefaultEvent(
-                EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector(), event.getEnvironmentDto(), event.getProxyConfig());
+        EnvProxyModificationDefaultEvent defaultEvent = EnvProxyModificationDefaultEvent.builder()
+                .withSelector(EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector())
+                .withEnvironmentDto(event.getEnvironmentDto())
+                .withProxyConfig(event.getProxyConfig())
+                .withPreviousProxyConfig(event.getPreviousProxyConfig())
+                .build();
         verify(eventSender).sendEvent(defaultEvent, wrappedEvent.getHeaders());
     }
 

@@ -6,4 +6,6 @@ import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 public interface ProxyConfigModificationEvent extends EnvironmentEvent {
 
     ProxyConfig getProxyConfig();
+
+    ProxyConfig getPreviousProxyConfig();
 }

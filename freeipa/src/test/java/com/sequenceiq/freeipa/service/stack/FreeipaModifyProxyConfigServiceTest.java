@@ -94,7 +94,7 @@ class FreeipaModifyProxyConfigServiceTest {
     void validateWithoutEntitlement() {
         when(entitlementService.isEditProxyConfigEnabled(ACCOUNT_ID)).thenReturn(false);
 
-        Assertions.assertThatThrownBy(() -> underTest.modifyProxyConfig(ENV_CRN, ACCOUNT_ID))
+        Assertions.assertThatThrownBy(() -> underTest.modifyProxyConfig(ENV_CRN, null, ACCOUNT_ID))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Proxy config modification is not enabled in your account");
     }
@@ -103,7 +103,7 @@ class FreeipaModifyProxyConfigServiceTest {
     void validateNonAvailableEnv() {
         when(stackStatus.getStatus()).thenReturn(Status.CREATE_FAILED);
 
-        Assertions.assertThatThrownBy(() -> underTest.modifyProxyConfig(ENV_CRN, ACCOUNT_ID))
+        Assertions.assertThatThrownBy(() -> underTest.modifyProxyConfig(ENV_CRN, null, ACCOUNT_ID))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Proxy config modification is not supported in current FreeIpa status: CREATE_FAILED");
     }
@@ -112,7 +112,7 @@ class FreeipaModifyProxyConfigServiceTest {
     void failToStartOperation() {
         when(operation.getStatus()).thenReturn(OperationState.FAILED);
 
-        OperationStatus result = underTest.modifyProxyConfig(ENV_CRN, ACCOUNT_ID);
+        OperationStatus result = underTest.modifyProxyConfig(ENV_CRN, null, ACCOUNT_ID);
 
         assertThat(result).isEqualTo(operationStatus);
         verifyStartOperation();
@@ -129,14 +129,14 @@ class FreeipaModifyProxyConfigServiceTest {
         OperationStatus failedOperationStatus = mock(OperationStatus.class);
         when(operationConverter.convert(failedOperation)).thenReturn(failedOperationStatus);
 
-        OperationStatus result = underTest.modifyProxyConfig(ENV_CRN, ACCOUNT_ID);
+        OperationStatus result = underTest.modifyProxyConfig(ENV_CRN, null, ACCOUNT_ID);
 
         assertThat(result).isEqualTo(failedOperationStatus);
     }
 
     @Test
     void success() {
-        OperationStatus result = underTest.modifyProxyConfig(ENV_CRN, ACCOUNT_ID);
+        OperationStatus result = underTest.modifyProxyConfig(ENV_CRN, null, ACCOUNT_ID);
 
         assertThat(result).isEqualTo(operationStatus);
         verify(stackUpdater).updateStackStatus(stack, MODIFY_PROXY_CONFIG_REQUESTED, "Starting proxy config modification");

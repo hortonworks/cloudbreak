@@ -90,8 +90,8 @@ public class FreeIpaPollerService {
         }
     }
 
-    public void waitForModifyProxyConfig(Long envId, String envCrn) {
-        OperationStatus status = freeIpaService.modifyProxyConfig(envCrn);
+    public void waitForModifyProxyConfig(Long envId, String envCrn, String previousProxyCrn) {
+        OperationStatus status = freeIpaService.modifyProxyConfig(envCrn, previousProxyCrn);
         if (status.getStatus() != OperationState.COMPLETED) {
             try {
                 Polling.stopAfterAttempt(modifyProxyAttempt)

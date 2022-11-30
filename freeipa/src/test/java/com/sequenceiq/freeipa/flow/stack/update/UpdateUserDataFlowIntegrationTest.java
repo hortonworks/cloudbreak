@@ -141,7 +141,7 @@ class UpdateUserDataFlowIntegrationTest {
 
     @Test
     public void testUserDataUpdateWhenNewUserDataFails() throws Exception {
-        doThrow(new BadRequestException()).when(userDataService).regenerateUserData(STACK_ID);
+        doThrow(new BadRequestException()).when(userDataService).regenerateUserDataForCcmUpgrade(STACK_ID);
         testFlow(CALLED_ONCE_TILL_GENERATE_USERDATA, false);
     }
 
@@ -164,7 +164,7 @@ class UpdateUserDataFlowIntegrationTest {
     private void verifyServiceCalls(int tillInt) {
         final int[] expected = new int[ALL_CALLED_ONCE];
         Arrays.fill(expected, 0, tillInt, 1);
-        verify(userDataService, times(expected[0])).regenerateUserData(STACK_ID);
+        verify(userDataService, times(expected[0])).regenerateUserDataForCcmUpgrade(STACK_ID);
     }
 
     private void flowFinishedSuccessfully() {
@@ -178,7 +178,12 @@ class UpdateUserDataFlowIntegrationTest {
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> freeIpaFlowManager.notify(selector,
-                        new UserDataUpdateRequest(selector, STACK_ID, Tunnel.CCM).withOperationId("opi")));
+                        UserDataUpdateRequest.builder()
+                                .withSelector(selector)
+                                .withStackId(STACK_ID)
+                                .withOldTunnel(Tunnel.CCM)
+                                .withOperationId("opi")
+                                .build()));
     }
 
     private void letItFlow(FlowIdentifier flowIdentifier) {

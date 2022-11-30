@@ -34,17 +34,24 @@ public abstract class AbstractEnvProxyModificationAction<P extends ProxyConfigMo
     protected EnvProxyModificationContext createFlowContext(FlowParameters flowParameters,
             StateContext<EnvProxyModificationState, EnvProxyModificationStateSelectors> stateContext, P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
-        ProxyConfig previousProxyConfig = (ProxyConfig) variables.computeIfAbsent(PREVIOUS_PROXY_CONFIG, k -> getPreviousProxyConfig(payload));
-        return new EnvProxyModificationContext(flowParameters, previousProxyConfig);
+        Optional<ProxyConfig> previousProxyConfig =
+                (Optional<ProxyConfig>) variables.computeIfAbsent(PREVIOUS_PROXY_CONFIG, k -> getPreviousProxyConfig(payload));
+        return new EnvProxyModificationContext(flowParameters, previousProxyConfig.orElse(null));
     }
 
-    private ProxyConfig getPreviousProxyConfig(P payload) {
-        return environmentService.findEnvironmentByIdOrThrow(payload.getResourceId()).getProxyConfig();
+    private Optional<ProxyConfig> getPreviousProxyConfig(P payload) {
+        return Optional.ofNullable(environmentService.findEnvironmentByIdOrThrow(payload.getResourceId()).getProxyConfig());
     }
 
     @Override
     protected Object getFailurePayload(P payload, Optional<EnvProxyModificationContext> flowContext, Exception ex) {
-        return new EnvProxyModificationFailedEvent(payload.getEnvironmentDto(), payload.getProxyConfig(), getFailureEnvironmentStatus(), ex);
+        return EnvProxyModificationFailedEvent.builder()
+                .withEnvironmentDto(payload.getEnvironmentDto())
+                .withProxyConfig(payload.getProxyConfig())
+                .withPreviousProxyConfig(payload.getPreviousProxyConfig())
+                .withEnvironmentStatus(getFailureEnvironmentStatus())
+                .withException(ex)
+                .build();
     }
 
     protected EnvironmentStatus getFailureEnvironmentStatus() {

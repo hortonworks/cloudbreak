@@ -43,10 +43,11 @@ public class UpdateUserDataHandler extends ExceptionCatcherEventHandler<UserData
         try {
             LOGGER.info("Updating userData in the stack's current used image entity...");
             if (request.getOldTunnel() != null) {
+                LOGGER.info("Updating userdata for CCM upgrade");
                 switch (request.getOldTunnel()) {
                     case CCM:
                         LOGGER.debug("Regenerating user data from request payload.");
-                        userDataService.regenerateUserData(request.getResourceId());
+                        userDataService.regenerateUserDataForCcmUpgrade(request.getResourceId());
                         break;
                     case CCMV2:
                         LOGGER.debug("Updating Jumpgate flag only.");
@@ -55,9 +56,10 @@ public class UpdateUserDataHandler extends ExceptionCatcherEventHandler<UserData
                     default:
                         throw new IllegalStateException(String.format("Upgrade from %s is not implemented", request.getOldTunnel()));
                 }
-            } else {
-                LOGGER.debug("Old tunnel type was not provided, regenerating user data from request payload.");
-                userDataService.regenerateUserData(request.getResourceId());
+            }
+            if (request.isModifyProxyConfig()) {
+                LOGGER.info("Updating userdata for proxy modification");
+                userDataService.updateProxyConfig(request.getResourceId());
             }
             return new UserDataUpdateSuccess(request.getResourceId());
         } catch (Exception e) {

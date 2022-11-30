@@ -87,14 +87,15 @@ class AbstractEnvProxyModificationActionTest {
 
     @Test
     void createFlowContextWithVariable() {
-        ProxyConfig proxyConfig1 = mock(ProxyConfig.class);
-        when(extendedState.getVariables()).thenReturn(new HashMap<>(Map.of(AbstractEnvProxyModificationAction.PREVIOUS_PROXY_CONFIG, proxyConfig1)));
+        ProxyConfig proxyConfig = mock(ProxyConfig.class);
+        when(extendedState.getVariables())
+                .thenReturn(new HashMap<>(Map.of(AbstractEnvProxyModificationAction.PREVIOUS_PROXY_CONFIG, Optional.of(proxyConfig))));
 
         EnvProxyModificationContext result = underTest.createFlowContext(flowParameters, stateContext, payload);
 
         assertThat(result)
                 .returns(flowParameters, CommonContext::getFlowParameters)
-                .returns(proxyConfig1, EnvProxyModificationContext::getPreviousProxyConfig);
+                .returns(proxyConfig, EnvProxyModificationContext::getPreviousProxyConfig);
     }
 
     @Test

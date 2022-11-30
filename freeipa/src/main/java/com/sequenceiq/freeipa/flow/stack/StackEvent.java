@@ -38,7 +38,7 @@ public class StackEvent implements IdempotentEvent<StackEvent> {
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         this.selector = selector;
         this.stackId = stackId;
-        this.accepted = accepted;
+        this.accepted = Objects.requireNonNullElse(accepted, new Promise<>());
     }
 
     @Override
