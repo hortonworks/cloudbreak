@@ -141,7 +141,6 @@ dependencyManagement {
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'net.jcip',                           name: 'jcip-annotations',            version: '1.0'
     dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '1.22.0'
-    dependency group: 'com.github.fommil',                  name: 'openssh',                     version: '1.0'
 
     dependency (group: 'io.swagger',                        name: 'swagger-jersey2-jaxrs',       version: swaggerVersion) {
       exclude 'org.yaml:snakeyaml'
@@ -197,7 +196,6 @@ dependencies {
 
   implementation group: 'net.jcip',                           name: 'jcip-annotations'
   implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2'
-  implementation group: 'com.github.fommil',                  name: 'openssh'
 
   implementation group: 'javax.mail',                         name: 'mail'
   implementation group: 'javax.xml.bind',                     name: 'jaxb-api'
