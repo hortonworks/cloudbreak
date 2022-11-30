@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,6 +76,9 @@ public class AzureStackViewProviderTest {
 
     @Mock
     private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Mock
+    private Retry retryService;
 
     @BeforeEach
     public void before() {
