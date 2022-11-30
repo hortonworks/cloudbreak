@@ -37,6 +37,9 @@ public class ExternalDatabaseConfig {
     @Value("${cb.externaldatabase.pause.supported.platform:AWS,GCP}")
     private Set<CloudPlatform> dbServicePauseSupportedPlatforms;
 
+    @Value("${cb.externaldatabase.sslenforcement.supported.platform:AWS,AZURE}")
+    private Set<CloudPlatform> dbServiceSslEnforcementSupportedPlatforms;
+
     @Inject
     private Set<DatabaseServerParameterDecorator> databaseServerParameterDecorators;
 
@@ -48,6 +51,10 @@ public class ExternalDatabaseConfig {
 
     public boolean isExternalDatabasePauseSupportedFor(CloudPlatform cloudPlatform) {
         return dbServicePauseSupportedPlatforms.contains(cloudPlatform);
+    }
+
+    public boolean isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform cloudPlatform) {
+        return dbServiceSslEnforcementSupportedPlatforms.contains(cloudPlatform);
     }
 
     public Set<CloudPlatform> getSupportedExternalDatabasePlatforms() {
@@ -105,4 +112,5 @@ public class ExternalDatabaseConfig {
         }
         return Optional.of(JsonUtil.readValue(databaseTemplateJson, DatabaseStackConfig.class));
     }
+
 }
