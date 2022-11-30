@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
+
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.AllocateAddressRequest;
 import com.amazonaws.services.ec2.model.AllocateAddressResult;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.AssociateAddressResult;
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
@@ -168,6 +171,20 @@ public class AmazonEc2Client extends AmazonClient {
 
     public DescribeRouteTablesResult describeRouteTables(DescribeRouteTablesRequest describeRouteTablesRequest) {
         return client.describeRouteTables(describeRouteTablesRequest);
+    }
+
+    public DescribeInstancesResult retryableDescribeInstances(DescribeInstancesRequest describeInstancesRequest) {
+        return retry.testWith1SecDelayMax5TimesMaxDelay5MinutesMultiplier5(() -> {
+            try {
+                return client.describeInstances(describeInstancesRequest);
+            } catch (AmazonEC2Exception e) {
+                if (e.getErrorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND_ERROR_CODE)) {
+                    throw new Retry.ActionFailedException("The requested instances are not found on AWS side: " + describeInstancesRequest.getInstanceIds(), e);
+                } else {
+                    throw e;
+                }
+            }
+        });
     }
 
     public DescribeInstancesResult describeInstances(DescribeInstancesRequest describeInstancesRequest) {
