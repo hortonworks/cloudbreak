@@ -37,7 +37,12 @@ public class ProxyConfigModificationFreeipaStateAction extends AbstractEnvProxyM
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_START_STATE);
 
         String selector = EnvProxyModificationHandlerSelectors.TRACK_FREEIPA_PROXY_MODIFICATION_EVENT.selector();
-        EnvironmentEvent event = new EnvProxyModificationDefaultEvent(selector, environmentDto, payload.getProxyConfig());
+        EnvironmentEvent event = EnvProxyModificationDefaultEvent.builder()
+                .withSelector(selector)
+                .withEnvironmentDto(environmentDto)
+                .withProxyConfig(payload.getProxyConfig())
+                .withPreviousProxyConfig(context.getPreviousProxyConfig())
+                .build();
         sendEvent(context, selector, event);
     }
 

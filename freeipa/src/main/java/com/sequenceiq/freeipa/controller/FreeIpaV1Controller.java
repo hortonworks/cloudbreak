@@ -445,9 +445,10 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @InternalOnly
     public OperationStatus modifyProxyConfigInternal(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
+            @ValidCrn(resource = CrnResourceDescriptor.PROXY) @ResourceCrn String previousProxyCrn,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return modifyProxyConfigService.modifyProxyConfig(environmentCrn, accountId);
+        return modifyProxyConfigService.modifyProxyConfig(environmentCrn, previousProxyCrn, accountId);
     }
 
     @Override

@@ -29,10 +29,15 @@ public class UpgradeCcmFlowEventChainFactory implements FlowEventChainFactory<Up
                 event.getOldTunnel(), event.accepted())
                 .withIsChained(true)
                 .withIsFinal(false));
-        flowEventChain.add(new UserDataUpdateRequest(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(), event.getResourceId(), event.getOldTunnel())
-                .withOperationId(event.getOperationId())
-                .withIsChained(true)
-                .withIsFinal(true));
+        flowEventChain.add(
+                UserDataUpdateRequest.builder()
+                        .withSelector(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event())
+                        .withStackId(event.getResourceId())
+                        .withOldTunnel(event.getOldTunnel())
+                        .withOperationId(event.getOperationId())
+                        .withChained(true)
+                        .withFinalFlow(true)
+                        .build());
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

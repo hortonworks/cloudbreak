@@ -1,0 +1,35 @@
+#!/bin/bash
+
+## logging
+exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
+set -x
+
+export ENVIRONMENT_CRN="crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:e89ff689-59a1-48a4-96ac-6397f5db8b09"
+export CLOUD_PLATFORM="AWS"
+export START_LABEL=97
+export PLATFORM_DISK_PREFIX=xvd
+export LAZY_FORMAT_DISK_LIMIT=12
+export IS_GATEWAY=true
+export TMP_SSH_KEY="dummy"
+export SSH_USER=cloudbreak
+export SALT_BOOT_PASSWORD=...
+export SALT_BOOT_SIGN_KEY=...
+export CB_CERT=...
+export IS_CCM_ENABLED=false
+export IS_CCM_V2_ENABLED=false
+export IS_PROXY_ENABLED=true
+export PROXY_HOST=1.2.3.4
+export PROXY_PORT=1234
+export PROXY_PROTOCOL=http
+export PROXY_USER="username"
+export PROXY_PASSWORD="password"
+export PROXY_NO_PROXY_HOSTS="noproxy"
+
+touch /tmp/cb-custom-data-default.txt
+
+/usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
+
+chmod o-rwx /var/log/user-data.log
+chmod o-rwx /cdp/bin/*
+chmod o-rwx -R /etc/certs/ || :

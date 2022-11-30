@@ -231,12 +231,12 @@ public class FreeIpaService {
         }
     }
 
-    public OperationStatus modifyProxyConfig(String environmentCrn) {
+    public OperationStatus modifyProxyConfig(String environmentCrn, String previousProxyCrn) {
         try {
-            LOGGER.debug("Calling FreeIPA modify proxy config for environment {}", environmentCrn);
+            LOGGER.debug("Calling FreeIPA modify proxy config for environment {} with previousProxyCrn {}", environmentCrn, previousProxyCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    initiatorUserCrn -> freeIpaV1Endpoint.modifyProxyConfigInternal(environmentCrn, initiatorUserCrn));
+                    initiatorUserCrn -> freeIpaV1Endpoint.modifyProxyConfigInternal(environmentCrn, previousProxyCrn, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to modify proxy config on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);

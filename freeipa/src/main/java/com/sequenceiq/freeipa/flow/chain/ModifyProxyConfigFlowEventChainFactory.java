@@ -28,10 +28,15 @@ public class ModifyProxyConfigFlowEventChainFactory implements FlowEventChainFac
         flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, event.getOperationId()));
         flowEventChain.add(new ModifyProxyConfigTriggerEvent(event.getResourceId(), event.accepted(), event.getOperationId()));
         flowEventChain.add(
-                new UserDataUpdateRequest(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(), event.getResourceId(), event.accepted())
+                UserDataUpdateRequest.builder()
+                        .withSelector(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event())
+                        .withStackId(event.getResourceId())
+                        .withModifyProxyConfig(true)
+                        .withAccepted(event.accepted())
                         .withOperationId(event.getOperationId())
-                        .withIsChained(true)
-                        .withIsFinal(true));
+                        .withChained(true)
+                        .withFinalFlow(true)
+                        .build());
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

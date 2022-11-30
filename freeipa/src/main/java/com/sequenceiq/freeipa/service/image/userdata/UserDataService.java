@@ -19,7 +19,10 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigUserDataReplacer;
+import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -64,13 +67,16 @@ public class UserDataService {
     @Inject
     private CachedEnvironmentClientService environmentClientService;
 
+    @Inject
+    private ProxyConfigUserDataReplacer proxyConfigUserDataReplacer;
+
     public void createUserData(Long stackId) {
         Stack stack = getStack(stackId);
         LOGGER.debug("Creating user data for stack {}", stack.getResourceName());
         createUserData(stack, () -> ccmUserDataService.fetchAndSaveCcmParameters(stack));
     }
 
-    public void regenerateUserData(Long stackId) {
+    public void regenerateUserDataForCcmUpgrade(Long stackId) {
         Stack stack = getStack(stackId);
         LOGGER.debug("Regenerating user data for stack {}", stack.getResourceName());
         createUserData(stack, stack::getCcmParameters);
@@ -79,9 +85,21 @@ public class UserDataService {
     public void updateJumpgateFlagOnly(Long stackId) {
         LOGGER.debug("Updating Jumpgate flag in user data for stack {}", stackId);
         ImageEntity image = imageService.getByStackId(stackId);
-        image.setUserdata(image.getUserdata().replace("IS_CCM_ENABLED=true", "IS_CCM_ENABLED=false")
-                .replace("IS_CCM_V2_ENABLED=false", "IS_CCM_V2_ENABLED=true")
-                .replace("IS_CCM_V2_JUMPGATE_ENABLED=false", "IS_CCM_V2_JUMPGATE_ENABLED=true"));
+        String userData = new UserDataReplacer(image.getUserdata())
+                .replace("IS_CCM_ENABLED", false)
+                .replace("IS_CCM_V2_ENABLED", true)
+                .replace("IS_CCM_V2_JUMPGATE_ENABLED", true)
+                .getUserData();
+        image.setUserdata(userData);
+        imageService.save(image);
+    }
+
+    public void updateProxyConfig(Long stackId) {
+        LOGGER.debug("Updating proxy config in user data for stack {}", stackId);
+        Stack stack = getStack(stackId);
+        ImageEntity image = imageService.getByStackId(stackId);
+        String userData = proxyConfigUserDataReplacer.replaceProxyConfigInUserDataByEnvCrn(image.getUserdata(), stack.getEnvironmentCrn());
+        image.setUserdata(userData);
         imageService.save(image);
     }
 
@@ -112,6 +130,7 @@ public class UserDataService {
 
     private Stack getStack(Long stackId) {
         Stack stack = stackService.getStackById(stackId);
+        MDCBuilder.buildMdcContext(stack);
         return stack;
     }
 }

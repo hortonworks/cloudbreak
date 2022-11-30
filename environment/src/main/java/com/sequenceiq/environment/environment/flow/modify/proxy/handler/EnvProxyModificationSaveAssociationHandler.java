@@ -34,12 +34,21 @@ public class EnvProxyModificationSaveAssociationHandler extends EventSenderAware
         try {
             EnvironmentDto environmentDto = environmentService.updateProxyConfig(eventData.getEnvironmentDto().getId(), eventData.getProxyConfig());
 
-            EnvProxyModificationDefaultEvent envProxyModificationEvent = new EnvProxyModificationDefaultEvent(
-                    EnvProxyModificationStateSelectors.MODIFY_PROXY_FREEIPA_EVENT.selector(), environmentDto, eventData.getProxyConfig());
+            EnvProxyModificationDefaultEvent envProxyModificationEvent = EnvProxyModificationDefaultEvent.builder()
+                    .withSelector(EnvProxyModificationStateSelectors.MODIFY_PROXY_FREEIPA_EVENT.selector())
+                    .withEnvironmentDto(environmentDto)
+                    .withProxyConfig(eventData.getProxyConfig())
+                    .withPreviousProxyConfig(eventData.getPreviousProxyConfig())
+                    .build();
             eventSender().sendEvent(envProxyModificationEvent, event.getHeaders());
         } catch (Exception e) {
-            EnvProxyModificationFailedEvent envProxyModificationFailedEvent = new EnvProxyModificationFailedEvent(
-                    eventData.getEnvironmentDto(), eventData.getProxyConfig(), EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED, e);
+            EnvProxyModificationFailedEvent envProxyModificationFailedEvent = EnvProxyModificationFailedEvent.builder()
+                    .withEnvironmentDto(eventData.getEnvironmentDto())
+                    .withProxyConfig(eventData.getProxyConfig())
+                    .withPreviousProxyConfig(eventData.getPreviousProxyConfig())
+                    .withEnvironmentStatus(EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED)
+                    .withException(e)
+                    .build();
             eventSender().sendEvent(envProxyModificationFailedEvent, event.getHeaders());
         }
     }

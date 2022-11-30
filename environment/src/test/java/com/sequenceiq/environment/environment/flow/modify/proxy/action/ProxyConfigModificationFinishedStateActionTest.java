@@ -50,6 +50,9 @@ class ProxyConfigModificationFinishedStateActionTest extends ActionTest {
     @Mock
     private ProxyConfig proxyConfig;
 
+    @Mock
+    private ProxyConfig previousProxyConfig;
+
     @Captor
     private ArgumentCaptor<UsageProto.CDPEnvironmentProxyConfigEditEvent> usageEventCaptor;
 
@@ -60,7 +63,12 @@ class ProxyConfigModificationFinishedStateActionTest extends ActionTest {
         super.setUp(context);
         when(environmentDto.getResourceCrn()).thenReturn(ENV_CRN);
         when(proxyConfig.getResourceCrn()).thenReturn(PROXY_CRN);
-        payload = new EnvProxyModificationDefaultEvent("selector", environmentDto, proxyConfig);
+        payload = EnvProxyModificationDefaultEvent.builder()
+                .withSelector("selector")
+                .withEnvironmentDto(environmentDto)
+                .withProxyConfig(proxyConfig)
+                .withPreviousProxyConfig(previousProxyConfig)
+                .build();
     }
 
     @Test

@@ -306,6 +306,7 @@ public interface FreeIpaV1Endpoint {
             notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "internalModifyProxyConfigByEnvironmentV1")
     OperationStatus modifyProxyConfigInternal(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
+            @ValidCrn(resource = CrnResourceDescriptor.PROXY) @QueryParam("previousProxy") String previousProxyCrn,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 

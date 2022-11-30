@@ -37,7 +37,12 @@ public class ProxyConfigModificationStartStateAction extends AbstractEnvProxyMod
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_START_STATE);
 
         String selector = EnvProxyModificationHandlerSelectors.SAVE_NEW_PROXY_ASSOCIATION_HANDLER_EVENT.selector();
-        EnvironmentEvent event = new EnvProxyModificationDefaultEvent(selector, environmentDto, payload.getProxyConfig());
+        EnvironmentEvent event = EnvProxyModificationDefaultEvent.builder()
+                .withSelector(selector)
+                .withEnvironmentDto(environmentDto)
+                .withProxyConfig(payload.getProxyConfig())
+                .withPreviousProxyConfig(context.getPreviousProxyConfig())
+                .build();
         sendEvent(context, selector, event);
     }
 }

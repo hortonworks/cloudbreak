@@ -152,7 +152,12 @@ public class EnvironmentReactorFlowManager {
     public FlowIdentifier triggerEnvironmentProxyConfigModification(EnvironmentDto environment, ProxyConfig proxyConfig) {
         LOGGER.info("Environment proxy config modification flow triggered.");
         EnvProxyModificationDefaultEvent envProxyModificationEvent =
-                new EnvProxyModificationDefaultEvent(EnvProxyModificationStateSelectors.MODIFY_PROXY_START_EVENT.selector(), environment, proxyConfig);
+                EnvProxyModificationDefaultEvent.builder()
+                        .withSelector(EnvProxyModificationStateSelectors.MODIFY_PROXY_START_EVENT.selector())
+                        .withEnvironmentDto(environment)
+                        .withProxyConfig(proxyConfig)
+                        .withPreviousProxyConfig(environment.getProxyConfig())
+                        .build();
         return eventSender.sendEvent(envProxyModificationEvent, new Event.Headers(getFlowTriggerUsercrn(ThreadBasedUserCrnProvider.getUserCrn())));
     }
 

@@ -46,11 +46,19 @@ class EnvProxyModificationSaveAssociationHandlerTest {
     @Mock
     private ProxyConfig proxyConfig;
 
+    @Mock
+    private ProxyConfig previousProxyConfig;
+
     private EnvProxyModificationDefaultEvent event;
 
     @BeforeEach
     void setUp() {
-        event = new EnvProxyModificationDefaultEvent(SELECTOR, environmentDto, proxyConfig);
+        event = EnvProxyModificationDefaultEvent.builder()
+                .withSelector(SELECTOR)
+                .withEnvironmentDto(environmentDto)
+                .withProxyConfig(proxyConfig)
+                .withPreviousProxyConfig(previousProxyConfig)
+                .build();
         lenient().when(environmentDto.getId()).thenReturn(ENV_ID);
         lenient().when(environmentService.findById(ENV_ID)).thenReturn(Optional.of(environmentDto));
     }
@@ -62,7 +70,7 @@ class EnvProxyModificationSaveAssociationHandlerTest {
         underTest.accept(wrappedEvent);
 
         EnvProxyModificationDefaultEvent envProxyModificationEvent = new EnvProxyModificationDefaultEvent(
-                EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector(), environmentDto, proxyConfig);
+                EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector(), environmentDto, proxyConfig, previousProxyConfig, null);
         verify(environmentService).updateProxyConfig(ENV_ID, proxyConfig);
         verify(eventSender).sendEvent(envProxyModificationEvent, wrappedEvent.getHeaders());
     }
@@ -75,7 +83,7 @@ class EnvProxyModificationSaveAssociationHandlerTest {
         underTest.accept(wrappedEvent);
 
         EnvProxyModificationFailedEvent envProxyModificationFailedEvent = new EnvProxyModificationFailedEvent(
-                environmentDto, proxyConfig, EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED, cause);
+                environmentDto, proxyConfig, previousProxyConfig, EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED, cause, null);
         verify(environmentService).updateProxyConfig(ENV_ID, proxyConfig);
         verify(eventSender).sendEvent(envProxyModificationFailedEvent, wrappedEvent.getHeaders());
     }

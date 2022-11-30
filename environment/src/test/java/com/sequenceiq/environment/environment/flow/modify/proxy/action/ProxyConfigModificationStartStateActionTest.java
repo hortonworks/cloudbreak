@@ -58,7 +58,7 @@ class ProxyConfigModificationStartStateActionTest extends ActionTest {
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_START_STATE);
 
         String selector = EnvProxyModificationHandlerSelectors.SAVE_NEW_PROXY_ASSOCIATION_HANDLER_EVENT.selector();
-        EnvProxyModificationDefaultEvent event = new EnvProxyModificationDefaultEvent(selector, environmentDto, proxyConfig);
+        EnvProxyModificationDefaultEvent event = new EnvProxyModificationDefaultEvent(selector, environmentDto, proxyConfig, null, null);
         verifySendEvent(context, selector, event);
     }
 

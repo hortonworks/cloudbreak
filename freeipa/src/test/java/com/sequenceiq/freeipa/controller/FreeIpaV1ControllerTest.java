@@ -296,9 +296,9 @@ class FreeIpaV1ControllerTest {
     void modifyProxyConfigInternalTest() {
         when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         OperationStatus operationStatus = new OperationStatus();
-        when(modifyProxyConfigService.modifyProxyConfig(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(operationStatus);
+        when(modifyProxyConfigService.modifyProxyConfig(ENVIRONMENT_CRN, null, ACCOUNT_ID)).thenReturn(operationStatus);
 
-        OperationStatus result = underTest.modifyProxyConfigInternal(ENVIRONMENT_CRN, ACCOUNT_ID);
+        OperationStatus result = underTest.modifyProxyConfigInternal(ENVIRONMENT_CRN, null, ACCOUNT_ID);
 
         assertThat(result).isEqualTo(operationStatus);
     }

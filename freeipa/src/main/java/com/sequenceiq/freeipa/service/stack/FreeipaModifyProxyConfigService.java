@@ -54,11 +54,11 @@ public class FreeipaModifyProxyConfigService {
         this.operationConverter = operationConverter;
     }
 
-    public OperationStatus modifyProxyConfig(String environmentCrn, String accountId) {
+    public OperationStatus modifyProxyConfig(String environmentCrn, String previousProxyCrn, String accountId) {
         MDCBuilder.addEnvCrn(environmentCrn);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
         validate(stack);
-        return startModifyProxyConfigOperation(stack);
+        return startModifyProxyConfigOperation(stack, previousProxyCrn);
     }
 
     private void validate(Stack stack) {
@@ -70,24 +70,24 @@ public class FreeipaModifyProxyConfigService {
         }
     }
 
-    private OperationStatus startModifyProxyConfigOperation(Stack stack) {
+    private OperationStatus startModifyProxyConfigOperation(Stack stack, String previousProxyCrn) {
         LOGGER.info("Start 'MODIFY_PROXY_CONFIG' operation");
         Operation operation = operationService.startOperation(stack.getAccountId(), OperationType.MODIFY_PROXY_CONFIG,
                 List.of(stack.getEnvironmentCrn()), List.of());
         if (OperationState.RUNNING == operation.getStatus()) {
-            operation = triggerModifyProxyConfigFlowChain(operation, stack);
+            operation = triggerModifyProxyConfigFlowChain(operation, stack, previousProxyCrn);
         } else {
             LOGGER.info("Operation isn't in RUNNING state: {}", operation);
         }
         return operationConverter.convert(operation);
     }
 
-    private Operation triggerModifyProxyConfigFlowChain(Operation operation, Stack stack) {
+    private Operation triggerModifyProxyConfigFlowChain(Operation operation, Stack stack, String previousProxyCrn) {
         try {
             LOGGER.info("Starting modify proxy config flow chain, new status: {}", MODIFY_PROXY_CONFIG_REQUESTED);
             stackUpdater.updateStackStatus(stack, MODIFY_PROXY_CONFIG_REQUESTED, "Starting proxy config modification");
             ModifyProxyFlowChainTriggerEvent event = new ModifyProxyFlowChainTriggerEvent(MODIFY_PROXY_CHAIN_TRIGGER_EVENT,
-                    stack.getId(), operation.getOperationId());
+                    stack.getId(), operation.getOperationId(), previousProxyCrn);
                 flowManager.notify(MODIFY_PROXY_CHAIN_TRIGGER_EVENT, event);
             LOGGER.info("Started modify proxy config flow");
             return operation;

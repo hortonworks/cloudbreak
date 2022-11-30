@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents.UPDA
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -55,16 +56,16 @@ class UpdateUserDataHandlerTest {
     void tunnelCcmV1ThenRegenerateUserData() {
         when(userDataUpdateRequest.getOldTunnel()).thenReturn(Tunnel.CCM);
         underTest.accept(event);
-        verify(userDataService).regenerateUserData(STACK_ID);
+        verify(userDataService).regenerateUserDataForCcmUpgrade(STACK_ID);
         verify(eventBus).notify(eq(EventSelectorUtil.selector(UserDataUpdateSuccess.class)), any(Event.class));
     }
 
     @Test
     void tunnelCcmV1ThenRegenerateFails() {
         when(userDataUpdateRequest.getOldTunnel()).thenReturn(Tunnel.CCM);
-        doThrow(new IllegalStateException("failure")).when(userDataService).regenerateUserData(any());
+        doThrow(new IllegalStateException("failure")).when(userDataService).regenerateUserDataForCcmUpgrade(any());
         underTest.accept(event);
-        verify(userDataService).regenerateUserData(STACK_ID);
+        verify(userDataService).regenerateUserDataForCcmUpgrade(STACK_ID);
         verify(eventBus).notify(eq(UPDATE_USERDATA_FAILED_EVENT.event()), any(Event.class));
     }
 
@@ -98,7 +99,15 @@ class UpdateUserDataHandlerTest {
     void tunnelNull() {
         when(userDataUpdateRequest.getOldTunnel()).thenReturn(null);
         underTest.accept(event);
-        verify(userDataService).regenerateUserData(STACK_ID);
+        verify(userDataService, never()).regenerateUserDataForCcmUpgrade(STACK_ID);
+        verify(eventBus).notify(eq(EventSelectorUtil.selector(UserDataUpdateSuccess.class)), any(Event.class));
+    }
+
+    @Test
+    void modifyProxy() {
+        when(userDataUpdateRequest.isModifyProxyConfig()).thenReturn(true);
+        underTest.accept(event);
+        verify(userDataService).updateProxyConfig(STACK_ID);
         verify(eventBus).notify(eq(EventSelectorUtil.selector(UserDataUpdateSuccess.class)), any(Event.class));
     }
 }

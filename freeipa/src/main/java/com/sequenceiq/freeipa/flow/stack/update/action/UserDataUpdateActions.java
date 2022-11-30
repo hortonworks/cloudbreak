@@ -50,11 +50,16 @@ public class UserDataUpdateActions {
         return new AbstractUserDataUpdateAction<>(UserDataUpdateRequest.class) {
             @Override
             protected void doExecute(StackContext context, UserDataUpdateRequest payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Recreate userdata for new freeipa instances");
+                LOGGER.info("Update userdata for new freeipa instances");
                 setOperationId(variables, payload.getOperationId());
                 setChainedAction(variables, payload.isChained());
                 setFinalChain(variables, payload.isFinalFlow());
-                sendEvent(context, new UserDataUpdateRequest(context.getStack().getId(), payload.getOldTunnel()));
+                sendEvent(context,
+                        UserDataUpdateRequest.builder()
+                                .withStackId(context.getStack().getId())
+                                .withOldTunnel(payload.getOldTunnel())
+                                .withModifyProxyConfig(payload.isModifyProxyConfig())
+                                .build());
             }
 
             @Override
