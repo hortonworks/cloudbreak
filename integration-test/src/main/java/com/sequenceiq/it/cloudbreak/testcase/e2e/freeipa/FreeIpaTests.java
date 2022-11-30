@@ -23,7 +23,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
-import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
@@ -78,9 +77,6 @@ public class FreeIpaTests extends AbstractE2ETest {
                     .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
                     .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4(), key("preDeployment"))
-                .given("telemetry", TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
                 .given(freeIpa, FreeIpaTestDto.class)
                     .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
                     .withTelemetry("telemetry")

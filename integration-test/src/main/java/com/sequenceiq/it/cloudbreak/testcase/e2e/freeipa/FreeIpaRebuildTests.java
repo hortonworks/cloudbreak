@@ -12,7 +12,6 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public class FreeIpaRebuildTests extends AbstractE2ETest {
@@ -38,12 +37,9 @@ public class FreeIpaRebuildTests extends AbstractE2ETest {
         int instanceCountByGroup = 2;
 
         testContext
-                .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
                 .given(freeIpa, FreeIpaTestDto.class)
-                .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
-                .withTelemetry("telemetry")
+                    .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
+                    .withTelemetry("telemetry")
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .when(freeIpaTestClient.delete())
