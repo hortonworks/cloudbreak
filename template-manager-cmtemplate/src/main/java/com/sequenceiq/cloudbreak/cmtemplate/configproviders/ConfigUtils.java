@@ -8,7 +8,6 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
@@ -56,8 +55,8 @@ public class ConfigUtils {
         return new ApiClusterTemplateVariable().name(name).value(value);
     }
 
-    public static RdsConfigWithoutCluster getRdsConfigOfType(DatabaseType databaseType, TemplatePreparationObject source) {
-        return source.getRdsConfig(databaseType);
+    public static RdsView getRdsViewOfType(DatabaseType databaseType, TemplatePreparationObject source) {
+        return source.getRdsView(databaseType);
     }
 
     public static Optional<StorageLocationView> getStorageLocationForServiceProperty(TemplatePreparationObject source, String serviceProperty) {

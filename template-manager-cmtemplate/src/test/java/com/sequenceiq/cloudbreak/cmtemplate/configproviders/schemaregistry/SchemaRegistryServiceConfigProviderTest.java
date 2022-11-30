@@ -15,13 +15,12 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -73,9 +72,8 @@ public class SchemaRegistryServiceConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
 
-        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(DatabaseType.REGISTRY.toString());
-        when(rdsConfig.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
         when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/schema_registry");
         when(rdsConfig.getConnectionUserName()).thenReturn("schema_registry_server");
         when(rdsConfig.getConnectionPassword()).thenReturn("schema_registry_server_password");
@@ -83,7 +81,7 @@ public class SchemaRegistryServiceConfigProviderTest {
         return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withHostgroupViews(Set.of(master, worker))
-                .withRdsConfigs(Set.of(rdsConfig))
+                .withRdsViews(Set.of(rdsConfig))
                 .build();
     }
 

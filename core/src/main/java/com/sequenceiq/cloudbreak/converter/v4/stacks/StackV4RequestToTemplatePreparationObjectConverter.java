@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -68,6 +69,8 @@ import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
+import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -141,6 +144,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
     @Inject
     private StackV4RequestToGatewayConverter stackV4RequestToGatewayConverter;
 
+    @Inject
+    private RdsViewProvider rdsViewProvider;
+
     public TemplatePreparationObject convert(StackV4Request source) {
         try {
             CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
@@ -150,7 +156,10 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
             Credential credential = getCredential(source, environment);
             LdapView ldapConfig = getLdapConfig(source, environment);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential.getAttributes());
-            Set<RdsConfigWithoutCluster> rdsConfigs = getRdsConfigs(source, workspace);
+            Set<RdsView> rdsConfigs = getRdsConfigs(source, workspace)
+                    .stream()
+                    .map(e -> rdsViewProvider.getRdsView(e))
+                    .collect(Collectors.toSet());
             Blueprint blueprint = getBlueprint(source, workspace);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getGateway() == null ? null : stackV4RequestToGatewayConverter.convert(source);
@@ -167,7 +176,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
 
             Builder builder = Builder.builder()
                     .withCloudPlatform(source.getCloudPlatform())
-                    .withRdsConfigs(rdsConfigs)
+                    .withRdsViews(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
                     .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed(version))
                     .withBlueprintView(blueprintView)

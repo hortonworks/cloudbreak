@@ -14,8 +14,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 
-public class RdsViewTest {
+public class RdsViewProviderTest {
 
     private static final String ASSERT_ERROR_MSG = "The generated connection URL(connectionHost field) is not valid!";
 
@@ -23,12 +24,14 @@ public class RdsViewTest {
 
     private static final String SSL_OPTIONS_SUFFIX = "sslmode=verify-full&sslrootcert=" + SSL_CERTS_FILE_PATH;
 
+    private RdsViewProvider underTest = new RdsViewProvider();
+
     @Test
     public void testCreateRdsViewWhenConnectionUrlContainsSubprotocolAndSubname() {
         String connectionUrl = "jdbc:postgresql:subname://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getHost()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com");
         assertThat(underTest.getPort()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("5432");
@@ -41,7 +44,7 @@ public class RdsViewTest {
         String connectionUrl = "jdbc:postgresql://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getHost()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com");
         assertThat(underTest.getPort()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("5432");
@@ -59,7 +62,7 @@ public class RdsViewTest {
         RDSConfig rdsConfig = createRdsConfig(connectionUrl);
         rdsConfig.setConnectionUserName(rdsConfig.getConnectionUserName() + "@some-rds");
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getConnectionUserName()).isEqualTo("admin@some-rds");
     }
@@ -69,7 +72,7 @@ public class RdsViewTest {
         String connectionUrl = "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getHost()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com");
         assertThat(underTest.getPort()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("5432");
@@ -81,7 +84,7 @@ public class RdsViewTest {
         String connectionUrl = "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432:5432/ranger";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getConnectionString()).withFailMessage(ASSERT_ERROR_MSG)
                 .isEqualTo("some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432:5432/ranger");
@@ -92,7 +95,7 @@ public class RdsViewTest {
         String connectionUrl = "jdbc:postgresql://ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:5432/ranger";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, DatabaseType.RANGER);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getConnectionString()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:5432");
     }
@@ -102,7 +105,7 @@ public class RdsViewTest {
         String connectionUrl = "jdbc:postgresql://ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:5432/ranger";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, DatabaseType.HIVE);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getConnectionString()).withFailMessage(ASSERT_ERROR_MSG)
                 .isEqualTo("jdbc:postgresql://ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:5432/ranger");
@@ -113,7 +116,7 @@ public class RdsViewTest {
         String connectionUrl = "jdbc:oracle:@ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521/orcl";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.ORACLE12, DatabaseType.RANGER);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getConnectionString()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521/orcl");
     }
@@ -123,7 +126,7 @@ public class RdsViewTest {
         String connectionUrl = "jdbc:oracle:@ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521:orcl";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.ORACLE12, DatabaseType.HIVE);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getConnectionString()).withFailMessage(ASSERT_ERROR_MSG)
                 .isEqualTo("jdbc:oracle:@ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521:orcl");
@@ -134,7 +137,7 @@ public class RdsViewTest {
         String connectionUrl = "jdbc:oracle:thin:@ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521:orcl";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.ORACLE12);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getDatabaseName()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("orcl");
     }
@@ -144,7 +147,7 @@ public class RdsViewTest {
         String connectionUrl = "jdbc:oracle:thin:@ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521:orcl";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.ORACLE12);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getPort()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("1521");
         assertThat(underTest.getHost()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("ranger.cmseikcocinw.us-east-1.rds.amazonaws.com");
@@ -158,7 +161,7 @@ public class RdsViewTest {
         String connectionUrl = "jdbc:oracle:thin:@ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521/XE";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.ORACLE12);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getPort()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("1521");
         assertThat(underTest.getDatabaseName()).withFailMessage(ASSERT_ERROR_MSG).isEqualTo("XE");
@@ -174,7 +177,7 @@ public class RdsViewTest {
         String connectionUrl = "jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.MYSQL);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getHostWithPortWithJdbc()).withFailMessage(ASSERT_ERROR_MSG)
                 .isEqualTo("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306");
@@ -184,14 +187,14 @@ public class RdsViewTest {
     public void testCreateRdsViewWhenMalformedUrl() {
         RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://foo.com", DatabaseVendor.MYSQL);
 
-        assertThatCode(() -> new RdsView(rdsConfig)).isInstanceOf(IllegalArgumentException.class);
+        assertThatCode(() -> underTest.getRdsView(rdsConfig)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     public void testCreateRdsViewHostWithPortWithJdbcWhenQueryParameters() {
         RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger?foo=bar", DatabaseVendor.MYSQL);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getHostWithPortWithJdbc()).isEqualTo("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306");
     }
@@ -201,7 +204,7 @@ public class RdsViewTest {
         RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger", DatabaseVendor.MYSQL);
         rdsConfig.setSslMode(RdsSslMode.DISABLED);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.isUseSsl()).isFalse();
     }
@@ -211,7 +214,7 @@ public class RdsViewTest {
         RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger", DatabaseVendor.MYSQL);
         rdsConfig.setSslMode(RdsSslMode.ENABLED);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.isUseSsl()).isTrue();
     }
@@ -220,7 +223,7 @@ public class RdsViewTest {
     public void testCreateRdsViewSslCertificateFilePathWhenNoFilePath() {
         RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger", DatabaseVendor.MYSQL);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig);
 
         assertThat(underTest.getSslCertificateFilePath()).isEqualTo("");
     }
@@ -229,7 +232,7 @@ public class RdsViewTest {
     public void testCreateRdsViewSslCertificateFilePathWhenNullFilePath() {
         RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger", DatabaseVendor.MYSQL);
 
-        RdsView underTest = new RdsView(rdsConfig, null);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig, null);
 
         assertThat(underTest.getSslCertificateFilePath()).isEqualTo("");
     }
@@ -238,7 +241,7 @@ public class RdsViewTest {
     public void testCreateRdsViewSslCertificateFilePathWhenEmptyFilePath() {
         RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger", DatabaseVendor.MYSQL);
 
-        RdsView underTest = new RdsView(rdsConfig, "");
+        RdsView underTest = this.underTest.getRdsView(rdsConfig, "");
 
         assertThat(underTest.getSslCertificateFilePath()).isEqualTo("");
     }
@@ -247,7 +250,7 @@ public class RdsViewTest {
     public void testCreateRdsViewSslCertificateFilePathWhenValidFilePath() {
         RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger", DatabaseVendor.MYSQL);
 
-        RdsView underTest = new RdsView(rdsConfig, SSL_CERTS_FILE_PATH);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig, SSL_CERTS_FILE_PATH);
 
         assertThat(underTest.getSslCertificateFilePath()).isEqualTo(SSL_CERTS_FILE_PATH);
     }
@@ -257,7 +260,7 @@ public class RdsViewTest {
         RdsConfigWithoutCluster rdsView = Mockito.mock(RdsConfigWithoutCluster.class);
         when(rdsView.isArchived()).thenReturn(true);
         when(rdsView.getConnectionDriver()).thenReturn("driver");
-        when(rdsView.getConnectionURL()).thenReturn("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger");
+        when(rdsView.getConnectionURL()).thenReturn("jdbc:mysql://ozzie-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ozzie");
         when(rdsView.getConnectionPassword()).thenReturn("pass");
         when(rdsView.getConnectionUserName()).thenReturn("username");
         when(rdsView.getConnectorJarUrl()).thenReturn("jarurl");
@@ -268,26 +271,26 @@ public class RdsViewTest {
         when(rdsView.getId()).thenReturn(-1L);
         when(rdsView.getName()).thenReturn("name");
         when(rdsView.getSslMode()).thenReturn(RdsSslMode.ENABLED);
-        when(rdsView.getType()).thenReturn("type");
+        when(rdsView.getType()).thenReturn("ozzie");
 
-        RdsView underTest = new RdsView(rdsView, "ssl-path");
+        RdsView underTest = this.underTest.getRdsView(rdsView, "ssl-path");
         assertThat(underTest.getClusterManagerVendor()).isEqualTo("mysql");
         assertThat(underTest.getConnectionString())
-                .isEqualTo("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger?sslmode=verify-full&sslrootcert=ssl-path");
+                .isEqualTo("jdbc:mysql://ozzie-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ozzie?sslmode=verify-full&sslrootcert=ssl-path");
         assertThat(underTest.getConnectionUserName()).isEqualTo("username");
-        assertThat(underTest.getHostWithPortWithJdbc()).isEqualTo("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306");
-        assertThat(underTest.getHost()).isEqualTo("ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com");
+        assertThat(underTest.getHostWithPortWithJdbc()).isEqualTo("jdbc:mysql://ozzie-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306");
+        assertThat(underTest.getHost()).isEqualTo("ozzie-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com");
         assertThat(underTest.getConnectionDriver()).isEqualTo("driver");
         assertThat(underTest.getConnectionPassword()).isEqualTo("pass");
         assertThat(underTest.getConnectionURL())
-                .isEqualTo("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger?sslmode=verify-full&sslrootcert=ssl-path");
+                .isEqualTo("jdbc:mysql://ozzie-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ozzie?sslmode=verify-full&sslrootcert=ssl-path");
         assertThat(underTest.getDatabaseEngine()).isEqualTo("mysql");
         assertThat(underTest.getDatabaseType()).isEqualTo("mysql");
         assertThat(underTest.getDatabaseVendor()).isEqualTo(DatabaseVendor.MYSQL);
-        assertThat(underTest.getDatabaseName()).isEqualTo("ranger");
+        assertThat(underTest.getDatabaseName()).isEqualTo("ozzie");
         assertThat(underTest.getFancyName()).isEqualTo("MySQL / MariaDB");
         assertThat(underTest.getLowerCaseDatabaseEngine()).isEqualTo("mysql");
-        assertThat(underTest.getName()).isEqualTo("ranger");
+        assertThat(underTest.getName()).isEqualTo("ozzie");
         assertThat(underTest.getPassword()).isEqualTo("pass");
         assertThat(underTest.getPort()).isEqualTo("3306");
         assertThat(underTest.getSslCertificateFilePath()).isEqualTo("ssl-path");
@@ -295,7 +298,7 @@ public class RdsViewTest {
         assertThat(underTest.getUserName()).isEqualTo("username");
         assertThat(underTest.getVendor()).isEqualTo("mysql");
         assertThat(underTest.getWithoutJDBCPrefix())
-                .isEqualTo("ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger?sslmode=verify-full&sslrootcert=ssl-path");
+                .isEqualTo("ozzie-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ozzie?sslmode=verify-full&sslrootcert=ssl-path");
         assertThat(underTest.isUseSsl()).isEqualTo(true);
     }
 
@@ -317,7 +320,7 @@ public class RdsViewTest {
         RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.MYSQL);
         rdsConfig.setSslMode(RdsSslMode.ENABLED);
 
-        RdsView underTest = new RdsView(rdsConfig, SSL_CERTS_FILE_PATH);
+        RdsView underTest = this.underTest.getRdsView(rdsConfig, SSL_CERTS_FILE_PATH);
 
         assertThat(underTest.getConnectionURL()).isEqualTo(connectionUrlExpected);
     }

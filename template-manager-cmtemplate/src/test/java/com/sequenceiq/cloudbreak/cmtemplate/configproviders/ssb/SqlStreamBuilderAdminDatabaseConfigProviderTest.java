@@ -18,10 +18,10 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -77,18 +77,19 @@ public class SqlStreamBuilderAdminDatabaseConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
 
-        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(DatabaseType.SQL_STREAM_BUILDER_ADMIN.toString());
-        when(rdsConfig.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
-        when(rdsConfig.getConnectionDriver()).thenReturn(DatabaseVendor.POSTGRES.connectionDriver());
-        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/ssb_admin");
+        when(rdsConfig.getDatabaseVendor()).thenReturn(DatabaseVendor.POSTGRES);
+        when(rdsConfig.getHost()).thenReturn("testhost");
+        when(rdsConfig.getPort()).thenReturn("5432");
+        when(rdsConfig.getDatabaseName()).thenReturn("ssb_admin");
         when(rdsConfig.getConnectionUserName()).thenReturn("ssb_test_user");
         when(rdsConfig.getConnectionPassword()).thenReturn("ssb_test_pw");
 
         return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withHostgroupViews(Set.of(manager, master, worker))
-                .withRdsConfigs(Set.of(rdsConfig))
+                .withRdsViews(Set.of(rdsConfig))
                 .build();
     }
 }

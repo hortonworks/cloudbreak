@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
+import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -115,7 +117,10 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER)))
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER))
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
                 .withProductDetails(generateCmRepo(() -> cdhVersion), null)
                 .build();
@@ -157,7 +162,10 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER)))
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER))
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(() -> "7.0.0"), null)
                 .build();
 
@@ -196,7 +204,10 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master))
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER)))
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER))
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
 
@@ -231,7 +242,9 @@ public class RangerRoleConfigProviderTest {
         // We do not configure RANGER DB
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
-                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.HIVE)))
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.HIVE)).stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
                 .build();
 
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
@@ -244,7 +257,11 @@ public class RangerRoleConfigProviderTest {
     public void testRoleConfigsForMultipleDb() {
         // We configure multiple DBs
         assertThatCode(() -> Builder.builder()
-                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER), rdsConfigWithoutCluster(DatabaseType.RANGER))).build())
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER), rdsConfigWithoutCluster(DatabaseType.RANGER))
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
+                .build())
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -253,7 +270,10 @@ public class RangerRoleConfigProviderTest {
         RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
         when(rdsConfig.getSslMode()).thenReturn(RdsSslMode.ENABLED);
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsConfigs(Set.of(rdsConfig))
+                .withRdsViews(Set.of(rdsConfig)
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
+                        .collect(Collectors.toSet()))
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
