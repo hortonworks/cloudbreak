@@ -104,6 +104,7 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     @Query("SELECT fl.flowId as flowId, " +
             "fl.resourceId as resourceId, " +
             "fl.created as created, " +
+            "fl.endTime as endTime, " +
             "fl.flowChainId as flowChainId, " +
             "fl.nextEvent as nextEvent, " +
             "fl.payloadType as payloadType, " +
@@ -117,9 +118,9 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
             "fl.flowTriggerUserCrn as flowTriggerUserCrn, " +
             "fl.operationType as operationType " +
             "FROM FlowLog fl " +
-            "WHERE fl.flowId IN (:flowIds) " +
+            "WHERE fl.flowChainId IN (:chainIds) " +
             "ORDER BY fl.created DESC")
-    List<FlowLogWithoutPayload> findAllWithoutPayloadByFlowIdsCreatedDesc(@Param("flowIds") Set<String> flowIds);
+    List<FlowLogWithoutPayload> findAllWithoutPayloadByChainIdsCreatedDesc(@Param("chainIds") Set<String> chainIds);
 
     @Query("SELECT fl.flowId as flowId, " +
             "fl.resourceId as resourceId, " +
@@ -140,4 +141,7 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
             "WHERE fl.flowId = :flowId " +
             "ORDER BY fl.created desc")
     List<FlowLogWithoutPayload> findAllWithoutPayloadByFlowIdOrderByCreatedDesc(@Param("flowId") String flowId);
+
+    @Query("SELECT fl FROM FlowLog fl WHERE fl.flowChainId IN (:chainIds) AND fl.currentState <> 'FINISHED' ORDER BY fl.created DESC")
+    List<FlowLog> findAllByFlowChainIdOrderByCreatedDesc(@Param("chainIds") Set<String> chainIds);
 }

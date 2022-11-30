@@ -2,11 +2,13 @@ package com.sequenceiq.flow.service.flowlog;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -399,10 +401,10 @@ public class FlowLogDBService implements FlowLogService {
         return flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized();
     }
 
-    public List<FlowLogWithoutPayload> getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(Set<String> flowIds) {
-        LOGGER.info("Getting flow logs by these flow ids: {}", Joiner.on(",").join(flowIds));
-        if (!flowIds.isEmpty()) {
-            return flowLogRepository.findAllWithoutPayloadByFlowIdsCreatedDesc(flowIds);
+    public List<FlowLogWithoutPayload> getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(Set<String> chainIds) {
+        if (null != chainIds && !chainIds.isEmpty()) {
+            LOGGER.info("Getting flow logs by these flow chain ids: {}", Joiner.on(",").join(chainIds));
+            return flowLogRepository.findAllWithoutPayloadByChainIdsCreatedDesc(chainIds);
         } else {
             return Collections.emptyList();
         }
@@ -411,5 +413,13 @@ public class FlowLogDBService implements FlowLogService {
     @Override
     public List<FlowLogWithoutPayload> findAllWithoutPayloadByFlowIdOrderByCreatedDesc(String flowId) {
         return flowLogRepository.findAllWithoutPayloadByFlowIdOrderByCreatedDesc(flowId);
+    }
+
+    @Override
+    public List<FlowLog> findAllFlowByFlowChainId(Set<String> chainIds) {
+        List<FlowLog> flowDbLogs = flowLogRepository.findAllByFlowChainIdOrderByCreatedDesc(chainIds);
+        return flowDbLogs.stream().collect(Collectors.groupingBy(FlowLog::getFlowId,
+                        Collectors.reducing(BinaryOperator.maxBy(Comparator.comparing(FlowLog::getCreated)))))
+                .values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 }
