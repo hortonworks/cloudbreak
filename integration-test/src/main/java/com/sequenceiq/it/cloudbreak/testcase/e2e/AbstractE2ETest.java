@@ -20,7 +20,10 @@ import org.testng.annotations.Listeners;
 
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryOnceTestListener;
@@ -70,6 +73,27 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
             ((TestContext) data[0]).getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, (TestContext) data[0]));
         }
         spotUtil.setUseSpotInstances(Boolean.FALSE);
+    }
+
+    /**
+     * Overrides the integration test environment creation with setting Telemetry up for E2E resources by default.
+     *
+     * @param testContext   Spring offers ApplicationContextAware interface to provide configuration of the Integration Test ApplicationContext.
+     *                      Should not be null!
+     */
+    @Override
+    protected void createDefaultEnvironment(TestContext testContext) {
+        testContext
+                .given("telemetry", TelemetryTestDto.class)
+                    .withLogging()
+                    .withReportClusterLogs()
+                .given(EnvironmentTestDto.class)
+                    .withTelemetry("telemetry")
+                    .withCreateFreeIpa(Boolean.FALSE)
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(getEnvironmentTestClient().describe())
+                .validate();
     }
 
     /**
