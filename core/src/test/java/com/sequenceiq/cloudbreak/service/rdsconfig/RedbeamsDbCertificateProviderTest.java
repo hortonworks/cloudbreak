@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +22,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider.RedbeamsDbSslDetails;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -36,9 +37,6 @@ class RedbeamsDbCertificateProviderTest {
 
     @Mock
     private RedbeamsDbServerConfigurer dbServerConfigurer;
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private DatalakeService datalakeService;
@@ -61,9 +59,10 @@ class RedbeamsDbCertificateProviderTest {
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
 
-        Set<String> actual = underTest.getRelatedSslCerts(stack);
+        RedbeamsDbSslDetails result = underTest.getRelatedSslCerts(stack);
 
-        assertThat(actual).isEmpty();
+        assertThat(result.getSslCerts()).isEmpty();
+        assertThat(result.isSslEnabledForStack()).isFalse();
     }
 
     @Test
@@ -79,10 +78,10 @@ class RedbeamsDbCertificateProviderTest {
         when(dbServerConfigurer.isRemoteDatabaseNeeded(dbServerCrn)).thenReturn(Boolean.TRUE);
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(new DatabaseServerV4Response());
 
+        RedbeamsDbSslDetails result = underTest.getRelatedSslCerts(stack);
 
-        Set<String> actual = underTest.getRelatedSslCerts(stack);
-
-        assertThat(actual).isEmpty();
+        assertThat(result.getSslCerts()).isEmpty();
+        assertThat(result.isSslEnabledForStack()).isFalse();
     }
 
     @Test
@@ -100,9 +99,34 @@ class RedbeamsDbCertificateProviderTest {
         databaseServerV4Response.setSslConfig(new SslConfigV4Response());
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
 
-        Set<String> actual = underTest.getRelatedSslCerts(stack);
+        RedbeamsDbSslDetails result = underTest.getRelatedSslCerts(stack);
 
-        assertThat(actual).isEmpty();
+        assertThat(result.getSslCerts()).isEmpty();
+        assertThat(result.isSslEnabledForStack()).isFalse();
+    }
+
+    @Test
+    void getRelatedSslCertsWhenTheClusterSdxAndRdsConfiguredWithSSLButNoCerts() {
+        String dbServerCrn = "adbservercrn";
+        Cluster cluster = TestUtil.cluster();
+        cluster.setDatabaseServerCrn(dbServerCrn);
+        StackDto stack = mock(StackDto.class);
+        when(stack.getCluster()).thenReturn(cluster);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getType()).thenReturn(StackType.DATALAKE);
+        when(stackView.getResourceCrn()).thenReturn("stackCrn");
+        when(dbServerConfigurer.isRemoteDatabaseNeeded(dbServerCrn)).thenReturn(Boolean.TRUE);
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        SslConfigV4Response sslConfig = getSslConfigV4ResponseWithCertificate(Set.of());
+        databaseServerV4Response.setSslConfig(sslConfig);
+        when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
+
+        IllegalStateException illegalStateException = Assertions.assertThrows(IllegalStateException.class, () -> underTest.getRelatedSslCerts(stack));
+
+        assertThat(illegalStateException)
+                .hasMessage("External DB SSL enforcement is enabled for cluster(crn:'stackCrn', name: 'dummyCluster') and remote database('adbservercrn')," +
+                "but no certificates have been returned!");
     }
 
     @Test
@@ -122,14 +146,16 @@ class RedbeamsDbCertificateProviderTest {
         databaseServerV4Response.setSslConfig(sslConfig);
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
 
-        Set<String> actual = underTest.getRelatedSslCerts(stack);
+        RedbeamsDbSslDetails result = underTest.getRelatedSslCerts(stack);
 
+        Set<String> actual = result.getSslCerts();
         assertThat(actual).isNotEmpty();
         assertThat(actual).contains(certificateA);
+        assertThat(result.isSslEnabledForStack()).isTrue();
     }
 
     @Test
-    void getRelatedSslCertsWhenTheClusterDistroXAndNoRdsConfiguredAndThereIsNoRelatedSdx() {
+    void getRelatedSslCertsWhenTheClusterDistroXAndRdsConfiguredAndThereIsNoRelatedSdx() {
         String dbServerCrn = "adbservercrn";
         String certificateA = "certificate-A";
         Cluster cluster = TestUtil.cluster();
@@ -144,14 +170,16 @@ class RedbeamsDbCertificateProviderTest {
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
 
-        Set<String> actual = underTest.getRelatedSslCerts(stack);
+        RedbeamsDbSslDetails result = underTest.getRelatedSslCerts(stack);
 
+        Set<String> actual = result.getSslCerts();
         assertThat(actual).isNotEmpty();
         assertThat(actual).contains(certificateA);
+        assertThat(result.isSslEnabledForStack()).isTrue();
     }
 
     @Test
-    void getRelatedSslCertsWhenTheClusterDistroXAndNoRdsConfiguredAndRelatedSdxDoesNotHaveRdsConfigured() {
+    void getRelatedSslCertsWhenTheClusterDistroXAndRdsConfiguredAndRelatedSdxDoesNotHaveRdsConfigured() {
         String dbServerCrn = "adbservercrn";
         String certificateA = "certificate-A";
 
@@ -178,10 +206,12 @@ class RedbeamsDbCertificateProviderTest {
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
 
-        Set<String> actual = underTest.getRelatedSslCerts(stack);
+        RedbeamsDbSslDetails result = underTest.getRelatedSslCerts(stack);
 
+        Set<String> actual = result.getSslCerts();
         assertThat(actual).isNotEmpty();
         assertThat(actual).contains(certificateA);
+        assertThat(result.isSslEnabledForStack()).isTrue();
     }
 
     @Test
@@ -212,10 +242,12 @@ class RedbeamsDbCertificateProviderTest {
         databaseServerV4ResponseB.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateB)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrnB)).thenReturn(databaseServerV4ResponseB);
 
-        Set<String> actual = underTest.getRelatedSslCerts(stack);
+        RedbeamsDbSslDetails result = underTest.getRelatedSslCerts(stack);
 
+        Set<String> actual = result.getSslCerts();
         assertThat(actual).isNotEmpty();
         assertThat(actual).contains(certificateB);
+        assertThat(result.isSslEnabledForStack()).isFalse();
     }
 
     @Test
@@ -251,10 +283,12 @@ class RedbeamsDbCertificateProviderTest {
         databaseServerV4ResponseB.setSslConfig(sslConfig);
         when(dbServerConfigurer.getDatabaseServer(dbServerCrnB)).thenReturn(databaseServerV4ResponseB);
 
-        Set<String> actual = underTest.getRelatedSslCerts(stack);
+        RedbeamsDbSslDetails result = underTest.getRelatedSslCerts(stack);
 
+        Set<String> actual = result.getSslCerts();
         assertThat(actual).isNotEmpty();
         assertThat(actual).contains(certificateA);
+        assertThat(result.isSslEnabledForStack()).isTrue();
     }
 
     @Test
@@ -289,10 +323,12 @@ class RedbeamsDbCertificateProviderTest {
         databaseServerV4ResponseB.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateB)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrnB)).thenReturn(databaseServerV4ResponseB);
 
-        Set<String> actual = underTest.getRelatedSslCerts(stack);
+        RedbeamsDbSslDetails result = underTest.getRelatedSslCerts(stack);
 
+        Set<String> actual = result.getSslCerts();
         assertThat(actual).isNotEmpty();
         assertThat(actual).contains(certificateA, certificateB);
+        assertThat(result.isSslEnabledForStack()).isTrue();
     }
 
     @Test
