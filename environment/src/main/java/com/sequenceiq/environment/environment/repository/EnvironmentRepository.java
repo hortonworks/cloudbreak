@@ -111,8 +111,9 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     List<Environment> findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
             @Param("parentEnvironmentId") Long parentEnvironmentId);
 
-    @Query("SELECT e.resourceCrn as remoteResourceId, e.id as localId, e.name as name FROM Environment e WHERE e.archived = false and e.status in (:statuses)")
-    List<JobResource> findAllRunningAndStatusIn(@Param("statuses") Collection<EnvironmentStatus> statuses);
+    @Query("SELECT e.resourceCrn as remoteResourceId, e.id as localId, e.name as name FROM Environment e WHERE e.archived = false " +
+            "and e.status not in (:statuses)")
+    List<JobResource> findAllRunningAndStatusNotIn(@Param("statuses") Collection<EnvironmentStatus> statuses);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(e.id, e.resourceCrn) FROM Environment e " +
             "WHERE e.accountId = :accountId AND e.archived = false")
