@@ -12,10 +12,14 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.management.network.Subnet;
+import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
@@ -28,9 +32,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 @Component
 class AzureStackViewProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureStackViewProvider.class);
 
     private static final long AZURE_NUMBER_OF_RESERVED_IPS = 5;
 
@@ -45,6 +52,10 @@ class AzureStackViewProvider {
 
     @Inject
     private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Inject
+    @Qualifier("DefaultRetryService")
+    private Retry retryService;
 
     AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack, AzureClient client, AuthenticatedContext ac) {
         Map<String, String> customImageNamePerInstance = getCustomImageNamePerInstance(ac, cloudStack);
@@ -83,8 +94,21 @@ class AzureStackViewProvider {
         String resourceGroup = network.getStringParameter(RESOURCE_GROUP_NAME);
         String networkId = network.getStringParameter(NETWORK_ID);
         Collection<String> subnetIds = azureUtils.getCustomSubnetIds(network);
+        com.microsoft.azure.management.network.Network networkByResourceGroup =
+                retryService.testWith1SecDelayMax5Times(
+                        () -> {
+                            try {
+                                return client.getNetworkByResourceGroup(resourceGroup, networkId);
+                            } catch (ProviderAuthenticationFailedException e) {
+                                throw e;
+                            } catch (RuntimeException e) {
+                                LOGGER.debug("Azure network query request failed, operation will be retried.");
+                                throw new Retry.ActionFailedException(e.getMessage());
+                            }
+                        }
+                );
         for (String subnetId : subnetIds) {
-            Subnet subnet = client.getSubnetProperties(resourceGroup, networkId, subnetId);
+            Subnet subnet = networkByResourceGroup.subnets().get(subnetId);
             long available = getAvailableAddresses(subnet);
             result.put(subnetId, available);
         }
