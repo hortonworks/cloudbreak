@@ -49,8 +49,11 @@ public class EnvironmentNetworkProviderValidator {
         NetworkDto network = environmentDto.getNetwork();
         String cloudPlatform = environmentDto.getCloudPlatform();
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        LOGGER.debug("Validate network parameters that cloudplatform specific params are filled up properly.");
         validateNetworkHasTheSamePropertyFilledAsTheDesiredCloudPlatform(network, cloudPlatform, resultBuilder);
+        LOGGER.debug("Validate network that it exists on provider side.");
         validateNetwork(network, cloudPlatform, resultBuilder, environmentValidationDto);
+        LOGGER.debug("Validate security group that it exists on provider side.");
         validateSecurityGroup(environmentValidationDto, cloudPlatform, resultBuilder);
         return resultBuilder.build();
     }

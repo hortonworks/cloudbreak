@@ -3,6 +3,8 @@ package com.sequenceiq.environment.environment.validation.validators;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
@@ -13,12 +15,17 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 @Component
 public class EnvironmentRegionValidator {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentRegionValidator.class);
+
     public ValidationResultBuilder validateRegions(Set<String> requestedRegions, CloudRegions cloudRegions, String cloudPlatform) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         if (cloudRegions.areRegionsSupported()) {
+            LOGGER.debug("Region is supported for {} cloud.", cloudPlatform);
             validateRegionsWhereSupported(requestedRegions, cloudRegions.getRegionNames(), resultBuilder, cloudPlatform);
         } else if (!requestedRegions.isEmpty()) {
-            resultBuilder.error(String.format("Regions are not supported on cloudprovider: [%s].", cloudPlatform));
+            String error = String.format("Regions are not supported on cloudprovider: [%s].", cloudPlatform);
+            LOGGER.debug(error);
+            resultBuilder.error(error);
         }
         return resultBuilder;
     }
