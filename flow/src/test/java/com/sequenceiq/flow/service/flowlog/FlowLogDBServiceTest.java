@@ -17,11 +17,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -60,7 +62,6 @@ import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
-import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
@@ -223,15 +224,15 @@ class FlowLogDBServiceTest {
     }
 
     @Test
-    void cancelTooOldTerminationFlowForResourceTest() throws TransactionService.TransactionExecutionException {
+    void cancelTooOldTerminationFlowForResourceTest() throws TransactionExecutionException {
         Set<FlowLogIdWithTypeAndTimestamp> flowLogs = new LinkedHashSet<>();
         Long currentTime = 123456789L;
         doReturn(currentTime).when(clock).getCurrentTimeMillis();
         FlowLogIdWithTypeAndTimestamp flowLog2 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        when(flowLog2.getFlowType()).thenReturn(ClassValue.of(Class.class));
+        when(flowLog2.getFlowType()).thenReturn(of(Class.class));
         flowLogs.add(flowLog2);
         FlowLogIdWithTypeAndTimestamp flowLog1 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        when(flowLog1.getFlowType()).thenReturn(ClassValue.of(TerminationFlowConfig.class));
+        when(flowLog1.getFlowType()).thenReturn(of(TerminationFlowConfig.class));
         when(flowLog1.getCreated()).thenReturn(9000L);
         when(flowLog1.getFlowId()).thenReturn("flow1");
         flowLogs.add(flowLog1);
@@ -252,11 +253,11 @@ class FlowLogDBServiceTest {
     void doNotCancelTooYoungTerminationFlowForResourceTest() {
         Set<FlowLogIdWithTypeAndTimestamp> flowLogs = new HashSet<>();
         FlowLogIdWithTypeAndTimestamp flowLog1 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        when(flowLog1.getFlowType()).thenReturn(ClassValue.of(TerminationFlowConfig.class));
+        when(flowLog1.getFlowType()).thenReturn(of(TerminationFlowConfig.class));
         when(flowLog1.getCreated()).thenReturn(11000L);
         flowLogs.add(flowLog1);
         FlowLogIdWithTypeAndTimestamp flowLog2 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        when(flowLog2.getFlowType()).thenReturn(ClassValue.of(Class.class));
+        when(flowLog2.getFlowType()).thenReturn(of(Class.class));
         flowLogs.add(flowLog2);
         when(flowLogRepository.findAllRunningFlowLogByResourceId(eq(1L))).thenReturn(flowLogs);
         when(applicationFlowInformation.getTerminationFlow()).thenReturn(Collections.singletonList(TerminationFlowConfig.class));
@@ -356,7 +357,7 @@ class FlowLogDBServiceTest {
     }
 
     @Test
-    void testIsTerminatedFlowAlreadyRunningWhenLastFlowIsTerminationButNotPending() throws ClassNotFoundException {
+    void testIsTerminatedFlowAlreadyRunningWhenLastFlowTermButNotPending() throws ClassNotFoundException {
         FlowLog flowLog = mock(FlowLog.class);
         com.sequenceiq.flow.domain.ClassValue terminationFlowConfig = of(TerminationFlowConfig.class.getName());
         when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.of(flowLog));
@@ -377,7 +378,7 @@ class FlowLogDBServiceTest {
     }
 
     @Test
-    void testIsTerminatedFlowAlreadyRunningWhenShouldReturnFalseWhenTheFlowTypeIsNotPresent() {
+    void testTermFlowAlreadyRunningReturnFalseWhenTheFlowTypeIsNotPresent() {
         FlowLog flowLog = mock(FlowLog.class);
         when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.of(flowLog));
         when(flowLog.getFlowType()).thenReturn(null);
@@ -390,6 +391,65 @@ class FlowLogDBServiceTest {
         when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.empty());
         boolean actual = underTest.isFlowConfigAlreadyRunning(1L, TerminationFlowConfig.class);
         Assertions.assertFalse(actual);
+    }
+
+    @Test
+    void testFindAllFlowByFlowChainId() {
+        FlowLog log1 = new FlowLog(1289L, "0de1361e-5538-4052-a02b-c79a3bb9c5bd",
+                "DATAHUB_CLUSTERS_DELETE_STARTED_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
+        log1.setCreated(1669058834862L);
+        log1.setEndTime(1669058834878L);
+        FlowLog log2 = new FlowLog(1291L, "0de1361e-5538-4052-a02b-c79a3bb9c5bd",
+                "DATALAKE_CLUSTERS_DELETE_STARTED_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
+        log2.setCreated(1669058834613L);
+        log2.setEndTime(1669058834858L);
+        FlowLog log3 = new FlowLog(1290L, "0de1361e-5538-4052-a02b-c79a3bb9c5bd",
+                "EXPERIENCE_DELETE_STARTED_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
+        log3.setCreated(1669058834492L);
+        log3.setEndTime(1669058834611L);
+        FlowLog log4 = new FlowLog(1295L, "741b0bd1-f94a-4184-82c9-c6240c22faf4",
+                "ENV_DELETE_FAILED_STATE", true, StateStatus.FAILED, OperationType.UNKNOWN);
+        log4.setCreated(1669058928253L);
+        FlowLog log5 = new FlowLog(1294L, "741b0bd1-f94a-4184-82c9-c6240c22faf4",
+                "FREEIPA_DELETE_STARTED_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
+        log5.setCreated(1669058928119L);
+        log5.setEndTime(1669058928246L);
+        FlowLog log6 = new FlowLog(1293L, "741b0bd1-f94a-4184-82c9-c6240c22faf4",
+                "INIT_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
+        log6.setCreated(1669058834958L);
+        log6.setEndTime(1669058928114L);
+        when(flowLogRepository.findAllByFlowChainIdOrderByCreatedDesc(Set.of("a"))).thenReturn(List.of(log1, log2, log3, log4, log5, log6));
+        List<FlowLog> actual = underTest.findAllFlowByFlowChainId(Set.of("a"));
+        assertEquals(2, actual.size());
+        assertEquals(log1, actual.stream().filter(s -> Objects.equals(s.getFlowId(), "0de1361e-5538-4052-a02b-c79a3bb9c5bd")).findFirst().get());
+        Assertions.assertNull(actual.stream().filter(s -> Objects.equals(s.getFlowId(), "741b0bd1-f94a-4184-82c9-c6240c22faf4")).findFirst().get().getEndTime());
+    }
+
+    @Test
+    void testFindAllFlowByFlowChainIdEmptyResult() {
+        when(flowLogRepository.findAllByFlowChainIdOrderByCreatedDesc(Set.of("a"))).thenReturn(new ArrayList<>());
+        List<FlowLog> actual = underTest.findAllFlowByFlowChainId(Set.of("a"));
+        assertEquals(0, actual.size());
+    }
+
+    @Test
+    void testgetFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc() {
+        FlowLogWithoutPayload log1 = mock(FlowLogWithoutPayload.class);
+        when(flowLogRepository.findAllWithoutPayloadByChainIdsCreatedDesc(Set.of("a"))).thenReturn(List.of(log1));
+        List<FlowLogWithoutPayload> actual = underTest.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(Set.of("a"));
+        assertEquals(1, actual.size());
+    }
+
+    @Test
+    void testFlowLogsWithoutPayloadByFlowChainIdsCreatedDescNullChainId() {
+        List<FlowLogWithoutPayload> actual = underTest.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(null);
+        assertEquals(0, actual.size());
+    }
+
+    @Test
+    void testFlowLogsWithoutPayloadByFlowChainIdsCreatedDescEmptyChainId() {
+        List<FlowLogWithoutPayload> actual = underTest.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(new HashSet<>());
+        assertEquals(0, actual.size());
     }
 
     public static class TerminationFlowConfig extends AbstractFlowConfiguration<MockFlowState, MockFlowEvent> {

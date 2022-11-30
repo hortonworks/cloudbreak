@@ -8,6 +8,8 @@ public interface FlowLogWithoutPayload {
 
     Long getCreated();
 
+    Long getEndTime();
+
     String getFlowId();
 
     String getFlowChainId();
