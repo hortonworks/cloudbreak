@@ -78,8 +78,6 @@ dependencies {
   implementation     ("io.swagger:swagger-jersey2-jaxrs:$swaggerVersion") {
     exclude group: 'org.yaml'
   }
-  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                        version: '2.3.1'
-  implementation     group: 'org.glassfish.jaxb',        name: 'jaxb-runtime',                    version: '2.3.1'
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                   version: jerseyCoreVersion
   implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',       version: jerseyCoreVersion
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations',              version: mybatisMigrationVersion
