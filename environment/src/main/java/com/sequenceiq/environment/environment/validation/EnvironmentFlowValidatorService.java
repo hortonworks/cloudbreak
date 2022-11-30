@@ -68,7 +68,7 @@ public class EnvironmentFlowValidatorService {
 
     public ValidationResult.ValidationResultBuilder validateRegionsAndLocation(String location, Set<String> requestedRegions,
             Environment environment, CloudRegions cloudRegions) {
-        LOGGER.debug("Validating regions and location for environment.");
+        LOGGER.debug("Validate Environment cloud region and location which is {}.", cloudRegions);
         String cloudPlatform = environment.getCloudPlatform();
         ValidationResult.ValidationResultBuilder regionValidationResult
                 = environmentRegionValidator.validateRegions(requestedRegions, cloudRegions, cloudPlatform);
@@ -78,34 +78,42 @@ public class EnvironmentFlowValidatorService {
     }
 
     public ValidationResult validateTelemetryLoggingStorageLocation(Environment environment) {
+        LOGGER.debug("Validate Environment telemetry location.");
         return logStorageLocationValidator.validateTelemetryLoggingStorageLocation(environment);
     }
 
     public ValidationResult validateTelemetryLoggingStorageConfig(Environment environment) {
+        LOGGER.debug("Validate Environment telemetry configurations.");
         return logStorageConfigurationValidator.validateTelemetryLoggingStorageConfiguration(environment);
     }
 
     public ValidationResult validateBackupStorageLocation(Environment environment) {
+        LOGGER.debug("Validate Environment backup location.");
         return backupLocationValidator.validateBackupStorageLocation(environment);
     }
 
     public ValidationResult validateBackupStorageConfig(Environment environment) {
+        LOGGER.debug("Validate Environment backup configurations.");
         return backupStorageConfigurationValidator.validateBackupStorageConfiguration(environment);
     }
 
     public ValidationResult validateNetworkWithProvider(EnvironmentValidationDto environmentValidationDto) {
+        LOGGER.debug("Validate Environment network configurations.");
         return environmentNetworkProviderValidator.validate(environmentValidationDto);
     }
 
     public ValidationResult validateParameters(EnvironmentValidationDto environmentValidationDto, ParametersDto parametersDto) {
+        LOGGER.debug("Validate Environment parameters.");
         return environmentParameterValidator.validate(environmentValidationDto, parametersDto);
     }
 
     public ValidationResult validateAuthentication(EnvironmentValidationDto environmentValidationDto) {
+        LOGGER.debug("Validate Environment authentication.");
         return environmentAuthenticationValidator.validate(environmentValidationDto);
     }
 
     public ValidationResult validateAwsKeysPresent(EnvironmentValidationDto environmentValidationDto) {
+        LOGGER.debug("Validate Environment AWS keys.");
         ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         if (environmentValidationDto.getEnvironmentDto().getCloudPlatform().equals(CloudPlatform.AWS.name())) {
             return encryptionKeyArnValidator.validate(environmentValidationDto);
