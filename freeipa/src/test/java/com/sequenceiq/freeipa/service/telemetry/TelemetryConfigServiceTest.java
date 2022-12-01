@@ -2,12 +2,16 @@ package com.sequenceiq.freeipa.service.telemetry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -31,11 +35,13 @@ import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
@@ -80,10 +86,22 @@ public class TelemetryConfigServiceTest {
     @Mock
     private AltusMachineUserService altusMachineUserService;
 
+    @Mock
+    private TransactionService transactionService;
+
+    @Mock
+    private MonitoringConfiguration monitoringConfiguration;
+
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws TransactionService.TransactionExecutionException {
         underTest = new TelemetryConfigService();
         MockitoAnnotations.openMocks(this);
+        lenient().doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
+        lenient().when(monitoringConfiguration.getRemoteWriteUrl()).thenReturn("http://nope");
+        lenient().when(monitoringConfiguration.getPaasRemoteWriteUrl()).thenReturn("http://nope-paas");
     }
 
     @Test
@@ -156,6 +174,51 @@ public class TelemetryConfigServiceTest {
         assertFalse(result.getLogShipperContext().isEnabled());
         assertFalse(result.getDatabusContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
+        verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
+    }
+
+    @Test
+    public void testTelemetryIsTurnedOffIfEntitlementIsNotGranted() throws IOException {
+        // GIVEN
+        UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
+                .setClouderaManagerLicenseKey("myLicense")
+                .build();
+        given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
+        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
+        Stack stack = createStack(telemetry(false, true, false));
+        given(stackService.getStackById(STACK_ID)).willReturn(stack);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(stack);
+        // THEN
+        assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getDatabusContext().isEnabled());
+        assertFalse(result.getMonitoringContext().isEnabled());
+        assertNull(stack.getTelemetry().getMonitoring().getRemoteWriteUrl());
+        verify(altusMachineUserService, never()).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
+    }
+
+    @Test
+    public void testTelemetryIsTurnedOnIfEntitlementIsGranted() throws IOException {
+        // GIVEN
+        UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
+                .setClouderaManagerLicenseKey("myLicense")
+                .build();
+        given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
+        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        MonitoringCredential monitoringCredential = new MonitoringCredential();
+        monitoringCredential.setAccessKey("accessKey");
+        monitoringCredential.setPrivateKey("privateKey");
+        given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
+                .willReturn(Optional.of(monitoringCredential));
+        Stack stack = createStack(telemetry(false, false, false));
+        given(stackService.getStackById(STACK_ID)).willReturn(stack);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(stack);
+        // THEN
+        assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getDatabusContext().isEnabled());
+        assertTrue(result.getMonitoringContext().isEnabled());
+        assertNotNull(stack.getTelemetry().getMonitoring().getRemoteWriteUrl());
         verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
     }
 

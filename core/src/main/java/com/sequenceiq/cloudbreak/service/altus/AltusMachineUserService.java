@@ -98,7 +98,7 @@ public class AltusMachineUserService {
 
     public Optional<AltusCredential> generateMonitoringMachineUser(StackView stack, Telemetry telemetry, CdpAccessKeyType cdpAccessKeyType) {
         String accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
-        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
+        if (telemetry.isComputeMonitoringEnabled()) {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> altusIAMService.generateMonitoringMachineUserWithAccessKey(new MachineUserRequest()
@@ -126,7 +126,7 @@ public class AltusMachineUserService {
 
     public void clearMonitoringMachineUser(StackView stack, ClusterView cluster, Telemetry telemetry) {
         String accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
-        if (entitlementService.isComputeMonitoringEnabled(accountId) || isMonitoringCredentialAvailable(cluster)) {
+        if (telemetry.isComputeMonitoringEnabled() || isMonitoringCredentialAvailable(cluster)) {
             String machineUserName = getMonitoringMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
