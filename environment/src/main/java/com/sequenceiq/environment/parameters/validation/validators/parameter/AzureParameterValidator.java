@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -41,6 +42,9 @@ public class AzureParameterValidator implements ParameterValidator {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private AzureUtils azureUtils;
 
     @Override
     public ValidationResult validate(EnvironmentValidationDto environmentValidationDto, ParametersDto parametersDto,
@@ -93,7 +97,7 @@ public class AzureParameterValidator implements ParameterValidator {
         LOGGER.debug("Using single, existing resource group {}", azureResourceGroupDto.getName());
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environmentDto.getCredential());
         AzureClient azureClient = azureClientService.getClient(cloudCredential);
-        if (!azureClient.resourceGroupExists(azureResourceGroupDto.getName())) {
+        if (!azureUtils.checkResourceGroupExistenceWithRetry(azureClient, azureResourceGroupDto.getName())) {
             validationResultBuilder.error(
                     String.format("Resource group '%s' does not exist or insufficient permission to access it.", azureResourceGroupDto.getName()));
         }

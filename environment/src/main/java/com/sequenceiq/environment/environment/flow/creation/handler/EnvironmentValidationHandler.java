@@ -96,9 +96,9 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                                 goToNextState(environmentDtoEvent, environmentDto);
                             } catch (WebApplicationException e) {
                                 String responseMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-                                goToFailedState(environmentDtoEvent, e.getMessage() + ". " + responseMessage);
+                                goToFailedStateWithException(environmentDtoEvent, e.getMessage() + ". " + responseMessage, e);
                             } catch (Exception e) {
-                                goToFailedState(environmentDtoEvent, e.getMessage());
+                                goToFailedStateWithException(environmentDtoEvent, e.getMessage(), e);
                             }
                         }, () -> goToFailedState(environmentDtoEvent, String.format("Environment was not found with id '%s'.", environmentDto.getId()))
                 );
@@ -148,6 +148,18 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         if (validationResult.hasError()) {
             throw new EnvironmentServiceException(validationResult.getFormattedErrors());
         }
+    }
+
+    private void goToFailedStateWithException(Event<EnvironmentValidationDto> environmentDtoEvent, String message, Exception e) {
+        LOGGER.warn("Environment validation failed: {}", message, e);
+        EnvironmentDto environmentDto = environmentDtoEvent.getData().getEnvironmentDto();
+        EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
+                environmentDto.getId(),
+                environmentDto.getName(),
+                new BadRequestException(message, e),
+                environmentDto.getResourceCrn());
+
+        eventBus.notify(failureEvent.selector(), new Event<>(environmentDtoEvent.getHeaders(), failureEvent));
     }
 
     private void goToFailedState(Event<EnvironmentValidationDto> environmentDtoEvent, String message) {
