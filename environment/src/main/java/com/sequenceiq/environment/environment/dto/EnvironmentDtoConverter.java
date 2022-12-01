@@ -27,6 +27,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.credential.CredentialDetailsConverter;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -64,6 +65,8 @@ public class EnvironmentDtoConverter {
 
     private final FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider;
 
+    private final CredentialDetailsConverter credentialDetailsConverter;
+
     public EnvironmentDtoConverter(Map<CloudPlatform,
             EnvironmentNetworkConverter> environmentNetworkConverterMap,
             Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
@@ -75,7 +78,8 @@ public class EnvironmentDtoConverter {
             AccountTagService accountTagService,
             CrnUserDetailsService crnUserDetailsService,
             EnvironmentRecipeService environmentRecipeService,
-            FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider) {
+            FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider,
+            CredentialDetailsConverter credentialDetailsConverter) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.authenticationDtoConverter = authenticationDtoConverter;
@@ -87,6 +91,7 @@ public class EnvironmentDtoConverter {
         this.crnUserDetailsService = crnUserDetailsService;
         this.environmentRecipeService = environmentRecipeService;
         this.ipaInstanceCountByGroupProvider = ipaInstanceCountByGroupProvider;
+        this.credentialDetailsConverter = credentialDetailsConverter;
     }
 
     public EnvironmentViewDto environmentViewToViewDto(EnvironmentView environmentView) {
@@ -166,6 +171,7 @@ public class EnvironmentDtoConverter {
                 .withEnvironmentDomain(environment.getDomain());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        builder.withCredentialDetails(credentialDetailsConverter.credentialToCredentialDetails(cloudPlatform, environment.getCredential()));
         doIfNotNull(environment.getParameters(), parameters -> builder.withParameters(
                 environmentParamsConverterMap.get(cloudPlatform).convertToDto(parameters)));
         doIfNotNull(environment.getNetwork(), network -> builder.withNetwork(
