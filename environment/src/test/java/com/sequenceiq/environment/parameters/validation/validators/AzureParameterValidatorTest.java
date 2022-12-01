@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -55,6 +56,9 @@ public class AzureParameterValidatorTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private AzureUtils azureUtils;
 
     @InjectMocks
     private AzureParameterValidator underTest;
@@ -120,7 +124,7 @@ public class AzureParameterValidatorTest {
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
-        when(azureClient.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
+        when(azureUtils.checkResourceGroupExistenceWithRetry(azureClient, RESOURCE_GROUP_NAME)).thenReturn(true);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
@@ -143,7 +147,7 @@ public class AzureParameterValidatorTest {
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
-        when(azureClient.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
+        when(azureUtils.checkResourceGroupExistenceWithRetry(azureClient, RESOURCE_GROUP_NAME)).thenReturn(true);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
@@ -166,7 +170,7 @@ public class AzureParameterValidatorTest {
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
-        when(azureClient.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
+        when(azureUtils.checkResourceGroupExistenceWithRetry(azureClient, RESOURCE_GROUP_NAME)).thenReturn(false);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
@@ -266,7 +270,7 @@ public class AzureParameterValidatorTest {
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
-        when(azureClient.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
+        when(azureUtils.checkResourceGroupExistenceWithRetry(azureClient, RESOURCE_GROUP_NAME)).thenReturn(false);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
@@ -289,7 +293,7 @@ public class AzureParameterValidatorTest {
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
-        when(azureClient.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
+        when(azureUtils.checkResourceGroupExistenceWithRetry(azureClient, RESOURCE_GROUP_NAME)).thenReturn(false);
         when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(false);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
@@ -316,7 +320,7 @@ public class AzureParameterValidatorTest {
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
-        when(azureClient.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
+        when(azureUtils.checkResourceGroupExistenceWithRetry(azureClient, RESOURCE_GROUP_NAME)).thenReturn(false);
         when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(false);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
@@ -342,7 +346,7 @@ public class AzureParameterValidatorTest {
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
-        when(azureClient.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
+        when(azureUtils.checkResourceGroupExistenceWithRetry(azureClient, RESOURCE_GROUP_NAME)).thenReturn(false);
         when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(true);
         when(entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(anyString())).thenReturn(false);
 

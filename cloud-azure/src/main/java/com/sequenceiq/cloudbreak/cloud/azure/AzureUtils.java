@@ -739,6 +739,16 @@ public class AzureUtils {
         });
     }
 
+    public boolean checkResourceGroupExistenceWithRetry(AzureClient client, String resourceGroupName) {
+        return retryService.testWith2SecDelayMax5Times(() -> {
+            try {
+                return client.resourceGroupExists(resourceGroupName);
+            } catch (Exception ex) {
+                throw new Retry.ActionFailedException(ex);
+            }
+        });
+    }
+
     public CloudConnectorException convertToCloudConnectorException(CloudException e, String actionDescription) {
         LOGGER.warn(String.format("%s failed, cloud exception happened:", actionDescription), e);
         if (e.body() != null && e.body().details() != null) {
