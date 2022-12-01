@@ -380,7 +380,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return String.join("/", azureProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
+        return String.join("/", azureProperties.getCloudStorage().getBaseLocation(), trimObjectName(DEFAULT_STORAGE_NAME),
+                getSuiteName(), getTestName());
     }
 
     @Override

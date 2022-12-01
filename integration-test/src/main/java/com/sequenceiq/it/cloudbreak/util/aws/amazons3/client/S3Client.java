@@ -1,11 +1,12 @@
 package com.sequenceiq.it.cloudbreak.util.aws.amazons3.client;
 
+import static java.lang.String.format;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 @Service
 public class S3Client {
@@ -30,6 +32,10 @@ public class S3Client {
     private AwsCloudProvider awsCloudProvider;
 
     public S3Client() {
+    }
+
+    public AwsProperties getAwsProperties() {
+        return awsProperties;
     }
 
     public AmazonS3 buildS3Client() {
@@ -45,7 +51,7 @@ public class S3Client {
                 .build();
     }
 
-    public String getBucketName() {
+    public String getDefaultBucketName() {
         String baseLocation = awsProperties.getCloudStorage().getBaseLocation();
         try {
             URI uri = new URI(baseLocation);
@@ -61,18 +67,33 @@ public class S3Client {
         }
     }
 
-    public String getPath(String objectPath) {
-        String[] parts = getObjects(objectPath);
-        if (!StringUtils.isEmpty(objectPath) && parts.length > 3) {
-            return StringUtils.join(ArrayUtils.removeAll(parts, 0, 1), "/");
-        } else {
-            LOGGER.debug("No path found in S3 location.");
-            return "";
+    public String getKeyPrefix(String baseLocation) {
+        URI baseLocationUri = getBaseLocationUri(baseLocation);
+        return StringUtils.removeStart(baseLocationUri.getPath(), "/");
+    }
+
+    public String getBucketName(String baseLocation) {
+        URI baseLocationUri = getBaseLocationUri(baseLocation);
+        return baseLocationUri.getHost();
+    }
+
+    public URI getDefaultBaseLocationUri() {
+        String defaultBaseLocation = String.join(".", "http://" + getDefaultBucketName(), "s3", awsProperties.getRegion(), "amazonaws.com");
+        try {
+            return new URI(defaultBaseLocation);
+        } catch (Exception e) {
+            LOGGER.error("Default Amazon S3 base location path: '{}' is not a valid URI!", defaultBaseLocation);
+            throw new TestFailException(format(" Default Amazon S3 base location path: '%s' is not a valid URI! ", defaultBaseLocation));
         }
     }
 
-    public String getBaseLocationUri() {
-        return String.join(".", "http://" + getBucketName(), "s3", awsProperties.getRegion(), "amazonaws.com");
+    public URI getBaseLocationUri(String baseLocation) {
+        try {
+            return new URI(baseLocation);
+        } catch (Exception e) {
+            LOGGER.error("Amazon S3 base location path: '{}' is not a valid URI!", baseLocation);
+            throw new TestFailException(format(" Amazon S3 base location path: '%s' is not a valid URI! ", baseLocation));
+        }
     }
 
     private String[] getObjects(String splittable) {
