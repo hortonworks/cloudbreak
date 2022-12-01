@@ -16,7 +16,7 @@ jar {
 
 configurations.all {
     resolutionStrategy {
-        force 'net.bytebuddy:byte-buddy:1.9.13'
+        force 'net.bytebuddy:byte-buddy:1.12.19'
     }
 }
 
