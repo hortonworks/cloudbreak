@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
-public class ProfilerMetricsConfigProvider extends AbstractRdsConfigProvider {
+public class ProfilerMetricsRdsConfigProvider extends AbstractRdsConfigProvider {
     private static final String PILLAR_KEY = "profiler_metrics";
 
     @Value("${cb.profiler.metrics.database.user:profiler_metric}")

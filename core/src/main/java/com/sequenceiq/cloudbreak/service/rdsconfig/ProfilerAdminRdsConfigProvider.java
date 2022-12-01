@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
-public class ProfilerAdminConfigProvider extends AbstractRdsConfigProvider {
+public class ProfilerAdminRdsConfigProvider extends AbstractRdsConfigProvider {
     private static final String PILLAR_KEY = "profiler_admin";
 
     @Value("${cb.profiler.admin.database.user:profiler_agent}")
