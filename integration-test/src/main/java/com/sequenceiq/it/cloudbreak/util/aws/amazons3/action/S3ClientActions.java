@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.util.aws.amazons3.action;
 import static java.lang.String.format;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
@@ -33,14 +33,14 @@ public class S3ClientActions extends S3Client {
 
     public void deleteNonVersionedBucket(String baseLocation) {
         AmazonS3 s3Client = buildS3Client();
-        String bucketName = getBucketName();
-        String prefix = StringUtils.substringAfterLast(baseLocation, "/");
+        String bucketName = getBucketName(baseLocation);
+        String keyPrefix = getKeyPrefix(baseLocation);
 
         if (s3Client.doesBucketExistV2(bucketName)) {
             try {
                 ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
                         .withBucketName(bucketName)
-                        .withPrefix(prefix);
+                        .withPrefix(keyPrefix);
                 ObjectListing objectListing = s3Client.listObjects(listObjectsRequest);
 
                 do {
@@ -72,16 +72,15 @@ public class S3ClientActions extends S3Client {
 
     public void listBucketSelectedObject(String baseLocation, String selectedObject, boolean zeroContent) {
         AmazonS3 s3Client = buildS3Client();
-        String bucketName = getBucketName();
-        AmazonS3URI amazonS3URI = new AmazonS3URI(getBaseLocationUri());
+        String bucketName = getBucketName(baseLocation);
+        String keyPrefix = getKeyPrefix(baseLocation);
         List<S3ObjectSummary> filteredObjectSummaries;
-        String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
 
         if (StringUtils.isEmpty(selectedObject)) {
             selectedObject = "ranger";
         }
 
-        Log.log(LOGGER, format(" Amazon S3 URI: %s", amazonS3URI));
+        Log.log(LOGGER, format(" Amazon S3 URI: %s", getBaseLocationUri(baseLocation)));
         Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
         Log.log(LOGGER, format(" Amazon S3 Key Prefix: %s", keyPrefix));
         Log.log(LOGGER, format(" Amazon S3 Object: %s", selectedObject));
@@ -143,36 +142,20 @@ public class S3ClientActions extends S3Client {
     }
 
     public String getLoggingUrl(String baseLocation, String clusterLogPath) {
-        AmazonS3 s3Client = buildS3Client();
-        AmazonS3URI amazonS3URI = new AmazonS3URI(getBaseLocationUri());
-        String bucketName = amazonS3URI.getBucket();
-        String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
+        URI baseLocationUri = getBaseLocationUri(baseLocation);
+        String bucketName = getBucketName(baseLocation);
+        String logPath = baseLocationUri.getPath();
+        String deploymentS3Console = "https://s3.console.aws.amazon.com/s3/buckets/";
 
-        Log.log(LOGGER, format(" Amazon S3 URI: %s", amazonS3URI));
+        Log.log(LOGGER, format(" Amazon S3 URI: %s", baseLocationUri));
         Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
-        Log.log(LOGGER, format(" Amazon S3 Key Prefix: %s",  keyPrefix));
+        Log.log(LOGGER, format(" Amazon S3 Log Path: %s",  logPath));
         Log.log(LOGGER, format(" Amazon S3 Cluster Logs: %s", clusterLogPath));
 
-        if (s3Client.doesBucketExistV2(bucketName)) {
-            try {
-                String deploymentS3Console = "https://s3.console.aws.amazon.com/s3/buckets/";
-                if (StringUtils.containsIgnoreCase(amazonS3URI.getRegion(), "us-gov")) {
-                    deploymentS3Console = "https://console.amazonaws-us-gov.com/s3/buckets/";
-                }
-                return format("%s%s?region=%s&prefix=%s%s/&showversions=false",
-                        deploymentS3Console, bucketName, amazonS3URI.getRegion(), keyPrefix, clusterLogPath);
-            } catch (AmazonServiceException e) {
-                LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
-                throw new TestFailException("Amazon S3 couldn't process the call.", e);
-            } catch (SdkClientException e) {
-                LOGGER.error("Amazon S3 response could not been parsed, because of error!", e);
-                throw new TestFailException("Amazon S3 response could not been parsed", e);
-            } finally {
-                s3Client.shutdown();
-            }
-        } else {
-            LOGGER.error("Amazon S3 bucket is NOT present with name: {}", bucketName);
-            throw new TestFailException("Amazon S3 bucket is NOT present with name: " + bucketName);
+        if (StringUtils.containsIgnoreCase(getAwsProperties().getRegion(), "us-gov")) {
+            deploymentS3Console = "https://console.amazonaws-us-gov.com/s3/buckets/";
         }
+        return format("%s%s?region=%s&prefix=%s%s/&showversions=false",
+                deploymentS3Console, bucketName, getAwsProperties().getRegion(), getKeyPrefix(baseLocation), clusterLogPath);
     }
 }

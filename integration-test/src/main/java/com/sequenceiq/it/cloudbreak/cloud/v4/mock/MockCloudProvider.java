@@ -426,7 +426,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return String.join("/", mockProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
+        return String.join("/", mockProperties.getCloudStorage().getBaseLocation(), trimObjectName(DEFAULT_STORAGE_NAME),
+                getSuiteName(), getTestName());
     }
 
     @Override

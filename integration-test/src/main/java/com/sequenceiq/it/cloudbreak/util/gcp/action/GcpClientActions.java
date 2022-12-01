@@ -5,7 +5,6 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -277,21 +276,27 @@ public class GcpClientActions extends GcpClient {
         }
     }
 
+    public String getBucketName(String baseLocation) {
+        URI baseLocationUri = getBaseLocationUri(baseLocation);
+        return baseLocationUri.getHost();
+    }
+
+    public String getKeyPrefix(String baseLocation) {
+        URI baseLocationUri = getBaseLocationUri(baseLocation);
+        return StringUtils.removeStart(baseLocationUri.getPath(), "/");
+    }
+
     public void listBucketSelectedObject(String baseLocation, boolean zeroContent) {
         Storage storage = buildStorage();
         URI baseLocationUri = getBaseLocationUri(baseLocation);
-        String bucketName = baseLocationUri.getHost();
-        String selectedObjectPath = baseLocationUri.getPath();
-        String keyPrefix = Arrays.stream(StringUtils.split(baseLocationUri.getPath(), "/"))
-                .filter(StringUtils::isNotEmpty)
-                .collect(Collectors.toList()).get(0);
+        String bucketName = getBucketName(baseLocation);
+        String keyPrefix = getKeyPrefix(baseLocation);
         Page<Blob> blobs;
         List<Blob> filteredBlobs = new ArrayList<>();
 
         Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
         Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
         Log.log(LOGGER, format(" Google GCS Key Prefix: %s", keyPrefix));
-        Log.log(LOGGER, format(" Google GCS Object: %s", selectedObjectPath));
 
         try {
             /**
@@ -322,15 +327,15 @@ public class GcpClientActions extends GcpClient {
             throw new TestFailException(format(" Google GCS path: '%s' does not exist! ", keyPrefix));
         } else {
             for (Blob blob : blobs.iterateAll()) {
-                if (StringUtils.remove(blob.getName(), "/").contains(StringUtils.remove(selectedObjectPath, "/"))) {
+                if (StringUtils.remove(blob.getName(), "/").contains(StringUtils.remove(keyPrefix, "/"))) {
                     filteredBlobs.add(blob);
                 }
             }
             if (CollectionUtils.isEmpty(filteredBlobs)) {
-                Log.error(LOGGER, "Google GCS object: %s has 0 sub-objects!", selectedObjectPath);
-                throw new TestFailException(format("Google GCS object: %s has 0 sub-objects!", selectedObjectPath));
+                Log.error(LOGGER, "Google GCS object: %s has 0 sub-objects!", keyPrefix);
+                throw new TestFailException(format("Google GCS object: %s has 0 sub-objects!", keyPrefix));
             } else {
-                Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects.", selectedObjectPath, filteredBlobs.size()));
+                Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects.", keyPrefix, filteredBlobs.size()));
                 for (Blob filteredBlob : filteredBlobs.stream().limit(10).collect(Collectors.toList())) {
                     if (filteredBlob.getSize().compareTo(0L) == 0 && !zeroContent) {
                         /**
@@ -340,10 +345,10 @@ public class GcpClientActions extends GcpClient {
                          * - BlobInfo.isDirectory() returns true
                          */
                         if (filteredBlob.isDirectory()) {
-                            LOGGER.warn("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
+                            LOGGER.warn("Google GCS path: '{}' has 0 bytes of content!", keyPrefix);
                         } else {
-                            LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
-                            throw new TestFailException(format("Google GCS path: '%s' has 0 bytes of content!", selectedObjectPath));
+                            LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", keyPrefix);
+                            throw new TestFailException(format("Google GCS path: '%s' has 0 bytes of content!", keyPrefix));
                         }
                     }
                 }
@@ -354,17 +359,13 @@ public class GcpClientActions extends GcpClient {
     public void deleteNonVersionedBucket(String baseLocation) {
         Storage storage = buildStorage();
         URI baseLocationUri = getBaseLocationUri(baseLocation);
-        String bucketName = baseLocationUri.getHost();
-        String selectedObjectPath = baseLocationUri.getPath();
-        String keyPrefix = Arrays.stream(StringUtils.split(selectedObjectPath, "/"))
-                .filter(StringUtils::isNotEmpty)
-                .collect(Collectors.toList()).get(0);
+        String bucketName = getBucketName(baseLocation);
+        String keyPrefix = getKeyPrefix(baseLocation);
         Blob blob;
 
         Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
         Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
         Log.log(LOGGER, format(" Google GCS Key Prefix: %s", keyPrefix));
-        Log.log(LOGGER, format(" Google GCS Object: %s", selectedObjectPath));
 
         try {
             blob = storage.get(bucketName, keyPrefix);
@@ -388,11 +389,15 @@ public class GcpClientActions extends GcpClient {
 
     public String getLoggingUrl(String baseLocation, String clusterLogPath) {
         URI baseLocationUri = getBaseLocationUri(baseLocation);
-        String bucketName = baseLocationUri.getHost();
-        String keyPrefix = Arrays.stream(StringUtils.split(baseLocationUri.getPath(), "/"))
-                .filter(StringUtils::isNotEmpty)
-                .collect(Collectors.toList()).get(0);
+        String bucketName = getBucketName(baseLocation);
+        String logPath = baseLocationUri.getPath();
+
+        Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
+        Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
+        Log.log(LOGGER, format(" Google GCS Log Path: %s", logPath));
+        Log.log(LOGGER, format(" Google GCS Cluster Logs: %s", clusterLogPath));
+
         return format("https://console.cloud.google.com/storage/browser/%s/%s%s?project=gcp-dev-cloudbreak",
-                    bucketName, keyPrefix, clusterLogPath);
+                bucketName, getKeyPrefix(baseLocation), clusterLogPath);
     }
 }

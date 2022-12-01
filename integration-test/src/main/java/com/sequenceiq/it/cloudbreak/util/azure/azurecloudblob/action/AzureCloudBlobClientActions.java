@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.action;
 
 import static java.lang.String.format;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
@@ -277,7 +278,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     public void listAllFolders(String baseLocation) {
         String containerName = getContainerName(baseLocation);
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
-        String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
+        String keyPrefix = getKeyPrefix(baseLocation);
 
         Log.log(LOGGER, format(" Azure Blob Storage URI: %s", cloudBlobContainer.getStorageUri()));
         Log.log(LOGGER, format(" Azure Blob Container: %s", cloudBlobContainer.getName()));
@@ -320,7 +321,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     public void listSelectedDirectory(String baseLocation, String selectedDirectory, boolean zeroContent) {
         String containerName = getContainerName(baseLocation);
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
-        String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
+        String keyPrefix = getKeyPrefix(baseLocation);
 
         Log.log(LOGGER, format(" Azure Blob Storage URI: %s", cloudBlobContainer.getStorageUri()));
         Log.log(LOGGER, format(" Azure Blob Container: %s", cloudBlobContainer.getName()));
@@ -365,21 +366,35 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         }
     }
 
+    public URI getBaseLocationUri(String baseLocation) {
+        try {
+            return new URI(baseLocation);
+        } catch (Exception e) {
+            LOGGER.error("Azure Adls base location path: '{}' is not a valid URI!", baseLocation);
+            throw new TestFailException(format(" Azure Adls base location path: '%s' is not a valid URI! ", baseLocation));
+        }
+    }
+
+    public String getKeyPrefix(String baseLocation) {
+        URI baseLocationUri = getBaseLocationUri(baseLocation);
+        return StringUtils.removeStart(baseLocationUri.getPath(), "/");
+    }
+
     public String getLoggingUrl(String baseLocation, String clusterLogPath) {
         String containerName = getContainerName(baseLocation);
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
-        String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
+        String keyPrefix = getKeyPrefix(baseLocation);
 
         Log.log(LOGGER, format(" Azure Blob Storage URI: %s", cloudBlobContainer.getStorageUri()));
         Log.log(LOGGER, format(" Azure Blob Container: %s", cloudBlobContainer.getName()));
-        Log.log(LOGGER, format(" Azure Blob Key Prefix: %s", keyPrefix));
+        Log.log(LOGGER, format(" Azure Blob Log Path: %s", keyPrefix));
         Log.log(LOGGER, format(" Azure Blob Cluster Logs: %s", clusterLogPath));
 
         try {
             CloudBlobDirectory storageDirectory = cloudBlobContainer.getDirectoryReference(keyPrefix);
             CloudBlobDirectory logsDirectory = storageDirectory.getDirectoryReference(clusterLogPath);
             if (logsDirectory.listBlobs().iterator().hasNext()) {
-                return String.format("https://autotestingapi.blob.core.windows.net/%s/%s%s",
+                return format("https://autotestingapi.blob.core.windows.net/%s/%s%s",
                         containerName, keyPrefix, clusterLogPath);
             } else {
                 LOGGER.error("Azure Adls Gen 2 Blob is NOT present at '{}' container in '{}' storage directory with path: [{}]", containerName, keyPrefix,

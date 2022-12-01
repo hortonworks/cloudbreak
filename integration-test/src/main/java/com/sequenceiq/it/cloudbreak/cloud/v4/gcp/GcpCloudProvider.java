@@ -430,7 +430,8 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return String.join("/", gcpProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
+        return String.join("/", gcpProperties.getCloudStorage().getBaseLocation(), trimObjectName(DEFAULT_STORAGE_NAME),
+                getSuiteName(), getTestName());
     }
 
     @Override
