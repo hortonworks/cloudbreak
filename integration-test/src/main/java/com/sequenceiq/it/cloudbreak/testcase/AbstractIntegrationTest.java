@@ -139,6 +139,21 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
+    protected void createDatalakeWithName(TestContext testContext, String name) {
+        initiateDatalakeCreationWithName(testContext, name);
+        waitForDatalakeCreation(testContext);
+    }
+
+    protected void initiateDatalakeCreationWithName(TestContext testContext, String name) {
+        testContext
+                .given(SdxInternalTestDto.class)
+                .withName(name)
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withEnableMultiAz()
+                .when(sdxTestClient.createInternal())
+                .validate();
+    }
+
     protected void createDatalake(TestContext testContext) {
         initiateDatalakeCreation(testContext);
         waitForDatalakeCreation(testContext);
@@ -236,9 +251,24 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
+    protected void createCredentialWithName(TestContext testContext, String name) {
+        testContext.given(CredentialTestDto.class)
+                .withName(name)
+                .when(credentialTestClient.create())
+                .validate();
+    }
+
     protected void createDefaultImageCatalog(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
+                .when(new ImageCatalogCreateRetryAction())
+                .validate();
+    }
+
+    protected void createImageCatalogWithName(TestContext testContext, String name) {
+        testContext
+                .given(ImageCatalogTestDto.class)
+                .withName(name)
                 .when(new ImageCatalogCreateRetryAction())
                 .validate();
     }

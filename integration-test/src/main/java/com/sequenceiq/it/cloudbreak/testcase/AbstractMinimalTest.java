@@ -32,10 +32,10 @@ import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.E2ETestContext;
 import com.sequenceiq.it.cloudbreak.context.MeasuredTestContext;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.PurgeGarbageService;
-import com.sequenceiq.it.cloudbreak.context.E2ETestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -65,7 +65,7 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     protected static final Map<String, Status> START_IN_PROGRESS = Map.of("status", Status.START_IN_PROGRESS, "clusterStatus", Status.START_IN_PROGRESS);
 
-    protected static final String TEST_CONTEXT_WITH_MOCK = "testContextWithMock";
+    public static final String TEST_CONTEXT_WITH_MOCK = "testContextWithMock";
 
     protected static final String TEST_CONTEXT = "testContextWithoutMock";
 

@@ -72,6 +72,18 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    protected void createEnvironmentWithFreeIpaWithName(TestContext testContext, String envName) {
+        String freeIpaImageCatalogUrl = testContext.getCloudProvider().getFreeIpaImageCatalogUrl();
+        String latestBaseImageID = testContext.getCloudProvider().getLatestBaseImageID();
+        testContext.given(EnvironmentTestDto.class)
+                .withName(envName)
+                .withFreeIpaImage(freeIpaImageCatalogUrl, latestBaseImageID)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.describe())
+                .validate();
+    }
+
     @Override
     protected void createDefaultDatalake(TestContext testContext) {
         createDefaultEnvironment(testContext);
