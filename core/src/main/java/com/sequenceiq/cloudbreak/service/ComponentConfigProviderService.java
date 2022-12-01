@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -160,6 +161,15 @@ public class ComponentConfigProviderService {
                 component.getName()).orElseThrow(NotFoundException.notFound("component", component.getName()));
         componentEntity.setAttributes(component.getAttributes());
         componentEntity.setName(component.getName());
+        componentRepository.save(componentEntity);
+    }
+
+    public void replaceTelemetryComponent(Long stackId, Telemetry telemetry) {
+        ComponentType componentType = ComponentType.TELEMETRY;
+        Component componentEntity = componentRepository.findComponentByStackIdComponentTypeName(stackId, componentType,
+                componentType.name()).orElseThrow(NotFoundException.notFound("component", componentType.name()));
+        componentEntity.setAttributes(new Json(telemetry));
+        componentEntity.setName(componentType.name());
         componentRepository.save(componentEntity);
     }
 }

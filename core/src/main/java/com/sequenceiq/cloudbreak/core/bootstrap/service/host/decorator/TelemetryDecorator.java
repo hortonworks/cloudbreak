@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.CdpCredential;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Logging;
+import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
@@ -94,6 +95,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         ClusterView cluster = stackDto.getCluster();
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
+        updateMonitoringConfigIfNeeded(accountId, stack, telemetry);
         DataBusCredential dataBusCredential = convertOrReturnNull(cluster.getDatabusCredential(), DataBusCredential.class);
         MonitoringCredential monitoringCredential = convertOrReturnNull(cluster.getMonitoringCredential(), MonitoringCredential.class);
         TelemetryContext telemetryContext = new TelemetryContext();
@@ -111,6 +113,21 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             telemetryContext.setMonitoringContext(createMonitoringContext(stack, cluster, telemetryContext, accountId, monitoringCredential, cdpAccessKeyType));
         }
         return telemetryContext;
+    }
+
+    private void updateMonitoringConfigIfNeeded(String accountId, StackView stackView, Telemetry telemetry) {
+        if (telemetry != null) {
+            boolean computeMonitoringEntitled = entitlementService.isComputeMonitoringEnabled(accountId);
+            if (!telemetry.isComputeMonitoringEnabled() && computeMonitoringEntitled) {
+                Monitoring monitoring = new Monitoring();
+                monitoring.setRemoteWriteUrl(monitoringUrlResolver.resolve(accountId, entitlementService.isCdpSaasEnabled(accountId)));
+                telemetry.setMonitoring(monitoring);
+                componentConfigProviderService.replaceTelemetryComponent(stackView.getId(), telemetry);
+            } else if (telemetry.isComputeMonitoringEnabled() && !computeMonitoringEntitled) {
+                telemetry.setMonitoring(new Monitoring());
+                componentConfigProviderService.replaceTelemetryComponent(stackView.getId(), telemetry);
+            }
+        }
     }
 
     private DatabusContext createDatabusContext(StackView stack, Telemetry telemetry, DataBusCredential dataBusCredential, String accountId,
@@ -158,8 +175,6 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             if (telemetry.isComputeMonitoringEnabled()) {
                 LOGGER.info("Configuring monitoring url: {}", telemetry.getMonitoring().getRemoteWriteUrl());
                 builder.withRemoteWriteUrl(telemetry.getMonitoring().getRemoteWriteUrl());
-            } else {
-                builder.withRemoteWriteUrl(monitoringUrlResolver.resolve(accountId, entitlementService.isCdpSaasEnabled(accountId)));
             }
         }
         if (entitlementService.isCdpSaasEnabled(accountId)) {
