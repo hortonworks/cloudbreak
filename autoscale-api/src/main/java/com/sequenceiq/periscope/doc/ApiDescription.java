@@ -6,6 +6,7 @@ public class ApiDescription {
     public static final String CONFIGURATION_DESCRIPTION = "Operations on configurations";
     public static final String HISTORY_DESCRIPTION = "Operations on histories";
     public static final String CLUSTERS_DESCRIPTION = "Operations on clusters";
+    public static final String TRIGGER_DESCRIPTION = "Operations on scaling triggers";
     public static final String POLICIES_DESCRIPTION = "Operations on policies";
 
     private ApiDescription() {
@@ -89,6 +90,11 @@ public class ApiDescription {
         public static final String CLUSTER_PUT = "modify cluster";
         public static final String CLUSTER_GET = "retrieve cluster";
         public static final String CLUSTER_GET_ALL = "retrieve all cluster";
+        public static final String TRIGGER_GET_ALL = "retrieve all triggers";
+        public static final String TRIGGER_CRN = "retrieve particuler scaling trigger using CRN value";
+        public static final String TRIGGER_TIMESTAMP = "retrieve all triggers after a particuler time stamp";
+        public static final String SCALING_TRIGGERS_BETWEEN_TIME_INTERVAL = "retrieve all triggers between the start time and the end time";
+        public static final String FAILED_SCALING_TRIGGERS_AFTER_TIMESTAMP = "retrieve the data of failed scaling opertions in the given duration";
         public static final String CLUSTER_DELETE = "delete cluster";
         public static final String CLUSTER_SET_STATE = "set cluster state";
         public static final String CLUSTER_SET_AUTOSCALE_STATE = "enable or disable cluster's autoscale feature";
@@ -121,6 +127,11 @@ public class ApiDescription {
         public static final String STACK_TYPE = "Type of stack in Cloudbreak";
         public static final String STATE = "State of the cluster";
         public static final String TIME_ALERTS = "Time based alerts of the cluster";
+        public static final String TRIGGER_CRN = "crn value of the particular trigger";
+        public static final String FLOW_ID = "flow id of the trigger";
+        public static final String START_TIME = "start time of the trigger";
+        public static final String END_TIME = "end time of the trigger";
+        public static final String TRIGGER_STATUS = "Status of the trigger";
         public static final String LOAD_ALERTS = "Load based alerts of the cluster";
         public static final String SCALING_CONFIGURATION = "Scaling configuration for the cluster";
     }

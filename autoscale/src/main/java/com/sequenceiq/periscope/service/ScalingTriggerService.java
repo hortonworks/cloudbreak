@@ -66,6 +66,18 @@ public class ScalingTriggerService {
                 .stream().map(ScalingTrigger::getId).collect(Collectors.toList());
     }
 
+    public List<ScalingTrigger> findAllInGivenIntervalForCluster(Cluster cluster, long durationInMinutes) {
+        Date startTimeAfter = new Date(Instant.now().minus(durationInMinutes, ChronoUnit.MINUTES).toEpochMilli());
+        return scalingTriggerRepository.findAllByClusterWithStartTimeAfter(cluster.getId(), startTimeAfter);
+    }
+
+    public List<ScalingTrigger> findAllWithTriggerFailed(Cluster cluster, long durationInMinutes) {
+        Date startTimeAfter = new Date(Instant.now().minus(durationInMinutes, ChronoUnit.MINUTES).toEpochMilli());
+        return scalingTriggerRepository.findAllByClusterAndTriggerStatuses(cluster.getId(),
+                newArrayList(TriggerStatus.DOWNSCALE_TRIGGER_FAILED, TriggerStatus.UPSCALE_TRIGGER_FAILED, TriggerStatus.METRICS_COLLECTION_FAILED), startTimeAfter);
+    }
+
+
     public List<ScalingTrigger> findAllScalingTriggersWithStatusesForCluster(Cluster cluster, Collection<TriggerStatus> statuses) {
         return scalingTriggerRepository.findAllByClusterAndInTriggerStatuses(cluster.getId(), statuses);
     }
@@ -80,6 +92,12 @@ public class ScalingTriggerService {
         Date startTimeFrom = new Date(timestampFrom);
         Date startTimeUntil = new Date(timestampUntil);
         return scalingTriggerRepository.findAllByClusterAndTriggerStatusBetweenInterval(cluster.getId(), status, startTimeFrom, startTimeUntil);
+    }
+
+    public List<ScalingTrigger> findAllInTimeRangeForCluster(Cluster cluster, long timeStampFrom, long timeStampUntil) {
+        Date startTimeFrom = new Date(timeStampFrom);
+        Date startTimeUntil = new Date(timeStampUntil);
+        return scalingTriggerRepository.findAllByClusterInGivenInterval(cluster.getId(), startTimeFrom, startTimeUntil);
     }
 
     public void deleteScalingTriggers(Set<Long> triggerIds) {

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.controller.DistroXAutoScaleClusterV1Controller;
+import com.sequenceiq.periscope.controller.DistroXAutoScaleScalingActivityV1Controller;
 import com.sequenceiq.periscope.controller.HistoryController;
 import com.sequenceiq.periscope.controller.mapper.AccessDeniedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.BadRequestExceptionMapper;
@@ -103,6 +104,7 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         register(DistroXAutoScaleClusterV1Controller.class);
+        register(DistroXAutoScaleScalingActivityV1Controller.class);
         register(HistoryController.class);
         register(AuthorizationInfoController.class);
 

@@ -101,6 +101,7 @@ public class SecurityConfig {
             http.addFilterAfter(headerAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
                     .antMatchers(API_ROOT_CONTEXT + "/v1/clusters/**").authenticated()
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/scaling_operations/**").authenticated()
                     .antMatchers(API_ROOT_CONTEXT + "/v2/clusters/**").authenticated()
                     .antMatchers(API_ROOT_CONTEXT + "/v1/distrox/**").authenticated()
                     .antMatchers(API_ROOT_CONTEXT + "/authorization/**").authenticated()
