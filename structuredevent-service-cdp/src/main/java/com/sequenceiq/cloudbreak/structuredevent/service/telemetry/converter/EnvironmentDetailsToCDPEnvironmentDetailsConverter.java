@@ -16,6 +16,8 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialType;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
@@ -35,6 +37,19 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
 
     @Inject
     private EnvironmentDetailsToCDPNetworkDetailsConverter networkDetailsConverter;
+
+    private final Map<CredentialType, UsageProto.CDPCredentialType.Value> credentialTypeMap = Map.of(
+            CredentialType.AWS_KEY_BASED, UsageProto.CDPCredentialType.Value.AWS_KEY_BASED,
+            CredentialType.AWS_ROLE_BASED, UsageProto.CDPCredentialType.Value.AWS_ROLE_BASED,
+            CredentialType.AZURE_CODEGRANTFLOW, UsageProto.CDPCredentialType.Value.AZURE_CODEGRANTFLOW,
+            CredentialType.AZURE_APPBASED_SECRET, UsageProto.CDPCredentialType.Value.AZURE_APPBASED_SECRET,
+            CredentialType.AZURE_APPBASED_CERTIFICATE, UsageProto.CDPCredentialType.Value.AZURE_APPBASED_CERTIFICATE,
+            CredentialType.GCP_P12, UsageProto.CDPCredentialType.Value.GCP_P12,
+            CredentialType.GCP_JSON, UsageProto.CDPCredentialType.Value.GCP_JSON,
+            CredentialType.YARN, UsageProto.CDPCredentialType.Value.YARN,
+            CredentialType.MOCK, UsageProto.CDPCredentialType.Value.MOCK,
+            CredentialType.UNKNOWN, UsageProto.CDPCredentialType.Value.UNKNOWN
+    );
 
     public UsageProto.CDPEnvironmentDetails convert(EnvironmentDetails srcEnvironmentDetails) {
         UsageProto.CDPEnvironmentDetails.Builder cdpEnvironmentDetails = UsageProto.CDPEnvironmentDetails.newBuilder();
@@ -84,11 +99,23 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
             if (userTags != null && !userTags.isEmpty()) {
                 cdpEnvironmentDetails.setUserTags(JsonUtil.writeValueAsStringSilentSafe(userTags));
             }
+            cdpEnvironmentDetails.setCredentialDetails(convertCredentialDetails(srcEnvironmentDetails.getCredentialDetails()));
         }
 
         UsageProto.CDPEnvironmentDetails ret = cdpEnvironmentDetails.build();
         LOGGER.debug("Converted CDPEnvironmentDetails event: {}", ret);
         return ret;
+    }
+
+    private UsageProto.CDPCredentialDetails convertCredentialDetails(CredentialDetails credentialDetails) {
+        UsageProto.CDPCredentialDetails.Builder cdpCredentialDetails = UsageProto.CDPCredentialDetails.newBuilder();
+        if (credentialDetails != null && credentialDetails.getCredentialType() != null) {
+            cdpCredentialDetails.setCredentialType(credentialTypeMap.getOrDefault(
+                    credentialDetails.getCredentialType(), UsageProto.CDPCredentialType.Value.UNKNOWN));
+        } else {
+            cdpCredentialDetails.setCredentialType(UsageProto.CDPCredentialType.Value.UNKNOWN);
+        }
+        return cdpCredentialDetails.build();
     }
 
     private UsageProto.CDPEnvironmentAwsDetails convertAwsDetails(ParametersDto parametersDto) {

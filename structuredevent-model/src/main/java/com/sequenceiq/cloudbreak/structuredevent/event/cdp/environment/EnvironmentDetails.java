@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -41,4 +42,6 @@ public interface EnvironmentDetails {
     Map<String, String> getUserDefinedTags();
 
     String getDomain();
+
+    CredentialDetails getCredentialDetails();
 }

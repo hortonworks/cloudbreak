@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
@@ -15,6 +16,8 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
     private Credential credential;
 
     private ProxyConfig proxyConfig;
+
+    private CredentialDetails credentialDetails;
 
     public Credential getCredential() {
         return credential;
@@ -42,6 +45,15 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
         this.proxyConfig = proxyConfig;
     }
 
+    @Override
+    public CredentialDetails getCredentialDetails() {
+        return credentialDetails;
+    }
+
+    public void setCredentialDetails(CredentialDetails credentialDetails) {
+        this.credentialDetails = credentialDetails;
+    }
+
     public static EnvironmentDtoBuilder builder() {
         return new EnvironmentDtoBuilder();
     }
@@ -58,6 +70,8 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
 
         private ProxyConfig proxyConfig;
 
+        private CredentialDetails credentialDetails;
+
         private EnvironmentDtoBuilder() {
         }
 
@@ -71,10 +85,16 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
             return this;
         }
 
+        public EnvironmentDtoBuilder withCredentialDetails(CredentialDetails credentialDetails) {
+            this.credentialDetails = credentialDetails;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setCredential(credential);
             environmentDto.setProxyConfig(proxyConfig);
+            environmentDto.setCredentialDetails(credentialDetails);
             super.build(environmentDto);
             return environmentDto;
         }
