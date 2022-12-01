@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -32,6 +34,8 @@ import com.sequenceiq.notification.NotificationController;
 
 @Controller
 public class AuditCredentialV1Controller extends NotificationController implements AuditCredentialEndpoint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditCredentialV1Controller.class);
 
     private final CredentialService credentialService;
 
@@ -83,22 +87,20 @@ public class AuditCredentialV1Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_AUDIT_CREDENTIAL)
-    public CredentialResponse post(@Valid CredentialRequest request) {
+    public CredentialResponse post(@Valid CredentialRequest createCredentialRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String creator = ThreadBasedUserCrnProvider.getUserCrn();
-        Credential credential = credentialRequestConverter.convert(request);
-        credential.setType(AUDIT);
-        credential.setVerifyPermissions(false);
-        notify(ResourceEvent.CREDENTIAL_CREATED);
-        Set<Credential> auditCredentialsByPlatfom = credentialService
+        Set<Credential> auditCredentialsByPlatform = credentialService
                 .listAvailablesByAccountId(accountId, AUDIT)
                 .stream()
-                .filter(c -> c.getCloudPlatform().equals(credential.getCloudPlatform()))
+                .filter(c -> c.getCloudPlatform().equals(createCredentialRequest.getCloudPlatform()))
                 .collect(Collectors.toSet());
-        if (auditCredentialsByPlatfom.isEmpty()) {
-            return credentialResponseConverter.convert(credentialService.create(credential, accountId, creator, AUDIT));
+        if (auditCredentialsByPlatform.isEmpty()) {
+            Credential createdCredential = credentialService.create(createCredentialRequest, accountId, ThreadBasedUserCrnProvider.getUserCrn(), AUDIT);
+            notify(ResourceEvent.CREDENTIAL_CREATED);
+            LOGGER.debug("Credential has been created: {}", createdCredential);
+            return credentialResponseConverter.convert(createdCredential);
         } else {
-            throw new BadRequestException(String.format("Audit credential already exist for %s cloud.", credential.getCloudPlatform()));
+            throw new BadRequestException(String.format("Audit credential already exist for %s cloud.", createCredentialRequest.getCloudPlatform()));
         }
     }
 
