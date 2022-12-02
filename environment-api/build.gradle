@@ -23,7 +23,7 @@ dependencies {
     implementation     group: "org.glassfish.jersey.ext",      name: "jersey-proxy-client",            version: jerseyCoreVersion
     implementation     group: "org.glassfish.jersey.media",    name: "jersey-media-json-jackson",      version: jerseyCoreVersion
     implementation     group: "javax.activation",              name: "activation",                     version: javaxActivationVersion
-    implementation     group: "com.sun.xml.ws",                name: "rt",                             version: "2.3.0"
+    implementation     group: "com.sun.xml.ws",                name: "rt",                             version: "4.0.0"
     implementation     group: "com.sun.xml.ws",                name: "jaxws-rt",                       version: "2.3.0"
     implementation     group: "io.opentracing.contrib",        name: "opentracing-jaxrs2",             version: opentracingJaxrs2Version
     testImplementation group: "org.assertj",                   name: "assertj-core",                   version: assertjVersion
