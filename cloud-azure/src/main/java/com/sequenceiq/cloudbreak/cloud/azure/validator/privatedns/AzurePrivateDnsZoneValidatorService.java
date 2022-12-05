@@ -7,13 +7,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
 import com.azure.resourcemanager.resources.fluentcore.arm.ResourceId;
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
+import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -23,11 +25,14 @@ public class AzurePrivateDnsZoneValidatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzurePrivateDnsZoneValidatorService.class);
 
-    public ValidationResultBuilder existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneServiceEnum serviceEnum,
-            ResourceId existingPrivateDnsZoneResourceId, ValidationResultBuilder resultBuilder) {
-        if (!serviceEnum.getDnsZoneName().equals(existingPrivateDnsZoneResourceId.name())) {
+    @Inject
+    private AzurePrivateDnsZoneMatcherService azurePrivateDnsZoneMatcherService;
+
+    public ValidationResult.ValidationResultBuilder existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneDescriptor dnsZoneDescriptor,
+            ResourceId existingPrivateDnsZoneResourceId, ValidationResult.ValidationResultBuilder resultBuilder) {
+        if (!azurePrivateDnsZoneMatcherService.zoneNameMatchesPattern(dnsZoneDescriptor, existingPrivateDnsZoneResourceId.name())) {
             String validationMessage = String.format("The provided private DNS zone %s is not a valid DNS zone name for %s. Please use a DNS zone with " +
-                    "name %s and try again.", existingPrivateDnsZoneResourceId.id(), serviceEnum.getResourceType(), serviceEnum.getDnsZoneName());
+                    "name %s and try again.", existingPrivateDnsZoneResourceId.id(), dnsZoneDescriptor.getResourceType(), dnsZoneDescriptor.getDnsZoneName());
             addValidationError(validationMessage, resultBuilder);
         }
         return resultBuilder;
