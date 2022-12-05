@@ -39,6 +39,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
@@ -146,6 +147,7 @@ public class SdxRuntimeUpgradeService {
 
     private SdxUpgradeResponse initSdxUpgrade(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request, SdxCluster cluster) {
         verifyPaywallAccess(userCrn, request);
+        validateRollingUpgrade(request, cluster);
         String imageId = determineImageId(request, upgradeCandidates);
         boolean skipBackup = request != null && Boolean.TRUE.equals(request.getSkipBackup());
         boolean skipAtlasMetadata = request != null && Boolean.TRUE.equals(request.isSkipAtlasMetadata());
@@ -157,6 +159,16 @@ public class SdxRuntimeUpgradeService {
                 rollingUpgradeEnabled);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), Collections.singletonList(imageId));
         return new SdxUpgradeResponse(message, flowIdentifier);
+    }
+
+    private void validateRollingUpgrade(SdxUpgradeRequest request, SdxCluster cluster) {
+        if (Boolean.TRUE.equals(request.getRollingUpgradeEnabled()) && !SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape())) {
+            String message = String.format("The rolling upgrade is not allowed for %s cluster shape. "
+                    + "If you want to use rolling upgrade you need to launch a Data Lake with %s cluster shape.",
+                    cluster.getClusterShape().name(), SdxClusterShape.MEDIUM_DUTY_HA.name());
+            LOGGER.warn(message);
+            throw new BadRequestException(message);
+        }
     }
 
     private SdxUpgradeResponse initSdxUpgradePreparation(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request,
