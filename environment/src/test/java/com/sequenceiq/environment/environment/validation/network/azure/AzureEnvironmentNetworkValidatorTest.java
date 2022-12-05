@@ -100,7 +100,7 @@ class AzureEnvironmentNetworkValidatorTest {
         verify(azurePrivateEndpointValidator).checkMultipleResourceGroup(validationResultBuilder, environmentDto,
                 networkDto);
         verify(azurePrivateEndpointValidator).checkNewPrivateDnsZone(validationResultBuilder, environmentDto, networkDto);
-        verify(azurePrivateEndpointValidator).checkExistingPrivateDnsZone(validationResultBuilder, environmentDto, networkDto);
+        verify(azurePrivateEndpointValidator).checkExistingServicePrivateDnsZone(validationResultBuilder, environmentDto, networkDto);
     }
 
     @Test
@@ -118,7 +118,8 @@ class AzureEnvironmentNetworkValidatorTest {
         verify(azurePrivateEndpointValidator, never()).checkNewPrivateDnsZone(any(), any(), any());
         verify(azurePrivateEndpointValidator, never()).checkMultipleResourceGroup(any(), any(), any());
         verify(azurePrivateEndpointValidator, never()).checkNewPrivateDnsZone(any(), any(), any());
-        verify(azurePrivateEndpointValidator, never()).checkExistingPrivateDnsZone(any(), any(), any());
+        verify(azurePrivateEndpointValidator, never()).checkExistingServicePrivateDnsZone(any(), any(), any());
+        verify(azurePrivateEndpointValidator, never()).checkExistingRegisteredOnlyPrivateDnsZone(any(), any(), any());
         assertFalse(validationResultBuilder.build().hasError());
     }
 
