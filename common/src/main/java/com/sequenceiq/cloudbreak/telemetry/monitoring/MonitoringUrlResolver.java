@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.telemetry.monitoring;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MonitoringUrlResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MonitoringUrlResolver.class);
@@ -14,12 +18,13 @@ public class MonitoringUrlResolver {
 
     private final String monitoringPaasEndpointConfig;
 
-    public MonitoringUrlResolver(String monitoringEndpointConfig, String monitoringPaasEndpointConfig) {
-        this.monitoringEndpointConfig = monitoringEndpointConfig;
-        if (StringUtils.isBlank(monitoringPaasEndpointConfig)) {
-            this.monitoringPaasEndpointConfig = monitoringEndpointConfig;
+    @Inject
+    public MonitoringUrlResolver(MonitoringConfiguration monitoringConfiguration) {
+        this.monitoringEndpointConfig = monitoringConfiguration.getRemoteWriteUrl();
+        if (StringUtils.isBlank(monitoringConfiguration.getPaasRemoteWriteUrl())) {
+            this.monitoringPaasEndpointConfig = monitoringConfiguration.getRemoteWriteUrl();
         } else {
-            this.monitoringPaasEndpointConfig = monitoringPaasEndpointConfig;
+            this.monitoringPaasEndpointConfig = monitoringConfiguration.getPaasRemoteWriteUrl();
         }
     }
 

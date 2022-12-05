@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -57,6 +58,9 @@ public class TelemetryConverterTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private MonitoringUrlResolver monitoringUrlResolver;
+
     private TelemetryConverter underTest;
 
     @Before
@@ -69,7 +73,7 @@ public class TelemetryConverterTest {
         when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
-        underTest = new TelemetryConverter(telemetryConfiguration, entitlementService, true, true);
+        underTest = new TelemetryConverter(telemetryConfiguration, entitlementService, true, true, monitoringUrlResolver);
     }
 
     @Test
@@ -262,7 +266,7 @@ public class TelemetryConverterTest {
         when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
-        TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, true, false);
+        TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, true, false, monitoringUrlResolver);
         // WHEN
         TelemetryRequest result = converter.convert(null, sdxClusterResponse);
         // THEN
@@ -339,7 +343,7 @@ public class TelemetryConverterTest {
         when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
-        TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, false, true);
+        TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, false, true, monitoringUrlResolver);
         // WHEN
         TelemetryRequest result = converter.convert(response, sdxClusterResponse);
         // THEN

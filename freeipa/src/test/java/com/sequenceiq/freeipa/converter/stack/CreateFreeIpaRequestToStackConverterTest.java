@@ -128,7 +128,7 @@ public class CreateFreeIpaRequestToStackConverterTest {
                 any(),
                 any(),
                 mapCaptorForEncryption.capture())).thenReturn(new InstanceGroup());
-        when(telemetryConverter.convert(source.getTelemetry())).thenReturn(new Telemetry());
+        when(telemetryConverter.convert(ACCOUNT_ID, source.getTelemetry())).thenReturn(new Telemetry());
         when(backupConverter.convert(source.getTelemetry())).thenReturn(new Backup());
         when(entitlementService.internalTenant(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(costTagging.prepareDefaultTags(any())).thenReturn(new HashMap<>());
@@ -170,7 +170,7 @@ public class CreateFreeIpaRequestToStackConverterTest {
                 any(),
                 mapCaptorForEncryption.capture())).thenReturn(new InstanceGroup());
         when(networkConverter.convert(any(NetworkRequest.class))).thenReturn(new Network());
-        when(telemetryConverter.convert(source.getTelemetry())).thenReturn(new Telemetry());
+        when(telemetryConverter.convert(ACCOUNT_ID, source.getTelemetry())).thenReturn(new Telemetry());
         when(backupConverter.convert(source.getTelemetry())).thenReturn(new Backup());
         when(entitlementService.internalTenant(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(costTagging.prepareDefaultTags(any())).thenReturn(new HashMap<>());
@@ -208,7 +208,7 @@ public class CreateFreeIpaRequestToStackConverterTest {
                 any(),
                 any(),
                 mapCaptorForEncryption.capture())).thenReturn(new InstanceGroup());
-        when(telemetryConverter.convert(source.getTelemetry())).thenReturn(new Telemetry());
+        when(telemetryConverter.convert(ACCOUNT_ID, source.getTelemetry())).thenReturn(new Telemetry());
         when(backupConverter.convert(source.getTelemetry())).thenReturn(new Backup());
         when(entitlementService.internalTenant(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(costTagging.prepareDefaultTags(any())).thenReturn(new HashMap<>());

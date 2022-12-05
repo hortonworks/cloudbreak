@@ -1,11 +1,14 @@
 package com.sequenceiq.freeipa.converter.telemetry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -36,20 +39,29 @@ public class TelemetryConverter {
 
     private final String databusEndpoint;
 
-    public TelemetryConverter(TelemetryConfiguration configuration,
-            @Value("${freeipa.telemetry.enabled:true}") boolean freeIpaTelemetryEnabled) {
+    private final MonitoringUrlResolver monitoringUrlResolver;
+
+    private final EntitlementService entitlementService;
+
+    public TelemetryConverter(
+            TelemetryConfiguration configuration,
+            @Value("${freeipa.telemetry.enabled:true}") boolean freeIpaTelemetryEnabled,
+            MonitoringUrlResolver monitoringUrlResolver,
+            EntitlementService entitlementService) {
         this.freeIpaTelemetryEnabled = freeIpaTelemetryEnabled;
         this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
+        this.monitoringUrlResolver = monitoringUrlResolver;
+        this.entitlementService = entitlementService;
     }
 
-    public Telemetry convert(TelemetryRequest request) {
+    public Telemetry convert(String accountId, TelemetryRequest request) {
         Telemetry telemetry = null;
         if (freeIpaTelemetryEnabled && request != null) {
             telemetry = new Telemetry();
             telemetry.setLogging(createLoggingFromRequest(request.getLogging()));
-            telemetry.setMonitoring(createMonitoringFromRequest(request.getMonitoring()));
+            telemetry.setMonitoring(createMonitoringFromRequest(accountId, request.getMonitoring()));
             telemetry.setFeatures(createFeaturesFromRequest(request.getFeatures()));
             telemetry.setDatabusEndpoint(databusEndpoint);
             telemetry.setFluentAttributes(request.getFluentAttributes());
@@ -98,11 +110,15 @@ public class TelemetryConverter {
         return logging;
     }
 
-    private Monitoring createMonitoringFromRequest(MonitoringRequest monitoringRequest) {
+    private Monitoring createMonitoringFromRequest(String accountId, MonitoringRequest monitoringRequest) {
         Monitoring monitoring = null;
-        if (monitoringRequest != null) {
+        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
             monitoring = new Monitoring();
-            monitoring.setRemoteWriteUrl(monitoringRequest.getRemoteWriteUrl());
+            if (monitoringRequest != null && StringUtils.isNotBlank(monitoringRequest.getRemoteWriteUrl())) {
+                monitoring.setRemoteWriteUrl(monitoringUrlResolver.resolve(accountId, monitoringRequest.getRemoteWriteUrl()));
+            } else {
+                monitoring.setRemoteWriteUrl(monitoringUrlResolver.resolve(accountId, entitlementService.isCdpSaasEnabled(accountId)));
+            }
         }
         return monitoring;
     }

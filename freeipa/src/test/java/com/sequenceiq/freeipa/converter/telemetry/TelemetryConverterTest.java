@@ -4,15 +4,23 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -24,6 +32,7 @@ import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 
+@ExtendWith(MockitoExtension.class)
 public class TelemetryConverterTest {
 
     private static final String INSTANCE_PROFILE_VALUE = "myInstanceProfile";
@@ -36,6 +45,14 @@ public class TelemetryConverterTest {
 
     private static final String EMAIL = "blah@blah.blah";
 
+    private static final String ACCOUNT_ID = "account1";
+
+    @Mock
+    private MonitoringUrlResolver monitoringUrlResolver;
+
+    @Mock
+    private EntitlementService entitlementService;
+
     private TelemetryConverter underTest;
 
     @BeforeEach
@@ -46,7 +63,8 @@ public class TelemetryConverterTest {
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
-        underTest = new TelemetryConverter(telemetryConfiguration, true);
+        MockitoAnnotations.openMocks(this);
+        underTest = new TelemetryConverter(telemetryConfiguration, true, monitoringUrlResolver, entitlementService);
     }
 
     @Test
@@ -62,8 +80,10 @@ public class TelemetryConverterTest {
         monitoringRequest.setRemoteWriteUrl(MONITORING_REMOTE_WRITE_URL);
         telemetryRequest.setMonitoring(monitoringRequest);
         telemetryRequest.setFeatures(featuresRequest);
+        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        when(monitoringUrlResolver.resolve(anyString(), anyString())).thenReturn(MONITORING_REMOTE_WRITE_URL);
         // WHEN
-        Telemetry result = underTest.convert(telemetryRequest);
+        Telemetry result = underTest.convert(ACCOUNT_ID, telemetryRequest);
         // THEN
         assertThat(result.getFeatures().getWorkloadAnalytics(), nullValue());
         assertThat(result.getFeatures().getClusterLogsCollection().getEnabled(), is(false));
@@ -104,7 +124,7 @@ public class TelemetryConverterTest {
         telemetryRequest.setLogging(logging);
         telemetryRequest.setFeatures(featuresRequest);
         // WHEN
-        Telemetry result = underTest.convert(telemetryRequest);
+        Telemetry result = underTest.convert(ACCOUNT_ID, telemetryRequest);
         // THEN
         assertThat(result.getFeatures().getWorkloadAnalytics(), nullValue());
         assertThat(result.getFeatures().getClusterLogsCollection().getEnabled(), is(false));

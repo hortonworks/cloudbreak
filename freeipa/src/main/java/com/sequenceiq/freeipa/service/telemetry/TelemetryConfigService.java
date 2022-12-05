@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.telemetry.context.NodeStatusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
@@ -101,7 +100,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
     private TelemetryFeatureService telemetryFeatureService;
 
     @Inject
-    private MonitoringConfiguration monitoringConfiguration;
+    private MonitoringUrlResolver monitoringUrlResolver;
 
     @Inject
     private TransactionService transactionService;
@@ -142,8 +141,6 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         if (telemetry != null) {
             boolean computeMonitoringEntitled = entitlementService.isComputeMonitoringEnabled(stack.getAccountId());
             if (!telemetry.isComputeMonitoringEnabled() && computeMonitoringEntitled) {
-                MonitoringUrlResolver monitoringUrlResolver = new MonitoringUrlResolver(
-                        monitoringConfiguration.getRemoteWriteUrl(), monitoringConfiguration.getPaasRemoteWriteUrl());
                 Monitoring monitoring = new Monitoring();
                 monitoring.setRemoteWriteUrl(monitoringUrlResolver.resolve(stack.getAccountId(), entitlementService.isCdpSaasEnabled(stack.getAccountId())));
                 telemetry.setMonitoring(monitoring);
@@ -194,6 +191,8 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             }
             if (telemetry.isComputeMonitoringEnabled()) {
                 builder.withRemoteWriteUrl(telemetry.getMonitoring().getRemoteWriteUrl());
+            } else {
+                builder.withRemoteWriteUrl(monitoringUrlResolver.resolve(stack.getAccountId(), entitlementService.isCdpSaasEnabled(stack.getAccountId())));
             }
         }
         if (entitlementService.isCdpSaasEnabled(stack.getAccountId())) {

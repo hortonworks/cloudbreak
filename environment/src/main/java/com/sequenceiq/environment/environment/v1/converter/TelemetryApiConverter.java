@@ -42,11 +42,10 @@ public class TelemetryApiConverter {
 
     private final EntitlementService entitlementService;
 
-    public TelemetryApiConverter(TelemetryConfiguration configuration, EntitlementService entitlementService) {
+    public TelemetryApiConverter(TelemetryConfiguration configuration, MonitoringUrlResolver monitoringUrlResolver, EntitlementService entitlementService) {
         this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
         this.entitlementService = entitlementService;
-        this.monitoringUrlResolver = new MonitoringUrlResolver(
-                configuration.getMonitoringConfiguration().getRemoteWriteUrl(), configuration.getMonitoringConfiguration().getPaasRemoteWriteUrl());
+        this.monitoringUrlResolver = monitoringUrlResolver;
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
     }
 
