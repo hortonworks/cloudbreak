@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter.spi;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -88,7 +87,7 @@ public class InstanceMetaDataToCloudInstanceConverter {
     }
 
     public List<CloudInstance> convert(List<InstanceMetadataView> metaDataEntities, InstanceGroupView group, String envCrn,
-            StackAuthentication stackAuthentication) throws IOException {
+            StackAuthentication stackAuthentication) {
         List<CloudInstance> cloudInstances = new ArrayList<>();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(envCrn);
         for (InstanceMetadataView metaDataEntity : metaDataEntities) {
@@ -114,8 +113,7 @@ public class InstanceMetaDataToCloudInstanceConverter {
         Map<String, Object> cloudInstanceParameters = stackToCloudStackConverter.buildCloudInstanceParameters(
                 environment,
                 metaDataEntity,
-                CloudPlatform.valueOf(template.getCloudPlatform()),
-                group.getTemplate());
+                CloudPlatform.valueOf(template.getCloudPlatform()));
         params.putAll(cloudInstanceParameters);
 
         return new CloudInstance(
