@@ -51,8 +51,9 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         if (environmentValidationDto.getValidationType() == ValidationType.ENVIRONMENT_CREATION) {
             azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
             azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto);
-            azurePrivateEndpointValidator.checkExistingPrivateDnsZone(resultBuilder, environmentDto, networkDto);
+            azurePrivateEndpointValidator.checkExistingManagedPrivateDnsZone(resultBuilder, environmentDto, networkDto);
             azurePrivateEndpointValidator.checkNewPrivateDnsZone(resultBuilder, environmentDto, networkDto);
+            azurePrivateEndpointValidator.checkExistingRegisteredOnlyPrivateDnsZone(resultBuilder, environmentDto, networkDto);
         } else {
             LOGGER.debug("Skipping Private Endpoint related validations as they have been validated before during env creation");
         }
