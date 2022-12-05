@@ -11,9 +11,10 @@ class MonitoringUrlResolverTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new MonitoringUrlResolver(
-                "http://localhost/saas/$accountid",
-                "http://localhost/$accountid");
+        MonitoringConfiguration monitoringConfiguration = new MonitoringConfiguration();
+        monitoringConfiguration.setRemoteWriteUrl("http://localhost/saas/$accountid");
+        monitoringConfiguration.setPaasRemoteWriteUrl("http://localhost/$accountid");
+        underTest = new MonitoringUrlResolver(monitoringConfiguration);
     }
 
     @Test

@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
@@ -90,7 +90,7 @@ public class TelemetryConfigServiceTest {
     private TransactionService transactionService;
 
     @Mock
-    private MonitoringConfiguration monitoringConfiguration;
+    private MonitoringUrlResolver monitoringUrlResolver;
 
     @BeforeEach
     public void setUp() throws TransactionService.TransactionExecutionException {
@@ -100,8 +100,6 @@ public class TelemetryConfigServiceTest {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
         }).when(transactionService).required(any(Runnable.class));
-        lenient().when(monitoringConfiguration.getRemoteWriteUrl()).thenReturn("http://nope");
-        lenient().when(monitoringConfiguration.getPaasRemoteWriteUrl()).thenReturn("http://nope-paas");
     }
 
     @Test
@@ -212,6 +210,7 @@ public class TelemetryConfigServiceTest {
                 .willReturn(Optional.of(monitoringCredential));
         Stack stack = createStack(telemetry(false, false, false));
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
+        given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(stack);
         // THEN

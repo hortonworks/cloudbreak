@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
@@ -54,7 +54,7 @@ public class TelemetryDecoratorTest {
     private TelemetryDecorator underTest;
 
     @Mock
-    private MonitoringConfiguration monitoringConfiguration;
+    private MonitoringUrlResolver monitoringUrlResolver;
 
     @Mock
     private AltusMachineUserService altusMachineUserService;
@@ -86,8 +86,15 @@ public class TelemetryDecoratorTest {
     @Before
     public void setUp() {
         initMocks();
-        underTest = new TelemetryDecorator(altusMachineUserService, vmLogsService, entitlementService,
-                dataBusEndpointProvider, monitoringConfiguration, componentConfigProviderService, clusterComponentConfigProvider, "1.0.0");
+        underTest = new TelemetryDecorator(
+                altusMachineUserService,
+                vmLogsService,
+                entitlementService,
+                dataBusEndpointProvider,
+                monitoringUrlResolver,
+                componentConfigProviderService,
+                clusterComponentConfigProvider,
+                "1.0.0");
     }
 
     @Test
@@ -176,6 +183,7 @@ public class TelemetryDecoratorTest {
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.66.0-b100");
         telemetry.setMonitoring(monitoring);
+        given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -310,8 +318,6 @@ public class TelemetryDecoratorTest {
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString())).willReturn("https://cloudera-dbus-dev.amazonaws.com");
         given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
         given(altusMachineUserService.getCdpAccessKeyType(any())).willReturn(CdpAccessKeyType.ECDSA);
-        given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("http://nope");
-        given(monitoringConfiguration.getPaasRemoteWriteUrl()).willReturn("http://nope-paas");
     }
 
     private StackDto createStack() {

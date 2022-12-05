@@ -135,7 +135,7 @@ public class CreateFreeIpaRequestToStackConverter {
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
         stack.setInstanceGroups(convertInstanceGroups(source, stack, environment, accountId));
-        stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
+        stack.setTelemetry(telemetryConverter.convert(accountId, source.getTelemetry()));
         if (source.getBackup() != null && isNotEmpty(source.getBackup().getStorageLocation())) {
             stack.setBackup(backupConverter.convert(source.getBackup()));
         } else {

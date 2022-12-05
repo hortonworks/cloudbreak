@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringAuthConfig;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
@@ -82,7 +81,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             VmLogsService vmLogsService,
             EntitlementService entitlementService,
             DataBusEndpointProvider dataBusEndpointProvider,
-            MonitoringConfiguration monitoringConfiguration,
+            MonitoringUrlResolver monitoringUrlResolver,
             ComponentConfigProviderService componentConfigProviderService,
             ClusterComponentConfigProvider clusterComponentConfigProvider,
             @Value("${info.app.version:}") String version) {
@@ -90,8 +89,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         this.vmLogsService = vmLogsService;
         this.entitlementService = entitlementService;
         this.dataBusEndpointProvider = dataBusEndpointProvider;
-        this.monitoringUrlResolver = new MonitoringUrlResolver(
-                monitoringConfiguration.getRemoteWriteUrl(), monitoringConfiguration.getPaasRemoteWriteUrl());
+        this.monitoringUrlResolver = monitoringUrlResolver;
         this.componentConfigProviderService = componentConfigProviderService;
         this.clusterComponentConfigProvider = clusterComponentConfigProvider;
         this.version = version;
