@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.account;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4.DISABLE_SHOW_BLUEPRINT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4.DISABLE_SHOW_CLI;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,10 +55,12 @@ public class PreferencesService {
     }
 
     public Set<String> enabledPlatforms() {
-        Set<String> platforms;
-        platforms = enabledPlatforms.isEmpty()
-                ? cloudConstants.stream().map(cloudConstant -> cloudConstant.platform().value()).collect(Collectors.toSet())
-                : Sets.newHashSet(enabledPlatforms.split(","));
+        Set<String> platforms = Collections.emptySet();
+        if (enabledPlatformConfigurationsAreEmpty()) {
+            platforms = cloudConstants.stream().map(cloudConstant -> cloudConstant.platform().value()).collect(Collectors.toSet());
+        } else if (!Strings.isNullOrEmpty(enabledPlatforms)) {
+            platforms = Sets.newHashSet(enabledPlatforms.split(","));
+        }
         return platforms;
     }
 
@@ -105,4 +108,7 @@ public class PreferencesService {
         return result;
     }
 
+    private boolean enabledPlatformConfigurationsAreEmpty() {
+        return Strings.isNullOrEmpty(enabledPlatforms) && Strings.isNullOrEmpty(enabledGovPlatforms);
+    }
 }
