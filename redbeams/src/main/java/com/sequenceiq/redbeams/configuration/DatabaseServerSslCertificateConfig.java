@@ -68,6 +68,7 @@ public class DatabaseServerSslCertificateConfig {
             Map.entry(PLATFORM_AWS + ".af-south-1", 0),
             Map.entry(PLATFORM_AWS + ".me-south-1", 0),
             Map.entry(PLATFORM_AWS + ".ap-east-1", 0),
+            Map.entry(PLATFORM_AWS + ".ap-southeast-3", 0),
             Map.entry(PLATFORM_AWS + ".us-gov-west-1", 3),
             Map.entry(PLATFORM_AWS + ".us-gov-east-1", 3),
             Map.entry(PLATFORM_AZURE, 1));
@@ -78,6 +79,7 @@ public class DatabaseServerSslCertificateConfig {
             Map.entry(PLATFORM_AWS + ".af-south-1", "rds-ca-2019-af-south-1"),
             Map.entry(PLATFORM_AWS + ".me-south-1", "rds-ca-2019-me-south-1"),
             Map.entry(PLATFORM_AWS + ".ap-east-1", "rds-ca-rsa2048-g1"),
+            Map.entry(PLATFORM_AWS + ".ap-southeast-3", "rds-ca-rsa2048-g1"),
             Map.entry(PLATFORM_AWS + ".us-gov-west-1", "rds-ca-rsa4096-g1"),
             Map.entry(PLATFORM_AWS + ".us-gov-east-1", "rds-ca-rsa4096-g1"),
             Map.entry(PLATFORM_AZURE, "DigiCertGlobalRootG2"));
