@@ -71,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -497,5 +498,11 @@ public class ClusterService {
 
     public Cluster getClusterReference(Long id) {
         return repository.getById(id);
+    }
+
+    public void updateDbSslCert(Long clusterId, RedbeamsDbCertificateProvider.RedbeamsDbSslDetails relatedSslCerts) {
+        Set<String> rootSslCerts = relatedSslCerts.getSslCerts();
+        String allCerts = String.join("\n", rootSslCerts);
+        repository.updateDbSslCert(clusterId, allCerts, relatedSslCerts.isSslEnabledForStack());
     }
 }
