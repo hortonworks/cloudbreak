@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -21,6 +20,7 @@ import org.testng.annotations.Listeners;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -35,9 +35,6 @@ import com.sequenceiq.it.util.TagsUtil;
 public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractE2ETest.class);
-
-    @Value("${integrationtest.azure.resourcegroup.name:}")
-    private String resourceGroupName;
 
     @Inject
     private SpotUtil spotUtil;
@@ -96,6 +93,30 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    @Override
+    protected void createEnvironmentWithFreeIpa(TestContext testContext) {
+        createResourceGroup(testContext);
+        super.createEnvironmentWithFreeIpa(testContext);
+    }
+
+    @Override
+    protected void createDefaultDatalake(TestContext testContext) {
+        createResourceGroup(testContext);
+        super.createDefaultDatalake(testContext);
+    }
+
+    @Override
+    protected void createDefaultDatahub(TestContext testContext) {
+        createResourceGroup(testContext);
+        super.createDefaultDatahub(testContext);
+    }
+
+    @Override
+    protected void createStorageOptimizedDatahub(TestContext testContext) {
+        createResourceGroup(testContext);
+        super.createStorageOptimizedDatahub(testContext);
+    }
+
     /**
      * Given Cloud Platform is the only supported one for the test. (Invoked in the 'setupTest')
      *
@@ -134,15 +155,20 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     /**
      * Creating new temporary Azure resource group for E2E tests.
      */
-    @BeforeMethod
-    public void createResourceGroup(Object[] data) {
+    @BeforeMethod(alwaysRun = true)
+    protected void createResourceGroup(Object[] data) {
         TestContext testContext = (TestContext) data[0];
+        createResourceGroup(testContext);
+    }
+
+    private void createResourceGroup(TestContext testContext) {
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
         if (CloudPlatform.AZURE.name().equalsIgnoreCase(cloudProvider)) {
             Map<String, String> tags = Map.of("owner", testContext.getActingUserOwnerTag(),
                     "creation-timestamp", testContext.getCreationTimestampTag());
-            ResourceGroup temporaryResourceGroup = azureCloudFunctionality.createResourceGroup(resourceGroupName, tags);
+            ResourceGroup temporaryResourceGroup = azureCloudFunctionality.createResourceGroup(testContext.getTestParameter()
+                    .get(ResourceGroupTest.AZURE_RESOURCE_GROUP_NAME), tags);
             LOGGER.info("The temporary single resource group '{}' for E2E tests has been provisioned with status '{}' before test has been started!",
                     temporaryResourceGroup.name(), temporaryResourceGroup.provisioningState());
         } else {
