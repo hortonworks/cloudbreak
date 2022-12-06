@@ -37,6 +37,8 @@ import org.mockito.quality.Strictness;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -44,11 +46,13 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.DependentRolesHealthCheckService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 
@@ -244,6 +248,62 @@ public class UpdateNodeCountValidatorTest {
                         Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state. Node group start operation is not allowed for this state."),
                         "compute", true, true, -1)
         );
+    }
+
+    private void checkExecutableThrowException(Optional<String> errorMessageSegment, Executable executable) {
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, executable);
+        Assert.assertEquals(errorMessageSegment.get(), badRequestException.getMessage());
+        Assert.assertTrue(badRequestException.getMessage().contains(errorMessageSegment.get()));
+    }
+
+    private InstanceMetadataView generateInstanceMetadata(InstanceStatus instanceStatus, InstanceMetadataType instanceMetadataType) {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceMetadataType(instanceMetadataType);
+        instanceMetaData.setInstanceStatus(instanceStatus);
+        instanceMetaData.setDiscoveryFQDN("hg0-host-2");
+        return instanceMetaData;
+    }
+
+    @Test
+    public void testValidateCMStatusNonPrimaryGatewayUnhealthy() {
+        StackDto stack = mock(StackDto.class);
+        List<InstanceMetadataView> instanceMetaDataAsList = new ArrayList<>();
+        instanceMetaDataAsList.add(generateInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, InstanceMetadataType.GATEWAY_PRIMARY));
+        instanceMetaDataAsList.add(generateInstanceMetadata(InstanceStatus.SERVICES_UNHEALTHY, InstanceMetadataType.GATEWAY));
+        when(stack.getAllAvailableInstances()).thenReturn(instanceMetaDataAsList);
+        assertDoesNotThrow(() -> underTest.validateCMStatus(stack));
+    }
+
+    @Test
+    public void testValidateCMStatusAllGatewayHealthy() {
+        StackDto stack = mock(StackDto.class);
+        List<InstanceMetadataView> instanceMetaDataAsList = new ArrayList<>();
+        instanceMetaDataAsList.add(generateInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, InstanceMetadataType.GATEWAY_PRIMARY));
+        instanceMetaDataAsList.add(generateInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, InstanceMetadataType.GATEWAY));
+        when(stack.getAllAvailableInstances()).thenReturn(instanceMetaDataAsList);
+        assertDoesNotThrow(() -> underTest.validateCMStatus(stack));
+    }
+
+    @Test
+    public void testValidateCMStatusAllGatewayUnhealthy() {
+        StackDto stack = mock(StackDto.class);
+        List<InstanceMetadataView> instanceMetaDataAsList = new ArrayList<>();
+        instanceMetaDataAsList.add(generateInstanceMetadata(InstanceStatus.SERVICES_UNHEALTHY, InstanceMetadataType.GATEWAY_PRIMARY));
+        instanceMetaDataAsList.add(generateInstanceMetadata(InstanceStatus.SERVICES_UNHEALTHY, InstanceMetadataType.GATEWAY));
+        when(stack.getAllAvailableInstances()).thenReturn(instanceMetaDataAsList);
+        Optional<String> errorMessageSegment = Optional.of("Upscale is not allowed because the CM host is not healthy: hg0-host-2: SERVICES_UNHEALTHY.");
+        checkExecutableThrowException(errorMessageSegment, () -> underTest.validateCMStatus(stack));
+    }
+
+    @Test
+    public void testValidateCMStatusPrimaryGatewayUnhealthy() {
+        StackDto stack = mock(StackDto.class);
+        List<InstanceMetadataView> instanceMetaDataAsList = new ArrayList<>();
+        instanceMetaDataAsList.add(generateInstanceMetadata(InstanceStatus.SERVICES_UNHEALTHY, InstanceMetadataType.GATEWAY_PRIMARY));
+        instanceMetaDataAsList.add(generateInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, InstanceMetadataType.GATEWAY));
+        when(stack.getAllAvailableInstances()).thenReturn(instanceMetaDataAsList);
+        Optional<String> errorMessageSegment = Optional.of("Upscale is not allowed because the CM host is not healthy: hg0-host-2: SERVICES_UNHEALTHY.");
+        checkExecutableThrowException(errorMessageSegment, () -> underTest.validateCMStatus(stack));
     }
 
     @Test
