@@ -67,7 +67,7 @@ public class ClusterManagerUpscaleService {
         NodeReachabilityResult nodeReachabilityResult = hostRunner.addClusterServices(stackDto, hostGroupWithAdjustment, repair);
         String clusterManagerIp = stackDto.getClusterManagerIp();
         if (primaryGatewayChanged) {
-            clusterManagerIp = clusterServiceRunner.updateAmbariClientConfig(stackDto);
+            clusterManagerIp = clusterServiceRunner.updateClusterManagerClientConfig(stackDto);
         }
         clusterService.updateInstancesToRunning(stackId, nodeReachabilityResult.getReachableNodes());
         clusterService.updateInstancesToZombie(stackId, nodeReachabilityResult.getUnreachableNodes());
