@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -74,6 +75,9 @@ public class TelemetryDecoratorTest {
     private Telemetry telemetry = new Telemetry();
 
     @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
     private Logging logging;
 
     @Spy
@@ -83,7 +87,7 @@ public class TelemetryDecoratorTest {
     public void setUp() {
         initMocks();
         underTest = new TelemetryDecorator(altusMachineUserService, vmLogsService, entitlementService,
-                dataBusEndpointProvider, monitoringConfiguration, componentConfigProviderService, "1.0.0");
+                dataBusEndpointProvider, monitoringConfiguration, componentConfigProviderService, clusterComponentConfigProvider, "1.0.0");
     }
 
     @Test
@@ -99,6 +103,7 @@ public class TelemetryDecoratorTest {
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(telemetry.getMonitoring()).willReturn(monitoring);
         given(monitoring.getRemoteWriteUrl()).willReturn("https://remotewrite:80/api/v1/write");
+        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.65.0-b62");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -133,6 +138,7 @@ public class TelemetryDecoratorTest {
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(telemetry.getMonitoring()).willReturn(monitoring);
         given(monitoring.getRemoteWriteUrl()).willReturn("https://remotewrite:80/api/v1/write");
+        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.65.0-b62");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -168,6 +174,7 @@ public class TelemetryDecoratorTest {
         given(telemetry.isAnyDataBusBasedFeatureEnablred()).willReturn(false);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.66.0-b100");
         telemetry.setMonitoring(monitoring);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
@@ -178,6 +185,80 @@ public class TelemetryDecoratorTest {
         assertTrue(result.getMonitoringContext().isEnabled());
         assertNotNull(telemetry.getMonitoring().getRemoteWriteUrl());
         verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
+    }
+
+    @Test
+    public void testCreateTelemetryContextWithMonitoringOnlyAndMajorVersionChanged() {
+        // GIVEN
+        given(telemetry.isAnyDataBusBasedFeatureEnablred()).willReturn(false);
+        given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
+        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(telemetry.getMonitoring()).willReturn(monitoring);
+        given(monitoring.getRemoteWriteUrl()).willReturn("https://remotewrite:80/api/v1/write");
+        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("3.65.0-b620000");
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(createStack());
+        // THEN
+        assertFalse(result.getDatabusContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
+        assertTrue(result.getMonitoringContext().isEnabled());
+        assertNotNull(telemetry.getMonitoring().getRemoteWriteUrl());
+        verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
+    }
+
+    @Test
+    public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsTooOld() {
+        // GIVEN
+        given(telemetry.isAnyDataBusBasedFeatureEnablred()).willReturn(false);
+        given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
+        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.65.0-b61");
+        telemetry.setMonitoring(monitoring);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(createStack());
+        // THEN
+        assertFalse(result.getDatabusContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
+        assertFalse(result.getMonitoringContext().isEnabled());
+        verify(altusMachineUserService, times(0)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
+    }
+
+    @Test
+    public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsVeryOld() {
+        // GIVEN
+        given(telemetry.isAnyDataBusBasedFeatureEnablred()).willReturn(false);
+        given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
+        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.21.0-b10000");
+        telemetry.setMonitoring(monitoring);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(createStack());
+        // THEN
+        assertFalse(result.getDatabusContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
+        assertFalse(result.getMonitoringContext().isEnabled());
+        verify(altusMachineUserService, times(0)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
+    }
+
+    @Test
+    public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsUnkown() {
+        // GIVEN
+        given(telemetry.isAnyDataBusBasedFeatureEnablred()).willReturn(false);
+        given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
+        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn(null);
+        telemetry.setMonitoring(monitoring);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(createStack());
+        // THEN
+        assertFalse(result.getDatabusContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getMeteringContext().isEnabled());
+        assertFalse(result.getMonitoringContext().isEnabled());
+        verify(altusMachineUserService, times(0)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
     }
 
     @Test
@@ -245,6 +326,7 @@ public class TelemetryDecoratorTest {
         stack.setCloudPlatform("AWS");
         stack.setId(1L);
         Cluster cluster = new Cluster();
+        cluster.setId(2L);
         cluster.setName("cl1");
         cluster.setCloudbreakClusterManagerMonitoringUser("myUsr");
         cluster.setCloudbreakClusterManagerMonitoringPassword("myPass");

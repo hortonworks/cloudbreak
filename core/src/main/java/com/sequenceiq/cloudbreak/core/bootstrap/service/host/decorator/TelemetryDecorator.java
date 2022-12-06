@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.CdpCredential;
@@ -55,6 +57,8 @@ import com.sequenceiq.common.api.telemetry.model.VmLog;
 
 @Component
 public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
+
+    private static final String CB_VERSION_WITH_VM_AGENT_REMOVAL = "2.65.0-b62";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryDecorator.class);
 
@@ -72,12 +76,15 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private final ComponentConfigProviderService componentConfigProviderService;
 
+    private final ClusterComponentConfigProvider clusterComponentConfigProvider;
+
     public TelemetryDecorator(AltusMachineUserService altusMachineUserService,
             VmLogsService vmLogsService,
             EntitlementService entitlementService,
             DataBusEndpointProvider dataBusEndpointProvider,
             MonitoringConfiguration monitoringConfiguration,
             ComponentConfigProviderService componentConfigProviderService,
+            ClusterComponentConfigProvider clusterComponentConfigProvider,
             @Value("${info.app.version:}") String version) {
         this.altusMachineUserService = altusMachineUserService;
         this.vmLogsService = vmLogsService;
@@ -86,6 +93,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         this.monitoringUrlResolver = new MonitoringUrlResolver(
                 monitoringConfiguration.getRemoteWriteUrl(), monitoringConfiguration.getPaasRemoteWriteUrl());
         this.componentConfigProviderService = componentConfigProviderService;
+        this.clusterComponentConfigProvider = clusterComponentConfigProvider;
         this.version = version;
     }
 
@@ -159,13 +167,12 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         Telemetry telemetry = telemetryContext.getTelemetry();
         NodeStatusContext nodeStatusContext = telemetryContext.getNodeStatusContext();
         builder.withClusterType(MonitoringClusterType.CLOUDERA_MANAGER);
-        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
+        if (entitlementService.isComputeMonitoringEnabled(accountId) && !isSaltComponentCbVersionBeforeVmAgentRemoved(cluster)) {
             builder.enabled();
             MonitoringCredential credential = getOrRefreshMonitoringCredential(stack, accountId, telemetry, monitoringCredential, cdpAccessKeyType);
             builder.withCredential(credential);
             MonitoringAuthConfig cmAuthConfig = null;
-            if (cluster != null && cluster.getCloudbreakClusterManagerMonitoringUser() != null
-                    && cluster.getCloudbreakClusterManagerMonitoringPassword() != null) {
+            if (cluster.getCloudbreakClusterManagerMonitoringUser() != null && cluster.getCloudbreakClusterManagerMonitoringPassword() != null) {
                 String cmMonitoringUser = cluster.getCloudbreakClusterManagerMonitoringUser();
                 char[] cmMonitoringPassword = cluster.getCloudbreakClusterManagerMonitoringPassword().toCharArray();
                 cmAuthConfig = new MonitoringAuthConfig(cmMonitoringUser, cmMonitoringPassword);
@@ -182,6 +189,21 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         }
         builder.withSharedPassword(nodeStatusContext.getPassword());
         return builder.build();
+    }
+
+    private boolean isSaltComponentCbVersionBeforeVmAgentRemoved(ClusterView cluster) {
+        if (cluster == null) {
+            return true;
+        } else {
+            String saltCbVersion = clusterComponentConfigProvider.getSaltStateComponentCbVersion(cluster.getId());
+            if (saltCbVersion == null) {
+                return true;
+            } else {
+                VersionComparator versionComparator = new VersionComparator();
+                int compare = versionComparator.compare(() -> saltCbVersion, () -> CB_VERSION_WITH_VM_AGENT_REMOVAL);
+                return compare < 0;
+            }
+        }
     }
 
     private MeteringContext createMeteringContext(StackView stack, Telemetry telemetry) {
