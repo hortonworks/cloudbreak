@@ -651,6 +651,7 @@ class DatabaseServerSslCertificateConfigTest {
                 {"AWS, af-south-1", CloudPlatform.AWS.name(), "af-south-1", 0},
                 {"AWS, me-south-1", CloudPlatform.AWS.name(), "me-south-1", 0},
                 {"AWS, ap-east-1", CloudPlatform.AWS.name(), "ap-east-1", 0},
+                {"AWS, ap-southeast-3", CloudPlatform.AWS.name(), "ap-southeast-3", 0},
                 {"AWS, us-gov-west-1", CloudPlatform.AWS.name(), "us-gov-west-1", 3},
                 {"AWS, us-gov-east-1", CloudPlatform.AWS.name(), "us-gov-east-1", 3},
                 {"aws, null", "aws", null, 0},
@@ -680,6 +681,7 @@ class DatabaseServerSslCertificateConfigTest {
                 {"AWS, af-south-1", CloudPlatform.AWS.name(), "af-south-1", "rds-ca-2019-af-south-1"},
                 {"AWS, me-south-1", CloudPlatform.AWS.name(), "me-south-1", "rds-ca-2019-me-south-1"},
                 {"AWS, ap-east-1", CloudPlatform.AWS.name(), "ap-east-1", "rds-ca-rsa2048-g1"},
+                {"AWS, ap-southeast-3", CloudPlatform.AWS.name(), "ap-southeast-3", "rds-ca-rsa2048-g1"},
                 {"AWS, us-gov-west-1", CloudPlatform.AWS.name(), "us-gov-west-1", "rds-ca-rsa4096-g1"},
                 {"AWS, us-gov-east-1", CloudPlatform.AWS.name(), "us-gov-east-1", "rds-ca-rsa4096-g1"},
                 {"aws, null", "aws", null, RDS_CA_2019},
@@ -703,15 +705,15 @@ class DatabaseServerSslCertificateConfigTest {
     @Test
     void getSupportedPlatformsForLegacyMaxVersionTest() {
         assertThat(underTest.getSupportedPlatformsForLegacyMaxVersion())
-                .isEqualTo(Set.of("aws", "aws.eu-south-1", "aws.af-south-1", "aws.me-south-1", "aws.ap-east-1", "aws.us-gov-west-1", "aws.us-gov-east-1",
-                        "azure"));
+                .isEqualTo(Set.of("aws", "aws.eu-south-1", "aws.af-south-1", "aws.me-south-1", "aws.ap-east-1", "aws.ap-southeast-3", "aws.us-gov-west-1",
+                        "aws.us-gov-east-1", "azure"));
     }
 
     @Test
     void getSupportedPlatformsForLegacyCloudProviderIdentifierTest() {
         assertThat(underTest.getSupportedPlatformsForLegacyCloudProviderIdentifier())
-                .isEqualTo(Set.of("aws", "aws.eu-south-1", "aws.af-south-1", "aws.me-south-1", "aws.ap-east-1", "aws.us-gov-west-1", "aws.us-gov-east-1",
-                        "azure"));
+                .isEqualTo(Set.of("aws", "aws.eu-south-1", "aws.af-south-1", "aws.me-south-1", "aws.ap-east-1", "aws.ap-southeast-3", "aws.us-gov-west-1",
+                        "aws.us-gov-east-1", "azure"));
     }
 
     static Object[][] getCertByCloudPlatformAndRegionAndVersionDataProvider() {
