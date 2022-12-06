@@ -78,7 +78,7 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
             params.put(NetworkConstants.SUBNET_ID, SUBNET_ID);
             params.put(CloudInstance.INSTANCE_NAME, INSTANCE_NAME);
         }
-        when(stackToCloudStackConverter.buildCloudInstanceParameters(any(), any(), any())).thenReturn(params);
+        when(stackToCloudStackConverter.buildCloudInstanceParameters(any(), any(), any(), any())).thenReturn(params);
     }
 
     @Test
