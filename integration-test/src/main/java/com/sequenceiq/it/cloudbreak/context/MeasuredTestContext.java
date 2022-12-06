@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -50,6 +51,11 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public TestContext as(CloudbreakUser cloudbreakUser) {
         return wrappedTestContext.as(cloudbreakUser);
+    }
+
+    @Override
+    public TestParameter getTestParameter() {
+        return wrappedTestContext.getTestParameter();
     }
 
     @Override

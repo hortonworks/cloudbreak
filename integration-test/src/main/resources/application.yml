@@ -212,8 +212,8 @@ integrationtest:
         loggerIdentity:
       secure: false
     resourcegroup:
-      usage: MULTIPLE
-      name:
+      usage: SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT
+      name: cb-e2e-westus2-tmp
     marketplace:
       freeipa:
         image:
