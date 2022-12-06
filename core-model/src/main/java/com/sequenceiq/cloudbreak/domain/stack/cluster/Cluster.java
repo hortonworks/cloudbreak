@@ -241,6 +241,11 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     @Column(nullable = false)
     private Boolean embeddedDatabaseOnAttachedDisk = Boolean.FALSE;
 
+    @Column(columnDefinition = "TEXT")
+    private String dbSslRootCertBundle;
+
+    private Boolean dbSslEnabled;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -876,6 +881,24 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     public void setCustomConfigurations(CustomConfigurations customConfigurations) {
         this.customConfigurations = customConfigurations;
+    }
+
+    @Override
+    public String getDbSslRootCertBundle() {
+        return dbSslRootCertBundle;
+    }
+
+    public void setDbSslRootCertBundle(String dbSslRootCertBundle) {
+        this.dbSslRootCertBundle = dbSslRootCertBundle;
+    }
+
+    @Override
+    public Boolean getDbSslEnabled() {
+        return dbSslEnabled;
+    }
+
+    public void setDbSslEnabled(Boolean dbSslEnabled) {
+        this.dbSslEnabled = dbSslEnabled;
     }
 
     @Override
