@@ -51,7 +51,7 @@ public class ClusterServiceRunner {
     @Inject
     private GatewayService gatewayService;
 
-    public void runAmbariServices(StackDto stackDto) {
+    public void runClusterManagerServices(StackDto stackDto) {
         ClusterView cluster = stackDto.getCluster();
 
         generateGatewaySignKeys(stackDto.getGateway());
@@ -70,10 +70,13 @@ public class ClusterServiceRunner {
         }
     }
 
-    public String updateAmbariClientConfig(StackDto stackDto) {
+    public String updateClusterManagerClientConfig(StackDto stackDto) {
         String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(stackDto);
-        HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stackDto.getStack(), gatewayIp);
-        clusterService.updateAmbariClientConfig(stackDto.getCluster().getId(), ambariClientConfig);
+        if (!gatewayIp.equals(stackDto.getClusterManagerIp())) {
+            LOGGER.debug("Cluster manager IP has changed from {} to {}, updating cluster metadata.", stackDto.getClusterManagerIp(), gatewayIp);
+            HttpClientConfig clusterManagerClientConfig = buildClusterManagerClientConfig(stackDto.getStack(), gatewayIp);
+            clusterService.updateClusterManagerClientConfig(stackDto.getCluster().getId(), clusterManagerClientConfig);
+        }
         return gatewayIp;
     }
 
@@ -97,7 +100,7 @@ public class ClusterServiceRunner {
         return hostRunner.changePrimaryGateway(stackDto);
     }
 
-    private HttpClientConfig buildAmbariClientConfig(StackView stack, String gatewayPublicIp) {
+    private HttpClientConfig buildClusterManagerClientConfig(StackView stack, String gatewayPublicIp) {
         return tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), gatewayPublicIp, stack.getCloudPlatform());
     }
 }
