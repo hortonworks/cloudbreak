@@ -557,34 +557,43 @@ public class SdxBackupRestoreService {
      * @param entitlementEnabled Whether the entitlement required for backups with this operation is enabled.
      * @return true if backup can be performed, False otherwise.
      */
+    @SuppressWarnings("checkstyle:NPathComplexity")
     public boolean shouldSdxBackupBePerformed(SdxCluster cluster, boolean entitlementEnabled) {
         String reason = null;
         if (!entitlementEnabled) {
-            reason = "Required entitlement for backup during this operation not enabled for this account.";
-        } else if (!datalakeDrConfig.isConfigured()) {
-            reason = "Datalake DR is not configured!";
-        } else {
-            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(cluster.getEnvName());
-            CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
-            if (CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name())) {
-                return true;
-            }
-
-            if (isVersionOlderThan(cluster, "7.2.1")) {
-                reason = "Unsupported runtime: " + cluster.getRuntime();
-            } else if (cluster.getCloudStorageFileSystemType() == null) {
-                reason = "Cloud storage not initialized";
-            } else if (cluster.getCloudStorageFileSystemType().isGcs()) {
-                reason = "Unsupported cloud provider GCS ";
-            } else if (cluster.getCloudStorageFileSystemType().isAdlsGen2() &&
-                    isVersionOlderThan(cluster, "7.2.2")) {
-                reason = "Unsupported cloud provider Azure on runtime: " + cluster.getRuntime();
-            }
-        }
-        if (reason != null) {
-            LOGGER.info("Backup not triggered. Reason: " + reason);
+            LOGGER.info("Backup not triggered. Reason: Required entitlement for backup during this operation not enabled for this account");
             return false;
         }
+        if (!datalakeDrConfig.isConfigured()) {
+            LOGGER.info("Backup not triggered. Reason: Datalake DR is not configured!");
+            return false;
+        }
+
+        DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(cluster.getEnvName());
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
+        if (CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name())) {
+            LOGGER.info("Backup triggered on MOCK cloud platform");
+            return true;
+        }
+
+        if (isVersionOlderThan(cluster, "7.2.1")) {
+            LOGGER.info("Backup not triggered. Reason: Unsupported runtime {}", cluster.getRuntime());
+            return false;
+        }
+        if (cluster.getCloudStorageFileSystemType() == null) {
+            LOGGER.info("Backup not triggered. Reason: Cloud storage not initialized");
+            return false;
+        }
+        if (cluster.getCloudStorageFileSystemType().isAdlsGen2() && isVersionOlderThan(cluster, "7.2.2")) {
+            LOGGER.info("Backup not triggered. Reason: Unsupported cloud provider Azure on runtime:  {}", cluster.getRuntime());
+            return false;
+        }
+
+        if (cluster.getCloudStorageFileSystemType().isGcs() && isVersionOlderThan(cluster, "7.2.15")) {
+            LOGGER.info("Backup not triggered. Reason: Unsupported cloud provider GCP on runtime:  {}", cluster.getRuntime());
+            return false;
+        }
+
         return true;
     }
 
