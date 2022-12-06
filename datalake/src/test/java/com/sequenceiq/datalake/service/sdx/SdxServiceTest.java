@@ -1241,21 +1241,44 @@ class SdxServiceTest {
     }
 
     @Test
-    void testSdxResizeByAccountIdAndNameWhenSdxOnGcp() {
+    void testSdxResizeGcpClusterSuccess() throws IOException {
+        final String runtime = "7.2.15";
         SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
         sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
         sdxClusterResizeRequest.setEnvironment("environment");
 
         SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setId(1L);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.GCS);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
         sdxCluster.setDatabaseCrn(null);
+        sdxCluster.setRuntime(runtime);
+        sdxCluster.setCloudStorageBaseLocation("gcs://some/dir/");
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.resizeSdx(USER_CRN, "sdxcluster",
-                sdxClusterResizeRequest));
-        assertTrue(badRequestException.getMessage().startsWith("Unsupported cloud provider GCP"));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+
+        mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.GCP);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.15/gcp/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), sdxClusterResizeRequest));
+        SdxCluster createdSdxCluster = result.getLeft();
+        assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());
+        assertEquals(runtime, createdSdxCluster.getRuntime());
+        assertEquals("gcs://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
+        assertEquals("envir", createdSdxCluster.getEnvName());
+
     }
 
     @Test
@@ -1436,7 +1459,7 @@ class SdxServiceTest {
     }
 
     @Test
-    void testSdxResizeClusterSuccess() throws Exception {
+    void testSdxResizeAwsClusterSuccess() throws Exception {
         final String runtime = "7.2.10";
         SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
         sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);

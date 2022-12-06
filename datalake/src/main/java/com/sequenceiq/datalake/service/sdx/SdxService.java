@@ -1024,9 +1024,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 .ifPresent(existedSdx -> {
                     throw new BadRequestException("SDX which is detached already exists for the environment. SDX name: " + existedSdx.getClusterName());
                 });
-        if (sdxCluster.getCloudStorageFileSystemType() != null && sdxCluster.getCloudStorageFileSystemType().isGcs()) {
-            throw new BadRequestException("Unsupported cloud provider GCP. SDX name: " + sdxCluster.getClusterName());
-        }
     }
 
     private void validateRuntimeAndImage(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment,
