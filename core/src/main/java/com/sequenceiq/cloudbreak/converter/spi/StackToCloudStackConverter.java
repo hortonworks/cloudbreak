@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -57,6 +58,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -64,7 +66,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -190,18 +191,20 @@ public class StackToCloudStackConverter {
     }
 
     public CloudInstance buildInstance(InstanceMetadataView instanceMetaData, InstanceGroupView instanceGroup,
-            StackAuthentication stackAuthentication, Long privateId, InstanceStatus status, DetailedEnvironmentResponse environment) {
+            StackAuthentication stackAuthentication, Long privateId, InstanceStatus status,
+            DetailedEnvironmentResponse environment) {
         return buildInstance(instanceMetaData,
                 instanceGroup,
                 stackAuthentication,
                 privateId,
                 status,
                 environment,
-                NetworkScaleDetails.getEmpty());
+                instanceGroup.getTemplate());
     }
 
     public CloudInstance buildInstance(InstanceMetadataView instanceMetaData, InstanceGroupView instanceGroup, StackAuthentication stackAuthentication,
-            Long privateId, InstanceStatus status, DetailedEnvironmentResponse environment, NetworkScaleDetails networkScaleDetails) {
+            Long privateId, InstanceStatus status, DetailedEnvironmentResponse environment,
+            Template template) {
         LOGGER.trace("Instance metadata is {}", instanceMetaData == null ? null : instanceMetaData.getInstanceId());
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
         String instanceImageId = instanceMetaData == null ? null : instanceMetadataToImageIdConverter.convert(instanceMetaData);
@@ -210,7 +213,10 @@ public class StackToCloudStackConverter {
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
 
         Map<String, Object> parameters = buildCloudInstanceParameters(
-                environment, instanceMetaData, CloudPlatform.valueOf(instanceGroup.getTemplate().getCloudPlatform()));
+                environment,
+                instanceMetaData,
+                CloudPlatform.valueOf(instanceGroup.getTemplate().getCloudPlatform()),
+                template);
         return new CloudInstance(
                 id,
                 instanceTemplate,
@@ -524,14 +530,17 @@ public class StackToCloudStackConverter {
         return status;
     }
 
-    public Map<String, Object> buildCloudInstanceParameters(DetailedEnvironmentResponse environment, InstanceMetadataView instanceMetaData,
-            CloudPlatform platform) {
+    public Map<String, Object> buildCloudInstanceParameters(DetailedEnvironmentResponse environment,
+            InstanceMetadataView instanceMetaData, CloudPlatform platform, Template template) {
         Map<String, Object> params = new HashMap<>();
         putIfPresent(params, CloudInstance.DISCOVERY_NAME, getIfNotNull(instanceMetaData, InstanceMetadataView::getShortHostname));
         putIfPresent(params, SUBNET_ID, getIfNotNull(instanceMetaData, InstanceMetadataView::getSubnetId));
         putIfPresent(params, CloudInstance.INSTANCE_NAME, getIfNotNull(instanceMetaData, InstanceMetadataView::getInstanceName));
         putIfPresent(params, CloudInstance.FQDN, getIfNotNull(instanceMetaData, InstanceMetadataView::getDiscoveryFQDN));
         Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environment, platform);
+        if (environment != null && platform.name().equalsIgnoreCase(CloudPlatform.AZURE.name())) {
+            params.put(AzureInstanceTemplate.RESOURCE_DISK_ATTACHED, getResourceDiskAttached(template.getAttributes()));
+        }
         if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
             AzureResourceGroup resourceGroup = resourceGroupOptional.get();
             String resourceGroupName = resourceGroup.getName();
@@ -540,6 +549,21 @@ public class StackToCloudStackConverter {
             params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
         }
         return params;
+    }
+
+    private boolean getResourceDiskAttached(Json attributes) {
+        boolean resourceDiskAttached;
+        if (attributes != null) {
+            try {
+                AzureInstanceTemplateV4Parameters parameters = attributes.get(AzureInstanceTemplateV4Parameters.class);
+                resourceDiskAttached = parameters.getResourceDiskAttached();
+            } catch (IOException e) {
+                resourceDiskAttached = false;
+            }
+        } else {
+            resourceDiskAttached = false;
+        }
+        return resourceDiskAttached;
     }
 
     private Map<String, String> buildCloudStackParameters(StackDtoDelegate stack, DetailedEnvironmentResponse environment) {

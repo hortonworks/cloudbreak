@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4ParameterBase;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
@@ -32,6 +33,17 @@ public class AzureInstanceTemplateV4Parameters extends InstanceTemplateV4Paramet
 
     @ApiModelProperty(notes = "by default true")
     private Boolean managedDisk = Boolean.TRUE;
+
+    @ApiModelProperty(notes = "by default true")
+    private Boolean resourceDiskAttached = Boolean.TRUE;
+
+    public Boolean getResourceDiskAttached() {
+        return resourceDiskAttached == null ? Boolean.TRUE : resourceDiskAttached;
+    }
+
+    public void setResourceDiskAttached(Boolean resourceDiskAttached) {
+        this.resourceDiskAttached = resourceDiskAttached;
+    }
 
     public Boolean getEncrypted() {
         return encrypted;
@@ -73,6 +85,13 @@ public class AzureInstanceTemplateV4Parameters extends InstanceTemplateV4Paramet
         encryption.setType(getBoolean(parameters, AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED) ? EncryptionType.CUSTOM : null);
         encryption.setKey(getParameterOrNull(parameters, InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
         encryption.setDiskEncryptionSetId(getParameterOrNull(parameters, AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID));
+        String resourceDiskAttachedString = getParameterOrNull(parameters, AzureInstanceTemplate.RESOURCE_DISK_ATTACHED);
+        // Backward compatibility is required here. Cluster which provisioned before this change can use only instancetypes which has resource disk
+        if (Strings.isNullOrEmpty(resourceDiskAttachedString)) {
+            resourceDiskAttached = true;
+        } else {
+            resourceDiskAttached = getBoolean(parameters, AzureInstanceTemplate.RESOURCE_DISK_ATTACHED);
+        }
         managedDisk = getBoolean(parameters, "managedDisk");
     }
 
@@ -83,6 +102,11 @@ public class AzureInstanceTemplateV4Parameters extends InstanceTemplateV4Paramet
         putIfValueNotNull(map, "encrypted", encrypted);
         if (encryption != null) {
             putIfValueNotNull(map, AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, encryption.getType() == EncryptionType.CUSTOM);
+        }
+        if (resourceDiskAttached == null) {
+            putIfValueNotNull(map, AzureInstanceTemplate.RESOURCE_DISK_ATTACHED, true);
+        } else {
+            putIfValueNotNull(map, AzureInstanceTemplate.RESOURCE_DISK_ATTACHED, resourceDiskAttached);
         }
         putIfValueNotNull(map, "managedDisk", managedDisk);
         return map;
