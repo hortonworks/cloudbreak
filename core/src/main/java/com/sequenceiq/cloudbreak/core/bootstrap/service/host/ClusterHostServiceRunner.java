@@ -249,13 +249,15 @@ public class ClusterHostServiceRunner {
     @Inject
     private RdsViewProvider rdsViewProvider;
 
-    public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto, Map<String, String> candidateAddresses) {
+    public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
+            Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
         try {
             Set<Node> allNodes = stackUtil.collectNodes(stackDto, emptySet());
             Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stackDto, candidateAddresses.keySet());
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
             List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
-            executeRunClusterServices(stackDto, candidateAddresses, allNodes, reachableNodes, gatewayConfigs, grainsProperties);
+            executeRunClusterServices(stackDto, candidateAddresses,
+                    allNodes, reachableNodes, gatewayConfigs, grainsProperties, runPreServiceDeploymentRecipe);
             return new NodeReachabilityResult(reachableNodes, Set.of());
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
@@ -282,7 +284,8 @@ public class ClusterHostServiceRunner {
             Set<String> reachableCandidateHostNames = nodeReachabilityResult.getReachableHosts();
             LOGGER.debug("We are about to execute cluster services (salt highstate, pre cluster manager recipe execution, mount disks, etc.) " +
                     "for reachable candidates (targeted operation): {}", Joiner.on(",").join(reachableCandidateHostNames));
-            executeRunClusterServices(stackDto, candidateAddresses, reachableCandidates, reachableCandidates, gatewayConfigs, grainsProperties);
+            executeRunClusterServices(stackDto, candidateAddresses, reachableCandidates, reachableCandidates,
+                    gatewayConfigs, grainsProperties, true);
             return nodeReachabilityResult;
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
@@ -292,7 +295,8 @@ public class ClusterHostServiceRunner {
     }
 
     private void executeRunClusterServices(StackDto stackDto, Map<String, String> candidateAddresses,
-            Set<Node> allNodes, Set<Node> reachableNodes, List<GatewayConfig> gatewayConfigs, List<GrainProperties> grainsProperties)
+            Set<Node> allNodes, Set<Node> reachableNodes, List<GatewayConfig> gatewayConfigs,
+            List<GrainProperties> grainsProperties, boolean runPreServiceDeploymentRecipe)
             throws IOException, CloudbreakOrchestratorException, CloudbreakException {
         SaltConfig saltConfig = createSaltConfig(stackDto, grainsProperties);
         StackView stack = stackDto.getStack();
@@ -301,7 +305,9 @@ public class ClusterHostServiceRunner {
         hostOrchestrator.initServiceRun(stackDto, gatewayConfigs, allNodes, reachableNodes, saltConfig,
                 exitCriteriaModel, stack.getCloudPlatform());
         mountDisks(stackDto.getStack(), candidateAddresses, allNodes, reachableNodes);
-        recipeEngine.executePreServiceDeploymentRecipes(stackDto, candidateAddresses, hostGroupService.getByClusterWithRecipes(stack.getClusterId()));
+        if (runPreServiceDeploymentRecipe) {
+            recipeEngine.executePreServiceDeploymentRecipes(stackDto, candidateAddresses, hostGroupService.getByClusterWithRecipes(stack.getClusterId()));
+        }
         hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.REMOVE);
     }
@@ -339,7 +345,7 @@ public class ClusterHostServiceRunner {
         if (!repair && !candidatesContainGatewayNode && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stackDto.getStack())) {
             nodeReachabilityResult = runTargetedClusterServices(stackDto, candidates);
         } else {
-            nodeReachabilityResult = runClusterServices(stackDto, candidates);
+            nodeReachabilityResult = runClusterServices(stackDto, candidates, true);
         }
         return nodeReachabilityResult;
     }

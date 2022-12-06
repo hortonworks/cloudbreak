@@ -91,7 +91,8 @@ public class SaltUpdateActions {
 
             @Override
             protected Selectable createRequest(ClusterViewContext context) {
-                return new StartAmbariServicesRequest(context.getStackId(), false);
+                return new StartAmbariServicesRequest(context.getStackId(),
+                        false, false);
             }
         };
     }

@@ -51,13 +51,13 @@ public class ClusterServiceRunner {
     @Inject
     private GatewayService gatewayService;
 
-    public void runClusterManagerServices(StackDto stackDto) {
+    public void runClusterManagerServices(StackDto stackDto, boolean runPreServiceDeploymentRecipe) {
         ClusterView cluster = stackDto.getCluster();
 
         generateGatewaySignKeys(stackDto.getGateway());
 
         MDCBuilder.buildMdcContext(cluster);
-        hostRunner.runClusterServices(stackDto, Map.of());
+        hostRunner.runClusterServices(stackDto, Map.of(), runPreServiceDeploymentRecipe);
         for (InstanceMetadataView instanceMetaData : stackDto.getRunningInstanceMetaDataSet()) {
             instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_RUNNING);
         }

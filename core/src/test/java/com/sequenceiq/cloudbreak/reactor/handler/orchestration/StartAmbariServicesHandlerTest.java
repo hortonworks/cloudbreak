@@ -84,7 +84,8 @@ class StartAmbariServicesHandlerTest {
     @ValueSource(booleans = { false, true })
     void testAcceptWhenExceptionThenFailure(boolean defaultClusterManagerAuth) {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
-        doThrow(new CloudbreakServiceException(EXCEPTION_MESSAGE)).when(clusterServiceRunner).runClusterManagerServices(stack);
+        doThrow(new CloudbreakServiceException(EXCEPTION_MESSAGE)).when(clusterServiceRunner).runClusterManagerServices(stack, true);
+
         underTest.accept(getEvent(defaultClusterManagerAuth));
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
@@ -101,7 +102,7 @@ class StartAmbariServicesHandlerTest {
 
     private Event<StartAmbariServicesRequest> getEvent(boolean defaultClusterManagerAuth) {
         StartAmbariServicesRequest startAmbariServicesRequest =
-                new StartAmbariServicesRequest(STACK_ID, defaultClusterManagerAuth);
+                new StartAmbariServicesRequest(STACK_ID, defaultClusterManagerAuth, true);
         Event<StartAmbariServicesRequest> handlerEvent = mock(Event.class);
         when(handlerEvent.getData()).thenReturn(startAmbariServicesRequest);
         return handlerEvent;
