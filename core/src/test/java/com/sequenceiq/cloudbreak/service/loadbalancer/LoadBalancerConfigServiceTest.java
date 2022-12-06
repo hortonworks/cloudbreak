@@ -5,11 +5,11 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.YARN;
 import static java.util.stream.Collectors.toSet;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -23,12 +23,13 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -61,9 +62,11 @@ import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
+@ExtendWith(MockitoExtension.class)
 public class LoadBalancerConfigServiceTest extends SubnetTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
@@ -102,9 +105,8 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     @InjectMocks
     private LoadBalancerConfigService underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         Field supportedPlatformsField = ReflectionUtils.findField(LoadBalancerConfigService.class, "supportedPlatforms");
         ReflectionUtils.makeAccessible(supportedPlatformsField);
         ReflectionUtils.setField(supportedPlatformsField, underTest, "AWS,AZURE,YARN");
@@ -135,7 +137,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.getKnoxGatewayGroups(stack));
         assertEquals(exception.getMessage(), "KNOX can only be installed on instance group where type is GATEWAY. As per the template " +
-                "dummy" + " KNOX_GATEWAY role config is present in groups " + groups  +
+                "dummy" + " KNOX_GATEWAY role config is present in groups " + groups +
                 " while the GATEWAY nodeType is available for instance group " + Set.of("gateway"));
     }
 
@@ -275,10 +277,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         environment.getNetwork().setLoadBalancerCreation(LoadBalancerCreation.DISABLED);
         StackV4Request request = new StackV4Request();
 
-        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
-        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
-        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
-
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
             assertEquals(0, loadBalancers.size());
@@ -329,9 +327,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
-        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
-        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
-
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
             assert loadBalancers.isEmpty();
@@ -340,8 +335,8 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
     @Test
     public void testCreateLoadBalancerForDataLakeEntitlementDisabled() {
-        Stack stack = createAwsStack(StackType.DATALAKE, PRIVATE_ID_1);
-        DetailedEnvironmentResponse environment = createEnvironment(getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1), false, "AZURE");
+        Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1), false, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -596,9 +591,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
-        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
-        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
-
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, null, request);
             assert loadBalancers.isEmpty();
@@ -742,8 +734,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
-        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
-
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
             assertEquals(0, loadBalancers.size());
@@ -762,8 +752,8 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             boolean result = underTest.isLoadBalancerCreationConfigured(stack, environment);
             assert result;
-            assertEquals("Target groups should not be set on a dry run",
-                    0, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
+            assertEquals(0, stack.getInstanceGroups().iterator().next().getTargetGroups().size(),
+                    "Target groups should not be set on a dry run");
         });
     }
 
@@ -771,7 +761,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testCreateAzurePrivateLoadBalancer() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -798,7 +788,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testCreateAzurePublicLoadBalancer() {
         Stack stack = createAzureStack(StackType.DATALAKE, PUBLIC_ID_1, false);
         CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -824,7 +814,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testCreateAzurePrivateLoadBalancerWithOozieHA() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -851,17 +841,14 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testAzureLoadBalancerDisabledWithOozieHA() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
         azureParameters.setLoadBalancerSku(LoadBalancerSku.NONE);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
         request.setAzure(azureParameters);
 
-        when(entitlementService.azureDatalakeLoadBalancerEnabled(anyString())).thenReturn(false);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/de-ha.bp"));
-        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
-        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
 
         assertThrows(CloudbreakServiceException.class,
                 () -> underTest.createLoadBalancers(stack, environment, request));
@@ -871,7 +858,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testCreateAzureEndpointGateway() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, true, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, true, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -893,7 +880,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testCreateAzureLoadBalancerWithSkuSetToStandard() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
         azureParameters.setLoadBalancerSku(LoadBalancerSku.STANDARD);
         StackV4Request request = new StackV4Request();
@@ -924,7 +911,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testCreateAzureLoadBalancerWithSkuSetToBasic() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
         azureParameters.setLoadBalancerSku(LoadBalancerSku.BASIC);
         StackV4Request request = new StackV4Request();
@@ -954,7 +941,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testCreateAzureLoadBalancerSelectsDefaultWhenSkuIsNotSet() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -987,17 +974,14 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testAzureLoadBalancerDisabled() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
         azureParameters.setLoadBalancerSku(LoadBalancerSku.NONE);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(true);
         request.setAzure(azureParameters);
 
-        when(entitlementService.azureDatalakeLoadBalancerEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
-        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
-        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
@@ -1043,13 +1027,12 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testCreateAzureMultipleKnoxInstanceGroups() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
         when(entitlementService.azureDatalakeLoadBalancerEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-multi-knox.bp"));
-        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
@@ -1065,10 +1048,41 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void isdatalakeLoadBalancerEntitlementEnabled() {
         Stack azureStack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         Set<LoadBalancer> loadBalancers = underTest.setupLoadBalancers(azureStack, environment, false, true, LoadBalancerSku.BASIC);
         assertEquals(new HashSet<>(), loadBalancers);
+    }
+
+    @Test
+    public void testCreateAzureLoadBalancerWithoutOutboundLoadBalancer() {
+        Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
+        CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, true);
+        AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
+        azureParameters.setLoadBalancerSku(LoadBalancerSku.STANDARD);
+        StackV4Request request = new StackV4Request();
+        request.setAzure(azureParameters);
+
+        when(entitlementService.azureDatalakeLoadBalancerEnabled(anyString())).thenReturn(true);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
+
+            assertEquals(1, loadBalancers.size());
+            assertTrue(loadBalancers.stream().anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType())));
+            assertTrue(loadBalancers.stream().noneMatch(l -> LoadBalancerType.OUTBOUND.equals(l.getType())));
+            InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
+                    .filter(ig -> "master".equals(ig.getGroupName()))
+                    .findFirst().get();
+            assertEquals(1, masterInstanceGroup.getTargetGroups().size());
+            assertTrue(loadBalancers.stream().allMatch(l -> LoadBalancerSku.STANDARD.equals(l.getSku())));
+
+            checkAvailabilitySetAttributes(loadBalancers);
+        });
     }
 
     private String getBlueprintText(String path) {
@@ -1201,6 +1215,16 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setNetwork(network);
         environment.setCloudPlatform(cloudPlatform);
+        return environment;
+    }
+
+    private DetailedEnvironmentResponse createAzureEnvironment(CloudSubnet subnet, boolean enableEndpointGateway, boolean noOutboundLoadBalancer) {
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, enableEndpointGateway, AZURE);
+        AzureEnvironmentParameters azureParameters = new AzureEnvironmentParameters()
+                .builder()
+                .withNoOutboundLoadBalancer(noOutboundLoadBalancer)
+                .build();
+        environment.setAzure(azureParameters);
         return environment;
     }
 }

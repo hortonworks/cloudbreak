@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.parameters.v1.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +62,7 @@ public class AzureEnvironmentParametersConverterTest {
                                     .withEncryptionKeyUrl(KEY_URL)
                                     .withEncryptionKeyResourceGroupName(KEY_RESOURCE_GROUP_NAME)
                                     .build())
+                            .withNoOutboundLoadBalancer(true)
                             .build())
                     .build();
             Environment environment = new Environment();
@@ -77,6 +79,7 @@ public class AzureEnvironmentParametersConverterTest {
             assertEquals(ID, azureResult.getId());
             assertEquals(KEY_URL, azureResult.getEncryptionKeyUrl());
             assertEquals(KEY_RESOURCE_GROUP_NAME, azureResult.getEncryptionKeyResourceGroupName());
+            assertTrue(azureResult.isNoOutboundLoadBalancer());
         }
 
         @Test
@@ -90,6 +93,7 @@ public class AzureEnvironmentParametersConverterTest {
             parameters.setEncryptionKeyUrl(KEY_URL);
             parameters.setDiskEncryptionSetId("DummyDesId");
             parameters.setEncryptionKeyResourceGroupName(KEY_RESOURCE_GROUP_NAME);
+            parameters.setNoOutboundLoadBalancer(true);
 
             ParametersDto result = underTest.convertToDto(parameters);
 
@@ -99,5 +103,6 @@ public class AzureEnvironmentParametersConverterTest {
             assertEquals(KEY_URL, result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
             assertEquals("DummyDesId", result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getDiskEncryptionSetId());
             assertEquals(KEY_RESOURCE_GROUP_NAME, result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
+            assertTrue(result.getAzureParametersDto().isNoOutboundLoadBalancer());
         }
 }

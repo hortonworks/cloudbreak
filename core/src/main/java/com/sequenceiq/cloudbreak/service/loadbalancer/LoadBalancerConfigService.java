@@ -59,6 +59,7 @@ import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.TargetGroupType;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -342,7 +343,7 @@ public class LoadBalancerConfigService {
 
             if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
                 setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PRIVATE);
-                if (!createPublicLb && AZURE.equalsIgnoreCase(stack.getCloudPlatform()) && LoadBalancerSku.STANDARD.equals(sku)) {
+                if (shouldCreateOutboundLoadBalancer(createPublicLb, stack, sku, environment)) {
                     LOGGER.debug("Found private only Azure load balancer configuration; creating outbound public load balancer for egress.");
                     setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.OUTBOUND);
                 }
@@ -357,6 +358,16 @@ public class LoadBalancerConfigService {
         } else {
             LOGGER.debug("No Knox instance groups found. If load balancer creation is enabled, Knox routing in the load balancer will be skipped.");
         }
+    }
+
+    private boolean shouldCreateOutboundLoadBalancer(boolean createPublicLb, Stack stack, LoadBalancerSku sku, DetailedEnvironmentResponse environment) {
+        return !createPublicLb
+                && AZURE.equalsIgnoreCase(stack.getCloudPlatform())
+                && LoadBalancerSku.STANDARD.equals(sku)
+                && !Optional.of(environment)
+                            .map(DetailedEnvironmentResponse::getAzure)
+                            .map(AzureEnvironmentParameters::isNoOutboundLoadBalancer)
+                            .orElse(false);
     }
 
     private void setupLoadBalancer(boolean dryRun, Stack stack, Set<LoadBalancer> loadBalancers, TargetGroup targetGroup, LoadBalancerType type) {
