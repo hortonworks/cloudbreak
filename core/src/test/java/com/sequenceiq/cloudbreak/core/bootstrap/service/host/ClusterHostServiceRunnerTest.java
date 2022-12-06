@@ -8,10 +8,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -256,7 +258,7 @@ class ClusterHostServiceRunnerTest {
     @Test
     void shouldUsecollectAndCheckReachableNodes() throws NodesUnreachableException {
         try {
-            underTest.runClusterServices(stack, Map.of());
+            underTest.runClusterServices(stack, Map.of(), true);
             fail();
         } catch (NullPointerException e) {
             verify(stackUtil).collectAndCheckReachableNodes(eq(stack), any());
@@ -270,7 +272,7 @@ class ClusterHostServiceRunnerTest {
         when(stackUtil.collectAndCheckReachableNodes(eq(stack), any())).thenThrow(new NodesUnreachableException("error", unreachableNodes));
 
         CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
-                () -> underTest.runClusterServices(stack, Map.of()));
+                () -> underTest.runClusterServices(stack, Map.of(), true));
         assertEquals("Can not run cluster services on new nodes because the configuration management service is not responding on these nodes: " +
                 "[node1.example.com]", cloudbreakServiceException.getMessage());
     }
@@ -365,7 +367,7 @@ class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    void testDecoratePillarWithMountInfo() throws CloudbreakOrchestratorException, NodesUnreachableException {
+    void testDecoratePillarWithMountInfo() throws CloudbreakOrchestratorException, NodesUnreachableException, CloudbreakException {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
@@ -376,11 +378,41 @@ class ClusterHostServiceRunnerTest {
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
 
-        underTest.runClusterServices(stack, Map.of());
+        underTest.runClusterServices(stack, Map.of(), true);
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), saltConfig.capture(), any());
+        verify(recipeEngine).executePreServiceDeploymentRecipes(any(), anyMap(), anySet());
+        Set<Node> reachableNodes = reachableCandidates.getValue();
+        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
+        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway3", node.getHostname())));
+        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn1", node.getHostname())));
+        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
+        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn3", node.getHostname())));
+        assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
+        assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
+    }
+
+    @Test
+    void testDecoratePillarWithMountInfoWithoutRecipeVerification()
+            throws CloudbreakOrchestratorException, NodesUnreachableException, CloudbreakException {
+        setupMocksForRunClusterServices();
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("gateway3"));
+        when(stackUtil.collectAndCheckReachableNodes(any(), any())).thenReturn(nodes);
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
+        when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN)))
+                .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
+
+        underTest.runClusterServices(stack, Map.of(), false);
+
+        ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), saltConfig.capture(), any());
+        verifyNoInteractions(recipeEngine);
         Set<Node> reachableNodes = reachableCandidates.getValue();
         assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
         assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway3", node.getHostname())));

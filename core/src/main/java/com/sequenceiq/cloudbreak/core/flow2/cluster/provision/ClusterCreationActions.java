@@ -322,7 +322,7 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(ClusterCreationViewContext context) {
-                return new StartAmbariServicesRequest(context.getStackId(), true);
+                return new StartAmbariServicesRequest(context.getStackId(), true, true);
             }
         };
     }
