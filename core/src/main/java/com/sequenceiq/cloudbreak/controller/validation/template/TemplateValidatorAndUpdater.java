@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.validation.template;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Suppliers;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
@@ -37,7 +35,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -45,7 +42,6 @@ import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -53,7 +49,7 @@ import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
 
 @Component
-public class TemplateValidator {
+public class TemplateValidatorAndUpdater {
 
     public static final String GROUP_NAME_ID_BROKER = "idbroker";
 
@@ -63,13 +59,10 @@ public class TemplateValidator {
 
     public static final String ROLE_IMPALAD = "IMPALAD";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TemplateValidator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TemplateValidatorAndUpdater.class);
 
     @Inject
     private CloudParameterService cloudParameterService;
-
-    @Inject
-    private TemplateService templateService;
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
@@ -79,6 +72,9 @@ public class TemplateValidator {
 
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @Inject
+    private ResourceDiskPropertyCalculator resourceDiskPropertyCalculator;
 
     @Value("${cb.doc.urls.supportedInstanceTypes:https://www.cloudera.com/products/pricing/cdp-public-cloud-service-rates.html}")
     private String supportedVmTypesDocPageLink;
@@ -128,25 +124,7 @@ public class TemplateValidator {
 
             validateVolumeTemplates(value, vmType, platform, validationBuilder, instanceGroup, stack.getBlueprint().getBlueprintText());
             validateMaximumVolumeSize(value, vmType, validationBuilder);
-            updateWithResourceDiskAttached(credential, instanceGroup.getTemplate(), vmType);
-        }
-    }
-
-    private void updateWithResourceDiskAttached(Credential credential, Template template, VmType vmType) {
-        if (credential.cloudPlatform().equalsIgnoreCase(CloudPlatform.AZURE.name())) {
-            if (template.getCloudPlatform() != null && template.getAttributes() != null) {
-                try {
-                    AzureInstanceTemplateV4Parameters parameters = template.getAttributes().get(AzureInstanceTemplateV4Parameters.class);
-                    if (parameters == null) {
-                        parameters = new AzureInstanceTemplateV4Parameters();
-                    }
-                    parameters.setResourceDiskAttached(vmType.getMetaData().getResourceDiskAttached());
-                    Optional.ofNullable(parameters.asMap()).map(toJson()).ifPresent(template::setAttributes);
-                    templateService.savePure(template);
-                } catch (IOException e) {
-                    LOGGER.info("There was an error {} with deserializing AzureInstanceTemplateV4Parameters.", e);
-                }
-            }
+            resourceDiskPropertyCalculator.updateWithResourceDiskAttached(credential, instanceGroup.getTemplate(), vmType);
         }
     }
 
