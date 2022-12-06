@@ -260,6 +260,7 @@ public class EnvironmentResponseConverterTest {
                 azureEnvironmentParameters.getResourceEncryptionParameters().getEncryptionKeyUrl());
         assertEquals("dummy-des-id", azureEnvironmentParameters.getResourceEncryptionParameters().getDiskEncryptionSetId());
         assertEquals("dummyResourceGroupName", azureEnvironmentParameters.getResourceEncryptionParameters().getEncryptionKeyResourceGroupName());
+        assertEquals(azureParametersDto.isNoOutboundLoadBalancer(), azureEnvironmentParameters.isNoOutboundLoadBalancer());
     }
 
     private void assertGcpParameters(GcpParametersDto gcpParametersDto, GcpEnvironmentParameters gcpEnvironmentParameters) {
@@ -337,6 +338,7 @@ public class EnvironmentResponseConverterTest {
                                         .withDiskEncryptionSetId("dummy-des-id")
                                         .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
                                         .build())
+                        .withNoOutboundLoadBalancer(true)
                         .build())
                 .build();
     }

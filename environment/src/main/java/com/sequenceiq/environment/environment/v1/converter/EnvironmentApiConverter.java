@@ -262,6 +262,10 @@ public class EnvironmentApiConverter {
                                 .map(this::azureResourceEncryptionParametersToAzureEncryptionParametersDto)
                                 .orElse(null)
                 )
+                .withNoOutboundLoadBalancer(
+                        Optional.ofNullable(azureEnvironmentParameters)
+                                .map(AzureEnvironmentParameters::isNoOutboundLoadBalancer)
+                                .orElse(false))
                 .build();
     }
 

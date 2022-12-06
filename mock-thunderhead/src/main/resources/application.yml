@@ -44,7 +44,7 @@ auth:
     datalake:
       efs.enable: false
       customimage.enable: true
-      loadbalancer.enable: false
+      loadbalancer.enable: true
       backup.on.upgrade.enable: false
       backup.on.resize.enable: true
       light.to.medium.migration.enable: true

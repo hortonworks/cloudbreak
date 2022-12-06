@@ -22,6 +22,9 @@ public class AzureEnvironmentParameters implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.RESOURCE_ENCRYPTION_PARAMETERS)
     private AzureResourceEncryptionParameters resourceEncryptionParameters;
 
+    @ApiModelProperty(EnvironmentModelDescription.NO_OUTBOUND_LOAD_BALANCER)
+    private boolean noOutboundLoadBalancer;
+
     public AzureResourceGroup getResourceGroup() {
         return resourceGroup;
     }
@@ -38,11 +41,20 @@ public class AzureEnvironmentParameters implements Serializable {
         this.resourceEncryptionParameters = resourceEncryptionParameters;
     }
 
+    public boolean isNoOutboundLoadBalancer() {
+        return noOutboundLoadBalancer;
+    }
+
+    public void setNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
+        this.noOutboundLoadBalancer = noOutboundLoadBalancer;
+    }
+
     @Override
     public String toString() {
         return "AzureEnvironmentParameters{" +
                 "resourceGroup=" + resourceGroup +
                 ", resourceEncryptionParameters=" + resourceEncryptionParameters +
+                ", noOutboundLoadBalancer=" + noOutboundLoadBalancer +
                 '}';
     }
 
@@ -55,6 +67,8 @@ public class AzureEnvironmentParameters implements Serializable {
         private AzureResourceGroup azureResourceGroup;
 
         private AzureResourceEncryptionParameters resourceEncryptionParameters;
+
+        private boolean noOutboundLoadBalancer;
 
         private Builder() {
         }
@@ -69,10 +83,16 @@ public class AzureEnvironmentParameters implements Serializable {
             return this;
         }
 
+        public Builder withNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
+            this.noOutboundLoadBalancer = noOutboundLoadBalancer;
+            return this;
+        }
+
         public AzureEnvironmentParameters build() {
             AzureEnvironmentParameters azureEnvironmentParameters = new AzureEnvironmentParameters();
             azureEnvironmentParameters.setResourceGroup(azureResourceGroup);
             azureEnvironmentParameters.setResourceEncryptionParameters(resourceEncryptionParameters);
+            azureEnvironmentParameters.setNoOutboundLoadBalancer(noOutboundLoadBalancer);
             return azureEnvironmentParameters;
         }
     }

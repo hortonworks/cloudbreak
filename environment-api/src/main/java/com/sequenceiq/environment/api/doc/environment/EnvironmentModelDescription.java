@@ -148,6 +148,9 @@ public class EnvironmentModelDescription {
     public static final String ENVIRONMENT_DOMAIN_NAME = "The domain name that's has been generated for the environment.";
 
     public static final String AWS_DISK_ENCRYPTION_PARAMETERS = "AWS Disk encryption parameters";
+
+    public static final String NO_OUTBOUND_LOAD_BALANCER = "Flag that marks the request to not create an outbound load balancer";
+
     private EnvironmentModelDescription() {
     }
 }
