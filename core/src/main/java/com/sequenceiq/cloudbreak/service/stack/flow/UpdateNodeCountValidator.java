@@ -97,8 +97,7 @@ public class UpdateNodeCountValidator {
     public void validateCMStatus(StackDto stack) {
         List<InstanceMetadataView> instanceMetaDataAsList = stack.getAllAvailableInstances();
         List<InstanceMetadataView> unhealthyCM = instanceMetaDataAsList.stream()
-                .filter(instanceMetaData -> (instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY) ||
-                        instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY_PRIMARY))
+                .filter(instanceMetaData -> instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY_PRIMARY)
                         && !InstanceStatus.SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
                 .collect(Collectors.toList());
         if (!unhealthyCM.isEmpty()) {
