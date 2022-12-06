@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
+import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -114,7 +114,7 @@ public class StackCreatorServiceTest {
     private ImageService imageService;
 
     @Mock
-    private TemplateValidator templateValidator;
+    private TemplateValidatorAndUpdater templateValidatorAndUpdater;
 
     @Mock
     private SharedServiceConfigProvider sharedServiceConfigProvider;

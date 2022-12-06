@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.controller.validation.datalake.DataLakeValidato
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
+import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.flow2.validate.cloud.config.CloudConfigValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.cloud.event.ValidateCloudConfigRequest;
@@ -64,7 +64,7 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
     private StackValidator stackValidator;
 
     @Inject
-    private TemplateValidator templateValidator;
+    private TemplateValidatorAndUpdater templateValidatorAndUpdater;
 
     @Inject
     private ClusterCreationEnvironmentValidator environmentValidator;
@@ -94,7 +94,7 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
             for (InstanceGroup instanceGroup : instanceGroups) {
                 LOGGER.info("Validate template for {} name with {} instanceGroup.", name, instanceGroup.toString());
                 StackType type = stack.getType();
-                templateValidator.validate(
+                templateValidatorAndUpdater.validate(
                         credential,
                         instanceGroup,
                         stack,
