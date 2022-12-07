@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.modify.proxy.action;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +32,6 @@ class ProxyConfigModificationFreeipaStateActionTest extends ActionTest {
     @InjectMocks
     private ProxyConfigModificationFreeipaStateAction underTest;
 
-    @Mock
     private EnvProxyModificationContext context;
 
     @Mock
@@ -42,10 +42,8 @@ class ProxyConfigModificationFreeipaStateActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        super.setUp(context);
-        when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
-                EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_FREEIPA_STARTED,
-                EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_START_STATE)).thenReturn(environmentDto);
+        context = new EnvProxyModificationContext(flowParameters, null);
+        when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any())).thenReturn(environmentDto);
     }
 
     @Test
@@ -54,7 +52,7 @@ class ProxyConfigModificationFreeipaStateActionTest extends ActionTest {
 
         verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(context, payload,
                 EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_FREEIPA_STARTED,
-                EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_START_STATE);
+                EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FREEIPA_STATE);
         String selector = EnvProxyModificationHandlerSelectors.TRACK_FREEIPA_PROXY_MODIFICATION_EVENT.selector();
         verifySendEvent(context, selector,
                 new EnvProxyModificationDefaultEvent(selector, environmentDto, payload.getProxyConfig(), payload.getPreviousProxyConfig(), payload.accepted()));

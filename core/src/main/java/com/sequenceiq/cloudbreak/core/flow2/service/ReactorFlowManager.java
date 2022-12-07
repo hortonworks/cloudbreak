@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesBaseEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.modifyproxy.ModifyProxyConfigFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OSUpgradeByUpgradeSetsTriggerEvent;
@@ -226,6 +227,11 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerRotateSaltPassword(Long stackId, RotateSaltPasswordReason reason, RotateSaltPasswordType type) {
         String selector = RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new RotateSaltPasswordRequest(stackId, reason, type));
+    }
+
+    public FlowIdentifier triggerModifyProxyConfig(Long stackId, String previousProxyConfigCrn) {
+        String selector = FlowChainTriggers.MODIFY_PROXY_CONFIG_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new ModifyProxyConfigFlowChainTriggerEvent(stackId, previousProxyConfigCrn));
     }
 
     public FlowIdentifier triggerClusterReInstall(Long stackId) {

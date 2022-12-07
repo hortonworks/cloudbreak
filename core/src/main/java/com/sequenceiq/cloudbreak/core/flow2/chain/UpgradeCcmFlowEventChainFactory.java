@@ -31,7 +31,11 @@ public class UpgradeCcmFlowEventChainFactory implements FlowEventChainFactory<Up
         flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(
                 new UpgradeCcmTriggerRequest(UPGRADE_CCM_EVENT.event(), event.getResourceId(), event.getClusterId(), event.getOldTunnel(), null));
-        flowEventChain.add(new UserDataUpdateRequest(UPDATE_USERDATA_TRIGGER_EVENT.event(), event.getResourceId(), event.getOldTunnel()));
+        flowEventChain.add(UserDataUpdateRequest.builder()
+                .withSelector(UPDATE_USERDATA_TRIGGER_EVENT.event())
+                .withStackId(event.getResourceId())
+                .withOldTunnel(event.getOldTunnel())
+                .build());
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

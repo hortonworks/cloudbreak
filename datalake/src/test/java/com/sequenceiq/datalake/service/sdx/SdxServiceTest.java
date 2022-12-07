@@ -1647,6 +1647,26 @@ class SdxServiceTest {
     }
 
     @Test
+    void modifyProxyConfig() {
+        SdxCluster sdxCluster = getSdxCluster();
+        String previousProxyConfigCrn = "previous-proxy-crn";
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        FlowIdentifier cbFlowIdentifier = mock(FlowIdentifier.class);
+        when(stackV4Endpoint.modifyProxyConfigInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, previousProxyConfigCrn, USER_CRN)).thenReturn(cbFlowIdentifier);
+        FlowIdentifier sdxFlowIdentifier = mock(FlowIdentifier.class);
+        when(sdxReactorFlowManager.triggerModifyProxyConfigTracker(sdxCluster)).thenReturn(sdxFlowIdentifier);
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.modifyProxyConfig(sdxCluster, previousProxyConfigCrn));
+
+        assertEquals(sdxFlowIdentifier, result);
+        verify(stackV4Endpoint).modifyProxyConfigInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, previousProxyConfigCrn, USER_CRN);
+        verify(regionAwareInternalCrnGenerator).getInternalCrnForServiceAsString();
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, cbFlowIdentifier);
+        verify(sdxReactorFlowManager).triggerModifyProxyConfigTracker(sdxCluster);
+    }
+
+    @Test
     void refreshDatahubsWithoutName() {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString()))

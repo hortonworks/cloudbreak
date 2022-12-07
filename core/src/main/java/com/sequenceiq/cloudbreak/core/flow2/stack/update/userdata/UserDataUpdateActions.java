@@ -53,7 +53,7 @@ public class UserDataUpdateActions {
             @Override
             protected void doExecute(StackContext context, UserDataUpdateRequest payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Recreate userdata for new instances");
-                sendEvent(context, new UserDataUpdateRequest(context.getStack().getId(), payload.getOldTunnel()));
+                sendEvent(context, new UserDataUpdateRequest(context.getStack().getId(), payload.getOldTunnel(), payload.isModifyProxyConfig()));
             }
         };
     }
