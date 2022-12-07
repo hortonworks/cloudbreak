@@ -1,8 +1,8 @@
 package com.sequenceiq.distrox.v1.distrox;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -19,10 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -67,9 +65,6 @@ public class StackOperationsTest {
     private static final String IMAGE_CATALOG = "image catalog";
 
     private static final String ACCOUNT_ID = "accountId";
-
-    @Rule
-    public final ExpectedException exceptionRule = ExpectedException.none();
 
     @InjectMocks
     private StackOperations underTest;
@@ -126,8 +121,8 @@ public class StackOperationsTest {
 
     private User user;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.initMocks(this);
         user = TestUtil.user(1L, "someUserId");
         stack = TestUtil.stack();
@@ -135,7 +130,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void testDeleteWhenForcedTrueThenDeleteCalled() {
+    void testDeleteWhenForcedTrueThenDeleteCalled() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
 
         underTest.delete(nameOrCrn, ACCOUNT_ID, true);
@@ -144,7 +139,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void testDeleteWhenForcedFalseThenDeleteCalled() {
+    void testDeleteWhenForcedFalseThenDeleteCalled() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
 
         underTest.delete(nameOrCrn, ACCOUNT_ID, false);
@@ -153,7 +148,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void testGetWhenNameOrCrnNameFilledThenProperGetCalled() {
+    void testGetWhenNameOrCrnNameFilledThenProperGetCalled() {
         StackV4Response expected = stackResponse();
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
         when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE))
@@ -166,7 +161,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void testGetWhenNameOrCrnCrnFilledThenProperGetCalled() {
+    void testGetWhenNameOrCrnCrnFilledThenProperGetCalled() {
         StackV4Response expected = stackResponse();
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(stack.getResourceCrn());
         when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE))
@@ -180,7 +175,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void testGetForInternalCrn() {
+    void testGetForInternalCrn() {
         when(cloudbreakUser.getUserCrn()).thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
         when(stackApiViewService.retrieveStackByCrnAndType(anyString(), any(StackType.class))).thenReturn(new StackApiView());
         when(stackApiViewToStackViewV4ResponseConverter.convert(any(StackApiView.class))).thenReturn(new StackViewV4Response());
@@ -195,7 +190,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void testGetWithEnvironmentCrnsByResourceCrns() {
+    void testGetWithEnvironmentCrnsByResourceCrns() {
         StackCrnView stack1 = mock(StackCrnView.class);
         when(stack1.getResourceCrn()).thenReturn("crn1");
         when(stack1.getEnvironmentCrn()).thenReturn("envcrn1");
@@ -217,7 +212,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void testChangeImageCatalogFlowNotInProgress() {
+    void testChangeImageCatalogFlowNotInProgress() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
         when(stackService.getByNameOrCrnInWorkspace(nameOrCrn, stack.getWorkspace().getId())).thenReturn(stack);
         when(flowLogService.isOtherFlowRunning(stack.getId())).thenReturn(false);
@@ -228,7 +223,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void testChangeImageCatalogThrowsExceptionWhenFlowInProgress() {
+    void testChangeImageCatalogThrowsExceptionWhenFlowInProgress() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
         when(stackService.getByNameOrCrnInWorkspace(nameOrCrn, stack.getWorkspace().getId())).thenReturn(stack);
         when(flowLogService.isOtherFlowRunning(stack.getId())).thenReturn(true);
@@ -237,7 +232,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void testGenerateImageCatalog() {
+    void testGenerateImageCatalog() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
         CloudbreakImageCatalogV3 imageCatalog = mock(CloudbreakImageCatalogV3.class);
         when(stackService.getByNameOrCrnInWorkspace(nameOrCrn, stack.getWorkspace().getId())).thenReturn(stack);
@@ -249,7 +244,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void rotateSaltPassword() {
+    void rotateSaltPassword() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
 
         underTest.rotateSaltPassword(nameOrCrn, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
@@ -258,7 +253,7 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void checkIfSaltPasswordRotationNeeded() {
+    void checkIfSaltPasswordRotationNeeded() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
         SaltPasswordStatus saltPasswordStatus = SaltPasswordStatus.OK;
         when(stackCommonService.getSaltPasswordStatus(nameOrCrn, ACCOUNT_ID)).thenReturn(saltPasswordStatus);
@@ -267,6 +262,16 @@ public class StackOperationsTest {
 
         assertEquals(saltPasswordStatus, result);
         verify(stackCommonService).getSaltPasswordStatus(nameOrCrn, ACCOUNT_ID);
+    }
+
+    @Test
+    void modifyProxyConfig() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+        String previousProxyConfigCrn = "prev-proxy-crn";
+
+        underTest.modifyProxyConfig(nameOrCrn, ACCOUNT_ID, previousProxyConfigCrn);
+
+        verify(stackCommonService).modifyProxyConfig(nameOrCrn, ACCOUNT_ID, previousProxyConfigCrn);
     }
 
     private StackV4Response stackResponse() {

@@ -18,6 +18,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -32,18 +33,21 @@ public class SdxService implements PaasRemoteDataContextSupplier {
 
     private final SdxUpgradeEndpoint sdxUpgradeEndpoint;
 
+    private final SdxInternalEndpoint sdxInternalEndpoint;
+
     private final OperationEndpoint sdxOperationEndpoint;
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public SdxService(SdxEndpoint sdxEndpoint, SdxUpgradeEndpoint sdxUpgradeEndpoint,
+    public SdxService(SdxEndpoint sdxEndpoint, SdxUpgradeEndpoint sdxUpgradeEndpoint, SdxInternalEndpoint sdxInternalEndpoint,
             OperationEndpoint sdxOperationEndpoint, WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
 
         this.sdxEndpoint = sdxEndpoint;
         this.sdxUpgradeEndpoint = sdxUpgradeEndpoint;
+        this.sdxInternalEndpoint = sdxInternalEndpoint;
         this.sdxOperationEndpoint = sdxOperationEndpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
@@ -125,6 +129,18 @@ public class SdxService implements PaasRemoteDataContextSupplier {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to get Operation for datalake CRN '%s' due to '%s'.", datalakeCrn, errorMessage), e);
+            throw new SdxOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public FlowIdentifier modifyProxy(String datalakeCrn, String previousProxyCrn) {
+        try {
+            LOGGER.debug("Calling SDX modify proxy by CRN {}", datalakeCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    initiatorUserCrn -> sdxInternalEndpoint.modifyProxy(datalakeCrn, previousProxyCrn, initiatorUserCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to modify proxy config of SDX cluster by crn '%s' due to '%s'.", datalakeCrn, errorMessage), e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }

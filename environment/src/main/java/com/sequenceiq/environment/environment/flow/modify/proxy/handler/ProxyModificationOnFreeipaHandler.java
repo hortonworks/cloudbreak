@@ -45,7 +45,7 @@ public class ProxyModificationOnFreeipaHandler extends EventSenderAwareHandler<E
             freeIpaPollerService.waitForModifyProxyConfig(eventData.getResourceId(), eventData.getResourceCrn(), previousProxyCrn);
 
             EnvProxyModificationDefaultEvent envProxyModificationEvent = EnvProxyModificationDefaultEvent.builder()
-                    .withSelector(EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector())
+                    .withSelector(EnvProxyModificationStateSelectors.MODIFY_PROXY_DATALAKE_EVENT.selector())
                     .withEnvironmentDto(eventData.getEnvironmentDto())
                     .withProxyConfig(eventData.getProxyConfig())
                     .withPreviousProxyConfig(eventData.getPreviousProxyConfig())

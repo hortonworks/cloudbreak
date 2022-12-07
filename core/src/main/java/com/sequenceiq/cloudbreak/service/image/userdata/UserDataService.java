@@ -29,9 +29,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigUserDataReplacer;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Service
@@ -63,23 +65,54 @@ public class UserDataService {
     @Inject
     private CcmUserDataService ccmUserDataService;
 
+    @Inject
+    private ProxyConfigUserDataReplacer proxyConfigUserDataReplacer;
+
     public void updateJumpgateFlagOnly(Long stackId) {
         LOGGER.debug("Updating Jumpgate flag in user data for stack {}", stackId);
+        Map<InstanceGroupType, String> userdata = getUserData(stackId);
+        String gatewayUserdata = userdata.get(InstanceGroupType.GATEWAY);
+        String result = new UserDataReplacer(gatewayUserdata)
+                .replace("IS_CCM_V2_JUMPGATE_ENABLED", true)
+                .replace("IS_CCM_V2_ENABLED",  true)
+                .replace("IS_CCM_ENABLED",  false)
+                .getUserData();
+        userdata.put(InstanceGroupType.GATEWAY, result);
+        Stack stack = stackService.getByIdWithLists(stackId);
+        updateUserData(stack, userdata);
+    }
+
+    public void updateProxyConfig(Long stackId) {
+        LOGGER.debug("Updating proxy config in user data for stack {}", stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
+        Map<InstanceGroupType, String> userDataByInstanceGroup = getUserData(stackId);
+        String gatewayUserData = userDataByInstanceGroup.get(InstanceGroupType.GATEWAY);
+        String result = proxyConfigUserDataReplacer.replaceProxyConfigInUserDataByEnvCrn(gatewayUserData, stack.getEnvironmentCrn());
+        userDataByInstanceGroup.put(InstanceGroupType.GATEWAY, result);
+        updateUserData(stack, userDataByInstanceGroup);
+    }
+
+    private Map<InstanceGroupType, String> getUserData(Long stackId) {
         try {
             Image image = imageService.getImage(stackId);
-            Map<InstanceGroupType, String> userdata = new HashMap<>(image.getUserdata());
-            String gatewayUserdata = userdata.get(InstanceGroupType.GATEWAY);
-            String result = gatewayUserdata.replace("IS_CCM_V2_JUMPGATE_ENABLED=false", "IS_CCM_V2_JUMPGATE_ENABLED=true")
-                    .replace("IS_CCM_V2_ENABLED=false", "IS_CCM_V2_ENABLED=true")
-                    .replace("IS_CCM_ENABLED=true", "IS_CCM_ENABLED=false");
-            userdata.put(InstanceGroupType.GATEWAY, result);
-            Stack stack = stackService.getByIdWithLists(stackId);
+            return new HashMap<>(image.getUserdata());
+        } catch (CloudbreakImageNotFoundException e) {
+            throw convertToServiceException(e);
+        }
+    }
+
+    private void updateUserData(Stack stack, Map<InstanceGroupType, String> userdata) {
+        try {
             imageService.decorateImageWithUserDataForStack(stack, userdata);
         } catch (CloudbreakImageNotFoundException e) {
-            String message = "Image not found for update jumpgate";
-            LOGGER.error(message);
-            throw new CloudbreakServiceException(message, e);
+            throw convertToServiceException(e);
         }
+    }
+
+    private static CloudbreakServiceException convertToServiceException(CloudbreakImageNotFoundException e) {
+        String message = "Image not found for user data update";
+        LOGGER.error(message);
+        return new CloudbreakServiceException(message, e);
     }
 
     public void createUserData(Long stackId) throws CloudbreakImageNotFoundException {

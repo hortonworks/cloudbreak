@@ -42,7 +42,14 @@ public class UpdateUserDataHandler extends ExceptionCatcherEventHandler<UserData
         UserDataUpdateRequest request = event.getData();
         try {
             LOGGER.info("Updating userData in the stack's current used image component...");
-            userDataService.updateJumpgateFlagOnly(request.getResourceId());
+            if (request.getOldTunnel() != null) {
+                LOGGER.info("Updating userdata for CCM upgrade");
+                userDataService.updateJumpgateFlagOnly(request.getResourceId());
+            }
+            if (request.isModifyProxyConfig()) {
+                LOGGER.info("Updating userdata for proxy config modification");
+                userDataService.updateProxyConfig(request.getResourceId());
+            }
             return new UserDataUpdateSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Updating user data in the stack's image component has failed", e);

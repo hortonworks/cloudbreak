@@ -41,7 +41,6 @@ class ProxyConfigModificationFinishedStateActionTest extends ActionTest {
     @InjectMocks
     private ProxyConfigModificationFinishedStateAction underTest;
 
-    @Mock
     private EnvProxyModificationContext context;
 
     @Mock
@@ -60,7 +59,7 @@ class ProxyConfigModificationFinishedStateActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        super.setUp(context);
+        context = new EnvProxyModificationContext(flowParameters, previousProxyConfig);
         when(environmentDto.getResourceCrn()).thenReturn(ENV_CRN);
         when(proxyConfig.getResourceCrn()).thenReturn(PROXY_CRN);
         payload = EnvProxyModificationDefaultEvent.builder()

@@ -183,6 +183,7 @@ public enum ResourceEvent {
 
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_STARTED("environment.proxy.modification.started"),
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_FREEIPA_STARTED("environment.proxy.modification.freeipa.started"),
+    ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_DATALAKE_STARTED("environment.proxy.modification.datalake.started"),
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED("environment.proxy.modification.failed"),
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FINISHED("environment.proxy.modification.finished"),
 
@@ -355,6 +356,13 @@ public enum ResourceEvent {
     DATAHUB_UPGRADE_CCM_NOT_AVAILABLE("datahub.ccm.upgrade.not.available"),
     DATAHUB_UPGRADE_CCM_ALREADY_UPGRADED("datahub.ccm.upgrade.already.upgraded"),
     DATAHUB_UPGRADE_CCM_NOT_UPGRADEABLE("datahub.ccm.upgrade.not.upgradeable"),
+    DATALAKE_PROXY_CONFIG_MODIFICATION_IN_PROGRESS("datalake.proxy.modification.inprogress"),
+    DATALAKE_PROXY_CONFIG_MODIFICATION_FAILED("datalake.proxy.modification.failed"),
+    DATALAKE_PROXY_CONFIG_MODIFICATION_FINISHED("datalake.proxy.modification.finished"),
+    CLUSTER_MODIFY_PROXY_CONFIG_SALT_STATE("cluster.proxy.modification.saltstate"),
+    CLUSTER_MODIFY_PROXY_CONFIG_ON_CM("cluster.proxy.modification.cm"),
+    CLUSTER_MODIFY_PROXY_CONFIG_SUCCESS("cluster.proxy.modification.success"),
+    CLUSTER_MODIFY_PROXY_CONFIG_FAILED("cluster.proxy.modification.failed"),
     CLUSTER_MANAGER_UPGRADE("cluster.manager.upgrade"),
     CLUSTER_MANAGER_UPGRADE_NOT_NEEDED("cluster.manager.upgrade.not.needed"),
     CLUSTER_MANAGER_UPGRADE_FINISHED("cluster.manager.upgrade.finished"),
