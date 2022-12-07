@@ -133,4 +133,14 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     public Map<String, String> getLaunchTemplateUserData(String name) {
         return amazonEC2Util.listLaunchTemplatesUserData(name);
     }
+
+    @Override
+    public Boolean isCloudFormationExistForStack(String name) {
+        return amazonEC2Util.isCloudFormationExistForStack(name);
+    }
+
+    @Override
+    public Boolean isFreeipaCfStackExistForEnvironment(String environmentCrn) {
+        return !amazonEC2Util.listStacksByEnvironmentCrn(environmentCrn).isEmpty();
+    }
 }
