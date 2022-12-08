@@ -167,7 +167,7 @@ public class HeartbeatServiceTest {
         myNewFlowLogs.addAll(node2FlowLogs);
         when(flowLogService.findAllByCloudbreakNodeId(MY_ID)).thenReturn(myNewFlowLogs);
 
-        when(runningFlows.get(any())).thenReturn(null);
+        when(runningFlows.getRunningFlowIdsSnapshot()).thenReturn(Set.of());
 
         heartbeatService.scheduledFlowDistribution();
 
@@ -219,7 +219,7 @@ public class HeartbeatServiceTest {
         myNewFlowLogs.addAll(node2FlowLogs);
         when(flowLogService.findAllByCloudbreakNodeId(MY_ID)).thenReturn(myNewFlowLogs);
 
-        when(runningFlows.get(any())).thenReturn(null);
+        when(runningFlows.getRunningFlowIdsSnapshot()).thenReturn(Set.of());
 
         heartbeatService.scheduledFlowDistribution();
 
@@ -271,7 +271,7 @@ public class HeartbeatServiceTest {
         myNewFlowLogs.addAll(node2FlowLogs);
         when(flowLogService.findAllByCloudbreakNodeId(MY_ID)).thenReturn(myNewFlowLogs);
 
-        when(runningFlows.get(any())).thenReturn(null);
+        when(runningFlows.getRunningFlowIdsSnapshot()).thenReturn(Set.of());
 
         List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getResourceId).distinct().collect(Collectors.toList());
         when(haApplication.getDeletingResources(anySet())).thenReturn(Set.of(stackIds.get(0), stackIds.get(2)));
@@ -336,7 +336,7 @@ public class HeartbeatServiceTest {
         myNewFlowLogs.addAll(node2FlowLogs);
         when(flowLogService.findAllByCloudbreakNodeId(MY_ID)).thenReturn(myNewFlowLogs);
 
-        when(runningFlows.get(any())).thenReturn(null);
+        when(runningFlows.getRunningFlowIdsSnapshot()).thenReturn(Set.of());
 
         List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getResourceId).distinct().collect(Collectors.toList());
         when(haApplication.getDeletingResources(anySet())).thenReturn(Set.of(stackIds.get(0), stackIds.get(2)));
@@ -387,7 +387,7 @@ public class HeartbeatServiceTest {
         myNewFlowLogs.addAll(node1FlowLogs.stream().filter(fl -> fl.getFlowId().equalsIgnoreCase(suspendedFlows.get(2))).collect(Collectors.toList()));
         when(flowLogService.findAllByCloudbreakNodeId(MY_ID)).thenReturn(myNewFlowLogs);
 
-        when(runningFlows.get(any())).thenReturn(null);
+        when(runningFlows.getRunningFlowIdsSnapshot()).thenReturn(Set.of());
 
         when(flowLogService.saveAll(anyCollection())).thenThrow(new OptimisticLockingFailureException("Someone already distributed the flows.."));
 
@@ -427,7 +427,7 @@ public class HeartbeatServiceTest {
         List<FlowLog> myNewFlowLogs = node1FlowLogs.stream().filter(fl -> fl.getFlowId().equalsIgnoreCase(suspendedFlows.get(0))).collect(Collectors.toList());
         when(flowLogService.findAllByCloudbreakNodeId(MY_ID)).thenReturn(new HashSet<>(myNewFlowLogs));
 
-        when(runningFlows.get(any())).thenReturn(null);
+        when(runningFlows.getRunningFlowIdsSnapshot()).thenReturn(Set.of());
 
         when(flowLogService.saveAll(anyCollection())).thenThrow(new OptimisticLockingFailureException("Someone already distributed the flows.."));
 
