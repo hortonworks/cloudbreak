@@ -54,6 +54,7 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.util.FreeIpaStatusValidator;
 
 @Service
 public class CleanupService {
@@ -101,6 +102,9 @@ public class CleanupService {
     @Inject
     private KeytabCacheService keytabCacheService;
 
+    @Inject
+    private FreeIpaStatusValidator statusValidator;
+
     @Value("${freeipa.server.deletion.check.maxWaitSeconds}")
     private int serverDeletionCheckMaxWaitSeconds;
 
@@ -109,7 +113,8 @@ public class CleanupService {
 
     public OperationStatus cleanup(String accountId, CleanupRequest request) {
         String environmentCrn = request.getEnvironmentCrn();
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
+        Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
+        statusValidator.throwBadRequestIfFreeIpaIsUnreachable(stack);
         Operation operation =
                 operationService.startOperation(accountId, OperationType.CLEANUP, Set.of(environmentCrn), Collections.emptySet());
         Set<String> statesToSkip = cleanupStepToStateNameConverter.convert(request.getCleanupStepsToSkip());
