@@ -118,5 +118,13 @@
   {
     "path": "/var/log/httpd-crt-tracking.log",
     "label": "httpd-crt-tracking"
+  },
+  {
+    "path": "/var/log/cdp-request-signer/cdp-request-signer.log",
+    "label": "cdp-request-signer"
+  },
+  {
+    "path": "/var/log/cdp-prometheus/cdp-prometheus.log",
+    "label": "cdp-prometheus"
   }
 ]
