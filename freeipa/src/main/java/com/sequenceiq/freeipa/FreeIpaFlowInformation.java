@@ -1,11 +1,18 @@
 package com.sequenceiq.freeipa;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.UNKNOWN;
+
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
@@ -15,6 +22,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationFlowConfig;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
 public class FreeIpaFlowInformation implements ApplicationFlowInformation {
@@ -31,6 +39,9 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
 
     private static final List<Class<? extends FlowConfiguration<?>>> TERMINATION_FLOWS = List.of(StackTerminationFlowConfig.class);
 
+    @Inject
+    private StackService stackService;
+
     @Override
     public List<String> getAllowedParallelFlows() {
         return PARALLEL_FLOWS;
@@ -39,6 +50,16 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
     @Override
     public List<Class<? extends FlowConfiguration<?>>> getTerminationFlow() {
         return TERMINATION_FLOWS;
+    }
+
+    @Override
+    public void handleFlowFail(FlowLog flowLog) {
+        Stack stack = stackService.getStackById(flowLog.getResourceId());
+        LOGGER.info("Handling failed freeipa flow {} for {}", flowLog, stack.getName());
+        if (stack.getStackStatus() != null && stack.getStackStatus().getStatus() != null) {
+            stack.setStackStatus(new StackStatus(stack, stack.getStackStatus().getStatus().mapToFailedIfInProgress(), "Flow failed", UNKNOWN));
+            stackService.save(stack);
+        }
     }
 
 }

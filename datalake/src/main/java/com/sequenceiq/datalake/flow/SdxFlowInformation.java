@@ -48,20 +48,18 @@ public class SdxFlowInformation implements ApplicationFlowInformation {
     @Override
     public void handleFlowFail(FlowLog flowLog) {
         SdxCluster sdxCluster = sdxService.getById(flowLog.getResourceId());
-        LOGGER.info("Handling failed flow {} for {}", flowLog, sdxCluster);
-        if (sdxCluster != null)  {
-            SdxStatusEntity actualStatusForSdx = sdxStatusService.getActualStatusForSdx(sdxCluster);
-            LOGGER.debug("Sdx status {} while handling flow failure", actualStatusForSdx);
-            if (actualStatusForSdx != null) {
-                DatalakeStatusEnum status = actualStatusForSdx.getStatus();
-                if (status != null) {
-                    DatalakeStatusEnum failedStatus = status.mapToFailedIfInProgress();
-                    try {
-                        sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, "Datalake flow failed", sdxCluster);
-                    } catch (NotFoundException e) {
-                        LOGGER.warn("We tried to handle flow fail, but can't set status to failed because data lake was not found. " +
-                                "Probably another termination flow was terminate this data lake");
-                    }
+        LOGGER.info("Handling failed SDX flow {} for {}", flowLog, sdxCluster.getName());
+        SdxStatusEntity actualStatusForSdx = sdxStatusService.getActualStatusForSdx(sdxCluster);
+        LOGGER.debug("Sdx status {} while handling flow failure", actualStatusForSdx);
+        if (actualStatusForSdx != null) {
+            DatalakeStatusEnum status = actualStatusForSdx.getStatus();
+            if (status != null) {
+                DatalakeStatusEnum failedStatus = status.mapToFailedIfInProgress();
+                try {
+                    sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, "Datalake flow failed", sdxCluster);
+                } catch (NotFoundException e) {
+                    LOGGER.warn("We tried to handle flow fail, but can't set status to failed because data lake was not found. " +
+                            "Probably another termination flow was terminate this data lake");
                 }
             }
         }
