@@ -61,7 +61,7 @@ public class FlowCleanupJob extends TracedQuartzJob {
     }
 
     private void purgeFlowStatCache() {
-        flowStatCache.cleanOldCacheEntries(runningFlows.getRunningFlowIds());
+        flowStatCache.cleanOldCacheEntries(runningFlows.getRunningFlowIdsSnapshot());
     }
 
     public void purgeFinalisedFlowLogs() throws TransactionService.TransactionExecutionException {
