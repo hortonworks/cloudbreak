@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanag
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerAdminRoleConfigProvider.PROFILER_ADMIN_DATABASE_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -52,20 +54,20 @@ public class ProfilerAdminRoleConfigProviderTest {
 
         assertThat(profilerAdmin.size()).isEqualTo(5);
 
-        assertThat(profilerAdmin.get(0).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_HOST);
-        assertThat(profilerAdmin.get(0).getValue()).isEqualTo("10.1.1.1");
+        assertThat(profilerAdmin.get(0).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_USER);
+        assertThat(profilerAdmin.get(0).getValue()).isEqualTo("heyitsme");
 
-        assertThat(profilerAdmin.get(1).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_NAME);
-        assertThat(profilerAdmin.get(1).getValue()).isEqualTo("profiler_agent");
+        assertThat(profilerAdmin.get(1).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_PASSWORD);
+        assertThat(profilerAdmin.get(1).getValue()).isEqualTo("iamsoosecure");
 
-        assertThat(profilerAdmin.get(2).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_TYPE);
-        assertThat(profilerAdmin.get(2).getValue()).isEqualTo("POSTGRES");
+        assertThat(profilerAdmin.get(2).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_HOST);
+        assertThat(profilerAdmin.get(2).getValue()).isEqualTo("10.1.1.1");
 
-        assertThat(profilerAdmin.get(3).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_USER);
-        assertThat(profilerAdmin.get(3).getValue()).isEqualTo("heyitsme");
+        assertThat(profilerAdmin.get(3).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_NAME);
+        assertThat(profilerAdmin.get(3).getValue()).isEqualTo("profiler_agent");
 
-        assertThat(profilerAdmin.get(4).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_PASSWORD);
-        assertThat(profilerAdmin.get(4).getValue()).isEqualTo("iamsoosecure");
+        assertThat(profilerAdmin.get(4).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_TYPE);
+        assertThat(profilerAdmin.get(4).getValue()).isEqualTo("POSTGRES");
     }
 
     private TemplatePreparationObject getTemplatePreparationObject() {
@@ -73,6 +75,9 @@ public class ProfilerAdminRoleConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
         return Builder.builder().withHostgroupViews(Set.of(master, worker))
+                .withProductDetails(new ClouderaManagerRepo()
+                        .withBaseUrl("url")
+                        .withVersion("7.2.2"), new ArrayList<>())
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_AGENT))
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
@@ -89,6 +94,8 @@ public class ProfilerAdminRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, gateway))
+                .withProductDetails(new ClouderaManagerRepo()
+                        .withVersion("7.2.2"), new ArrayList<>())
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_AGENT))
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
@@ -102,20 +109,20 @@ public class ProfilerAdminRoleConfigProviderTest {
 
         assertThat(profilerAdmin.size()).isEqualTo(5);
 
-        assertThat(profilerAdmin.get(0).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_HOST);
-        assertThat(profilerAdmin.get(0).getValue()).isEqualTo("10.1.1.1");
+        assertThat(profilerAdmin.get(0).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_USER);
+        assertThat(profilerAdmin.get(0).getValue()).isEqualTo("heyitsme");
 
-        assertThat(profilerAdmin.get(1).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_NAME);
-        assertThat(profilerAdmin.get(1).getValue()).isEqualTo("profiler_agent");
+        assertThat(profilerAdmin.get(1).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_PASSWORD);
+        assertThat(profilerAdmin.get(1).getValue()).isEqualTo("iamsoosecure");
 
-        assertThat(profilerAdmin.get(2).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_TYPE);
-        assertThat(profilerAdmin.get(2).getValue()).isEqualTo("POSTGRES");
+        assertThat(profilerAdmin.get(2).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_HOST);
+        assertThat(profilerAdmin.get(2).getValue()).isEqualTo("10.1.1.1");
 
-        assertThat(profilerAdmin.get(3).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_USER);
-        assertThat(profilerAdmin.get(3).getValue()).isEqualTo("heyitsme");
+        assertThat(profilerAdmin.get(3).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_NAME);
+        assertThat(profilerAdmin.get(3).getValue()).isEqualTo("profiler_agent");
 
-        assertThat(profilerAdmin.get(4).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_PASSWORD);
-        assertThat(profilerAdmin.get(4).getValue()).isEqualTo("iamsoosecure");
+        assertThat(profilerAdmin.get(4).getName()).isEqualTo(PROFILER_ADMIN_DATABASE_TYPE);
+        assertThat(profilerAdmin.get(4).getValue()).isEqualTo("POSTGRES");
     }
 
     private String getBlueprintText(String path) {

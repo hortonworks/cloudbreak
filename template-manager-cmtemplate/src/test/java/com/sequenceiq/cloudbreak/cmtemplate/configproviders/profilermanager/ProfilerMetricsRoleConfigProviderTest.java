@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanag
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -52,20 +54,20 @@ public class ProfilerMetricsRoleConfigProviderTest {
 
         assertThat(profilerMetrics.size()).isEqualTo(5);
 
-        assertThat(profilerMetrics.get(0).getName()).isEqualTo(PROFILER_METRICS_DATABASE_HOST);
-        assertThat(profilerMetrics.get(0).getValue()).isEqualTo("10.1.1.1");
+        assertThat(profilerMetrics.get(2).getName()).isEqualTo(PROFILER_METRICS_DATABASE_HOST);
+        assertThat(profilerMetrics.get(2).getValue()).isEqualTo("10.1.1.1");
 
-        assertThat(profilerMetrics.get(1).getName()).isEqualTo(PROFILER_METRICS_DATABASE_NAME);
-        assertThat(profilerMetrics.get(1).getValue()).isEqualTo("profiler_metric");
+        assertThat(profilerMetrics.get(3).getName()).isEqualTo(PROFILER_METRICS_DATABASE_NAME);
+        assertThat(profilerMetrics.get(3).getValue()).isEqualTo("profiler_metric");
 
-        assertThat(profilerMetrics.get(2).getName()).isEqualTo(PROFILER_METRICS_DATABASE_TYPE);
-        assertThat(profilerMetrics.get(2).getValue()).isEqualTo("POSTGRES");
+        assertThat(profilerMetrics.get(4).getName()).isEqualTo(PROFILER_METRICS_DATABASE_TYPE);
+        assertThat(profilerMetrics.get(4).getValue()).isEqualTo("POSTGRES");
 
-        assertThat(profilerMetrics.get(3).getName()).isEqualTo(PROFILER_METRICS_DATABASE_USER);
-        assertThat(profilerMetrics.get(3).getValue()).isEqualTo("heyitsme");
+        assertThat(profilerMetrics.get(0).getName()).isEqualTo(PROFILER_METRICS_DATABASE_USER);
+        assertThat(profilerMetrics.get(0).getValue()).isEqualTo("heyitsme");
 
-        assertThat(profilerMetrics.get(4).getName()).isEqualTo(PROFILER_METRICS_DATABASE_PASSWORD);
-        assertThat(profilerMetrics.get(4).getValue()).isEqualTo("iamsoosecure");
+        assertThat(profilerMetrics.get(1).getName()).isEqualTo(PROFILER_METRICS_DATABASE_PASSWORD);
+        assertThat(profilerMetrics.get(1).getValue()).isEqualTo("iamsoosecure");
     }
 
     private TemplatePreparationObject getTemplatePreparationObject() {
@@ -73,6 +75,8 @@ public class ProfilerMetricsRoleConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
         return Builder.builder().withHostgroupViews(Set.of(master, worker))
+                .withProductDetails(new ClouderaManagerRepo()
+                        .withVersion("7.2.2"), new ArrayList<>())
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_METRIC))
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
@@ -102,20 +106,20 @@ public class ProfilerMetricsRoleConfigProviderTest {
 
         assertThat(profilerMetrics.size()).isEqualTo(5);
 
-        assertThat(profilerMetrics.get(0).getName()).isEqualTo(PROFILER_METRICS_DATABASE_HOST);
-        assertThat(profilerMetrics.get(0).getValue()).isEqualTo("10.1.1.1");
+        assertThat(profilerMetrics.get(2).getName()).isEqualTo(PROFILER_METRICS_DATABASE_HOST);
+        assertThat(profilerMetrics.get(2).getValue()).isEqualTo("10.1.1.1");
 
-        assertThat(profilerMetrics.get(1).getName()).isEqualTo(PROFILER_METRICS_DATABASE_NAME);
-        assertThat(profilerMetrics.get(1).getValue()).isEqualTo("profiler_metric");
+        assertThat(profilerMetrics.get(3).getName()).isEqualTo(PROFILER_METRICS_DATABASE_NAME);
+        assertThat(profilerMetrics.get(3).getValue()).isEqualTo("profiler_metric");
 
-        assertThat(profilerMetrics.get(2).getName()).isEqualTo(PROFILER_METRICS_DATABASE_TYPE);
-        assertThat(profilerMetrics.get(2).getValue()).isEqualTo("POSTGRES");
+        assertThat(profilerMetrics.get(4).getName()).isEqualTo(PROFILER_METRICS_DATABASE_TYPE);
+        assertThat(profilerMetrics.get(4).getValue()).isEqualTo("POSTGRES");
 
-        assertThat(profilerMetrics.get(3).getName()).isEqualTo(PROFILER_METRICS_DATABASE_USER);
-        assertThat(profilerMetrics.get(3).getValue()).isEqualTo("heyitsme");
+        assertThat(profilerMetrics.get(0).getName()).isEqualTo(PROFILER_METRICS_DATABASE_USER);
+        assertThat(profilerMetrics.get(0).getValue()).isEqualTo("heyitsme");
 
-        assertThat(profilerMetrics.get(4).getName()).isEqualTo(PROFILER_METRICS_DATABASE_PASSWORD);
-        assertThat(profilerMetrics.get(4).getValue()).isEqualTo("iamsoosecure");
+        assertThat(profilerMetrics.get(1).getName()).isEqualTo(PROFILER_METRICS_DATABASE_PASSWORD);
+        assertThat(profilerMetrics.get(1).getValue()).isEqualTo("iamsoosecure");
     }
 
     private String getBlueprintText(String path) {
