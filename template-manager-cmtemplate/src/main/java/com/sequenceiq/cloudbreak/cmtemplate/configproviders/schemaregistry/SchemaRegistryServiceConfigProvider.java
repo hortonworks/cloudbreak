@@ -5,8 +5,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.GENERATED_RANGER_SERVICE_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.StreamingAppRdsRoleConfigProviderUtil.dataBaseTypeForCM;
-import static java.util.Collections.emptyList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -33,24 +33,29 @@ public class SchemaRegistryServiceConfigProvider extends AbstractRdsRoleConfigPr
 
     static final String DATABASE_PASSWORD = "database_password";
 
+    static final String DATABASE_JDBC_URL_OVERRIDE = "database_jdbc_url_override";
+
     static final String RANGER_PLUGIN_SR_SERVICE_NAME = "ranger.plugin.schema-registry.service.name";
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
+        List<ApiClusterTemplateConfig> config = new ArrayList<>();
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
             RdsView schemaRegistryRdsView = getRdsView(source);
-            return List.of(
-                    config(DATABASE_TYPE, dataBaseTypeForCM(schemaRegistryRdsView.getDatabaseVendor())),
-                    config(DATABASE_NAME, schemaRegistryRdsView.getDatabaseName()),
-                    config(DATABASE_HOST, schemaRegistryRdsView.getHost()),
-                    config(DATABASE_PORT, schemaRegistryRdsView.getPort()),
-                    config(DATABASE_USER, schemaRegistryRdsView.getConnectionUserName()),
-                    config(DATABASE_PASSWORD, schemaRegistryRdsView.getConnectionPassword())
-            );
+            config.add(config(DATABASE_TYPE, dataBaseTypeForCM(schemaRegistryRdsView.getDatabaseVendor())));
+            config.add(config(DATABASE_USER, schemaRegistryRdsView.getConnectionUserName()));
+            config.add(config(DATABASE_PASSWORD, schemaRegistryRdsView.getConnectionPassword()));
+            if (schemaRegistryRdsView.isUseSsl()) {
+                config.add(config(DATABASE_JDBC_URL_OVERRIDE, schemaRegistryRdsView.getConnectionURL()));
+            } else {
+                config.add(config(DATABASE_NAME, schemaRegistryRdsView.getDatabaseName()));
+                config.add(config(DATABASE_HOST, schemaRegistryRdsView.getHost()));
+                config.add(config(DATABASE_PORT, schemaRegistryRdsView.getPort()));
+            }
         }
-        return emptyList();
+        return config;
     }
 
     @Override
