@@ -81,8 +81,6 @@ public enum Status {
             .put(UPDATE_REQUESTED, UPDATE_FAILED)
             .put(STOP_REQUESTED, STOP_FAILED)
             .put(START_REQUESTED, START_FAILED)
-            .put(MODIFY_PROXY_CONFIG_REQUESTED, MODIFY_PROXY_CONFIG_FAILED)
-            .put(MODIFY_PROXY_CONFIG_IN_PROGRESS, MODIFY_PROXY_CONFIG_FAILED)
             .put(CREATE_IN_PROGRESS, CREATE_FAILED)
             .put(UPDATE_IN_PROGRESS, UPDATE_FAILED)
             .put(DELETE_IN_PROGRESS, DELETE_FAILED)
@@ -157,11 +155,9 @@ public enum Status {
             case UPDATE_REQUESTED:
             case STOP_REQUESTED:
             case START_REQUESTED:
-            case MODIFY_PROXY_CONFIG_REQUESTED:
             case CREATE_IN_PROGRESS:
             case UPDATE_IN_PROGRESS:
             case DELETE_IN_PROGRESS:
-            case MODIFY_PROXY_CONFIG_IN_PROGRESS:
             case STOP_IN_PROGRESS:
             case DIAGNOSTICS_COLLECTION_IN_PROGRESS:
             case UPGRADE_CCM_REQUESTED:
