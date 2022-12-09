@@ -60,6 +60,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCERS;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCER_DNS_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_CLUSTER_IN_WORKSPACE;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DETERMINE_DATALAKE_DATA_SIZES;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
 import java.util.List;
@@ -687,4 +688,11 @@ public interface StackV4Endpoint {
     UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(
             @PathParam("workspaceId") Long workspaceId,
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
+
+    @POST
+    @Path("{name}/determine_datalake_data_sizes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DETERMINE_DATALAKE_DATA_SIZES, nickname = "determineDatalakeDataSizes")
+    void determineDatalakeDataSizes(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("operationId") String operationId);
 }

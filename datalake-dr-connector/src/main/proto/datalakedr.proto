@@ -55,6 +55,12 @@ service datalakeDR {
    */
   rpc CancelDatalakeRestore (CancelDatalakeRestoreRequest) returns (CancelDatalakeRestoreResponse) {
   }
+
+  /**
+   * Submit datalake data info for persisting and processing
+   */
+  rpc SubmitDatalakeDataInfo (DatalakeDataInfoObject) returns (SubmitDatalakeDataInfoResponse) {
+  }
 }
 
 // A common enum used to describe whether terms have been accepted or not
@@ -307,4 +313,24 @@ message CancelDatalakeRestoreRequest {
 */
 message CancelDatalakeRestoreResponse {
   string result = 1; // result of the invalidation operation.
+}
+
+/**
+ * Object containing datalake data info.
+ */
+message DatalakeDataInfoObject {
+  string operationId = 1;// ID of the operation, used for storing in the backing DB.
+  uint64 databaseSizeInBytes = 2; // Total size of the DBs on the datalake.
+  uint64 hbaseAtlasEntityAuditEventsTableSizeInBytes = 3; // Size of the Atlas entity audit events HBase table.
+  uint64 hbaseAtlasJanusTableSizeInBytes = 4; // Size of the Atlas Janus HBase table.
+  uint64 solrVertexIndexCollectionSizeInBytes = 5; // Size of the vertex Solr index collection.
+  uint64 solrFulltextIndexCollectionSizeInBytes = 6; // Size of the fulltext Solr index collection.
+  uint64 solrEdgeIndexCollectionSizeInBytes = 7; // Size of the edge Solr index collection.
+  uint64 solrRangerAuditsCollectionSizeInBytes = 8; // Size of the Ranger Audits Solr collection.
+}
+
+/**
+ * Empty response for submission of datalake data info.
+ */
+message SubmitDatalakeDataInfoResponse {
 }

@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.datalakemetrics.DetermineDatalakeDataSizesService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
@@ -161,6 +162,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+
+    @Inject
+    private DetermineDatalakeDataSizesService determineDatalakeDataSizesService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -515,5 +519,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         List<SubnetIdWithResourceNameAndCrn> usedSubnets = stackCommonService.getAllUsedSubnetsByEnvironmentCrn(environmentCrn);
         LOGGER.info("All used subnets ({}) for environment: {}", usedSubnets, environmentCrn);
         return usedSubnets;
+    }
+
+    public void determineDatalakeDataSizes(Long workspaceId, NameOrCrn nameOrCrn, String operationId) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        determineDatalakeDataSizesService.determineDatalakeDataSizes(stack, operationId);
     }
 }

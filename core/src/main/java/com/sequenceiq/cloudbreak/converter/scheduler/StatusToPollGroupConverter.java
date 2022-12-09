@@ -54,6 +54,7 @@ public class StatusToPollGroupConverter {
             case RECOVERY_IN_PROGRESS:
             case RECOVERY_FAILED:
             case EXTERNAL_DATABASE_UPGRADE_FAILED:
+            case DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS:
                 return PollGroup.POLLABLE;
             case DELETE_COMPLETED:
                 return PollGroup.CANCELLED;
