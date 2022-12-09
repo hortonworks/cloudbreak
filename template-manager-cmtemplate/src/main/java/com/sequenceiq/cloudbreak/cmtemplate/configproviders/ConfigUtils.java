@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.github.jknack.handlebars.internal.text.StringEscapeUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -66,7 +67,7 @@ public class ConfigUtils {
     }
 
     public static String getSafetyValveProperty(String key, String value) {
-        return String.format(CM_SAFETY_VALVE_PROPERTY_FORMAT, key, value);
+        return String.format(CM_SAFETY_VALVE_PROPERTY_FORMAT, key, StringEscapeUtils.escapeXml11(value));
     }
 
     public static String getSafetyValveConfiguration(String value) {
