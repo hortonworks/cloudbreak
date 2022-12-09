@@ -31,7 +31,6 @@ import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserE
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.FreeIpaStatusValidator;
 
 @ExtendWith(MockitoExtension.class)
 class BindUserCreateServiceTest {
@@ -54,21 +53,16 @@ class BindUserCreateServiceTest {
     @Mock
     private StackService stackService;
 
-    @Mock
-    private FreeIpaStatusValidator statusValidator;
-
     @InjectMocks
     private BindUserCreateService underTest;
 
-    private Stack stack;
-
     @BeforeEach
     public void init() {
-        stack = new Stack();
+        Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setEnvironmentCrn(ENV_CRN);
         stack.setAccountId(ACCOUNT);
-        when(stackService.getFreeIpaStackWithMdcContext(ENV_CRN, ACCOUNT)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT)).thenReturn(stack);
     }
 
     @Test
@@ -86,7 +80,6 @@ class BindUserCreateServiceTest {
         assertEquals(operationStatus, response);
         ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
         verify(flowManager).notify(eq(CREATE_BIND_USER_EVENT.event()), captor.capture());
-        verify(statusValidator).throwBadRequestIfFreeIpaIsUnreachable(stack);
         Acceptable event = captor.getValue();
         assertTrue(event instanceof CreateBindUserEvent);
         CreateBindUserEvent bindUserEvent = (CreateBindUserEvent) event;
@@ -112,7 +105,6 @@ class BindUserCreateServiceTest {
 
         assertEquals(operationStatus, response);
         verifyNoInteractions(flowManager);
-        verify(statusValidator).throwBadRequestIfFreeIpaIsUnreachable(stack);
     }
 
     @Test
@@ -135,7 +127,6 @@ class BindUserCreateServiceTest {
         OperationStatus response = underTest.createBindUser(ACCOUNT, request);
 
         assertEquals(failedOperationStatus, response);
-        verify(statusValidator).throwBadRequestIfFreeIpaIsUnreachable(stack);
     }
 
     private BindUserCreateRequest createRequest() {
