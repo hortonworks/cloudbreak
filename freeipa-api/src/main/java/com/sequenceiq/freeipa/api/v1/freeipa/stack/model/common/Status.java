@@ -1,7 +1,12 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common;
 
+import static java.lang.String.format;
+
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
 
 //if statuses are added in this enum class, please also add them in cloudbreak-ui repository
 //https://github.com/hortonworks/hortonworks-cloud/blob/master/web/cloudbreak-ui/src/app/helpers/freeipa.helpers.ts
@@ -71,6 +76,24 @@ public enum Status {
 
     public static final Collection<Status> FREEIPA_CCM_UPGRADE_IN_PROGRESS_STATUSES = List.of(UPGRADE_CCM_IN_PROGRESS);
 
+    private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
+            .put(REQUESTED, CREATE_FAILED)
+            .put(UPDATE_REQUESTED, UPDATE_FAILED)
+            .put(STOP_REQUESTED, STOP_FAILED)
+            .put(START_REQUESTED, START_FAILED)
+            .put(MODIFY_PROXY_CONFIG_REQUESTED, MODIFY_PROXY_CONFIG_FAILED)
+            .put(MODIFY_PROXY_CONFIG_IN_PROGRESS, MODIFY_PROXY_CONFIG_FAILED)
+            .put(CREATE_IN_PROGRESS, CREATE_FAILED)
+            .put(UPDATE_IN_PROGRESS, UPDATE_FAILED)
+            .put(DELETE_IN_PROGRESS, DELETE_FAILED)
+            .put(STOP_IN_PROGRESS, STOP_FAILED)
+            .put(START_IN_PROGRESS, START_FAILED)
+            .put(DIAGNOSTICS_COLLECTION_IN_PROGRESS, AVAILABLE)
+            .put(UPGRADE_CCM_REQUESTED, UPGRADE_CCM_FAILED)
+            .put(UPGRADE_CCM_IN_PROGRESS, UPGRADE_CCM_FAILED)
+            .put(WAIT_FOR_SYNC, AVAILABLE)
+            .build();
+
     public boolean isRemovableStatus() {
         return REMOVABLE_STATUSES.contains(this);
     }
@@ -127,4 +150,41 @@ public enum Status {
         return !FREEIPA_VERTICALLY_NON_SCALABLE_STATUSES.contains(this);
     }
 
+    //CHECKSTYLE:OFF: CyclomaticComplexity
+    public boolean isInProgress() {
+        switch (this) {
+            case REQUESTED:
+            case UPDATE_REQUESTED:
+            case STOP_REQUESTED:
+            case START_REQUESTED:
+            case MODIFY_PROXY_CONFIG_REQUESTED:
+            case CREATE_IN_PROGRESS:
+            case UPDATE_IN_PROGRESS:
+            case DELETE_IN_PROGRESS:
+            case MODIFY_PROXY_CONFIG_IN_PROGRESS:
+            case STOP_IN_PROGRESS:
+            case DIAGNOSTICS_COLLECTION_IN_PROGRESS:
+            case UPGRADE_CCM_REQUESTED:
+            case UPGRADE_CCM_IN_PROGRESS:
+            case START_IN_PROGRESS:
+            case WAIT_FOR_SYNC:
+                return true;
+            default:
+                return false;
+        }
+    }
+    //CHECKSTYLE:ON: CyclomaticComplexity
+
+    public Status mapToFailedIfInProgress() {
+        if (isInProgress()) {
+            Status result = IN_PROGRESS_TO_FINAL_STATUS_MAPPING.get(this);
+            if (result == null) {
+                throw new IllegalArgumentException(format("Status '%s' is not mappable to failed state.", this));
+            } else {
+                return result;
+            }
+        } else {
+            return this;
+        }
+    }
 }

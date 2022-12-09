@@ -162,7 +162,7 @@ public class AwsMetaDataCollectorTest {
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
 
-        when(amazonEC2Client.describeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
+        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
 
         Instance instance = mock(Instance.class);
         when(instance.getInstanceId()).thenReturn("i-1");
@@ -259,7 +259,7 @@ public class AwsMetaDataCollectorTest {
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
 
-        when(amazonEC2Client.describeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
+        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
 
         List<Instance> instances = new ArrayList<>();
         Instance instance = mock(Instance.class);
@@ -324,7 +324,7 @@ public class AwsMetaDataCollectorTest {
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
 
-        when(amazonEC2Client.describeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
+        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
 
         List<Instance> instances = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
@@ -390,7 +390,7 @@ public class AwsMetaDataCollectorTest {
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
 
-        when(amazonEC2Client.describeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
+        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
 
         Mockito.when(awsLifeCycleMapper.getLifeCycle(any())).thenReturn(CLOUD_INSTANCE_LIFE_CYCLE);
 
@@ -465,7 +465,7 @@ public class AwsMetaDataCollectorTest {
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
 
-        when(amazonEC2Client.describeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
+        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
 
         Instance instance1 = mock(Instance.class);
         when(instance1.getInstanceId()).thenReturn("i-1");
