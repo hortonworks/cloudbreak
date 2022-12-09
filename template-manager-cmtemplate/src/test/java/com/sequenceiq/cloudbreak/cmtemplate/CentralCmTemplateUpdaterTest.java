@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.StubDfsConfigPr
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseCloudStorageServiceConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
@@ -140,7 +141,7 @@ public class CentralCmTemplateUpdaterTest {
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
         doNothing().when(adlsConfigProvider).populateServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class), anyString());
-        RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.HIVE);
+        RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED);
         RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
         when(templatePreparationObject.getRdsViews()).thenReturn(Set.of(rdsView));
         when(templatePreparationObject.getRdsView(DatabaseType.HIVE)).thenReturn(rdsView);

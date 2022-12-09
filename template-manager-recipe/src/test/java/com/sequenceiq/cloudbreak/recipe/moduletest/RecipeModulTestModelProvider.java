@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.recipe.testrepeater.TestFile;
@@ -48,7 +49,8 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplatePreparationObject() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsViews(Set.of(TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfigWithoutCluster(DatabaseType.HIVE))))
+                .withRdsViews(Set.of(TemplateCoreTestUtil.rdsViewProvider()
+                        .getRdsView(rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED))))
                 .build();
     }
 
@@ -153,7 +155,9 @@ class RecipeModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsViews(
-                        Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.DRUID), rdsConfigWithoutCluster(DatabaseType.HIVE))
+                        Sets.newHashSet(
+                                rdsConfigWithoutCluster(DatabaseType.DRUID, RdsSslMode.DISABLED),
+                                rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED))
                             .stream()
                             .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                             .collect(Collectors.toSet())
@@ -165,7 +169,9 @@ class RecipeModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsViews(
-                        Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER), rdsConfigWithoutCluster(DatabaseType.HIVE))
+                        Sets.newHashSet(
+                                rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED),
+                                rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED))
                                 .stream()
                                 .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                                 .collect(Collectors.toSet())
@@ -186,7 +192,7 @@ class RecipeModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsViews(
-                        Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.HIVE))
+                        Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED))
                                 .stream()
                                 .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                                 .collect(Collectors.toSet())
@@ -199,7 +205,7 @@ class RecipeModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsViews(
-                        Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER))
+                        Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                                 .stream()
                                 .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                                 .collect(Collectors.toSet())
@@ -212,7 +218,7 @@ class RecipeModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.5", "HDP"))
                 .withRdsViews(
-                        Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER))
+                        Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                                 .stream()
                                 .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                                 .collect(Collectors.toSet())
@@ -227,7 +233,8 @@ class RecipeModulTestModelProvider {
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .withRdsViews(
-                        Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER), rdsConfigWithoutCluster(DatabaseType.HIVE))
+                        Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED),
+                                rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED))
                                 .stream()
                                 .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                                 .collect(Collectors.toSet())

@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConvert
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.StackV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -284,7 +285,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         Set<RdsConfigWithoutCluster> rdsConfigs = new HashSet<>();
         RdsViewProvider realRdsViewProvider = new RdsViewProvider();
         for (String rdsConfigName : rdsConfigNames) {
-            RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.values()[i++]);
+            RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.values()[i++], RdsSslMode.DISABLED);
             rdsConfigs.add(rdsConfig);
             RdsView rdsView = realRdsViewProvider.getRdsView(rdsConfig);
             when(rdsViewProvider.getRdsView(rdsConfig)).thenReturn(rdsView);

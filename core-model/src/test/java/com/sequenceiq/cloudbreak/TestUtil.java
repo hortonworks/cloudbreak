@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -677,7 +678,8 @@ public class TestUtil {
         return rdsConfig;
     }
 
-    public static RdsConfigWithoutCluster rdsConfigWithoutCluster(DatabaseType databaseType, DatabaseVendor databaseVendor) {
+    public static RdsConfigWithoutCluster rdsConfigWithoutCluster(DatabaseType databaseType, DatabaseVendor databaseVendor,
+        RdsSslMode sslMode) {
         RdsConfigWithoutCluster rdsConfig = Mockito.mock(RdsConfigWithoutCluster.class);
         lenient().when(rdsConfig.getId()).thenReturn(generateUniqueId());
         String databaseName = databaseType.name() + rdsConfig.getId();
@@ -690,6 +692,7 @@ public class TestUtil {
         lenient().when(rdsConfig.getDatabaseEngine()).thenReturn(databaseVendor);
         lenient().when(rdsConfig.getDescription()).thenReturn("someDescription");
         lenient().when(rdsConfig.getStatus()).thenReturn(ResourceStatus.DEFAULT);
+        lenient().when(rdsConfig.getSslMode()).thenReturn(sslMode);
         lenient().when(rdsConfig.getStackVersion()).thenReturn("3.2");
         lenient().when(rdsConfig.getConnectorJarUrl()).thenReturn("http://somejarurl.com");
         return rdsConfig;
@@ -699,8 +702,8 @@ public class TestUtil {
         return rdsConfig(databaseType, DatabaseVendor.POSTGRES);
     }
 
-    public static RdsConfigWithoutCluster rdsConfigWithoutCluster(DatabaseType databaseType) {
-        return rdsConfigWithoutCluster(databaseType, DatabaseVendor.POSTGRES);
+    public static RdsConfigWithoutCluster rdsConfigWithoutCluster(DatabaseType databaseType, RdsSslMode sslMode) {
+        return rdsConfigWithoutCluster(databaseType, DatabaseVendor.POSTGRES, sslMode);
     }
 
     private static String getConneectionUrl(DatabaseType databaseType, DatabaseVendor databaseVendor) {
