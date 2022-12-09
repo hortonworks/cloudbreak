@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
+import static com.sequenceiq.cloudbreak.service.Retry.ActionFailedException.wrapRte;
+
 import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.ResponseMetadata;
 import com.amazonaws.services.elasticfilesystem.AmazonElasticFileSystem;
@@ -44,66 +46,66 @@ public class AmazonEfsClient extends AmazonClient {
     }
 
     public CreateFileSystemResult createFileSystem(CreateFileSystemRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.createFileSystem(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.createFileSystem(request)));
     }
 
     public CreateMountTargetResult createMountTarget(CreateMountTargetRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.createMountTarget(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.createMountTarget(request)));
     }
 
     public CreateTagsResult createTags(CreateTagsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.createTags(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.createTags(request)));
     }
 
     public DeleteFileSystemResult deleteFileSystem(DeleteFileSystemRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.deleteFileSystem(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.deleteFileSystem(request)));
     }
 
     public DeleteMountTargetResult deleteMountTarget(DeleteMountTargetRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.deleteMountTarget(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.deleteMountTarget(request)));
     }
 
     public DeleteTagsResult deleteTags(DeleteTagsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.deleteTags(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.deleteTags(request)));
     }
 
     public DescribeFileSystemsResult describeFileSystems(DescribeFileSystemsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeFileSystems(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeFileSystems(request)));
     }
 
     public DescribeFileSystemsResult describeFileSystems() {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeFileSystems());
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeFileSystems()));
     }
 
     public DescribeLifecycleConfigurationResult describeLifecycleConfiguration(DescribeLifecycleConfigurationRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeLifecycleConfiguration(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeLifecycleConfiguration(request)));
     }
 
     public DescribeMountTargetSecurityGroupsResult describeMountTargetSecurityGroups(DescribeMountTargetSecurityGroupsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeMountTargetSecurityGroups(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeMountTargetSecurityGroups(request)));
     }
 
     public DescribeMountTargetsResult describeMountTargets(DescribeMountTargetsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeMountTargets(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeMountTargets(request)));
     }
 
     public DescribeTagsResult describeTags(DescribeTagsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeTags(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeTags(request)));
     }
 
     public ModifyMountTargetSecurityGroupsResult modifyMountTargetSecurityGroups(ModifyMountTargetSecurityGroupsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.modifyMountTargetSecurityGroups(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.modifyMountTargetSecurityGroups(request)));
     }
 
     public PutLifecycleConfigurationResult putLifecycleConfiguration(PutLifecycleConfigurationRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.putLifecycleConfiguration(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.putLifecycleConfiguration(request)));
     }
 
     public UpdateFileSystemResult updateFileSystem(UpdateFileSystemRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.updateFileSystem(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.updateFileSystem(request)));
     }
 
     public ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.getCachedResponseMetadata(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.getCachedResponseMetadata(request)));
     }
 }
