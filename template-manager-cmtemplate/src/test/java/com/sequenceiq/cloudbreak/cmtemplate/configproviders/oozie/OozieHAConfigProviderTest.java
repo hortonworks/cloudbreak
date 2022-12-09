@@ -25,7 +25,7 @@ public class OozieHAConfigProviderTest {
     public void testGetServiceConfigsWithSingleRolesPerHostGroup() {
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, false);
 
         assertFalse(underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject));
     }
@@ -34,7 +34,7 @@ public class OozieHAConfigProviderTest {
     public void testGetServiceConfigsWithOozieHA() {
         String inputJson = getBlueprintText("input/de-ha.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 2);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 2, false);
 
         assertTrue(underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject));
 
@@ -56,7 +56,7 @@ public class OozieHAConfigProviderTest {
     public void testGetServiceConfigsWithNoOozie() {
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, false);
 
         assertFalse(underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject));
     }
