@@ -12,8 +12,6 @@ public interface Retry {
 
     <T> T testWith1SecDelayMax5Times(Supplier<T> action) throws ActionFailedException;
 
-    <T> T testWith1SecDelayMax5TimesMaxDelay5MinutesMultiplier5(Supplier<T> action) throws ActionFailedException;
-
     class ActionFailedException extends RuntimeException {
         public ActionFailedException() {
         }

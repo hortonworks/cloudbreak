@@ -316,7 +316,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(amazonASClient, asGroupName);
 
         DescribeInstancesRequest instancesRequest = cloudFormationStackUtil.createDescribeInstancesRequest(instanceIds);
-        DescribeInstancesResult instancesResult = amazonEC2Client.retryableDescribeInstances(instancesRequest);
+        DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
 
         return instancesResult.getReservations().stream()
                 .flatMap(reservation -> reservation.getInstances().stream())

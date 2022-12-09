@@ -463,12 +463,6 @@ public class HeartbeatServiceTest {
             public <T> T testWith1SecDelayMax5Times(Supplier<T> action) throws ActionFailedException {
                 return null;
             }
-
-            @Override
-            public <T> T testWith1SecDelayMax5TimesMaxDelay5MinutesMultiplier5(Supplier<T> action) throws ActionFailedException {
-                return null;
-            }
-
         }
 
         Set<FlowLog> flowLogs = new HashSet<>(getFlowLogs(2, 5000));
@@ -513,12 +507,6 @@ public class HeartbeatServiceTest {
             public <T> T testWith1SecDelayMax5Times(Supplier<T> action) throws ActionFailedException {
                 return null;
             }
-
-            @Override
-            public <T> T testWith1SecDelayMax5TimesMaxDelay5MinutesMultiplier5(Supplier<T> action) throws ActionFailedException {
-                return null;
-            }
-
         }
 
         // When the cloudbreak instance can not reach the db
