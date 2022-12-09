@@ -353,7 +353,7 @@ class HiveMetastoreConfigProviderTest {
     }
 
     private RdsConfigWithoutCluster createRdsConfig(RdsSslMode sslMode) {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.HIVE);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED);
         when(rdsConfig.getSslMode()).thenReturn(sslMode);
         return rdsConfig;
     }

@@ -117,7 +117,7 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER))
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                         .collect(Collectors.toSet()))
@@ -162,7 +162,7 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER))
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                         .collect(Collectors.toSet()))
@@ -204,7 +204,7 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master))
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER))
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                         .collect(Collectors.toSet()))
@@ -242,7 +242,7 @@ public class RangerRoleConfigProviderTest {
         // We do not configure RANGER DB
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
-                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.HIVE)).stream()
+                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED)).stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                         .collect(Collectors.toSet()))
                 .build();
@@ -257,7 +257,9 @@ public class RangerRoleConfigProviderTest {
     public void testRoleConfigsForMultipleDb() {
         // We configure multiple DBs
         assertThatCode(() -> Builder.builder()
-                .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER), rdsConfigWithoutCluster(DatabaseType.RANGER))
+                .withRdsViews(Set.of(
+                        rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED),
+                        rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                         .collect(Collectors.toSet()))
@@ -267,7 +269,7 @@ public class RangerRoleConfigProviderTest {
 
     @Test
     public void testGetRoleConfigsDbWithSsl() {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED);
         when(rdsConfig.getSslMode()).thenReturn(RdsSslMode.ENABLED);
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(rdsConfig)

@@ -62,6 +62,32 @@ public class OozieRoleConfigProviderTest {
     }
 
     @Test
+    public void testGetRoleConfigsWithSingleRolesPerHostGroupWhenSSLIsTrue() {
+        String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, true);
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
+
+        assertEquals(4, oozieServer.size());
+
+        assertEquals("oozie_database_type", oozieServer.get(0).getName());
+        assertEquals("postgresql", oozieServer.get(0).getValue());
+
+        assertEquals("oozie_database_user", oozieServer.get(1).getName());
+        assertEquals("testuser", oozieServer.get(1).getValue());
+
+        assertEquals("oozie_database_password", oozieServer.get(2).getName());
+        assertEquals("testpassword", oozieServer.get(2).getValue());
+
+        assertEquals("oozie_config_safety_valve", oozieServer.get(3).getName());
+        assertEquals("<property><name>oozie.service.JPAService.jdbc.url</name><value>" +
+                        "jdbc:postgresql://testhost:5432/ooziedb?sslmode=verify-full&amp;sslrootcert=</value></property>",
+                oozieServer.get(3).getValue());
+    }
+
+    @Test
     public void testGetRoleConfigsWithOozieHA() {
         String inputJson = getBlueprintText("input/de-ha.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);

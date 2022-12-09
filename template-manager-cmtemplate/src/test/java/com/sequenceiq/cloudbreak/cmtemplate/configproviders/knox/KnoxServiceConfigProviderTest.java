@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -40,7 +41,8 @@ public class KnoxServiceConfigProviderTest {
 
     @ParameterizedTest(name = "{index}: check knox properties cm version {0} and cdh version {1} will produce {2} property")
     @MethodSource("cmCdhCombinationsRoleConfigs")
-    public void testGetRoleConfigsShouldReturnEmptyList(String cdhVersion, String cmVersion, boolean ssl, int numberOfProperties) {
+    public void testGetRoleConfigsShouldReturnEmptyList(String cdhVersion, String cmVersion, boolean ssl,
+        int numberOfProperties, boolean sslPresented) {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", blueprintTextProcessor);
         RdsView rdsConfig = mock(RdsView.class);
@@ -58,7 +60,18 @@ public class KnoxServiceConfigProviderTest {
                                 .withVersion(cdhVersion)
                                 .withName("CDH")))
                 .build();
-        Assert.assertTrue(underTest.getRoleConfigs("", source).size() == numberOfProperties);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", source);
+
+        Optional<ApiClusterTemplateConfig> sslOptional = roleConfigs
+                .stream()
+                .filter(e -> e.getName().equals("gateway_database_ssl_enabled"))
+                .findFirst();
+        if (sslPresented) {
+            Assert.assertTrue(sslOptional.isPresent());
+        } else {
+            Assert.assertTrue(sslOptional.isEmpty());
+        }
+        Assert.assertTrue(roleConfigs.size() == numberOfProperties);
     }
 
     @Test
@@ -116,20 +129,20 @@ public class KnoxServiceConfigProviderTest {
 
     static Object[][] cmCdhCombinationsRoleConfigs() {
         return new Object[][]{
-                { "7.2.10",                         "7.4.2", true,   2 },
-                { "7.2.11",                         "7.4.1", true,   0 },
-                { "7.2.11",                         "7.4.2", true,   2 },
-                { "7.2.9-1.cdh7.2.9.p1.14166188",   "7.4.1", true,   2 },
-                { "7.2.8",                          "7.4.2", true,   0 },
-                { "7.2.8",                          "7.4.1", true,   0 },
-                { "7.2.9",                          "7.4.2", true,   0 },
-                { "7.2.10",                         "7.4.2", false,  0 },
-                { "7.2.11",                         "7.4.1", false,  0 },
-                { "7.2.11",                         "7.4.2", false,  0 },
-                { "7.2.9-1.cdh7.2.9.p1.14166188",   "7.4.1", false,  0 },
-                { "7.2.8",                          "7.4.2", false,  0 },
-                { "7.2.8",                          "7.4.1", false,  0 },
-                { "7.2.9",                          "7.4.2", false,  0 },
+                { "7.2.10",                         "7.4.2", true,   2, true },
+                { "7.2.11",                         "7.4.1", true,   0, false },
+                { "7.2.11",                         "7.4.2", true,   2, true },
+                { "7.2.9-1.cdh7.2.9.p1.14166188",   "7.4.1", true,   2, true },
+                { "7.2.8",                          "7.4.2", true,   0, false },
+                { "7.2.8",                          "7.4.1", true,   0, false },
+                { "7.2.9",                          "7.4.2", true,   0, false },
+                { "7.2.10",                         "7.4.2", false,  0, false },
+                { "7.2.11",                         "7.4.1", false,  0, false },
+                { "7.2.11",                         "7.4.2", false,  0, false },
+                { "7.2.9-1.cdh7.2.9.p1.14166188",   "7.4.1", false,  0, false },
+                { "7.2.8",                          "7.4.2", false,  0, false },
+                { "7.2.8",                          "7.4.1", false,  0, false },
+                { "7.2.9",                          "7.4.2", false,  0, false },
         };
     }
 }

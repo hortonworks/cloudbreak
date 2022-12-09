@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
@@ -60,7 +61,7 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void configurationNeededIfRdsConfigAndRoleBothPresent() {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED);
         RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
         when(source.getRdsView(DatabaseType.RANGER)).thenReturn(rdsView);
         when(templateProcessor.isRoleTypePresentInService(subject.getServiceType(), subject.getRoleTypes())).thenReturn(Boolean.TRUE);
@@ -70,7 +71,7 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void configurationNotNeededIfRoleAbsent() {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED);
         RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
         when(source.getRdsView(DatabaseType.RANGER)).thenReturn(rdsView);
         when(templateProcessor.isRoleTypePresentInService(subject.getServiceType(), subject.getRoleTypes())).thenReturn(Boolean.FALSE);
@@ -87,7 +88,7 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void getRdsConfigTestWhenRdsConfigPresent() {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED);
         RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
         when(source.getRdsView(DatabaseType.RANGER)).thenReturn(rdsView);
 
@@ -103,7 +104,7 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void getRdsViewTest() {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED);
         RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
         when(source.getRdsView(DatabaseType.RANGER)).thenReturn(rdsView);
         when(source.getRdsSslCertificateFilePath()).thenReturn(SSL_CERTS_FILE_PATH);

@@ -32,7 +32,7 @@ public class RdsConfigToRdsDetailsConverterTest {
     @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
     @MethodSource("databaseTypeAndVendorDataProvider")
     public void testWhenSourceThenItsValueShouldBePassedBesideAllLogicIndependentData(DatabaseType databaseType, DatabaseVendor vendor) {
-        RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor);
+        RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor, RdsSslMode.DISABLED);
         when(source.getStatus()).thenReturn(ResourceStatus.DEFAULT);
         RdsDetails result = underTest.convert(source);
 
@@ -42,7 +42,7 @@ public class RdsConfigToRdsDetailsConverterTest {
     @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
     @MethodSource("databaseTypeAndVendorDataProvider")
     public void testWhenDatabaseEngineIsEmbeddedThenIsExternalShouldBeFalseOtherwiseTrue(DatabaseType databaseType, DatabaseVendor vendor) {
-        RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor);
+        RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor, RdsSslMode.DISABLED);
         when(source.getStatus()).thenReturn(ResourceStatus.DEFAULT);
 
         RdsDetails result = underTest.convert(source);
@@ -70,7 +70,7 @@ public class RdsConfigToRdsDetailsConverterTest {
     }
 
     private void testWhenSslModeInternal(DatabaseType databaseType, DatabaseVendor vendor, RdsSslMode sslMode, String sslModeStringExpected) {
-        RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor);
+        RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor, RdsSslMode.DISABLED);
         when(source.getSslMode()).thenReturn(sslMode);
         when(source.getStatus()).thenReturn(ResourceStatus.DEFAULT);
 
@@ -83,7 +83,7 @@ public class RdsConfigToRdsDetailsConverterTest {
     @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
     @MethodSource("databaseTypeAndVendorDataProvider")
     public void testAllLogicIndependentDataArePassedProperly(DatabaseType databaseType, DatabaseVendor vendor) {
-        RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor);
+        RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor, RdsSslMode.DISABLED);
         when(source.getStatus()).thenReturn(ResourceStatus.DEFAULT);
 
         RdsDetails result = underTest.convert(source);
