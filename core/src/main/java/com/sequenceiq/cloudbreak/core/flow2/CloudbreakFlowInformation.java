@@ -51,7 +51,7 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
     @Override
     public void handleFlowFail(FlowLog flowLog) {
         Stack stack = stackService.getById(flowLog.getResourceId());
-        LOGGER.info("Handling failed CB flow {} for {}", flowLog, stack.getName());
+        LOGGER.info("Handling failed flow {} for {}", flowLog, stack);
         if (stack.getStackStatus() != null && stack.getStackStatus().getDetailedStackStatus() != null) {
             stack.setStackStatus(new StackStatus(stack, stack.getStackStatus().getStatus().mapToFailedIfInProgress(), "Flow failed", UNKNOWN));
             stackService.save(stack);
