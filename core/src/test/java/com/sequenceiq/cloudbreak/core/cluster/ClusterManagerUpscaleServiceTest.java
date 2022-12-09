@@ -84,7 +84,7 @@ public class ClusterManagerUpscaleServiceTest {
         when(clusterHostServiceRunner.addClusterServices(eq(stackDto), any(), anyBoolean()))
                 .thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
         doNothing().when(clusterService).updateInstancesToRunning(eq(STACK_ID), any());
-        when(clusterServiceRunner.updateClusterManagerClientConfig(eq(stackDto))).thenReturn("clusterIp");
+        when(clusterServiceRunner.updateAmbariClientConfig(eq(stackDto))).thenReturn("clusterIp");
         when(clusterApiConnectors.getConnector(eq(stackDto), eq("clusterIp"))).thenReturn(clusterApi);
 
         underTest.upscaleClusterManager(STACK_ID, Collections.singletonMap("hg", 1), true, false);

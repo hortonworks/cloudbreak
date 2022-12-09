@@ -200,11 +200,11 @@ public class ClusterService {
         return repository.findOneByStackId(stackId);
     }
 
-    public Cluster updateClusterManagerClientConfig(Long clusterId, HttpClientConfig clusterManagerClientConfig) {
+    public Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig) {
         Cluster cluster = getCluster(clusterId);
-        cluster.setClusterManagerIp(clusterManagerClientConfig.getApiAddress());
+        cluster.setClusterManagerIp(ambariClientConfig.getApiAddress());
         cluster = repository.save(cluster);
-        LOGGER.info("Updated cluster: [clusterManagerIp: '{}'].", clusterManagerClientConfig.getApiAddress());
+        LOGGER.info("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
         return cluster;
     }
 

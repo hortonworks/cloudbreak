@@ -47,8 +47,11 @@ public class StartAmbariServicesHandler implements EventHandler<StartAmbariServi
         Selectable response;
         try {
             StackDto stack = stackDtoService.getById(stackId);
-            String clusterManagerIp = clusterServiceRunner.updateClusterManagerClientConfig(stack);
-            clusterServiceRunner.runClusterManagerServices(stack);
+            String clusterManagerIp = stack.getClusterManagerIp();
+            if (clusterManagerIp == null) {
+                clusterManagerIp = clusterServiceRunner.updateAmbariClientConfig(stack);
+            }
+            clusterServiceRunner.runAmbariServices(stack);
             clusterApiConnectors.getConnector(stack, clusterManagerIp).waitForServer(request.isDefaultClusterManagerAuth());
             response = new StartClusterManagerServicesSuccess(stackId);
         } catch (Exception e) {
