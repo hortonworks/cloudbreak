@@ -15,6 +15,7 @@ public interface Retry {
     <T> T testWith1SecDelayMax5TimesMaxDelay5MinutesMultiplier5(Supplier<T> action) throws ActionFailedException;
 
     class ActionFailedException extends RuntimeException {
+
         public ActionFailedException() {
         }
 
@@ -37,6 +38,26 @@ public interface Retry {
         public static ActionFailedException ofCause(Throwable cause) {
             return new ActionFailedException(cause != null ? cause.getMessage() : null, cause);
         }
-    }
 
+        public static Runnable wrapRte(Runnable action) {
+            return () -> {
+                try {
+                    action.run();
+                } catch (RuntimeException e) {
+                    throw new ActionFailedException(e);
+                }
+            };
+        }
+
+        public static <T> Supplier<T> wrapRte(Supplier<T> action) {
+            return () -> {
+                try {
+                    return action.get();
+                } catch (RuntimeException e) {
+                    throw new ActionFailedException(e);
+                }
+            };
+        }
+
+    }
 }

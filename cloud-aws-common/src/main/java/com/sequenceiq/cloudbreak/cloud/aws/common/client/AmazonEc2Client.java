@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
+
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.service.Retry.ActionFailedException.wrapRte;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.AllocateAddressRequest;
@@ -93,27 +95,27 @@ public class AmazonEc2Client extends AmazonClient {
     }
 
     public CreateVolumeResult createVolume(CreateVolumeRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.createVolume(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.createVolume(request)));
     }
 
     public DescribeSubnetsResult describeSubnets(DescribeSubnetsRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeSubnets(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeSubnets(request)));
     }
 
     public ModifyInstanceAttributeResult modifyInstanceAttribute(ModifyInstanceAttributeRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.modifyInstanceAttribute(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.modifyInstanceAttribute(request)));
     }
 
     public DeleteVolumeResult deleteVolume(DeleteVolumeRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.deleteVolume(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.deleteVolume(request)));
     }
 
     public DescribeVolumesResult describeVolumes(DescribeVolumesRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.describeVolumes(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeVolumes(request)));
     }
 
     public AttachVolumeResult attachVolume(AttachVolumeRequest request) {
-        return retry.testWith2SecDelayMax15Times(() -> client.attachVolume(request));
+        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.attachVolume(request)));
     }
 
     public DescribeRegionsResult describeRegions(DescribeRegionsRequest describeRegionsRequest) {
