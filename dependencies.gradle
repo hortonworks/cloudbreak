@@ -25,7 +25,7 @@ ext {
   // Network
   dnsjavaVersion = '2.1.7'
   httpClientVersion = '4.5.10'
-  nettyVersion = '4.1.77.Final'
+  nettyVersion = '4.1.85.Final'
   okhttpVersion = '3.14.9'
 
   // Cloud SDKs
