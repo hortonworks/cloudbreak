@@ -18,7 +18,7 @@ dependencies {
 
     implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
 
-    implementation group: 'com.sun.jersey',                name: 'jersey-core',                    version: '1.19.1'
+    implementation group: 'com.sun.jersey',                name: 'jersey-core',                    version: '1.19.4'
     implementation group: 'com.sun.jersey',                name: 'jersey-client',                   version: '1.19.1'
 
     testImplementation group: 'org.springframework.boot',  name:'spring-boot-starter-test',        version: springBootVersion
