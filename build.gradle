@@ -170,7 +170,12 @@ subprojects {
                         '**/cloudbreak/domain/**',
                         '**/environment/**/domain/**',
                         '**/environment/**/attributes/**',
-                        '**Config**.java'
+                        '**Config**.java',
+                        '**Entry**.java',
+                        '*.json',
+                        '*.yaml',
+                        '*.yml',
+                        '*.ftl'
                 ]
         )
       })

@@ -1,11 +1,12 @@
 package com.sequenceiq.redbeams.configuration;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,15 +21,18 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration
-@ConfigurationProperties(prefix = "redbeams.ssl")
 public class DatabaseServerSslCertificateConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseServerSslCertificateConfig.class);
@@ -41,15 +45,17 @@ public class DatabaseServerSslCertificateConfig {
 
     private static final String CLOUD_PLATFORM_AND_REGION_FORMAT = "%s.%s";
 
-    private static final String CERT_LIST_SEPARATOR_REGEX = ";";
+    private static final String CERT_LIST_SEPARATOR_REGEX = "/";
 
-    private static final int GROUP_VERSION = 1;
+    private static final int GROUP_PROVIDER_INDEX_FROM_LAST = 3;
 
-    private static final int GROUP_CLOUD_PROVIDER_IDENTIFIER = 2;
+    private static final int GROUP_REGION_INDEX_FROM_LAST = 2;
 
-    private static final int GROUP_CERT_PEM = 3;
+    private static final int GROUP_CERT_INDEX_FROM_LAST = 1;
 
-    private static final Pattern CERT_ENTRY_PATTERN = Pattern.compile("([-+]?[0-9]+):([^:]+):([^:]+)");
+    private static final int GROUP_CERT_NAME = 1;
+
+    private static final String CERT_EXTENSION = ".yml";
 
     // See 20210219153728_CB-10722_Set_AWS_root_cert_ID_when_creating_RDS.sql
     private static final int CLOUD_PROVIDER_IDENTIFIER_MAX_LENGTH = 255;
@@ -61,6 +67,8 @@ public class DatabaseServerSslCertificateConfig {
     private static final String PLATFORM_AWS = CloudPlatform.AWS.toString().toLowerCase();
 
     private static final String PLATFORM_AZURE = CloudPlatform.AZURE.toString().toLowerCase();
+
+    private static final ResourcePatternResolver PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
 
     private static final Map<String, Integer> CERT_LEGACY_MAX_VERSIONS_BY_CLOUD_PLATFORM = Map.ofEntries(
             Map.entry(PLATFORM_AWS, 0),
@@ -84,6 +92,9 @@ public class DatabaseServerSslCertificateConfig {
             Map.entry(PLATFORM_AWS + ".us-gov-east-1", "rds-ca-rsa4096-g1"),
             Map.entry(PLATFORM_AZURE, "DigiCertGlobalRootG2"));
 
+    @Value("${cert.path:/certs}")
+    private String certPath;
+
     // Must not be renamed or made final, gets injected from application properties
     private Map<String, String> certs = new HashMap<>();
 
@@ -99,12 +110,33 @@ public class DatabaseServerSslCertificateConfig {
 
     @PostConstruct
     public void setupCertsCache() {
+        try {
+            certs = Arrays.stream(PATTERN_RESOLVER.getResources("classpath:" + certPath + "/**/*" + CERT_EXTENSION))
+                    .map(resource -> {
+                        try {
+                            String[] path = resource.getURL().getPath().split(certPath);
+                            String key = String.format("%s%s", certPath, path[GROUP_CERT_NAME]);
+                            String value = FileReaderUtils.readFileFromClasspath(key);
+                            return Map.entry(key, value);
+                        } catch (IOException e) {
+                            LOGGER.error("Could not load certificates from classpath: {}", e);
+                        }
+                        return null;
+                    })
+                    .filter(e -> StringUtils.isNoneBlank(e.getValue()))
+                    .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+        } catch (IOException e) {
+            LOGGER.error("Could not load certificates from classpath: {}", e);
+        }
+
         certsByCloudPlatformCache = certs.entrySet()
                 .stream()
-                .filter(e -> StringUtils.isNoneBlank(e.getValue()))
-                .collect(Collectors.toMap(e -> e.getKey().toLowerCase(), e -> buildCertsSet(e.getKey().toLowerCase(), e.getValue())));
+                .map(e -> buildCert(e.getKey().toLowerCase(Locale.ROOT), e.getValue()))
+                .collect(Collectors.groupingBy(SslCertificateEntry::getCloudKey))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().stream().collect(Collectors.toSet())));
 
-        validateCloudPlatformFormat();
         validateCloudProviderIdentifierUniqueness();
 
         certsByCloudPlatformByVersionCache = certsByCloudPlatformCache.entrySet()
@@ -137,35 +169,29 @@ public class DatabaseServerSslCertificateConfig {
         }
     }
 
-    private Set<SslCertificateEntry> buildCertsSet(String cloudPlatform, String entries) {
-        List<SslCertificateEntry> certsList = Arrays.stream(entries.split(CERT_LIST_SEPARATOR_REGEX))
-                .map(String::trim)
-                .map(e -> parseCertEntry(cloudPlatform, e))
-                .collect(Collectors.toList());
-        Set<SslCertificateEntry> result = new HashSet<>();
-        // Not checking for global uniqueness; it is permitted to have common versions for multiple cloud providers.
-        certsList.forEach(e -> {
-            if (!result.add(e)) {
-                throw new IllegalArgumentException(
-                        String.format("Duplicated SSL certificate version %d for cloud platform \"%s\"", e.getVersion(),
-                                prettyPrintCloudPlatform(cloudPlatform)));
-            }
-        });
-        return result;
+    private SslCertificateEntry buildCert(String filePath, String fileContent) {
+        return parseCertEntry(filePath, fileContent);
     }
 
-    private SslCertificateEntry parseCertEntry(String cloudPlatform, String entry) {
-        Matcher matcher = CERT_ENTRY_PATTERN.matcher(entry);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException(String.format("Malformed SSL certificate entry for cloud platform \"%s\": \"%s\"",
-                    prettyPrintCloudPlatform(cloudPlatform), entry));
+    SslCertificateEntry parseCertEntry(String filePath, String fileContent) {
+        SslContent content = new Yaml().loadAs(fileContent, SslContent.class);
+        String[] fileSegments = filePath.split(CERT_LIST_SEPARATOR_REGEX);
+        String[] split = Arrays.stream(fileSegments)
+                .filter(i -> !Strings.isNullOrEmpty(i))
+                .toArray(String[]::new);
+        if (split.length < GROUP_PROVIDER_INDEX_FROM_LAST) {
+            throw new IllegalStateException(String.format("Cert file path format is not valid: %s", filePath));
         }
-        int version = Integer.parseInt(matcher.group(GROUP_VERSION));
-        String cloudProviderIdentifier = matcher.group(GROUP_CLOUD_PROVIDER_IDENTIFIER);
+        int version = Integer.parseInt(split[split.length - GROUP_CERT_INDEX_FROM_LAST]
+                .replace(CERT_EXTENSION, ""));
+        String cloudPlatform = split[split.length - GROUP_PROVIDER_INDEX_FROM_LAST];
+        String cloudRegion = split[split.length - GROUP_REGION_INDEX_FROM_LAST];
+        String cloudProviderIdentifier = content.getName();
+        String certPem = content.getCert();
+        String cloudKey = String.format("%s.%s", cloudPlatform, cloudRegion);
         validateCloudProviderIdentifierFormat(cloudPlatform, cloudProviderIdentifier);
-        String certPem = matcher.group(GROUP_CERT_PEM);
         X509Certificate x509Cert = extractX509Certificate(cloudPlatform, certPem);
-        return new SslCertificateEntry(version, cloudProviderIdentifier, certPem, x509Cert);
+        return new SslCertificateEntry(version, cloudKey, cloudProviderIdentifier, cloudPlatform, certPem, x509Cert);
     }
 
     private void validateCloudProviderIdentifierFormat(String cloudPlatform, String cloudProviderIdentifier) {
@@ -214,15 +240,6 @@ public class DatabaseServerSslCertificateConfig {
                 .stream()
                 .max(Integer::compareTo)
                 .orElseThrow(() -> createEmptyCertsByVersionMapException(cloudPlatform));
-    }
-
-    private void validateCloudPlatformFormat() {
-        for (String cloudPlatform : certsByCloudPlatformCache.keySet()) {
-            Matcher matcher = CLOUD_PLATFORM_AND_REGION_PATTERN.matcher(cloudPlatform);
-            if (!matcher.matches()) {
-                throw new IllegalArgumentException(String.format("Malformed cloud platform \"%s\".", prettyPrintCloudPlatform(cloudPlatform)));
-            }
-        }
     }
 
     private void validateCloudProviderIdentifierUniqueness() {

@@ -3,23 +3,32 @@ package com.sequenceiq.redbeams.configuration;
 import static java.util.Objects.requireNonNull;
 
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 import java.util.Objects;
 
 public class SslCertificateEntry {
+
+    private static final String DEFAULT = ".default";
 
     private final int version;
 
     private final String cloudProviderIdentifier;
 
+    private final String cloudPlatform;
+
     private final String certPem;
+
+    private final String cloudKey;
 
     private final X509Certificate x509Cert;
 
-    public SslCertificateEntry(int version, String cloudProviderIdentifier, String certPem, X509Certificate x509Cert) {
+    public SslCertificateEntry(int version, String cloudKey, String cloudProviderIdentifier, String cloudPlatform, String certPem, X509Certificate x509Cert) {
         this.version = version;
+        this.cloudKey = requireNonNull(cloudKey.toLowerCase(Locale.ROOT).replace(DEFAULT, ""));
         this.cloudProviderIdentifier = requireNonNull(cloudProviderIdentifier);
         this.certPem = requireNonNull(certPem);
         this.x509Cert = requireNonNull(x509Cert);
+        this.cloudPlatform = requireNonNull(cloudPlatform);
     }
 
     public int getVersion() {
@@ -36,6 +45,14 @@ public class SslCertificateEntry {
 
     public X509Certificate getX509Cert() {
         return x509Cert;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public String getCloudKey() {
+        return cloudKey;
     }
 
     /**
@@ -73,6 +90,8 @@ public class SslCertificateEntry {
                 ", cloudProviderIdentifier='" + cloudProviderIdentifier + '\'' +
                 ", certPem='" + certPem + '\'' +
                 ", x509Cert=" + x509Cert +
+                ", cloudPlatform=" + cloudPlatform +
+                ", cloudKey=" + cloudKey +
                 '}';
     }
 
