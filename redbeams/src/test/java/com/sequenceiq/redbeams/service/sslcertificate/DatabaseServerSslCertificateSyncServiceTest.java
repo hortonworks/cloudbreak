@@ -53,6 +53,8 @@ class DatabaseServerSslCertificateSyncServiceTest {
 
     private static final String CERT_ID_3 = "certID-3";
 
+    private static final String AWS = "aws";
+
     private static final int CERT_VERSION = 789;
 
     private static final String CERT_PEM = "cert-PEM";
@@ -250,7 +252,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
                 .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
 
-        SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_3, CERT_PEM, x509Cert);
+        SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_3, CERT_ID_3, AWS, CERT_PEM, x509Cert);
         when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
                 .thenReturn(cert);
 
@@ -274,7 +276,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
                 .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
 
-        SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_2, "", x509Cert);
+        SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_2, CERT_ID_2, AWS, "", x509Cert);
         when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
                 .thenReturn(cert);
 
@@ -299,7 +301,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
                 .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
 
-        SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_2, CERT_PEM, x509Cert);
+        SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_2, CERT_ID_2, AWS, CERT_PEM, x509Cert);
         when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
                 .thenReturn(cert);
 

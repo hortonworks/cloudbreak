@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -229,8 +230,10 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(uuidGeneratorService.uuidVariableParts(anyInt())).thenReturn("parts");
         when(entitlementService.internalTenant(anyString())).thenReturn(true);
 
-        sslCertificateEntryV2 = new SslCertificateEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_V2, CERT_PEM_V2, x509Certificate);
-        sslCertificateEntryV3 = new SslCertificateEntry(VERSION_3, CLOUD_PROVIDER_IDENTIFIER_V3, CERT_PEM_V3, x509Certificate);
+        sslCertificateEntryV2 = new SslCertificateEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_V2,
+                CLOUD_PROVIDER_IDENTIFIER_V2, AWS_CLOUD_PLATFORM.name().toLowerCase(Locale.ROOT), CERT_PEM_V2, x509Certificate);
+        sslCertificateEntryV3 = new SslCertificateEntry(VERSION_3, CLOUD_PROVIDER_IDENTIFIER_V3,
+                CLOUD_PROVIDER_IDENTIFIER_V3, AWS_CLOUD_PLATFORM.name().toLowerCase(Locale.ROOT), CERT_PEM_V3, x509Certificate);
         when(databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(anyString(), eq(REGION))).thenReturn(MAX_VERSION);
 
         when(clock.getCurrentInstant()).thenReturn(NOW);
@@ -457,7 +460,13 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AWS_CLOUD_PLATFORM);
 
         when(databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(AWS_CLOUD_PLATFORM.name(), REGION)).thenReturn(SINGLE_CERT);
-        SslCertificateEntry sslCertificateEntryV3Broken = new SslCertificateEntry(VERSION_3, "", CERT_PEM_V3, x509Certificate);
+        SslCertificateEntry sslCertificateEntryV3Broken = new SslCertificateEntry(
+                VERSION_3,
+                CERT_PEM_V3,
+                "",
+                AWS_CLOUD_PLATFORM.name().toLowerCase(Locale.ROOT),
+                CERT_PEM_V3,
+                x509Certificate);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(AWS_CLOUD_PLATFORM.name(), REGION))
                 .thenReturn(Set.of(sslCertificateEntryV3Broken));
 
@@ -471,7 +480,13 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AWS_CLOUD_PLATFORM);
 
         when(databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(AWS_CLOUD_PLATFORM.name(), REGION)).thenReturn(SINGLE_CERT);
-        SslCertificateEntry sslCertificateEntryV3Broken = new SslCertificateEntry(VERSION_3, CLOUD_PROVIDER_IDENTIFIER_V3, "", x509Certificate);
+        SslCertificateEntry sslCertificateEntryV3Broken = new SslCertificateEntry(
+                VERSION_3,
+                CLOUD_PROVIDER_IDENTIFIER_V3,
+                CLOUD_PROVIDER_IDENTIFIER_V3,
+                AWS_CLOUD_PLATFORM.name().toLowerCase(Locale.ROOT),
+                "",
+                x509Certificate);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(AWS_CLOUD_PLATFORM.name(), REGION))
                 .thenReturn(Set.of(sslCertificateEntryV3Broken));
 
@@ -502,7 +517,8 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private void conversionTestWhenSslEnabledAndThreeCertsReturnedInternal(String cloudPlatform) {
         when(databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(cloudPlatform, REGION)).thenReturn(THREE_CERTS);
-        SslCertificateEntry sslCertificateEntryV1 = new SslCertificateEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_V1, CERT_PEM_V1, x509Certificate);
+        SslCertificateEntry sslCertificateEntryV1 = new SslCertificateEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_V1,
+                CLOUD_PROVIDER_IDENTIFIER_V1, AWS_CLOUD_PLATFORM.name().toLowerCase(Locale.ROOT), CERT_PEM_V1, x509Certificate);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(cloudPlatform, REGION))
                 .thenReturn(Set.of(sslCertificateEntryV1, sslCertificateEntryV2, sslCertificateEntryV3));
 
@@ -562,7 +578,13 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     void conversionTestWhenSslEnabledAndAzureAndTwoCertsErrorDuplicatedCertPem() {
         setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
 
-        SslCertificateEntry sslCertificateEntryV2DuplicateOfV3 = new SslCertificateEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_V3, CERT_PEM_V3, x509Certificate);
+        SslCertificateEntry sslCertificateEntryV2DuplicateOfV3 = new SslCertificateEntry(
+                VERSION_2,
+                CLOUD_PROVIDER_IDENTIFIER_V3,
+                CLOUD_PROVIDER_IDENTIFIER_V3,
+                AWS_CLOUD_PLATFORM.name().toLowerCase(Locale.ROOT),
+                CERT_PEM_V3,
+                x509Certificate);
 
         when(databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(AZURE_CLOUD_PLATFORM.name(), REGION)).thenReturn(TWO_CERTS);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(AZURE_CLOUD_PLATFORM.name(), REGION))
@@ -577,7 +599,13 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     void conversionTestWhenSslEnabledAndAzureAndTwoCertsErrorVersionMismatch() {
         setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
 
-        SslCertificateEntry sslCertificateEntryV2Broken = new SslCertificateEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_V2, CERT_PEM_V2, x509Certificate);
+        SslCertificateEntry sslCertificateEntryV2Broken = new SslCertificateEntry(
+                VERSION_1,
+                CLOUD_PROVIDER_IDENTIFIER_V2,
+                CLOUD_PROVIDER_IDENTIFIER_V2,
+                AWS_CLOUD_PLATFORM.name().toLowerCase(Locale.ROOT),
+                CERT_PEM_V2,
+                x509Certificate);
 
         when(databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(AZURE_CLOUD_PLATFORM.name(), REGION)).thenReturn(TWO_CERTS);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(AZURE_CLOUD_PLATFORM.name(), REGION))
