@@ -35,8 +35,8 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
 
     @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name " +
             "FROM Stack s " +
-            "WHERE s.terminated = -1 and s.stackStatus.status in (:statuses)")
-    List<JobResource> findAllRunningAndStatusIn(@Param("statuses") Collection<Status> statuses);
+            "WHERE s.terminated = -1 and s.stackStatus.status not in (:statuses)")
+    List<JobResource> findAllRunningAndStatusNotIn(@Param("statuses") Collection<Status> statuses);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id ")
     Optional<Stack> findOneWithLists(@Param("id") Long id);

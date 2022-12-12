@@ -1,5 +1,12 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETED_ON_PROVIDER_SIDE;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REQUESTED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STACK_AVAILABLE;
+
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -55,19 +62,13 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
     }
 
     public List<JobResource> findAllForAutoSync() {
-        return stackRepository.findAllRunningAndStatusIn(List.of(
-                Status.AVAILABLE,
-                Status.UPDATE_FAILED,
-                Status.START_FAILED,
-                Status.STOP_FAILED,
-                Status.UNREACHABLE,
-                Status.UNHEALTHY,
-                Status.UNKNOWN,
-                Status.STOPPED,
-                Status.START_IN_PROGRESS,
-                Status.STOP_IN_PROGRESS,
-                Status.STOP_REQUESTED,
-                Status.START_REQUESTED));
+        return stackRepository.findAllRunningAndStatusNotIn(List.of(
+                REQUESTED,
+                CREATE_IN_PROGRESS,
+                STACK_AVAILABLE,
+                DELETE_IN_PROGRESS,
+                DELETE_COMPLETED,
+                DELETED_ON_PROVIDER_SIDE));
     }
 
     public Stack getByIdWithListsInTransaction(Long id) {
