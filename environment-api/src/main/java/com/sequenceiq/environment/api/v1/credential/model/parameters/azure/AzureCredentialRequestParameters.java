@@ -3,7 +3,6 @@ package com.sequenceiq.environment.api.v1.credential.model.parameters.azure;
 import java.io.Serializable;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,12 +16,10 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class AzureCredentialRequestParameters implements Serializable {
 
-    @NotNull
-    @ApiModelProperty(required = true, example = "a8d4457d-310v-41p6-sc53-14g8d733e514")
+    @ApiModelProperty(example = "a8d4457d-310v-41p6-sc53-14g8d733e514")
     private String subscriptionId;
 
-    @NotNull
-    @ApiModelProperty(required = true, example = "b10u3481-2451-10ba-7sfd-9o2d1v60185d")
+    @ApiModelProperty(example = "b10u3481-2451-10ba-7sfd-9o2d1v60185d")
     private String tenantId;
 
     @Valid
