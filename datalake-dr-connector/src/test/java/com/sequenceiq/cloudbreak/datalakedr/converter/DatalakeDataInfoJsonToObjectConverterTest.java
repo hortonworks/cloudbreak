@@ -38,6 +38,8 @@ public class DatalakeDataInfoJsonToObjectConverterTest {
 
     private static final Long VERTEX_SIZE = 496952L;
 
+    private static final Long AVAILABLE_BACKUP_SIZE = 8765L;
+
     private static final String TEST_DATA_SIZES_RESPONSE = '{' +
             "\"database\":{" +
             "\"hive\":" + HIVE_SIZE + ',' +
@@ -55,6 +57,7 @@ public class DatalakeDataInfoJsonToObjectConverterTest {
             "\"ranger_audits\":" + RANGER_AUDITS_SIZE + ',' +
             "\"vertex_index\":" + VERTEX_SIZE +
             '}' +
+            ",\"freeSpace\":" + AVAILABLE_BACKUP_SIZE +
             '}';
 
     @InjectMocks
@@ -75,6 +78,7 @@ public class DatalakeDataInfoJsonToObjectConverterTest {
         assertEquals(out.getSolrFulltextIndexCollectionSizeInBytes(), FULLTEXT_SIZE);
         assertEquals(out.getSolrRangerAuditsCollectionSizeInBytes(), RANGER_AUDITS_SIZE);
         assertEquals(out.getSolrVertexIndexCollectionSizeInBytes(), VERTEX_SIZE);
+        assertEquals(out.getDatabaseBackupNodeFreeSpaceInBytes(), AVAILABLE_BACKUP_SIZE);
     }
 
     @Test

@@ -100,6 +100,8 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter {
                     .ifPresent(failures::add);
             getFailure(OperationEnum.RANGER_AUDIT_VALIDATION_PRECHECK.description(), operationStates.getAdminOperations().getPrecheckRangerAuditValidation())
                     .ifPresent(failures::add);
+            getFailure(OperationEnum.DB_BACKUP_STORAGE_PRECHECK.description(), operationStates.getAdminOperations().getPrecheckBackupTemporaryStorage())
+                    .ifPresent(failures::add);
             failure = failures.isEmpty() ? null : String.join(", ", failures);
         } else {
             failure = StringUtils.isNotBlank(legacyFailureReason) ? legacyFailureReason : null;

@@ -86,6 +86,7 @@ message AdminOperationsBackupRestoreState {
   BackupRestoreOperationStatus startServices = 2; // Restarting services after the backup or restore is complete.
   BackupRestoreOperationStatus precheckStoragePermission = 3;
   BackupRestoreOperationStatus precheckRangerAuditValidation = 4;
+  BackupRestoreOperationStatus precheckBackupTemporaryStorage = 5;  // Check available storage to perform a backup operation
 }
 
 // HbaseBackupRestoreState
@@ -327,6 +328,7 @@ message DatalakeDataInfoObject {
   uint64 solrFulltextIndexCollectionSizeInBytes = 6; // Size of the fulltext Solr index collection.
   uint64 solrEdgeIndexCollectionSizeInBytes = 7; // Size of the edge Solr index collection.
   uint64 solrRangerAuditsCollectionSizeInBytes = 8; // Size of the Ranger Audits Solr collection.
+  uint64 databaseBackupNodeFreeSpaceInBytes = 9; // Space available for database backup.
 }
 
 /**
