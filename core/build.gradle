@@ -132,7 +132,7 @@ dependencyManagement {
       entry 'bcpkix-jdk15on'
     }
 
-    dependencySet(group: 'com.jayway.restassured',  version: '2.3.4') {
+    dependencySet(group: 'com.jayway.restassured',  version: '2.9.0') {
       entry 'rest-assured'
       entry 'json-path'
     }
