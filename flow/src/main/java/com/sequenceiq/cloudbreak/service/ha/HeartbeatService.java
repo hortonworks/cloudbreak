@@ -137,10 +137,11 @@ public class HeartbeatService {
             }
 
             String nodeId = nodeConfig.getId();
+            Set<String> runningFlowIdsSnapshot = runningFlows.getRunningFlowIdsSnapshot();
             Set<String> allMyFlows = flowLogService.findAllByCloudbreakNodeId(nodeId).stream()
                     .map(FlowLog::getFlowId).collect(Collectors.toSet());
             LOGGER.info("All my flows: {}", allMyFlows);
-            Set<String> newFlows = allMyFlows.stream().filter(f -> runningFlows.get(f) == null).collect(Collectors.toSet());
+            Set<String> newFlows = allMyFlows.stream().filter(f -> !runningFlowIdsSnapshot.contains(f)).collect(Collectors.toSet());
             LOGGER.info("Restarted flows: {}", newFlows);
             for (String flow : newFlows) {
                 try {
