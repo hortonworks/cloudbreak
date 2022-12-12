@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.core;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,6 +53,10 @@ public class FlowRegister {
         metricService.submit(FlowMetricType.ACTIVE_FLOWS, runningFlows.size());
         LOGGER.info("Running flows after removal: {}", runningFlows.keySet());
         return pair == null ? null : pair.getLeft();
+    }
+
+    public Set<String> getRunningFlowIdsSnapshot() {
+        return new HashSet<>(runningFlows.keySet());
     }
 
     public Set<String> getRunningFlowIds() {
