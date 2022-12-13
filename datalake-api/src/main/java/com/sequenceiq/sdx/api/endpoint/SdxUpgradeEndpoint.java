@@ -76,7 +76,7 @@ public interface SdxUpgradeEndpoint {
     @Path("/crn/{crn}/upgrade_rds")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Upgrades the database server of the data lake", nickname = "upgradeDatalakeDatabaseByCrn")
-    SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByCrn(@PathParam("crn") String clusterCrn, @Valid SdxUpgradeDatabaseServerRequest
-            sdxUpgradeDatabaseServerRequest);
+    SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String clusterCrn,
+            @Valid SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest);
 
 }
