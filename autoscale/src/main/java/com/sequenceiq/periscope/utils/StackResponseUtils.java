@@ -23,9 +23,13 @@ public class StackResponseUtils {
 
     public Optional<InstanceMetaDataV4Response> getNotTerminatedPrimaryGateways(StackV4Response stackResponse) {
         return stackResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream()).filter(
-                im -> im.getInstanceType() == InstanceMetadataType.GATEWAY_PRIMARY
-                        && im.getInstanceStatus() != InstanceStatus.TERMINATED
+                im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceType())
+                        && !InstanceStatus.TERMINATED.equals(im.getInstanceStatus())
         ).findFirst();
+    }
+
+    public String getPrimaryGatewayHostIP(StackV4Response stackResponse) {
+        return getNotTerminatedPrimaryGateways(stackResponse).map(InstanceMetaDataV4Response::getPrivateIp).orElse(null);
     }
 
     public Map<String, String> getCloudInstanceIdsForHostGroup(StackV4Response stackResponse, String hostGroup) {

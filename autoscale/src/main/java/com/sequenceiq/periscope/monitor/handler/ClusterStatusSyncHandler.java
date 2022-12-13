@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.monitor.event.ClusterStatusSyncEvent;
@@ -31,6 +34,7 @@ import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DependentHostGroupsService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
+import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 @Component
 public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStatusSyncEvent> {
@@ -48,6 +52,9 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
     @Inject
     private ClouderaManagerCommunicator cmCommunicator;
+
+    @Inject
+    private StackResponseUtils stackResponseUtils;
 
     @Inject
     private DependentHostGroupsService dependentHostGroupsService;
@@ -69,6 +76,8 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         DependentHostGroupsV4Response dependentHostGroupsResponse = dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(cluster.getStackCrn(),
                 policyHostGroups);
 
+        updateClusterManagerDetails(cluster, stackResponse);
+
         boolean clusterAvailable = determineClusterAvailability(cluster, stackResponse, dependentHostGroupsResponse, policyHostGroups) &&
                 cmCommunicator.isClusterManagerRunning(cluster);
 
@@ -76,6 +85,16 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         LOGGER.info("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", stackResponse, cluster.getStackCrn(), clusterAvailable);
 
         updateClusterState(cluster, stackResponse, clusterAvailable);
+    }
+
+    private void updateClusterManagerDetails(Cluster cluster, StackV4Response stackResponse) {
+        ClusterManager cm = cluster.getClusterManager();
+        String primaryGatewayIp = stackResponseUtils.getPrimaryGatewayHostIP(stackResponse);
+        if (!Strings.isNullOrEmpty(primaryGatewayIp) && !primaryGatewayIp.equals(cm.getHost())) {
+            ClusterManager newCm = new ClusterManager(primaryGatewayIp, cm.getPort(), cm.getUser(), cm.getPass(), ClusterManagerVariant.CLOUDERA_MANAGER);
+            cluster.setClusterManager(newCm);
+            clusterService.save(cluster);
+        }
     }
 
     private void updateClusterState(Cluster cluster, StackV4Response stackResponse, boolean clusterAvailable) {
