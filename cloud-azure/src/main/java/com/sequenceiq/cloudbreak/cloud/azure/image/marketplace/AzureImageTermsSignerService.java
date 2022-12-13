@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestOperationsService;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestResponseException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudPlatformValidationWarningException;
 
 @Service
@@ -85,7 +86,7 @@ public class AzureImageTermsSignerService {
             String message =
                     errorMessageBuilder.buildWithReason(String.format("error when signing vm image terms and conditions, message is '%s'", e.getMessage()));
             LOGGER.warn(message, e);
-            throw new CloudConnectorException(message, e);
+            throw new CloudImageException(message, e);
         }
     }
 

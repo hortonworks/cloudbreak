@@ -15,6 +15,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_COPY_CHECK_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_COPY_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_COPY_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_FALLBACK_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_FALLBACK_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_PREPARATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_PREPARATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.LAUNCH_LOAD_BALANCER_FAILED_EVENT;
@@ -63,7 +66,10 @@ class StackCreationEventTest {
             entry(ATTACHED_VOLUME_CONSUMPTION_COLLECTION_SCHEDULING_FINISHED_EVENT, "ATTACHEDVOLUMECONSUMPTIONCOLLECTIONSCHEDULINGSUCCESS"),
             entry(ATTACHED_VOLUME_CONSUMPTION_COLLECTION_SCHEDULING_FAILED_EVENT, "ATTACHEDVOLUMECONSUMPTIONCOLLECTIONSCHEDULINGFAILED"),
             entry(STACK_CREATION_FAILED_EVENT, "STACK_CREATION_FAILED"), entry(STACK_CREATION_FINISHED_EVENT, "STACK_CREATION_FINISHED"),
-            entry(STACKCREATION_FAILURE_HANDLED_EVENT, "STACK_CREATION_FAILHANDLED")
+            entry(STACKCREATION_FAILURE_HANDLED_EVENT, "STACK_CREATION_FAILHANDLED"),
+            entry(IMAGE_FALLBACK_EVENT, "IMAGEFALLBACK"),
+            entry(IMAGE_FALLBACK_FINISHED_EVENT, "IMAGEFALLBACKSUCCESS"),
+            entry(IMAGE_FALLBACK_FAILED_EVENT, "IMAGEFALLBACKFAILED")
     ));
 
     @ParameterizedTest(name = "underTest={0}")

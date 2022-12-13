@@ -15,6 +15,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_COPY_CHECK_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_COPY_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_COPY_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_FALLBACK_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_FALLBACK_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_PREPARATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_PREPARATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.LAUNCH_LOAD_BALANCER_FAILED_EVENT;
@@ -41,6 +44,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.GET_TLS_INFO_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.IMAGESETUP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.IMAGE_CHECK_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.IMAGE_FALLBACK_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.PROVISIONING_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.PROVISION_LOAD_BALANCER_STATE;
@@ -72,7 +76,11 @@ public class StackCreationFlowConfig extends StackStatusFinalizerAbstractFlowCon
             .from(IMAGE_CHECK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_COPY_CHECK_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)
             .from(IMAGE_CHECK_STATE).to(CREATE_CREDENTIAL_STATE).event(IMAGE_COPY_FINISHED_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)
             .from(CREATE_CREDENTIAL_STATE).to(START_PROVISIONING_STATE).event(CREATE_CREDENTIAL_FINISHED_EVENT).failureEvent(CREATE_CREDENTIAL_FAILED_EVENT)
+
             .from(START_PROVISIONING_STATE).to(PROVISION_LOAD_BALANCER_STATE).event(LAUNCH_STACK_FINISHED_EVENT).failureEvent(LAUNCH_STACK_FAILED_EVENT)
+            .from(START_PROVISIONING_STATE).to(IMAGE_FALLBACK_STATE).event(IMAGE_FALLBACK_EVENT).failureEvent(LAUNCH_STACK_FAILED_EVENT)
+            .from(IMAGE_FALLBACK_STATE).to(IMAGESETUP_STATE).event(IMAGE_FALLBACK_FINISHED_EVENT).failureEvent(IMAGE_FALLBACK_FAILED_EVENT)
+
             .from(PROVISION_LOAD_BALANCER_STATE).to(PROVISIONING_FINISHED_STATE).event(LAUNCH_LOAD_BALANCER_FINISHED_EVENT)
             .failureEvent(LAUNCH_LOAD_BALANCER_FAILED_EVENT)
             .from(PROVISIONING_FINISHED_STATE).to(COLLECTMETADATA_STATE).event(COLLECT_METADATA_FINISHED_EVENT).failureEvent(COLLECT_METADATA_FAILED_EVENT)

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -69,10 +70,16 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(launchStackRequestEvent.getHeaders(), result));
             LOGGER.debug("Launching the stack successfully finished for {}", cloudContext);
+        } catch (CloudImageException e) {
+            LaunchStackResult result = new LaunchStackResult(request.getResourceId(), List.of());
+            request.getResult().onNext(result);
+            eventBus.notify("IMAGEFALLBACK", new Event<>(launchStackRequestEvent.getHeaders(), result));
+            LOGGER.debug("Marketplace image error, attempt to fallback to vhd image {}", cloudContext);
         } catch (Exception e) {
             if (ExceptionUtils.getRootCause(e) instanceof InterruptedException) {
                 LOGGER.info("Interrupted exception is ignored as it has been thrown because of graceful shutdown of the java process.");
             }
+
             LaunchStackResult failure = new LaunchStackResult(e, request.getResourceId());
             LOGGER.warn("Error during launching the stack:", e);
             request.getResult().onNext(failure);
@@ -83,7 +90,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
     /**
      * Creates a poll task which waits for the resources to be fully up and running, or more specifically,
      * for the resources to be in a permanent successful state.
-     *
+     * <p>
      * Returns the result of the poll task.
      */
     private ResourcesStatePollerResult waitForResources(AuthenticatedContext ac, List<CloudResourceStatus> resourceStatuses, CloudContext cloudContext)
