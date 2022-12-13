@@ -1,9 +1,9 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.service.loadbalancer;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
-import static com.sequenceiq.cloudbreak.service.LoadBalancerConfigConverter.MISSING_CLOUD_RESOURCE;
+import static com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigConverter.MISSING_CLOUD_RESOURCE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
