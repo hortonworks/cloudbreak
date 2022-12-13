@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
@@ -64,5 +66,17 @@ public class FlowController implements FlowEndpoint {
     @AccountIdNotNeeded
     public FlowCheckResponse hasFlowRunningByFlowId(String flowId) {
         return flowService.getFlowState(flowId);
+    }
+
+    @Override
+    @AccountIdNotNeeded
+    public Page<FlowLogResponse> getFlowLogsByFlowIds(List<String> flowIds, int size, int page) {
+        return flowService.getFlowLogsByIds(flowIds, PageRequest.of(page, size));
+    }
+
+    @Override
+    @AccountIdNotNeeded
+    public Page<FlowCheckResponse> getFlowChainsStatusesByChainIds(List<String> chainIds, int size, int page) {
+        return flowService.getFlowChainsByChainIds(chainIds, PageRequest.of(page, size));
     }
 }

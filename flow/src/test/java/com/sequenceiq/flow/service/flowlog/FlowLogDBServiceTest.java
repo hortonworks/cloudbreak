@@ -43,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
@@ -197,9 +198,9 @@ class FlowLogDBServiceTest {
 
     @Test
     void testGetFlowLogsWithChainId() {
-        when(flowLogRepository.findAllByFlowIdsCreatedDesc(any())).thenReturn(List.of(createFlowLog("flow")));
+        when(flowLogRepository.findAllByFlowIdsCreatedDesc(any(), any())).thenReturn(new PageImpl<>(List.of(createFlowLog("flow"))));
 
-        assertEquals(1, underTest.getFlowLogsByFlowIdsCreatedDesc(Set.of("flowchain")).size());
+        assertEquals(1, underTest.getFlowLogsByFlowIdsCreatedDesc(Set.of("flowchain"), PageRequest.of(0, 50)).getContent().size());
     }
 
     @Test

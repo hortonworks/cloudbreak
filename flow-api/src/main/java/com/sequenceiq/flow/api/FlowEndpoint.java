@@ -2,6 +2,9 @@ package com.sequenceiq.flow.api;
 
 import java.util.List;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -9,6 +12,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+
+import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -23,6 +29,7 @@ import io.swagger.annotations.ApiOperation;
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/flow", description = "Operations on flow logs", protocols = "http,https",
         consumes = MediaType.APPLICATION_JSON)
+@Validated
 public interface FlowEndpoint {
 
     @GET
@@ -80,4 +87,23 @@ public interface FlowEndpoint {
     @ApiOperation(value = "Check if there is a running flow for flow id", produces = "application/json", notes = "Flow log operations",
             nickname = "hasFlowRunningByFlowId")
     FlowCheckResponse hasFlowRunningByFlowId(@PathParam("flowId") String flowId);
+
+    @GET
+    @Path("/logs/flowIds")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Get flow logs by a list of flow ids - Input size max 50", produces = "application/json", notes = "Flow log operations",
+            nickname = "getFlowLogsByFlowIds")
+    Page<FlowLogResponse> getFlowLogsByFlowIds(@NotNull @Size(max = 50, message = "Input size should not be over 50")
+        @QueryParam("flowIds") List<String> flowIds,
+        @Min(value = 1, message = "Page size should be greater than 0") @QueryParam("size") int size, @QueryParam("page") int page);
+
+    @GET
+    @Path("/check/chainIds")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Gets flow check responses for parent chains - Input size max 50",
+            produces = "application/json", notes = "Flow check log operations",
+            nickname = "getFlowChainsStatusesByChainIds")
+    Page<FlowCheckResponse> getFlowChainsStatusesByChainIds(@NotNull @Size(max = 50, message = "Input size should not be over 50")
+        @QueryParam("chainIds") List<String> chainIds,
+        @Min(value = 1, message = "Page size should be greater than 0") @QueryParam("size") int size, @QueryParam("page") int page);
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -17,6 +18,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Joiner;
@@ -134,5 +137,9 @@ public class FlowChainLogService {
             return flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(flowChainType);
         }
         return false;
+    }
+
+    public Page<FlowChainLog> findAllByFlowChainIdInOrderByCreatedDesc(Set<String> flowChainIds, Pageable pageable) {
+        return repository.nativeFindByFlowChainIdInOrderByCreatedDesc(flowChainIds, pageable);
     }
 }
