@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.service.loadbalancer;
 
 import javax.inject.Inject;
 
