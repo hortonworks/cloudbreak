@@ -13,22 +13,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
+import com.sequenceiq.flow.repository.RepositoryTestConfig.RepositoryTestInitializer;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(initializers = RepositoryTestConfig.RepositoryTestInitializer.class, classes = RepositoryTestConfig.class)
+@ContextConfiguration(initializers = RepositoryTestInitializer.class, classes = RepositoryTestConfig.class)
 @DataJpaTest
 class FlowLogRepositoryTest {
 
@@ -62,12 +67,81 @@ class FlowLogRepositoryTest {
         assertThat(result).isEqualTo(2);
     }
 
+    @Test
+    void testFindAllByFlowIdsCreatedDesc() {
+        String flowId1 = randomUUID().toString();
+        FlowLog flowLog1 = createFlowLog(flowId1);
+        flowLog1.setCreated(1L);
+        String flowId2 = randomUUID().toString();
+        FlowLog flowLog2 = createFlowLog(flowId2);
+        flowLog2.setCreated(2L);
+        String flowId3 = randomUUID().toString();
+        FlowLog flowLog3 = createFlowLog(flowId3);
+        flowLog3.setCreated(3L);
+        String flowId4 = randomUUID().toString();
+        FlowLog flowLog4 = createFlowLog(flowId4);
+        flowLog4.setCreated(4L);
+
+        saveFlowLogs(flowLog1, flowLog2, flowLog3, flowLog4);
+
+        Page<FlowLog> result = underTest.findAllByFlowIdsCreatedDesc(Set.of(flowId1, flowId2, flowId3, flowId4),
+                PageRequest.of(0, 4));
+
+        assertThat(result.getContent().size()).isEqualTo(4);
+        Assertions.assertTrue(result.getContent().contains(flowLog1));
+        Assertions.assertTrue(result.getContent().contains(flowLog2));
+        Assertions.assertTrue(result.getContent().contains(flowLog3));
+        Assertions.assertTrue(result.getContent().contains(flowLog4));
+    }
+
+    @Test
+    void testFindAllByFlowIdsCreatedDescPaginated() {
+        String flowId1 = randomUUID().toString();
+        FlowLog flowLog1 = createFlowLog(flowId1);
+        flowLog1.setCreated(1L);
+        String flowId2 = randomUUID().toString();
+        FlowLog flowLog2 = createFlowLog(flowId2);
+        flowLog2.setCreated(2L);
+        String flowId3 = randomUUID().toString();
+        FlowLog flowLog3 = createFlowLog(flowId3);
+        flowLog3.setCreated(3L);
+        String flowId4 = randomUUID().toString();
+        FlowLog flowLog4 = createFlowLog(flowId4);
+        flowLog4.setCreated(4L);
+
+        saveFlowLogs(flowLog1, flowLog2, flowLog3, flowLog4);
+
+        Page<FlowLog> resultPaginated = underTest.findAllByFlowIdsCreatedDesc(Set.of(flowId1, flowId2, flowId3, flowId4),
+                PageRequest.of(0, 2));
+
+        assertThat(resultPaginated.getContent().size()).isEqualTo(2);
+        Assertions.assertTrue(resultPaginated.getContent().contains(flowLog3));
+        Assertions.assertTrue(resultPaginated.getContent().contains(flowLog4));
+        assertThat(resultPaginated.getTotalElements()).isEqualTo(4);
+
+        Assertions.assertTrue(resultPaginated.hasNext());
+
+        resultPaginated = underTest.findAllByFlowIdsCreatedDesc(Set.of(flowId1, flowId2, flowId3, flowId4),
+                resultPaginated.nextPageable());
+
+        assertThat(resultPaginated.getContent().size()).isEqualTo(2);
+        Assertions.assertTrue(resultPaginated.getContent().contains(flowLog1));
+        Assertions.assertTrue(resultPaginated.getContent().contains(flowLog2));
+        assertThat(resultPaginated.getTotalElements()).isEqualTo(4);
+    }
+
     private Instant nowMinus(Duration of) {
         return now().minus(of);
     }
 
     private FlowLog createFlowLog(boolean finalized, StateStatus status, OperationType type) {
         return new FlowLog((long) TEST_RESOURCE_ID.incrementAndGet(), randomUUID().toString(), TEST_CURRENT_FLOW_STATE, finalized, status, type);
+    }
+
+    private FlowLog createFlowLog(String flowId) {
+        return new FlowLog((long) TEST_RESOURCE_ID.incrementAndGet(), flowId,
+                randomUUID().toString(), "TEST_USR_CRN", "TEST_NEXT_FLOW_STATE", null,
+                null, null, null, TEST_CURRENT_FLOW_STATE);
     }
 
     private void saveFlowLogs(FlowLog... flowLogs) {

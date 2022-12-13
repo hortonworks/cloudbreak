@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -145,6 +150,18 @@ class FlowChainLogServiceTest {
         assertTrue(underTest.isFlowTriggeredByFlowChain("flowChainType", Optional.of(flowLog)));
 
         assertFalse(underTest.isFlowTriggeredByFlowChain("flowChainType1", Optional.of(flowLog)));
+    }
+
+    @Test
+    void testFindAllByFlowChainIdInOrderByCreatedDesc() {
+        FlowChainLog flowChainLog = new FlowChainLog();
+        flowChainLog.setFlowChainId("FLOW_CHAIN_ID");
+        when(flowLogRepository.nativeFindByFlowChainIdInOrderByCreatedDesc(anySet(), any()))
+                .thenReturn(new PageImpl<>(List.of(flowChainLog)));
+        Page<FlowChainLog> flowChains = underTest.findAllByFlowChainIdInOrderByCreatedDesc(Set.of("chainId"), PageRequest.of(0, 50));
+        assertEquals(1, flowChains.getTotalPages());
+        assertEquals(1, flowChains.getTotalElements());
+        assertEquals("FLOW_CHAIN_ID", flowChains.getContent().get(0).getFlowChainId());
     }
 
     private FlowChainLog flowChainLog(String flowChainId, String parentFlowChainId, long created) {

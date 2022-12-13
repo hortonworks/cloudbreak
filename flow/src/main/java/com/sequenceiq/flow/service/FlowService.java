@@ -2,16 +2,23 @@ package com.sequenceiq.flow.service;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.isFlowInFailedState;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -21,12 +28,17 @@ import javax.ws.rs.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.util.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
@@ -148,10 +160,10 @@ public class FlowService {
         if (!flowCheckResponse.getHasActiveFlow() && !relatedFlowLogs.isEmpty()) {
             Map<String, Optional<FlowLogWithoutPayload>> latestFlowsByCreatedMap = relatedFlowLogs.stream()
                     .filter(s -> !Objects.equals(s.getCurrentState(), "FINISHED"))
-                    .collect(Collectors.groupingBy(FlowLogWithoutPayload::getFlowId,
+                    .collect(groupingBy(FlowLogWithoutPayload::getFlowId,
                         Collectors.reducing(BinaryOperator.maxBy(Comparator.comparing(FlowLogWithoutPayload::getCreated)))));
             List<FlowLogWithoutPayload> flowLogForEndTime = latestFlowsByCreatedMap.values().stream()
-                    .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+                    .filter(Optional::isPresent).map(Optional::get).collect(toList());
             Optional<Long> flowEndTime = flowLogForEndTime.stream().map(FlowLogWithoutPayload::getEndTime)
                     .filter(Objects::nonNull).max(Long::compareTo);
             if (flowEndTime.isPresent()) {
@@ -259,5 +271,69 @@ public class FlowService {
         checkState(Crn.isCrn(resourceCrn));
         List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnInFlowChain(resourceCrn);
         return flowOperationStatisticsService.createOperationResponse(resourceCrn, flowLogs);
+    }
+
+    public Page<FlowLogResponse> getFlowLogsByIds(List<String> flowIds, Pageable pageable) {
+        LOGGER.info("Getting flow logs by flow ids list {}", flowIds);
+        Page<FlowLog> flowLogResponses = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(new HashSet<>(flowIds), pageable);
+        return new PageImpl<>(flowLogResponses.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(toList()),
+                flowLogResponses.getPageable(), flowLogResponses.getTotalElements());
+    }
+
+    public Page<FlowCheckResponse> getFlowChainsByChainIds(List<String> chainIds, Pageable pageable) {
+        LOGGER.info("Getting flow check responses by flow check ids list {}", chainIds);
+        Page<FlowChainLog> flowChainLogs = flowChainLogService
+                .findAllByFlowChainIdInOrderByCreatedDesc(new HashSet<>(chainIds), pageable);
+        Map<String, FlowChainLog> flowChainsMap = flowChainLogs
+                .stream().filter(flowChainLog -> flowChainLog.getParentFlowChainId() == null)
+                .collect(Collectors.toMap(FlowChainLog::getFlowChainId, Function.identity()));
+
+        List<FlowChainLog> allRelatedFlowChainsList = new ArrayList<>();
+        Map<String, String> parentChainIdByChainIdMap = new HashMap<>();
+        Benchmark.measure(() -> flowChainsMap.forEach((parentFlowChainId, parentFlowChainLog) -> {
+            List<FlowChainLog> relatedFlowChainLogs = flowChainLogService.getRelatedFlowChainLogs(List.of(parentFlowChainLog));
+            relatedFlowChainLogs.forEach(log -> parentChainIdByChainIdMap.put(log.getFlowChainId(), parentFlowChainId));
+            allRelatedFlowChainsList.addAll(relatedFlowChainLogs);
+            allRelatedFlowChainsList.add(parentFlowChainLog);
+        }), LOGGER, "Finding all related flow chains took {}ms");
+
+        Set<String> flowChainIdsSet = allRelatedFlowChainsList.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
+
+        Map<String, List<FlowLogWithoutPayload>> flowLogsByParentChainId = fetchFlowLogsByParentChainId(flowChainIdsSet,
+                parentChainIdByChainIdMap);
+
+        List<FlowCheckResponse> result = flowChainsMap.keySet().stream()
+                .map(parentFlowChainId -> convertFlowChainToFlowCheckResponse(flowChainsMap.get(parentFlowChainId),
+                        flowLogsByParentChainId.getOrDefault(parentFlowChainId, List.of())))
+                .collect(toList());
+
+        return new PageImpl<>(result, flowChainLogs.getPageable(), flowChainLogs.getTotalElements());
+    }
+
+    private Map<String, List<FlowLogWithoutPayload>> fetchFlowLogsByParentChainId(Set<String> flowChainIdsSet,
+            Map<String, String> parentChainIdByChainIdMap) {
+        Map<String, List<FlowLogWithoutPayload>> flowLogsByChainId = flowLogDBService
+                .getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(flowChainIdsSet)
+                .stream().collect(groupingBy(FlowLogWithoutPayload::getFlowChainId, LinkedHashMap::new, toList()));
+
+        Map<String, List<FlowLogWithoutPayload>> flowLogsByParentChainId = new HashMap<>();
+        flowLogsByChainId.forEach((flowChainId, flowLogsList) -> {
+            String parentId = parentChainIdByChainIdMap.getOrDefault(flowChainId, flowChainId);
+            List<FlowLogWithoutPayload> flowLogs = flowLogsByParentChainId.getOrDefault(parentId, Lists.newArrayList());
+            flowLogs.addAll(flowLogsList);
+            flowLogsByParentChainId.put(parentId, flowLogs);
+        });
+
+        return flowLogsByParentChainId;
+    }
+
+    private FlowCheckResponse convertFlowChainToFlowCheckResponse(FlowChainLog chainLog, List<FlowLogWithoutPayload> relatedFlowLogs) {
+        FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
+        flowCheckResponse.setFlowChainId(chainLog.getFlowChainId());
+        flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainLog.getFlowChainId(), List.of(chainLog),
+                relatedFlowLogs));
+        flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(relatedFlowLogs, failHandledEvents));
+        setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
+        return flowCheckResponse;
     }
 }

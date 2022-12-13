@@ -2,6 +2,7 @@ package com.sequenceiq.flow.service;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -9,7 +10,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,6 +26,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -40,6 +47,8 @@ import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 @ExtendWith(MockitoExtension.class)
 public class FlowServiceTest {
+
+    private static final Pageable PAGEABLE = PageRequest.of(0, 50);
 
     private static final String STACK_CRN = "crn:cdp:sdx:us-west-1:1234:sdxcluster:mystack";
 
@@ -348,6 +357,7 @@ public class FlowServiceTest {
         lenient().when(flowLog.getStateStatus()).thenReturn(StateStatus.SUCCESSFUL);
         lenient().when(flowLog.getFinalized()).thenReturn(true);
         lenient().when(flowLog.getFlowId()).thenReturn(flowId);
+        lenient().when(flowLog.getFlowChainId()).thenReturn(FLOW_CHAIN_ID);
         return flowLog;
     }
 
@@ -363,6 +373,19 @@ public class FlowServiceTest {
         return flowLog;
     }
 
+    private FlowLogWithoutPayload flowLog(String currentState, String nextEvent, long created, String flowId,
+            Long endTime, String chainId) {
+        FlowLogWithoutPayload flowLog = mock(FlowLogWithoutPayload.class);
+        lenient().when(flowLog.getCurrentState()).thenReturn(currentState);
+        lenient().when(flowLog.getNextEvent()).thenReturn(nextEvent);
+        lenient().when(flowLog.getCreated()).thenReturn(created);
+        lenient().when(flowLog.getStateStatus()).thenReturn(StateStatus.SUCCESSFUL);
+        lenient().when(flowLog.getFinalized()).thenReturn(true);
+        lenient().when(flowLog.getFlowId()).thenReturn(flowId);
+        lenient().when(flowLog.getFlowChainId()).thenReturn(chainId);
+        return flowLog;
+    }
+
     private FlowLogWithoutPayload pendingFlowLog(String currentState, String nextEvent, long created, String flowId) {
         FlowLogWithoutPayload flowLog = mock(FlowLogWithoutPayload.class);
         lenient().when(flowLog.getCurrentState()).thenReturn(currentState);
@@ -371,6 +394,7 @@ public class FlowServiceTest {
         lenient().when(flowLog.getStateStatus()).thenReturn(StateStatus.PENDING);
         lenient().when(flowLog.getFinalized()).thenReturn(false);
         lenient().when(flowLog.getFlowId()).thenReturn(flowId);
+        lenient().when(flowLog.getFlowChainId()).thenReturn(FLOW_CHAIN_ID);
         return flowLog;
     }
 
@@ -442,5 +466,210 @@ public class FlowServiceTest {
 
         Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
         Assertions.assertNull(flowCheckResponse.getEndTime());
+    }
+
+    @Test
+    void testGetFlowLogsByIdsEmpty() {
+        when(flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(anySet(), any())).thenReturn(new PageImpl<>(List.of()));
+
+        Assertions.assertEquals(0, underTest.getFlowLogsByIds(List.of(FLOW_ID), PAGEABLE).getContent().size());
+
+        verify(flowLogDBService).getFlowLogsByFlowIdsCreatedDesc(anySet(), any());
+    }
+
+    @Test
+    void testGetFlowLogsByIds() {
+        when(flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(anySet(), any())).thenReturn(new PageImpl<>(List.of(new FlowLog())));
+
+        Assertions.assertEquals(1, underTest.getFlowLogsByIds(List.of(FLOW_ID), PAGEABLE).getContent().size());
+
+        verify(flowLogDBService).getFlowLogsByFlowIdsCreatedDesc(anySet(), any());
+        verify(flowLogConverter).convert(any());
+    }
+
+    private void setUpFlowChains(FlowChainLog flowChainLog, boolean hasEventInQueue, List<FlowLogWithoutPayload> flowLogs) {
+        List<FlowChainLog> chainLogs = List.of(flowChainLog);
+        when(flowChainLogService.findAllByFlowChainIdInOrderByCreatedDesc(Set.of(FLOW_CHAIN_ID), PageRequest.of(0, 50)))
+                .thenReturn(new PageImpl<>(chainLogs));
+        lenient().when(flowChainLogService.hasEventInFlowChainQueue(chainLogs)).thenReturn(hasEventInQueue);
+        when(flowLogDBService.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(Set.of(FLOW_CHAIN_ID))).thenReturn(flowLogs);
+    }
+
+    @Test
+    void testCompletedFlowChains() {
+        setUpFlowChains(flowChainLog(), false, List.of(
+                flowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 3, "123"),
+                flowLog(INTERMEDIATE_STATE, NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")));
+
+        Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+        Assertions.assertFalse(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+    }
+
+    @Test
+    void testWhenFlowChainsNotFound() {
+        when(flowChainLogService.findAllByFlowChainIdInOrderByCreatedDesc(anySet(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+
+        Assertions.assertEquals(0, flowCheckResponse.getContent().size());
+        verify(flowChainLogService).findAllByFlowChainIdInOrderByCreatedDesc(anySet(), any());
+        verify(flowLogDBService).getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(new HashSet<>());
+    }
+
+    @Test
+    void testRunningFlowChainsWhenHasEventInQueue() {
+        setUpFlowChains(flowChainLog(), true, List.of(
+                flowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")));
+
+        Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+
+        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+    }
+
+    @Test
+    void testRunningFlowChainsWithoutFinishedState() {
+        setUpFlowChains(flowChainLog(), false, List.of(
+                flowLog(INTERMEDIATE_STATE, NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")));
+
+        Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+
+        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+    }
+
+    @Test
+    void testFailedFlowChains() {
+        setUpFlowChains(flowChainLog(), false, List.of(
+                flowLog(INTERMEDIATE_STATE, FAIL_HANDLED_NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")));
+        Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+
+        Assertions.assertFalse(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+    }
+
+    @Test
+    void testFailedAndRestartedFlowChains() {
+        setUpFlowChains(flowChainLog(), false, List.of(
+                flowLog(INTERMEDIATE_STATE, NEXT_EVENT, 4, "123"),
+                flowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 3, "123"),
+                flowLog(INTERMEDIATE_STATE, FAIL_HANDLED_NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")));
+
+        Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+
+        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+    }
+
+    @Test
+    void testCompletedAfterTwoRetryFlowChains() {
+        setUpFlowChains(flowChainLog(), false, List.of(
+                flowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 8, "123"),
+                flowLog(INTERMEDIATE_STATE, NEXT_EVENT, 7, "123"),
+                flowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 6, "123"),
+                flowLog(INTERMEDIATE_STATE, FAIL_HANDLED_NEXT_EVENT, 5, "123"),
+                flowLog(INTERMEDIATE_STATE, NEXT_EVENT, 4, "123"),
+                flowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 3, "123"),
+                flowLog(INTERMEDIATE_STATE, FAIL_HANDLED_NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")));
+
+        Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+
+        Assertions.assertFalse(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+    }
+
+    @Test
+    void testRunningFlowChainsWithPendingFlowLog() {
+        setUpFlowChains(flowChainLog(), false, List.of(
+                pendingFlowLog(INTERMEDIATE_STATE, NEXT_EVENT, 4, "123"),
+                flowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 3, "123"),
+                flowLog(INTERMEDIATE_STATE, FAIL_HANDLED_NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")));
+
+        Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+
+        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+    }
+
+    @Test
+    void testRunningFlowChainsWithChildChains() {
+        setUpFlowChainsWithChildren(flowChainLog(), flowChainLogChild(), false, List.of(
+                pendingFlowLog(INTERMEDIATE_STATE, NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123"),
+                flowLog(INTERMEDIATE_STATE, NEXT_EVENT, 2, "123", null, FLOW_CHAIN_ID + "_CHILD"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123", 1L, FLOW_CHAIN_ID + "_CHILD")));
+
+        Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+
+        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        Assertions.assertNull(flowCheckResponse.getContent().get(0).getEndTime());
+    }
+
+    private void setUpFlowChainsWithChildren(FlowChainLog flowChainLog, FlowChainLog flowChainLogChild,
+            boolean hasEventInQueue, List<FlowLogWithoutPayload> flowLogs) {
+        List<FlowChainLog> chainLogs = List.of(flowChainLog);
+        List<FlowChainLog> childChainLogs = new ArrayList<>();
+        childChainLogs.add(flowChainLogChild);
+        when(flowChainLogService.findAllByFlowChainIdInOrderByCreatedDesc(Set.of(FLOW_CHAIN_ID),
+                PageRequest.of(0, 50))).thenReturn(new PageImpl<>(chainLogs));
+        when(flowChainLogService.getRelatedFlowChainLogs(chainLogs)).thenReturn(childChainLogs);
+        lenient().when(flowChainLogService.hasEventInFlowChainQueue(chainLogs)).thenReturn(hasEventInQueue);
+        when(flowLogDBService.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(Set.of(FLOW_CHAIN_ID, FLOW_CHAIN_ID + "_CHILD"))).thenReturn(flowLogs);
+    }
+
+    private FlowChainLog flowChainLogChild() {
+        FlowChainLog flowChainLog = new FlowChainLog();
+        flowChainLog.setFlowChainId(FLOW_CHAIN_ID + "_CHILD");
+        flowChainLog.setParentFlowChainId(FLOW_CHAIN_ID);
+        return flowChainLog;
+    }
+
+    @Test
+    void testRunningFlowChainsWithMultipleChildChains() {
+        List<FlowChainLog> chainLogs = List.of(flowChainLog());
+
+        FlowChainLog childFlowChainLog1 = new FlowChainLog();
+        childFlowChainLog1.setFlowChainId(FLOW_CHAIN_ID + "_CHILD_1");
+        childFlowChainLog1.setParentFlowChainId(FLOW_CHAIN_ID);
+
+        FlowChainLog childFlowChainLog2 = new FlowChainLog();
+        childFlowChainLog2.setFlowChainId(FLOW_CHAIN_ID + "_CHILD_2");
+        childFlowChainLog2.setParentFlowChainId(FLOW_CHAIN_ID);
+
+        List<FlowChainLog> childChainLogs = List.of(childFlowChainLog1, childFlowChainLog2);
+
+        when(flowChainLogService.findAllByFlowChainIdInOrderByCreatedDesc(Set.of(FLOW_CHAIN_ID),
+                PageRequest.of(0, 50))).thenReturn(new PageImpl<>(chainLogs));
+
+        when(flowChainLogService.getRelatedFlowChainLogs(chainLogs)).thenReturn(childChainLogs);
+
+        lenient().when(flowChainLogService.hasEventInFlowChainQueue(chainLogs)).thenReturn(false);
+
+        List<FlowLogWithoutPayload> flowLogs = List.of(
+                pendingFlowLog(INTERMEDIATE_STATE, NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123"),
+                flowLog(INTERMEDIATE_STATE, NEXT_EVENT, 2, "123", null, FLOW_CHAIN_ID + "_CHILD_1"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123", 1L, FLOW_CHAIN_ID + "_CHILD_1"),
+                flowLog(INTERMEDIATE_STATE, NEXT_EVENT, 2, "123", null, FLOW_CHAIN_ID + "_CHILD_2"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123", 1L, FLOW_CHAIN_ID + "_CHILD_2"));
+
+        when(flowLogDBService.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(Set.of(FLOW_CHAIN_ID,
+                FLOW_CHAIN_ID + "_CHILD_1", FLOW_CHAIN_ID + "_CHILD_2"))).thenReturn(flowLogs);
+
+        Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+
+        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        Assertions.assertNull(flowCheckResponse.getContent().get(0).getEndTime());
     }
 }

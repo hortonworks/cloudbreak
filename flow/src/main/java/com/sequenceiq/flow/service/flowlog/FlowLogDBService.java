@@ -19,6 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -365,12 +367,12 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogRepository.findAllFlowIdsByChainIds(flowChainIds);
     }
 
-    public List<FlowLog> getFlowLogsByFlowIdsCreatedDesc(Set<String> flowIds) {
+    public Page<FlowLog> getFlowLogsByFlowIdsCreatedDesc(Set<String> flowIds, Pageable page) {
         LOGGER.info("Getting flow logs by these flow ids: {}", Joiner.on(",").join(flowIds));
         if (!flowIds.isEmpty()) {
-            return flowLogRepository.findAllByFlowIdsCreatedDesc(flowIds);
+            return flowLogRepository.findAllByFlowIdsCreatedDesc(flowIds, page);
         } else {
-            return Collections.emptyList();
+            return new PageImpl<>(Collections.emptyList());
         }
     }
 
@@ -403,7 +405,7 @@ public class FlowLogDBService implements FlowLogService {
         return flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized();
     }
 
-    public List<FlowLogWithoutPayload> getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(Set<String> chainIds) {
+    public List<FlowLogWithoutPayload>  getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(Set<String> chainIds) {
         if (null != chainIds && !chainIds.isEmpty()) {
             LOGGER.info("Getting flow logs by these flow chain ids: {}", Joiner.on(",").join(chainIds));
             return flowLogRepository.findAllWithoutPayloadByChainIdsCreatedDesc(chainIds);

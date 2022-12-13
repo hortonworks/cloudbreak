@@ -24,8 +24,8 @@ public class FlowRestUrlParser extends LegacyRestUrlParser {
     public static final int CHECK_CHAIN_ID_GROUP_NUMBER = 13;
 
     private static final Pattern PATTERN = Pattern.compile("flow/" +
-            "((logs/(resource/name/([^/]+)|resource/crn/([^/]+)|([^/]+))(/last)?)|" +
-            "(check/((flowId/([^/]+))|(chainId/([^/]+)))))");
+            "((logs/(flowIds|resource/name/([^/]+)|resource/crn/([^/]+)|([^/]+))(/last)?)|" +
+            "(check/((flowId/([^/]+))|(chainId/([^/]+))))|(check/chainIds))");
 
     @Override
     public Pattern getPattern() {
