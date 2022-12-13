@@ -11,6 +11,8 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataFailed;
@@ -35,6 +37,9 @@ public enum StackCreationEvent implements FlowEvent {
     CREATE_CREDENTIAL_FAILED_EVENT(CloudPlatformResult.failureSelector(CreateCredentialResult.class)),
     LAUNCH_STACK_FINISHED_EVENT(CloudPlatformResult.selector(LaunchStackResult.class)),
     LAUNCH_STACK_FAILED_EVENT(CloudPlatformResult.failureSelector(LaunchStackResult.class)),
+    IMAGE_FALLBACK_EVENT("IMAGEFALLBACK"),
+    IMAGE_FALLBACK_FINISHED_EVENT(EventSelectorUtil.selector(ImageFallbackSuccess.class)),
+    IMAGE_FALLBACK_FAILED_EVENT(EventSelectorUtil.selector(ImageFallbackFailed.class)),
     LAUNCH_LOAD_BALANCER_FINISHED_EVENT(CloudPlatformResult.selector(LaunchLoadBalancerResult.class)),
     LAUNCH_LOAD_BALANCER_FAILED_EVENT(CloudPlatformResult.failureSelector(LaunchLoadBalancerResult.class)),
     COLLECT_METADATA_FINISHED_EVENT(CloudPlatformResult.selector(CollectMetadataResult.class)),

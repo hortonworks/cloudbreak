@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
@@ -47,9 +48,12 @@ import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
+import com.sequenceiq.freeipa.flow.stack.provision.SetupResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.LaunchStackResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataSuccess;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -128,9 +132,9 @@ public class StackProvisionActions {
 
     @Bean(name = "IMAGESETUP_STATE")
     public Action<?, ?> prepareImageAction() {
-        return new AbstractStackProvisionAction<>(SetupResult.class) {
+        return new AbstractStackProvisionAction<>(StackEvent.class) {
             @Override
-            protected void doExecute(StackContext context, SetupResult payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackProvisionService.prepareImage(context.getStack());
                 sendEvent(context);
             }
@@ -140,6 +144,11 @@ public class StackProvisionActions {
                 CloudStack cloudStack = cloudStackConverter.convert(context.getStack());
                 Image image = imageConverter.convert(imageService.getByStack(context.getStack()));
                 return new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new SetupResultToStackEventConverter());
             }
         };
     }
@@ -174,6 +183,26 @@ public class StackProvisionActions {
                 //FIXME AdjustmentType and treshold
                 return new LaunchStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         AdjustmentType.EXACT, 1L);
+            }
+        };
+    }
+
+    @Bean(name = "IMAGE_FALLBACK_STATE")
+    public Action<?, ?> imageFallbackAction() {
+        return new AbstractStackProvisionAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new ImageFallbackRequest(context.getStack().getId());
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new LaunchStackResultToStackEventConverter());
             }
         };
     }

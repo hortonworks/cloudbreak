@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackProvisionConstants.START_DATE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_FALLBACK;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_SETUP;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_ROLLBACK_FAILED;
@@ -167,6 +168,10 @@ public class StackCreationService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATING_INFRASTRUCTURE, "Creating infrastructure");
         flowMessageService.fireEventAndLog(stack.getId(), CREATE_IN_PROGRESS.name(), STACK_PROVISIONING);
         instanceMetaDataService.saveInstanceRequests(stack, cloudStack.getGroups());
+    }
+
+    public void fireImageFallbackFlowMessage(Long stackId) {
+        flowMessageService.fireEventAndLog(stackId, CREATE_IN_PROGRESS.name(), STACK_IMAGE_FALLBACK);
     }
 
     public Stack stackProvisioningFinished(StackContext context, LaunchStackResult result, Map<Object, Object> variables) {

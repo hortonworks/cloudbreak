@@ -216,6 +216,7 @@ public enum ResourceEvent {
     STACK_IMAGE_UPDATE_FAILED("stack.image.update.failed"),
     STACK_IMAGE_SETUP("stack.image.setup"),
     STACK_PROVISIONING("stack.provisioning"),
+    STACK_IMAGE_FALLBACK("stack.image.fallback"),
     STACK_INFRASTRUCTURE_TIME("stack.infrastructure.time"),
     STACK_INFRASTRUCTURE_CREATE_FAILED("stack.infrastructure.create.failed"),
     STACK_INFRASTRUCTURE_ROLLBACK("stack.infrastructure.rollback"),

@@ -49,6 +49,8 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.LaunchStackResultToStackEventConverter;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.SetupResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
@@ -60,6 +62,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.StackWithFingerprintsEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingRequest;
@@ -78,6 +81,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
 public class StackCreationActions {
@@ -173,9 +177,9 @@ public class StackCreationActions {
 
     @Bean(name = "IMAGESETUP_STATE")
     public Action<?, ?> prepareImageAction() {
-        return new AbstractStackCreationAction<>(SetupResult.class) {
+        return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
-            protected void doExecute(StackCreationContext context, SetupResult payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackCreationService.prepareImage(context.getStackId(), variables);
                 sendEvent(context);
             }
@@ -190,6 +194,11 @@ public class StackCreationActions {
                 } catch (CloudbreakImageNotFoundException e) {
                     throw new CloudbreakServiceException(e);
                 }
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new SetupResultToStackEventConverter());
             }
         };
     }
@@ -228,6 +237,27 @@ public class StackCreationActions {
                 FailurePolicy policy = Optional.ofNullable(stack.getFailurePolicy()).orElse(new FailurePolicy());
                 return new LaunchStackRequest(context.getCloudContext(), context.getCloudCredential(), cloudStack,
                         policy.getAdjustmentType(), policy.getThreshold());
+            }
+        };
+    }
+
+    @Bean(name = "IMAGE_FALLBACK_STATE")
+    public Action<?, ?> imageFallbackAction() {
+        return new AbstractStackCreationAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
+                stackCreationService.fireImageFallbackFlowMessage(context.getStackId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackCreationContext context) {
+                return new ImageFallbackRequest(context.getStackId());
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new LaunchStackResultToStackEventConverter());
             }
         };
     }

@@ -222,6 +222,21 @@ public class ImageService {
         String translatedRegion = cloudPlatformConnectors.getDefault(platform(cloudPlatform.toUpperCase())).regionToDisplayName(region);
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
+            return selectImageByRegionPreferDefault(translatedRegion, imagesByRegion, platformString.nameToLowerCase());
+        }
+        String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
+                imgFromCatalog, platformString);
+        throw new CloudbreakImageNotFoundException(msg);
+    }
+
+    public String determineImageNameByRegion(String cloudPlatform, ImageCatalogPlatform platformString, String region,
+            com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog) throws CloudbreakImageNotFoundException {
+        Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(
+                platformString.nameToLowerCase(),
+                imgFromCatalog.getImageSetsByProvider());
+        String translatedRegion = cloudPlatformConnectors.getDefault(platform(cloudPlatform.toUpperCase())).regionToDisplayName(region);
+        if (imagesForPlatform.isPresent()) {
+            Map<String, String> imagesByRegion = imagesForPlatform.get();
             return selectImageByRegion(translatedRegion, imagesByRegion, platformString.nameToLowerCase());
         }
         String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
@@ -229,9 +244,17 @@ public class ImageService {
         throw new CloudbreakImageNotFoundException(msg);
     }
 
-    private String selectImageByRegion(String translatedRegion, Map<String, String> imagesByRegion, String platform) throws CloudbreakImageNotFoundException {
+    private String selectImageByRegionPreferDefault(String translatedRegion, Map<String, String> imagesByRegion, String platform)
+            throws CloudbreakImageNotFoundException {
             return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
                     .or(() -> findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion))
+                    .orElseThrow(() -> new CloudbreakImageNotFoundException(
+                            String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
+                                    imagesByRegion, platform, translatedRegion)));
+    }
+
+    private String selectImageByRegion(String translatedRegion, Map<String, String> imagesByRegion, String platform) throws CloudbreakImageNotFoundException {
+            return findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion)
                     .orElseThrow(() -> new CloudbreakImageNotFoundException(
                             String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
                                     imagesByRegion, platform, translatedRegion)));

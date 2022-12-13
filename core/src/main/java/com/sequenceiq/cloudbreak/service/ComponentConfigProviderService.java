@@ -172,4 +172,14 @@ public class ComponentConfigProviderService {
         componentEntity.setName(componentType.name());
         componentRepository.save(componentEntity);
     }
+
+    public Component getImageComponent(Long stackId) throws CloudbreakImageNotFoundException {
+        Component component = getComponent(stackId, ComponentType.IMAGE, ComponentType.IMAGE.name());
+        if (component == null) {
+            throw new CloudbreakImageNotFoundException(String.format("Image not found: stackId: %d, componentType: %s, name: %s",
+                    stackId, ComponentType.IMAGE.name(), ComponentType.IMAGE.name()));
+        }
+        LOGGER.debug("Image found! stackId: {}, component: {}", stackId, component);
+        return component;
+    }
 }
