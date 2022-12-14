@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
+import com.sequenceiq.cloudbreak.service.stack.ServiceStatusCheckerLogLocationDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -172,6 +173,9 @@ public class StackStatusCheckerJobTest {
     @Mock
     private MetricsClient metricsClient;
 
+    @Mock
+    private ServiceStatusCheckerLogLocationDecorator serviceStatusCheckerLogLocationDecorator;
+
     @BeforeEach
     public void init() {
         Tracer tracer = Mockito.mock(Tracer.class);
@@ -276,6 +280,7 @@ public class StackStatusCheckerJobTest {
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
+        when(serviceStatusCheckerLogLocationDecorator.decorate(any(), any(), any())).thenAnswer(i -> i.getArgument(0));
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
@@ -322,6 +327,7 @@ public class StackStatusCheckerJobTest {
         Set<String> computeGroups = new HashSet<>();
         computeGroups.add("compute");
         when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(computeGroups);
+        when(serviceStatusCheckerLogLocationDecorator.decorate(any(), any(), any())).thenAnswer(i -> i.getArgument(0));
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());

@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
+import com.sequenceiq.cloudbreak.service.stack.ServiceStatusCheckerLogLocationDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -172,6 +173,9 @@ class StackStatusIntegrationTest {
     @MockBean
     private EnvironmentClientService environmentClientService;
 
+    @MockBean
+    private ServiceStatusCheckerLogLocationDecorator serviceStatusCheckerLogLocationDecorator;
+
     private Stack stack;
 
     @Mock
@@ -191,6 +195,7 @@ class StackStatusIntegrationTest {
         setUpClusterApi();
         when(environmentClientService.getByCrnAsInternal(anyString())).thenReturn(environment);
         when(jobExecutionContext.getMergedJobDataMap()).thenReturn(new JobDataMap());
+        when(serviceStatusCheckerLogLocationDecorator.decorate(any(), any(), any())).thenAnswer(i -> i.getArgument(0));
     }
 
     private void setUpRunningInstances() {

@@ -39,7 +39,7 @@ public class ExtendedHostStatuses {
                 .anyMatch(healthCheck -> HealthCheckResult.UNHEALTHY.equals(healthCheck.getResult()));
     }
 
-    private boolean hasHostUnhealthyServices(HostName hostName) {
+    public boolean hasHostUnhealthyServices(HostName hostName) {
         return emptyIfNull(hostsHealth.get(hostName)).stream()
                 .filter(healthCheck -> HealthCheckType.SERVICES.equals(healthCheck.getType()))
                 .anyMatch(healthCheck -> HealthCheckResult.UNHEALTHY.equals(healthCheck.getResult()));
