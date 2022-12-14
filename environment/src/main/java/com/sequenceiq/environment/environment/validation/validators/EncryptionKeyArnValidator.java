@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.cloudbreak.service.Retry.ActionFailedException.wrapRte;
 
 import java.util.Collections;
 import java.util.List;
@@ -101,8 +100,8 @@ public class EncryptionKeyArnValidator {
                 Platform.platform(environmentDto.getCloudPlatform()), null);
 
         try {
-            CloudEncryptionKeys encryptionKeys =  retryService.testWith2SecDelayMax15Times(wrapRte(() -> cloudPlatformConnectors.get(cloudPlatformVariant).
-                    platformResources().encryptionKeys(extendedCloudCredential, region, Collections.emptyMap())));
+            CloudEncryptionKeys encryptionKeys =  retryService.testWith2SecDelayMax15Times(() -> cloudPlatformConnectors.get(cloudPlatformVariant).
+                    platformResources().encryptionKeys(extendedCloudCredential, region, Collections.emptyMap()));
             List<String> keyArns = encryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).collect(Collectors.toList());
             if (keyArns.stream().noneMatch(s -> s.equals(encryptionKeyArn))) {
                 validationResultBuilder.error("Following encryption keys are retrieved from the cloud " + keyArns +
