@@ -378,11 +378,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
-    public void waitForServices(int requestId) {
-
-    }
-
-    @Override
     public String getSdxContext() {
         ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();

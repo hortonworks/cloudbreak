@@ -1,15 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.CLUSTER_SERVICES_RESTART_FAILURE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.CLUSTER_SERVICES_RESTART_POLLING_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.CLUSTER_SERVICES_RESTART_POLLING_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.CLUSTER_SERVICES_RESTART_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.CLUSTER_SERVICES_RESTART_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartState.CLUSTER_SERVICE_RESTARTING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartState.CLUSTER_SERVICE_RESTART_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartState.CLUSTER_SERVICE_RESTART_FINISHED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartState.CLUSTER_SERVICE_RESTART_POLLING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartState.INIT_STATE;
 
@@ -31,13 +29,9 @@ public class ClusterServicesRestartFlowConfig extends StackStatusFinalizerAbstra
                     .event(CLUSTER_SERVICES_RESTART_TRIGGER_EVENT)
                     .noFailureEvent()
 
-                    .from(CLUSTER_SERVICE_RESTARTING_STATE).to(CLUSTER_SERVICE_RESTART_POLLING_STATE)
-                    .event(CLUSTER_SERVICES_RESTART_POLLING_EVENT)
+                    .from(CLUSTER_SERVICE_RESTARTING_STATE).to(CLUSTER_SERVICE_RESTART_FINISHED_STATE)
+                    .event(CLUSTER_SERVICES_RESTART_FINISHED_EVENT)
                     .failureEvent(CLUSTER_SERVICES_RESTART_FAILURE_EVENT)
-
-                    .from(CLUSTER_SERVICE_RESTART_POLLING_STATE).to(CLUSTER_SERVICE_RESTART_FINISHED_STATE)
-                    .event(CLUSTER_SERVICES_RESTART_POLLING_FINISHED_EVENT)
-                    .failureEvent(CLUSTER_SERVICES_RESTART_POLLING_EVENT)
 
                     .from(CLUSTER_SERVICE_RESTART_FINISHED_STATE).to(FINAL_STATE)
                     .event(FINALIZED_EVENT)

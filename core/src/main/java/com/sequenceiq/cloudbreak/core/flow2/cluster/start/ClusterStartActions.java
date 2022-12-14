@@ -24,8 +24,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterDbCertRotation
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartFailedRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DnsUpdateFinished;
@@ -107,21 +105,11 @@ public class ClusterStartActions {
         };
     }
 
-    @Bean(name = "CLUSTER_START_POLLING_STATE")
-    public Action<?, ?> clusterStartPolling() {
+    @Bean(name = "CLUSTER_START_FINISHED_STATE")
+    public Action<?, ?> clusterStartFinished() {
         return new AbstractClusterAction<>(ClusterStartResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterStartResult payload, Map<Object, Object> variables) {
-                sendEvent(context, new ClusterStartPollingRequest(context.getStackId(), payload.getRequestId()));
-            }
-        };
-    }
-
-    @Bean(name = "CLUSTER_START_FINISHED_STATE")
-    public Action<?, ?> clusterStartFinished() {
-        return new AbstractClusterAction<>(ClusterStartPollingResult.class) {
-            @Override
-            protected void doExecute(ClusterViewContext context, ClusterStartPollingResult payload, Map<Object, Object> variables) {
                 clusterStartService.clusterStartFinished(context.getStack());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);

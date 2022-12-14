@@ -55,19 +55,18 @@ public class ClusterServicesRestartHandler implements EventHandler<ClusterServic
     public void accept(Event<ClusterServicesRestartRequest> event) {
         ClusterServicesRestartRequest request = event.getData();
         ClusterServicesRestartResult result;
-        int requestId;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Optional<Stack> datalakeStack = datalakeService.getDatalakeStackByDatahubStack(stack);
             CmTemplateProcessor blueprintProcessor = getCmTemplateProcessor(stack.getCluster());
             if (datalakeStack.isPresent() && clusterServicesRestartService.isRDCRefreshNeeded(stack, datalakeStack.get())) {
                 LOGGER.info("Deploying client config and restarting services");
-                requestId = clusterServicesRestartService.refreshClusterOnRestart(stack, datalakeStack.get(), blueprintProcessor);
+                clusterServicesRestartService.refreshClusterOnRestart(stack, datalakeStack.get(), blueprintProcessor);
             } else {
                 LOGGER.info("Restarting services");
-                requestId = apiConnectors.getConnector(stack).clusterModificationService().restartClusterServices();
+                apiConnectors.getConnector(stack).clusterModificationService().restartClusterServices();
             }
-            result = new ClusterServicesRestartResult(request, requestId);
+            result = new ClusterServicesRestartResult(request);
         } catch (Exception e) {
             result = new ClusterServicesRestartResult(e.getMessage(), e, request);
         }

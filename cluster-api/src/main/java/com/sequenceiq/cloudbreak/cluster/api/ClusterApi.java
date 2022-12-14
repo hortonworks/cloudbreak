@@ -35,10 +35,6 @@ public interface ClusterApi {
         return clusterSetupService().waitForHosts(hostsInCluster);
     }
 
-    default void waitForServices(int requestId) throws CloudbreakException {
-        clusterSetupService().waitForServices(requestId);
-    }
-
     default void replaceUserNamePassword(String newUserName, String newPassword) throws CloudbreakException {
         clusterSecurityService().replaceUserNamePassword(newUserName, newPassword);
     }
@@ -76,16 +72,16 @@ public interface ClusterApi {
         clusterModificationService().stopCluster(disableKnoxAutorestart);
     }
 
-    default int startCluster() throws CloudbreakException {
-        return clusterModificationService().startCluster();
+    default void startCluster() throws CloudbreakException {
+        clusterModificationService().startCluster();
     }
 
     default void startClusterMgmtServices() throws CloudbreakException {
         clusterModificationService().startClusterMgmtServices();
     }
 
-    default int startClusterServices() throws CloudbreakException {
-        return clusterModificationService().deployConfigAndStartClusterServices();
+    default void startClusterServices() throws CloudbreakException {
+        clusterModificationService().deployConfigAndStartClusterServices();
     }
 
     default Set<ParcelInfo> gatherInstalledParcels(String stackName) {

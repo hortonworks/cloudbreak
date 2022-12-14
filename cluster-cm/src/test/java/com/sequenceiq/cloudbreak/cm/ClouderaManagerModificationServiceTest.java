@@ -1148,7 +1148,6 @@ class ClouderaManagerModificationServiceTest {
         // GIVEN
         when(clustersResourceApi.deployClientConfig(stack.getName())).thenReturn(new ApiCommand().id(new BigDecimal(100)));
         when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
-        when(clouderaManagerRestartService.doRestartServicesIfNeeded(apiClientMock, stack, false)).thenReturn(200);
         // WHEN
         underTest.deployConfigAndStartClusterServices();
         // THEN
