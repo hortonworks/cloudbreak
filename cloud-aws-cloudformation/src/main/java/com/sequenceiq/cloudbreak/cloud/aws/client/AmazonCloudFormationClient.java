@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.client;
 
-import static com.sequenceiq.cloudbreak.service.Retry.ActionFailedException.wrapRte;
-
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
@@ -39,31 +37,31 @@ public class AmazonCloudFormationClient extends AmazonClient {
     }
 
     public DescribeStacksResult describeStacks(DescribeStacksRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeStacks(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.describeStacks(request));
     }
 
     public CreateStackResult createStack(CreateStackRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.createStack(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.createStack(request));
     }
 
     public DeleteStackResult deleteStack(DeleteStackRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.deleteStack(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.deleteStack(request));
     }
 
     public DescribeStackResourceResult describeStackResource(DescribeStackResourceRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeStackResource(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.describeStackResource(request));
     }
 
     public DescribeStackResourcesResult describeStackResources(DescribeStackResourcesRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeStackResources(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.describeStackResources(request));
     }
 
     public DescribeStackEventsResult describeStackEvents(DescribeStackEventsRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeStackEvents(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.describeStackEvents(request));
     }
 
     public UpdateStackResult updateStack(UpdateStackRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.updateStack(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.updateStack(request));
     }
 
     public ValidateTemplateResult validateTemplate(ValidateTemplateRequest request) {
@@ -71,7 +69,7 @@ public class AmazonCloudFormationClient extends AmazonClient {
     }
 
     public ListStackResourcesResult listStackResources(ListStackResourcesRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.listStackResources(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.listStackResources(request));
     }
 
     // FIXME return actual waiter instead

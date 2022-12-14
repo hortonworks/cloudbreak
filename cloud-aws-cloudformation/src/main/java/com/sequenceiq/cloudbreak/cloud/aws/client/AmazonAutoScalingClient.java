@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.client;
 
-import static com.sequenceiq.cloudbreak.service.Retry.ActionFailedException.wrapRte;
-
 import com.amazonaws.services.autoscaling.AmazonAutoScaling;
 import com.amazonaws.services.autoscaling.model.CreateLaunchConfigurationRequest;
 import com.amazonaws.services.autoscaling.model.CreateLaunchConfigurationResult;
@@ -41,36 +39,36 @@ public class AmazonAutoScalingClient extends AmazonClient {
     }
 
     public SuspendProcessesResult suspendProcesses(SuspendProcessesRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.suspendProcesses(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.suspendProcesses(request));
     }
 
     public ResumeProcessesResult resumeProcesses(ResumeProcessesRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.resumeProcesses(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.resumeProcesses(request));
     }
 
     public DescribeAutoScalingGroupsResult describeAutoScalingGroups(DescribeAutoScalingGroupsRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeAutoScalingGroups(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.describeAutoScalingGroups(request));
     }
 
     public UpdateAutoScalingGroupResult updateAutoScalingGroup(UpdateAutoScalingGroupRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.updateAutoScalingGroup(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.updateAutoScalingGroup(request));
     }
 
     public DetachInstancesResult detachInstances(DetachInstancesRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.detachInstances(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.detachInstances(request));
     }
 
     public DescribeAutoScalingInstancesResult describeAutoScalingInstances(DescribeAutoScalingInstancesRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeAutoScalingInstances(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.describeAutoScalingInstances(request));
     }
 
     public DescribeScalingActivitiesResult describeScalingActivities(DescribeScalingActivitiesRequest request) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() -> client.describeScalingActivities(request)));
+        return retry.testWith2SecDelayMax15Times(() -> client.describeScalingActivities(request));
     }
 
     public TerminateInstanceInAutoScalingGroupResult terminateInstance(TerminateInstanceInAutoScalingGroupRequest terminateInstanceInAutoScalingGroupRequest) {
-        return retry.testWith2SecDelayMax15Times(wrapRte(() ->
-                client.terminateInstanceInAutoScalingGroup(terminateInstanceInAutoScalingGroupRequest)));
+        return retry.testWith2SecDelayMax15Times(() ->
+                client.terminateInstanceInAutoScalingGroup(terminateInstanceInAutoScalingGroupRequest));
     }
 
     public DescribeLaunchConfigurationsResult describeLaunchConfigurations(DescribeLaunchConfigurationsRequest launchConfigurationsRequest) {
