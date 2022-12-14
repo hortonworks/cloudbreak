@@ -120,8 +120,10 @@ ipa-replica-install \
           --no-dnssec-validation \
 {%- endif %}
           --unattended \
-          --dirsrv-config-file /opt/salt/initial-ldap-conf.ldif \
-          --no-ntp
+{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 7 %}
+          --no-ntp \
+{%- endif %}
+          --dirsrv-config-file /opt/salt/initial-ldap-conf.ldif
 
 set +e
 
