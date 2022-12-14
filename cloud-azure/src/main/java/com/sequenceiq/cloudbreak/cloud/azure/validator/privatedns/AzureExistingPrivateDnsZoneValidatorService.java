@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.arm.resources.ResourceId;
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
+import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
@@ -23,7 +23,7 @@ public class AzureExistingPrivateDnsZoneValidatorService {
     private AzurePrivateDnsZoneValidatorService azurePrivateDnsZoneValidatorService;
 
     public ValidationResult.ValidationResultBuilder validate(AzureClient azureClient, String networkResourceGroupName,
-            String networkName, Map<AzurePrivateDnsZoneServiceEnum, String> serviceToPrivateDnsZoneId, ValidationResult.ValidationResultBuilder resultBuilder) {
+            String networkName, Map<AzurePrivateDnsZoneDescriptor, String> serviceToPrivateDnsZoneId, ValidationResult.ValidationResultBuilder resultBuilder) {
         serviceToPrivateDnsZoneId.forEach((service, privateDnsZoneId) -> {
             try {
                 ResourceId privateDnsZoneResourceId = ResourceId.fromString(privateDnsZoneId);

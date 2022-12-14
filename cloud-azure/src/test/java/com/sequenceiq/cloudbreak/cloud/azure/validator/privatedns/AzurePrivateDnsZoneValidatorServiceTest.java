@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.SubResource;
+import com.microsoft.azure.arm.resources.ResourceId;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.privatedns.v2018_09_01.PrivateZone;
 import com.microsoft.azure.management.privatedns.v2018_09_01.ProvisioningState;
@@ -43,6 +44,11 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 @ExtendWith(MockitoExtension.class)
 public class AzurePrivateDnsZoneValidatorServiceTest {
 
+    private static final String UNKNOWN_SERVICE_ZONE_NAME = "unknown.service.zone.name";
+
+    @Mock
+    private AzurePrivateDnsZoneMatcherService azurePrivateDnsZoneMatcherService;
+
     @InjectMocks
     private AzurePrivateDnsZoneValidatorService underTest;
 
@@ -51,23 +57,28 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
 
     @Test
     void testExistingPrivateDnsZoneNamesAreSupportedWhenSupportedDnsZoneName() {
+        ResourceId privateDnsZoneResourceId = getPrivateDnsZoneResourceId();
+        when(azurePrivateDnsZoneMatcherService.isZoneNameMatchingPattern(AzurePrivateDnsZoneServiceEnum.POSTGRES, privateDnsZoneResourceId.name()))
+                .thenReturn(true);
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
 
-        resultBuilder = underTest.existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneServiceEnum.POSTGRES, getPrivateDnsZoneResourceId(), resultBuilder);
+        resultBuilder = underTest.existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneServiceEnum.POSTGRES, privateDnsZoneResourceId, resultBuilder);
 
         assertFalse(resultBuilder.build().hasError());
     }
 
     @Test
     void testExistingPrivateDnsZoneNamesAreSupportedWhenUnsupportedDnsZoneName() {
+        when(azurePrivateDnsZoneMatcherService.isZoneNameMatchingPattern(AzurePrivateDnsZoneServiceEnum.POSTGRES, UNKNOWN_SERVICE_ZONE_NAME))
+                .thenReturn(false);
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
 
         resultBuilder = underTest.existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneServiceEnum.POSTGRES,
-                getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME, "another.zone.name"), resultBuilder);
+                getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME, UNKNOWN_SERVICE_ZONE_NAME), resultBuilder);
 
         ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of(
                 "The provided private DNS zone /subscriptions/subscriptionId/resourceGroups/a-resource-group-name/providers/Microsoft.Network/privateDnsZones" +
-                        "/another.zone.name is not a valid DNS zone name for Microsoft.DBforPostgreSQL/servers. Please use a DNS zone with name " +
+                        "/unknown.service.zone.name is not a valid DNS zone name for Microsoft.DBforPostgreSQL/servers. Please use a DNS zone with name " +
                         "privatelink.postgres.database.azure.com and try again."));
     }
 
