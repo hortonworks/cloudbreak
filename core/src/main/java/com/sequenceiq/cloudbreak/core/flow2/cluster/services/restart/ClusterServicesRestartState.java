@@ -9,7 +9,6 @@ public enum ClusterServicesRestartState implements FlowState {
     INIT_STATE,
     CLUSTER_SERVICE_RESTART_FAILED_STATE,
     CLUSTER_SERVICE_RESTARTING_STATE,
-    CLUSTER_SERVICE_RESTART_POLLING_STATE(FillInMemoryStateStoreRestartAction.class),
     CLUSTER_SERVICE_RESTART_FINISHED_STATE,
 
     FINAL_STATE;

@@ -56,8 +56,6 @@ public interface ClusterSetupService {
 
     void waitForHostsHealthy(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException;
 
-    void waitForServices(int requestId) throws CloudbreakException;
-
     String getSdxContext();
 
     void setupProxy(ProxyConfig proxyConfig);

@@ -7,11 +7,8 @@ import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
 
 public class ClusterStartResult extends ClusterPlatformResult<ClusterStartRequest> implements FlowPayload {
 
-    private final Integer requestId;
-
-    public ClusterStartResult(ClusterStartRequest request, int requestId) {
+    public ClusterStartResult(ClusterStartRequest request) {
         super(request);
-        this.requestId = requestId;
     }
 
     @JsonCreator
@@ -20,10 +17,6 @@ public class ClusterStartResult extends ClusterPlatformResult<ClusterStartReques
             @JsonProperty("errorDetails") Exception errorDetails,
             @JsonProperty("request") ClusterStartRequest request) {
         super(statusReason, errorDetails, request);
-        requestId = null;
     }
 
-    public Integer getRequestId() {
-        return requestId;
-    }
 }

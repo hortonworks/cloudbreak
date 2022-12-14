@@ -22,11 +22,11 @@ public interface ClusterModificationService {
 
     void stopCluster(boolean full) throws CloudbreakException;
 
-    int startCluster() throws CloudbreakException;
+    void startCluster() throws CloudbreakException;
 
     void startClusterMgmtServices() throws CloudbreakException;
 
-    int deployConfigAndStartClusterServices() throws CloudbreakException;
+    void deployConfigAndStartClusterServices() throws CloudbreakException;
 
     Map<String, String> getComponentsByCategory(String blueprintName, String hostGroupName);
 
@@ -86,7 +86,7 @@ public interface ClusterModificationService {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
-    default int restartClusterServices() {
+    default void restartClusterServices() {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 }

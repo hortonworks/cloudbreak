@@ -65,18 +65,17 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
     public void accept(Event<ClusterStartRequest> event) {
         ClusterStartRequest request = event.getData();
         ClusterStartResult result;
-        int requestId;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Optional<Stack> datalakeStack = datalakeService.getDatalakeStackByDatahubStack(stack);
             CmTemplateProcessor blueprintProcessor = getCmTemplateProcessor(stack.getCluster());
             if (datalakeStack.isPresent() && clusterServicesRestartService.isRDCRefreshNeeded(stack, datalakeStack.get())) {
-                requestId = clusterServicesRestartService.refreshClusterOnStart(stack, datalakeStack.get(), blueprintProcessor);
+                clusterServicesRestartService.refreshClusterOnStart(stack, datalakeStack.get(), blueprintProcessor);
             } else {
-                requestId = apiConnectors.getConnector(stack).startCluster();
+                apiConnectors.getConnector(stack).startCluster();
             }
             handleStopStartScalingFeature(stack, blueprintProcessor);
-            result = new ClusterStartResult(request, requestId);
+            result = new ClusterStartResult(request);
         } catch (Exception e) {
             result = new ClusterStartResult(e.getMessage(), e, request);
         }

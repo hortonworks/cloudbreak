@@ -4,11 +4,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEve
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_DB_CERT_ROTATION_FINISH_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_FAILURE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_PILLAR_CONFIG_UPDATE_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_PILLAR_CONFIG_UPDATE_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_POLLING_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_POLLING_FAILURE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_POLLING_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.DNS_UPDATE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FINALIZED_EVENT;
@@ -16,7 +14,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartSta
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_STARTING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_FINISHED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_POLLING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_UPDATE_PILLAR_CONFIG_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.INIT_STATE;
@@ -53,13 +50,9 @@ public class ClusterStartFlowConfig extends StackStatusFinalizerAbstractFlowConf
                     .event(DNS_UPDATE_FINISHED_EVENT)
                     .noFailureEvent()
 
-                    .from(CLUSTER_STARTING_STATE).to(CLUSTER_START_POLLING_STATE)
-                    .event(CLUSTER_START_POLLING_EVENT)
+                    .from(CLUSTER_STARTING_STATE).to(CLUSTER_START_FINISHED_STATE)
+                    .event(CLUSTER_START_FINISHED_EVENT)
                     .failureEvent(CLUSTER_START_FAILURE_EVENT)
-
-                    .from(CLUSTER_START_POLLING_STATE).to(CLUSTER_START_FINISHED_STATE)
-                    .event(CLUSTER_START_POLLING_FINISHED_EVENT)
-                    .failureEvent(CLUSTER_START_POLLING_FAILURE_EVENT)
 
                     .from(CLUSTER_START_FINISHED_STATE).to(FINAL_STATE)
                     .event(FINALIZED_EVENT)

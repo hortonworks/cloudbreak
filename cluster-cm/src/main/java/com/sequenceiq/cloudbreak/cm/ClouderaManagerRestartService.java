@@ -52,20 +52,20 @@ public class ClouderaManagerRestartService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    public int doRestartServicesIfNeeded(ApiClient apiClient, StackDtoDelegate stack, boolean rollingRestartEnabled) throws ApiException, CloudbreakException {
+    public void doRestartServicesIfNeeded(ApiClient apiClient, StackDtoDelegate stack, boolean rollingRestartEnabled) throws ApiException, CloudbreakException {
         LOGGER.debug("Restarting Cloudera Manager services, rollingRestartEnabled: {}", rollingRestartEnabled);
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         Optional<ApiCommand> optionalActiveRestartCommand = findActiveRestartCommand(stack, clustersResourceApi, rollingRestartEnabled);
         if (optionalActiveRestartCommand.isPresent()) {
             LOGGER.debug("Restart for Cluster services is already running with id: [{}]", optionalActiveRestartCommand.get().getId());
-            return waitForRestartExecution(apiClient, stack, optionalActiveRestartCommand.get());
+            waitForRestartExecution(apiClient, stack, optionalActiveRestartCommand.get());
         } else {
             LOGGER.info("Calling restart command. rollingRestartEnabled {}", rollingRestartEnabled);
             ApiCommand restartCommand = rollingRestartEnabled ?
                     executeRollingRestartCommand(apiClient, stack, clustersResourceApi) :
                     executeRestartCommand(stack, clustersResourceApi);
             eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
-            return waitForRestartExecution(apiClient, stack, restartCommand);
+            waitForRestartExecution(apiClient, stack, restartCommand);
         }
     }
 
@@ -76,16 +76,14 @@ public class ClouderaManagerRestartService {
         waitForRestartExecution(apiClient, stack, optionalRestartCommand.orElse(null));
     }
 
-    private int waitForRestartExecution(ApiClient apiClient, StackDtoDelegate stack, ApiCommand restartCommand) throws CloudbreakException {
+    private void waitForRestartExecution(ApiClient apiClient, StackDtoDelegate stack, ApiCommand restartCommand) throws CloudbreakException {
         if (Objects.isNull(restartCommand)) {
             LOGGER.debug("There is no running restart command.");
-            return 0;
         } else {
             LOGGER.debug("Start polling restart command. The command ID is: {}", restartCommand.getId());
             ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, restartCommand.getId());
             pollingResultErrorHandler.handlePollingResult(pollingResult, "Cluster was terminated while restarting services.",
                     "Timeout happened while restarting services.");
-            return restartCommand.getId().intValue();
         }
     }
 
