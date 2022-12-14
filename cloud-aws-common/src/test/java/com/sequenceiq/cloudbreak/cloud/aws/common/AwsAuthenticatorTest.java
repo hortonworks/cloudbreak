@@ -27,6 +27,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -133,7 +136,10 @@ class AwsAuthenticatorTest {
             AwsSessionCredentialClient.class,
             AwsDefaultZoneProvider.class,
             AwsEnvironmentVariableChecker.class,
-            RetryService.class
+            RetryService.class,
+            AwsEndpointProvider.class,
+            AwsRegionEndpointProvider.class,
+            AwsServiceEndpointProvider.class
     })
     static class Config {
     }

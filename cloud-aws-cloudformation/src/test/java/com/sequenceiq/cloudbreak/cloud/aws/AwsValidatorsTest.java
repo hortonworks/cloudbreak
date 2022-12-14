@@ -50,6 +50,9 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSessionCredentialClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.config.AwsConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyMultiplePreferPrivate;
@@ -91,6 +94,9 @@ class AwsValidatorsTest {
 
     @Inject
     private AwsStackValidator awsStackValidatorUnderTest;
+
+    @Mock
+    private AwsEndpointProvider awsEndpointProvider;
 
     @Mock
     private AmazonCloudFormationClient amazonCloudFormationClient;
@@ -255,6 +261,9 @@ class AwsValidatorsTest {
             SubnetFilterStrategyMultiplePreferPublic.class,
             SubnetFilterStrategyMultiplePreferPrivate.class,
             SubnetSelectorService.class,
+            AwsEndpointProvider.class,
+            AwsRegionEndpointProvider.class,
+            AwsServiceEndpointProvider.class,
     })
     static class Config {
 

@@ -5,7 +5,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScaling;
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClientBuilder;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
+import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -32,22 +34,20 @@ public class AwsCloudFormationClient extends AwsClient {
 
     @VisibleForTesting
     AmazonCloudFormation createCloudFormation(AwsCredentialView awsCredential, String regionName) {
-        return com.amazonaws.services.cloudformation.AmazonCloudFormationClient.builder()
+        AmazonCloudFormationClientBuilder clientBuilder = com.amazonaws.services.cloudformation.AmazonCloudFormationClient.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withClientConfiguration(getDefaultClientConfiguration())
-                .withRegion(regionName)
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withClientConfiguration(getDefaultClientConfiguration())
-                .build();
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer));
+        getAwsEndpointProvider().setupEndpoint(clientBuilder, AmazonCloudFormation.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return clientBuilder.build();
     }
 
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {
-        AmazonAutoScaling client = proxy(com.amazonaws.services.autoscaling.AmazonAutoScalingClient.builder()
+        AmazonAutoScalingClientBuilder clientBuilder = com.amazonaws.services.autoscaling.AmazonAutoScalingClient.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
-                .withRegion(regionName)
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withClientConfiguration(getDefaultClientConfiguration())
-                .build(), awsCredential, regionName);
-        return new AmazonAutoScalingClient(client, retry);
+                .withClientConfiguration(getDefaultClientConfiguration());
+        getAwsEndpointProvider().setupEndpoint(clientBuilder, AmazonAutoScaling.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonAutoScalingClient(proxy(clientBuilder.build(), awsCredential, regionName), retry);
     }
 }
