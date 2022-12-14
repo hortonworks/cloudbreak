@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestOperationsService;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestResponseException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudPlatformValidationWarningException;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureImageTermsSignerServiceTest {
@@ -47,7 +46,7 @@ public class AzureImageTermsSignerServiceTest {
     @Mock
     private AzureClient azureClient;
 
-    private AzureMarketplaceImage azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version");
+    private final AzureMarketplaceImage azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version");
 
     static Object[][] exceptionsFromHttpMethod() {
         return new Object[][]{
@@ -62,7 +61,7 @@ public class AzureImageTermsSignerServiceTest {
         when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenReturn(setupAzureImageTerms(signedFromRestResponse));
 
-        boolean signedFromService = underTest.isSigned(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
+        boolean signedFromService = underTest.getImageTermStatus(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient).getAsBoolean();
 
         assertEquals(signedFromService, signedFromRestResponse);
         verify(azureClient).getAccessToken();
@@ -74,7 +73,7 @@ public class AzureImageTermsSignerServiceTest {
         when(azureClient.getAccessToken()).thenReturn(Optional.empty());
 
         Exception exception = Assertions.assertThrows(CloudConnectorException.class,
-                () -> underTest.isSigned(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
+                () -> underTest.getImageTermStatus(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
 
         assertEquals("Error when retrieving if marketplace image terms and conditions are signed for " +
                         "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
@@ -89,7 +88,7 @@ public class AzureImageTermsSignerServiceTest {
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(new RestClientException("myMessage"));
 
         Exception exception = Assertions.assertThrows(CloudConnectorException.class,
-                () -> underTest.isSigned(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
+                () -> underTest.getImageTermStatus(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
 
         assertEquals("Error when retrieving if marketplace image terms and conditions are signed for " +
                         "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
@@ -104,14 +103,9 @@ public class AzureImageTermsSignerServiceTest {
         when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(new AzureRestResponseException("Missing permission"));
 
-        Exception exception = Assertions.assertThrows(CloudPlatformValidationWarningException.class,
-                () -> underTest.isSigned(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
+        AzureImageTermStatus imageTermStatus = underTest.getImageTermStatus(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
 
-        assertEquals("Failed to get the status of the Terms and Conditions for image AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', "
-                        + "planId='my-plan', version='my-version'}. "
-                        + "Please make sure that Azure Marketplace Terms and Conditions "
-                        + "have been accepted for your subscription before proceeding with CDP deployment.",
-                exception.getMessage());
+        assertEquals(AzureImageTermStatus.NON_READABLE, imageTermStatus);
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
     }

@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestOperationsService;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestResponseException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudPlatformValidationWarningException;
 
 @Service
 public class AzureImageTermsSignerService {
@@ -31,7 +30,7 @@ public class AzureImageTermsSignerService {
             "documentation at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.";
 
     private static final String SIGN_URL_AZ_TEMPLATE = "https://management.azure.com/subscriptions/%s/providers/Microsoft.MarketplaceOrdering/offerTypes/" +
-            "virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
+        "virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
 
     private static final String READ_PROBLEM_MESSAGE_TEMPLATE = "Failed to get the status of the Terms and Conditions for image %s. " +
             "Please make sure that Azure Marketplace Terms and Conditions have been accepted for your subscription before proceeding with CDP deployment.";
@@ -40,7 +39,7 @@ public class AzureImageTermsSignerService {
     private AzureRestOperationsService azureRestOperationsService;
 
     @Retryable(maxAttempts = 15, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public boolean isSigned(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage, AzureClient azureClient) {
+    public AzureImageTermStatus getImageTermStatus(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage, AzureClient azureClient) {
         URI signUri = getSignUri(subscriptionId, azureMarketplaceImage);
         ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(String.format(READ_ERROR_MESSAGE_TEMPLATE, azureMarketplaceImage))
                 .withPostfix("Please try again.");
@@ -48,11 +47,10 @@ public class AzureImageTermsSignerService {
         try {
             AzureImageTerms azureImageTerms = azureRestOperationsService.httpGet(signUri, AzureImageTerms.class, token);
             LOGGER.debug("Image terms and conditions received for image {} is : {}", azureMarketplaceImage, azureImageTerms);
-            return azureImageTerms.getProperties().isAccepted();
+            return AzureImageTermStatus.parseFromBoolean(azureImageTerms.getProperties().isAccepted());
         } catch (AzureRestResponseException e) {
-            String message = String.format(READ_PROBLEM_MESSAGE_TEMPLATE, azureMarketplaceImage);
-            LOGGER.warn(message, e);
-            throw new CloudPlatformValidationWarningException(message, e);
+            LOGGER.info("Image terms and conditions REST exception happened, maybe we cannot read the permissions: {}", e.getMessage());
+            return AzureImageTermStatus.NON_READABLE;
         } catch (Exception e) {
             String message = errorMessageBuilder.buildWithReason(e.getMessage());
             LOGGER.warn(message, e);
