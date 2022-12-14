@@ -81,7 +81,7 @@ public class ProvisionValidationHandlerTest {
         ValidationRequest request = createValidationRequest();
         CloudContext cloudContext = request.getCloudContext();
         mockCloudConnector(request, cloudContext);
-        doThrow(new CloudPlatformValidationWarningException(WARNING_MESSAGE, new Exception()))
+        doThrow(new CloudPlatformValidationWarningException(WARNING_MESSAGE))
                 .when(validator).validate(ac, request.getCloudStack());
 
         underTest.accept(new Event<>(request));
