@@ -16,12 +16,16 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.retry.PredefinedRetryPolicies;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.elasticfilesystem.AmazonElasticFileSystem;
+import com.amazonaws.services.elasticfilesystem.AmazonElasticFileSystemClientBuilder;
 import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancing;
+import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClientBuilder;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.kms.AWSKMS;
@@ -31,6 +35,7 @@ import com.amazonaws.services.rds.AmazonRDSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonClientExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
@@ -43,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.tracing.AwsTracingRequestHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
@@ -85,6 +91,9 @@ public abstract class AwsClient {
     @Inject
     private SdkClientExceptionMapper sdkClientExceptionMapper;
 
+    @Inject
+    private AwsEndpointProvider awsEndpointProvider;
+
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         try {
@@ -125,22 +134,21 @@ public abstract class AwsClient {
 
     @VisibleForTesting
     AmazonEC2 createAccessWithClientConfiguration(AwsCredentialView awsCredential, String regionName, ClientConfiguration clientConfiguration) {
-        return proxy(AmazonEC2Client.builder()
+        AmazonEC2ClientBuilder clientBuilder = AmazonEC2Client.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withClientConfiguration(clientConfiguration)
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withRegion(regionName)
-                .build(), awsCredential, regionName);
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer));
+        awsEndpointProvider.setupEndpoint(clientBuilder, AmazonEC2.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return proxy(clientBuilder.build(), awsCredential, regionName);
     }
 
     public AmazonCloudWatchClient createCloudWatchClient(AwsCredentialView awsCredential, String regionName) {
-        AmazonCloudWatch client = proxy(com.amazonaws.services.cloudwatch.AmazonCloudWatchClient.builder()
+        AmazonCloudWatchClientBuilder clientBuilder = com.amazonaws.services.cloudwatch.AmazonCloudWatchClient.builder()
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential))
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withRegion(regionName)
-                .build(), awsCredential, regionName);
-        return new AmazonCloudWatchClient(client);
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer));
+        awsEndpointProvider.setupEndpoint(clientBuilder, AmazonCloudWatch.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonCloudWatchClient(proxy(clientBuilder.build(), awsCredential, regionName));
     }
 
     public AmazonSecurityTokenServiceClient createSecurityTokenService(AwsCredentialView awsCredential) {
@@ -148,84 +156,76 @@ public abstract class AwsClient {
         return createSecurityTokenService(awsCredential, region);
     }
 
-    public AmazonSecurityTokenServiceClient createSecurityTokenService(AwsCredentialView awsCredential, String region) {
-        AWSSecurityTokenService client = proxy(com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient.builder()
+    public AmazonSecurityTokenServiceClient createSecurityTokenService(AwsCredentialView awsCredential, String regionName) {
+        AWSSecurityTokenServiceClientBuilder clientBuilder = com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withClientConfiguration(getDefaultClientConfiguration())
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withRegion(region)
-                .build(), awsCredential, region);
-        return new AmazonSecurityTokenServiceClient(client);
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer));
+        awsEndpointProvider.setupEndpoint(clientBuilder, AWSSecurityTokenService.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonSecurityTokenServiceClient(proxy(clientBuilder.build(), awsCredential, regionName));
     }
 
     public AmazonIdentityManagementClient createAmazonIdentityManagement(AwsCredentialView awsCredential) {
         String region = awsDefaultZoneProvider.getDefaultZone(awsCredential);
-        AmazonIdentityManagement client = proxy(AmazonIdentityManagementClientBuilder.standard()
+        AmazonIdentityManagementClientBuilder clientBuilder = AmazonIdentityManagementClientBuilder.standard()
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withRegion(region)
                 .withClientConfiguration(getDefaultClientConfiguration())
-                .withCredentials(getCredentialProvider(awsCredential))
-                .build(), awsCredential, region);
-        return new AmazonIdentityManagementClient(client);
+                .withCredentials(getCredentialProvider(awsCredential));
+        awsEndpointProvider.setupEndpoint(clientBuilder, AmazonIdentityManagement.ENDPOINT_PREFIX, region, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonIdentityManagementClient(proxy(clientBuilder.build(), awsCredential, region));
     }
 
     public AmazonKmsClient createAWSKMS(AwsCredentialView awsCredential, String regionName) {
-        AWSKMS client = proxy(AWSKMSClientBuilder.standard()
+        AWSKMSClientBuilder clientBuilder = AWSKMSClientBuilder.standard()
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withCredentials(getCredentialProvider(awsCredential))
-                .withRegion(regionName)
-                .build(), awsCredential, regionName);
-        return new AmazonKmsClient(client);
+                .withCredentials(getCredentialProvider(awsCredential));
+        awsEndpointProvider.setupEndpoint(clientBuilder, AWSKMS.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonKmsClient(proxy(clientBuilder.build(), awsCredential, regionName));
     }
 
     public AmazonElasticLoadBalancingClient createElasticLoadBalancingClient(AwsCredentialView awsCredential, String regionName) {
-        AmazonElasticLoadBalancing client = proxy(com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient.builder()
+        AmazonElasticLoadBalancingClientBuilder clientBuilder = com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
-                .withRegion(regionName)
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withClientConfiguration(getDefaultClientConfiguration())
-                .build(), awsCredential, regionName);
-        return new AmazonElasticLoadBalancingClient(client);
+                .withClientConfiguration(getDefaultClientConfiguration());
+        awsEndpointProvider.setupEndpoint(clientBuilder, AmazonElasticLoadBalancing.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonElasticLoadBalancingClient(proxy(clientBuilder.build(), awsCredential, regionName));
     }
 
     public AmazonEfsClient createElasticFileSystemClient(AwsCredentialView awsCredential, String regionName) {
-        AmazonElasticFileSystem client = proxy(com.amazonaws.services.elasticfilesystem.AmazonElasticFileSystemClient.builder()
+        AmazonElasticFileSystemClientBuilder clientBuilder = com.amazonaws.services.elasticfilesystem.AmazonElasticFileSystemClient.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
-                .withRegion(regionName)
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .build(), awsCredential, regionName);
-        return new AmazonEfsClient(client, retry);
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer));
+        awsEndpointProvider.setupEndpoint(clientBuilder, AmazonElasticFileSystem.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonEfsClient(proxy(clientBuilder.build(), awsCredential, regionName), retry);
     }
 
     public AmazonS3Client createS3Client(AwsCredentialView awsCredential) {
         String regionName = awsDefaultZoneProvider.getDefaultZone(awsCredential);
-        AmazonS3 client = proxy(AmazonS3ClientBuilder.standard()
+        AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard()
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredential))
-                .withRegion(regionName)
-                .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
-                .build(), awsCredential, regionName);
-        return new AmazonS3Client(client);
+                .withForceGlobalBucketAccessEnabled(Boolean.TRUE);
+        awsEndpointProvider.setupEndpoint(clientBuilder, AmazonS3.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonS3Client(proxy(clientBuilder.build(), awsCredential, regionName));
     }
 
-    public AmazonDynamoDBClient createDynamoDbClient(AwsCredentialView awsCredential, String region) {
-        final AmazonDynamoDB client = proxy(AmazonDynamoDBClientBuilder.standard()
+    public AmazonDynamoDBClient createDynamoDbClient(AwsCredentialView awsCredential, String regionName) {
+        AmazonDynamoDBClientBuilder clientBuilder = AmazonDynamoDBClientBuilder.standard()
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withClientConfiguration(getDynamoDbClientConfiguration())
-                .withCredentials(getCredentialProvider(awsCredential))
-                .withRegion(region)
-                .build(), awsCredential, region);
-        return new AmazonDynamoDBClient(client);
+                .withCredentials(getCredentialProvider(awsCredential));
+        awsEndpointProvider.setupEndpoint(clientBuilder, AmazonDynamoDB.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonDynamoDBClient(proxy(clientBuilder.build(), awsCredential, regionName));
     }
 
-    public AmazonRdsClient createRdsClient(AwsCredentialView awsCredentialView, String region) {
-        final AmazonRDS client = proxy(AmazonRDSClientBuilder.standard()
+    public AmazonRdsClient createRdsClient(AwsCredentialView awsCredential, String regionName) {
+        AmazonRDSClientBuilder clientBuilder = AmazonRDSClientBuilder.standard()
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withCredentials(getCredentialProvider(awsCredentialView))
-                .withClientConfiguration(getDefaultClientConfiguration())
-                .withRegion(region)
-                .build(), awsCredentialView, region);
-        return new AmazonRdsClient(client, awsPageCollector);
+                .withCredentials(getCredentialProvider(awsCredential))
+                .withClientConfiguration(getDefaultClientConfiguration());
+        awsEndpointProvider.setupEndpoint(clientBuilder, AmazonRDS.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonRdsClient(proxy(clientBuilder.build(), awsCredential, regionName), awsPageCollector);
     }
 
     protected ClientConfiguration getDefaultClientConfiguration() {
@@ -312,5 +312,9 @@ public abstract class AwsClient {
         AspectJProxyFactory proxyFactory = new AspectJProxyFactory(client);
         proxyFactory.addAspect(new AmazonClientExceptionHandler(awsCredentialView, region, sdkClientExceptionMapper));
         return proxyFactory.getProxy();
+    }
+
+    protected AwsEndpointProvider getAwsEndpointProvider() {
+        return awsEndpointProvider;
     }
 }

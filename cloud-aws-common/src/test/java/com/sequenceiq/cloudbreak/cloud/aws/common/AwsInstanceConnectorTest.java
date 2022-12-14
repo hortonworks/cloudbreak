@@ -56,6 +56,9 @@ import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsInstanceStatusMapper;
@@ -467,7 +470,10 @@ class AwsInstanceConnectorTest {
             AwsSessionCredentialClient.class,
             AwsDefaultZoneProvider.class,
             AwsEnvironmentVariableChecker.class,
-            RetryService.class
+            RetryService.class,
+            AwsEndpointProvider.class,
+            AwsRegionEndpointProvider.class,
+            AwsServiceEndpointProvider.class
     })
     static class Config {
     }
