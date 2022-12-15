@@ -178,12 +178,13 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
     @Override
     @Retryable(value = NotFoundException.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public String getResourceCrnByResourceName(String clusterName) {
+        // All controller methods annotated with @CheckPermissionByResourceName will forcefully sync a cluster to periscope for a successful authz check
         return getClusterByCrnOrName(NameOrCrn.ofName(clusterName)).getStackCrn();
     }
 
     @Override
     public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
-        return Optional.ofNullable(getClusterByCrnOrName(NameOrCrn.ofCrn(resourceCrn)).getEnvironmentCrn());
+        return clusterService.findOneByStackCrnAndTenant(resourceCrn, restRequestThreadLocalService.getCloudbreakTenant()).map(Cluster::getEnvironmentCrn);
     }
 
     public Optional<String> determineLoadBasedPolicyHostGroup(Cluster cluster) {
