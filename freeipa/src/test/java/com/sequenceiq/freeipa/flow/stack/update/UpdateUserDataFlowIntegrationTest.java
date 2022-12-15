@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -70,6 +72,8 @@ class UpdateUserDataFlowIntegrationTest {
     private static final int CALLED_ONCE_TILL_GENERATE_USERDATA = 1;
 
     private static final String USER_DATA = "hello hello is there anybody out there";
+
+    private static final Map<InstanceGroupType, String> USER_DATA_MAP = Map.of(InstanceGroupType.GATEWAY, USER_DATA);
 
     @Inject
     private FlowRegister flowRegister;
@@ -151,7 +155,7 @@ class UpdateUserDataFlowIntegrationTest {
     }
 
     private void verifyFinishingStatCalls(boolean success) throws Exception {
-        verify(resourcesApi, times(success ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA));
+        verify(resourcesApi, times(success ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA_MAP));
         verify(operationService, times(success ? 1 : 0)).completeOperation(any(), any(), any(), any());
         verify(operationService, times(success ? 0 : 1)).failOperation(any(), any(), any());
 

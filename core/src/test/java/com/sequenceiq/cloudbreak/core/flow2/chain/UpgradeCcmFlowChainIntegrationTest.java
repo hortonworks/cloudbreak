@@ -126,6 +126,8 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     private static final String USER_DATA = "hello hello is there anybody out there";
 
+    private static final Map<InstanceGroupType, String> USER_DATA_MAP = Map.of(InstanceGroupType.GATEWAY, USER_DATA);
+
     private static final long STACK_ID = 1L;
 
     private static final int ALL_CALLED_ONCE = 4;
@@ -264,7 +266,7 @@ class UpgradeCcmFlowChainIntegrationTest {
     @BeforeEach
     public void setup() throws CloudbreakImageNotFoundException {
         mockStackService();
-        Image image = new Image("alma", Map.of(InstanceGroupType.GATEWAY, USER_DATA), "", "", "", "", "", null);
+        Image image = new Image("alma", USER_DATA_MAP, "", "", "", "", "", null);
         when(imageService.getImage(STACK_ID)).thenReturn(image);
 
         CloudConnector connector = mock(CloudConnector.class);
@@ -317,7 +319,7 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     private void verifyFinishingStatCalls(boolean saltUpdateSuccess, boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
         verify(upgradeCcmService, times(ccmUpgradeSuccess ? 1 : 0)).ccmUpgradeFinished(eq(1L), eq(0L), anyBoolean());
-        verify(resourcesApi, times(userDataUpdateSuccess ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA));
+        verify(resourcesApi, times(userDataUpdateSuccess ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA_MAP));
         verify(upgradeCcmService, times(ccmUpgradeSuccess || !saltUpdateSuccess ? 0 : 1)).ccmUpgradeFailed(any(), anyLong());
         verify(clusterApi, times(saltUpdateSuccess ? 1 : 0)).waitForServer(anyBoolean());
     }

@@ -1,34 +1,37 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
+import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
-public class AwsUpdateServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AwsUpdateServiceTest {
 
     @Mock
     private AwsImageUpdateService awsImageUpdateService;
@@ -45,13 +48,8 @@ public class AwsUpdateServiceTest {
     @InjectMocks
     private AwsUpdateService underTest;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void updateCloudFormationTemplateResourceWithImageParameter() {
+    void updateCloudFormationTemplateResourceWithImageParameter() {
         CloudResource cloudResource = CloudResource.builder()
                 .withName("cf")
                 .withType(ResourceType.CLOUDFORMATION_STACK)
@@ -67,7 +65,7 @@ public class AwsUpdateServiceTest {
     }
 
     @Test
-    public void updateCloudFormationTemplateResourceWithoutImageParameter() {
+    void updateCloudFormationTemplateResourceWithoutImageParameter() {
         CloudResource cloudResource = CloudResource.builder()
                 .withName("cf")
                 .withType(ResourceType.CLOUDFORMATION_STACK)
@@ -76,8 +74,6 @@ public class AwsUpdateServiceTest {
                 .withName("cf")
                 .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
                 .build();
-        when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
-        doNothing().when(awsLaunchTemplateUpdateService).updateLaunchTemplate(anyMap(), any(), anyString(), any());
 
         List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, launch), UpdateType.IMAGE_UPDATE);
 
@@ -86,7 +82,7 @@ public class AwsUpdateServiceTest {
     }
 
     @Test
-    public void updateRandomResource() {
+    void updateRandomResource() {
         CloudResource cloudResource = CloudResource.builder()
                 .withName("cf")
                 .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
@@ -97,11 +93,40 @@ public class AwsUpdateServiceTest {
                 .withType(ResourceType.CLOUDFORMATION_STACK)
                 .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
-        doNothing().when(awsLaunchTemplateUpdateService).updateLaunchTemplate(anyMap(), any(), anyString(), any());
 
         List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, cf), UpdateType.IMAGE_UPDATE);
 
         verify(awsImageUpdateService, times(0)).updateImage(ac, stack, cloudResource);
         assertEquals(1, statuses.size());
+    }
+
+    @Test
+    void updateUserData() {
+        when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
+        Group coreGroup = mock(Group.class);
+        when(coreGroup.getType()).thenReturn(InstanceGroupType.CORE);
+        Group gatewayGroup = mock(Group.class);
+        when(gatewayGroup.getType()).thenReturn(InstanceGroupType.GATEWAY);
+        when(stack.getGroups()).thenReturn(List.of(coreGroup, gatewayGroup));
+
+        Map<InstanceGroupType, String> userData = Map.of(
+                InstanceGroupType.CORE, "core",
+                InstanceGroupType.GATEWAY, "gateway"
+        );
+
+        CloudResource cf = CloudResource.builder()
+                .withName("cf")
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .build();
+
+        underTest.updateUserData(ac, stack, List.of(cf), userData);
+
+        String encodedCoreUserData = Base64.getEncoder().encodeToString(userData.get(InstanceGroupType.CORE).getBytes());
+        Map<LaunchTemplateField, String> coreFields = Map.of(LaunchTemplateField.USER_DATA, encodedCoreUserData);
+        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(coreFields, ac, cf.getName(), coreGroup);
+        String encodedGatewayUserData = Base64.getEncoder().encodeToString(userData.get(InstanceGroupType.GATEWAY).getBytes());
+        Map<LaunchTemplateField, String> gatewayFields = Map.of(LaunchTemplateField.USER_DATA, encodedGatewayUserData);
+        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(gatewayFields, ac, cf.getName(), gatewayGroup);
     }
 }

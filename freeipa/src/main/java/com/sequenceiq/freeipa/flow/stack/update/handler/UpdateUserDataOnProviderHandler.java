@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.stack.update.handler;
 
 import static com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents.UPDATE_USERDATA_FAILED_EVENT;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -48,7 +51,8 @@ public class UpdateUserDataOnProviderHandler extends ExceptionCatcherEventHandle
             AuthenticatedContext auth = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             CloudStack stack = request.getCloudStack();
 
-            connector.resources().updateUserData(auth, stack, request.getCloudResources(), request.getUserData());
+            Map<InstanceGroupType, String> userData = Map.of(InstanceGroupType.GATEWAY, request.getUserData());
+            connector.resources().updateUserData(auth, stack, request.getCloudResources(), userData);
             return new UserDataUpdateOnProviderResult(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Updating user data on provider side has failed", e);

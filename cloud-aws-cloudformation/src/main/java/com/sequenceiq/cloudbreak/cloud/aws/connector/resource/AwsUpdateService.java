@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.CommonResourceType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -88,12 +89,17 @@ public class AwsUpdateService {
         }
     }
 
-    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            Map<InstanceGroupType, String> userData) {
         String cfTemplate = stack.getTemplate();
         if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
             CloudResource cfResource = getCloudFormationStack(resources);
-            awsLaunchTemplateUpdateService.updateFieldsOnAllLaunchTemplate(authenticatedContext, cfResource.getName(), Map.of(LaunchTemplateField.USER_DATA,
-                    Base64.getEncoder().encodeToString(userData.getBytes())));
+            stack.getGroups().forEach(group -> {
+                String groupUserData = userData.get(group.getType());
+                String encodedGroupUserData = Base64.getEncoder().encodeToString(groupUserData.getBytes());
+                Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.USER_DATA, encodedGroupUserData);
+                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group);
+            });
         } else {
             throw new NotImplementedException("UserData update for stack template is not implemented yet, only for AWS::EC2::LaunchTemplate.");
         }

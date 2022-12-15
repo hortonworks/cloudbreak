@@ -69,9 +69,9 @@ public class UserDataUpdateActions {
             @Override
             protected Selectable createRequest(StackContext context) {
                 StackDtoDelegate stack = context.getStack();
-                String userData;
+                Map<InstanceGroupType, String> userData;
                 try {
-                    userData = imageService.getImage(stack.getId()).getUserdata().get(InstanceGroupType.GATEWAY);
+                    userData = imageService.getImage(stack.getId()).getUserdata();
                 } catch (CloudbreakImageNotFoundException e) {
                     return new UserDataUpdateFailed(stack.getId(), e);
                 }

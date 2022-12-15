@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
@@ -69,7 +71,8 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            Map<InstanceGroupType, String> userData) {
         LOGGER.info("Update userdata is not implemented on AWS Native!");
     }
 

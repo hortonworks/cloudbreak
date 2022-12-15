@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.chain.FlowChains;
@@ -89,6 +91,8 @@ class UpgradeCcmFlowChainIntegrationTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
     private static final String USER_DATA = "hello hello is there anybody out there";
+
+    private static final Map<InstanceGroupType, String> USER_DATA_MAP = Map.of(InstanceGroupType.GATEWAY, USER_DATA);
 
     private static final long STACK_ID = 1L;
 
@@ -190,7 +194,7 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     private void verifyFinishingStatCalls(boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess, boolean minaRemoved) throws Exception {
         verify(upgradeCcmService, times(ccmUpgradeSuccess ? 1 : 0)).finishedState(STACK_ID, minaRemoved);
-        verify(resourcesApi, times(userDataUpdateSuccess ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA));
+        verify(resourcesApi, times(userDataUpdateSuccess ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA_MAP));
 
         ArgumentCaptor<UpgradeCcmContext> contextCaptor = ArgumentCaptor.forClass(UpgradeCcmContext.class);
         ArgumentCaptor<UpgradeCcmFailureEvent> payloadCaptor = ArgumentCaptor.forClass(UpgradeCcmFailureEvent.class);
@@ -231,7 +235,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMinaState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMina(STACK_ID);
         inOrder.verify(userDataService, times(expected[i++])).regenerateUserData(STACK_ID);
-        inOrder.verify(resourcesApi, times(expected[i++])).updateUserData(any(), any(), any(), eq(USER_DATA));
+        inOrder.verify(resourcesApi, times(expected[i++])).updateUserData(any(), any(), any(), eq(USER_DATA_MAP));
     }
 
     private void flowFinishedSuccessfully(int numberOfRanFlows) {
