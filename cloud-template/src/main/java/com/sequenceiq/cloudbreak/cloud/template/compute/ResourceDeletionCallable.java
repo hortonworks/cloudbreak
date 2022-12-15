@@ -39,7 +39,7 @@ public class ResourceDeletionCallable implements Callable<ResourceRequestResult<
     private final boolean cancellable;
 
     public ResourceDeletionCallable(ResourceDeletionCallablePayload payload, SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler,
-            ResourcePollTaskFactory resourcePollTaskFactory, PersistenceNotifier persistenceNotifier) {
+                                    ResourcePollTaskFactory resourcePollTaskFactory, PersistenceNotifier persistenceNotifier) {
         this.syncPollingScheduler = syncPollingScheduler;
         this.resourcePollTaskFactory = resourcePollTaskFactory;
         this.persistenceNotifier = persistenceNotifier;
@@ -58,9 +58,13 @@ public class ResourceDeletionCallable implements Callable<ResourceRequestResult<
             try {
                 deletedResource = builder.delete(context, auth, resource);
             } catch (PreserveResourceException ignored) {
-                LOGGER.debug("Preserve resource for later use.");
+                LOGGER.info("Preserve resource for later use.");
                 CloudResourceStatus status = new CloudResourceStatus(resource, ResourceStatus.CREATED);
                 return new ResourceRequestResult<>(FutureResult.SUCCESS, Collections.singletonList(status));
+            } catch (Exception e) {
+                LOGGER.info("Exception during deleting cloud resource {}", resource, e);
+                CloudResourceStatus status = new CloudResourceStatus(resource, ResourceStatus.FAILED, e.getMessage());
+                return new ResourceRequestResult<>(FutureResult.FAILED, Collections.singletonList(status));
             }
             if (deletedResource != null) {
                 PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory
