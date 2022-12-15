@@ -166,7 +166,7 @@ public class DistroXAutoScaleClusterV1EndpointTest {
                 .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_GCP_STOP_START_SCALING").build())
                 .build();
         testCluster.setClusterPertain(
-                clusterPertainRepsitory.findByUserCrn(clusterPertain.getUserCrn())
+                clusterPertainRepsitory.findFirstByUserCrn(clusterPertain.getUserCrn())
                         .orElseGet(() -> clusterPertainRepsitory.save(clusterPertain)));
         clusterRepository.save(testCluster);
 
