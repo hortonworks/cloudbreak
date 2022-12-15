@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -94,25 +95,31 @@ public class ComputeResourceService {
         List<CloudResourceStatus> results = new ArrayList<>();
         Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         Variant variant = auth.getCloudContext().getVariant();
-        List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(variant);
-        int numberOfBuilders = builders.size();
-        for (int i = numberOfBuilders - 1; i >= 0; i--) {
-            ComputeResourceBuilder<ResourceBuilderContext> builder = builders.get(i);
+        List<ComputeResourceBuilder<ResourceBuilderContext>> builders = Lists.reverse(resourceBuilders.compute(variant));
+        for (ComputeResourceBuilder<ResourceBuilderContext> builder : builders) {
             List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
             for (CloudResource cloudResource : resourceList) {
-                ResourceDeletionCallablePayload deletionCallablePayload
-                        = new ResourceDeletionCallablePayload(context, auth, cloudResource, builder, cancellable);
-                ResourceDeletionCallable deletionCallable = resourceActionFactory.buildDeletionCallable(deletionCallablePayload);
-                Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(deletionCallable);
-                futures.add(future);
+                ResourceDeletionCallable deletionCallable = resourceActionFactory.buildDeletionCallable(
+                        new ResourceDeletionCallablePayload(context, auth, cloudResource, builder, cancellable));
+                futures.add(resourceBuilderExecutor.submit(deletionCallable));
                 if (isRequestFull(futures.size(), context)) {
-                    results.addAll(getBuilderResults(futures));
+                    results.addAll(getDeletedResourcesOrFail(futures));
                 }
             }
             // wait for builder type to finish before starting the next one
-            results.addAll(getBuilderResults(futures));
+            results.addAll(getDeletedResourcesOrFail(futures));
         }
         return results;
+    }
+
+    private List<CloudResourceStatus> getDeletedResourcesOrFail(Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures) {
+        Map<FutureResult, List<List<CloudResourceStatus>>> futureResults = waitForRequests(futures);
+        List<List<CloudResourceStatus>> failedResources = futureResults.get(FutureResult.FAILED);
+        if (!failedResources.isEmpty()) {
+            throw new CloudConnectorException("Resource deletion failed. Reason: "
+                    + flatList(failedResources).stream().map(CloudResourceStatus::getStatusReason).collect(Collectors.joining(" ")));
+        }
+        return flatList(futureResults.get(FutureResult.SUCCESS));
     }
 
     public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack, List<CloudResource> cloudResource) {
@@ -207,11 +214,7 @@ public class ComputeResourceService {
     }
 
     private boolean isRequestFull(int runningRequests, ResourceBuilderContext context) {
-        return isRequestFullWithCloudPlatform(1, runningRequests, context);
-    }
-
-    private boolean isRequestFullWithCloudPlatform(int numberOfBuilders, int runningRequests, ResourceBuilderContext context) {
-        return (runningRequests * numberOfBuilders) % context.getParallelResourceRequest() == 0;
+        return runningRequests % context.getParallelResourceRequest() == 0;
     }
 
     private List<CloudResource> getResources(ResourceType resourceType, Iterable<CloudResource> resources) {
