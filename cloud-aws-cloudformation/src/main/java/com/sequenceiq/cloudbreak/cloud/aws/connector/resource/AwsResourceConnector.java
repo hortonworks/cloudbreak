@@ -5,6 +5,7 @@ import static java.util.Collections.singletonList;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCert
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
 
@@ -189,8 +191,8 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources, String userData)
-            throws Exception {
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources,
+            Map<InstanceGroupType, String> userData) throws Exception {
         awsUpdateService.updateUserData(authenticatedContext, stack, cloudResources, userData);
     }
 

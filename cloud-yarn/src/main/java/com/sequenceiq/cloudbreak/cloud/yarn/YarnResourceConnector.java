@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.loadbalancer.service.launch.YarnLoad
 import com.sequenceiq.cloudbreak.cloud.yarn.status.YarnApplicationStatus;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -254,7 +255,8 @@ public class YarnResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            Map<InstanceGroupType, String> userData) {
         LOGGER.info("Update userdata is not implemented on Yarn!");
     }
 

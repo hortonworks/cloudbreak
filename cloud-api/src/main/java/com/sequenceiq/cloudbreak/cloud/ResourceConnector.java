@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.List;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCert
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 /**
  * Cloudbreak handles the entities on the Cloud provider side as generic resources and supports CRUD operations on them.
@@ -240,14 +242,15 @@ public interface ResourceConnector {
             throws Exception;
 
     /**
-     * Update yser data for the cluster instances which contains parameters for user-data scricpt run during intsances' bootstrap.
+     * Update user data for the cluster instances which contains parameters for user-data script run during instances' bootstrap.
      *
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of the new infrastructure (e.g new security groups)
-     * @param userData             the user data
+     * @param userData             the user data by instance group type
      * @throws Exception in case of any error
      */
-    void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) throws Exception;
+    void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, Map<InstanceGroupType, String> userData)
+            throws Exception;
 
     /**
      * Update of infrastructure on Cloud platform, add new instances. It does not need to wait/block until the infrastructure update is
