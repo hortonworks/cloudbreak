@@ -76,8 +76,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
-    public DistroXRdsUpgradeV1Response upgradeRdsByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB)
-        @ResourceCrn String crn, @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest) {
+    public DistroXRdsUpgradeV1Response upgradeRdsByCrn(@ResourceCrn String crn, DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
         return upgradeRds(distroxRdsUpgradeRequest, nameOrCrn);
     }

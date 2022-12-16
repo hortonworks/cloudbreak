@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackD
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -178,6 +179,21 @@ public class SdxDatabaseServerUpgradeServiceTest {
         Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("Data Lake %s is not available for database server upgrade", SDX_CLUSTER_NAME));
+
+        verify(sdxDatabaseServerUpgradeAvailabilityService, never()).isUpgradeNeeded(any(), any());
+        verify(databaseService, never()).getDatabaseServer(any());
+        verify(reactorFlowManager, never()).triggerDatabaseServerUpgradeFlow(any(), any());
+    }
+
+    @Test
+    void testUpgradeWhenClusterNotExistThenExceptionIsThrown() {
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        doThrow(new NotFoundException("SDX cluster 'testCluster' not found."))
+                .when(sdxService).getByNameOrCrn(any(), eq(NAME_OR_CRN));
+
+        Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("SDX cluster 'testCluster' not found.");
 
         verify(sdxDatabaseServerUpgradeAvailabilityService, never()).isUpgradeNeeded(any(), any());
         verify(databaseService, never()).getDatabaseServer(any());

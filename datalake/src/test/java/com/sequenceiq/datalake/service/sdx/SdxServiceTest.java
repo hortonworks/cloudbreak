@@ -46,6 +46,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -397,6 +398,25 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq("hortonworks"), eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(sdxCluser));
         SdxCluster returnedSdxCluster = underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofCrn(ENVIRONMENT_CRN));
         assertEquals(sdxCluser, returnedSdxCluster);
+    }
+
+    @Test
+    void testGetSdxClusterByNameOrCrnWhenClusterCrnProvidedThrowsExceptionIfClusterDoesNotExists() {
+        SdxCluster sdxCluser = new SdxCluster();
+        sdxCluser.setEnvName("env");
+        sdxCluser.setClusterName(CLUSTER_NAME);
+        when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq("hortonworks"), eq(ENVIRONMENT_CRN))).thenReturn(Optional.empty());
+        Assertions.assertThatCode(() -> underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofCrn(ENVIRONMENT_CRN)))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("SDX cluster '" + ENVIRONMENT_CRN + "' not found.");
+    }
+
+    @Test
+    void testGetSdxClusterByNameOrCrnWhenClusterNameProvidedThrowsExceptionIfClusterDoesNotExists() {
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.empty());
+        Assertions.assertThatCode(() -> underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME)))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("SDX cluster '" + CLUSTER_NAME + "' not found.");
     }
 
     @Test
