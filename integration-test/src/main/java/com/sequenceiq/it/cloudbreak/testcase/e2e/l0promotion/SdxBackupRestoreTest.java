@@ -68,6 +68,9 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
                 .then(this::validateDatalakeStatus)
                 .then((tc, testDto, client) -> {
                     getCloudFunctionality(tc).cloudStorageListContainer(cloudStorageBaseLocation, backupObject, true);
+                    String databaseBackupLocation = cloudStorageBaseLocation + '/' + backupObject + '/' + backupId + "_database_backup";
+                    getCloudFunctionality(tc).cloudStorageListContainer(databaseBackupLocation, "hive_backup", true);
+                    getCloudFunctionality(tc).cloudStorageListContainer(databaseBackupLocation, "ranger_backup", true);
                     return testDto;
                 })
                 .validate();
