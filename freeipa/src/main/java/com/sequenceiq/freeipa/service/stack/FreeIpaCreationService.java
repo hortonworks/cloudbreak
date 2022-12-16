@@ -165,9 +165,11 @@ public class FreeIpaCreationService {
 
         String template = templateService.waitGetTemplate(getPlatformTemplateRequest);
         stack.setTemplate(template);
-        SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(accountId);
+        SecurityConfig securityConfig = measure(() -> tlsSecurityService.generateSecurityKeys(accountId), LOGGER,
+                "Generating security keys took {} ms for {}", stack.getName());
         multiAzValidator.validateMultiAzForStack(stack.getPlatformvariant(), stack.getInstanceGroups());
-        freeIpaRecommendationService.validateCustomInstanceType(stack, credential);
+        measure(() -> freeIpaRecommendationService.validateCustomInstanceType(stack, credential), LOGGER,
+                "Validating custom instance type took {} ms for {}", stack.getName());
         try {
             Triple<Stack, ImageEntity, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
                 SecurityConfig savedSecurityConfig = securityConfigService.save(securityConfig);
