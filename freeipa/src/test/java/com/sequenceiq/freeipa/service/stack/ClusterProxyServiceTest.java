@@ -76,6 +76,8 @@ public class ClusterProxyServiceTest {
 
     private static final String STACK_RESOURCE_CRN = "resourceCrn";
 
+    private static final String ENVIRONMENT_CRN = "environmentCrn";
+
     @InjectMocks
     private ClusterProxyService underTest;
 
@@ -152,6 +154,7 @@ public class ClusterProxyServiceTest {
         assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa", List.of("https://privateIpAddress:9443"), List.of(), null));
         assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa.ipadom", List.of("https://privateIpAddress:9443"), List.of(),
                 null));
+        assertThat(proxyRegistrationReq.getEnvironmentCrn()).isEqualTo(ENVIRONMENT_CRN);
     }
 
     @ParameterizedTest
@@ -223,6 +226,7 @@ public class ClusterProxyServiceTest {
         assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa.test.freeipa.domain",
                 List.of("https://privateIpAddress1:9443", "https://privateIpAddress2:9443"), null, false, List.of(), null,
                 new ClusterServiceHealthCheck(INTERVAL_IN_SEC_V_2, HEALTH_STATUS_ENDPOINT_V_2, TIMEOUT_IN_SEC_V_2, HEALTHY_STATUS_CODE_V_2)));
+        assertThat(proxyRegistrationReq.getEnvironmentCrn()).isEqualTo(ENVIRONMENT_CRN);
     }
 
     @Test
@@ -382,6 +386,7 @@ public class ClusterProxyServiceTest {
         stack.setResourceCrn(STACK_RESOURCE_CRN);
         SecurityConfig securityConfig = new SecurityConfig();
         stack.setSecurityConfig(securityConfig);
+        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         return stack;
     }
 
