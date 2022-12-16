@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
@@ -222,7 +223,12 @@ public class EC2ClientActions extends EC2Client {
     }
 
     public Map<String, String> listLaunchTemplatesUserData(String stack) {
-        List<StackResourceSummary> launchTemplateList = cfClientActions.getLaunchTemplatesToStack(stack);
+        List<StackResourceSummary> launchTemplateList;
+        try {
+            launchTemplateList = cfClientActions.getLaunchTemplatesToStack(stack);
+        } catch (Exception e) {
+            launchTemplateList = List.of();
+        }
         AmazonEC2 client = buildEC2Client();
 
         Map<String, String> result = new HashMap<>();
@@ -237,5 +243,13 @@ public class EC2ClientActions extends EC2Client {
         }
 
         return result;
+    }
+
+    public Boolean isCloudFormationExistForStack(String stack) {
+        return !cfClientActions.listCfStacksByName(stack).isEmpty();
+    }
+
+    public List<Stack> listCfStacksByEnvironment(String crn) {
+        return cfClientActions.listCfStacksByTagsEnvironmentCrn(crn);
     }
 }

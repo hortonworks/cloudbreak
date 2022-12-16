@@ -157,6 +157,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return this;
     }
 
+    public FreeIpaTestDto withVariant(String variant) {
+        getRequest().setVariant(variant);
+        return this;
+    }
+
     public FreeIpaTestDto withSpotPercentage(int spotPercentage) {
         getRequest().getInstanceGroups().forEach(instanceGroupRequest -> {
             AwsInstanceTemplateParameters aws = instanceGroupRequest.getInstanceTemplate().getAws();

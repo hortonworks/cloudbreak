@@ -86,8 +86,9 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
 
         testContext
                 .given(freeIpa, FreeIpaTestDto.class)
-                    .withTelemetry("telemetry")
-                    .withUpgradeCatalogAndImage()
+                .withTelemetry("telemetry")
+
+                .withUpgradeCatalogAndImage()
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .given(SdxTestDto.class)

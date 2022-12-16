@@ -12,6 +12,7 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.cloudformation.model.ListStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
+import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.services.cloudformation.model.StackSummary;
 import com.sequenceiq.it.cloudbreak.util.aws.amazoncf.client.CfClient;
@@ -20,18 +21,27 @@ import com.sequenceiq.it.cloudbreak.util.aws.amazoncf.client.CfClient;
 public class CfClientActions {
     private static final String AWS_EC_2_LAUNCH_TEMPLATE = "AWS::EC2::LaunchTemplate";
 
+    private static final String CLOUDERA_ENVIRONMENT_RESOURCE_NAME = "Cloudera-Environment-Resource-Name";
+
     @Inject
     private CfClient cfClient;
 
-    public List<StackSummary> listCfStacksWithName(String name) {
+    public List<StackSummary> listCfStacksByName(String name) {
         AmazonCloudFormation client = cfClient.buildCfClient();
         return client.listStacks().getStackSummaries()
                 .stream().filter(stack -> stack.getStackName().startsWith(name)).collect(Collectors.toList());
     }
 
+    public List<Stack> listCfStacksByTagsEnvironmentCrn(String crn) {
+        AmazonCloudFormation client = cfClient.buildCfClient();
+        return client.describeStacks().getStacks().stream().filter(
+                stack -> stack.getTags().stream().anyMatch(tag -> tag.getKey().equals(CLOUDERA_ENVIRONMENT_RESOURCE_NAME) && tag.getValue().equals(crn))
+        ).collect(Collectors.toList());
+    }
+
     public List<StackResourceSummary> getLaunchTemplatesToStack(String name) {
         AmazonCloudFormation client = cfClient.buildCfClient();
-        List<StackSummary> list = listCfStacksWithName(name);
+        List<StackSummary> list = listCfStacksByName(name);
         if (list.size() == 0) {
             return null;
         }
