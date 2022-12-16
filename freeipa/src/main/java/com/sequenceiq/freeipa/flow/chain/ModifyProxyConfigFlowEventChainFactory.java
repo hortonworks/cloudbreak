@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
+import com.sequenceiq.freeipa.flow.stack.modify.proxy.event.ModifyProxyConfigTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.modify.proxy.event.ModifyProxyFlowChainTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateRequest;
@@ -23,10 +25,13 @@ public class ModifyProxyConfigFlowEventChainFactory implements FlowEventChainFac
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(ModifyProxyFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new UserDataUpdateRequest(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(), event.getResourceId(), event.accepted())
-                .withOperationId(event.getOperationId())
-                .withIsChained(true)
-                .withIsFinal(true));
+        flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, event.getOperationId()));
+        flowEventChain.add(new ModifyProxyConfigTriggerEvent(event.getResourceId(), event.accepted(), event.getOperationId()));
+        flowEventChain.add(
+                new UserDataUpdateRequest(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(), event.getResourceId(), event.accepted())
+                        .withOperationId(event.getOperationId())
+                        .withIsChained(true)
+                        .withIsFinal(true));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

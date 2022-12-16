@@ -8,6 +8,8 @@ import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -178,6 +180,7 @@ public class FreeIpaService {
         }
     }
 
+    @Retryable(value = FreeIpaOperationFailedException.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public OperationStatus getOperationStatus(String operationId) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         try {

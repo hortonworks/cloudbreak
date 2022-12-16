@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
+import com.sequenceiq.freeipa.entity.Stack;
 
 @Service
 public class ProxyConfigService {
@@ -24,8 +25,8 @@ public class ProxyConfigService {
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
 
-    public Map<String, SaltPillarProperties> createProxyPillarConfig(String environmentCrn) {
-        Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(environmentCrn);
+    public Map<String, SaltPillarProperties> createProxyPillarConfig(Stack stack) {
+        Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         if (proxyConfig.isPresent()) {
             ProxyConfig config = proxyConfig.get();
             Map<String, Object> proxy = new HashMap<>();
@@ -37,6 +38,7 @@ public class ProxyConfigService {
                 proxy.put("password", auth.getPassword());
             });
             proxy.put("noProxyHosts", config.getNoProxyHosts());
+            proxy.put("tunnel", stack.getTunnel());
             return Map.of(PROXY_KEY, new SaltPillarProperties(PROXY_SLS_PATH, singletonMap(PROXY_KEY, proxy)));
         } else {
             return Map.of();
