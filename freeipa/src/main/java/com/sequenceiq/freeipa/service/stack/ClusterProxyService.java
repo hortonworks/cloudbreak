@@ -188,6 +188,7 @@ public class ClusterProxyService {
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(createTunnelEntries(stack, tunnelGatewayConfigs));
         } else if (stack.getTunnel().useCcmV2OrJumpgate()) {
+            requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn());
             requestBuilder.withCcmV2Entries(createCcmV2Configs(stack, tunnelGatewayConfigs));
         }
         ConfigRegistrationRequest request = requestBuilder.build();
