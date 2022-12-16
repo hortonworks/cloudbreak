@@ -8,7 +8,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedse
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @Component
 public class SdxConverter {
@@ -20,7 +19,7 @@ public class SdxConverter {
             LOGGER.info("We don't attach the cluster to any Datalake, because the environment has not SDX. So we continue the creation as simple WORKLOAD.");
             return null;
         }
-        if (sdx.getStatus() != SdxClusterStatusResponse.RUNNING) {
+        if (!sdx.getStatus().isAvailable()) {
             throw new BadRequestException(
                     String.format("Your current Environment %s contains one Data Lake the name of which is %s. " +
                             "This Data Lake should be in running/available state but currently it is in '%s' instead of Running. " +
