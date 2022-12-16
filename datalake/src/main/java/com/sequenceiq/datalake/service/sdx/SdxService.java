@@ -1290,7 +1290,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public PayloadContext getPayloadContext(Long resourceId) {
         try {
             SdxCluster sdxCluster = getById(resourceId);
-            DetailedEnvironmentResponse envResp = environmentClientService.getByCrn(sdxCluster.getEnvCrn());
+            DetailedEnvironmentResponse envResp = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> environmentClientService.getByCrn(sdxCluster.getEnvCrn()));
             return PayloadContext.create(sdxCluster.getCrn(), envResp.getCloudPlatform());
         } catch (NotFoundException ignored) {
             // skip
