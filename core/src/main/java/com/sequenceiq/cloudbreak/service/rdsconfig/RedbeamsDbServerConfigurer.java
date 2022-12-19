@@ -84,7 +84,7 @@ public class RedbeamsDbServerConfigurer {
         return SslMode.isEnabled(sslMode) ? RdsSslMode.ENABLED : RdsSslMode.DISABLED;
     }
 
-    public boolean isRemoteDatabaseNeeded(String dbServerCrn) {
+    public boolean isRemoteDatabaseRequested(String dbServerCrn) {
         return StringUtils.isNotEmpty(dbServerCrn);
     }
 

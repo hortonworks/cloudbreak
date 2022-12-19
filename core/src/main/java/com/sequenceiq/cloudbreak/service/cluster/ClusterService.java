@@ -500,9 +500,10 @@ public class ClusterService {
         return repository.getById(id);
     }
 
-    public void updateDbSslCert(Long clusterId, RedbeamsDbCertificateProvider.RedbeamsDbSslDetails relatedSslCerts) {
+    public String updateDbSslCert(Long clusterId, RedbeamsDbCertificateProvider.RedbeamsDbSslDetails relatedSslCerts) {
         Set<String> rootSslCerts = relatedSslCerts.getSslCerts();
         String allCerts = String.join("\n", rootSslCerts);
         repository.updateDbSslCert(clusterId, allCerts, relatedSslCerts.isSslEnabledForStack());
+        return allCerts;
     }
 }

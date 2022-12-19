@@ -121,7 +121,7 @@ public class StackToStackDetailsConverter {
 
     private void convertDatabaseType(StackDetails stackDetails, ClusterView cluster, Optional<InstanceGroupView> gatewayGroup) {
         try {
-            if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster.getDatabaseServerCrn())) {
+            if (dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
                 stackDetails.setDatabaseType(EXTERNAL_DB);
             } else {
                 if (embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(cluster, gatewayGroup)) {

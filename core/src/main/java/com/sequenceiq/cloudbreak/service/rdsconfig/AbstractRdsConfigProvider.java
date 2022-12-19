@@ -72,7 +72,7 @@ public abstract class AbstractRdsConfigProvider {
             if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED) {
                 Map<String, Object> postgres = new HashMap<>();
                 String databaseServerCrn = stackDto.getCluster().getDatabaseServerCrn();
-                if (dbServerConfigurer.isRemoteDatabaseNeeded(databaseServerCrn)) {
+                if (dbServerConfigurer.isRemoteDatabaseRequested(databaseServerCrn)) {
                     DatabaseServerV4Response dbServerResponse = dbServerConfigurer.getDatabaseServer(databaseServerCrn);
                     postgres.put("remote_db_url", dbServerResponse.getHost());
                     postgres.put("remote_db_port", dbServerResponse.getPort());
@@ -108,7 +108,7 @@ public abstract class AbstractRdsConfigProvider {
         if (isRdsConfigNeeded(cluster.getBlueprint(), cluster.hasGateway())
                 && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
             RDSConfig newRdsConfig;
-            if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster.getDatabaseServerCrn())) {
+            if (dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
                 newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack.getName(), stack.getId(), cluster.getDatabaseServerCrn(), cluster.getId(),
                         getDb(), getDbUser(), getRdsType());
             } else {
@@ -135,7 +135,7 @@ public abstract class AbstractRdsConfigProvider {
                 && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
             RDSConfig newRdsConfig;
             StackView stack = stackDto.getStack();
-            if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster.getDatabaseServerCrn())) {
+            if (dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
                 newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack.getName(), stack.getId(), cluster.getDatabaseServerCrn(), cluster.getId(),
                         getDb(), getDbUser(), getRdsType());
             } else {
