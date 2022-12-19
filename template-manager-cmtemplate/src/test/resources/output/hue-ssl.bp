@@ -1,0 +1,96 @@
+{
+  "cdhVersion": "7.2.11",
+  "displayName": "testcluster",
+  "cmVersion": "7.4.3",
+  "services": [
+    {
+      "refName": "hue",
+      "serviceType": "HUE",
+      "serviceConfigs": [
+        {
+          "name": "database_type",
+          "value": "postgresql"
+        },
+        {
+          "name": "database_user",
+          "value": "heyitsme"
+        },
+        {
+          "name": "database_name",
+          "value": "hue"
+        },
+        {
+          "name": "database_host",
+          "value": "10.1.1.1"
+        },
+        {
+          "name": "database_port",
+          "value": "5432"
+        },
+        {
+          "name": "database_password",
+          "value": "iamsoosecure"
+        },
+        {
+          "name": "hue_service_safety_valve",
+          "value": "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig\n[[database]]\noptions='{\"sslmode\": \"verify-full\", \"sslrootcert\": \"/foo/bar.pem\"}'\n"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hue-HUE_SERVER-BASE",
+          "roleType": "HUE_SERVER",
+          "base": true
+        },
+        {
+          "refName": "hue-HUE_LOAD_BALANCER-BASE",
+          "roleType": "HUE_LOAD_BALANCER",
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hue-HUE_SERVER-BASE",
+        "hue-HUE_LOAD_BALANCER-BASE"
+      ]
+    }
+  ],
+  "instantiator": {
+    "clusterName": "testcluster",
+    "hosts": [
+      {
+        "hostName": "host3",
+        "hostTemplateRefName": "worker"
+      },
+      {
+        "hostName": "host4",
+        "hostTemplateRefName": "worker"
+      },
+      {
+        "hostName": "host1",
+        "hostTemplateRefName": "master"
+      },
+      {
+        "hostName": "host2",
+        "hostTemplateRefName": "master"
+      }
+    ],
+    "keepHostTemplates": true,
+    "lenient": true
+  },
+  "tags": [
+    {
+      "name": "_cldr_cb_origin",
+      "value": "cloudbreak"
+    },
+    {
+      "name": "_cldr_cb_clustertype",
+      "value": "Data Hub"
+    }
+  ]
+}

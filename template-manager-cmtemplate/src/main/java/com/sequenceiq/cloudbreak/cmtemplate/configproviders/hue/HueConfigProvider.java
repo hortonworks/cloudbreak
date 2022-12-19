@@ -1,12 +1,17 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getCmVersion;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,10 +19,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFile;
+import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFileFactory;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
@@ -26,52 +32,46 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 @Component
 public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
+    public static final String HUE_SERVICE_SAFETY_VALVE = "hue_service_safety_valve";
+
+    public static final String HUE_SERVER_HUE_SAFETY_VALVE = "hue_server_hue_safety_valve";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(HueConfigProvider.class);
-
-    private static final String HUE_DATABASE_HOST = "hue-hue_database_host";
-
-    private static final String HUE_DATABASE_PORT = "hue-hue_database_port";
-
-    private static final String HUE_DATABASE_NAME = "hue-hue_database_name";
-
-    private static final String HUE_HUE_DATABASE_TYPE = "hue-hue_database_type";
-
-    private static final String HUE_HUE_DATABASE_USER = "hue-hue_database_user";
-
-    private static final String HUE_DATABASE_PASSWORD = "hue-hue_database_password";
-
-    private static final String HUE_SAFETY_VALVE = "hue-hue_service_safety_valve";
-
-    private static final String HUE_KNOX_PROXYHOSTS = "hue-knox_proxyhosts";
 
     private static final String KNOX_PROXYHOSTS = "knox_proxyhosts";
 
     private static final String SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN = "[desktop]\n[[knox]]\nknox_proxyhosts=";
 
+    private static final String SAFETY_VALVE_DATABASE_KEY_PATTERN = "[desktop]\n[[database]]\noptions=";
+
+    private static final String DATABASE_OPTIONS_FORMAT = "'{\"sslmode\": \"verify-full\", \"sslrootcert\": \"%s\"}'";
+
+    @Inject
+    private IniFileFactory iniFileFactory;
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> result = new ArrayList<>();
-        result.add(new ApiClusterTemplateConfig().name("database_host").variable(HUE_DATABASE_HOST));
-        result.add(new ApiClusterTemplateConfig().name("database_port").variable(HUE_DATABASE_PORT));
-        result.add(new ApiClusterTemplateConfig().name("database_name").variable(HUE_DATABASE_NAME));
-        result.add(new ApiClusterTemplateConfig().name("database_type").variable(HUE_HUE_DATABASE_TYPE));
-        result.add(new ApiClusterTemplateConfig().name("database_user").variable(HUE_HUE_DATABASE_USER));
-        result.add(new ApiClusterTemplateConfig().name("database_password").variable(HUE_DATABASE_PASSWORD));
-        configureKnoxProxyHostsServiceConfig(source, result);
-        return result;
-    }
-
-    @Override
-    public List<ApiClusterTemplateVariable> getServiceConfigVariables(TemplatePreparationObject source) {
-        List<ApiClusterTemplateVariable> result = new ArrayList<>();
         RdsView hueRdsView = getRdsView(source);
-        result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_HOST).value(hueRdsView.getHost()));
-        result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_PORT).value(hueRdsView.getPort()));
-        result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_NAME).value(hueRdsView.getDatabaseName()));
-        result.add(new ApiClusterTemplateVariable().name(HUE_HUE_DATABASE_TYPE).value(hueRdsView.getSubprotocol()));
-        result.add(new ApiClusterTemplateVariable().name(HUE_HUE_DATABASE_USER).value(hueRdsView.getConnectionUserName()));
-        result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_PASSWORD).value(hueRdsView.getConnectionPassword()));
-        configureKnoxProxyHostsConfigVariables(source, result);
+        result.add(config("database_host", hueRdsView.getHost()));
+        result.add(config("database_port", hueRdsView.getPort()));
+        result.add(config("database_name", hueRdsView.getDatabaseName()));
+        result.add(config("database_type", hueRdsView.getSubprotocol()));
+        result.add(config("database_user", hueRdsView.getConnectionUserName()));
+        result.add(config("database_password", hueRdsView.getConnectionPassword()));
+
+        IniFile safetyValve = iniFileFactory.create();
+        configureKnoxProxyHostsServiceConfig(source, result, safetyValve);
+        if (isDbSslNeeded(source, hueRdsView)) {
+            LOGGER.info("Adding DB SSL options to {}", HUE_SERVICE_SAFETY_VALVE);
+            String dbSslConfig = SAFETY_VALVE_DATABASE_KEY_PATTERN.concat(String.format(DATABASE_OPTIONS_FORMAT, hueRdsView.getSslCertificateFilePath()));
+            safetyValve.addContent(dbSslConfig);
+        }
+        String valveValue = safetyValve.print();
+        if (!valveValue.isEmpty()) {
+            LOGGER.info("Using {} settings of [{}]", HUE_SERVICE_SAFETY_VALVE, valveValue);
+            result.add(config(HUE_SERVICE_SAFETY_VALVE, valveValue));
+        }
         return result;
     }
 
@@ -95,26 +95,16 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         return List.of();
     }
 
-    private void configureKnoxProxyHostsServiceConfig(TemplatePreparationObject source, List<ApiClusterTemplateConfig> result) {
-        GatewayView gateway = source.getGatewayView();
-        String cdhVersion = getCdhVersionString(source);
-        GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
-        if (externalFQDNShouldConfigured(gateway, generalClusterConfigs)) {
-            // CDPD version 7.1.0 and above have a dedicated knox_proxyhosts property to set the knox proxy hosts.
-            if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
-                result.add(new ApiClusterTemplateConfig().name(KNOX_PROXYHOSTS).variable(HUE_KNOX_PROXYHOSTS));
-            } else {
-                result.add(new ApiClusterTemplateConfig().name("hue_service_safety_valve").variable(HUE_SAFETY_VALVE));
-            }
-        }
+    private boolean isDbSslNeeded(TemplatePreparationObject source, RdsView hueRdsView) {
+        return isVersionNewerOrEqualThanLimited(getCmVersion(source), CLOUDERAMANAGER_VERSION_7_2_2) && hueRdsView.isUseSsl();
     }
 
-    private void configureKnoxProxyHostsConfigVariables(TemplatePreparationObject source, List<ApiClusterTemplateVariable> result) {
+    private void configureKnoxProxyHostsServiceConfig(TemplatePreparationObject source, List<ApiClusterTemplateConfig> result, IniFile safetyValve) {
         GatewayView gateway = source.getGatewayView();
         String cdhVersion = getCdhVersionString(source);
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
-        if (externalFQDNShouldConfigured(gateway, generalClusterConfigs)) {
-            Set<String> proxyHosts = new HashSet<>();
+        if (externalFqdnShouldBeConfigured(gateway, generalClusterConfigs)) {
+            Set<String> proxyHosts = new LinkedHashSet<>();
             if (generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().isPresent()) {
                 proxyHosts.add(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().get());
             }
@@ -126,13 +116,13 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
             }
             if (!proxyHosts.isEmpty()) {
                 String proxyHostsString = String.join(",", proxyHosts);
+                // CDPD version 7.1.0 and above have a dedicated knox_proxyhosts property to set the knox proxy hosts.
                 if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
-                    LOGGER.debug("Using {} settings of [{}]", HUE_KNOX_PROXYHOSTS, proxyHostsString);
-                    result.add(new ApiClusterTemplateVariable().name(HUE_KNOX_PROXYHOSTS).value(proxyHostsString));
+                    LOGGER.info("Using {} settings of [{}]", KNOX_PROXYHOSTS, proxyHostsString);
+                    result.add(config(KNOX_PROXYHOSTS, proxyHostsString));
                 } else {
-                    LOGGER.debug("Adding knox proxy hosts [{}] to {}", proxyHostsString, HUE_SAFETY_VALVE);
-                    String valveValue = SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN.concat(proxyHostsString);
-                    result.add(new ApiClusterTemplateVariable().name(HUE_SAFETY_VALVE).value(valveValue));
+                    LOGGER.info("Adding knox proxy hosts [{}] to {}", proxyHostsString, HUE_SERVICE_SAFETY_VALVE);
+                    safetyValve.addContent(SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN.concat(proxyHostsString));
                 }
             }
         }
@@ -142,10 +132,11 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         return source.getBlueprintView().getProcessor().getVersion().orElse("");
     }
 
-    private boolean externalFQDNShouldConfigured(GatewayView gateway, GeneralClusterConfigs generalClusterConfigs) {
+    private boolean externalFqdnShouldBeConfigured(GatewayView gateway, GeneralClusterConfigs generalClusterConfigs) {
         return gateway != null
                 && ((StringUtils.isNotEmpty(generalClusterConfigs.getExternalFQDN())
                 && generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().isPresent())
                 || generalClusterConfigs.getLoadBalancerGatewayFqdn().isPresent());
     }
+
 }

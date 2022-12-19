@@ -167,6 +167,34 @@
       ]
     },
     {
+      "refName": "hue",
+      "serviceType": "HUE",
+      "serviceConfigs": [
+        {
+          "name": "hue_service_safety_valve",
+          "value": "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hue-HUE_SERVER-BASE",
+          "roleType": "HUE_SERVER",
+          "base": true,
+          "configs": [
+            {
+              "name": "hue_server_hue_safety_valve",
+              "value": "[dashboard]\nhas_sql_enabled=true"
+            }
+          ]
+        },
+        {
+          "refName": "hue-HUE_LOAD_BALANCER-BASE",
+          "roleType": "HUE_LOAD_BALANCER",
+          "base": true
+        }
+      ]
+    },
+    {
       "refName": "hive",
       "serviceType": "HIVE",
       "serviceConfigs": [
@@ -227,6 +255,8 @@
         "hive-GATEWAY-BASE",
         "hive-HIVEMETASTORE-BASE",
         "hive-HIVESERVER2-BASE",
+        "hue-HUE_LOAD_BALANCER-BASE",
+        "hue-HUE_SERVER-BASE",
         "impala-CATALOGSERVER-BASE",
         "impala-STATESTORE-BASE",
         "kafka-KAFKA_BROKER-BASE",

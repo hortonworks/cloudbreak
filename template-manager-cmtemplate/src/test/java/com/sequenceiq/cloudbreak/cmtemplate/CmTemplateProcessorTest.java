@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +22,11 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -35,8 +41,11 @@ import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
+import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFile;
+import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFileFactory;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -46,9 +55,19 @@ import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationPropertyView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
+@ExtendWith(MockitoExtension.class)
 public class CmTemplateProcessorTest {
 
     private CmTemplateProcessor underTest;
+
+    @Mock
+    private IniFileFactory iniFileFactory;
+
+    @Mock
+    private IniFile safetyValveService;
+
+    @Mock
+    private IniFile safetyValveRole;
 
     @Test
     public void testAddServiceConfigs() {
@@ -85,6 +104,7 @@ public class CmTemplateProcessorTest {
     @Test
     public void addExistingSafetyValveConfigs() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
+
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(new ApiClusterTemplateConfig()
                             .name("hive_service_config_safety_valve")
@@ -94,6 +114,7 @@ public class CmTemplateProcessorTest {
 
         ApiClusterTemplateService service = underTest.getTemplate().getServices().stream().filter(srv -> "HIVE".equals(srv.getServiceType())).findAny().get();
         List<ApiClusterTemplateConfig> serviceConfigs = service.getServiceConfigs();
+
         assertEquals(1, serviceConfigs.size());
         assertEquals("hive_service_config_safety_valve", serviceConfigs.get(0).getName());
         assertTrue(serviceConfigs.get(0).getValue().startsWith("<property><name>testkey</name><value>testvalue</value></property>"));
@@ -118,6 +139,47 @@ public class CmTemplateProcessorTest {
         assertTrue(gwConfigs.get(0).getValue().startsWith("testkey=testvalue"));
         assertTrue(gwConfigs.get(0).getValue().endsWith("spark.yarn.access.hadoopFileSystems=s3a://expn-cis-sandbox-prod-cdp-us-east-1"));
         assertTrue(gwConfigs.get(0).getValue().contains("\n"));
+    }
+
+    @Test
+    public void addExistingSafetyValveConfigsIniFile() {
+        when(iniFileFactory.create()).thenReturn(safetyValveService, safetyValveRole);
+
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"), iniFileFactory);
+
+        List<ApiClusterTemplateConfig> serviceConfigsInput = new ArrayList<>();
+        serviceConfigsInput.add(new ApiClusterTemplateConfig()
+                            .name("hue_service_safety_valve")
+                            .value("[desktop]\n[[knox]]\nknox_proxyhosts=foo.com"));
+        String expectedSafetyValveValueService =
+                "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig\n[[knox]]\nknox_proxyhosts=foo.com";
+        when(safetyValveService.print()).thenReturn(expectedSafetyValveValueService);
+
+        underTest.addServiceConfigs("HUE", serviceConfigsInput);
+
+        verify(safetyValveService).addContent("[desktop]\n[[knox]]\nknox_proxyhosts=foo.com");
+        verify(safetyValveService).addContent("[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig");
+        ApiClusterTemplateService service = underTest.getTemplate().getServices().stream().filter(srv -> "HUE".equals(srv.getServiceType())).findAny().get();
+        List<ApiClusterTemplateConfig> serviceConfigsResult = service.getServiceConfigs();
+        Map<String, String> serviceConfigToValue = ConfigTestUtil.getConfigNameToValueMap(serviceConfigsResult);
+        assertThat(serviceConfigToValue).containsOnly(entry("hue_service_safety_valve", expectedSafetyValveValueService));
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigsInput = new HashMap<>();
+        roleConfigsInput.put("hue-HUE_SERVER-BASE",
+                List.of(new ApiClusterTemplateConfig().name("hue_server_hue_safety_valve").value("[dashboard]\n[[engines]]\n[[[sql]]]\nnesting=true")));
+        String expectedSafetyValveValueRole = "[dashboard]\nhas_sql_enabled=true\n[[engines]]\n[[[sql]]]\nnesting=true";
+        when(safetyValveRole.print()).thenReturn(expectedSafetyValveValueRole);
+
+        underTest.addRoleConfigs("HUE", roleConfigsInput);
+
+        verify(safetyValveRole).addContent("[dashboard]\n[[engines]]\n[[[sql]]]\nnesting=true");
+        verify(safetyValveRole).addContent("[dashboard]\nhas_sql_enabled=true");
+        ApiClusterTemplateRoleConfigGroup role = service.getRoleConfigGroups().stream().filter(rcg -> "HUE_SERVER".equals(rcg.getRoleType())).findAny().get();
+        List<ApiClusterTemplateConfig> roleConfigsResult = role.getConfigs();
+        Map<String, String> roleConfigToValue = ConfigTestUtil.getConfigNameToValueMap(roleConfigsResult);
+        assertThat(roleConfigToValue).containsOnly(entry("hue_server_hue_safety_valve", expectedSafetyValveValueRole));
+
+        verifyNoMoreInteractions(iniFileFactory, safetyValveService, safetyValveRole);
     }
 
     @Test

@@ -61,9 +61,12 @@ import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
+import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFile;
+import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFileFactory;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
@@ -81,15 +84,29 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmTemplateProcessor.class);
 
+    private static final Set<String> INI_FILE_SAFETY_VALVE_CONFIGS = Set.of(HueConfigProvider.HUE_SERVICE_SAFETY_VALVE,
+            HueConfigProvider.HUE_SERVER_HUE_SAFETY_VALVE);
+
+    private static final IniFileFactory DEFAULT_INI_FILE_FACTORY = new IniFileFactory();
+
     private final ApiClusterTemplate cmTemplate;
 
+    private final IniFileFactory iniFileFactory;
+
     public CmTemplateProcessor(@Nonnull String cmTemplateText) {
+        // Not using the Spring bean because it would add a superfluous StaticApplicationContext.getApplicationContext() dependency
+        this(cmTemplateText, DEFAULT_INI_FILE_FACTORY);
+    }
+
+    @VisibleForTesting
+    CmTemplateProcessor(@Nonnull String cmTemplateText, IniFileFactory iniFileFactory) {
         try {
             cmTemplate = JsonUtil.readValue(cmTemplateText, ApiClusterTemplate.class);
             transformHostGroupNameToLowerCase();
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to parse blueprint text.", e);
         }
+        this.iniFileFactory = iniFileFactory;
     }
 
     private void transformHostGroupNameToLowerCase() {
@@ -699,15 +716,27 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         String configName = newConfig.getName();
         ApiClusterTemplateConfig existingApiClusterTemplateConfig = existingConfigs.get(configName);
         if (existingApiClusterTemplateConfig != null) {
+            LOGGER.info("Found config present in both blueprint and generated settings: '{}'", configName);
             // OPSAPS-54706 Let's honor the safety valve settings in both bp and generated.
             if (configName.endsWith("_safety_valve")) {
                 String oldConfigValue = existingApiClusterTemplateConfig.getValue();
                 String newConfigValue = newConfig.getValue();
 
-                // By CB-1452 append the bp config at the end of generated config to give precedence to it. Add a newline in between for it to be safe
-                // with property file safety valves and command line safety valves.
-                newConfig.setValue(newConfigValue + '\n' + oldConfigValue);
+                if (INI_FILE_SAFETY_VALVE_CONFIGS.contains(configName)) {
+                    LOGGER.info("Merging INI file safety valve config values: '{}'", configName);
+                    // Merge INI file configs, giving precedence to the blueprint (old) value
+                    IniFile safetyValve = iniFileFactory.create();
+                    safetyValve.addContent(newConfigValue);
+                    safetyValve.addContent(oldConfigValue);
+                    newConfig.setValue(safetyValve.print());
+                } else {
+                    LOGGER.info("Merging regular safety valve config values: '{}'", configName);
+                    // By CB-1452 append the bp config at the end of generated config to give precedence to it. Add a newline in between for it to be safe
+                    // with property file safety valves and command line safety valves.
+                    newConfig.setValue(newConfigValue + '\n' + oldConfigValue);
+                }
             } else {
+                LOGGER.info("Ignoring generated value and keeping blueprint default for config: '{}'", configName);
                 // Again by CB-1452 we need to give precedence to the value given in bp.
                 return;
             }
