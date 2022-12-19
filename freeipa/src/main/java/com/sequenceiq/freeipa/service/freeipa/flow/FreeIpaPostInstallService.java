@@ -41,12 +41,11 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class FreeIpaPostInstallService {
+    public static final String USER_ADMIN_PRIVILEGE = "User Administrators";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaPostInstallService.class);
 
     private static final String SET_PASSWORD_EXPIRATION_PERMISSION = "Set Password Expiration";
-
-    private static final String USER_ADMIN_PRIVILEGE = "User Administrators";
 
     private static final int MAX_USERNAME_LENGTH = 255;
 
@@ -100,11 +99,14 @@ public class FreeIpaPostInstallService {
         freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
         if (fullPostInstall) {
             setInitialFreeIpaPolicies(stack, freeIpaClient);
-            userSyncBindUserService.createUserAndLdapConfig(stack);
+            userSyncBindUserService.createUserAndLdapConfig(stack, freeIpaClient);
             synchronizeUsers(stack);
         } else {
-            if (!userSyncBindUserService.doesBindUserAndConfigAlreadyExist(stack)) {
-                userSyncBindUserService.createUserAndLdapConfig(stack);
+            if (!userSyncBindUserService.doesBindUserAndConfigAlreadyExist(stack, freeIpaClient)) {
+                userSyncBindUserService.createUserAndLdapConfig(stack, freeIpaClient);
+            } else {
+                LOGGER.debug("Usersync bind user already exists, ensure it's part of the admin group.");
+                userSyncBindUserService.addBindUserToAdminGroup(stack, freeIpaClient);
             }
         }
         if (freeIpaRecipeService.hasRecipeType(stackId, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)) {

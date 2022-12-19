@@ -1,13 +1,10 @@
 package com.sequenceiq.freeipa.client.operation;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.SudoRule;
 
 public class SudoRuleAddGroupOperation extends AbstractFreeIpaAddOperation<SudoRule> {
@@ -17,7 +14,7 @@ public class SudoRuleAddGroupOperation extends AbstractFreeIpaAddOperation<SudoR
     private final String group;
 
     private SudoRuleAddGroupOperation(String name, String group) {
-        super(name);
+        super(name, SudoRule.class);
         this.group = group;
     }
 
@@ -33,11 +30,6 @@ public class SudoRuleAddGroupOperation extends AbstractFreeIpaAddOperation<SudoR
     @Override
     protected Map<String, Object> getParams() {
         return Map.of("group", group);
-    }
-
-    @Override
-    public Optional<SudoRule> invoke(FreeIpaClient freeIpaClient) throws FreeIpaClientException {
-        return invokeAdd(freeIpaClient, SudoRule.class);
     }
 
     @Override

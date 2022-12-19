@@ -62,12 +62,18 @@ public class GroupAddMemberOperation extends AbstractFreeipaOperation<Group> {
             } else {
                 // TODO specialize RPCResponse completed/failed objects
                 LOGGER.error("Failed to add {} to group '{}': {}", users, group, rpcResponse.getFailed());
-                warnings.accept(group, String.format("Failed to add users to group: %s", rpcResponse.getFailed()));
+                if (warnings != null) {
+                    warnings.accept(group, String.format("Failed to add users to group: %s", rpcResponse.getFailed()));
+                }
             }
             return Optional.of(rpcResponse.getResult());
         } catch (FreeIpaClientException e) {
             LOGGER.error("Failed to add {} to group '{}'", users, group, e);
-            warnings.accept(group, String.format("Failed to add users %s to group: %s", users, e.getMessage()));
+            if (warnings != null) {
+                warnings.accept(group, String.format("Failed to add users %s to group: %s", users, e.getMessage()));
+            } else {
+                throw e;
+            }
             freeIpaClient.checkIfClientStillUsable(e);
         }
         return Optional.empty();

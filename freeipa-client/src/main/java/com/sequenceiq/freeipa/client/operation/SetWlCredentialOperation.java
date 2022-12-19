@@ -9,6 +9,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public class SetWlCredentialOperation extends UserModOperation {
 
+    public static final String CDP_HASHED_PASSWORD = "cdpHashedPassword";
+
+    public static final String CDP_UNENCRYPTED_KRB_PRINCIPAL_KEY = "cdpUnencryptedKrbPrincipalKey";
+
     private String hashedPassword;
 
     private String unencryptedKrbPrincipalKey;
@@ -44,8 +48,8 @@ public class SetWlCredentialOperation extends UserModOperation {
         Map<String, Object> params = sensitiveMap();
         List<String> attributes = new ArrayList<>();
         if (StringUtils.isNotBlank(hashedPassword)) {
-            attributes.add("cdpHashedPassword=" + hashedPassword);
-            attributes.add("cdpUnencryptedKrbPrincipalKey=" + unencryptedKrbPrincipalKey);
+            attributes.add(CDP_HASHED_PASSWORD + "=" + hashedPassword);
+            attributes.add(CDP_UNENCRYPTED_KRB_PRINCIPAL_KEY + "=" + unencryptedKrbPrincipalKey);
             attributes.add("krbPasswordExpiration=" + expiration);
         }
 

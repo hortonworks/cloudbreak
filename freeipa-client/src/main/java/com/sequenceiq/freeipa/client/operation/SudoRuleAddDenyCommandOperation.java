@@ -1,13 +1,10 @@
 package com.sequenceiq.freeipa.client.operation;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.SudoRule;
 
 public class SudoRuleAddDenyCommandOperation  extends AbstractFreeIpaAddOperation<SudoRule> {
@@ -17,7 +14,7 @@ public class SudoRuleAddDenyCommandOperation  extends AbstractFreeIpaAddOperatio
     private final String command;
 
     private SudoRuleAddDenyCommandOperation(String name, String command) {
-        super(name);
+        super(name, SudoRule.class);
         this.command = command;
     }
 
@@ -33,11 +30,6 @@ public class SudoRuleAddDenyCommandOperation  extends AbstractFreeIpaAddOperatio
     @Override
     protected Map<String, Object> getParams() {
         return Map.of("sudocmd", command);
-    }
-
-    @Override
-    public Optional<SudoRule> invoke(FreeIpaClient freeIpaClient) throws FreeIpaClientException {
-        return invokeAdd(freeIpaClient, SudoRule.class);
     }
 
     @Override

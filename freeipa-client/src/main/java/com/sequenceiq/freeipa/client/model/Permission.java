@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.client.model;
 
 import java.util.List;
-import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -23,6 +22,10 @@ public class Permission {
 
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private String ipapermlocation;
+
+    private List<String> ipapermincludedattr;
+
+    private List<String> ipapermright;
 
     public String getCn() {
         return cn;
@@ -72,15 +75,33 @@ public class Permission {
         this.ipapermlocation = ipapermlocation;
     }
 
+    public List<String> getIpapermincludedattr() {
+        return ipapermincludedattr;
+    }
+
+    public void setIpapermincludedattr(List<String> ipapermincludedattr) {
+        this.ipapermincludedattr = ipapermincludedattr;
+    }
+
+    public List<String> getIpapermright() {
+        return ipapermright;
+    }
+
+    public void setIpapermright(List<String> ipapermright) {
+        this.ipapermright = ipapermright;
+    }
+
     @Override
     public String toString() {
-        return new StringJoiner(", ", Permission.class.getSimpleName() + "[", "]")
-                .add("cn='" + cn + "'")
-                .add("dn='" + dn + "'")
-                .add("ipapermbindruletype=" + ipapermbindruletype)
-                .add("ipapermissiontype=" + ipapermissiontype)
-                .add("ipapermdefaultattr=" + ipapermdefaultattr)
-                .add("ipapermlocation='" + ipapermlocation + "'")
-                .toString();
+        return "Permission{" +
+                "cn='" + cn + '\'' +
+                ", dn='" + dn + '\'' +
+                ", ipapermbindruletype=" + ipapermbindruletype +
+                ", ipapermissiontype=" + ipapermissiontype +
+                ", ipapermdefaultattr=" + ipapermdefaultattr +
+                ", ipapermlocation='" + ipapermlocation + '\'' +
+                ", ipapermincludedattr=" + ipapermincludedattr +
+                ", ipapermright=" + ipapermright +
+                '}';
     }
 }

@@ -11,42 +11,46 @@ import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 
 public abstract class AbstractFreeIpaAddOperation<R> extends AbstractFreeipaOperation<R> {
 
-    private final String name;
+    private final String flag;
+
+    private final Class<R> respType;
 
     private Optional<AbstractFreeipaOperation<R>> getOperation = Optional.empty();
 
-    protected AbstractFreeIpaAddOperation(String name) {
-        this.name = name;
+    protected AbstractFreeIpaAddOperation(String flag, Class<R> respType) {
+        this.flag = flag;
+        this.respType = respType;
     }
 
-    protected AbstractFreeIpaAddOperation(String name, AbstractFreeipaOperation<R> getOperation) {
-        this.name = name;
+    protected AbstractFreeIpaAddOperation(String flag, AbstractFreeipaOperation<R> getOperation, Class<R> respType) {
+        this.flag = flag;
         this.getOperation = Optional.ofNullable(getOperation);
+        this.respType = respType;
     }
 
     protected abstract Logger getLogger();
 
     @Override
     protected List<Object> getFlags() {
-        return List.of(name);
+        return List.of(flag);
     }
 
-    protected Optional<R> invokeAdd(FreeIpaClient freeIpaClient, Class<R> clazz) throws FreeIpaClientException {
+    public Optional<R> invoke(FreeIpaClient freeIpaClient) throws FreeIpaClientException {
         try {
-            getLogger().debug("Adding '{}'", name);
-            R added = invoke(freeIpaClient, clazz);
+            getLogger().debug("Adding '{}'", flag);
+            R added = invoke(freeIpaClient, respType);
             getLogger().debug("Added '{}'", added);
             return Optional.of(added);
         } catch (FreeIpaClientException e) {
             if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
-                getLogger().debug("'{}' already exists", name);
+                getLogger().debug("'{}' already exists", flag);
                 if (getOperation.isPresent()) {
                     return getOperation.get().invoke(freeIpaClient);
                 } else {
                     return Optional.empty();
                 }
             } else {
-                getLogger().error("Failed to add '{}'", name, e);
+                getLogger().error("Failed to add '{}'", flag, e);
                 throw e;
             }
         }
