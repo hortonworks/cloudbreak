@@ -1,13 +1,10 @@
 package com.sequenceiq.freeipa.client.operation;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.SudoRule;
 
 public class SudoRuleAddOperation extends AbstractFreeIpaAddOperation<SudoRule> {
@@ -19,7 +16,7 @@ public class SudoRuleAddOperation extends AbstractFreeIpaAddOperation<SudoRule> 
     private final boolean hostCategoryAll;
 
     private SudoRuleAddOperation(String name, boolean hostCategoryAll, AbstractFreeipaOperation<SudoRule> getOperation) {
-        super(name, getOperation);
+        super(name, getOperation, SudoRule.class);
         this.hostCategoryAll = hostCategoryAll;
     }
 
@@ -35,11 +32,6 @@ public class SudoRuleAddOperation extends AbstractFreeIpaAddOperation<SudoRule> 
     @Override
     protected Map<String, Object> getParams() {
         return hostCategoryAll ? HOST_CATEGORY_ALL : Map.of();
-    }
-
-    @Override
-    public Optional<SudoRule> invoke(FreeIpaClient freeIpaClient) throws FreeIpaClientException {
-        return invokeAdd(freeIpaClient, SudoRule.class);
     }
 
     @Override
