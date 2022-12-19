@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider.RedbeamsDbSslDetails;
@@ -60,15 +61,28 @@ public class PostgresConfigService {
     @Inject
     private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
 
+    @Inject
+    private ClusterService clusterService;
+
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto) {
         Map<String, Object> postgresConfig = initPostgresConfig(stackDto);
 
-        RedbeamsDbSslDetails sslDetails = dbCertificateProvider.getRelatedSslCerts(stackDto);
-        Set<String> rootCerts = sslDetails.getSslCerts();
-        if (CollectionUtils.isNotEmpty(rootCerts)) {
-            Map<String, String> rootSslCertsMap = Map.of("ssl_certs", String.join("\n", rootCerts),
+        String rootCertsBundle = null;
+        boolean sslEnabled = false;
+        if (stackDto.getCluster().getDbSslEnabled()) {
+            if (StringUtils.isBlank(stackDto.getCluster().getDbSslRootCertBundle())) {
+                RedbeamsDbSslDetails sslDetails = dbCertificateProvider.getRelatedSslCerts(stackDto);
+                rootCertsBundle = clusterService.updateDbSslCert(stackDto.getCluster().getId(), sslDetails);
+                sslEnabled = sslDetails.isSslEnabledForStack();
+            } else {
+                rootCertsBundle = stackDto.getCluster().getDbSslRootCertBundle();
+                sslEnabled = stackDto.getCluster().getDbSslEnabled();
+            }
+        }
+        if (StringUtils.isNotEmpty(rootCertsBundle)) {
+            Map<String, String> rootSslCertsMap = Map.of("ssl_certs", rootCertsBundle,
                     "ssl_certs_file_path", dbCertificateProvider.getSslCertsFilePath(),
-                    "ssl_enabled", String.valueOf(sslDetails.isSslEnabledForStack()));
+                    "ssl_enabled", String.valueOf(sslEnabled));
             servicePillar.put(POSTGRES_COMMON, new SaltPillarProperties("/postgresql/root-certs.sls",
                     singletonMap("postgres_root_certs", rootSslCertsMap)));
         }

@@ -9,5 +9,10 @@ create-root-certs-file:
     - user: root
     - group: root
     - mode: 644
-    - unless: test -f {{ postgresql.root_certs_file }}
+
+cm-server-restart-root-cert-changed:
+  service.running:
+    - name: cloudera-scm-server
+    - watch:
+        - file: create-root-certs-file
 {% endif %}
