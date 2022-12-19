@@ -44,13 +44,15 @@ public class RedbeamsDbCertificateProvider {
 
     public RedbeamsDbSslDetails getRelatedSslCerts(StackDto stackDto) {
         Set<String> relatedSslCerts = new HashSet<>();
+        Set<String> sslCertsForStack = new HashSet<>();
         getDatalakeDatabaseRootCerts(stackDto.getStack(), relatedSslCerts);
         ClusterView cluster = stackDto.getCluster();
-        Set<String> sslCertsForStack = getDatabaseRootCerts(cluster.getName(), cluster.getDatabaseServerCrn(), stackDto.getStack().getResourceCrn());
-        relatedSslCerts.addAll(sslCertsForStack);
-        //TODO persist the gathered certs for the cluster to support cert rotation in the future
-
-        // Note: When stackDto is a DH, relatedSslCerts is the union of DL + DH certs, and sslEnabledForStack is purely determined by the presence of DH certs.
+        if (dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
+            sslCertsForStack = getDatabaseRootCerts(cluster.getName(), cluster.getDatabaseServerCrn(), stackDto.getStack().getResourceCrn());
+            relatedSslCerts.addAll(sslCertsForStack);
+        }
+        // Note: When stackDto is a DH, relatedSslCerts is the union of DL + DH certs,
+        // and sslEnabledForStack is purely determined by the presence of DH certs.
         return new RedbeamsDbSslDetails(relatedSslCerts, !sslCertsForStack.isEmpty());
     }
 
@@ -69,7 +71,7 @@ public class RedbeamsDbCertificateProvider {
 
     private Set<String> getDatabaseRootCerts(String clusterName, String dbServerCrn, String stackResourceCrn) {
         Set<String> result = new HashSet<>();
-        if (dbServerConfigurer.isRemoteDatabaseNeeded(dbServerCrn)) {
+        if (dbServerConfigurer.isRemoteDatabaseRequested(dbServerCrn)) {
             LOGGER.info("Gathering cluster's(crn:'{}', name: '{}') remote database('{}') root certificates", stackResourceCrn, clusterName, dbServerCrn);
             DatabaseServerV4Response databaseServer = dbServerConfigurer.getDatabaseServer(dbServerCrn);
             SslConfigV4Response sslConfig = databaseServer.getSslConfig();

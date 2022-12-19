@@ -71,7 +71,7 @@ public class StackToStackDetailsConverterTest {
     public void testConversionExternalDB() {
         // GIVEN
         Stack stack = createStack();
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(stack.getCluster().getDatabaseServerCrn())).thenReturn(true);
+        when(dbServerConfigurer.isRemoteDatabaseRequested(stack.getCluster().getDatabaseServerCrn())).thenReturn(true);
         // WHEN
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN

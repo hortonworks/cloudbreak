@@ -122,7 +122,7 @@ class AbstractRdsConfigProviderTest {
         RDSConfig config = new RDSConfig();
         config.setType(DatabaseType.CLOUDERA_MANAGER.name());
         when(dbServerConfigurer.createNewRdsConfig(any(), any(), any(), any(), any(), any(), any())).thenReturn(config);
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(true);
+        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         DatabaseServerV4Response resp = new DatabaseServerV4Response();
         resp.setHost(DB_HOST);
         resp.setPort(DB_PORT);

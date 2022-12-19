@@ -33,75 +33,33 @@
         <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE" />
     </Match>
     <Match>
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
         <Class name="~.*MapperImpl$"/>
     </Match>
     <Match>
         <Class name="~.*EncryptionConverter$"/>
     </Match>
     <Match>
-        <Class name="~com\.sequenceiq\.cloudbreak\.audit\.converter\.AuditEventDetailsProto.*"/>
+        <Package name="~prometheus.*"/>
+    </Match>
+    <Match>
+        <Class name="~.*Proto$"/>
     </Match>
     <Match>
         <Source name="~.*/generated/.*" />
     </Match>
     <Match>
-        <Package name="~org\.apache\.cb\.yarn.*"/>
+        <Package name="~org\.apache\.*"/>
     </Match>
     <Match>
-        <Package name="~prometheus.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.audit.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.authorization.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.personalresourceview.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.usermanagement.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.idbrokermappingmanagement.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.minasshd.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.clusterconnectivitymanagementv2.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.common.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.publicendpointmanagement.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.telemetry\.nodestatus.*"/>
+        <Package name="~com\.cloudera\.thunderhead\.*"/>
     </Match>
     <Match>
         <Package name="~com\.cloudera\.sigma\.service\.dbus.*"/>
     </Match>
     <Match>
-        <Bug pattern="REC_CATCH_EXCEPTION" />
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.datalakedr.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.authdistributor.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.sdxsvc.*"/>
-    </Match>
-    <Match>
         <Package name="~com\.cloudera\.cdp\.servicediscovery.*"/>
-    </Match>
-    <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.metering\.events.*"/>
     </Match>
 </FindBugsFilter>

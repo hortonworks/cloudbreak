@@ -36,7 +36,7 @@ class UpgradeRdsBackupRestoreStateParamsProviderTest {
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(true);
+        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         Map<String, SaltPillarProperties> actualResult = underTest.createParamsForRdsBackupRestore(stackDto, "backuplocation");
         Map<String, Object> pillarParams = (Map<String, Object>) actualResult.get("postgresql-upgrade").getProperties().get("upgrade");
         Map<String, Object> backupParams = (Map<String, Object>) pillarParams.get("backup");
@@ -51,7 +51,7 @@ class UpgradeRdsBackupRestoreStateParamsProviderTest {
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(true);
+        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         Map<String, SaltPillarProperties> actualResult = underTest.createParamsForRdsBackupRestore(stackDto, null);
         Map<String, Object> pillarParams = (Map<String, Object>) actualResult.get("postgresql-upgrade").getProperties().get("upgrade");
         Map<String, Object> backupParams = (Map<String, Object>) pillarParams.get("backup");

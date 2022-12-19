@@ -146,6 +146,10 @@ subprojects {
     toolVersion = "4.7.3"
     excludeFilter = file("$rootProject.projectDir/config/spotbugs/excludeFilter.xml")
     effort = "min"
+    ignoreFailures = false
+    showProgress = true
+    onlyAnalyze = [ 'com.sequenceiq.cloudbreak.*' ]
+    maxHeapSize = '2g'
   }
 
   jacoco {

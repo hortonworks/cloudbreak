@@ -41,7 +41,7 @@ public class UpgradeRdsBackupRestoreStateParamsProvider {
 
     private String determineRdsBackupLocation(StackDto stackDto, String rdsBackupLocation) {
         String backupLocation;
-        if (dbServerConfigurer.isRemoteDatabaseNeeded(stackDto.getCluster().getDatabaseServerCrn())
+        if (dbServerConfigurer.isRemoteDatabaseRequested(stackDto.getCluster().getDatabaseServerCrn())
                 || !embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)) {
             backupLocation = StringUtils.isNotEmpty(rdsBackupLocation) ? rdsBackupLocation : "/var";
         } else {

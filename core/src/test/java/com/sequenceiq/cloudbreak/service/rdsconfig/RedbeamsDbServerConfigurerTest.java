@@ -143,12 +143,12 @@ public class RedbeamsDbServerConfigurerTest {
 
     @Test
     public void isRemoteDatabaseNeededWhenDbServerCrnIsPresent() {
-        assertThat(underTest.isRemoteDatabaseNeeded(DB_SERVER_CRN)).isTrue();
+        assertThat(underTest.isRemoteDatabaseRequested(DB_SERVER_CRN)).isTrue();
     }
 
     @Test
     public void isRemoteDatabaseNeeded() {
-        assertThat(underTest.isRemoteDatabaseNeeded(null)).isFalse();
+        assertThat(underTest.isRemoteDatabaseRequested(null)).isFalse();
     }
 
     private Cluster createCluster(String dbServerCrn) {
