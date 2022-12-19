@@ -100,7 +100,7 @@ public class ClusterService {
         ClusterPertain clusterPertain =
                 new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId(), stack.getUserCrn());
         cluster.setClusterPertain(
-                clusterPertainRepository.findByUserCrn(clusterPertain.getUserCrn())
+                clusterPertainRepository.findFirstByUserCrn(clusterPertain.getUserCrn())
                         .orElseGet(() -> clusterPertainRepository.save(clusterPertain)));
 
         cluster = save(cluster);
