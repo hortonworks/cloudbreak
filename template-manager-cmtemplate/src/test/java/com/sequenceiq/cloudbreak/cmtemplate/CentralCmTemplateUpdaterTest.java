@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -15,14 +16,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
@@ -31,6 +33,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -40,7 +43,9 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreConfigProvi
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.StubDfsConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseCloudStorageServiceConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFileFactory;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -52,6 +57,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationPropertyView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
@@ -64,23 +70,27 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CentralCmTemplateUpdaterTest {
 
     private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String FQDN = "fqdn";
 
-    @InjectMocks
-    private CentralCmTemplateUpdater generator = new CentralCmTemplateUpdater();
+    private static final String SSL_CERTIFICATE_FILE_PATH = "/foo/bar.pem";
 
     @InjectMocks
-    private HbaseCloudStorageServiceConfigProvider hbaseCloudStorageProvider = new HbaseCloudStorageServiceConfigProvider();
+    private CentralCmTemplateUpdater generator;
+
+    @InjectMocks
+    private HbaseCloudStorageServiceConfigProvider hbaseCloudStorageProvider;
 
     @InjectMocks
     private CoreConfigProvider coreConfigProvider;
 
-    private StubDfsConfigProvider stubDfsConfigProvider = new StubDfsConfigProvider();
+    @InjectMocks
+    private HueConfigProvider hueConfigProvider;
 
     @Spy
     private TemplateProcessor templateProcessor;
@@ -107,6 +117,9 @@ public class CentralCmTemplateUpdaterTest {
     private BlueprintView blueprintView;
 
     @Mock
+    private BlueprintTextProcessor blueprintTextProcessor;
+
+    @Mock
     private CustomConfigurationsView customConfigurationsView;
 
     @Mock
@@ -124,9 +137,12 @@ public class CentralCmTemplateUpdaterTest {
     @Mock
     private RdsViewProvider rdsViewProvider;
 
+    @Spy
+    private IniFileFactory iniFileFactory;
+
     private ClouderaManagerRepo clouderaManagerRepo;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(entitlementService.sdxHbaseCloudStorageEnabled(anyString())).thenReturn(true);
 
@@ -134,18 +150,25 @@ public class CentralCmTemplateUpdaterTest {
                 new HiveMetastoreConfigProvider(),
                 coreConfigProvider,
                 hbaseCloudStorageProvider,
-                stubDfsConfigProvider);
+                new StubDfsConfigProvider(),
+                hueConfigProvider);
         when(cmTemplateProcessorFactory.get(anyString())).thenAnswer(i -> new CmTemplateProcessor(i.getArgument(0)));
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+        when(blueprintView.getProcessor()).thenReturn(blueprintTextProcessor);
         when(templatePreparationObject.getHostgroupViews()).thenReturn(toHostgroupViews(getHostgroupMappings()));
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
         doNothing().when(adlsConfigProvider).populateServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class), anyString());
-        RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED);
-        RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
-        when(templatePreparationObject.getRdsViews()).thenReturn(Set.of(rdsView));
-        when(templatePreparationObject.getRdsView(DatabaseType.HIVE)).thenReturn(rdsView);
+        RdsConfigWithoutCluster rdsConfigHive = TestUtil.rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED);
+        RdsView rdsViewHive = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfigHive);
+        RdsConfigWithoutCluster rdsConfigHueSsl = TestUtil.rdsConfigWithoutCluster(DatabaseType.HUE, RdsSslMode.ENABLED);
+        RdsView rdsViewHueSsl = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfigHueSsl, SSL_CERTIFICATE_FILE_PATH);
+        when(templatePreparationObject.getRdsViews()).thenReturn(Set.of(rdsViewHive, rdsViewHueSsl));
+        when(templatePreparationObject.getRdsView(DatabaseType.HIVE)).thenReturn(rdsViewHive);
+        when(templatePreparationObject.getRdsView(DatabaseType.HUE)).thenReturn(rdsViewHueSsl);
+        when(templatePreparationObject.getRdsSslCertificateFilePath()).thenReturn(SSL_CERTIFICATE_FILE_PATH);
         when(templatePreparationObject.getCustomConfigurationsView()).thenReturn(Optional.of(customConfigurationsView));
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
 
         List<StorageLocationView> locations = new ArrayList<>();
         StorageLocation hbaseRootDir = new StorageLocation();
@@ -244,7 +267,7 @@ public class CentralCmTemplateUpdaterTest {
     }
 
     @Test
-    public void getCmTemplateIfCoresettingspresentedShouldNotOverrideTheProperty() {
+    public void getCmTemplateIfCoreSettingsPresentShouldNotOverrideTheProperty() {
         List<StorageLocationView> locations = new ArrayList<>();
 
         StorageLocation hbaseRootDir = new StorageLocation();
@@ -252,10 +275,10 @@ public class CentralCmTemplateUpdaterTest {
         hbaseRootDir.setValue("s3a://bucket/cluster1/hbase");
         locations.add(new StorageLocationView(hbaseRootDir));
 
-        StorageLocation coresettings = new StorageLocation();
-        coresettings.setProperty("core_defaultfs");
-        coresettings.setValue("s3a://bucket/cluster1/hbase");
-        locations.add(new StorageLocationView(coresettings));
+        StorageLocation coreSettings = new StorageLocation();
+        coreSettings.setProperty("core_defaultfs");
+        coreSettings.setValue("s3a://bucket/cluster1/hbase");
+        locations.add(new StorageLocationView(coreSettings));
 
         S3FileSystemConfigurationsView fileSystemConfigurationsView =
                 new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
@@ -267,7 +290,7 @@ public class CentralCmTemplateUpdaterTest {
     }
 
     @Test
-    public void getCmTemplateIfCoresettingspresentedShouldNotOverrideThePropertyWithEmptyString() {
+    public void getCmTemplateIfCoreSettingsPresentShouldNotOverrideThePropertyWithEmptyString() {
         List<StorageLocationView> locations = new ArrayList<>();
 
         StorageLocation hbaseRootDir = new StorageLocation();
@@ -275,10 +298,10 @@ public class CentralCmTemplateUpdaterTest {
         hbaseRootDir.setValue("s3a://bucket/cluster1/hbase");
         locations.add(new StorageLocationView(hbaseRootDir));
 
-        StorageLocation coresettings = new StorageLocation();
-        coresettings.setProperty("core_defaultfs");
-        coresettings.setValue("s3a://bucket/cluster1/hbase");
-        locations.add(new StorageLocationView(coresettings));
+        StorageLocation coreSettings = new StorageLocation();
+        coreSettings.setProperty("core_defaultfs");
+        coreSettings.setValue("s3a://bucket/cluster1/hbase");
+        locations.add(new StorageLocationView(coreSettings));
 
         S3FileSystemConfigurationsView fileSystemConfigurationsView =
                 new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
@@ -305,7 +328,7 @@ public class CentralCmTemplateUpdaterTest {
     public void getCmTemplateWithoutHosts() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-without-hosts.bp"));
         String generated = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> generator.getBlueprintText(templatePreparationObject));
-        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-without-hosts.bp")).getTemplate().toString(),
+        assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-without-hosts.bp")).getTemplate().toString(),
                 new CmTemplateProcessor(generated).getTemplate().toString());
     }
 
@@ -336,7 +359,7 @@ public class CentralCmTemplateUpdaterTest {
             String generated = generator.getBlueprintText(templatePreparationObject);
             String expected = new CmTemplateProcessor(getBlueprintText("output/kafka-without-hdfs.bp")).getTemplate().toString();
             String output = new CmTemplateProcessor(generated).getTemplate().toString();
-            Assert.assertEquals(expected, output);
+            assertEquals(expected, output);
         });
     }
 
@@ -366,14 +389,20 @@ public class CentralCmTemplateUpdaterTest {
         String generated = generator.getBlueprintText(templatePreparationObject);
         String expected = new CmTemplateProcessor(getBlueprintText("output/kafka-without-hdfs-cm-771.bp")).getTemplate().toString();
         String output = new CmTemplateProcessor(generated).getTemplate().toString();
-        Assert.assertEquals(expected, output);
+        assertEquals(expected, output);
+    }
+
+    @Test
+    public void getCmTemplateHueDbSsl() {
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/hue-ssl.bp"));
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.11"));
+        clouderaManagerRepo.setVersion("7.4.3");
+        ApiClusterTemplate generated = testGetCmTemplate();
+        assertMatchesBlueprintAtPath("output/hue-ssl.bp", generated);
     }
 
     private void assertMatchesBlueprintAtPath(String path, ApiClusterTemplate generated) {
-        Assert.assertEquals(
-                String.valueOf(new CmTemplateProcessor(getBlueprintText(path)).getTemplate()),
-                String.valueOf(generated)
-        );
+        assertEquals(String.valueOf(new CmTemplateProcessor(getBlueprintText(path)).getTemplate()), String.valueOf(generated));
     }
 
     private String getBlueprintText(String path) {
