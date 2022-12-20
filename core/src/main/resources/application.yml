@@ -673,6 +673,8 @@ cb:
     port: 9443
   knox:
     port: 8443
+  http:
+    retryableStatusCodes: 403,408,425,429,502,503,504,509
   https:
     port: 443
   ssh:
@@ -824,6 +826,13 @@ cb:
         roles:
           - role: GATEWAY
             required: false
+  parcel:
+    retry:
+      maxAttempts: 5
+      backOffDelay: 2000
+      backOffMultiplier: 2
+
+
 
 cluster:
   monitoring:

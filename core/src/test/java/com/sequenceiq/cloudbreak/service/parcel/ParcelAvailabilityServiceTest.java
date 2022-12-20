@@ -4,16 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Test;
@@ -22,8 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
-import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -54,13 +49,7 @@ public class ParcelAvailabilityServiceTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private RestClientFactory restClientFactory;
-
-    @Mock
-    private PaywallCredentialPopulator paywallCredentialPopulator;
-
-    @Mock
-    private Client client;
+    private ParcelService parcelService;
 
     @Mock
     private CmUrlProvider cmUrlProvider;
@@ -76,8 +65,6 @@ public class ParcelAvailabilityServiceTest {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
         when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
-
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
 
         Response response1 = createMockResponse(200, PARCEL_1);
         Response response2 = createMockResponse(200, PARCEL_2);
@@ -100,8 +87,6 @@ public class ParcelAvailabilityServiceTest {
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
         when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
-
         Response response1 = createMockResponse(404, PARCEL_1);
         Response response2 = createMockResponse(200, PARCEL_2);
         Response response3 = createMockResponse(200, ARCHIVE_PARCEL);
@@ -123,8 +108,6 @@ public class ParcelAvailabilityServiceTest {
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
         when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
-
         createMockResponse(404, ARCHIVE_PARCEL);
         createMockResponse(200, PARCEL_1);
         createMockResponse(200, PARCEL_2);
@@ -139,8 +122,6 @@ public class ParcelAvailabilityServiceTest {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
         when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
-
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
 
         createMockResponse(200, ARCHIVE_PARCEL);
         createMockResponse(200, PARCEL_1);
@@ -157,13 +138,7 @@ public class ParcelAvailabilityServiceTest {
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
         when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
-
-        WebTarget webTarget = mock(WebTarget.class);
-        when(client.target(ARCHIVE_PARCEL)).thenReturn(webTarget);
-        Invocation.Builder request = mock(Invocation.Builder.class);
-        when(webTarget.request()).thenReturn(request);
-        when(request.head()).thenThrow(new BadRequestException());
+        when(parcelService.getHeadResponseForParcel(ARCHIVE_PARCEL)).thenThrow(new BadRequestException());
 
         createMockResponse(200, PARCEL_1);
         createMockResponse(200, PARCEL_2);
@@ -179,13 +154,7 @@ public class ParcelAvailabilityServiceTest {
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
         when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
-
-        WebTarget webTarget = mock(WebTarget.class);
-        when(client.target(PARCEL_1)).thenReturn(webTarget);
-        Invocation.Builder request = mock(Invocation.Builder.class);
-        when(webTarget.request()).thenReturn(request);
-        when(request.head()).thenThrow(new BadRequestException());
+        when(parcelService.getHeadResponseForParcel(PARCEL_1)).thenThrow(new BadRequestException());
 
         Response response3 = createMockResponse(200, ARCHIVE_PARCEL);
         Response response2 = createMockResponse(200, PARCEL_2);
@@ -200,13 +169,8 @@ public class ParcelAvailabilityServiceTest {
     }
 
     private Response createMockResponse(int status, String url) {
-        WebTarget webTarget = mock(WebTarget.class);
-        Invocation.Builder request = mock(Invocation.Builder.class);
-        Response response = mock(Response.class);
-        when(client.target(url)).thenReturn(webTarget);
-        when(webTarget.request()).thenReturn(request);
-        when(request.head()).thenReturn(response);
-        when(response.getStatus()).thenReturn(status);
+        Response response = Response.status(status).build();
+        when(parcelService.getHeadResponseForParcel(url)).thenReturn(Optional.of(response));
         return response;
     }
 
