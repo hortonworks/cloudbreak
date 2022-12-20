@@ -52,7 +52,7 @@ public class ResourceServiceTest {
                 .withType(ResourceType.CLOUDFORMATION_STACK)
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
 
         Mockito.when(resourceRepository.findAllByStackId(1L)).thenReturn(resources);

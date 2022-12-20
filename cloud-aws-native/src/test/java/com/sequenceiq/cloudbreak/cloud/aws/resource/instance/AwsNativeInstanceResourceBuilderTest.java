@@ -123,7 +123,7 @@ class AwsNativeInstanceResourceBuilderTest {
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("groupName")
-                .withParams(emptyMap())
+                .withParameters(emptyMap())
                 .build();
 
         Image image = mock(Image.class);
@@ -157,7 +157,7 @@ class AwsNativeInstanceResourceBuilderTest {
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
-                .withParams(emptyMap())
+                .withParameters(emptyMap())
                 .build();
         long privateId = 0;
         Instance instance = new Instance().withInstanceId("instanceId")
@@ -175,7 +175,7 @@ class AwsNativeInstanceResourceBuilderTest {
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
-                .withParams(emptyMap())
+                .withParameters(emptyMap())
                 .build();
         long privateId = 0;
         Instance instance = new Instance().withInstanceId("instanceId")
@@ -201,7 +201,7 @@ class AwsNativeInstanceResourceBuilderTest {
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("groupName")
-                .withParams(emptyMap())
+                .withParameters(emptyMap())
                 .build();
 
         Image image = mock(Image.class);
@@ -330,7 +330,7 @@ class AwsNativeInstanceResourceBuilderTest {
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
-                .withParams(emptyMap())
+                .withParameters(emptyMap())
                 .build();
 
         when(awsContext.isBuild()).thenReturn(false);
@@ -380,7 +380,7 @@ class AwsNativeInstanceResourceBuilderTest {
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
-                .withParams(emptyMap())
+                .withParameters(emptyMap())
                 .withInstanceId("i-aninstanceid")
                 .build();
     }

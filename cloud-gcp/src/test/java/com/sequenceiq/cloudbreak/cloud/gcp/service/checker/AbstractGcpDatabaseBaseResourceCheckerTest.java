@@ -19,7 +19,7 @@ public class AbstractGcpDatabaseBaseResourceCheckerTest {
                 .withType(ResourceType.GCP_DATABASE)
                 .withName("test-image")
                 .withStatus(CommonStatus.REQUESTED)
-                .withParams(Map.of())
+                .withParameters(Map.of())
                 .build();
         com.google.api.services.sqladmin.model.Operation operation = new com.google.api.services.sqladmin.model.Operation();
         operation.setName("op1");

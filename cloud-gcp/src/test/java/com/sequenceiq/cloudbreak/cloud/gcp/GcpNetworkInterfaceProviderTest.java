@@ -166,7 +166,7 @@ public class GcpNetworkInterfaceProviderTest {
                 .withName(name)
                 .withType(ResourceType.GCP_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
     }
 

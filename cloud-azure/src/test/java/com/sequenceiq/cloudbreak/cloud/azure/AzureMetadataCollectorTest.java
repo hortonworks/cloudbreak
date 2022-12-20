@@ -185,7 +185,7 @@ public class AzureMetadataCollectorTest {
                 .withType(ResourceType.AZURE_NETWORK)
                 .withStatus(CommonStatus.CREATED)
                 .withName(RESOURCE_GROUP_NAME)
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
     }
 

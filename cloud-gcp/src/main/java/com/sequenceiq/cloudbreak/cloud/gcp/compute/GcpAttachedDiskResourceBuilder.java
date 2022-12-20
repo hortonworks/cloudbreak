@@ -111,7 +111,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                 .withName(resourceName)
                 .withGroup(groupName)
                 .withAvailabilityZone(instance.getAvailabilityZone())
-                .withParams(attributes)
+                .withParameters(attributes)
                 .build();
     }
 
@@ -159,7 +159,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             volumeSetResource.putParameter(OPERATION_ID, operations);
             result.add(new Builder().cloudResource(volumeSetResource)
                     .withStatus(CommonStatus.CREATED)
-                    .withParams(volumeSetResource.getParameters())
+                    .withParameters(volumeSetResource.getParameters())
                     .build());
         }
 

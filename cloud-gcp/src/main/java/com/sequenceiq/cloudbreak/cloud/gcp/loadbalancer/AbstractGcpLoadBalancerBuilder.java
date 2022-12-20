@@ -79,7 +79,7 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
                 Map<String, Object> parameters = Map.of(TRAFFICPORTS, trafficPorts, HCPORT, healthCheckPort);
                 resources.add(new CloudResource.Builder().withType(resourceType())
                         .withName(resourceName)
-                        .withParams(parameters)
+                        .withParameters(parameters)
                         .build());
             });
         } else {
@@ -89,7 +89,7 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
                 Map<String, Object> parameters = Map.of(TRAFFICPORT, targetGroupPortPair.getTrafficPort(), HCPORT, healthCheckPort);
                 resources.add(new CloudResource.Builder().withType(resourceType())
                         .withName(resourceName)
-                        .withParams(parameters)
+                        .withParameters(parameters)
                         .build());
             });
         }

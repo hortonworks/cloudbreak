@@ -216,7 +216,7 @@ public class AzureCloudResourceService {
                 .withGroup(instanceGroupName)
                 .withStatus(sourceResource.getStatus())
                 .withPersistent(sourceResource.isPersistent())
-                .withParams(Map.of(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName, PRIVATE_ID, privateId))
+                .withParameters(Map.of(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName, PRIVATE_ID, privateId))
                 .build();
     }
 

@@ -206,7 +206,7 @@ public class AzureCloudResourceServiceTest {
                 .withStatus(status)
                 .withType(resourceType)
                 .withInstanceId(instanceId)
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
     }
 

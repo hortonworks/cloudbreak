@@ -123,7 +123,7 @@ public class AzureUpscaleServiceTest {
                 .thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
         CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
-                .withName("instance").withParams(Map.of()).build();
+                .withName("instance").withParameters(Map.of()).build();
         List<CloudResource> newInstances = List.of(newInstance);
         when(azureCloudResourceService.getDeploymentCloudResources(templateDeployment)).thenReturn(newInstances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
@@ -202,7 +202,7 @@ public class AzureUpscaleServiceTest {
                 .thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
         CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
-                .withName("instance").withParams(Map.of()).build();
+                .withName("instance").withParameters(Map.of()).build();
         List<CloudResource> newInstances = List.of(newInstance);
         when(azureCloudResourceService.getDeploymentCloudResources(templateDeployment)).thenReturn(newInstances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
@@ -266,7 +266,7 @@ public class AzureUpscaleServiceTest {
                 .withStatus(status)
                 .withType(resourceType)
                 .withInstanceId(instanceId)
-                .withParams(PARAMETERS)
+                .withParameters(PARAMETERS)
                 .build();
     }
 }

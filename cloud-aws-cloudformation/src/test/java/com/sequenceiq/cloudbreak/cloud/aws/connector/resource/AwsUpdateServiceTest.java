@@ -54,7 +54,7 @@ public class AwsUpdateServiceTest {
         CloudResource cloudResource = CloudResource.builder()
                 .withName("cf")
                 .withType(ResourceType.CLOUDFORMATION_STACK)
-                .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
 
         List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource));
@@ -89,12 +89,12 @@ public class AwsUpdateServiceTest {
         CloudResource cloudResource = CloudResource.builder()
                 .withName("cf")
                 .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
-                .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
         CloudResource cf = CloudResource.builder()
                 .withName("cf")
                 .withType(ResourceType.CLOUDFORMATION_STACK)
-                .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
         doNothing().when(awsLaunchTemplateUpdateService).updateLaunchTemplate(anyMap(), any(), anyString(), any());
 

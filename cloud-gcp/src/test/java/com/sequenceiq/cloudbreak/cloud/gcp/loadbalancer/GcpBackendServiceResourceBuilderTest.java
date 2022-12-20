@@ -126,7 +126,7 @@ public class GcpBackendServiceResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("hcsuper")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
 
@@ -135,7 +135,7 @@ public class GcpBackendServiceResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("super")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
 
@@ -184,7 +184,7 @@ public class GcpBackendServiceResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("hcsuper")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
 
@@ -193,7 +193,7 @@ public class GcpBackendServiceResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("super")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
 
@@ -245,7 +245,7 @@ public class GcpBackendServiceResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("super")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
 

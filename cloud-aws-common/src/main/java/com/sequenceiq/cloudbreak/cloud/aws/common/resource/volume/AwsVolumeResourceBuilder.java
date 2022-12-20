@@ -202,7 +202,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .withAvailabilityZone(targetAvailabilityZone)
                     .withGroup(group.getName())
                     .withStatus(CommonStatus.REQUESTED)
-                    .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                    .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                             .withAvailabilityZone(targetAvailabilityZone)
                             .withDeleteOnTermination(Boolean.TRUE)
                             .withVolumes(template.getVolumes().stream()
@@ -322,7 +322,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .withStatus(CommonStatus.CREATED)
                 .withName(resource.getName())
                 .withAvailabilityZone(resource.getAvailabilityZone() == null ? defaultAvailabilityZone : resource.getAvailabilityZone())
-                .withParams(resource.getParameters())
+                .withParameters(resource.getParameters())
                 .build();
     }
 

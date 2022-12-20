@@ -92,7 +92,7 @@ public class GcpInstanceGroupResourceBuilderTest {
                 .withGroup("master")
                 .withName("super")
                 .withInstanceId("id-123")
-                .withParams(new HashMap<>())
+                .withParameters(new HashMap<>())
                 .withPersistent(true)
                 .build();
 
@@ -150,7 +150,7 @@ public class GcpInstanceGroupResourceBuilderTest {
                 .withGroup("master")
                 .withName("super")
                 .withInstanceId("id-123")
-                .withParams(new HashMap<>())
+                .withParameters(new HashMap<>())
                 .withPersistent(true)
                 .build();
         Compute.InstanceGroups.Insert instanceGroupsInsert = mock(Compute.InstanceGroups.Insert.class);
@@ -181,7 +181,7 @@ public class GcpInstanceGroupResourceBuilderTest {
                 .withGroup("master")
                 .withName("super")
                 .withInstanceId("id-123")
-                .withParams(new HashMap<>())
+                .withParameters(new HashMap<>())
                 .withPersistent(true)
                 .build();
         Compute.InstanceGroups.Insert instanceGroupsInsert = mock(Compute.InstanceGroups.Insert.class);

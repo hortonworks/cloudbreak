@@ -183,7 +183,7 @@ public class GcpAttachedDiskResourceBuilderTest {
                 .withType(ResourceType.GCP_DISK)
                 .withStatus(CommonStatus.REQUESTED)
                 .withName("disk")
-                .withParams(params)
+                .withParameters(params)
                 .build());
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");

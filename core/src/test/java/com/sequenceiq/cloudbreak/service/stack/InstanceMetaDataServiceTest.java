@@ -340,7 +340,7 @@ class InstanceMetaDataServiceTest {
                 .withType(ResourceType.AWS_VOLUMESET)
                 .withStatus(CommonStatus.DETACHED)
                 .withName("name")
-                .withParams(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
                 .build();
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig"))
                 .thenReturn(List.of(cloudResource));
@@ -370,7 +370,7 @@ class InstanceMetaDataServiceTest {
                 .withType(ResourceType.AWS_VOLUMESET)
                 .withStatus(CommonStatus.DETACHED)
                 .withName("name")
-                .withParams(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
                 .build();
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig"))
                 .thenReturn(List.of(cloudResource));

@@ -157,7 +157,7 @@ public class AwsNativeEIPResourceBuilderTest {
                 .withName("name")
                 .withType(ResourceType.AWS_RESERVED_IP)
                 .withStatus(CommonStatus.CREATED)
-                .withParams(emptyMap())
+                .withParameters(emptyMap())
                 .build();
 
         CloudResource instanceResource = CloudResource.builder()
@@ -165,7 +165,7 @@ public class AwsNativeEIPResourceBuilderTest {
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
                 .withInstanceId("instanceId")
-                .withParams(emptyMap())
+                .withParameters(emptyMap())
                 .build();
 
         when(awsTaggingService.prepareEc2TagSpecification(any(), any())).thenReturn(new TagSpecification());

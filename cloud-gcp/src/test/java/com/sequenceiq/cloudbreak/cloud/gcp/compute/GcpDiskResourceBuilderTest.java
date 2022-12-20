@@ -169,7 +169,7 @@ class GcpDiskResourceBuilderTest {
                 .withType(ResourceType.GCP_DISK)
                 .withStatus(CommonStatus.REQUESTED)
                 .withName("disk")
-                .withParams(Map.of())
+                .withParameters(Map.of())
                 .build());
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");

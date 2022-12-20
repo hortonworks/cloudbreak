@@ -556,7 +556,7 @@ class AwsLaunchServiceLoadBalancerTest {
                 .withInstanceId(INSTANCE_ID)
                 .withType(AWS_INSTANCE)
                 .withStatus(CREATED)
-                .withParams(Map.of())
+                .withParameters(Map.of())
                 .withGroup(INSTANCE_NAME)
                 .build());
     }

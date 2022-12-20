@@ -40,7 +40,7 @@ public class CloudResourceTest {
                 .withType(ResourceType.AZURE_MANAGED_IMAGE)
                 .withName("test-image")
                 .withStatus(CommonStatus.REQUESTED)
-                .withParams(Map.of());
+                .withParameters(Map.of());
     }
 
 }

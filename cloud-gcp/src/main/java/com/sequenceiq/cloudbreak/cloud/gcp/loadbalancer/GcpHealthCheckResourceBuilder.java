@@ -48,7 +48,7 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
             Map<String, Object> parameters = Map.of(HCPORT, healthCheckPort);
             resources.add(new Builder().withType(resourceType())
                     .withName(resourceName)
-                    .withParams(parameters)
+                    .withParameters(parameters)
                     .build());
         }
         return resources;

@@ -100,7 +100,7 @@ public class AwsSecurityGroupResourceBuilderTest {
                 .withType(ResourceType.AWS_SECURITY_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
         String groupId = "groupId";
 
@@ -120,7 +120,7 @@ public class AwsSecurityGroupResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
                 .withReference("ref")
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
 
         when(awsMethodExecutor.execute(any(), eq(null))).thenReturn(null);
@@ -137,7 +137,7 @@ public class AwsSecurityGroupResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
                 .withReference("ref")
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
 
         when(awsMethodExecutor.execute(any(), eq(null))).thenReturn(new DeleteSecurityGroupResult());
@@ -153,7 +153,7 @@ public class AwsSecurityGroupResourceBuilderTest {
                 .withType(ResourceType.AWS_SECURITY_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
 
         CloudResource actual = underTest.delete(awsContext, ac, resource, network);

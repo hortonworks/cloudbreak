@@ -125,7 +125,7 @@ public class GcpForwardingRuleResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("super")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
 
@@ -134,7 +134,7 @@ public class GcpForwardingRuleResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("backendsuper")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
 
@@ -202,7 +202,7 @@ public class GcpForwardingRuleResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("super")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
 
@@ -211,7 +211,7 @@ public class GcpForwardingRuleResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("backendsuper")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
 

@@ -238,7 +238,7 @@ public class GcpMetadataCollectorTest {
                 .withName(name)
                 .withType(type)
                 .withStatus(CommonStatus.CREATED)
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
     }
 }

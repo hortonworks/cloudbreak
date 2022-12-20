@@ -75,7 +75,7 @@ public class SecurityGroupRecreatorServiceTest {
                 .withType(ResourceType.AWS_SECURITY_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
 
         when(group.getName()).thenReturn(hostGroupName);
@@ -101,7 +101,7 @@ public class SecurityGroupRecreatorServiceTest {
                 .withType(ResourceType.AWS_SECURITY_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
 
         when(group.getName()).thenReturn(hostGroupName);
@@ -124,7 +124,7 @@ public class SecurityGroupRecreatorServiceTest {
                 .withType(ResourceType.AWS_SECURITY_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
 
         when(group.getName()).thenReturn(hostGroupName);

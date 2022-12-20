@@ -117,7 +117,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                     .withName(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, stackCrn))
                     .withGroup(group.getName())
                     .withStatus(CommonStatus.REQUESTED)
-                    .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                    .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                             .withAvailabilityZone(availabilityZone)
                             .withDeleteOnTermination(Boolean.TRUE)
                             .withVolumes(
@@ -210,7 +210,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .withType(resource.getType())
                 .withStatus(status)
                 .withName(resource.getName())
-                .withParams(resource.getParameters())
+                .withParameters(resource.getParameters())
                 .build();
     }
 

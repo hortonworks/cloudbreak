@@ -114,7 +114,7 @@ public class GcpHealthCheckResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("super")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
         Compute.RegionHealthChecks.Insert healthCheckInsert = mock(Compute.RegionHealthChecks.Insert.class);
@@ -149,7 +149,7 @@ public class GcpHealthCheckResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
                 .withName("super")
-                .withParams(parameters)
+                .withParameters(parameters)
                 .withPersistent(true)
                 .build();
 
