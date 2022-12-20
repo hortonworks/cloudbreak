@@ -493,7 +493,7 @@ class AwsVolumeResourceBuilderTest {
                 .withType(ResourceType.AWS_VOLUMESET)
                 .withName(VOLUME_SET_NAME)
                 .withStatus(CommonStatus.REQUESTED)
-                .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                         .withAvailabilityZone(AVAILABILITY_ZONE)
                         .withVolumes(volumes)
                         .build()))

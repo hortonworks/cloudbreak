@@ -498,6 +498,6 @@ public class AwsRepairTest {
                 .withType(ResourceType.AWS_VOLUMESET)
                 .withInstanceId(instanceId)
                 .withPersistent(true)
-                .withParams(attributes).build();
+                .withParameters(attributes).build();
     }
 }

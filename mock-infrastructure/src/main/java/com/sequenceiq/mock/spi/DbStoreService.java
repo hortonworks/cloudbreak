@@ -46,21 +46,21 @@ public class DbStoreService {
                         .withType(ResourceType.MOCK_DATABASE)
                         .withName("mock database")
                         .withStatus(CommonStatus.CREATED)
-                        .withParams(Map.of())
+                        .withParameters(Map.of())
                         .build(),
                         ResourceStatus.CREATED),
                 new CloudResourceStatus(CloudResource.builder()
                         .withType(ResourceType.RDS_HOSTNAME)
                         .withName("mock_database")
                         .withStatus(CommonStatus.CREATED)
-                        .withParams(Map.of())
+                        .withParameters(Map.of())
                         .build(),
                         ResourceStatus.CREATED),
                 new CloudResourceStatus(CloudResource.builder()
                         .withType(ResourceType.RDS_PORT)
                         .withName("8989")
                         .withStatus(CommonStatus.CREATED)
-                        .withParams(Map.of())
+                        .withParameters(Map.of())
                         .build(),
                         ResourceStatus.CREATED));
     }

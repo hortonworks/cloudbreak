@@ -173,7 +173,7 @@ class AzureTerminationHelperServiceTest {
                 .withStatus(CommonStatus.CREATED)
                 .withName(name)
                 .withReference(reference)
-                .withParams(Map.of())
+                .withParameters(Map.of())
                 .build();
     }
 

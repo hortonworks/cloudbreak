@@ -98,7 +98,7 @@ public class AzureTransientDeploymentServiceTest {
                 .withStatus(CommonStatus.CREATED)
                 .withType(resourceType)
                 .withInstanceId("instanceId")
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
     }
 }

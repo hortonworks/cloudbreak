@@ -37,7 +37,7 @@ public class ResourceToCloudResourceConverter {
                 .withAvailabilityZone(resource.getAvailabilityZone())
                 .withGroup(resource.getInstanceGroup())
                 .withInstanceId(resource.getInstanceId())
-                .withParams(paramsMap)
+                .withParameters(paramsMap)
                 .build();
     }
 }

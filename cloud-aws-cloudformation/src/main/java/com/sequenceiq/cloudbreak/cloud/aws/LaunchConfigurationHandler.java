@@ -48,7 +48,7 @@ public class LaunchConfigurationHandler {
         autoScalingClient.createLaunchConfiguration(createLaunchConfigurationRequest);
         CloudResource cloudResource = CloudResource.builder()
                 .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .withName(createLaunchConfigurationRequest.getLaunchConfigurationName())
                 .withAvailabilityZone(cloudContext.getLocation().getAvailabilityZone().value())
                 .build();

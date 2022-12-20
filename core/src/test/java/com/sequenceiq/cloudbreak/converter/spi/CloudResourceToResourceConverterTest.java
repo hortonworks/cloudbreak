@@ -24,7 +24,7 @@ class CloudResourceToResourceConverterTest {
                 .withType(ResourceType.AWS_ENCRYPTED_AMI)
                 .withStatus(CommonStatus.REQUESTED)
                 .withName("ami-01231h231")
-                .withParams(Map.of())
+                .withParameters(Map.of())
                 .build());
 
         assertEquals(ResourceType.AWS_ENCRYPTED_AMI, convertedResource.getResourceType());
@@ -46,7 +46,7 @@ class CloudResourceToResourceConverterTest {
                 .withName("ami-01231h231")
                 .withGroup("group")
                 .withInstanceId("id")
-                .withParams(Map.of(CloudResource.ATTRIBUTES, Map.of("key", "test")))
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, Map.of("key", "test")))
                 .withReference("ref")
                 .build());
 

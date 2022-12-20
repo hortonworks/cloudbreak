@@ -78,7 +78,7 @@ public class CloudResourceRetrieverServiceTest {
                 .withName(RESOURCE)
                 .withType(RESOURCE_TYPE)
                 .withStatus(REQUESTED)
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
     }
 }

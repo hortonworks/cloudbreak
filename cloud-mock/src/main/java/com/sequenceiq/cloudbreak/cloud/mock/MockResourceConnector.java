@@ -252,7 +252,7 @@ public class MockResourceConnector implements ResourceConnector {
                 .withGroup(cloudInstance.getTemplate().getGroupName())
                 .withName(name)
                 .withInstanceId(instanceId)
-                .withParams(cloudInstance.getParameters())
+                .withParameters(cloudInstance.getParameters())
                 .withPersistent(true)
                 .build();
         return resource;

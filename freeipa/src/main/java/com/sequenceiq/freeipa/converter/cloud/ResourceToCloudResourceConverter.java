@@ -32,7 +32,7 @@ public class ResourceToCloudResourceConverter {
                 .withStatus(resource.getResourceStatus())
                 .withGroup(resource.getInstanceGroup())
                 .withInstanceId(resource.getInstanceId())
-                .withParams(paramsMap)
+                .withParameters(paramsMap)
                 .build();
     }
 }

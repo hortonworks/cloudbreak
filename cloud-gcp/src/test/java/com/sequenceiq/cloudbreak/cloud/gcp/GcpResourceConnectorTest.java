@@ -248,7 +248,7 @@ public class GcpResourceConnectorTest {
                 .withName(name)
                 .withGroup("master")
                 .withStatus(CommonStatus.REQUESTED)
-                .withParams(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
                 .build();
     }
 

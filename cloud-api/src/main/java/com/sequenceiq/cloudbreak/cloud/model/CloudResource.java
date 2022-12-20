@@ -185,8 +185,8 @@ public class CloudResource extends DynamicModel {
             return this;
         }
 
-        @JsonAlias({"parameters"})
-        public Builder withParams(Map<String, Object> parameters) {
+        @JsonAlias({"params"})
+        public Builder withParameters(Map<String, Object> parameters) {
             this.parameters = parameters;
             return this;
         }

@@ -118,7 +118,7 @@ public class CloudFormationStackUtilTest {
                 .withStackAware(true)
                 .withInstanceId("i-029627fe1ce09b970")
                 .withAvailabilityZone("us-west-2")
-                .withParams(Map.of("privateId", "9", "instanceType", "r5d.4xlarge"))
+                .withParameters(Map.of("privateId", "9", "instanceType", "r5d.4xlarge"))
                 .build();
         underTest.addLoadBalancerTargets(authenticatedContext, cloudLoadBalancer, List.of(cloudResource));
 
@@ -156,7 +156,7 @@ public class CloudFormationStackUtilTest {
                 .withStackAware(true)
                 .withInstanceId("i-029627fe1ce09b970")
                 .withAvailabilityZone("us-west-2")
-                .withParams(Map.of("privateId", "9", "instanceType", "r5d.4xlarge"))
+                .withParameters(Map.of("privateId", "9", "instanceType", "r5d.4xlarge"))
                 .build();
         underTest.addLoadBalancerTargets(authenticatedContext, cloudLoadBalancer, List.of(cloudResource));
 

@@ -68,7 +68,7 @@ public abstract class AbstractGcpComputeBaseResourceChecker extends AbstractGcpB
     protected CloudResource createOperationAwareCloudResource(CloudResource resource, Operation operation) {
         CloudResource build = new Builder()
                 .cloudResource(resource)
-                .withParams(resource.getParameters())
+                .withParameters(resource.getParameters())
                 .withPersistent(false)
                 .build();
         build.putParameter(OPERATION_ID, operation.getName());

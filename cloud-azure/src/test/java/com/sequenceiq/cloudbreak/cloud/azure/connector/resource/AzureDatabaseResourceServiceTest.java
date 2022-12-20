@@ -366,7 +366,7 @@ class AzureDatabaseResourceServiceTest {
                 .withReference(RESOURCE_REFERENCE)
                 .withName(name)
                 .withStatus(CommonStatus.CREATED)
-                .withParams(Map.of())
+                .withParameters(Map.of())
                 .build();
     }
 

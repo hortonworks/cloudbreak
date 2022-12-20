@@ -252,7 +252,7 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
                 .withType(resource.getType())
                 .withStatus(CommonStatus.CREATED)
                 .withName(resource.getName())
-                .withParams(resource.getParameters())
+                .withParameters(resource.getParameters())
                 .build();
     }
 

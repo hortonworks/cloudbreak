@@ -414,6 +414,6 @@ class SecurityGroupBuilderUtilTest {
                 .withStatus(CommonStatus.CREATED)
                 .withReference("sg-id")
                 .withGroup("groupName")
-                .withParams(emptyMap());
+                .withParameters(emptyMap());
     }
 }

@@ -236,7 +236,7 @@ public class AwsMetaDataCollectorTest {
                 List.of(new VolumeSetAttributes.Volume("volid1", "device", 100, "type", CloudVolumeUsageType.GENERAL)),
                 100, "type");
         resources.add(CloudResource.builder().withType(ResourceType.AWS_VOLUMESET).withStatus(CommonStatus.REQUESTED).withName("volume1").withGroup("worker")
-                .withParams(Map.of("attributes",
+                .withParameters(Map.of("attributes",
                         volumeSetAttributes))
                         .build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");

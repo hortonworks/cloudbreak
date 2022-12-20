@@ -75,7 +75,7 @@ public class CloudResourceRetrieverServiceTest {
                 .withName(RESOURCE)
                 .withType(AZURE_MANAGED_IMAGE)
                 .withStatus(REQUESTED)
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
     }
 }

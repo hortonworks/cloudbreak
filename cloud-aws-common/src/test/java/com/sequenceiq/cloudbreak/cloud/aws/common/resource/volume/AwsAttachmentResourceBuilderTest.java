@@ -62,7 +62,7 @@ public class AwsAttachmentResourceBuilderTest {
                 new VolumeSetAttributes.Volume("vol2", "device", 50, "type", CloudVolumeUsageType.GENERAL));
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("", false, "", volumes, 50, "type");
         CloudResource volumeResource = CloudResource.builder().withName("vol1").withType(ResourceType.AWS_VOLUMESET).withStatus(CommonStatus.CREATED)
-                .withInstanceId("instanceid").withParams(Map.of(ATTRIBUTES, volumeSetAttributes)).build();
+                .withInstanceId("instanceid").withParameters(Map.of(ATTRIBUTES, volumeSetAttributes)).build();
         buildableResource.add(volumeResource);
         AmazonEc2Client amazonEc2Client = mock(AmazonEc2Client.class);
         DescribeVolumesResult describeVolumesResult = new DescribeVolumesResult();
@@ -88,7 +88,7 @@ public class AwsAttachmentResourceBuilderTest {
                 new VolumeSetAttributes.Volume("vol2", "device", 50, "type", CloudVolumeUsageType.GENERAL));
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("", false, "", volumes, 50, "type");
         CloudResource volumeResource = CloudResource.builder().withName("vol1").withType(ResourceType.AWS_VOLUMESET).withStatus(CommonStatus.CREATED)
-                .withInstanceId("instanceid").withParams(Map.of(ATTRIBUTES, volumeSetAttributes)).build();
+                .withInstanceId("instanceid").withParameters(Map.of(ATTRIBUTES, volumeSetAttributes)).build();
         buildableResource.add(volumeResource);
         AmazonEc2Client amazonEc2Client = mock(AmazonEc2Client.class);
         DescribeVolumesResult describeVolumesResult = new DescribeVolumesResult();

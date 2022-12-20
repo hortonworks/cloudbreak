@@ -73,7 +73,7 @@ public class LoadBalancerServiceTest {
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
                 .withInstanceId("instanceId")
-                .withParams(Collections.emptyMap())
+                .withParameters(Collections.emptyMap())
                 .build();
 
         ArgumentCaptor<DeregisterTargetsRequest> argumentCaptor = ArgumentCaptor.forClass(DeregisterTargetsRequest.class);

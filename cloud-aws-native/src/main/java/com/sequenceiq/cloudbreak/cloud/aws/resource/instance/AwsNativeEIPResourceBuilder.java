@@ -122,7 +122,7 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
                     .withInstanceId(instanceId)
                     .withStatus(CommonStatus.CREATED)
                     .withReference(allocationId)
-                    .withParams(Map.of(CloudResource.ATTRIBUTES, EIpAttributes.EIpAttributesBuilder.builder()
+                    .withParameters(Map.of(CloudResource.ATTRIBUTES, EIpAttributes.EIpAttributesBuilder.builder()
                             .withAllocateId(allocationId)
                             .withAssociationId(associationId)
                             .build()))

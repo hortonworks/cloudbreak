@@ -48,7 +48,7 @@ public class GcpFirewallInResourceBuilderTest {
                 .withGroup("master")
                 .withName("super")
                 .withInstanceId("id-123")
-                .withParams(new HashMap<>())
+                .withParameters(new HashMap<>())
                 .withPersistent(true)
                 .build();
         GcpContext gcpContext = mock(GcpContext.class);
