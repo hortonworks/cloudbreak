@@ -13,7 +13,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-import com.cloudera.crypto.provider.OpenSSLJniProvider;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPFlowStructuredEventHandler;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -29,7 +28,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableAutoConfiguration(exclude = WebMvcMetricsAutoConfiguration.class)
 public class CloudbreakApplication {
     public static void main(String[] args) {
-        OpenSSLJniProvider.register();
         if (!versionedApplication().showVersionInfo(args)) {
             if (args.length == 0) {
                 SpringApplication.run(CloudbreakApplication.class);
