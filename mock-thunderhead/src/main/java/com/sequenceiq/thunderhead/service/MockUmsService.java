@@ -30,9 +30,7 @@ import com.sequenceiq.thunderhead.util.JsonUtil;
 @Service
 public class MockUmsService {
 
-    public static final String MAC_SIGNER_SECRET_KEY = "titokamisokkaldesokkaldesokkalhosszabbhogyfipscompliantlegyen";
-
-    public static final MacSigner SIGNATURE_VERIFIER = new MacSigner(MAC_SIGNER_SECRET_KEY);
+    public static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockUmsService.class);
 

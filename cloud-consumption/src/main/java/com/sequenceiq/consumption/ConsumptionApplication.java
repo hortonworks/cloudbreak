@@ -6,8 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.cloudera.crypto.provider.OpenSSLJniProvider;
-
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
@@ -17,7 +15,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class ConsumptionApplication {
 
     public static void main(String[] args) {
-        OpenSSLJniProvider.register();
         SpringApplication.run(ConsumptionApplication.class, args);
     }
 

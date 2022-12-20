@@ -5,8 +5,6 @@ import org.springframework.boot.actuate.autoconfigure.metrics.web.servlet.WebMvc
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import com.cloudera.crypto.provider.OpenSSLJniProvider;
-
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
@@ -15,7 +13,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class FreeIpaApplication {
 
     public static void main(String[] args) {
-        OpenSSLJniProvider.register();
         SpringApplication.run(FreeIpaApplication.class, args);
     }
 
