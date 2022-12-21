@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.flow.modify.proxy.handler;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -7,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +34,8 @@ class ProxyModificationOnDatalakeHandlerTest {
 
     private static final String NAME = "name";
 
+    private static final String PROXY_CRN = "proxy-crn";
+
     private static final String PREV_PROXY_CRN = "prev-proxy-crn";
 
     @Mock
@@ -45,10 +51,13 @@ class ProxyModificationOnDatalakeHandlerTest {
     private EnvironmentDto environmentDto;
 
     @Mock
-    private ProxyConfig proxyConfig;
-
-    @Mock
     private ProxyConfig previousProxyConfig;
+
+    @Captor
+    private ArgumentCaptor<EnvProxyModificationDefaultEvent> defaultEventCaptor;
+
+    @Captor
+    private ArgumentCaptor<EnvProxyModificationFailedEvent> failedEventCaptor;
 
     private EnvProxyModificationDefaultEvent event;
 
@@ -56,9 +65,10 @@ class ProxyModificationOnDatalakeHandlerTest {
     void setUp() {
         event = EnvProxyModificationDefaultEvent.builder()
                 .withSelector(SELECTOR)
-                .withEnvironmentDto(environmentDto)
-                .withProxyConfig(proxyConfig)
-                .withPreviousProxyConfig(previousProxyConfig)
+                .withResourceId(ENV_ID)
+                .withResourceName(NAME)
+                .withProxyConfigCrn(PROXY_CRN)
+                .withPreviousProxyConfigCrn(PREV_PROXY_CRN)
                 .build();
         lenient().when(environmentDto.getId()).thenReturn(ENV_ID);
         lenient().when(environmentDto.getName()).thenReturn(NAME);
@@ -73,14 +83,10 @@ class ProxyModificationOnDatalakeHandlerTest {
 
         underTest.accept(wrappedEvent);
 
-        EnvProxyModificationFailedEvent failedEvent = EnvProxyModificationFailedEvent.builder()
-                .withEnvironmentDto(event.getEnvironmentDto())
-                .withProxyConfig(event.getProxyConfig())
-                .withPreviousProxyConfig(event.getPreviousProxyConfig())
-                .withEnvironmentStatus(EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_DATALAKE_FAILED)
-                .withException(cause)
-                .build();
-        verify(eventSender).sendEvent(failedEvent, wrappedEvent.getHeaders());
+        verify(eventSender).sendEvent(failedEventCaptor.capture(), eq(wrappedEvent.getHeaders()));
+        assertThat(failedEventCaptor.getValue())
+                .returns(EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_DATALAKE_FAILED, EnvProxyModificationFailedEvent::getEnvironmentStatus)
+                .returns(cause, EnvProxyModificationFailedEvent::getException);
     }
 
     @Test
@@ -89,13 +95,9 @@ class ProxyModificationOnDatalakeHandlerTest {
 
         underTest.accept(wrappedEvent);
 
-        EnvProxyModificationDefaultEvent defaultEvent = EnvProxyModificationDefaultEvent.builder()
-                .withSelector(EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector())
-                .withEnvironmentDto(event.getEnvironmentDto())
-                .withProxyConfig(event.getProxyConfig())
-                .withPreviousProxyConfig(event.getPreviousProxyConfig())
-                .build();
-        verify(eventSender).sendEvent(defaultEvent, wrappedEvent.getHeaders());
+        verify(eventSender).sendEvent(defaultEventCaptor.capture(), eq(wrappedEvent.getHeaders()));
+        assertThat(defaultEventCaptor.getValue())
+                .returns(EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector(), EnvProxyModificationDefaultEvent::selector);
     }
 
 }

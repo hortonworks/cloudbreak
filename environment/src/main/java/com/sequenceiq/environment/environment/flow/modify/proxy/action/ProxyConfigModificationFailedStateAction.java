@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.modify.proxy.action;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,18 +39,18 @@ public class ProxyConfigModificationFailedStateAction extends AbstractEnvProxyMo
         environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
                 ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED, List.of(payload.getException().getMessage()),
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FAILED_STATE);
-        reportFailure(context, payload);
+        reportFailure(payload);
 
         sendEvent(context, EnvProxyModificationStateSelectors.HANDLE_FAILED_MODIFY_PROXY_EVENT.event(), payload);
     }
 
-    private void reportFailure(EnvProxyModificationContext context, EnvProxyModificationFailedEvent payload) {
+    private void reportFailure(EnvProxyModificationFailedEvent payload) {
         UsageProto.CDPEnvironmentProxyConfigEditEvent event = UsageProto.CDPEnvironmentProxyConfigEditEvent.newBuilder()
                 .setEnvironmentCrn(payload.getResourceCrn())
-                .setProxyConfigCrn(getProxyConfigCrn(payload.getProxyConfig()))
-                .setPreviousProxyConfigCrn(getProxyConfigCrn(context.getPreviousProxyConfig()))
+                .setProxyConfigCrn(Objects.requireNonNullElse(payload.getProxyConfigCrn(), ""))
+                .setPreviousProxyConfigCrn(Objects.requireNonNullElse(payload.getPreviousProxyConfigCrn(), ""))
                 .setResult(UsageProto.CDPEnvironmentProxyConfigEditResult.Value.ENVIRONMENT_FAILURE)
-                .setMessage(payload.getException().getMessage())
+                .setMessage(Objects.requireNonNullElse(payload.getException().getMessage(), ""))
                 .build();
         usageReporter.cdpEnvironmentProxyConfigEditEvent(event);
     }

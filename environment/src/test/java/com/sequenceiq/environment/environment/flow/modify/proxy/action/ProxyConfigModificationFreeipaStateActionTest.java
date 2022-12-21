@@ -42,7 +42,7 @@ class ProxyConfigModificationFreeipaStateActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        context = new EnvProxyModificationContext(flowParameters, null);
+        context = new EnvProxyModificationContext(flowParameters, null, null);
         when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any())).thenReturn(environmentDto);
     }
 
@@ -53,8 +53,6 @@ class ProxyConfigModificationFreeipaStateActionTest extends ActionTest {
         verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(context, payload,
                 EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_FREEIPA_STARTED,
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FREEIPA_STATE);
-        String selector = EnvProxyModificationHandlerSelectors.TRACK_FREEIPA_PROXY_MODIFICATION_EVENT.selector();
-        verifySendEvent(context, selector,
-                new EnvProxyModificationDefaultEvent(selector, environmentDto, payload.getProxyConfig(), payload.getPreviousProxyConfig(), payload.accepted()));
+        verifySendEvent(EnvProxyModificationHandlerSelectors.TRACK_FREEIPA_PROXY_MODIFICATION_EVENT.selector());
     }
 }

@@ -44,8 +44,7 @@ class ProxyConfigModificationStartStateActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        context = new EnvProxyModificationContext(flowParameters, null);
-        when(payload.getProxyConfig()).thenReturn(proxyConfig);
+        context = new EnvProxyModificationContext(flowParameters, null, null);
         when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any())).thenReturn(environmentDto);
     }
 
@@ -57,9 +56,7 @@ class ProxyConfigModificationStartStateActionTest extends ActionTest {
                 EnvironmentStatus.PROXY_CONFIG_MODIFICATION_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_STARTED,
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_START_STATE);
 
-        String selector = EnvProxyModificationHandlerSelectors.SAVE_NEW_PROXY_ASSOCIATION_HANDLER_EVENT.selector();
-        EnvProxyModificationDefaultEvent event = new EnvProxyModificationDefaultEvent(selector, environmentDto, proxyConfig, null, null);
-        verifySendEvent(context, selector, event);
+        verifySendEvent(EnvProxyModificationHandlerSelectors.SAVE_NEW_PROXY_ASSOCIATION_HANDLER_EVENT.selector());
     }
 
 }

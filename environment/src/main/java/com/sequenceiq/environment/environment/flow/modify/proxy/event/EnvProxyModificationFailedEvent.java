@@ -8,49 +8,45 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
 
 public class EnvProxyModificationFailedEvent extends BaseFailedFlowEvent implements ProxyConfigModificationEvent {
 
-    private final EnvironmentDto environmentDto;
+    private final String proxyConfigCrn;
 
-    private final ProxyConfig proxyConfig;
-
-    private final ProxyConfig previousProxyConfig;
+    private final String previousProxyConfigCrn;
 
     private final EnvironmentStatus environmentStatus;
 
     @JsonCreator
     public EnvProxyModificationFailedEvent(
-            @JsonProperty("environmentDto") EnvironmentDto environmentDto,
-            @JsonProperty("proxyConfig") ProxyConfig proxyConfig,
-            @JsonProperty("previousProxyConfig") ProxyConfig previousProxyConfig,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("resourceCrn") String resourceCrn,
+            @JsonProperty("resourceName") String resourceName,
+            @JsonProperty("proxyConfigCrn") String proxyConfigCrn,
+            @JsonProperty("previousProxyConfigCrn") String previousProxyConfigCrn,
             @JsonProperty("environmentStatus") EnvironmentStatus environmentStatus,
             @JsonProperty("exception") Exception exception,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
-        super(EnvProxyModificationStateSelectors.FAILED_MODIFY_PROXY_EVENT.selector(),
-                environmentDto.getResourceId(), accepted, environmentDto.getName(), environmentDto.getResourceCrn(), exception);
-        this.environmentDto = environmentDto;
-        this.proxyConfig = proxyConfig;
-        this.previousProxyConfig = previousProxyConfig;
+        super(EnvProxyModificationStateSelectors.FAILED_MODIFY_PROXY_EVENT.selector(), resourceId, accepted, resourceName, resourceCrn, exception);
+        this.proxyConfigCrn = proxyConfigCrn;
+        this.previousProxyConfigCrn = previousProxyConfigCrn;
         this.environmentStatus = environmentStatus;
     }
 
-    @Override
-    public EnvironmentDto getEnvironmentDto() {
-        return environmentDto;
+    public EnvProxyModificationFailedEvent(ProxyConfigModificationEvent event, Exception exception, EnvironmentStatus environmentStatus) {
+        this(event.getResourceId(), event.getResourceCrn(), event.getResourceName(), event.getProxyConfigCrn(), event.getPreviousProxyConfigCrn(),
+                environmentStatus, exception, event.accepted());
     }
 
     @Override
-    public ProxyConfig getProxyConfig() {
-        return proxyConfig;
+    public String getProxyConfigCrn() {
+        return proxyConfigCrn;
     }
 
     @Override
-    public ProxyConfig getPreviousProxyConfig() {
-        return previousProxyConfig;
+    public String getPreviousProxyConfigCrn() {
+        return previousProxyConfigCrn;
     }
 
     public EnvironmentStatus getEnvironmentStatus() {
@@ -66,69 +62,15 @@ public class EnvProxyModificationFailedEvent extends BaseFailedFlowEvent impleme
             return false;
         }
         EnvProxyModificationFailedEvent that = (EnvProxyModificationFailedEvent) o;
-        return Objects.equals(environmentDto, that.environmentDto)
-                && Objects.equals(proxyConfig, that.proxyConfig)
-                && Objects.equals(previousProxyConfig, that.previousProxyConfig)
-                && environmentStatus == that.environmentStatus;
+        return isClassAndEqualsEvent(EnvProxyModificationFailedEvent.class, that)
+                && Objects.equals(proxyConfigCrn, that.proxyConfigCrn)
+                && Objects.equals(previousProxyConfigCrn, that.previousProxyConfigCrn)
+                && Objects.equals(getException(), that.getException())
+                && Objects.equals(getEnvironmentStatus(), that.getEnvironmentStatus());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(environmentDto, proxyConfig, previousProxyConfig, environmentStatus);
-    }
-
-    public static EnvProxyModificationFailedEventBuilder builder() {
-        return new EnvProxyModificationFailedEventBuilder();
-    }
-
-    public static final class EnvProxyModificationFailedEventBuilder {
-        private EnvironmentDto environmentDto;
-
-        private ProxyConfig proxyConfig;
-
-        private ProxyConfig previousProxyConfig;
-
-        private EnvironmentStatus environmentStatus;
-
-        private Exception exception;
-
-        private Promise<AcceptResult> accepted;
-
-        private EnvProxyModificationFailedEventBuilder() {
-        }
-
-        public EnvProxyModificationFailedEventBuilder withEnvironmentDto(EnvironmentDto environmentDto) {
-            this.environmentDto = environmentDto;
-            return this;
-        }
-
-        public EnvProxyModificationFailedEventBuilder withProxyConfig(ProxyConfig proxyConfig) {
-            this.proxyConfig = proxyConfig;
-            return this;
-        }
-
-        public EnvProxyModificationFailedEventBuilder withPreviousProxyConfig(ProxyConfig previousProxyConfig) {
-            this.previousProxyConfig = previousProxyConfig;
-            return this;
-        }
-
-        public EnvProxyModificationFailedEventBuilder withEnvironmentStatus(EnvironmentStatus environmentStatus) {
-            this.environmentStatus = environmentStatus;
-            return this;
-        }
-
-        public EnvProxyModificationFailedEventBuilder withException(Exception exception) {
-            this.exception = exception;
-            return this;
-        }
-
-        public EnvProxyModificationFailedEventBuilder withAccepted(Promise<AcceptResult> accepted) {
-            this.accepted = accepted;
-            return this;
-        }
-
-        public EnvProxyModificationFailedEvent build() {
-            return new EnvProxyModificationFailedEvent(environmentDto, proxyConfig, previousProxyConfig, environmentStatus, exception, accepted);
-        }
+        return Objects.hash(getResourceId(), getProxyConfigCrn(), getPreviousProxyConfigCrn(), getEnvironmentStatus(), getException());
     }
 }

@@ -4,22 +4,26 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationFailedEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
 @Component
 public class EnvProxyModificationSaveAssociationHandler extends EventSenderAwareHandler<EnvProxyModificationDefaultEvent> {
 
+    private final ProxyConfigService proxyConfigService;
+
     private final EnvironmentService environmentService;
 
-    public EnvProxyModificationSaveAssociationHandler(EventSender eventSender, EnvironmentService environmentService) {
+    public EnvProxyModificationSaveAssociationHandler(EventSender eventSender, ProxyConfigService proxyConfigService, EnvironmentService environmentService) {
         super(eventSender);
+        this.proxyConfigService = proxyConfigService;
         this.environmentService = environmentService;
     }
 
@@ -32,24 +36,22 @@ public class EnvProxyModificationSaveAssociationHandler extends EventSenderAware
     public void accept(Event<EnvProxyModificationDefaultEvent> event) {
         EnvProxyModificationDefaultEvent eventData = event.getData();
         try {
-            EnvironmentDto environmentDto = environmentService.updateProxyConfig(eventData.getEnvironmentDto().getId(), eventData.getProxyConfig());
+            ProxyConfig proxyConfig = eventData.getProxyConfigCrn() != null
+                    ? proxyConfigService.getByCrn(eventData.getProxyConfigCrn())
+                    : null;
+            environmentService.updateProxyConfig(eventData.getResourceId(), proxyConfig);
 
             EnvProxyModificationDefaultEvent envProxyModificationEvent = EnvProxyModificationDefaultEvent.builder()
                     .withSelector(EnvProxyModificationStateSelectors.MODIFY_PROXY_FREEIPA_EVENT.selector())
-                    .withEnvironmentDto(environmentDto)
-                    .withProxyConfig(eventData.getProxyConfig())
-                    .withPreviousProxyConfig(eventData.getPreviousProxyConfig())
+                    .withResourceCrn(eventData.getResourceCrn())
+                    .withResourceId(eventData.getResourceId())
+                    .withResourceName(eventData.getResourceName())
+                    .withProxyConfigCrn(eventData.getProxyConfigCrn())
+                    .withPreviousProxyConfigCrn(eventData.getPreviousProxyConfigCrn())
                     .build();
             eventSender().sendEvent(envProxyModificationEvent, event.getHeaders());
         } catch (Exception e) {
-            EnvProxyModificationFailedEvent envProxyModificationFailedEvent = EnvProxyModificationFailedEvent.builder()
-                    .withEnvironmentDto(eventData.getEnvironmentDto())
-                    .withProxyConfig(eventData.getProxyConfig())
-                    .withPreviousProxyConfig(eventData.getPreviousProxyConfig())
-                    .withEnvironmentStatus(EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED)
-                    .withException(e)
-                    .build();
-            eventSender().sendEvent(envProxyModificationFailedEvent, event.getHeaders());
+            eventSender().sendEvent(new EnvProxyModificationFailedEvent(eventData, e, EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED), event.getHeaders());
         }
     }
 }

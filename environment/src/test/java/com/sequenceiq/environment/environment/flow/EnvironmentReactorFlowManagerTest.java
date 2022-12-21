@@ -43,6 +43,8 @@ class EnvironmentReactorFlowManagerTest {
 
     private static final String USER_CRN = "userCrn";
 
+    private static final String ENVIRONMENT_CRN = "envCrn";
+
     @Mock
     private EventSender eventSender;
 
@@ -100,7 +102,11 @@ class EnvironmentReactorFlowManagerTest {
     @Test
     void triggerEnvironmentProxyConfigModification() {
         EnvironmentDto environmentDto = mock(EnvironmentDto.class);
+        when(environmentDto.getResourceCrn()).thenReturn(ENVIRONMENT_CRN);
+        when(environmentDto.getName()).thenReturn(ENVIRONMENT_NAME);
+        when(environmentDto.getId()).thenReturn(ENVIRONMENT_ID);
         ProxyConfig proxyConfig = mock(ProxyConfig.class);
+        when(proxyConfig.getResourceCrn()).thenReturn("proxy-crn");
         when(eventSender.sendEvent(any(EnvProxyModificationDefaultEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
 
         FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
@@ -111,8 +117,10 @@ class EnvironmentReactorFlowManagerTest {
         EnvProxyModificationDefaultEvent event = envProxyModificationDefaultEventCaptor.getValue();
         assertThat(event)
                 .returns(EnvProxyModificationStateSelectors.MODIFY_PROXY_START_EVENT.selector(), BaseFlowEvent::selector)
-                .returns(environmentDto, EnvProxyModificationDefaultEvent::getEnvironmentDto)
-                .returns(proxyConfig, EnvProxyModificationDefaultEvent::getProxyConfig);
+                .returns(ENVIRONMENT_CRN, EnvProxyModificationDefaultEvent::getResourceCrn)
+                .returns(ENVIRONMENT_NAME, EnvProxyModificationDefaultEvent::getResourceName)
+                .returns(ENVIRONMENT_ID, EnvProxyModificationDefaultEvent::getResourceId)
+                .returns("proxy-crn", EnvProxyModificationDefaultEvent::getProxyConfigCrn);
         verifyHeaders();
     }
 

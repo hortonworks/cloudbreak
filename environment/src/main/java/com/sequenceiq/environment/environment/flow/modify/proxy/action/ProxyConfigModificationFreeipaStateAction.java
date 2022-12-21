@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.flow.EnvironmentEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationContext;
 import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
@@ -32,16 +30,18 @@ public class ProxyConfigModificationFreeipaStateAction extends AbstractEnvProxyM
     protected void doExecute(EnvProxyModificationContext context, EnvProxyModificationDefaultEvent payload, Map<Object, Object> variables) throws Exception {
         LOGGER.info("Env proxy modification freeipa step started");
 
-        EnvironmentDto environmentDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
+        environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
                 EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_FREEIPA_STARTED,
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FREEIPA_STATE);
 
         String selector = EnvProxyModificationHandlerSelectors.TRACK_FREEIPA_PROXY_MODIFICATION_EVENT.selector();
-        EnvironmentEvent event = EnvProxyModificationDefaultEvent.builder()
+        EnvProxyModificationDefaultEvent event = EnvProxyModificationDefaultEvent.builder()
                 .withSelector(selector)
-                .withEnvironmentDto(environmentDto)
-                .withProxyConfig(payload.getProxyConfig())
-                .withPreviousProxyConfig(context.getPreviousProxyConfig())
+                .withResourceCrn(payload.getResourceCrn())
+                .withResourceId(payload.getResourceId())
+                .withResourceName(payload.getResourceName())
+                .withProxyConfigCrn(payload.getProxyConfigCrn())
+                .withPreviousProxyConfigCrn(payload.getPreviousProxyConfigCrn())
                 .build();
         sendEvent(context, selector, event);
     }

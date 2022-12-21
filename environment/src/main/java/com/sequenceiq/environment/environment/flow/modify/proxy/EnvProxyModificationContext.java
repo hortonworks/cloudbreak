@@ -6,11 +6,18 @@ import com.sequenceiq.flow.core.FlowParameters;
 
 public class EnvProxyModificationContext extends CommonContext {
 
+    private final ProxyConfig proxyConfig;
+
     private final ProxyConfig previousProxyConfig;
 
-    public EnvProxyModificationContext(FlowParameters flowParameters, ProxyConfig previousProxyConfig) {
+    public EnvProxyModificationContext(FlowParameters flowParameters, ProxyConfig proxyConfig, ProxyConfig previousProxyConfig) {
         super(flowParameters);
+        this.proxyConfig = proxyConfig;
         this.previousProxyConfig = previousProxyConfig;
+    }
+
+    public ProxyConfig getProxyConfig() {
+        return proxyConfig;
     }
 
     public ProxyConfig getPreviousProxyConfig() {

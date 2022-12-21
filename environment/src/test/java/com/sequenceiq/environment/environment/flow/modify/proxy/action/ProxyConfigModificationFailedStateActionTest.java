@@ -1,8 +1,6 @@
 package com.sequenceiq.environment.environment.flow.modify.proxy.action;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -21,10 +19,10 @@ import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationContext;
 import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState;
+import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationFailedEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
-import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.flow.core.ActionTest;
 
 class ProxyConfigModificationFailedStateActionTest extends ActionTest {
@@ -46,7 +44,6 @@ class ProxyConfigModificationFailedStateActionTest extends ActionTest {
     @Mock
     private EnvProxyModificationContext context;
 
-    @Mock
     private EnvProxyModificationFailedEvent payload;
 
     @Mock
@@ -57,13 +54,13 @@ class ProxyConfigModificationFailedStateActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        context = new EnvProxyModificationContext(flowParameters, null);
-        when(payload.getResourceCrn()).thenReturn(ENV_CRN);
-        ProxyConfig proxyConfig = mock(ProxyConfig.class);
-        when(proxyConfig.getResourceCrn()).thenReturn(PROXY_CRN);
-        when(payload.getProxyConfig()).thenReturn(proxyConfig);
-        when(payload.getEnvironmentStatus()).thenReturn(STATUS);
-        when(payload.getException()).thenReturn(new RuntimeException(EXCEPTION_MESSAGE));
+        context = new EnvProxyModificationContext(flowParameters, null, null);
+        payload = new EnvProxyModificationFailedEvent(EnvProxyModificationDefaultEvent.builder()
+                .withResourceId(1L)
+                .withResourceName("env")
+                .withResourceCrn(ENV_CRN)
+                .withProxyConfigCrn(PROXY_CRN)
+                .build(), new RuntimeException(EXCEPTION_MESSAGE), STATUS);
     }
 
     @Test
