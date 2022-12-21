@@ -133,7 +133,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withEnvironmentCrn(testContext.get(EnvironmentTestDto.class).getResponse().getCrn())
                 .withClusterCrn(clusterCrn)
-                .when(redbeamsDatabaseServerTestClient.createV4())
+                .when(redbeamsDatabaseServerTestClient.create())
                 .await(Status.AVAILABLE)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)

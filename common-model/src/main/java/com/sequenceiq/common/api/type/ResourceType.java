@@ -77,6 +77,7 @@ public enum ResourceType {
     // MOCK
     MOCK_INSTANCE,
     MOCK_TEMPLATE,
+    MOCK_DATABASE,
     MOCK_VOLUME;
 
     private static final List<ResourceType> INSTANCE_TYPES = List.of(GCP_INSTANCE, MOCK_INSTANCE);

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType.ROOT;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -26,6 +28,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -46,6 +49,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
 import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
@@ -65,6 +70,9 @@ public class MockPlatformResources implements PlatformResources {
     private String defaultRegion;
 
     private VmType defaultVmType;
+
+    @Inject
+    private MockUrlFactory mockUrlFactory;
 
     private enum MockedVmTypes {
 
@@ -235,7 +243,7 @@ public class MockPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
-        boolean availabilityZonesNeeded) {
+            boolean availabilityZonesNeeded) {
         return new CloudRegions(regions, regionDisplayNames, regionCoordinates, defaultRegion, true);
     }
 
@@ -302,5 +310,14 @@ public class MockPlatformResources implements PlatformResources {
             }
         }
         return regions.keySet().iterator().next();
+    }
+
+    @Override
+    public CloudDatabaseServerSslCertificates databaseServerGeneralSslRootCertificates(CloudCredential cloudCredential, Region region) {
+        String[] certificates = mockUrlFactory.get("/db/certificates").get(String[].class);
+        Set<CloudDatabaseServerSslCertificate> setOfCertificates = List.of(certificates).stream().map(
+                certificate -> new CloudDatabaseServerSslCertificate(ROOT, certificate)).collect(Collectors.toSet());
+
+        return new CloudDatabaseServerSslCertificates(setOfCertificates);
     }
 }

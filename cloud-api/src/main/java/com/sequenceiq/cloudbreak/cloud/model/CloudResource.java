@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.google.common.base.Preconditions;
@@ -184,6 +185,7 @@ public class CloudResource extends DynamicModel {
             return this;
         }
 
+        @JsonAlias({"parameters"})
         public Builder withParams(Map<String, Object> parameters) {
             this.parameters = parameters;
             return this;

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.DELETED;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.UPDATED;
+import static com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType.ROOT;
 import static java.util.Collections.emptyList;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -94,6 +96,20 @@ public class MockResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier) {
+        //return oldLaunchDbImpl(authenticatedContext, stack, persistenceNotifier);
+        return newLaunchDbImpl(authenticatedContext, stack, persistenceNotifier);
+    }
+
+    private List<CloudResourceStatus> newLaunchDbImpl(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
+        LOGGER.info("launch db on mock spi");
+        CloudResourceStatus[] cloudResourceStatuses = mockUrlFactory.get(authenticatedContext, "/db")
+                .post(Entity.entity(stack, MediaType.APPLICATION_JSON_TYPE), CloudResourceStatus[].class);
+        List<CloudResource> cl = Arrays.stream(cloudResourceStatuses).map(crs -> crs.getCloudResource()).collect(Collectors.toList());
+        persistenceNotifier.notifyAllocations(cl, authenticatedContext.getCloudContext());
+        return List.of(cloudResourceStatuses);
+    }
+
+    private List<CloudResourceStatus> oldLaunchDbImpl(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         List<CloudResource> cloudResources = List.of(
                 new Builder()
                         .withType(ResourceType.RDS_HOSTNAME)
@@ -117,11 +133,14 @@ public class MockResourceConnector implements ResourceConnector {
     @Override
     public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
             TargetMajorVersion targetMajorVersion) {
+        mockUrlFactory.get(authenticatedContext, "/db/upgrade")
+                .post(Entity.entity(targetMajorVersion.getMajorVersion(), MediaType.APPLICATION_JSON_TYPE));
     }
 
     @Override
     public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) {
+        mockUrlFactory.get(authenticatedContext, "/db/upgrade").put(Entity.entity(targetMajorVersion.getMajorVersion(), MediaType.APPLICATION_JSON_TYPE));
     }
 
     @Override
@@ -142,7 +161,14 @@ public class MockResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) {
-        return emptyList();
+        //return emptyList();
+        return newTerminateDatabaseServerImpl(authenticatedContext, stack, resources, persistenceNotifier, force);
+    }
+
+    private List<CloudResourceStatus> newTerminateDatabaseServerImpl(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) {
+        mockUrlFactory.get(authenticatedContext, "/db").delete();
+        return  emptyList();
     }
 
     @Override
@@ -265,22 +291,29 @@ public class MockResourceConnector implements ResourceConnector {
 
     @Override
     public String getDBStackTemplate() throws TemplatingNotSupportedException {
-        //throw new TemplatingDoesNotSupportedException();
         return "BestDbStackTemplateInTheWorld";
     }
 
     @Override
     public void startDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
-        throw new UnsupportedOperationException("Database server start operation is not supported for " + getClass().getName());
+        mockUrlFactory.get(authenticatedContext, "/db").put(Entity.entity(Boolean.TRUE, MediaType.APPLICATION_JSON_TYPE));
     }
 
     @Override
     public void stopDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
-        throw new UnsupportedOperationException("Database server stop operation is not supported for " + getClass().getName());
+        mockUrlFactory.get(authenticatedContext, "/db").put(Entity.entity(Boolean.FALSE, MediaType.APPLICATION_JSON_TYPE));
     }
 
     @Override
-    public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
-        throw new UnsupportedOperationException("Database server status lookup is not supported for " + getClass().getName());
+    public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        return mockUrlFactory.get(authenticatedContext, "/db")
+                .get(ExternalDatabaseStatus.class);
+    }
+
+    @Override
+    public CloudDatabaseServerSslCertificate getDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        String certificate = mockUrlFactory.get(authenticatedContext, "/db/activecertificate")
+                .get(String.class);
+        return new CloudDatabaseServerSslCertificate(ROOT, certificate);
     }
 }

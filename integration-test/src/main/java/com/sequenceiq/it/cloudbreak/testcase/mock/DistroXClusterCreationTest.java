@@ -51,7 +51,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
 
     private static final String IMAGE_CATALOG_ID = "f6e778fc-7f17-4535-9021-515351df3691";
 
-    private static final String MOCK_HOSTNAME = "mockrdshost";
+    private static final String MOCK_HOSTNAME = "mock_database";
 
     private static final String CM_FOR_DISTRO_X = "cm4dstrx";
 
