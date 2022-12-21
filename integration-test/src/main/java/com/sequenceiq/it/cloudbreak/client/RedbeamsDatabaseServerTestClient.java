@@ -6,16 +6,31 @@ import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerDeleteAction;
+import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerStartAction;
+import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerStopAction;
+import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerUpgradeAction;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 
 @Service
 public class RedbeamsDatabaseServerTestClient {
 
-    public Action<RedbeamsDatabaseServerTestDto, RedbeamsClient> createV4() {
+    public Action<RedbeamsDatabaseServerTestDto, RedbeamsClient> create() {
         return new RedbeamsDatabaseServerCreateAction();
     }
 
-    public Action<RedbeamsDatabaseServerTestDto, RedbeamsClient> deleteV4() {
+    public Action<RedbeamsDatabaseServerTestDto, RedbeamsClient> delete() {
         return new RedbeamsDatabaseServerDeleteAction();
+    }
+
+    public Action<RedbeamsDatabaseServerTestDto, RedbeamsClient> start() {
+        return new RedbeamsDatabaseServerStartAction();
+    }
+
+    public Action<RedbeamsDatabaseServerTestDto, RedbeamsClient> stop() {
+        return new RedbeamsDatabaseServerStopAction();
+    }
+
+    public Action<RedbeamsDatabaseServerTestDto, RedbeamsClient> upgrade() {
+        return new RedbeamsDatabaseServerUpgradeAction();
     }
 }

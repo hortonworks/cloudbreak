@@ -48,9 +48,38 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withName(databaseName)
                 .withClusterCrn(clusterCrn)
-                .when(redbeamsDatabaseServerTest.createV4())
+                .when(redbeamsDatabaseServerTest.create())
                 .await(Status.AVAILABLE)
-                .when(redbeamsDatabaseServerTest.deleteV4())
+                .when(redbeamsDatabaseServerTest.delete())
+                .await(Status.DELETE_COMPLETED)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a prepared database",
+            when = "when a database create request is sent with the same database name",
+            then = "the create should return a BadRequestException")
+    public void stopStartRedbeamsDatabaseServerTest(MockedTestContext testContext) {
+        String databaseName = resourcePropertyProvider().getName();
+        String clusterCrn = TestCrnGenerator.getDatalakeCrn(UUID.randomUUID().toString(), "cloudera");
+        testContext
+                .given(EnvironmentTestDto.class)
+                .withNetwork()
+                .withCreateFreeIpa(Boolean.FALSE)
+                .withName(resourcePropertyProvider().getEnvironmentName())
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(RedbeamsDatabaseServerTestDto.class)
+                .withName(databaseName)
+                .withClusterCrn(clusterCrn)
+                .when(redbeamsDatabaseServerTest.create())
+                .await(Status.AVAILABLE)
+                .when(redbeamsDatabaseServerTest.stop())
+                .await(Status.STOPPED)
+                .when(redbeamsDatabaseServerTest.start())
+                .await(Status.AVAILABLE)
+                .when(redbeamsDatabaseServerTest.delete())
                 .await(Status.DELETE_COMPLETED)
                 .validate();
     }
@@ -72,7 +101,7 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withName(databaseName)
                 .withClusterCrn(TestCrnGenerator.getEnvironmentCrn("res", "acc"))
-                .whenException(redbeamsDatabaseServerTest.createV4(), BadRequestException.class,
+                .whenException(redbeamsDatabaseServerTest.create(), BadRequestException.class,
                         expectedMessage(".*Crn provided: crn:cdp:environments:us-west-1:acc:environment:res has invalid resource type or" +
                                 " service type. Denied service type / resource type pairs: [(]environments,environment[)].*"))
                 .validate();

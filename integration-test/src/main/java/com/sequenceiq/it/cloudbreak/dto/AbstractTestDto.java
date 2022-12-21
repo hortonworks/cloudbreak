@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.context.TestErrorLog;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ClouderaManagerEndpoints;
+import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.DatabaseEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ExperienceEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.FreeIPAEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.SaltEndpoints;
@@ -403,6 +404,13 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
             return new FreeIPAEndpoints<>((T) this, (MockedTestContext) getTestContext());
         }
         throw new TestFailException("mockFreeIpa is supported by MockedTestContext only.");
+    }
+
+    public DatabaseEndpoints<T> mockCloudDatabase() {
+        if (getTestContext() instanceof MockedTestContext) {
+            return new DatabaseEndpoints<>((T) this, (MockedTestContext) getTestContext());
+        }
+        throw new TestFailException("mockCloudDatabase is supported by MockedTestContext only");
     }
 
     public U getClientForCleanup() {
