@@ -21,8 +21,9 @@ import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModifica
 import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationFailedEvent;
-import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
+import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationHandlerSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.flow.core.ActionTest;
 
 class ProxyConfigModificationFailedStateActionTest extends ActionTest {
@@ -32,6 +33,8 @@ class ProxyConfigModificationFailedStateActionTest extends ActionTest {
     private static final String ENV_CRN = "env-crn";
 
     private static final String PROXY_CRN = "proxy-crn";
+
+    private static final String PROXY_NAME = "proxy-name";
 
     private static final String EXCEPTION_MESSAGE = "exception-message";
 
@@ -54,7 +57,9 @@ class ProxyConfigModificationFailedStateActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        context = new EnvProxyModificationContext(flowParameters, null, null);
+        ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setName(PROXY_NAME);
+        context = new EnvProxyModificationContext(flowParameters, proxyConfig, null);
         payload = new EnvProxyModificationFailedEvent(EnvProxyModificationDefaultEvent.builder()
                 .withResourceId(1L)
                 .withResourceName("env")
@@ -68,9 +73,9 @@ class ProxyConfigModificationFailedStateActionTest extends ActionTest {
         underTest.doExecute(context, payload, Map.of());
 
         verify(environmentStatusUpdateService).updateFailedEnvironmentStatusAndNotify(context, payload, STATUS,
-                ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED, List.of(EXCEPTION_MESSAGE),
+                ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED, List.of(PROXY_NAME, EXCEPTION_MESSAGE),
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FAILED_STATE);
-        verifySendEvent(context, EnvProxyModificationStateSelectors.HANDLE_FAILED_MODIFY_PROXY_EVENT.event(), payload);
+        verifySendEvent(context, EnvProxyModificationHandlerSelectors.REVERT_PROXY_ASSOCIATION_HANDLER_EVENT.event(), payload);
         verify(usageReporter).cdpEnvironmentProxyConfigEditEvent(usageEventCaptor.capture());
         Assertions.assertThat(usageEventCaptor.getValue())
                 .returns(ENV_CRN, UsageProto.CDPEnvironmentProxyConfigEditEvent::getEnvironmentCrn)

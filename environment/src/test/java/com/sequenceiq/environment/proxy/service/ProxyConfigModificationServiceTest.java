@@ -79,7 +79,7 @@ class ProxyConfigModificationServiceTest {
 
         assertThatThrownBy(() -> underTest.validateModify(environment))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Proxy config editing is not enabled in your account");
+                .hasMessage("Modifying proxy config is not enabled in your account");
     }
 
     @Test
@@ -88,7 +88,7 @@ class ProxyConfigModificationServiceTest {
 
         assertThatThrownBy(() -> underTest.validateModify(environment))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Proxy config editing is not supported when FreeIpa is not available");
+                .hasMessage("Modifying proxy config is not supported when FreeIpa is not available");
     }
 
     @Test
@@ -97,7 +97,7 @@ class ProxyConfigModificationServiceTest {
 
         assertThatThrownBy(() -> underTest.validateModify(environment))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Proxy config editing is not supported when Data Lake is not running");
+                .hasMessage("Modifying proxy config is not supported when Data Lake is not running");
     }
 
     @Test
@@ -108,7 +108,7 @@ class ProxyConfigModificationServiceTest {
 
         assertThatThrownBy(() -> underTest.validateModify(environment))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Proxy config editing is not supported when not all Data Hubs are available");
+                .hasMessage("Modifying proxy config is not supported when any of the Data Hubs are not available");
     }
 
     @Test

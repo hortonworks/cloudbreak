@@ -59,4 +59,8 @@ public abstract class AbstractEnvProxyModificationAction<P extends ProxyConfigMo
     protected EnvironmentStatus getFailureEnvironmentStatus() {
         return EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED;
     }
+
+    protected String getProxyConfigName(EnvProxyModificationContext context) {
+        return context.getProxyConfig() != null ? context.getProxyConfig().getName() : "no proxy";
+    }
 }

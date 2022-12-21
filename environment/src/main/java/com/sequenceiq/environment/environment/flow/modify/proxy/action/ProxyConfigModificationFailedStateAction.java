@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationContext;
 import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationFailedEvent;
-import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
+import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationHandlerSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 
 @Component("ProxyConfigModificationFailedStateAction")
@@ -37,11 +37,11 @@ public class ProxyConfigModificationFailedStateAction extends AbstractEnvProxyMo
         LOGGER.warn("Env proxy modification flow finished with an error", payload.getException());
 
         environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
-                ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED, List.of(payload.getException().getMessage()),
+                ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED, List.of(getProxyConfigName(context), payload.getException().getMessage()),
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FAILED_STATE);
         reportFailure(payload);
 
-        sendEvent(context, EnvProxyModificationStateSelectors.HANDLE_FAILED_MODIFY_PROXY_EVENT.event(), payload);
+        sendEvent(context, EnvProxyModificationHandlerSelectors.REVERT_PROXY_ASSOCIATION_HANDLER_EVENT.event(), payload);
     }
 
     private void reportFailure(EnvProxyModificationFailedEvent payload) {

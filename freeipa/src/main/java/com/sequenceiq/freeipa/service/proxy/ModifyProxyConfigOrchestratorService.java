@@ -75,7 +75,10 @@ public class ModifyProxyConfigOrchestratorService {
         NodeHealthDetails nodeHealthDetails = healthDetailsService.getInstanceHealthDetails(stack, instance);
         if (!nodeHealthDetails.getStatus().isAvailable()) {
             String issues = String.join("; ", nodeHealthDetails.getIssues());
-            String message = String.format("Health check failed after proxy config modification for instance %s: %s", instance.getDiscoveryFQDN(), issues);
+            String message = String.format(
+                    "Health check failed on instance %s after proxy configuration modification. " +
+                            "Please either fix your proxy configuration settings and try the operation again, or repair the failed instance. Details: %s",
+                    instance.getInstanceId(), issues);
             LOGGER.warn(message);
             throw new CloudbreakOrchestratorFailedException(message);
         }
