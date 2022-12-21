@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.modify.proxy.action;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
@@ -59,14 +59,13 @@ class ProxyConfigModificationFinishedStateActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        context = new EnvProxyModificationContext(flowParameters, previousProxyConfig);
-        when(environmentDto.getResourceCrn()).thenReturn(ENV_CRN);
-        when(proxyConfig.getResourceCrn()).thenReturn(PROXY_CRN);
+        context = new EnvProxyModificationContext(flowParameters, proxyConfig, previousProxyConfig);
+        lenient().when(environmentDto.getResourceCrn()).thenReturn(ENV_CRN);
+        lenient().when(proxyConfig.getResourceCrn()).thenReturn(PROXY_CRN);
         payload = EnvProxyModificationDefaultEvent.builder()
                 .withSelector("selector")
-                .withEnvironmentDto(environmentDto)
-                .withProxyConfig(proxyConfig)
-                .withPreviousProxyConfig(previousProxyConfig)
+                .withResourceCrn(ENV_CRN)
+                .withProxyConfigCrn(PROXY_CRN)
                 .build();
     }
 

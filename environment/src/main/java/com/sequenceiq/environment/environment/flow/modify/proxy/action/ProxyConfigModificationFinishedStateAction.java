@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.modify.proxy.action;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,16 +38,16 @@ public class ProxyConfigModificationFinishedStateAction extends AbstractEnvProxy
 
         environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.AVAILABLE,
                 ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FINISHED, EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FINISHED_STATE);
-        reportSuccess(context, payload);
+        reportSuccess(payload);
 
         sendEvent(context, EnvProxyModificationStateSelectors.FINALIZE_MODIFY_PROXY_EVENT.selector(), payload);
     }
 
-    private void reportSuccess(EnvProxyModificationContext context, EnvProxyModificationDefaultEvent payload) {
+    private void reportSuccess(EnvProxyModificationDefaultEvent payload) {
         UsageProto.CDPEnvironmentProxyConfigEditEvent event = UsageProto.CDPEnvironmentProxyConfigEditEvent.newBuilder()
                 .setEnvironmentCrn(payload.getResourceCrn())
-                .setProxyConfigCrn(getProxyConfigCrn(payload.getProxyConfig()))
-                .setPreviousProxyConfigCrn(getProxyConfigCrn(context.getPreviousProxyConfig()))
+                .setProxyConfigCrn(Objects.requireNonNullElse(payload.getProxyConfigCrn(), ""))
+                .setPreviousProxyConfigCrn(Objects.requireNonNullElse(payload.getPreviousProxyConfigCrn(), ""))
                 .setResult(UsageProto.CDPEnvironmentProxyConfigEditResult.Value.SUCCESS)
                 .build();
         usageReporter.cdpEnvironmentProxyConfigEditEvent(event);

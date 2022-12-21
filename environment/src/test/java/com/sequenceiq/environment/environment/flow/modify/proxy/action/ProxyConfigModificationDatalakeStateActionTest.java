@@ -41,10 +41,11 @@ class ProxyConfigModificationDatalakeStateActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        context = new EnvProxyModificationContext(flowParameters, null);
+        context = new EnvProxyModificationContext(flowParameters, null, null);
         payload = EnvProxyModificationDefaultEvent.builder()
-                .withPreviousProxyConfig(null)
-                .withEnvironmentDto(environmentDto)
+                .withProxyConfigCrn(null)
+                .withPreviousProxyConfigCrn(null)
+                .withResourceId(1L)
                 .build();
         when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any())).thenReturn(environmentDto);
     }
@@ -56,9 +57,7 @@ class ProxyConfigModificationDatalakeStateActionTest extends ActionTest {
         verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(context, payload,
                 EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_DATALAKE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_DATALAKE_STARTED,
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_DATALAKE_STATE);
-        String selector = EnvProxyModificationHandlerSelectors.TRACK_DATALAKE_PROXY_MODIFICATION_EVENT.selector();
-        verifySendEvent(context, selector,
-                new EnvProxyModificationDefaultEvent(selector, environmentDto, payload.getProxyConfig(), payload.getPreviousProxyConfig(), payload.accepted()));
+        verifySendEvent(EnvProxyModificationHandlerSelectors.TRACK_DATALAKE_PROXY_MODIFICATION_EVENT.selector());
     }
 
 }

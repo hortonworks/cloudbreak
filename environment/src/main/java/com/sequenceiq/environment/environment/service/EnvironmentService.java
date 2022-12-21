@@ -471,11 +471,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         }
     }
 
-    public EnvironmentDto updateProxyConfig(Long environmentId, ProxyConfig proxyConfig) {
+    public void updateProxyConfig(Long environmentId, ProxyConfig proxyConfig) {
         Environment environment = findEnvironmentByIdOrThrow(environmentId);
         environment.setProxyConfig(proxyConfig);
-        Environment savedEnvironment = save(environment);
-        return environmentDtoConverter.environmentToDto(savedEnvironment);
+        save(environment);
     }
 
 }

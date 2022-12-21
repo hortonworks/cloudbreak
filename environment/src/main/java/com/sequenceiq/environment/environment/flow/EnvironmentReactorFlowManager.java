@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_INITIALIZATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.chain.FlowChainTriggers.ENV_DELETE_CLUSTERS_TRIGGER_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
@@ -154,9 +155,11 @@ public class EnvironmentReactorFlowManager {
         EnvProxyModificationDefaultEvent envProxyModificationEvent =
                 EnvProxyModificationDefaultEvent.builder()
                         .withSelector(EnvProxyModificationStateSelectors.MODIFY_PROXY_START_EVENT.selector())
-                        .withEnvironmentDto(environment)
-                        .withProxyConfig(proxyConfig)
-                        .withPreviousProxyConfig(environment.getProxyConfig())
+                        .withResourceId(environment.getId())
+                        .withResourceName(environment.getName())
+                        .withResourceCrn(environment.getResourceCrn())
+                        .withProxyConfigCrn(getIfNotNull(proxyConfig, ProxyConfig::getResourceCrn))
+                        .withPreviousProxyConfigCrn(getIfNotNull(environment.getProxyConfig(), ProxyConfig::getResourceCrn))
                         .build();
         return eventSender.sendEvent(envProxyModificationEvent, new Event.Headers(getFlowTriggerUsercrn(ThreadBasedUserCrnProvider.getUserCrn())));
     }

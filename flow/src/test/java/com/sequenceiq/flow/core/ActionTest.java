@@ -66,6 +66,10 @@ public abstract class ActionTest {
         verify(eventBus).notify(anyString(), any(Event.class));
     }
 
+    protected <C extends CommonContext> void verifySendEvent(String selector) {
+        verify(eventBus).notify(eq(selector), any(Event.class));
+    }
+
     protected <C extends CommonContext, E> void verifySendEvent(C context, String selector, E event) {
         verify(eventBus).notify(eq(selector), eventCaptor.capture());
         Event<?> capturedEvent = eventCaptor.getValue();

@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.flow.modify.proxy.handler;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,7 +11,6 @@ import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyMo
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
-import com.sequenceiq.environment.proxy.domain.ProxyConfigBase;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -39,27 +36,20 @@ public class ProxyModificationOnFreeipaHandler extends EventSenderAwareHandler<E
         EnvProxyModificationDefaultEvent eventData = event.getData();
         try {
             LOGGER.info("Starting and waiting for freeipa modify proxy config");
-            String previousProxyCrn = Optional.ofNullable(eventData.getPreviousProxyConfig())
-                    .map(ProxyConfigBase::getResourceCrn)
-                    .orElse(null);
-            freeIpaPollerService.waitForModifyProxyConfig(eventData.getResourceId(), eventData.getResourceCrn(), previousProxyCrn);
+            freeIpaPollerService.waitForModifyProxyConfig(eventData.getResourceId(), eventData.getResourceCrn(), eventData.getPreviousProxyConfigCrn());
 
             EnvProxyModificationDefaultEvent envProxyModificationEvent = EnvProxyModificationDefaultEvent.builder()
                     .withSelector(EnvProxyModificationStateSelectors.MODIFY_PROXY_DATALAKE_EVENT.selector())
-                    .withEnvironmentDto(eventData.getEnvironmentDto())
-                    .withProxyConfig(eventData.getProxyConfig())
-                    .withPreviousProxyConfig(eventData.getPreviousProxyConfig())
+                    .withResourceCrn(eventData.getResourceCrn())
+                    .withResourceId(eventData.getResourceId())
+                    .withResourceName(eventData.getResourceName())
+                    .withProxyConfigCrn(eventData.getProxyConfigCrn())
+                    .withPreviousProxyConfigCrn(eventData.getPreviousProxyConfigCrn())
                     .build();
             eventSender().sendEvent(envProxyModificationEvent, event.getHeaders());
         } catch (Exception e) {
-            EnvProxyModificationFailedEvent envProxyModificationFailedEvent = EnvProxyModificationFailedEvent.builder()
-                    .withEnvironmentDto(eventData.getEnvironmentDto())
-                    .withProxyConfig(eventData.getProxyConfig())
-                    .withPreviousProxyConfig(eventData.getPreviousProxyConfig())
-                    .withEnvironmentStatus(EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED)
-                    .withException(e)
-                    .build();
-            eventSender().sendEvent(envProxyModificationFailedEvent, event.getHeaders());
+            eventSender().sendEvent(
+                    new EnvProxyModificationFailedEvent(eventData, e, EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED), event.getHeaders());
         }
     }
 }

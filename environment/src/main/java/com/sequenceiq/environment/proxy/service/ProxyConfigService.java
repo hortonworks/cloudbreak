@@ -103,9 +103,19 @@ public class ProxyConfigService implements CompositeAuthResourcePropertyProvider
                 .orElseThrow(notFound("No proxy config found with name", name));
     }
 
+    public ProxyConfig getByCrn(String crn) {
+        String accountId = Crn.safeFromString(crn).getAccountId();
+        return getByCrnForAccountId(crn, accountId);
+    }
+
     public ProxyConfig getByCrnForAccountId(String crn, String accountId) {
         return proxyConfigRepository.findByResourceCrnInAccount(crn, accountId)
                 .orElseThrow(notFound("No proxy config found with crn", crn));
+    }
+
+    public Optional<ProxyConfig> getOptionalByEnvironmentCrn(String environmentCrn) {
+        String accountId = Crn.safeFromString(environmentCrn).getAccountId();
+        return proxyConfigRepository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId);
     }
 
     public ProxyConfig getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
