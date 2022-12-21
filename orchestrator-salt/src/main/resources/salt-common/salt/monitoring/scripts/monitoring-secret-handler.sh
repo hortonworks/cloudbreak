@@ -18,6 +18,11 @@ function main() {
   local pwd_file=$2
   local output_file=$3
   local pwd=$(cat $pwd_file | tr -d '\n')
+
+  if ! command -v htpasswd &> /dev/null; then
+    yes | yum install httpd-tools &> /dev/null
+  fi
+
   if [[ -f "$output_file" ]]; then
     htpasswd -vb $output_file $username $pwd > /dev/null 2>&1
     local check_result="$?"
