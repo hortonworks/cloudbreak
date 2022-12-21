@@ -90,11 +90,8 @@ public class DistroXImagesTests extends AbstractE2ETest {
                     selectedImageID.set(cloudProvider.getLatestBaseImageID(tc, dto, client));
                     return dto;
                 })
-                .given(imageSettings, DistroXImageTestDto.class)
-                    .withImageCatalog(cloudProvider.getImageCatalogName())
-                    .withImageId(selectedImageID.get())
-                .given(distrox, DistroXTestDto.class)
-                    .withImageSettings(imageSettings)
+                .given(imageSettings, DistroXImageTestDto.class).withImageCatalog(cloudProvider.getImageCatalogName()).withImageId(selectedImageID.get())
+                .given(distrox, DistroXTestDto.class).withImageSettings(imageSettings)
                 .when(distroXTestClient.create(), key(distrox))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()

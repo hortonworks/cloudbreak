@@ -1,35 +1,28 @@
 package com.sequenceiq.cloudbreak.util;
 
-import java.security.SecureRandom;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
 public class PasswordUtil {
 
-    private static final int PWD_LENGTH = 26;
+    private static final int PWD_LENGTH = 128;
 
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final int RADIX = 32;
 
     private PasswordUtil() {
     }
 
     public static String generatePassword() {
-        return getRandomLettersAndNumbers(PWD_LENGTH);
-    }
-
-    public static String getRandomLettersAndNumbers(int count) {
-        return generate(count, true, true);
-    }
-
-    public static String getRandomAlphabetic(int count) {
-        return generate(count, true, false);
-    }
-
-    public static String getRandomNumeric(int count) {
-        return generate(count, false, true);
-    }
-
-    private static String generate(int count, boolean letters, boolean numbers) {
-        return RandomStringUtils.random(count, 0, 0, letters, numbers, null, SECURE_RANDOM);
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            String raw = RandomStringUtils.randomAscii(PWD_LENGTH);
+            byte[] digest = messageDigest.digest(raw.getBytes());
+            return new BigInteger(1, digest).toString(RADIX);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

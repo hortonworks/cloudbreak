@@ -66,6 +66,7 @@ public class TemplateDecorator {
                     LOGGER.debug("No VolumeParameterConfig found, which might be normal for platforms like YARN");
                     config = VolumeParameterConfig.EMPTY;
                 }
+
                 if (config.volumeParameterType() != null) {
                     if (volumeTemplate.getVolumeCount() == null) {
                         volumeTemplate.setVolumeCount(config.maximumNumber());
@@ -76,6 +77,7 @@ public class TemplateDecorator {
                 }
             }
         }
+
         return template;
     }
 

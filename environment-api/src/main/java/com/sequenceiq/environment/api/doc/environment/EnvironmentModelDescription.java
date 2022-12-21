@@ -30,16 +30,14 @@ public class EnvironmentModelDescription {
     public static final String GCP_SPECIFIC_PARAMETERS = "GCP-specific properties of the network";
     public static final String YARN_SPECIFIC_PARAMETERS = "Yarn-specific properties of the network";
     public static final String MOCK_PARAMETERS = "Mock-specific properties of the network";
-    public static final String AWS_VPC_ID = "AWS VPC ID of the specified networks";
+    public static final String AWS_VPC_ID = "AWS VPC id of the specified networks";
     public static final String GCP_NETWORK_ID = "Gcp network id";
     public static final String GCP_SHARED_PROJECT_ID = "Gcp shared project id";
     public static final String GCP_NO_PUBLIC_IP = "Gcp no public ip";
     public static final String GCP_NO_FIREWALL_RULES = "Gcp no firewall rules";
 
     public static final String AZURE_RESOURCE_GROUP_NAME = "Azure Resource Group Name of the specified network";
-    public static final String AZURE_PRIVATE_DNS_ZONE_ID = "Full resource ID of an existing Azure private DNS zone";
-
-    public static final String AZURE_AKS_PRIVATE_DNS_ZONE_ID = "Full resource ID of an existing Azure private DNS zone for a private AKS cluster";
+    public static final String AZURE_PRIVATE_DNS_ZONE_ID = "Full resource id of an existing azure private DNS zone";
     public static final String AZURE_NETWORK_ID = "Azure Network ID of the specified network";
     public static final String AZURE_NO_PUBLIC_IP = "Azure Network is private if this flag is true";
 
@@ -113,7 +111,7 @@ public class EnvironmentModelDescription {
     public static final String YARN_PARAMETERS = "YARN Specific parameters.";
 
     public static final String RESOURCE_GROUP_PARAMETERS = "Azure resource group parameters.";
-    public static final String EXISTING_RESOURCE_GROUP_NAME = "Name of an existing Azure resource group.";
+    public static final String EXISTING_RESOURCE_GROUP_NAME = "Name of an existing azure resource group.";
     public static final String RESOURCE_GROUP_NAME = "Name of the Azure resource group.";
     public static final String RESOURCE_GROUP_USAGE = "Resource group usage: single resource group for all resources where possible "
             + "or use multiple resource groups.";

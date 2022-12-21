@@ -1,13 +1,11 @@
 package com.sequenceiq.redbeams.flow.redbeams.start;
 
-import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.REDBEAMS_CERT_ROTATE_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.REDBEAMS_START_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.REDBEAMS_START_FAILED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.REDBEAMS_START_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.REDBEAMS_START_FINISHED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.START_DATABASE_SERVER_FAILED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.START_DATABASE_SERVER_FINISHED_EVENT;
-import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState.CERT_ROTATE_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState.FINAL_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState.INIT_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState.REDBEAMS_START_FAILED_STATE;
@@ -31,9 +29,7 @@ public class RedbeamsStartFlowConfing extends AbstractFlowConfiguration<Redbeams
             new Transition.Builder<RedbeamsStartState, RedbeamsStartEvent>().defaultFailureEvent(REDBEAMS_START_FAILED_EVENT)
                     .from(INIT_STATE).to(START_DATABASE_SERVER_STATE).event(REDBEAMS_START_EVENT)
                     .defaultFailureEvent()
-                    .from(START_DATABASE_SERVER_STATE).to(CERT_ROTATE_STATE).event(REDBEAMS_CERT_ROTATE_EVENT)
-                    .failureEvent(START_DATABASE_SERVER_FAILED_EVENT)
-                    .from(CERT_ROTATE_STATE).to(REDBEAMS_START_FINISHED_STATE).event(START_DATABASE_SERVER_FINISHED_EVENT)
+                    .from(START_DATABASE_SERVER_STATE).to(REDBEAMS_START_FINISHED_STATE).event(START_DATABASE_SERVER_FINISHED_EVENT)
                     .failureEvent(START_DATABASE_SERVER_FAILED_EVENT)
                     .from(REDBEAMS_START_FINISHED_STATE).to(FINAL_STATE).event(REDBEAMS_START_FINISHED_EVENT).defaultFailureEvent()
                     .build();

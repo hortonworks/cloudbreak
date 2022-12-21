@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
@@ -81,9 +80,6 @@ public class DistroXUpgradeAvailabilityServiceTest {
 
     @Mock
     private RuntimeVersionService runtimeVersionService;
-
-    @Mock
-    private CurrentImageUsageCondition currentImageUsageCondition;
 
     @InjectMocks
     private DistroXUpgradeAvailabilityService underTest;
@@ -128,7 +124,6 @@ public class DistroXUpgradeAvailabilityServiceTest {
         UpgradeV4Request request = new UpgradeV4Request();
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class), mock(ImageInfoV4Response.class)));
-        response.setCurrent(new ImageInfoV4Response());
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
 
@@ -217,7 +212,6 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image3 = new ImageInfoV4Response();
         image3.setCreated(5L);
         response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(new ImageInfoV4Response());
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
 
@@ -242,7 +236,6 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image8 = createImageResponse(8L, "C");
         ImageInfoV4Response image9 = createImageResponse(6L, "C");
         response.setUpgradeCandidates(List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9));
-        response.setCurrent(new ImageInfoV4Response());
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
 
@@ -269,7 +262,6 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image8 = createImageResponse(8L, "C");
         ImageInfoV4Response image9 = createImageResponse(6L, "C");
         response.setUpgradeCandidates(List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9));
-        response.setCurrent(new ImageInfoV4Response());
         StackView stackView = new StackView();
         ClusterView clusterView = new ClusterView();
         clusterView.setId(1L);
@@ -293,7 +285,6 @@ public class DistroXUpgradeAvailabilityServiceTest {
         UpgradeV4Request request = new UpgradeV4Request();
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of());
-        response.setCurrent(new ImageInfoV4Response());
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
 
@@ -314,7 +305,6 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image2 = createImageResponse(8L, "7.3.0");
         ImageInfoV4Response image3 = createImageResponse(6L, "7.4.0");
         response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(new ImageInfoV4Response());
         StackView stackView = new StackView();
         ClusterView clusterView = new ClusterView();
         clusterView.setId(1L);
@@ -345,7 +335,6 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image2 = createImageResponse(8L, "7.3.0");
         ImageInfoV4Response image3 = createImageResponse(6L, "7.4.0");
         response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(new ImageInfoV4Response());
         StackView stackView = new StackView();
         ClusterView clusterView = new ClusterView();
         clusterView.setId(1L);

@@ -6,12 +6,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -65,10 +65,11 @@ public class TemplateModelContextBuilder {
         return this;
     }
 
-    public TemplateModelContextBuilder withRdsViews(Iterable<RdsView> rdsViews) {
-        for (RdsView rdsView : rdsViews) {
-            if (rdsView != null) {
-                String componentName = rdsView.getType().toLowerCase(Locale.ROOT);
+    public TemplateModelContextBuilder withRdsConfigs(Iterable<RdsConfigWithoutCluster> rdsConfigs) {
+        for (RdsConfigWithoutCluster rdsConfig : rdsConfigs) {
+            if (rdsConfig != null) {
+                RdsView rdsView = new RdsView(rdsConfig);
+                String componentName = rdsConfig.getType().toLowerCase();
                 rds.put(componentName, rdsView);
             }
         }

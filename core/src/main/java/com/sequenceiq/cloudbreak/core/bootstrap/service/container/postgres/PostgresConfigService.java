@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider.RedbeamsDbSslDetails;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -63,12 +62,10 @@ public class PostgresConfigService {
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto) {
         Map<String, Object> postgresConfig = initPostgresConfig(stackDto);
 
-        RedbeamsDbSslDetails sslDetails = dbCertificateProvider.getRelatedSslCerts(stackDto);
-        Set<String> rootCerts = sslDetails.getSslCerts();
+        Set<String> rootCerts = dbCertificateProvider.getRelatedSslCerts(stackDto);
         if (CollectionUtils.isNotEmpty(rootCerts)) {
             Map<String, String> rootSslCertsMap = Map.of("ssl_certs", String.join("\n", rootCerts),
-                    "ssl_certs_file_path", dbCertificateProvider.getSslCertsFilePath(),
-                    "ssl_enabled", String.valueOf(sslDetails.isSslEnabledForStack()));
+                    "ssl_certs_file_path", dbCertificateProvider.getSslCertsFilePath());
             servicePillar.put(POSTGRES_COMMON, new SaltPillarProperties("/postgresql/root-certs.sls",
                     singletonMap("postgres_root_certs", rootSslCertsMap)));
         }

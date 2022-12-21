@@ -15,8 +15,6 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,7 +26,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider.RedbeamsDbSslDetails;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
 
@@ -77,8 +74,6 @@ class PostgresConfigServiceTest {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         when(stack.getStack()).thenReturn(new Stack());
 
-        when(dbCertificateProvider.getRelatedSslCerts(stack)).thenReturn(new RedbeamsDbSslDetails(Set.of(), false));
-
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
@@ -90,8 +85,6 @@ class PostgresConfigServiceTest {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         ReflectionTestUtils.setField(underTest, "databasesReusedDuringRecovery", List.of());
         when(stack.getStack()).thenReturn(new Stack());
-
-        when(dbCertificateProvider.getRelatedSslCerts(stack)).thenReturn(new RedbeamsDbSslDetails(Set.of(), false));
 
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
@@ -105,8 +98,6 @@ class PostgresConfigServiceTest {
         Stack stackView = new Stack();
         stackView.setExternalDatabaseEngineVersion(DBVERSION);
         when(stack.getStack()).thenReturn(stackView);
-
-        when(dbCertificateProvider.getRelatedSslCerts(stack)).thenReturn(new RedbeamsDbSslDetails(Set.of(), false));
 
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
@@ -124,15 +115,14 @@ class PostgresConfigServiceTest {
         assertThat(reusedDatabases).containsOnly(entry("recovery_reused_databases", List.of("HIVE")), entry(POSTGRES_VERSION, DBVERSION));
     }
 
-    @ParameterizedTest(name = "sslEnabledForStack={0}")
-    @ValueSource(booleans = {false, true})
-    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabled(boolean sslEnabledForStack) {
+    @Test
+    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabled() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         Set<String> rootCerts = new LinkedHashSet<>();
         rootCerts.add("cert1");
         rootCerts.add("cert2");
-        when(dbCertificateProvider.getRelatedSslCerts(stack)).thenReturn(new RedbeamsDbSslDetails(rootCerts, sslEnabledForStack));
+        when(dbCertificateProvider.getRelatedSslCerts(stack)).thenReturn(rootCerts);
         when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         Stack stackView = new Stack();
         stackView.setExternalDatabaseEngineVersion(DBVERSION);
@@ -150,8 +140,7 @@ class PostgresConfigServiceTest {
 
         Map<String, String> rootSslCertsMap = (Map<String, String>) properties.get("postgres_root_certs");
         assertThat(rootSslCertsMap).isNotNull();
-        assertThat(rootSslCertsMap).containsOnly(entry("ssl_certs", "cert1\ncert2"), entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
-                entry("ssl_enabled", String.valueOf(sslEnabledForStack)));
+        assertThat(rootSslCertsMap).containsOnly(entry("ssl_certs", "cert1\ncert2"), entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH));
     }
 
 }

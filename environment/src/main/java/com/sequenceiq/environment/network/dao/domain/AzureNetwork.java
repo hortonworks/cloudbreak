@@ -14,8 +14,6 @@ public class AzureNetwork extends BaseNetwork {
 
     private String databasePrivateDnsZoneId;
 
-    private String aksPrivateDnsZoneId;
-
     @Override
     public String getNetworkId() {
         return networkId;
@@ -49,14 +47,6 @@ public class AzureNetwork extends BaseNetwork {
         this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     }
 
-    public String getAksPrivateDnsZoneId() {
-        return aksPrivateDnsZoneId;
-    }
-
-    public void setAksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
-        this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
-    }
-
     @Override
     public String toString() {
         return "AzureNetwork{" +
@@ -64,7 +54,6 @@ public class AzureNetwork extends BaseNetwork {
                 ", resourceGroupName='" + resourceGroupName + '\'' +
                 ", noPublicIp=" + noPublicIp +
                 ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
-                ", aksPrivateDnsZoneId='" + aksPrivateDnsZoneId + '\'' +
                 "} " + super.toString();
     }
 }

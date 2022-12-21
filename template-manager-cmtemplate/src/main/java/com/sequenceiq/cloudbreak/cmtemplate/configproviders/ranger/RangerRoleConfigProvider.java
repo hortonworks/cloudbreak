@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -150,7 +151,8 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private void addDbSslConfigsIfNeeded(RdsView rangerRdsView, List<ApiClusterTemplateConfig> configList, String cmVersion) {
         if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_2) && rangerRdsView.isUseSsl()) {
-            configList.add(config(RANGER_ADMIN_SITE_XML_ROLE_SAFETY_VALVE, getSafetyValveProperty(RANGER_JPA_JDBC_URL, rangerRdsView.getConnectionURL())));
+            String escapedConnectionURL = StringEscapeUtils.escapeXml10(rangerRdsView.getConnectionURL());
+            configList.add(config(RANGER_ADMIN_SITE_XML_ROLE_SAFETY_VALVE, getSafetyValveProperty(RANGER_JPA_JDBC_URL, escapedConnectionURL)));
         }
     }
 

@@ -21,7 +21,7 @@ public class DistroXScaleV1Request implements JsonEntity {
     @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String group;
 
-    @NotNull(message = "desiredCount must not be null.")
+    @NotNull
     @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer desiredCount;
 

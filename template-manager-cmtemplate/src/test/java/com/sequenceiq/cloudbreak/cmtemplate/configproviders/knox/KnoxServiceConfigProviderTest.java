@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -20,10 +19,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 public class KnoxServiceConfigProviderTest {
 
@@ -39,39 +38,9 @@ public class KnoxServiceConfigProviderTest {
         Assert.assertTrue(underTest.getServiceType().equals(KNOX));
     }
 
-    @ParameterizedTest(name = "{index}: check knox properties cm version {0} and cdh version {1} will produce {2} property")
-    @MethodSource("cmCdhCombinationsRoleConfigs")
-    public void testGetRoleConfigsShouldReturnEmptyList(String cdhVersion, String cmVersion, boolean ssl,
-        int numberOfProperties, boolean sslPresented) {
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
-        BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", blueprintTextProcessor);
-        RdsView rdsConfig = mock(RdsView.class);
-        when(rdsConfig.getConnectionPassword()).thenReturn("pw");
-        when(rdsConfig.getConnectionUserName()).thenReturn("usr");
-        when(rdsConfig.isUseSsl()).thenReturn(ssl);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.KNOX_GATEWAY.name());
-        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://somehost.com:5432/dbName");
-        TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
-                .withBlueprintView(blueprintView)
-                .withRdsSslCertificateFilePath("file://path")
-                .withRdsViews(Set.of(rdsConfig))
-                .withProductDetails(new ClouderaManagerRepo().withVersion(cmVersion),
-                        List.of(new ClouderaManagerProduct()
-                                .withVersion(cdhVersion)
-                                .withName("CDH")))
-                .build();
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", source);
-
-        Optional<ApiClusterTemplateConfig> sslOptional = roleConfigs
-                .stream()
-                .filter(e -> e.getName().equals("gateway_database_ssl_enabled"))
-                .findFirst();
-        if (sslPresented) {
-            Assert.assertTrue(sslOptional.isPresent());
-        } else {
-            Assert.assertTrue(sslOptional.isEmpty());
-        }
-        Assert.assertTrue(roleConfigs.size() == numberOfProperties);
+    @Test
+    public void testGetRoleConfigsShouldReturnEmptyList() {
+        Assert.assertTrue(underTest.getRoleConfigs("", null).isEmpty());
     }
 
     @Test
@@ -93,7 +62,7 @@ public class KnoxServiceConfigProviderTest {
         CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", blueprintTextProcessor);
-        RdsView rdsConfig = mock(RdsView.class);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
         when(rdsConfig.getConnectionPassword()).thenReturn("pw");
         when(rdsConfig.getConnectionUserName()).thenReturn("usr");
         when(rdsConfig.getType()).thenReturn(DatabaseType.KNOX_GATEWAY.name());
@@ -101,7 +70,7 @@ public class KnoxServiceConfigProviderTest {
         TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withRdsSslCertificateFilePath("file://path")
-                .withRdsViews(Set.of(rdsConfig))
+                .withRdsConfigs(Set.of(rdsConfig))
                 .withProductDetails(new ClouderaManagerRepo().withVersion(cmVersion),
                         List.of(new ClouderaManagerProduct()
                                 .withVersion(cdhVersion)
@@ -124,25 +93,6 @@ public class KnoxServiceConfigProviderTest {
                 { "7.2.8",                          "7.4.2", 1 },
                 { "7.2.8",                          "7.4.1", 1 },
                 { "7.2.9",                          "7.4.2", 1 },
-        };
-    }
-
-    static Object[][] cmCdhCombinationsRoleConfigs() {
-        return new Object[][]{
-                { "7.2.10",                         "7.4.2", true,   2, true },
-                { "7.2.11",                         "7.4.1", true,   0, false },
-                { "7.2.11",                         "7.4.2", true,   2, true },
-                { "7.2.9-1.cdh7.2.9.p1.14166188",   "7.4.1", true,   2, true },
-                { "7.2.8",                          "7.4.2", true,   0, false },
-                { "7.2.8",                          "7.4.1", true,   0, false },
-                { "7.2.9",                          "7.4.2", true,   0, false },
-                { "7.2.10",                         "7.4.2", false,  0, false },
-                { "7.2.11",                         "7.4.1", false,  0, false },
-                { "7.2.11",                         "7.4.2", false,  0, false },
-                { "7.2.9-1.cdh7.2.9.p1.14166188",   "7.4.1", false,  0, false },
-                { "7.2.8",                          "7.4.2", false,  0, false },
-                { "7.2.8",                          "7.4.1", false,  0, false },
-                { "7.2.9",                          "7.4.2", false,  0, false },
         };
     }
 }

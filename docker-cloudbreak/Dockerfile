@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-11-runtime:1.14-6.1666624577-02122022
+FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-11-runtime:1.14-6.1666624577-02112022
 # We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
 MAINTAINER info@cloudera.com
 
@@ -26,13 +26,5 @@ RUN ( unzip cloudbreak.jar schema/* -d / ) || \
 # Install starter script for the Cloudbreak application
 COPY bootstrap/start_cloudbreak_app.sh /
 COPY bootstrap/wait_for_cloudbreak_api.sh /
-
-# Add OpenSSL provider to Java security policy file (FIPS enabled mode only).
-# - insert a line: fips.provider.1=OpenSSL
-# - increase the index for other fips.provider lines.
-RUN JAVA_SECURITY_POLICY_FILE=$JAVA_HOME/conf/security/java.security \
-&& for I in {20..1}; do J=$((I+1)); sed -i "s/fips.provider.$I=/fips.provider.$J=/" $JAVA_SECURITY_POLICY_FILE; done \
-&& N=$(grep -m 1 -n "^fips\.provider\.[[:digit:]]=" $JAVA_SECURITY_POLICY_FILE | cut -d: -f1) \
-&& sed -i "$N i fips.provider.1=OpenSSL" $JAVA_SECURITY_POLICY_FILE
 
 ENTRYPOINT ["/start_cloudbreak_app.sh"]

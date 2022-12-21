@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,14 +16,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
-import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -39,7 +35,7 @@ public class OozieRoleConfigProviderTest {
     public void testGetRoleConfigsWithSingleRolesPerHostGroup() {
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, false);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
@@ -62,36 +58,10 @@ public class OozieRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetRoleConfigsWithSingleRolesPerHostGroupWhenSSLIsTrue() {
-        String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, true);
-
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
-        List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
-
-        assertEquals(4, oozieServer.size());
-
-        assertEquals("oozie_database_type", oozieServer.get(0).getName());
-        assertEquals("postgresql", oozieServer.get(0).getValue());
-
-        assertEquals("oozie_database_user", oozieServer.get(1).getName());
-        assertEquals("testuser", oozieServer.get(1).getValue());
-
-        assertEquals("oozie_database_password", oozieServer.get(2).getName());
-        assertEquals("testpassword", oozieServer.get(2).getValue());
-
-        assertEquals("oozie_config_safety_valve", oozieServer.get(3).getName());
-        assertEquals("<property><name>oozie.service.JPAService.jdbc.url</name><value>" +
-                        "jdbc:postgresql://testhost:5432/ooziedb?sslmode=verify-full&amp;sslrootcert=</value></property>",
-                oozieServer.get(3).getValue());
-    }
-
-    @Test
     public void testGetRoleConfigsWithOozieHA() {
         String inputJson = getBlueprintText("input/de-ha.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 2, false);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 2);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
@@ -117,7 +87,7 @@ public class OozieRoleConfigProviderTest {
     public void testGetRoleConfigsWithNoOozie() {
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, false);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
@@ -126,7 +96,7 @@ public class OozieRoleConfigProviderTest {
     }
 
     static TemplatePreparationObject getTemplatePreparationObject(String inputJson,
-            CmTemplateProcessor cmTemplateProcessor, int numMasters, boolean ssl) {
+            CmTemplateProcessor cmTemplateProcessor, int numMasters) {
         List<String> hosts = new ArrayList<>();
         for (int i = 0; i < numMasters; i++) {
             hosts.add("master" + i + ".blah.timbuk2.dev.cldr.");
@@ -138,19 +108,11 @@ public class OozieRoleConfigProviderTest {
         lenient().when(rdsConfig.getConnectionPassword()).thenReturn("testpassword");
         lenient().when(rdsConfig.getConnectionUserName()).thenReturn("testuser");
         lenient().when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/ooziedb");
-        if (ssl) {
-            lenient().when(rdsConfig.getSslMode()).thenReturn(RdsSslMode.ENABLED);
-        }
+
         return Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
-                .withRdsViews(Set.of(rdsConfig)
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(rdsConfig))
                 .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
-                .withProductDetails(new ClouderaManagerRepo()
-                        .withVersion("7.2.2")
-                        .withBaseUrl("url"), new ArrayList<>())
                 .withCloudPlatform(CloudPlatform.GCP)
                 .build();
     }

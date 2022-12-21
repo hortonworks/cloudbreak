@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.datalake;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -53,27 +52,6 @@ public class DataLakeStatusCheckerServiceTest {
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
 
         underTest.validateRunningState(stack);
-    }
-
-    @Test
-    public void testValidateAvailableStateShouldNotThrowExceptionWhenInBackup() {
-        Stack stack = createStack();
-        List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_BACKUP_INPROGRESS, "Backup in Progress");
-
-        when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
-
-        underTest.validateAvailableState(stack);
-    }
-
-    @Test
-    public void testValidateAvailableStateShouldThrowExceptionWhenSdxIsNotAvailable() {
-        Stack stack = createStack();
-        List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
-                "Vertical Scale in Progress");
-
-        when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
-
-        assertThrows(BadRequestException.class, () -> underTest.validateAvailableState(stack));
     }
 
     private Stack createStack() {

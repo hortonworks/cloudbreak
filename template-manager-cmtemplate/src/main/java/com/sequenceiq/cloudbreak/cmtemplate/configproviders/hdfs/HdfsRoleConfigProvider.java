@@ -30,8 +30,6 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final Integer DFS_REPLICATION_VALUE = 2;
 
-    private static final String DFS_ENCRYPT_DATA_TRANSFER = "dfs_encrypt_data_transfer";
-
     private final EntitlementService entitlementService;
 
     public HdfsRoleConfigProvider(EntitlementService entitlementService) {
@@ -46,14 +44,9 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 configs.add(
                         config(FAILED_VOLUMES_TOLERATED, NUM_FAILED_VOLUMES_TOLERATED.toString())
                 );
-                if (isSDXOptimizationEnabled(source) && isNamenodeHA(source)) {
-                    configs.add(
-                            config(DFS_REPLICATION, DFS_REPLICATION_VALUE.toString())
-                    );
-                }
                 if (isSDXOptimizationEnabled(source)) {
                     configs.add(
-                            config(DFS_ENCRYPT_DATA_TRANSFER, "true")
+                            config(DFS_REPLICATION, DFS_REPLICATION_VALUE.toString())
                     );
                 }
                 return configs;
@@ -67,7 +60,7 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 }
                 return List.of();
             case HdfsRoles.GATEWAY:
-                if (isSDXOptimizationEnabled(source) && isNamenodeHA(source)) {
+                if (isSDXOptimizationEnabled(source)) {
                     //CHECKSTYLE:OFF
                     return List.of(config(
                             "hdfs_client_config_safety_valve",
@@ -83,6 +76,7 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private boolean isSDXOptimizationEnabled(TemplatePreparationObject source) {
         return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && isNamenodeHA(source)
                 && null != source.getStackType()
                 && source.getStackType().equals(StackType.DATALAKE);
     }

@@ -15,10 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,9 +59,8 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void configurationNeededIfRdsConfigAndRoleBothPresent() {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED);
-        RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
-        when(source.getRdsView(DatabaseType.RANGER)).thenReturn(rdsView);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
+        when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
         when(templateProcessor.isRoleTypePresentInService(subject.getServiceType(), subject.getRoleTypes())).thenReturn(Boolean.TRUE);
 
         assertThat(subject.isConfigurationNeeded(templateProcessor, source)).isTrue();
@@ -71,9 +68,8 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void configurationNotNeededIfRoleAbsent() {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED);
-        RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
-        when(source.getRdsView(DatabaseType.RANGER)).thenReturn(rdsView);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
+        when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
         when(templateProcessor.isRoleTypePresentInService(subject.getServiceType(), subject.getRoleTypes())).thenReturn(Boolean.FALSE);
 
         assertThat(subject.isConfigurationNeeded(templateProcessor, source)).isFalse();
@@ -81,38 +77,36 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void configurationNotNeededIfRdsConfigAbsent() {
-        when(source.getRdsView(DatabaseType.RANGER)).thenReturn(null);
+        when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(null);
 
         assertThat(subject.isConfigurationNeeded(templateProcessor, source)).isFalse();
     }
 
     @Test
     void getRdsConfigTestWhenRdsConfigPresent() {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED);
-        RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
-        when(source.getRdsView(DatabaseType.RANGER)).thenReturn(rdsView);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
+        when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
 
-        assertThat(subject.getRdsView(source)).isSameAs(rdsView);
+        assertThat(subject.getRdsConfig(source)).isSameAs(rdsConfig);
     }
 
     @Test
     void getRdsConfigTestWhenRdsConfigAbsent() {
-        when(source.getRdsView(DatabaseType.RANGER)).thenReturn(null);
+        when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(null);
 
-        assertThat(subject.getRdsView(source)).isNull();
+        assertThat(subject.getRdsConfig(source)).isNull();
     }
 
     @Test
     void getRdsViewTest() {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED);
-        RdsView rdsView = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfig);
-        when(source.getRdsView(DatabaseType.RANGER)).thenReturn(rdsView);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
+        when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
         when(source.getRdsSslCertificateFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
 
-        RdsView rdsViewTest = subject.getRdsView(source);
+        RdsView rdsView = subject.getRdsView(source);
 
-        assertThat(rdsViewTest).isNotNull();
-        assertThat(rdsViewTest.getSslCertificateFilePath()).isEqualTo(SSL_CERTS_FILE_PATH);
+        assertThat(rdsView).isNotNull();
+        assertThat(rdsView.getSslCertificateFilePath()).isEqualTo(SSL_CERTS_FILE_PATH);
     }
 
 }

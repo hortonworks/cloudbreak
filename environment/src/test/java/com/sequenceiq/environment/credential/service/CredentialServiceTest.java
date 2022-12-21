@@ -48,14 +48,12 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.CredentialType;
-import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
-import com.sequenceiq.environment.credential.v1.converter.CreateCredentialRequestToCredentialConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.environment.environment.verification.PolicyValidationErrorResponseConverter;
@@ -65,9 +63,7 @@ import com.sequenceiq.notification.NotificationSender;
 @TestPropertySource(properties = "environment.enabledplatforms=AWS, AZURE, BLAH, BAZ")
 class CredentialServiceTest {
 
-    private static final Credential ENV_CREDENTIAL = new Credential();
-
-    private static final Credential AUDIT_CREDENTIAL = new Credential();
+    private static final Credential CREDENTIAL = new Credential();
 
     private static final String PLATFORM = "PLATFORM";
 
@@ -107,9 +103,6 @@ class CredentialServiceTest {
     private CredentialValidator credentialValidator;
 
     @MockBean
-    private CreateCredentialRequestToCredentialConverter credentialRequestConverter;
-
-    @MockBean
     private ServiceProviderCredentialAdapter credentialAdapter;
 
     @MockBean
@@ -143,27 +136,19 @@ class CredentialServiceTest {
     void setupTestCredential() throws TransactionService.TransactionExecutionException {
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
 
-
+        CREDENTIAL.setName(CREDENTIAL_NAME);
+        CREDENTIAL.setCloudPlatform(PLATFORM);
         String credentialAttributesSecret = getTestAttributes(STATE, DEPLOYMENT_ADDRESS, REDIRECT_URL);
-        ENV_CREDENTIAL.setName(CREDENTIAL_NAME);
-        ENV_CREDENTIAL.setCloudPlatform(PLATFORM);
-        ENV_CREDENTIAL.setAttributes(credentialAttributesSecret);
-        ENV_CREDENTIAL.setType(ENVIRONMENT);
-
-        AUDIT_CREDENTIAL.setName(CREDENTIAL_NAME);
-        AUDIT_CREDENTIAL.setCloudPlatform(PLATFORM);
-        AUDIT_CREDENTIAL.setAttributes(credentialAttributesSecret);
-        AUDIT_CREDENTIAL.setType(AUDIT);
-
+        CREDENTIAL.setAttributes(credentialAttributesSecret);
 
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
     @Test
     void testListAvailablesByAccountId() {
-        when(repository.findAllByAccountId(any(), anyCollection(), any())).thenReturn(Set.of(ENV_CREDENTIAL));
+        when(repository.findAllByAccountId(any(), anyCollection(), any())).thenReturn(Set.of(CREDENTIAL));
 
-        assertThat(credentialServiceUnderTest.listAvailablesByAccountId(ACCOUNT_ID, AUDIT)).isEqualTo(Set.of(ENV_CREDENTIAL));
+        assertThat(credentialServiceUnderTest.listAvailablesByAccountId(ACCOUNT_ID, AUDIT)).isEqualTo(Set.of(CREDENTIAL));
         verify(credentialValidator, times(4))
                 .isCredentialCloudPlatformValid(anyString(), eq(ACCOUNT_ID), any(CredentialType.class));
     }
@@ -214,14 +199,14 @@ class CredentialServiceTest {
 
     @Test
     void testGetByNameForAccountIdHasResultAndEnvironmentCredential() {
-        when(repository.findByNameAndAccountId(any(), any(), anyCollection(), any())).thenReturn(Optional.of(ENV_CREDENTIAL));
-        assertEquals(ENV_CREDENTIAL, credentialServiceUnderTest.getByNameForAccountId(CREDENTIAL_NAME, ACCOUNT_ID, ENVIRONMENT));
+        when(repository.findByNameAndAccountId(any(), any(), anyCollection(), any())).thenReturn(Optional.of(CREDENTIAL));
+        assertEquals(CREDENTIAL, credentialServiceUnderTest.getByNameForAccountId(CREDENTIAL_NAME, ACCOUNT_ID, ENVIRONMENT));
     }
 
     @Test
     void testGetByNameForAccountIdHasResultAndAuditCredential() {
-        when(repository.findByNameAndAccountId(any(), any(), anyCollection(), any())).thenReturn(Optional.of(ENV_CREDENTIAL));
-        assertEquals(ENV_CREDENTIAL, credentialServiceUnderTest.getByNameForAccountId(CREDENTIAL_NAME, ACCOUNT_ID, AUDIT));
+        when(repository.findByNameAndAccountId(any(), any(), anyCollection(), any())).thenReturn(Optional.of(CREDENTIAL));
+        assertEquals(CREDENTIAL, credentialServiceUnderTest.getByNameForAccountId(CREDENTIAL_NAME, ACCOUNT_ID, AUDIT));
     }
 
     @Test
@@ -238,14 +223,14 @@ class CredentialServiceTest {
 
     @Test
     void testGetByCrnForAccountIdHasResultAndEnvironmentCredential() {
-        when(repository.findByCrnAndAccountId(any(), any(), anyCollection(), any(), anyBoolean())).thenReturn(Optional.of(ENV_CREDENTIAL));
-        assertEquals(ENV_CREDENTIAL, credentialServiceUnderTest.getByCrnForAccountId("123", ACCOUNT_ID, ENVIRONMENT));
+        when(repository.findByCrnAndAccountId(any(), any(), anyCollection(), any(), anyBoolean())).thenReturn(Optional.of(CREDENTIAL));
+        assertEquals(CREDENTIAL, credentialServiceUnderTest.getByCrnForAccountId("123", ACCOUNT_ID, ENVIRONMENT));
     }
 
     @Test
     void testGetByCrnForAccountIdHasResultAndAuditCredential() {
-        when(repository.findByCrnAndAccountId(any(), any(), anyCollection(), any(), anyBoolean())).thenReturn(Optional.of(ENV_CREDENTIAL));
-        assertEquals(ENV_CREDENTIAL, credentialServiceUnderTest.getByCrnForAccountId("123", ACCOUNT_ID, AUDIT));
+        when(repository.findByCrnAndAccountId(any(), any(), anyCollection(), any(), anyBoolean())).thenReturn(Optional.of(CREDENTIAL));
+        assertEquals(CREDENTIAL, credentialServiceUnderTest.getByCrnForAccountId("123", ACCOUNT_ID, AUDIT));
     }
 
     @Test
@@ -262,14 +247,14 @@ class CredentialServiceTest {
 
     @Test
     void testGetByEnvironmentCrnAndAccountIdHasResultAndAuditCredential() {
-        when(repository.findByEnvironmentCrnAndAccountId(any(), any(), anyCollection(), any())).thenReturn(Optional.of(ENV_CREDENTIAL));
-        assertEquals(ENV_CREDENTIAL, credentialServiceUnderTest.getByEnvironmentCrnAndAccountId("123", ACCOUNT_ID, AUDIT));
+        when(repository.findByEnvironmentCrnAndAccountId(any(), any(), anyCollection(), any())).thenReturn(Optional.of(CREDENTIAL));
+        assertEquals(CREDENTIAL, credentialServiceUnderTest.getByEnvironmentCrnAndAccountId("123", ACCOUNT_ID, AUDIT));
     }
 
     @Test
     void testGetByEnvironmentCrnAndAccountIdHasResultAndEnvironmentCredential() {
-        when(repository.findByEnvironmentCrnAndAccountId(any(), any(), anyCollection(), any())).thenReturn(Optional.of(ENV_CREDENTIAL));
-        assertEquals(ENV_CREDENTIAL, credentialServiceUnderTest.getByEnvironmentCrnAndAccountId("123", ACCOUNT_ID, ENVIRONMENT));
+        when(repository.findByEnvironmentCrnAndAccountId(any(), any(), anyCollection(), any())).thenReturn(Optional.of(CREDENTIAL));
+        assertEquals(CREDENTIAL, credentialServiceUnderTest.getByEnvironmentCrnAndAccountId("123", ACCOUNT_ID, ENVIRONMENT));
     }
 
     @Test
@@ -287,37 +272,37 @@ class CredentialServiceTest {
     @Test
     void testInteractiveLogin() throws JsonProcessingException {
         Map<String, String> testResult = Map.of("any", "any");
-        when(credentialAdapter.interactiveLogin(eq(ENV_CREDENTIAL), anyString())).thenReturn(testResult);
-        assertEquals(testResult, credentialServiceUnderTest.interactiveLogin("any", ENV_CREDENTIAL));
+        when(credentialAdapter.interactiveLogin(eq(CREDENTIAL), anyString())).thenReturn(testResult);
+        assertEquals(testResult, credentialServiceUnderTest.interactiveLogin("any", CREDENTIAL));
     }
 
     @Test
     void testInteractiveLoginBadRequestNoDeploymentAddress() throws JsonProcessingException {
-        ENV_CREDENTIAL.setAttributes(getTestAttributes(STATE, null, REDIRECT_URL));
-        when(credentialAdapter.interactiveLogin(eq(ENV_CREDENTIAL), anyString())).thenReturn(Map.of("any", "any"));
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.interactiveLogin("any", ENV_CREDENTIAL));
+        CREDENTIAL.setAttributes(getTestAttributes(STATE, null, REDIRECT_URL));
+        when(credentialAdapter.interactiveLogin(eq(CREDENTIAL), anyString())).thenReturn(Map.of("any", "any"));
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.interactiveLogin("any", CREDENTIAL));
     }
 
     @Test
     void testInteractiveLoginBadRequestNoCorrectAttributes() throws JsonProcessingException {
         CredentialAttributes azureAttributes = new CredentialAttributes();
-        ENV_CREDENTIAL.setAttributes(JsonUtil.writeValueAsString(azureAttributes));
-        when(credentialAdapter.interactiveLogin(eq(ENV_CREDENTIAL), anyString())).thenReturn(Map.of("any", "any"));
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.interactiveLogin("any", ENV_CREDENTIAL));
+        CREDENTIAL.setAttributes(JsonUtil.writeValueAsString(azureAttributes));
+        when(credentialAdapter.interactiveLogin(eq(CREDENTIAL), anyString())).thenReturn(Map.of("any", "any"));
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.interactiveLogin("any", CREDENTIAL));
     }
 
     @Test
     void testUpdateByAccountIdNotFoundAndEnvironmentCredential() {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> credentialServiceUnderTest.updateByAccountId(ENV_CREDENTIAL, ACCOUNT_ID, ENVIRONMENT));
+        assertThrows(NotFoundException.class, () -> credentialServiceUnderTest.updateByAccountId(CREDENTIAL, ACCOUNT_ID, ENVIRONMENT));
     }
 
     @Test
     void testUpdateByAccountIdNotFoundAndAuditCredential() {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> credentialServiceUnderTest.updateByAccountId(AUDIT_CREDENTIAL, ACCOUNT_ID, AUDIT));
+        assertThrows(NotFoundException.class, () -> credentialServiceUnderTest.updateByAccountId(CREDENTIAL, ACCOUNT_ID, AUDIT));
     }
 
     @Test
@@ -327,7 +312,7 @@ class CredentialServiceTest {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.of(result));
         when(credentialValidator.validateCredentialUpdate(any(), any(), any())).thenThrow(BadRequestException.class);
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.updateByAccountId(ENV_CREDENTIAL, ACCOUNT_ID, ENVIRONMENT));
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.updateByAccountId(CREDENTIAL, ACCOUNT_ID, ENVIRONMENT));
     }
 
     @Test
@@ -337,7 +322,7 @@ class CredentialServiceTest {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.of(result));
         when(credentialValidator.validateCredentialUpdate(any(), any(), any())).thenThrow(BadRequestException.class);
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.updateByAccountId(AUDIT_CREDENTIAL, ACCOUNT_ID, AUDIT));
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.updateByAccountId(CREDENTIAL, ACCOUNT_ID, AUDIT));
     }
 
     @Test
@@ -346,9 +331,9 @@ class CredentialServiceTest {
         result.setId(2L);
         result.setResourceCrn("this");
         result.setCloudPlatform(PLATFORM);
-        ENV_CREDENTIAL.setId(1L);
-        ENV_CREDENTIAL.setResourceCrn("that");
-        ENV_CREDENTIAL.setCloudPlatform(PLATFORM);
+        CREDENTIAL.setId(1L);
+        CREDENTIAL.setResourceCrn("that");
+        CREDENTIAL.setCloudPlatform(PLATFORM);
 
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.of(result));
@@ -357,9 +342,9 @@ class CredentialServiceTest {
         when(credentialValidator.validateCredentialUpdate(any(Credential.class), any(Credential.class), any(CredentialType.class)))
                 .thenReturn(ValidationResult.builder().build());
 
-        Credential testResult = credentialServiceUnderTest.updateByAccountId(ENV_CREDENTIAL, ACCOUNT_ID, ENVIRONMENT);
+        Credential testResult = credentialServiceUnderTest.updateByAccountId(CREDENTIAL, ACCOUNT_ID, ENVIRONMENT);
 
-        verify(repository).save(ENV_CREDENTIAL);
+        verify(repository).save(CREDENTIAL);
         assertEquals(2L, testResult.getId());
     }
 
@@ -369,9 +354,9 @@ class CredentialServiceTest {
         result.setId(2L);
         result.setResourceCrn("this");
         result.setCloudPlatform(PLATFORM);
-        AUDIT_CREDENTIAL.setId(1L);
-        AUDIT_CREDENTIAL.setResourceCrn("that");
-        AUDIT_CREDENTIAL.setCloudPlatform(PLATFORM);
+        CREDENTIAL.setId(1L);
+        CREDENTIAL.setResourceCrn("that");
+        CREDENTIAL.setCloudPlatform(PLATFORM);
 
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.of(result));
@@ -380,55 +365,49 @@ class CredentialServiceTest {
         when(credentialValidator.validateCredentialUpdate(any(Credential.class), any(Credential.class), any(CredentialType.class)))
                 .thenReturn(ValidationResult.builder().build());
 
-        Credential testResult = credentialServiceUnderTest.updateByAccountId(AUDIT_CREDENTIAL, ACCOUNT_ID, AUDIT);
+        Credential testResult = credentialServiceUnderTest.updateByAccountId(CREDENTIAL, ACCOUNT_ID, AUDIT);
 
-        verify(repository).save(AUDIT_CREDENTIAL);
+        verify(repository).save(CREDENTIAL);
         assertEquals(2L, testResult.getId());
     }
 
     @Test
     void testCreateSameNameSameAccountIdNotSavedAndEnvironmentCredential() {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
-                .thenReturn(Optional.of(ENV_CREDENTIAL));
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.create(ENV_CREDENTIAL, ACCOUNT_ID, USER_ID));
+                .thenReturn(Optional.of(CREDENTIAL));
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.create(CREDENTIAL, ACCOUNT_ID, USER_ID, ENVIRONMENT));
         verify(repository, never()).save(any());
     }
 
     @Test
     void testCreateSameNameSameAccountIdNotSavedAndAuditCredential() {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
-                .thenReturn(Optional.of(AUDIT_CREDENTIAL));
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.create(AUDIT_CREDENTIAL, ACCOUNT_ID, USER_ID));
+                .thenReturn(Optional.of(CREDENTIAL));
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.create(CREDENTIAL, ACCOUNT_ID, USER_ID, AUDIT));
         verify(repository, never()).save(any());
     }
 
     @Test
     void testVerifyNothingChanged() {
-        when(credentialAdapter.verify(any(), any())).thenReturn(new CredentialVerification(ENV_CREDENTIAL, false));
-        credentialServiceUnderTest.verify(ENV_CREDENTIAL);
+        when(credentialAdapter.verify(any(), any())).thenReturn(new CredentialVerification(CREDENTIAL, false));
+        credentialServiceUnderTest.verify(CREDENTIAL);
         verify(repository, never()).save(any());
     }
 
     @Test
     void testVerifyChanged() {
-        when(credentialAdapter.verify(any(), any())).thenReturn(new CredentialVerification(ENV_CREDENTIAL, true));
-        credentialServiceUnderTest.verify(ENV_CREDENTIAL);
+        when(credentialAdapter.verify(any(), any())).thenReturn(new CredentialVerification(CREDENTIAL, true));
+        credentialServiceUnderTest.verify(CREDENTIAL);
         verify(repository).save(any());
     }
 
     @Test
     void testCreateAndEnvironmentCredential() {
-        CredentialRequest credentialRequest = new CredentialRequest();
-        credentialRequest.setCloudPlatform(PLATFORM);
-
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.empty());
         when(credentialAdapter.verify(any(), anyString(), anyBoolean())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
         when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(credentialRequestConverter.convert(any())).thenReturn(ENV_CREDENTIAL);
-
-        credentialServiceUnderTest.create(credentialRequest, ACCOUNT_ID, USER_ID, ENVIRONMENT);
-
+        credentialServiceUnderTest.create(CREDENTIAL, ACCOUNT_ID, USER_ID, ENVIRONMENT);
         verify(credentialValidator).validateCredentialCloudPlatform(eq(PLATFORM), eq(USER_ID), any(CredentialType.class));
         verify(credentialValidator).validateParameters(any(), any());
         verify(repository).save(any());
@@ -436,17 +415,11 @@ class CredentialServiceTest {
 
     @Test
     void testCreateAndAuditCredential() {
-        CredentialRequest credentialRequest = new CredentialRequest();
-        credentialRequest.setCloudPlatform(PLATFORM);
-
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.empty());
         when(credentialAdapter.verify(any(), anyString(), anyBoolean())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
         when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(credentialRequestConverter.convert(any())).thenReturn(AUDIT_CREDENTIAL);
-
-        credentialServiceUnderTest.create(credentialRequest, ACCOUNT_ID, USER_ID, AUDIT);
-
+        credentialServiceUnderTest.create(CREDENTIAL, ACCOUNT_ID, USER_ID, AUDIT);
         verify(credentialValidator).validateCredentialCloudPlatform(eq(PLATFORM), eq(USER_ID), any(CredentialType.class));
         verify(credentialValidator).validateParameters(any(), any());
         verify(repository).save(any());
@@ -457,7 +430,7 @@ class CredentialServiceTest {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.empty());
         doThrow(BadRequestException.class).when(credentialValidator).validateParameters(any(), any());
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.create(ENV_CREDENTIAL, ACCOUNT_ID, USER_ID));
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.create(CREDENTIAL, ACCOUNT_ID, USER_ID, ENVIRONMENT));
         verify(repository, never()).save(any());
     }
 
@@ -466,7 +439,7 @@ class CredentialServiceTest {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.empty());
         doThrow(BadRequestException.class).when(credentialValidator).validateParameters(any(), any());
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.create(AUDIT_CREDENTIAL, ACCOUNT_ID, USER_ID));
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.create(CREDENTIAL, ACCOUNT_ID, USER_ID, AUDIT));
         verify(repository, never()).save(any());
     }
 
@@ -486,53 +459,53 @@ class CredentialServiceTest {
 
     @Test
     void testInitCodeGrantFlow() {
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(ENV_CREDENTIAL);
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
-        String result = credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, ENV_CREDENTIAL, USER_ID);
+        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(CREDENTIAL);
+        when(repository.save(any())).thenReturn(CREDENTIAL);
+        String result = credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL, USER_ID);
         assertEquals(REDIRECT_URL, result);
-        verify(repository).save(eq(ENV_CREDENTIAL));
+        verify(repository).save(eq(CREDENTIAL));
     }
 
     @Test
     void testInitCodeGrantFlowNoUrl() {
-        ENV_CREDENTIAL.setAttributes(getTestAttributes(STATE, DEPLOYMENT_ADDRESS, null));
+        CREDENTIAL.setAttributes(getTestAttributes(STATE, DEPLOYMENT_ADDRESS, null));
 
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(ENV_CREDENTIAL);
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
-        assertThrows(CredentialOperationException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, ENV_CREDENTIAL, USER_ID));
+        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(CREDENTIAL);
+        when(repository.save(any())).thenReturn(CREDENTIAL);
+        assertThrows(CredentialOperationException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL, USER_ID));
     }
 
     @Test
     void testInitCodeGrantFlowValidationErrorNotSaved() {
         doThrow(BadRequestException.class).when(credentialValidator).validateCredentialCloudPlatform(anyString(), anyString(), any(CredentialType.class));
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, ENV_CREDENTIAL, USER_ID));
-        verify(repository, never()).save(eq(ENV_CREDENTIAL));
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL, USER_ID));
+        verify(repository, never()).save(eq(CREDENTIAL));
     }
 
     @Test
     void testInitCodeGrantFlowAdapterErrorNotSaved() {
         when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenThrow(BadRequestException.class);
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, ENV_CREDENTIAL, USER_ID));
-        verify(repository, never()).save(eq(ENV_CREDENTIAL));
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL, USER_ID));
+        verify(repository, never()).save(eq(CREDENTIAL));
     }
 
     @Test
     void testInitCodeGrantFlowNoDeploymentAddress() {
-        ENV_CREDENTIAL.setAttributes(getTestAttributes(STATE, null, REDIRECT_URL));
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(ENV_CREDENTIAL);
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, ENV_CREDENTIAL, USER_ID));
-        verify(repository, never()).save(eq(ENV_CREDENTIAL));
+        CREDENTIAL.setAttributes(getTestAttributes(STATE, null, REDIRECT_URL));
+        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(CREDENTIAL);
+        when(repository.save(any())).thenReturn(CREDENTIAL);
+        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL, USER_ID));
+        verify(repository, never()).save(eq(CREDENTIAL));
     }
 
     @Test
     void testInitCodeGrantFlowExisting() {
-        when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Optional.of(ENV_CREDENTIAL));
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(ENV_CREDENTIAL);
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
+        when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Optional.of(CREDENTIAL));
+        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(CREDENTIAL);
+        when(repository.save(any())).thenReturn(CREDENTIAL);
         String result = credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL_NAME);
         assertEquals(REDIRECT_URL, result);
-        verify(repository).save(eq(ENV_CREDENTIAL));
+        verify(repository).save(eq(CREDENTIAL));
         verify(secretService).delete(eq(getTestAttributes(STATE, DEPLOYMENT_ADDRESS, REDIRECT_URL)));
     }
 
@@ -546,10 +519,10 @@ class CredentialServiceTest {
 
     @Test
     void testInitCodeGrantFlowExistingWithoutGrantFlow() {
-        ENV_CREDENTIAL.setAttributes(getTestAttributesWithCodeGrantFlow(null));
-        when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Optional.of(ENV_CREDENTIAL));
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(ENV_CREDENTIAL);
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
+        CREDENTIAL.setAttributes(getTestAttributesWithCodeGrantFlow(null));
+        when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Optional.of(CREDENTIAL));
+        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(CREDENTIAL);
+        when(repository.save(any())).thenReturn(CREDENTIAL);
         assertThrows(UnsupportedOperationException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL_NAME));
         verify(repository, never()).save(any());
         verify(secretService, never()).delete(anyString());
@@ -565,8 +538,8 @@ class CredentialServiceTest {
 
     @Test
     void testAuthorizeCodeGrantFlowFoundButStateDoesNotMatch() {
-        ENV_CREDENTIAL.setAttributes(getTestAttributes(DIFFERENT_STATE, DEPLOYMENT_ADDRESS, REDIRECT_URL));
-        when(repository.findAllByAccountId(eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Set.of(ENV_CREDENTIAL));
+        CREDENTIAL.setAttributes(getTestAttributes(DIFFERENT_STATE, DEPLOYMENT_ADDRESS, REDIRECT_URL));
+        when(repository.findAllByAccountId(eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Set.of(CREDENTIAL));
         assertThrows(NotFoundException.class,
                 () -> credentialServiceUnderTest.authorizeCodeGrantFlow(DIFFERENT_CODE, STATE, ACCOUNT_ID, "platform"));
         verify(repository, never()).save(any());
@@ -574,8 +547,8 @@ class CredentialServiceTest {
 
     @Test
     void testAuthorizeCodeGrantFlowFoundStateMatches() throws IOException {
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
-        when(repository.findAllByAccountId(eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Set.of(ENV_CREDENTIAL));
+        when(repository.save(any())).thenReturn(CREDENTIAL);
+        when(repository.findAllByAccountId(eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Set.of(CREDENTIAL));
         when(credentialAdapter.verify(any(), anyString())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
 
         Credential result =

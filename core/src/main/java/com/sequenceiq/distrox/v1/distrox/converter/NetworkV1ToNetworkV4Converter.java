@@ -33,7 +33,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureNetworkV1P
 import com.sequenceiq.distrox.api.v1.distrox.model.network.gcp.GcpNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.MockNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.yarn.YarnNetworkV1Parameters;
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -126,12 +125,10 @@ public class NetworkV1ToNetworkV4Converter {
         AzureNetworkV4Parameters response = new AzureNetworkV4Parameters();
 
         if (azureNetworkV1Parameters != null) {
-            EnvironmentNetworkAzureParams networkAzureParams = networkResponse.getAzure();
-            response.setNetworkId(networkAzureParams.getNetworkId());
-            response.setNoPublicIp(networkAzureParams.getNoPublicIp());
-            response.setResourceGroupName(networkAzureParams.getResourceGroupName());
-            response.setDatabasePrivateDnsZoneId(networkAzureParams.getDatabasePrivateDnsZoneId());
-            response.setAksPrivateDnsZoneId(networkAzureParams.getAksPrivateDnsZoneId());
+            response.setNetworkId(networkResponse.getAzure().getNetworkId());
+            response.setNoPublicIp(networkResponse.getAzure().getNoPublicIp());
+            response.setResourceGroupName(networkResponse.getAzure().getResourceGroupName());
+            response.setDatabasePrivateDnsZoneId(networkResponse.getAzure().getDatabasePrivateDnsZoneId());
             String subnetId = azureNetworkV1Parameters.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(subnetId);

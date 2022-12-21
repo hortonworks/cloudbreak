@@ -1,7 +1,5 @@
 package com.sequenceiq.environment;
 
-import static org.reflections.scanners.Scanners.SubTypes;
-
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,18 +8,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
-import org.reflections.util.ConfigurationBuilder;
+import org.reflections.scanners.SubTypesScanner;
 
 public class ConstructorTest {
 
     @Test
     @DisplayName("all request/response classes should have constructor implemented")
     public void testIfConstructorIsImplementedOnRequestResponses() throws ClassNotFoundException {
-        Reflections reflections = new Reflections(new ConfigurationBuilder().forPackage("com.sequenceiq.environment").setScanners(Scanners.SubTypes));
+        Reflections reflections = new Reflections("com.sequenceiq.environment", new SubTypesScanner(false));
         Set<String> missingConstructors = new HashSet<>();
-        for (String clazz : reflections.getAll(SubTypes)) {
-            if (clazz.startsWith("com.sequenceiq.environment") && !isTestClass(clazz)
+        for (String clazz : reflections.getAllTypes()) {
+            if (!clazz.endsWith("Test")
                     && (requestOrResponse(clazz) && !clazz.contains(".Valid"))
                     && !Class.forName(clazz).isInterface()) {
                 try {
@@ -40,10 +37,6 @@ public class ConstructorTest {
 
     private boolean requestOrResponse(String clazz) {
         return clazz.endsWith("Request") || clazz.endsWith("Response") || clazz.endsWith("Parameters");
-    }
-
-    private boolean isTestClass(String clazz) {
-        return clazz.endsWith("Test") || clazz.contains("Test$");
     }
 
 }

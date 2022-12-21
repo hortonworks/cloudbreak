@@ -380,8 +380,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return String.join("/", azureProperties.getCloudStorage().getBaseLocation(), trimObjectName(DEFAULT_STORAGE_NAME),
-                getSuiteName(), getTestName());
+        return String.join("/", azureProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
     @Override
@@ -425,7 +424,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (azureProperties.getBaseimage().getImageId() == null || azureProperties.getBaseimage().getImageId().isEmpty()) {
-            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AZURE.name(), false);
+            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AZURE.name(), false);
+            azureProperties.getBaseimage().setImageId(imageId);
+            return imageId;
         } else {
             return getLatestBaseImageID();
         }

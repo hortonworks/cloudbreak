@@ -16,7 +16,7 @@ jar {
 
 configurations.all {
     resolutionStrategy {
-        force 'net.bytebuddy:byte-buddy:1.12.19'
+        force 'net.bytebuddy:byte-buddy:1.9.13'
     }
 }
 
@@ -38,7 +38,7 @@ dependencies {
   implementation project(':template-manager-core')
   implementation project(':workspace')
 
-  implementation            group: "joda-time",                 name: "joda-time",                               version: "2.12.1"
+  implementation            group: "joda-time",                 name: "joda-time",                               version: "2.10.8"
   implementation            group: 'org.hibernate',             name: 'hibernate-envers',                        version: hibernateCoreVersion
 
   testImplementation project(path: ':common', configuration: 'tests')

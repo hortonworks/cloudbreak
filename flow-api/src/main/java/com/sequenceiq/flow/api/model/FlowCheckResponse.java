@@ -13,8 +13,6 @@ public class FlowCheckResponse {
 
     private Boolean latestFlowFinalizedAndFailed;
 
-    private Long endTime;
-
     public String getFlowId() {
         return flowId;
     }
@@ -45,13 +43,5 @@ public class FlowCheckResponse {
 
     public void setLatestFlowFinalizedAndFailed(Boolean latestFlowFinalizedAndFailed) {
         this.latestFlowFinalizedAndFailed = latestFlowFinalizedAndFailed;
-    }
-
-    public Long getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Long endTime) {
-        this.endTime = endTime;
     }
 }

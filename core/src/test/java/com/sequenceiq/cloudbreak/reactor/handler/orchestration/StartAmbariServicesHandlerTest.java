@@ -63,7 +63,7 @@ class StartAmbariServicesHandlerTest {
     void testAcceptWhenStartAmbariHandlerSucceeds(boolean defaultClusterManagerAuth) throws ClusterClientInitException, CloudbreakException {
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
-        when(clusterServiceRunner.updateClusterManagerClientConfig(stack)).thenReturn("ip");
+        when(stack.getClusterManagerIp()).thenReturn("ip");
         when(clusterApiConnectors.getConnector(stack, "ip")).thenReturn(clusterApi);
 
         underTest.accept(getEvent(defaultClusterManagerAuth));
@@ -77,14 +77,13 @@ class StartAmbariServicesHandlerTest {
         assertEquals(StartClusterManagerServicesSuccess.class, resultEvent.getData().getClass());
         StartClusterManagerServicesSuccess result = (StartClusterManagerServicesSuccess) resultEvent.getData();
         assertEquals(STACK_ID, result.getResourceId());
-        verify(clusterServiceRunner).updateClusterManagerClientConfig(stack);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
     void testAcceptWhenExceptionThenFailure(boolean defaultClusterManagerAuth) {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
-        doThrow(new CloudbreakServiceException(EXCEPTION_MESSAGE)).when(clusterServiceRunner).runClusterManagerServices(stack);
+        doThrow(new CloudbreakServiceException(EXCEPTION_MESSAGE)).when(clusterServiceRunner).runAmbariServices(stack);
         underTest.accept(getEvent(defaultClusterManagerAuth));
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
@@ -96,7 +95,6 @@ class StartAmbariServicesHandlerTest {
         StartAmbariServicesFailed result = (StartAmbariServicesFailed) resultEvent.getData();
         assertEquals(STACK_ID, result.getResourceId());
         assertEquals(EXCEPTION_MESSAGE, result.getException().getMessage());
-        verify(clusterServiceRunner).updateClusterManagerClientConfig(stack);
     }
 
     private Event<StartAmbariServicesRequest> getEvent(boolean defaultClusterManagerAuth) {

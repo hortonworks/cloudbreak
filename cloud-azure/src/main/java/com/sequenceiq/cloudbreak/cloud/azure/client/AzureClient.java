@@ -1025,18 +1025,6 @@ public class AzureClient {
         });
     }
 
-    public void modifyInstanceType(String resourceGroupName, String instanceName, String instanceType) {
-        handleAuthException(() -> {
-            LOGGER.info("Updating instance {} in {} resourcegroup to {} instancetype",
-                    instanceName, resourceGroupName, instanceName);
-            azure.virtualMachines()
-                    .getByResourceGroup(resourceGroupName, instanceName)
-                    .update()
-                    .withSize(instanceType)
-                    .apply();
-        });
-    }
-
     public boolean checkKeyVaultAccessPolicyForServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
         return handleAuthException(() -> {
             List<AccessPolicy> accessPolicies = azure.vaults()

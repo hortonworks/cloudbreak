@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +47,6 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 
 @ExtendWith(MockitoExtension.class)
 class HiveMetastoreConfigProviderTest {
@@ -104,10 +102,7 @@ class HiveMetastoreConfigProviderTest {
     @MethodSource("cmVersionMinimalDataProvider")
     void getServiceConfigsTestDbOnlyAndNoSsl(String testCaseName, Versioned cmVersion) {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(null))
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(null)))
                 .withProductDetails(generateCmRepo(cmVersion), null)
                 .build();
 
@@ -133,10 +128,7 @@ class HiveMetastoreConfigProviderTest {
     @Test
     void getServiceConfigsTestDbOnlyWithSsl() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(RdsSslMode.ENABLED))
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(RdsSslMode.ENABLED)))
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
@@ -173,10 +165,7 @@ class HiveMetastoreConfigProviderTest {
     @MethodSource("cmVersionNoSslSupportDataProvider")
     void getServiceConfigsTestDbOnlyWithSslButWrongCmVersion(String testCaseName, Versioned cmVersion) {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(RdsSslMode.ENABLED))
-                    .stream()
-                    .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                    .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(RdsSslMode.ENABLED)))
                 .withProductDetails(generateCmRepo(cmVersion), null)
                 .build();
 
@@ -188,10 +177,7 @@ class HiveMetastoreConfigProviderTest {
     @Test
     void getServiceConfigsTestDbOnlyWithSslAndTemplateWithHarmlessHmsServiceConfigs() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(RdsSslMode.ENABLED))
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(RdsSslMode.ENABLED)))
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
@@ -211,10 +197,7 @@ class HiveMetastoreConfigProviderTest {
     @Test
     void getServiceConfigsTestDbOnlyWithSslAndTemplateWithHarmlessHmsServiceConfigsAndDummyCustomHmsDbKeys() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(RdsSslMode.ENABLED))
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(RdsSslMode.ENABLED)))
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
@@ -228,10 +211,7 @@ class HiveMetastoreConfigProviderTest {
     @Test
     void getServiceConfigsTestDbOnlyWithSslAndTemplateWithHarmlessHmsServiceConfigsAndCustomHmsDbOverride() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(RdsSslMode.ENABLED))
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(RdsSslMode.ENABLED)))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
         initHmsServiceConfigs(List.of(config("foo", "bar"), config(HIVE_METASTORE_DATABASE_HOST, "customhms.mydomain.com")));
@@ -244,10 +224,7 @@ class HiveMetastoreConfigProviderTest {
     @Test
     void getServiceConfigsTestDbAndKerberos() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(null))
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(null)))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .withKerberosConfig(kerberosConfigFreeipa())
                 .build();
@@ -271,10 +248,7 @@ class HiveMetastoreConfigProviderTest {
     @Test
     void getServiceConfigsTestDatalakeAndNoLdap() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(null))
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(null)))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .withStackType(StackType.DATALAKE)
                 .build();
@@ -287,10 +261,7 @@ class HiveMetastoreConfigProviderTest {
     @Test
     void getServiceConfigsTestDatalakeWithLdap() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(null))
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(null)))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .withStackType(StackType.DATALAKE)
                 .withLdapConfig(ldapConfig())
@@ -316,10 +287,7 @@ class HiveMetastoreConfigProviderTest {
 
     @Test void getServiceConfigsTestDatahubCm710() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(null))
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(null)))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .withStackType(StackType.WORKLOAD).build();
 
@@ -330,10 +298,7 @@ class HiveMetastoreConfigProviderTest {
 
     @Test void getServiceConfigsTestDatahubCm711() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
-                .withRdsViews(Set.of(createRdsConfig(null))
-                        .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                        .collect(Collectors.toSet()))
+                .withRdsConfigs(Set.of(createRdsConfig(null)))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_1), null)
                 .withStackType(StackType.WORKLOAD).build();
 
@@ -353,7 +318,7 @@ class HiveMetastoreConfigProviderTest {
     }
 
     private RdsConfigWithoutCluster createRdsConfig(RdsSslMode sslMode) {
-        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.HIVE);
         when(rdsConfig.getSslMode()).thenReturn(sslMode);
         return rdsConfig;
     }

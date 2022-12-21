@@ -2,8 +2,6 @@ package com.sequenceiq.environment.environment.validation.cloudstorage;
 
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -14,8 +12,6 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry
 
 @Component
 public class EnvironmentLogStorageConfigurationValidator extends EnvironmentStorageConfigurationValidator {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentLogStorageConfigurationValidator.class);
 
     /**
      * Validate telemetry related logging storage configuration.
@@ -37,13 +33,10 @@ public class EnvironmentLogStorageConfigurationValidator extends EnvironmentStor
     private void validate(Environment environment, ValidationResult.ValidationResultBuilder resultBuilder) {
         EnvironmentLogging logging = environment.getTelemetry().getLogging();
         if (logging.getS3() != null && environment.getCloudPlatform().equals(CloudConstants.AWS)) {
-            LOGGER.debug("Validate S3 log storage configuration for {} environment", environment.getId());
             validateS3Config(environment, resultBuilder, logging.getS3().getInstanceProfile());
         } else if (logging.getAdlsGen2() != null && environment.getCloudPlatform().equals(CloudConstants.AZURE)) {
-            LOGGER.debug("Validate Adls Gen2 log storage configuration for {} environment", environment.getId());
             validateAdlsGen2Config(environment, resultBuilder, logging.getAdlsGen2().getManagedIdentity());
         } else if (logging.getGcs() != null && environment.getCloudPlatform().equals(CloudConstants.GCP)) {
-            LOGGER.debug("Validate GCS log storage configuration for {} environment", environment.getId());
             validateGcsConfig(environment, resultBuilder, logging.getGcs().getServiceAccountEmail());
         }
     }

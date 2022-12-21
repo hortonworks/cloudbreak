@@ -14,14 +14,11 @@ public class AzureParams {
 
     private String databasePrivateDnsZoneId;
 
-    private String aksPrivateDnsZoneId;
-
     private AzureParams(Builder builder) {
         networkId = builder.networkId;
         resourceGroupName = builder.resourceGroupName;
         noPublicIp = builder.noPublicIp;
         databasePrivateDnsZoneId = builder.databasePrivateDnsZoneId;
-        aksPrivateDnsZoneId = builder.aksPrivateDnsZoneId;
     }
 
     public String getNetworkId() {
@@ -56,14 +53,6 @@ public class AzureParams {
         this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     }
 
-    public String getAksPrivateDnsZoneId() {
-        return aksPrivateDnsZoneId;
-    }
-
-    public void setAksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
-        this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
-    }
-
     @Override
     public String toString() {
         return "AzureParams{" +
@@ -71,7 +60,6 @@ public class AzureParams {
                 ", resourceGroupName='" + resourceGroupName + '\'' +
                 ", noPublicIp=" + noPublicIp +
                 ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
-                ", aksPrivateDnsZoneId='" + aksPrivateDnsZoneId + '\'' +
                 '}';
     }
 
@@ -88,8 +76,6 @@ public class AzureParams {
         private boolean noPublicIp;
 
         private String databasePrivateDnsZoneId;
-
-        private String aksPrivateDnsZoneId;
 
         private Builder() {
         }
@@ -111,11 +97,6 @@ public class AzureParams {
 
         public Builder withDatabasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
             this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
-            return this;
-        }
-
-        public Builder withAksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
-            this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
             return this;
         }
 

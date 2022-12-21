@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
@@ -43,12 +42,10 @@ import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Logging;
-import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
@@ -99,12 +96,6 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
     @Inject
     private TelemetryFeatureService telemetryFeatureService;
 
-    @Inject
-    private MonitoringUrlResolver monitoringUrlResolver;
-
-    @Inject
-    private TransactionService transactionService;
-
     @Override
     public Map<String, SaltPillarProperties> createTelemetryConfigs(Long stackId, Set<TelemetryComponentType> components) {
         Stack stack = stackService.getStackById(stackId);
@@ -119,7 +110,6 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
     public TelemetryContext createTelemetryContext(Stack stack) {
         TelemetryContext telemetryContext = new TelemetryContext();
         Telemetry telemetry = stack.getTelemetry();
-        updateTelemetryIfMonitoringIsEnabled(stack, telemetry);
         telemetryContext.setTelemetry(telemetry);
         telemetryContext.setClusterType(FluentClusterType.FREEIPA);
         CdpAccessKeyType cdpAccessKeyType = getCdpAccessKeyType(stack);
@@ -135,33 +125,6 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             telemetryContext.setMeteringContext(MeteringContext.builder().build());
         }
         return telemetryContext;
-    }
-
-    private void updateTelemetryIfMonitoringIsEnabled(Stack stack, Telemetry telemetry) {
-        if (telemetry != null) {
-            boolean computeMonitoringEntitled = entitlementService.isComputeMonitoringEnabled(stack.getAccountId());
-            if (!telemetry.isComputeMonitoringEnabled() && computeMonitoringEntitled) {
-                Monitoring monitoring = new Monitoring();
-                monitoring.setRemoteWriteUrl(monitoringUrlResolver.resolve(stack.getAccountId(), entitlementService.isCdpSaasEnabled(stack.getAccountId())));
-                telemetry.setMonitoring(monitoring);
-                storeTelemetry(stack.getId(), telemetry);
-            } else if (telemetry.isComputeMonitoringEnabled() && !computeMonitoringEntitled) {
-                telemetry.setMonitoring(new Monitoring());
-                storeTelemetry(stack.getId(), telemetry);
-            }
-        }
-    }
-
-    private void storeTelemetry(Long stackId, Telemetry telemetry) {
-        try {
-            transactionService.required(() -> {
-                Stack stack = stackService.getStackById(stackId);
-                stack.setTelemetry(telemetry);
-                stackService.save(stack);
-            });
-        } catch (TransactionService.TransactionExecutionException e) {
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
-        }
     }
 
     private NodeStatusContext createNodeStatusContext(Stack stack) {
@@ -189,17 +152,15 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             } catch (IOException e) {
                 throw new CloudbreakServiceException(e);
             }
-            if (telemetry.isComputeMonitoringEnabled()) {
-                builder.withRemoteWriteUrl(telemetry.getMonitoring().getRemoteWriteUrl());
-            } else {
-                builder.withRemoteWriteUrl(monitoringUrlResolver.resolve(stack.getAccountId(), entitlementService.isCdpSaasEnabled(stack.getAccountId())));
-            }
         }
         if (entitlementService.isCdpSaasEnabled(stack.getAccountId())) {
             builder.withServiceType(MonitoringServiceType.SAAS);
         }
         builder.withClusterType(MonitoringClusterType.FREEIPA);
         builder.withSharedPassword(nodeStatusContext.getPassword());
+        if (telemetry.getMonitoring() != null) {
+            builder.withRemoteWriteUrl(telemetry.getMonitoring().getRemoteWriteUrl());
+        }
         return builder.build();
     }
 

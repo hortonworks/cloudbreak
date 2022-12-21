@@ -208,8 +208,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.RESTORE_IN_PROGRESS,
                 Status.LOAD_BALANCER_UPDATE_IN_PROGRESS,
                 Status.RECOVERY_IN_PROGRESS,
-                Status.RECOVERY_REQUESTED,
-                Status.DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS
+                Status.RECOVERY_REQUESTED
         );
     }
 

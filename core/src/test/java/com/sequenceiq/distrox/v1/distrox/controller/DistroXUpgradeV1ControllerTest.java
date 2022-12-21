@@ -39,8 +39,6 @@ class DistroXUpgradeV1ControllerTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
-    private static final String INTERNAL_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
-
     private static final String CLUSTER_NAME = "clusterName";
 
     private static final String DATAHUB_CRN = "crn:cdp:iam:us-west-1:1234:datahub:1";
@@ -184,43 +182,6 @@ class DistroXUpgradeV1ControllerTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByCrn(CLUSTER_NAME, distroxUpgradeRequest));
 
         verify(upgradeService).triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true);
-    }
-
-    @Test
-    public void testRollingUpgradeCalledWithCrn() {
-        DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
-        distroxUpgradeRequest.setRollingUpgradeEnabled(true);
-        UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
-        upgradeV4Request.setDryRun(Boolean.FALSE);
-        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, true, true, true);
-        when(upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
-        when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
-        when(upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings)).thenReturn(upgradeV4Request);
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false)).thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest));
-
-        verify(upgradeConverter).convert(distroxUpgradeRequest, internalUpgradeSettings);
-        verify(upgradeService).triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false);
-    }
-
-    @Test
-    public void testInternalRollingUpgradeCalledWithCrn() {
-        DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
-        UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
-        upgradeV4Request.setDryRun(Boolean.FALSE);
-        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(true, false, false, true);
-        when(upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings)).thenReturn(upgradeV4Request);
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, INTERNAL_CRN, upgradeV4Request, false)).thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
-
-        ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> underTest.upgradeClusterByCrnInternal(CLUSTER_NAME, distroxUpgradeRequest, USER_CRN, true));
-
-        verify(upgradeConverter).convert(distroxUpgradeRequest, internalUpgradeSettings);
-        verify(upgradeService).triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, INTERNAL_CRN, upgradeV4Request, false);
     }
 
     @Test

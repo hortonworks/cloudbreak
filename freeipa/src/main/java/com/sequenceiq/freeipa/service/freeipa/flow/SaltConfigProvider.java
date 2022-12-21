@@ -50,7 +50,7 @@ public class SaltConfigProvider {
         servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", singletonMap("freeipa", freeIpaConfigView.toMap())));
         servicePillarConfig.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
         servicePillarConfig.putAll(telemetryConfigService.createTelemetryPillarConfig(stack));
-        servicePillarConfig.putAll(proxyConfigService.createProxyPillarConfig(stack));
+        servicePillarConfig.putAll(proxyConfigService.createProxyPillarConfig(stack.getEnvironmentCrn()));
         servicePillarConfig.putAll(tagConfigService.createTagsPillarConfig(stack));
         servicePillarConfig.putAll(getCcmPillarProperties(stack));
         servicePillarConfig.putAll(ldapAgentConfigProvider.generateConfig(freeIpaConfigView.getDomain()));

@@ -18,7 +18,7 @@ dependencies {
   api project(':common')
 
   api group: 'io.opentracing.contrib',       name: 'opentracing-grpc',     version: opentracingGrpcVersion
-  implementation group: 'com.squareup.okhttp',          name: 'okhttp',               version: '2.7.5'
+  implementation group: 'com.squareup.okhttp',          name: 'okhttp',               version: '2.7.4'
   implementation group: 'org.slf4j',                    name: 'slf4j-api',            version: slf4jApiVersion
   implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: protobufVersion
 

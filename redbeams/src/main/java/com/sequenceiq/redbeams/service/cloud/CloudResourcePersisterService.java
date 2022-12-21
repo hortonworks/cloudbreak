@@ -3,7 +3,6 @@ package com.sequenceiq.redbeams.service.cloud;
 import static com.sequenceiq.redbeams.exception.NotFoundException.notFound;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -83,15 +82,9 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     public ResourceNotification delete(ResourceNotification notification) {
         LOGGER.debug("DBResource deletion notification received: {}", notification);
         Long stackId = notification.getCloudContext().getId();
-        List<CloudResource> cloudResources = notification.getCloudResources();
-        AtomicInteger deleted = new AtomicInteger(0);
-        cloudResources.stream()
-                .filter(cr -> resourceExists(stackId, cr))
-                .forEach(cloudResource -> {
-                    deleteResource(stackId, cloudResource);
-                    deleted.incrementAndGet();
-                });
-        LOGGER.debug("There are {} deleted resource(s)", deleted.get());
+        CloudResource cloudResource = notification.getCloudResource();
+        dbResourceService.findByStackAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType())
+                .ifPresent(value -> dbResourceService.delete(value));
         return notification;
     }
 
@@ -99,19 +92,5 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         if (persistedResource != null) {
             resource.setId(persistedResource.getId());
         }
-    }
-
-    private boolean resourceExists(Long stackId, CloudResource cloudResource) {
-        boolean exists = dbResourceService.existsByStackAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
-        String id = cloudResource.getName();
-        if (exists) {
-            LOGGER.debug("{} and {} already exists in DB for stack.", id, cloudResource.getType());
-        }
-        return exists;
-    }
-
-    private void deleteResource(Long stackId, CloudResource cloudResource) {
-        dbResourceService.findByStackAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType())
-                .ifPresent(value -> dbResourceService.delete(value));
     }
 }

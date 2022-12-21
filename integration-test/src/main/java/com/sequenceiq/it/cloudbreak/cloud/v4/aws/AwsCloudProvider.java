@@ -381,8 +381,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return String.join("/", awsProperties.getCloudStorage().getBaseLocation(), trimObjectName(DEFAULT_STORAGE_NAME),
-                getSuiteName(), getTestName());
+        return String.join("/", awsProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
     @Override
@@ -409,7 +408,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
-            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), getGovCloud());
+            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), getGovCloud());
+            awsProperties.getBaseimage().setImageId(imageId);
+            return imageId;
         } else {
             return getLatestBaseImageID();
         }

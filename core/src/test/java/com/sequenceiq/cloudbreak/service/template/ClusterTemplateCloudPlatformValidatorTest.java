@@ -58,30 +58,32 @@ class ClusterTemplateCloudPlatformValidatorTest {
     // CHECKSTYLE:OFF
     static Object[][] validateClusterTemplateCloudPlatformDataProvider() {
         return new Object[][] {
-                //  enabledPlatforms              cloudPlatform   azureEnabled    validExpected
-                { ENABLED_PLATFORMS_AWS_AZURE,    AWS,            false,          true },
-                { ENABLED_PLATFORMS_AWS_AZURE,    AZURE,          false,          false },
-                { ENABLED_PLATFORMS_AWS_AZURE,    GCP,            false,          false },
-                { ENABLED_PLATFORMS_AWS_AZURE,    FOO,            false,          false },
-                { ENABLED_PLATFORMS_AWS_AZURE,    AWS,            true,           true },
-                { ENABLED_PLATFORMS_AWS_AZURE,    AZURE,          true,           true },
-                { ENABLED_PLATFORMS_AWS_AZURE,    GCP,            true,           false },
-                { ENABLED_PLATFORMS_AWS_AZURE,    FOO,            true,           false },
+                //  enabledPlatforms              cloudPlatform   azureEnabled    gcpEnabled    validExpected
+                { ENABLED_PLATFORMS_AWS_AZURE,    AWS,            false,          false,        true },
+                { ENABLED_PLATFORMS_AWS_AZURE,    AZURE,          false,          false,        false },
+                { ENABLED_PLATFORMS_AWS_AZURE,    GCP,            false,          false,        false },
+                { ENABLED_PLATFORMS_AWS_AZURE,    FOO,            false,          false,        false },
+                { ENABLED_PLATFORMS_AWS_AZURE,    AWS,            true,           false,        true },
+                { ENABLED_PLATFORMS_AWS_AZURE,    AZURE,          true,           false,        true },
+                { ENABLED_PLATFORMS_AWS_AZURE,    GCP,            true,           false,        false },
+                { ENABLED_PLATFORMS_AWS_AZURE,    FOO,            true,           false,        false },
 
-                { ENABLED_PLATFORMS_AZURE_GCP,    AWS,            false,          false },
-                { ENABLED_PLATFORMS_AZURE_GCP,    AZURE,          false,          false },
-                { ENABLED_PLATFORMS_AZURE_GCP,    GCP,            false,          true },
-                { ENABLED_PLATFORMS_AZURE_GCP,    FOO,            false,          false },
-                { ENABLED_PLATFORMS_AZURE_GCP,    AWS,            true,           false },
-                { ENABLED_PLATFORMS_AZURE_GCP,    AZURE,          true,           true },
-                { ENABLED_PLATFORMS_AZURE_GCP,    GCP,            true,           true },
-                { ENABLED_PLATFORMS_AZURE_GCP,    FOO,            true,           false },
+                { ENABLED_PLATFORMS_AZURE_GCP,    AWS,            false,          false,        false },
+                { ENABLED_PLATFORMS_AZURE_GCP,    AZURE,          false,          false,        false },
+                { ENABLED_PLATFORMS_AZURE_GCP,    GCP,            false,          false,        false },
+                { ENABLED_PLATFORMS_AZURE_GCP,    FOO,            false,          false,        false },
+                { ENABLED_PLATFORMS_AZURE_GCP,    AWS,            true,           false,        false },
+                { ENABLED_PLATFORMS_AZURE_GCP,    AZURE,          true,           false,        true },
+                { ENABLED_PLATFORMS_AZURE_GCP,    GCP,            true,           false,        false },
+                { ENABLED_PLATFORMS_AZURE_GCP,    FOO,            true,           false,        false },
 
-                { ENABLED_PLATFORMS_AWS_GCP,      AZURE,          false,          false },
-                { ENABLED_PLATFORMS_AWS_GCP,      AZURE,          true,           false },
-                { ENABLED_PLATFORMS_AWS_GCP,      GCP,            false,          true },
-                { Set.of(),                       AZURE,          true,           true },
-                { Set.of(),                       GCP,            false,          true },
+                { ENABLED_PLATFORMS_AWS_GCP,      AZURE,          false,          false,        false },
+                { ENABLED_PLATFORMS_AWS_GCP,      AZURE,          true,           false,        false },
+                { ENABLED_PLATFORMS_AWS_GCP,      GCP,            false,          false,        false },
+                { ENABLED_PLATFORMS_AWS_GCP,      GCP,            false,          true,         true },
+                { Set.of(),                       AZURE,          true,           false,        true },
+                { Set.of(),                       GCP,            false,          true,         true },
+                { Set.of(),                       GCP,            false,          false,        false },
 
         };
     }
@@ -91,12 +93,15 @@ class ClusterTemplateCloudPlatformValidatorTest {
     @ParameterizedTest(name = "#{index} :\n"
             + "When enabled platforms are {0} and customer wants to start {1} resource => \n"
             + "Azure entitlement status: {2} \n"
-            + "Then CDP can start resources: {3}")
+            + "GCP entitlement status: {3} \n"
+            + "Then CDP can start resources: {4}")
     @MethodSource("validateClusterTemplateCloudPlatformDataProvider")
     void testIsClusterTemplateCloudPlatformValid(Set<String> enabledPlatforms, String cloudPlatform, boolean azureEnabled,
-        boolean validExpected) {
+        boolean gcpEnabled, boolean validExpected) {
         setUpUnderTest(enabledPlatforms);
         lenient().when(entitlementService.azureEnabled(ACCOUNT_ID)).thenReturn(azureEnabled);
+        lenient().when(entitlementService.gcpEnabled(ACCOUNT_ID)).thenReturn(gcpEnabled);
+
         assertThat(underTest.isClusterTemplateCloudPlatformValid(cloudPlatform, ACCOUNT_ID)).isEqualTo(validExpected);
     }
 

@@ -68,7 +68,6 @@ public class InstanceTypeCollectorServiceTest {
 
     @BeforeEach
     void setup() {
-        when(instanceGroupService.getInstanceGroupViewByStackId(69L)).thenReturn(List.of(getInstanceGroup()));
         when(instanceMetaDataService.countByInstanceGroupId(420L)).thenReturn(2);
         when(clouderaCostCache.getPriceByType(any())).thenReturn(0.5);
     }
@@ -78,6 +77,8 @@ public class InstanceTypeCollectorServiceTest {
         when(awsPricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
         when(awsPricingCache.getCpuCountForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(8);
         when(awsPricingCache.getMemoryForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(16);
+        when(awsPricingCache.getStoragePricePerGBHour(REGION, "gp2")).thenReturn(MAGIC_PRICE_PER_DISK_GB);
+        when(instanceGroupService.getInstanceGroupViewByStackId(69L)).thenReturn(List.of(getInstanceGroup("gp2")));
         when(credentialClientService.getByEnvironmentCrn(any())).thenReturn(getCredential("AWS"));
 
         ClusterCostDto clusterCostDto = underTest.getAllInstanceTypes(getStack("AWS"));
@@ -90,6 +91,8 @@ public class InstanceTypeCollectorServiceTest {
         when(azurePricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
         when(azurePricingCache.getCpuCountForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(8);
         when(azurePricingCache.getMemoryForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(16);
+        when(azurePricingCache.getStoragePricePerGBHour(REGION, "StandardSSD_LRS", 250)).thenReturn(MAGIC_PRICE_PER_DISK_GB);
+        when(instanceGroupService.getInstanceGroupViewByStackId(69L)).thenReturn(List.of(getInstanceGroup("StandardSSD_LRS")));
         when(credentialClientService.getByEnvironmentCrn(any())).thenReturn(getCredential("AZURE"));
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
@@ -121,7 +124,7 @@ public class InstanceTypeCollectorServiceTest {
         return stack;
     }
 
-    private InstanceGroup getInstanceGroup() {
+    private InstanceGroup getInstanceGroup(String volumeType) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setId(420L);
         Template template = new Template();
@@ -129,6 +132,7 @@ public class InstanceTypeCollectorServiceTest {
         VolumeTemplate volumeTemplate = new VolumeTemplate();
         volumeTemplate.setVolumeCount(2);
         volumeTemplate.setVolumeSize(250);
+        volumeTemplate.setVolumeType(volumeType);
         template.setVolumeTemplates(Set.of(volumeTemplate));
         instanceGroup.setTemplate(template);
         return instanceGroup;

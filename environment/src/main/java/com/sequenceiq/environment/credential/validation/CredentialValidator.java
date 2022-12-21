@@ -50,17 +50,6 @@ public class CredentialValidator {
         this.entitlementService = entitlementService;
     }
 
-    public void validateCreate(CredentialRequest createCredentialRequest) {
-        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        ValidationResult validationResult = Optional.ofNullable(providerValidators.get(createCredentialRequest.getCloudPlatform()))
-                .map(validator -> validator.validateCreate(createCredentialRequest, resultBuilder))
-                .orElse(resultBuilder.build());
-
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
-    }
-
     public void validateParameters(Platform platform, Json json) {
         credentialDefinitionService.checkPropertiesRemoveSensitives(platform, json);
     }
@@ -76,8 +65,12 @@ public class CredentialValidator {
         if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(accountId)) {
             throw new BadRequestException("Provisioning in Microsoft Azure is not enabled for this account.");
         }
+        if (GCP.name().equalsIgnoreCase(cloudPlatform) && CredentialType.ENVIRONMENT.equals(type)
+            && !entitlementService.gcpEnabled(accountId)) {
+            throw new BadRequestException("Provisioning in Google Cloud is not enabled for this account.");
+        }
         if (GCP.name().equalsIgnoreCase(cloudPlatform) && CredentialType.AUDIT.equals(type)
-                && !entitlementService.gcpAuditEnabled(accountId)) {
+            && !entitlementService.gcpAuditEnabled(accountId))  {
             throw new BadRequestException("Auditing in Google Cloud is not enabled for this account.");
         }
     }

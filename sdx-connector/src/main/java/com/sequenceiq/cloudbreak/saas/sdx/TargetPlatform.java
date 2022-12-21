@@ -2,17 +2,12 @@ package com.sequenceiq.cloudbreak.saas.sdx;
 
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 public enum TargetPlatform {
-
     SAAS(CrnResourceDescriptor.SDX_SAAS_INSTANCE),
     PAAS(CrnResourceDescriptor.DATALAKE);
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TargetPlatform.class);
 
     private CrnResourceDescriptor crnResourceDescriptor;
 
@@ -28,9 +23,6 @@ public enum TargetPlatform {
         return Arrays.stream(values())
                 .filter(platform -> platform.getCrnResourceDescriptor().equals(CrnResourceDescriptor.getByCrnString(crn)))
                 .findFirst()
-                .orElseGet(() -> {
-                    LOGGER.warn("Based on CRN we were not able to decide the target platform, fallback to PAAS");
-                    return PAAS;
-                });
+                .orElseThrow(() -> new NotFoundException(String.format("There is no SDX platform based on CRN %s", crn)));
     }
 }

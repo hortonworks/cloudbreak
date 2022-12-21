@@ -52,9 +52,6 @@ public class CommonClusterManagerProperties {
     public String getInternalSdxBlueprintName() {
         return String.format(internalSdxBlueprintName, runtimeVersion); }
 
-    public String getInternalSdxBlueprintNameWithRuntimeVersion(String runtimeVersion) {
-        return String.format(internalSdxBlueprintName, runtimeVersion); }
-
     public void setInternalSdxBlueprintName(String internalSdxBlueprintName) {
         this.internalSdxBlueprintName = internalSdxBlueprintName;
     }

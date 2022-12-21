@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.validation.ProviderCredentialValidator;
 
@@ -23,11 +22,6 @@ public class AwsCredentialValidator implements ProviderCredentialValidator {
     @Override
     public String supportedProvider() {
         return CloudPlatform.AWS.name();
-    }
-
-    @Override
-    public ValidationResult validateCreate(CredentialRequest credentialRequest, ValidationResultBuilder resultBuilder) {
-        return resultBuilder.build();
     }
 
     @Override

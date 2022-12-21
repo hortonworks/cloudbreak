@@ -65,8 +65,6 @@ public class AzureInstanceTemplate extends InstanceTemplate {
      */
     public static final String ENCRYPTION_AT_HOST_ENABLED = "encryptionAtHost";
 
-    public static final String RESOURCE_DISK_ATTACHED = "resourceDiskAttached";
-
     public AzureInstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status,
             Map<String, Object> parameters, Long templateId, String imageId) {
         super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId, TemporaryStorage.ATTACHED_VOLUMES, 0L);

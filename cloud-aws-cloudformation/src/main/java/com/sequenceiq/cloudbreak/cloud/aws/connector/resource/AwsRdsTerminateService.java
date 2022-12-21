@@ -95,7 +95,7 @@ public class AwsRdsTerminateService {
         CloudContext cloudContext = ac.getCloudContext();
         AmazonRdsClient rdsClient = awsClient.createRdsClient(credentialView, regionName);
         awsRdsParameterGroupService.removeFormerParamGroups(rdsClient, stack.getDatabaseServer(), resources);
-        persistenceNotifier.notifyDeletions(resources, cloudContext);
+        resources.forEach(resource -> persistenceNotifier.notifyDeletion(resource, cloudContext));
 
         // FIXME
         return List.of();

@@ -31,11 +31,8 @@ public class ImageFilterParams {
 
     private final String region;
 
-    private final boolean getAllImages;
-
     public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint,
-            Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform imageCatalogPlatform, String cloudPlatform, String region,
-            boolean getAllImages) {
+            Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform imageCatalogPlatform, String cloudPlatform, String region) {
         this.currentImage = currentImage;
         this.lockComponents = lockComponents;
         this.stackRelatedParcels = stackRelatedParcels;
@@ -46,7 +43,6 @@ public class ImageFilterParams {
         this.imageCatalogPlatform = imageCatalogPlatform;
         this.cloudPlatform = cloudPlatform;
         this.region = region;
-        this.getAllImages = getAllImages;
     }
 
     public Image getCurrentImage() {
@@ -93,10 +89,6 @@ public class ImageFilterParams {
         return region;
     }
 
-    public boolean isGetAllImages() {
-        return getAllImages;
-    }
-
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(Object o) {
@@ -116,13 +108,12 @@ public class ImageFilterParams {
                 Objects.equals(imageCatalogPlatform, that.imageCatalogPlatform) &&
                 Objects.equals(stackId, that.stackId) &&
                 Objects.equals(cloudPlatform, that.cloudPlatform) &&
-                Objects.equals(region, that.region) &&
-                Objects.equals(getAllImages, that.getAllImages);
+                Objects.equals(region, that.region);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings,
-                imageCatalogPlatform, cloudPlatform, region, getAllImages);
+                imageCatalogPlatform, cloudPlatform, region);
     }
 }

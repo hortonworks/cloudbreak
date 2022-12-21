@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import javax.validation.constraints.NotNull;
 
@@ -81,9 +79,6 @@ public class AzureUtilsTest {
 
     @Mock
     private CloudExceptionConverter cloudExceptionConverter;
-
-    @Mock
-    private Retry retryService;
 
     @InjectMocks
     private AzureUtils underTest;
@@ -611,31 +606,5 @@ public class AzureUtilsTest {
                         .as(input)
                         .isEqualTo(output.replaceAll("^0+", "")));
         softly.assertAll();
-    }
-
-    @Test
-    void testCheckResourceGroupExistenceWithRetryNoException() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(retryService.testWith2SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
-        when(azureClient.resourceGroupExists("rg-name")).thenReturn(true);
-
-        boolean result = underTest.checkResourceGroupExistenceWithRetry(azureClient, "rg-name");
-
-        assertTrue(result);
-        verify(retryService, times(1)).testWith2SecDelayMax5Times(any(Supplier.class));
-    }
-
-    @Test
-    void testCheckResourceGroupExistenceWithRetryExhausted() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(retryService.testWith2SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
-        when(azureClient.resourceGroupExists("rg-name")).thenThrow(new RuntimeException("error"));
-
-        Retry.ActionFailedException ex = assertThrows(Retry.ActionFailedException.class,
-                () -> underTest.checkResourceGroupExistenceWithRetry(azureClient, "rg-name"));
-
-        assertEquals(RuntimeException.class, ex.getCause().getClass());
-        assertEquals("java.lang.RuntimeException: error", ex.getMessage());
-        verify(retryService, times(1)).testWith2SecDelayMax5Times(any(Supplier.class));
     }
 }

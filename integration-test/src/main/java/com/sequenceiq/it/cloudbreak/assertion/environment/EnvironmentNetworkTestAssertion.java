@@ -1,11 +1,8 @@
 package com.sequenceiq.it.cloudbreak.assertion.environment;
 
-import static com.sequenceiq.common.api.type.DeploymentRestriction.ENDPOINT_ACCESS_GATEWAY;
-
-import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
@@ -111,13 +108,11 @@ public class EnvironmentNetworkTestAssertion {
                 .size();
     }
 
-    public static Assertion<EnvironmentTestDto, EnvironmentClient> environmentWithEndpointGatewayContainsNeccessaryConfigs(Collection<String> workloadSubnetIds,
-            Collection<String> loadBalancerSubnetIds) {
+    public static Assertion<EnvironmentTestDto, EnvironmentClient> environmentWithEndpointGatewayContainsNeccessaryConfigs(Set<String> subnetIds) {
         return (testContext, testDto, environmentClient) -> {
             DetailedEnvironmentResponse environment = environmentClient.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName());
             isPublicEndpointAccessGatewayEnabled(environment);
-            loadBalancerSubnetIdsWerePropagatedCorrectly(environment, loadBalancerSubnetIds);
-            workloadSubnetIdsWerePropagatedCorrectly(environment, workloadSubnetIds);
+            subnetIdsWerePropagatedCorrectly(environment, subnetIds);
             return testDto;
         };
     }
@@ -129,27 +124,9 @@ public class EnvironmentNetworkTestAssertion {
         }
     }
 
-    private static void loadBalancerSubnetIdsWerePropagatedCorrectly(DetailedEnvironmentResponse environment, Collection<String> expectedSubnetIds) {
+    private static void subnetIdsWerePropagatedCorrectly(DetailedEnvironmentResponse environment, Set<String> expectedSubnetIds) {
         if (!expectedSubnetIds.equals(environment.getNetwork().getEndpointGatewaySubnetIds())) {
             throw new IllegalArgumentException(String.format("Public endpoint access gateway subnet ids should be set to %s!", expectedSubnetIds));
         }
-        for (CloudSubnet cloudSubnet : environment.getNetwork().getSubnetMetas().values()) {
-            if (expectedSubnetIds.contains(cloudSubnet.getId()) && !cloudSubnet.getDeploymentRestrictions().contains(ENDPOINT_ACCESS_GATEWAY)) {
-                throw new IllegalStateException(String.format("The %s deployment restriction should not miss from the list!", ENDPOINT_ACCESS_GATEWAY.name()));
-            }
-        }
     }
-
-    private static void workloadSubnetIdsWerePropagatedCorrectly(DetailedEnvironmentResponse environment, Collection<String> expectedSubnetIds) {
-        if (!expectedSubnetIds.equals(environment.getNetwork().getSubnetIds())) {
-            throw new IllegalArgumentException(String.format("The subnet IDs should be set to %s!", expectedSubnetIds));
-        }
-        for (CloudSubnet cloudSubnet : environment.getNetwork().getSubnetMetas().values()) {
-            if (expectedSubnetIds.contains(cloudSubnet.getId()) && cloudSubnet.getDeploymentRestrictions().contains(ENDPOINT_ACCESS_GATEWAY)) {
-                throw new IllegalStateException(String.format("The %s deployment restriction should miss from the list restriction list!",
-                        ENDPOINT_ACCESS_GATEWAY.name()));
-            }
-        }
-    }
-
 }

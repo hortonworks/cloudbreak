@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,9 +59,6 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @InjectMocks
     private FreeIpaInstanceHealthDetailsService underTest;
-
-    @Mock
-    private FreeIpaInstanceHealthDetailsService mockFreeIpaInstanceHealthDetailsService;
 
     private List<RPCMessage> getLegacyBaseMessages(String host) {
         List<RPCMessage> messages = new ArrayList<>();
@@ -196,7 +192,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testGetInstanceHealthDetailsLegacyHealthyNode() throws Exception {
-        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
@@ -214,7 +210,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testGetInstanceHealthDetailsLegacyUnhealthyNode() throws Exception {
-        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn(HOST);
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
@@ -232,7 +228,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testGetInstanceHealthDetailsLegacyUnresponsiveNodeThrows() throws Exception {
-        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn(HOST);
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
@@ -246,7 +242,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testGetInstanceHealthDetailsHealthyNode() throws Exception {
-        FreeIpaHealthCheckClient mockIpaHealthClient = mock(FreeIpaHealthCheckClient.class);
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
         Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
         Mockito.when(mockIpaHealthClient.nodeHealth()).thenReturn(getGoodPayload(HOST));
@@ -263,7 +259,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testGetInstanceHealthDetailsUnhealthyNode() throws Exception {
-        FreeIpaHealthCheckClient mockIpaHealthClient = mock(FreeIpaHealthCheckClient.class);
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
         Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
         Mockito.when(mockIpaHealthClient.nodeHealth()).thenReturn(getErrorPayload(HOST));
@@ -280,7 +276,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testGetInstanceHealthDetailsUnresponsiveNodeThrows() throws Exception {
-        FreeIpaHealthCheckClient mockIpaHealthClient = mock(FreeIpaHealthCheckClient.class);
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
         Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
         Mockito.when(mockIpaHealthClient.nodeHealth()).thenThrow(ipaClientException);
@@ -293,7 +289,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testCheckFreeIpaHealthLegacyHealthyNode() throws Exception {
-        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
@@ -308,7 +304,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testCheckFreeIpaHealthLegacyUnhealthyNode() throws Exception {
-        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn(HOST);
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
@@ -323,7 +319,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testCheckFreeIpaHealthLegacyUnresponsiveNodeThrows() throws Exception {
-        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn(HOST);
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
@@ -337,7 +333,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testCheckFreeIpaHealthHealthyNode() throws Exception {
-        FreeIpaHealthCheckClient mockIpaHealthClient = mock(FreeIpaHealthCheckClient.class);
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
         Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
         Mockito.when(mockIpaHealthClient.nodeHealth()).thenReturn(getGoodPayload(HOST));
@@ -351,7 +347,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testCheckFreeIpaHealthUnhealthyNode() throws Exception {
-        FreeIpaHealthCheckClient mockIpaHealthClient = mock(FreeIpaHealthCheckClient.class);
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
         Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
         Mockito.when(mockIpaHealthClient.nodeHealth()).thenReturn(getErrorPayload(HOST));
@@ -365,7 +361,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testCheckFreeIpaHealthUnhealthyNodeWithFiltering() throws Exception {
-        FreeIpaHealthCheckClient mockIpaHealthClient = mock(FreeIpaHealthCheckClient.class);
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
         Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
         Mockito.when(mockIpaHealthClient.nodeHealth()).thenReturn(getErrorPayloadWithMixedResults(HOST));
@@ -388,7 +384,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
 
     @Test
     public void testCheckFreeIpaHealthUnresponsiveNodeThrows() throws Exception {
-        FreeIpaHealthCheckClient mockIpaHealthClient = mock(FreeIpaHealthCheckClient.class);
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
         Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
         Mockito.when(mockIpaHealthClient.nodeHealth()).thenThrow(ipaClientException);

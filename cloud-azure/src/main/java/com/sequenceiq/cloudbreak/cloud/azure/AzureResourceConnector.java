@@ -16,7 +16,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
-import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDatabaseResourceService;
@@ -24,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSi
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureUpscaleService;
-import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureVerticalScaleService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -75,9 +73,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
     @Inject
     private AzureUpscaleService azureUpscaleService;
-
-    @Inject
-    private AzureVerticalScaleService azureVerticalScaleService;
 
     @Inject
     private AzureStackViewProvider azureStackViewProvider;
@@ -315,16 +310,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type)
-            throws QuotaExceededException {
-        LOGGER.info("The update method which will be followed is {}.", type);
-        if (type.equals(UpdateType.VERTICAL_SCALE)) {
-            AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-            AzureStackView azureStackView = azureStackViewProvider
-                    .getAzureStack(new AzureCredentialView(authenticatedContext.getCloudCredential()), stack, client, authenticatedContext);
-            return azureVerticalScaleService.verticalScale(authenticatedContext, stack, resources, azureStackView, client);
-        }
-        return List.of();
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
+        return new ArrayList<>();
     }
 
     @Override
@@ -397,6 +384,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Override
     public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) {
-        azureDatabaseResourceService.upgradeDatabaseServer(authenticatedContext, stack, persistenceNotifier, targetMajorVersion, resources);
+        azureDatabaseResourceService.upgradeDatabaseServer(authenticatedContext, stack, persistenceNotifier, targetMajorVersion);
     }
 }

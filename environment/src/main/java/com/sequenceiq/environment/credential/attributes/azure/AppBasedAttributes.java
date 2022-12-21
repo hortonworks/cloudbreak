@@ -29,7 +29,7 @@ public class AppBasedAttributes {
     }
 
     public AppAuthenticationType getAuthenticationType() {
-        return authenticationType == null ? AppAuthenticationType.SECRET : authenticationType;
+        return authenticationType;
     }
 
     public void setAuthenticationType(AppAuthenticationType authenticationType) {

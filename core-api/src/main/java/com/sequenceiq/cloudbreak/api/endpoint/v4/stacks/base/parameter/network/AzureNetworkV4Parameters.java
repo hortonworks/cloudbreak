@@ -1,12 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network;
 
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.AKS_PRIVATE_DNS_ZONE_ID;
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE_DNS_ZONE_ID;
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_PUBLIC_IP;
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.SUBNET_ID;
-
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,9 +32,6 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
 
     @ApiModelProperty
     private String databasePrivateDnsZoneId;
-
-    @ApiModelProperty
-    private String aksPrivateDnsZoneId;
 
     public Boolean getNoPublicIp() {
         return noPublicIp;
@@ -83,23 +73,14 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     }
 
-    public String getAksPrivateDnsZoneId() {
-        return aksPrivateDnsZoneId;
-    }
-
-    public void setAksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
-        this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
-    }
-
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map, NO_PUBLIC_IP, noPublicIp);
-        putIfValueNotNull(map, RESOURCE_GROUP_NAME, resourceGroupName);
-        putIfValueNotNull(map, NETWORK_ID, networkId);
-        putIfValueNotNull(map, SUBNET_ID, subnetId);
-        putIfValueNotNull(map, DATABASE_PRIVATE_DNS_ZONE_ID, databasePrivateDnsZoneId);
-        putIfValueNotNull(map, AKS_PRIVATE_DNS_ZONE_ID, aksPrivateDnsZoneId);
+        putIfValueNotNull(map, "noPublicIp", noPublicIp);
+        putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
+        putIfValueNotNull(map, "networkId", networkId);
+        putIfValueNotNull(map, "subnetId", subnetId);
+        putIfValueNotNull(map, "databasePrivateDsZoneId", databasePrivateDnsZoneId);
         return map;
     }
 
@@ -112,11 +93,10 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
 
     @Override
     public void parse(Map<String, Object> parameters) {
-        noPublicIp = getBoolean(parameters, NO_PUBLIC_IP);
-        resourceGroupName = getParameterOrNull(parameters, RESOURCE_GROUP_NAME);
-        networkId = getParameterOrNull(parameters, NETWORK_ID);
-        subnetId = getParameterOrNull(parameters, SUBNET_ID);
-        databasePrivateDnsZoneId = getParameterOrNull(parameters, DATABASE_PRIVATE_DNS_ZONE_ID);
-        aksPrivateDnsZoneId = getParameterOrNull(parameters, AKS_PRIVATE_DNS_ZONE_ID);
+        noPublicIp = getBoolean(parameters, "noPublicIp");
+        resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
+        networkId = getParameterOrNull(parameters, "networkId");
+        subnetId = getParameterOrNull(parameters, "subnetId");
+        databasePrivateDnsZoneId = getParameterOrNull(parameters, "databasePrivateDsZoneId");
     }
 }

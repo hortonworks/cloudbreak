@@ -2,8 +2,6 @@ package com.sequenceiq.environment.environment.validation.cloudstorage;
 
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
@@ -26,8 +24,6 @@ import com.sequenceiq.environment.exception.EnvironmentServiceException;
 @Component
 public class CloudStorageLocationValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudStorageLocationValidator.class);
-
     private final CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint;
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -48,9 +44,7 @@ public class CloudStorageLocationValidator {
             throw new EnvironmentServiceException(String.format("The Google storage location [%s] should be a gs:// URL. %s",
                     storageLocation, getDocLink(environment.getCloudPlatform())));
         }
-        LOGGER.debug("Calculating bucket for {} location for {} environment.", storageLocation, environment.getId());
         String bucketName = getBucketName(fileSystemType, storageLocation);
-        LOGGER.debug("Bucket is {} for {} location for {} environment.", bucketName, storageLocation, environment.getId());
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
         ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
         ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(

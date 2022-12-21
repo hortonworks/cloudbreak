@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.image;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
@@ -50,9 +47,6 @@ public class ImageService {
 
     @Inject
     private ImageRevisionReaderService imageRevisionReaderService;
-
-    @Inject
-    private Clock clock;
 
     @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
@@ -169,20 +163,16 @@ public class ImageService {
         Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(platformString, imgFromCatalog.getImageSetsByProvider());
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
-            return selectImageByRegion(platformString, region, imgFromCatalog, imagesByRegion);
+            return findStringKeyWithEqualsIgnoreCase(region, imagesByRegion)
+                    .or(() -> findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion))
+                    .orElseThrow(() -> new ImageNotFoundException(
+                            String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
+                                    imgFromCatalog, platformString, region)));
         } else {
             String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
                     imgFromCatalog, platformString);
             throw new ImageNotFoundException(msg);
         }
-    }
-
-    private String selectImageByRegion(String platformString, String region, Image imgFromCatalog, Map<String, String> imagesByRegion) {
-        return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
-                .or(() -> findStringKeyWithEqualsIgnoreCase(region, imagesByRegion))
-                .orElseThrow(() -> new ImageNotFoundException(
-                        String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                                imgFromCatalog, platformString, region)));
     }
 
     private <T> Optional<T> findStringKeyWithEqualsIgnoreCase(String key, Map<String, T> map) {
@@ -232,12 +222,5 @@ public class ImageService {
                 source.getPackageVersions(),
                 true
         );
-    }
-
-    public List<ImageEntity> getImagesOfAliveStacks(Integer thresholdInDays) {
-        final LocalDateTime thresholdDate = clock.getCurrentLocalDateTime()
-                .minusDays(Optional.ofNullable(thresholdInDays).orElse(0));
-        final long thresholdTimestamp = Timestamp.valueOf(thresholdDate).getTime();
-        return imageRepository.findImagesOfAliveStacks(thresholdTimestamp);
     }
 }

@@ -5,8 +5,6 @@ import org.springframework.boot.actuate.autoconfigure.metrics.web.servlet.WebMvc
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import com.sequenceiq.cloudbreak.util.FipsOpenSSLLoaderUtil;
-
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableJpaRepositories(basePackages = { "com.sequenceiq" })
@@ -15,7 +13,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class DatalakeApplication {
 
     public static void main(String[] args) {
-        FipsOpenSSLLoaderUtil.registerOpenSSLJniProvider();
         SpringApplication.run(DatalakeApplication.class, args);
     }
 

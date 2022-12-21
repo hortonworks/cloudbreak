@@ -58,31 +58,19 @@ public class DatabaseServerSslCertificateConfig {
 
     private static final int DUMMY_VERSION = Integer.MIN_VALUE;
 
-    private static final String PLATFORM_AWS = CloudPlatform.AWS.toString().toLowerCase();
-
-    private static final String PLATFORM_AZURE = CloudPlatform.AZURE.toString().toLowerCase();
-
     private static final Map<String, Integer> CERT_LEGACY_MAX_VERSIONS_BY_CLOUD_PLATFORM = Map.ofEntries(
-            Map.entry(PLATFORM_AWS, 0),
-            Map.entry(PLATFORM_AWS + ".eu-south-1", 0),
-            Map.entry(PLATFORM_AWS + ".af-south-1", 0),
-            Map.entry(PLATFORM_AWS + ".me-south-1", 0),
-            Map.entry(PLATFORM_AWS + ".ap-east-1", 0),
-            Map.entry(PLATFORM_AWS + ".ap-southeast-3", 0),
-            Map.entry(PLATFORM_AWS + ".us-gov-west-1", 3),
-            Map.entry(PLATFORM_AWS + ".us-gov-east-1", 3),
-            Map.entry(PLATFORM_AZURE, 1));
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase(), 0),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".eu-south-1", 0),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".af-south-1", 0),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".me-south-1", 0),
+            Map.entry(CloudPlatform.AZURE.toString().toLowerCase(), 1));
 
     private static final Map<String, String> CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIERS_BY_CLOUD_PLATFORM = Map.ofEntries(
-            Map.entry(PLATFORM_AWS, "rds-ca-2019"),
-            Map.entry(PLATFORM_AWS + ".eu-south-1", "rds-ca-2019-eu-south-1"),
-            Map.entry(PLATFORM_AWS + ".af-south-1", "rds-ca-2019-af-south-1"),
-            Map.entry(PLATFORM_AWS + ".me-south-1", "rds-ca-2019-me-south-1"),
-            Map.entry(PLATFORM_AWS + ".ap-east-1", "rds-ca-rsa2048-g1"),
-            Map.entry(PLATFORM_AWS + ".ap-southeast-3", "rds-ca-rsa2048-g1"),
-            Map.entry(PLATFORM_AWS + ".us-gov-west-1", "rds-ca-rsa4096-g1"),
-            Map.entry(PLATFORM_AWS + ".us-gov-east-1", "rds-ca-rsa4096-g1"),
-            Map.entry(PLATFORM_AZURE, "DigiCertGlobalRootG2"));
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase(), "rds-ca-2019"),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".eu-south-1", "rds-ca-2019-eu-south-1"),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".af-south-1", "rds-ca-2019-af-south-1"),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".me-south-1", "rds-ca-2019-me-south-1"),
+            Map.entry(CloudPlatform.AZURE.toString().toLowerCase(), "DigiCertGlobalRootG2"));
 
     // Must not be renamed or made final, gets injected from application properties
     private Map<String, String> certs = new HashMap<>();
@@ -319,12 +307,6 @@ public class DatabaseServerSslCertificateConfig {
                 .map(c -> getValueByCloudPlatformAndRegion(certsByCloudPlatformByCloudProviderIdentifierCache, c, region))
                 .map(certsByCloudProviderIdentifierMap -> certsByCloudProviderIdentifierMap.get(cloudProviderIdentifier))
                 .orElse(null);
-    }
-
-    public int getNumberOfCertsTotal() {
-        return certsByCloudPlatformCache.values().stream()
-                .mapToInt(Set::size)
-                .sum();
     }
 
     public int getNumberOfCertsByCloudPlatformAndRegion(String cloudPlatform, String region) {

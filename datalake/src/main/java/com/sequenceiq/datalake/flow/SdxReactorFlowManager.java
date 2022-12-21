@@ -58,7 +58,6 @@ import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEv
 import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
-import com.sequenceiq.datalake.flow.dr.datalakeinfo.event.SubmitDatalakeDataInfoTriggerEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
@@ -280,12 +279,6 @@ public class SdxReactorFlowManager {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         UpgradeCcmStackEvent event = new UpgradeCcmStackEvent(UPGRADE_CCM_UPGRADE_STACK_EVENT.event(), cluster.getId(), initiatorUserCrn);
         return notify(event.selector(), event, cluster.getClusterName());
-    }
-
-    public void triggerSubmitDatalakeDataInfoFlow(SdxCluster sdxCluster, String operationId, String dataInfoJSON) {
-        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SubmitDatalakeDataInfoTriggerEvent event = new SubmitDatalakeDataInfoTriggerEvent(sdxCluster.getId(), initiatorUserCrn, operationId, dataInfoJSON);
-        notify(event.selector(), event, sdxCluster.getClusterName());
     }
 
     private FlowIdentifier notify(String selector, SdxEvent acceptable, String identifier) {

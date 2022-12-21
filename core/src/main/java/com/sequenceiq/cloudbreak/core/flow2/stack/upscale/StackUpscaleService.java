@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -223,9 +222,9 @@ public class StackUpscaleService {
         CloudConnector connector) throws Exception {
         CloudStack cloudStack = request.getCloudStack();
         try {
-            return connector.resources().update(ac, cloudStack, request.getResourceList(), UpdateType.VERTICAL_SCALE);
+            return connector.resources().update(ac, cloudStack, request.getResourceList());
         } catch (Exception e) {
-            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e, UpdateType.VERTICAL_SCALE);
+            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e);
         }
     }
 
@@ -242,10 +241,10 @@ public class StackUpscaleService {
     }
 
     private List<CloudResourceStatus> handleExceptionAndRetryUpdate(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
-        CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e, UpdateType type) throws Exception {
+        CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e) throws Exception {
         flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 e.getMessage());
-        return connector.resources().update(ac, cloudStack, request.getResourceList(), type);
+        return connector.resources().update(ac, cloudStack, request.getResourceList());
     }
 
     private int getRemovableNodeCount(AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, QuotaExceededException quotaExceededException,

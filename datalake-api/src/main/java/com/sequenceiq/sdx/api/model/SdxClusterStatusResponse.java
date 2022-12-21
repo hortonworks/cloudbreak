@@ -72,8 +72,4 @@ public enum SdxClusterStatusResponse {
     public boolean isRunning() {
         return RUNNING.equals(this);
     }
-
-    public boolean isAvailable() {
-        return RUNNING.equals(this) || DATALAKE_BACKUP_INPROGRESS.equals(this);
-    }
 }

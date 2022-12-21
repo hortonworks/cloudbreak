@@ -49,7 +49,6 @@ import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.ParentEnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
-import com.sequenceiq.environment.environment.dto.credential.CredentialDetailsConverter;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
@@ -193,9 +192,6 @@ class EnvironmentDtoConverterTest {
 
     @Mock
     private FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider;
-
-    @Mock
-    private CredentialDetailsConverter credentialDetailsConverter;
 
     @Captor
     private ArgumentCaptor<CDPTagGenerationRequest> cdpTagGenerationRequestCaptor;

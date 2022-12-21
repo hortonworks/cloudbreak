@@ -19,9 +19,7 @@ public class SdxDescribeInternalAction implements Action<SdxInternalTestDto, Sdx
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        if (testDto.getCrn() != null) {
-            Log.when(LOGGER, format(" SDX Crn: %s ", testDto.getCrn()));
-        }
+        Log.when(LOGGER, format(" SDX Crn: %s ", testDto.getCrn()));
         Log.whenJson(LOGGER, " SDX describe internal request: ", testDto.getRequest());
         testDto.setResponse(client.getDefaultClient()
                 .sdxEndpoint()

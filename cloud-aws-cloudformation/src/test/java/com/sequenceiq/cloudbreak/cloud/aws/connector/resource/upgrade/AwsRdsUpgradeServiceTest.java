@@ -105,7 +105,7 @@ public class AwsRdsUpgradeServiceTest {
         inOrder.verify(awsRdsUpgradeValidatorService).validateRdsIsAvailableOrUpgrading(rdsInfo);
         inOrder.verify(awsRdsUpgradeSteps).upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
         inOrder.verify(awsRdsUpgradeSteps).waitForUpgrade(ac, rdsClient, databaseServer);
-        verify(persistenceNotifier, times(1)).notifyDeletions(resources, cloudContext);
+        verify(persistenceNotifier, times(2)).notifyDeletion(any(CloudResource.class), eq(cloudContext));
     }
 
     @Test

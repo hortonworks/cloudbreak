@@ -18,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -58,7 +57,7 @@ public class AwsUpdateServiceTest {
                 .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.IMAGE_UPDATE);
+        List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource));
 
         verify(awsImageUpdateService, times(1)).updateImage(ac, stack, cloudResource);
         assertEquals(1, statuses.size());
@@ -79,7 +78,7 @@ public class AwsUpdateServiceTest {
         when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
         doNothing().when(awsLaunchTemplateUpdateService).updateLaunchTemplate(anyMap(), any(), anyString(), any());
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, launch), UpdateType.IMAGE_UPDATE);
+        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, launch));
 
         verify(awsImageUpdateService, times(0)).updateImage(ac, stack, cloudResource);
         assertEquals(0, statuses.size());
@@ -99,7 +98,7 @@ public class AwsUpdateServiceTest {
                 .build();
         doNothing().when(awsLaunchTemplateUpdateService).updateLaunchTemplate(anyMap(), any(), anyString(), any());
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, cf), UpdateType.IMAGE_UPDATE);
+        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, cf));
 
         verify(awsImageUpdateService, times(0)).updateImage(ac, stack, cloudResource);
         assertEquals(1, statuses.size());

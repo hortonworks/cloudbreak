@@ -12,7 +12,6 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
@@ -42,26 +41,14 @@ public class CloudNetworkService {
 
     public Map<String, CloudSubnet> retrieveSubnetMetadata(EnvironmentDto environmentDto, NetworkDto network) {
         Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(environmentDto, network, network == null ? Set.of() : network.getSubnetIds());
-        decorateWithDeploymentRestrictions(subnetMetadata, network);
+        subnetMetadata.forEach((name, subnet) -> subnet.setDeploymentRestrictions(DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS));
         return subnetMetadata;
     }
 
     public Map<String, CloudSubnet> retrieveSubnetMetadata(Environment environment, NetworkDto network) {
         Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(environment, network, network == null ? Set.of() : network.getSubnetIds());
-        decorateWithDeploymentRestrictions(subnetMetadata, network);
+        subnetMetadata.forEach((name, subnet) -> subnet.setDeploymentRestrictions(DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS));
         return subnetMetadata;
-    }
-
-    private void decorateWithDeploymentRestrictions(Map<String, CloudSubnet> subnetMetadata, NetworkDto network) {
-        if (network != null) {
-            subnetMetadata.forEach((name, subnet) -> {
-                if (CollectionUtils.isEmpty(network.getEndpointGatewaySubnetIds()) || network.getEndpointGatewaySubnetIds().contains(subnet.getId())) {
-                    subnet.setDeploymentRestrictions(DeploymentRestriction.ALL);
-                } else {
-                    subnet.setDeploymentRestrictions(DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS);
-                }
-            });
-        }
     }
 
     public Map<String, CloudSubnet> retrieveEndpointGatewaySubnetMetadata(EnvironmentDto environmentDto, NetworkDto network) {

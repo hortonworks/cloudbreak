@@ -1,44 +1,33 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue;
 
-import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil;
-import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFile;
-import com.sequenceiq.cloudbreak.cmtemplate.inifile.IniFileFactory;
-import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.template.views.RdsView;
 
-@ExtendWith(MockitoExtension.class)
 public class HueConfigProviderTest {
 
     private static final String HUE = "HUE";
@@ -55,251 +44,93 @@ public class HueConfigProviderTest {
 
     private static final String PASSWORD = "password";
 
-    @Mock
-    private IniFileFactory iniFileFactory;
-
-    @InjectMocks
     private HueConfigProvider underTest;
 
-    @Mock
-    private IniFile safetyValve;
+    @Before
+    public void setUp() {
+        underTest = new HueConfigProvider();
+    }
 
     @Test
     public void getServiceConfigs() {
-        BlueprintView blueprintView = getMockBlueprintView("7.1.0");
+        BlueprintView blueprintView = getMockBlueprintView("7.0.2", "7.0.2");
 
-        RdsView rdsConfig = mock(RdsView.class);
-        when(rdsConfig.getType()).thenReturn(HUE);
-        when(rdsConfig.getHost()).thenReturn(HOST);
-        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
-        when(rdsConfig.getPort()).thenReturn(PORT);
-        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
-        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
-        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-
-        TemplatePreparationObject tpo = new Builder()
-                .withRdsViews(Set.of(rdsConfig))
-                .withBlueprintView(blueprintView)
-                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
-                .build();
-
-        when(iniFileFactory.create()).thenReturn(safetyValve);
-        when(safetyValve.print()).thenReturn("");
-
+        TemplatePreparationObject tpo = new Builder().withBlueprintView(blueprintView).build();
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
-
-        verify(safetyValve, never()).addContent(anyString());
-        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
-        assertThat(configToValue).containsOnly(
-                entry("database_host", HOST),
-                entry("database_port", PORT),
-                entry("database_name", DB_NAME),
-                entry("database_type", DB_PROVIDER),
-                entry("database_user", USER_NAME),
-                entry("database_password", PASSWORD));
-
-        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
-        assertThat(configToVariable).isEmpty();
-    }
-
-    @Test
-    public void getServiceConfigsTestWhenGoodCmVersionButDbSslIsNotRequested() {
-        BlueprintView blueprintView = getMockBlueprintView("7.2.2");
-
-        RdsView rdsConfig = mock(RdsView.class);
-        when(rdsConfig.getType()).thenReturn(HUE);
-        when(rdsConfig.getHost()).thenReturn(HOST);
-        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
-        when(rdsConfig.getPort()).thenReturn(PORT);
-        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
-        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
-        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        when(rdsConfig.isUseSsl()).thenReturn(false);
-
-        TemplatePreparationObject tpo = new Builder()
-                .withRdsViews(Set.of(rdsConfig))
-                .withBlueprintView(blueprintView)
-                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
-                .build();
-
-        when(iniFileFactory.create()).thenReturn(safetyValve);
-        when(safetyValve.print()).thenReturn("");
-
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
-
-        verify(safetyValve, never()).addContent(anyString());
-        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
-        assertThat(configToValue).containsOnly(
-                entry("database_host", HOST),
-                entry("database_port", PORT),
-                entry("database_name", DB_NAME),
-                entry("database_type", DB_PROVIDER),
-                entry("database_user", USER_NAME),
-                entry("database_password", PASSWORD));
-
-        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
-        assertThat(configToVariable).isEmpty();
-    }
-
-    @Test
-    public void getServiceConfigsTestWhenDbSsl() {
-        BlueprintView blueprintView = getMockBlueprintView("7.2.2");
-
-        RdsView rdsConfig = mock(RdsView.class);
-        when(rdsConfig.getType()).thenReturn(HUE);
-        when(rdsConfig.getHost()).thenReturn(HOST);
-        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
-        when(rdsConfig.getPort()).thenReturn(PORT);
-        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
-        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
-        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        when(rdsConfig.isUseSsl()).thenReturn(true);
-        when(rdsConfig.getSslCertificateFilePath()).thenReturn("/foo/bar.pem");
-
-        TemplatePreparationObject tpo = new Builder()
-                .withRdsViews(Set.of(rdsConfig))
-                .withBlueprintView(blueprintView)
-                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
-                .build();
-
-        when(iniFileFactory.create()).thenReturn(safetyValve);
-        String expectedSafetyValveValue = "[desktop]\n[[database]]\noptions='{\"sslmode\": \"verify-full\", \"sslrootcert\": \"/foo/bar.pem\"}'";
-        when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
-
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
-
-        verify(safetyValve).addContent(expectedSafetyValveValue);
-        verifyNoMoreInteractions(safetyValve);
-        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
-        assertThat(configToValue).containsOnly(
-                entry("database_host", HOST),
-                entry("database_port", PORT),
-                entry("database_name", DB_NAME),
-                entry("database_type", DB_PROVIDER),
-                entry("database_user", USER_NAME),
-                entry("database_password", PASSWORD),
-                entry("hue_service_safety_valve", expectedSafetyValveValue));
-
-        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
-        assertThat(configToVariable).isEmpty();
+        Map<String, String> paramToVariable =
+                result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getVariable));
+        assertThat(paramToVariable).containsOnly(
+                new SimpleEntry<>("database_host", "hue-hue_database_host"),
+                new SimpleEntry<>("database_port", "hue-hue_database_port"),
+                new SimpleEntry<>("database_name", "hue-hue_database_name"),
+                new SimpleEntry<>("database_type", "hue-hue_database_type"),
+                new SimpleEntry<>("database_user", "hue-hue_database_user"),
+                new SimpleEntry<>("database_password", "hue-hue_database_password")
+        );
     }
 
     @Test
     public void getServiceConfigsWhenKnoxConfiguredToExternalDomain() {
-        BlueprintView blueprintView = getMockBlueprintView("7.0.1");
+        BlueprintView blueprintView = getMockBlueprintView("7.0.2", "7.0.2");
 
-        RdsView rdsConfig = mock(RdsView.class);
-        when(rdsConfig.getType()).thenReturn(HUE);
-        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
-        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        when(rdsConfig.getHost()).thenReturn(HOST);
-        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
-        when(rdsConfig.getPort()).thenReturn(PORT);
-        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
-
-        String expectedExternalFQDN = "myaddress.cloudera.site";
-        String expectedInternalFQDN = "private-gateway.cloudera.site";
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
+        generalClusterConfigs.setExternalFQDN("myaddress.cloudera.site");
         generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
-        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(expectedInternalFQDN));
-
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("private-gateway.cloudera.site"));
         TemplatePreparationObject tpo = new Builder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withGateway(new Gateway(), "", new HashSet<>())
                 .withBlueprintView(blueprintView)
-                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_1), null)
-                .withRdsViews(Set.of(rdsConfig))
+                .withGateway(new Gateway(), "", new HashSet<>())
                 .build();
-
-        when(iniFileFactory.create()).thenReturn(safetyValve);
-        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
-        String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
-        when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
-
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
-
-        verify(safetyValve).addContent(expectedSafetyValveValue);
-        verifyNoMoreInteractions(safetyValve);
-        verify(rdsConfig, never()).getSslCertificateFilePath();
-        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
-        assertThat(configToValue).containsOnly(
-                entry("database_host", HOST),
-                entry("database_port", PORT),
-                entry("database_name", DB_NAME),
-                entry("database_type", DB_PROVIDER),
-                entry("database_user", USER_NAME),
-                entry("database_password", PASSWORD),
-                entry("hue_service_safety_valve", expectedSafetyValveValue));
-
-        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
-        assertThat(configToVariable).isEmpty();
+        Map<String, String> paramToVariable =
+                result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getVariable));
+        assertThat(paramToVariable).containsOnly(
+                new SimpleEntry<>("database_host", "hue-hue_database_host"),
+                new SimpleEntry<>("database_port", "hue-hue_database_port"),
+                new SimpleEntry<>("database_name", "hue-hue_database_name"),
+                new SimpleEntry<>("database_type", "hue-hue_database_type"),
+                new SimpleEntry<>("database_user", "hue-hue_database_user"),
+                new SimpleEntry<>("database_password", "hue-hue_database_password"),
+                new SimpleEntry<>("hue_service_safety_valve", "hue-hue_service_safety_valve")
+        );
     }
 
     @Test
-    public void getServiceConfigsWhenKnoxConfiguredToExternalDomainWhenNoSafetyValve() {
-        BlueprintView blueprintView = getMockBlueprintView("7.1.0");
+    public void getServiceConfigVariables() {
+        BlueprintView blueprintView = getMockBlueprintView("7.2.0", "7.1.0");
 
-        RdsView rdsConfig = mock(RdsView.class);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
         when(rdsConfig.getType()).thenReturn(HUE);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        when(rdsConfig.getHost()).thenReturn(HOST);
-        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
-        when(rdsConfig.getPort()).thenReturn(PORT);
-        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
-
-        String expectedExternalFQDN = "myaddress.cloudera.site";
-        String expectedInternalFQDN = "private-gateway.cloudera.site";
-        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
-        generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
-        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(expectedInternalFQDN));
-
         TemplatePreparationObject tpo = new Builder()
-                .withGeneralClusterConfigs(generalClusterConfigs)
-                .withGateway(new Gateway(), "", new HashSet<>())
+                .withRdsConfigs(Set.of(rdsConfig))
                 .withBlueprintView(blueprintView)
-                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
-                .withRdsViews(Set.of(rdsConfig))
                 .build();
 
-        when(iniFileFactory.create()).thenReturn(safetyValve);
-        when(safetyValve.print()).thenReturn("");
-
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
-
-        verify(safetyValve, never()).addContent(anyString());
-        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
-        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
-        assertThat(configToValue).containsOnly(
-                entry("database_host", HOST),
-                entry("database_port", PORT),
-                entry("database_name", DB_NAME),
-                entry("database_type", DB_PROVIDER),
-                entry("database_user", USER_NAME),
-                entry("database_password", PASSWORD),
-                entry("knox_proxyhosts", proxyHostsExpected));
-
-        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
-        assertThat(configToVariable).isEmpty();
+        List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
+        Map<String, String> paramToVariable =
+                result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
+        assertThat(paramToVariable).containsOnly(
+                new SimpleEntry<>("hue-hue_database_host", HOST),
+                new SimpleEntry<>("hue-hue_database_port", PORT),
+                new SimpleEntry<>("hue-hue_database_name", DB_NAME),
+                new SimpleEntry<>("hue-hue_database_type", DB_PROVIDER),
+                new SimpleEntry<>("hue-hue_database_user", USER_NAME),
+                new SimpleEntry<>("hue-hue_database_password", PASSWORD));
     }
 
-    // Note: Due to the conflicting CM version requirements, it is impossible to have both the Knox Proxy Hosts and DB SSL settings in the Safety Valve!
     @Test
-    public void getServiceConfigsWhenKnoxConfiguredToExternalDomainWhenNoSafetyValveAndDbSsl() {
-        BlueprintView blueprintView = getMockBlueprintView("7.2.2");
+    public void getServiceConfigVariablesWhenKnoxConfiguredToExternalDomain() {
+        BlueprintView blueprintView = getMockBlueprintView("7.0.1", "7.0.1");
 
-        RdsView rdsConfig = mock(RdsView.class);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
         when(rdsConfig.getType()).thenReturn(HUE);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        when(rdsConfig.getHost()).thenReturn(HOST);
-        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
-        when(rdsConfig.getPort()).thenReturn(PORT);
-        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
-        when(rdsConfig.isUseSsl()).thenReturn(true);
-        when(rdsConfig.getSslCertificateFilePath()).thenReturn("/foo/bar.pem");
 
         String expectedExternalFQDN = "myaddress.cloudera.site";
         String expectedInternalFQDN = "private-gateway.cloudera.site";
@@ -312,32 +143,75 @@ public class HueConfigProviderTest {
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withGateway(new Gateway(), "", new HashSet<>())
                 .withBlueprintView(blueprintView)
-                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
-                .withRdsViews(Set.of(rdsConfig))
+                .withRdsConfigs(Set.of(rdsConfig))
                 .build();
 
-        when(iniFileFactory.create()).thenReturn(safetyValve);
-        String expectedSafetyValveValue = "[desktop]\n[[database]]\noptions='{\"sslmode\": \"verify-full\", \"sslrootcert\": \"/foo/bar.pem\"}'";
-        when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
+        List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
+        Map<String, String> paramToVariable =
+                result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
+        String proxyHostsExpected1 = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
+        String proxyHostsExpected2 = String.join(",", expectedExternalFQDN, expectedInternalFQDN);
+        String expectedSafetyValveValue1 = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected1);
+        String expectedSafetyValveValue2 = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected2);
+        assertEquals(7, paramToVariable.size());
+        assertThat(paramToVariable).contains(
+                new SimpleEntry<>("hue-hue_database_host", HOST),
+                new SimpleEntry<>("hue-hue_database_port", PORT),
+                new SimpleEntry<>("hue-hue_database_name", DB_NAME),
+                new SimpleEntry<>("hue-hue_database_type", DB_PROVIDER),
+                new SimpleEntry<>("hue-hue_database_user", USER_NAME),
+                new SimpleEntry<>("hue-hue_database_password", PASSWORD));
+        assertThat(paramToVariable).containsAnyOf(
+                new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue1),
+                new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue2));
+    }
 
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+    @Test
+    public void getServiceConfigVariablesWhenKnoxConfiguredToExternalDomainWhenNoSafetyValve() {
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        when(blueprintView.getVersion()).thenReturn("7.1.0");
 
-        verify(safetyValve).addContent(expectedSafetyValveValue);
-        verifyNoMoreInteractions(safetyValve);
-        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
-        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
-        assertThat(configToValue).containsOnly(
-                entry("database_host", HOST),
-                entry("database_port", PORT),
-                entry("database_name", DB_NAME),
-                entry("database_type", DB_PROVIDER),
-                entry("database_user", USER_NAME),
-                entry("database_password", PASSWORD),
-                entry("knox_proxyhosts", proxyHostsExpected),
-                entry("hue_service_safety_valve", expectedSafetyValveValue));
+        CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
+        when(templateProcessor.getVersion()).thenReturn(Optional.ofNullable("7.1.0"));
 
-        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
-        assertThat(configToVariable).isEmpty();
+        when(blueprintView.getProcessor()).thenReturn(templateProcessor);
+
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(HUE);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+
+        String expectedExternalFQDN = "myaddress.cloudera.site";
+        String expectedInternalFQDN = "private-gateway.cloudera.site";
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
+        generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(expectedInternalFQDN));
+
+        TemplatePreparationObject tpo = new Builder()
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withGateway(new Gateway(), "", new HashSet<>())
+                .withBlueprintView(blueprintView)
+                .withRdsConfigs(Set.of(rdsConfig))
+                .build();
+
+        List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
+        Map<String, String> paramToVariable =
+                result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
+        String proxyHostsExpected1 = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
+        String proxyHostsExpected2 = String.join(",", expectedExternalFQDN, expectedInternalFQDN);
+        assertEquals(7, paramToVariable.size());
+        assertThat(paramToVariable).contains(
+                new SimpleEntry<>("hue-hue_database_host", HOST),
+                new SimpleEntry<>("hue-hue_database_port", PORT),
+                new SimpleEntry<>("hue-hue_database_name", DB_NAME),
+                new SimpleEntry<>("hue-hue_database_type", DB_PROVIDER),
+                new SimpleEntry<>("hue-hue_database_user", USER_NAME),
+                new SimpleEntry<>("hue-hue_database_password", PASSWORD));
+        assertThat(paramToVariable).containsAnyOf(
+            new SimpleEntry<>("hue-knox_proxyhosts", proxyHostsExpected1),
+            new SimpleEntry<>("hue-knox_proxyhosts", proxyHostsExpected2));
     }
 
     @Test
@@ -356,107 +230,53 @@ public class HueConfigProviderTest {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
-        RdsView rdsConfig = mock(RdsView.class);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
         when(rdsConfig.getType()).thenReturn(HUE);
-
-        TemplatePreparationObject tpo = new Builder().withRdsViews(Set.of(rdsConfig)).build();
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
-
         assertThat(result).isTrue();
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void isConfigurationNeededFalseWhenNoHueOnCluster() {
+    public void isConfigurationNeededFalseWhenNoHueOnClusterr() {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
-        RdsView rdsConfig = mock(RdsView.class);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
         when(rdsConfig.getType()).thenReturn(HUE);
-
-        TemplatePreparationObject tpo = new Builder().withRdsViews(Set.of(rdsConfig)).build();
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
-
         assertThat(result).isFalse();
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void isConfigurationNeededFalseWhenNoDBRegistered() {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
         TemplatePreparationObject tpo = new Builder().build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
-
         assertThat(result).isFalse();
-        verifyNoInteractions(mockTemplateProcessor);
     }
 
     @Test
-    public void getServiceConfigsWhenKnoxConfiguredWithLoadBalancer() {
-        BlueprintView blueprintView = getMockBlueprintView("7.0.1");
+    public void getProxyHostsWhenLoadBalancerConfigured() {
+        BlueprintView blueprintView = getMockBlueprintView("7.0.1", "7.0.1");
 
-        RdsView rdsConfig = mock(RdsView.class);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
         when(rdsConfig.getType()).thenReturn(HUE);
-        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
-        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        when(rdsConfig.getHost()).thenReturn(HOST);
-        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
-        when(rdsConfig.getPort()).thenReturn(PORT);
-        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
-
-        String expectedExternalFQDN = "myaddress.cloudera.site";
-        String expectedLBFQDN = "loadbalancer-gateway.cloudera.site";
-        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
-        generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
-        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.empty());
-        generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.of(expectedLBFQDN));
-
-        TemplatePreparationObject tpo = new Builder()
-                .withGeneralClusterConfigs(generalClusterConfigs)
-                .withGateway(new Gateway(), "", new HashSet<>())
-                .withBlueprintView(blueprintView)
-                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_1), null)
-                .withRdsViews(Set.of(rdsConfig))
-                .build();
-
-        when(iniFileFactory.create()).thenReturn(safetyValve);
-        String proxyHostsExpected = String.join(",", expectedExternalFQDN, expectedLBFQDN);
-        String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
-        when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
-
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
-
-        verify(safetyValve).addContent(expectedSafetyValveValue);
-        verifyNoMoreInteractions(safetyValve);
-        verify(rdsConfig, never()).getSslCertificateFilePath();
-        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
-        assertThat(configToValue).containsOnly(
-                entry("database_host", HOST),
-                entry("database_port", PORT),
-                entry("database_name", DB_NAME),
-                entry("database_type", DB_PROVIDER),
-                entry("database_user", USER_NAME),
-                entry("database_password", PASSWORD),
-                entry("hue_service_safety_valve", expectedSafetyValveValue));
-
-        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
-        assertThat(configToVariable).isEmpty();
-    }
-
-    @Test
-    public void getServiceConfigsWhenKnoxConfiguredWithLoadBalancerPost710() {
-        BlueprintView blueprintView = getMockBlueprintView("7.1.0");
-
-        RdsView rdsConfig = mock(RdsView.class);
-        when(rdsConfig.getType()).thenReturn(HUE);
-        when(rdsConfig.getHost()).thenReturn(HOST);
-        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
-        when(rdsConfig.getPort()).thenReturn(PORT);
-        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
 
@@ -469,36 +289,62 @@ public class HueConfigProviderTest {
         generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.of(expectedLBFQDN));
 
         TemplatePreparationObject tpo = new Builder()
-                .withGeneralClusterConfigs(generalClusterConfigs)
-                .withGateway(new Gateway(), "", new HashSet<>())
-                .withBlueprintView(blueprintView)
-                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
-                .withRdsViews(Set.of(rdsConfig))
-                .build();
+            .withGeneralClusterConfigs(generalClusterConfigs)
+            .withGateway(new Gateway(), "", new HashSet<>())
+            .withBlueprintView(blueprintView)
+            .withRdsConfigs(Set.of(rdsConfig))
+            .build();
 
-        when(iniFileFactory.create()).thenReturn(safetyValve);
-        when(safetyValve.print()).thenReturn("");
-
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
-
-        verify(safetyValve, never()).addContent(anyString());
-        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
-        String proxyHostsExpected = String.join(",", expectedExternalFQDN, expectedLBFQDN);
-        assertThat(configToValue).containsOnly(
-                entry("database_host", HOST),
-                entry("database_port", PORT),
-                entry("database_name", DB_NAME),
-                entry("database_type", DB_PROVIDER),
-                entry("database_user", USER_NAME),
-                entry("database_password", PASSWORD),
-                entry("knox_proxyhosts", proxyHostsExpected));
-
-        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
-        assertThat(configToVariable).isEmpty();
+        List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
+        Map<String, String> paramToVariable =
+            result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
+        String proxyHostsExpected1 = String.join(",", expectedExternalFQDN, expectedLBFQDN);
+        String proxyHostsExpected2 = String.join(",", expectedLBFQDN, expectedExternalFQDN);
+        String expectedSafetyValveValue1 = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected1);
+        String expectedSafetyValveValue2 = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected2);
+        assertThat(paramToVariable).containsAnyOf(
+            new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue1),
+            new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue2));
     }
 
-    private BlueprintView getMockBlueprintView(String tmplVersion) {
+    @Test
+    public void getProxyHostsWhenLoadBalancerConfiguredPost710() {
+        BlueprintView blueprintView = getMockBlueprintView("7.2.0", "7.1.0");
+
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(HUE);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+
+        String expectedExternalFQDN = "myaddress.cloudera.site";
+        String expectedLBFQDN = "loadbalancer-gateway.cloudera.site";
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
+        generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.empty());
+        generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.of(expectedLBFQDN));
+
+        TemplatePreparationObject tpo = new Builder()
+            .withGeneralClusterConfigs(generalClusterConfigs)
+            .withGateway(new Gateway(), "", new HashSet<>())
+            .withBlueprintView(blueprintView)
+            .withRdsConfigs(Set.of(rdsConfig))
+            .build();
+
+        List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
+        Map<String, String> paramToVariable =
+            result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
+        String proxyHostsExpected1 = String.join(",", expectedExternalFQDN, expectedLBFQDN);
+        String proxyHostsExpected2 = String.join(",", expectedLBFQDN, expectedExternalFQDN);
+        assertThat(paramToVariable).containsAnyOf(
+            new SimpleEntry<>("hue-knox_proxyhosts", proxyHostsExpected1),
+            new SimpleEntry<>("hue-knox_proxyhosts", proxyHostsExpected2));
+    }
+
+    private BlueprintView getMockBlueprintView(String bpVersion, String tmplVersion) {
         BlueprintView blueprintView = mock(BlueprintView.class);
+        when(blueprintView.getVersion()).thenReturn(bpVersion);
 
         CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
         when(templateProcessor.getVersion()).thenReturn(Optional.ofNullable(tmplVersion));
@@ -507,13 +353,4 @@ public class HueConfigProviderTest {
         when(blueprintView.getProcessor()).thenReturn(templateProcessor);
         return blueprintView;
     }
-
-    private ClouderaManagerRepo generateCmRepo(Versioned version) {
-        return new ClouderaManagerRepo()
-                .withBaseUrl("baseurl")
-                .withGpgKeyUrl("gpgurl")
-                .withPredefined(true)
-                .withVersion(version.getVersion());
-    }
-
 }

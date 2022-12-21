@@ -11,34 +11,41 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class SaltUpdateTriggerEvent extends StackEvent {
 
-    private final String operationId;
+    private String operationId;
 
     private final boolean chained;
 
     private final boolean finalChain;
 
-    public SaltUpdateTriggerEvent(Long stackId) {
-        super(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), stackId);
+    public SaltUpdateTriggerEvent(String selector, Long stackId) {
+        super(selector, stackId);
         chained = false;
         finalChain = false;
-        operationId = null;
     }
 
     @JsonCreator
     public SaltUpdateTriggerEvent(
+            @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("chained") boolean chained,
-            @JsonProperty("finalChain") boolean finalChain,
-            @JsonProperty("operationId") String operationId) {
-        super(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), stackId, accepted);
+            @JsonProperty("finalChain") boolean finalChain) {
+        super(selector, stackId, accepted);
         this.chained = chained;
         this.finalChain = finalChain;
+    }
+
+    public SaltUpdateTriggerEvent withOperationId(String operationId) {
         this.operationId = operationId;
+        return this;
     }
 
     public String getOperationId() {
         return operationId;
+    }
+
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
     }
 
     public boolean isChained() {

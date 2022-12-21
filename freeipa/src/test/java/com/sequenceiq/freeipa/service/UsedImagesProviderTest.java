@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.api.v1.util.model.UsedImagesListV1Response;
 import com.sequenceiq.freeipa.entity.ImageEntity;
-import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class UsedImagesProviderTest {
@@ -21,14 +21,14 @@ class UsedImagesProviderTest {
     private static final int THRESHOLD_IN_DAYS = 180;
 
     @Mock
-    private ImageService imageService;
+    private StackService stackService;
 
     @InjectMocks
     private UsedImagesProvider underTest;
 
     @Test
     void testEmpty() {
-        when(imageService.getImagesOfAliveStacks(THRESHOLD_IN_DAYS)).thenReturn(List.of());
+        when(stackService.getImagesOfAliveStacks(THRESHOLD_IN_DAYS)).thenReturn(List.of());
 
         final UsedImagesListV1Response result = underTest.getUsedImages(THRESHOLD_IN_DAYS);
 
@@ -37,7 +37,7 @@ class UsedImagesProviderTest {
 
     @Test
     void testSingleImage() {
-        when(imageService.getImagesOfAliveStacks(THRESHOLD_IN_DAYS)).thenReturn(List.of(
+        when(stackService.getImagesOfAliveStacks(THRESHOLD_IN_DAYS)).thenReturn(List.of(
                 createImage("aws-image")));
 
         final UsedImagesListV1Response result = underTest.getUsedImages(THRESHOLD_IN_DAYS);
@@ -50,7 +50,7 @@ class UsedImagesProviderTest {
 
     @Test
     void testMultipleImages() {
-        when(imageService.getImagesOfAliveStacks(THRESHOLD_IN_DAYS)).thenReturn(List.of(
+        when(stackService.getImagesOfAliveStacks(THRESHOLD_IN_DAYS)).thenReturn(List.of(
                 createImage("aws-image"),
                 createImage("aws-image"),
                 createImage("azure-image")));

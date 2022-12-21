@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTe
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SaltJobFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public class SaltJobIdTracker implements OrchestratorBootstrap {
@@ -49,7 +48,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         if (JobState.NOT_STARTED.equals(saltJobRunner.getJobState())) {
             LOGGER.debug("Job has not started in the cluster. Starting for first time.");
             checkIsOtherJobRunning();
-            submitJob();
+            saltJobRunner.setJid(jobId(saltJobRunner.submit(saltConnector)));
             checkIsFinished(saltJobRunner.getJid().getJobId());
         } else if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
             String jobId = saltJobRunner.getJid().getJobId();
@@ -62,7 +61,8 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         } else if (JobState.FAILED == saltJobRunner.getJobState() || JobState.AMBIGUOUS == saltJobRunner.getJobState()) {
             String jobId = saltJobRunner.getJid().getJobId();
             LOGGER.debug("Job: {} failed in the previous time. Trigger again with these targets: {}", jobId, saltJobRunner.getTargetHostnames());
-            submitJob();
+            saltJobRunner.setJid(jobId(saltJobRunner.submit(saltConnector)));
+            saltJobRunner.setJobState(JobState.IN_PROGRESS);
             return call();
         }
         if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
@@ -84,11 +84,6 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             LOGGER.warn("There are running job(s) with id: {}. Postpone starting the new job until these are finished.", runningJobIds);
             throw new CloudbreakOrchestratorInProgressException("There are running job(s) with id: " + runningJobIds, saltJobRunner.getNodesWithError());
         }
-    }
-
-    private void submitJob() throws SaltJobFailedException {
-        saltJobRunner.setJid(jobId(saltJobRunner.submit(saltConnector)));
-        saltJobRunner.setJobState(JobState.IN_PROGRESS);
     }
 
     private List<String> mapToRunningJobIds(RunningJobsResponse runningJobs) {

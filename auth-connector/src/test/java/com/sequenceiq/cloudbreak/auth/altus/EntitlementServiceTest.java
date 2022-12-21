@@ -24,6 +24,8 @@ class EntitlementServiceTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
+    private static final String ACTOR_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID();
+
     private static final String ENTITLEMENT_FOO = "FOO";
 
     private static final String ENTITLEMENT_BAR = "BAR";
@@ -42,6 +44,9 @@ class EntitlementServiceTest {
                 // entitlementName, function, enabled
                 {"CDP_AZURE", (EntitlementCheckFunction) EntitlementService::azureEnabled, false},
                 {"CDP_AZURE", (EntitlementCheckFunction) EntitlementService::azureEnabled, true},
+
+                {"CDP_GCP", (EntitlementCheckFunction) EntitlementService::gcpEnabled, false},
+                {"CDP_GCP", (EntitlementCheckFunction) EntitlementService::gcpEnabled, true},
 
                 {"AUDIT_ARCHIVING_GCP", (EntitlementCheckFunction) EntitlementService::gcpAuditEnabled, false},
                 {"AUDIT_ARCHIVING_GCP", (EntitlementCheckFunction) EntitlementService::gcpAuditEnabled, true},
@@ -148,9 +153,6 @@ class EntitlementServiceTest {
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true},
 
-                {"CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionDatahubEnabled, false},
-                {"CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionDatahubEnabled, true},
-
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, false},
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, true},
 
@@ -247,9 +249,6 @@ class EntitlementServiceTest {
 
                 {"CDP_AZURE_IMAGE_MARKETPLACE_ONLY", (EntitlementCheckFunction) EntitlementService::azureOnlyMarketplaceImagesEnabled, false},
                 {"CDP_AZURE_IMAGE_MARKETPLACE_ONLY", (EntitlementCheckFunction) EntitlementService::azureOnlyMarketplaceImagesEnabled, true},
-
-                {"WORKLOAD_IAM_USERSYNC_ROUTING", (EntitlementCheckFunction) EntitlementService::isWiamUsersyncRoutingEnabled, false},
-                {"WORKLOAD_IAM_USERSYNC_ROUTING", (EntitlementCheckFunction) EntitlementService::isWiamUsersyncRoutingEnabled, true},
         };
     }
 
@@ -267,6 +266,7 @@ class EntitlementServiceTest {
         assertThat(underTest.getEntitlements(ACCOUNT_ID)).containsExactly(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
     }
 
+    @SuppressWarnings("unchecked")
     private void setUpUmsClient(String entitlement, boolean entitled) {
         Account.Builder builder = Account.newBuilder();
         if (entitled) {

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.orchestrator;
 
+import static com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -27,7 +29,7 @@ public class SaltUpdateService {
     public FlowIdentifier updateSaltStates(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        StackEvent event = new SaltUpdateTriggerEvent(stack.getId());
+        StackEvent event = new SaltUpdateTriggerEvent(SALT_UPDATE_EVENT.event(), stack.getId());
         LOGGER.info("Triggering salt update flow with event: {}", event);
         return flowManager.notify(event.selector(), event);
     }

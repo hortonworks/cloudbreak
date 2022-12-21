@@ -140,11 +140,13 @@ dependencyManagement {
     dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonDatabindVersion
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'net.jcip',                           name: 'jcip-annotations',            version: '1.0'
-    dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '1.42.3'
+    dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '1.22.0'
+    dependency group: 'com.github.fommil',                  name: 'openssh',                     version: '1.0'
 
     dependency (group: 'io.swagger',                        name: 'swagger-jersey2-jaxrs',       version: swaggerVersion) {
       exclude 'org.yaml:snakeyaml'
     }
+    dependency group: 'javax.mail',                         name: 'mail',                        version: '1.5.0-b01'
     dependency group: 'dnsjava',                            name: 'dnsjava',                     version: '2.1.7'
 
     dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: '1.2.0.RELEASE'
@@ -154,6 +156,7 @@ dependencyManagement {
     dependency group: 'org.freemarker',                     name: 'freemarker',                  version: freemarkerVersion
     dependency group: 'org.postgresql',                     name: 'postgresql',                  version: postgreSQLVersion
     dependency group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart',      version: jerseyCoreVersion
+    dependency group: 'javax.xml.bind',                     name: 'jaxb-api',                    version: '2.3.0'
     dependency group: 'org.mybatis',                        name: 'mybatis-migrations',          version: mybatisMigrationVersion
     dependency group: 'org.mockito',                        name: 'mockito-core',                version: mockitoVersion
     dependency group: 'org.apache.commons',                 name: 'commons-collections4',        version: commonsCollections4Version
@@ -194,7 +197,10 @@ dependencies {
 
   implementation group: 'net.jcip',                           name: 'jcip-annotations'
   implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2'
+  implementation group: 'com.github.fommil',                  name: 'openssh'
 
+  implementation group: 'javax.mail',                         name: 'mail'
+  implementation group: 'javax.xml.bind',                     name: 'jaxb-api'
   implementation group: 'dnsjava',                            name: 'dnsjava'
 
   implementation group: 'io.springfox',                       name: 'springfox-boot-starter'
@@ -205,7 +211,7 @@ dependencies {
 
   implementation group: 'com.dyngr',                          name: 'polling',                          version: dyngrPollingVersion
   implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',                 version: jacksonDatabindVersion
-  implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2',      version: '1.42.3'
+  implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2',      version: '1.40.1'
   implementation group: 'com.google.auth',                    name: 'google-auth-library-oauth2-http',  version: '1.2.2'
   implementation group: 'org.apache.commons',                 name: 'commons-lang3',                    version: '3.12.0'
   implementation group: 'com.google.guava',                   name: 'guava',                            version: guavaVersion

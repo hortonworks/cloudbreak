@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigur
 import com.sequenceiq.cloudbreak.template.filesystem.gcs.GcsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
-import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
@@ -18,8 +17,6 @@ import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 public class TemplateCoreTestUtil {
 
     private static final String IDENTITY_USER_EMAIL = "identity.user@email.com";
-
-    private static final RdsViewProvider RDS_VIEW_PROVIDER = new RdsViewProvider();
 
     private TemplateCoreTestUtil() {
     }
@@ -111,7 +108,4 @@ public class TemplateCoreTestUtil {
         return new StorageLocationView(storageLocation);
     }
 
-    public static RdsViewProvider rdsViewProvider() {
-        return RDS_VIEW_PROVIDER;
-    }
 }

@@ -22,12 +22,10 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_VERTICAL_SCALE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_JUMPGATE;
@@ -73,6 +71,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_SELECT_INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
@@ -117,7 +116,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.SDX_CONFIGU
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_USERSYNC_ROUTING;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -161,6 +159,10 @@ public class EntitlementService {
 
     public boolean azureEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_AZURE);
+    }
+
+    public boolean gcpEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_GCP);
     }
 
     public boolean gcpAuditEnabled(String accountId) {
@@ -351,14 +353,6 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_CB_AWS_VERTICAL_SCALE);
     }
 
-    public boolean azureVerticalScaleEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_CB_AZURE_VERTICAL_SCALE);
-    }
-
-    public boolean gcpVerticalScaleEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_CB_GCP_VERTICAL_SCALE);
-    }
-
     public boolean ccmV1ToV2JumpgateUpgradeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE);
     }
@@ -373,10 +367,6 @@ public class EntitlementService {
 
     public boolean databaseWireEncryptionEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_DATABASE_WIRE_ENCRYPTION);
-    }
-
-    public boolean databaseWireEncryptionDatahubEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB);
     }
 
     public boolean datalakeLoadBalancerEnabled(String accountId) {
@@ -619,8 +609,8 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_CB_COST_CALCULATION);
     }
 
-    public boolean isWiamUsersyncRoutingEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, WORKLOAD_IAM_USERSYNC_ROUTING);
+    public boolean isCO2CalculationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_CO2_CALCULATION);
     }
 
     public List<String> getEntitlements(String accountId) {

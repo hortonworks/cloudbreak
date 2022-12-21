@@ -84,16 +84,13 @@ public class CloudStorageValidator {
         log.setType(CloudIdentityType.LOG);
         LoggingRequest logging = telemetryRequest.getLogging();
         if (logging.getS3() != null) {
-            LOGGER.debug("Setting up S3 location for logging configuration.");
             log.setS3(logging.getS3());
         } else if (logging.getAdlsGen2() != null) {
-            LOGGER.debug("Setting up Adls Gen2 location for logging configuration.");
             log.setAdlsGen2(logging.getAdlsGen2());
         } else if (logging.getGcs() != null) {
-            LOGGER.debug("Setting up GCS location for logging configuration.");
             log.setGcs(logging.getGcs());
         } else if (logging.getCloudwatch() != null) {
-            LOGGER.debug("Cloudwatch will act as S3 storage identity!");
+            LOGGER.debug("Cloudwatch will act as s3 storage identity!");
             S3CloudStorageV1Parameters s3CloudwatchParams = new S3CloudStorageV1Parameters();
             s3CloudwatchParams.setInstanceProfile(logging.getCloudwatch().getInstanceProfile());
             log.setS3(s3CloudwatchParams);

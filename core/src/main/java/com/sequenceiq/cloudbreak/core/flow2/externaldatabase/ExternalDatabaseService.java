@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,16 +20,9 @@ import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
@@ -45,8 +37,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -61,8 +51,6 @@ public class ExternalDatabaseService {
     public static final int DURATION_IN_MINUTES_FOR_DB_POLLING = 60;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalDatabaseService.class);
-
-    private static final String SSL_ENFORCEMENT_MIN_RUNTIME_VERSION = "7.2.2";
 
     private static final PollingConfig DB_POLLING_CONFIG = PollingConfig.builder()
             .withSleepTime(SLEEP_TIME_IN_SEC_FOR_DB_POLLING)
@@ -82,24 +70,14 @@ public class ExternalDatabaseService {
 
     private final DatabaseObtainerService databaseObtainerService;
 
-    private final EntitlementService entitlementService;
-
-    private final ExternalDatabaseConfig externalDatabaseConfig;
-
-    private final CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
     public ExternalDatabaseService(RedbeamsClientService redbeamsClient, ClusterRepository clusterRepository,
             Map<CloudPlatform, DatabaseStackConfig> dbConfigs, Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap,
-            DatabaseObtainerService databaseObtainerService, EntitlementService entitlementService, ExternalDatabaseConfig externalDatabaseConfig,
-            CmTemplateProcessorFactory cmTemplateProcessorFactory) {
+            DatabaseObtainerService databaseObtainerService) {
         this.redbeamsClient = redbeamsClient;
         this.clusterRepository = clusterRepository;
         this.dbConfigs = dbConfigs;
         this.parameterDecoratorMap = parameterDecoratorMap;
         this.databaseObtainerService = databaseObtainerService;
-        this.entitlementService = entitlementService;
-        this.externalDatabaseConfig = externalDatabaseConfig;
-        this.cmTemplateProcessorFactory = cmTemplateProcessorFactory;
     }
 
     public void provisionDatabase(Cluster cluster, DatabaseAvailabilityType externalDatabase, DetailedEnvironmentResponse environment) {
@@ -108,8 +86,9 @@ public class ExternalDatabaseService {
         try {
             Optional<DatabaseServerV4Response> existingDatabase = findExistingDatabase(cluster, environment.getCrn());
             if (existingDatabase.isPresent()) {
-                databaseCrn = existingDatabase.get().getCrn();
-                LOGGER.debug("Found existing database with CRN {}", databaseCrn);
+                String dbCrn = existingDatabase.get().getCrn();
+                LOGGER.debug("Found existing database with CRN {}", dbCrn);
+                databaseCrn = dbCrn;
             } else {
                 LOGGER.debug("Requesting new database server creation");
                 AllocateDatabaseServerV4Request request = getDatabaseRequest(environment, externalDatabase, cluster);
@@ -244,52 +223,13 @@ public class ExternalDatabaseService {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(environment.getCrn());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.US));
-        Stack stack = cluster.getStack();
-        String databaseEngineVersion = Optional.ofNullable(stack).map(Stack::getExternalDatabaseEngineVersion).orElse(null);
+        String databaseEngineVersion = Optional.ofNullable(cluster).map(Cluster::getStack).map(Stack::getExternalDatabaseEngineVersion).orElse(null);
         req.setDatabaseServer(getDatabaseServerStackRequest(cloudPlatform, externalDatabase, databaseEngineVersion));
-        if (stack != null) {
-            req.setClusterCrn(stack.getResourceCrn());
-            req.setTags(getUserDefinedTags(stack));
+        if (cluster.getStack() != null) {
+            req.setClusterCrn(cluster.getStack().getResourceCrn());
+            req.setTags(getUserDefinedTags(cluster.getStack()));
         }
-        configureSslEnforcement(req, cloudPlatform, cluster);
         return req;
-    }
-
-    private void configureSslEnforcement(AllocateDatabaseServerV4Request req, CloudPlatform cloudPlatform, Cluster cluster) {
-        String runtime = getRuntime(cluster);
-        if (externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)
-                && entitlementService.databaseWireEncryptionDatahubEnabled(Crn.safeFromString(cluster.getEnvironmentCrn()).getAccountId())) {
-            LOGGER.info("Applying external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
-            SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();
-            sslConfigV4Request.setSslMode(SslMode.ENABLED);
-            req.setSslConfig(sslConfigV4Request);
-        } else {
-            LOGGER.info("Skipping external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
-        }
-    }
-
-    private String getRuntime(Cluster cluster) {
-        String runtime = null;
-        Optional<String> blueprintTextOpt = Optional.ofNullable(cluster.getBlueprint()).map(Blueprint::getBlueprintText);
-        if (blueprintTextOpt.isPresent()) {
-            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintTextOpt.get());
-            runtime = cmTemplateProcessor.getStackVersion();
-            LOGGER.info("Blueprint text is available for stack, found runtime version '{}'", runtime);
-        } else {
-            LOGGER.warn("Blueprint text is unavailable for stack, thus runtime version cannot be determined.");
-        }
-        return runtime;
-    }
-
-    private boolean isSslEnforcementSupportedForRuntime(String runtime) {
-        if (StringUtils.isBlank(runtime)) {
-            // While this may happen for custom data lakes, it is not possible for DH clusters
-            LOGGER.info("Runtime version is NOT specified, external DB SSL enforcement is NOT permitted");
-            return false;
-        }
-        boolean permitted = CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(() -> runtime, () -> SSL_ENFORCEMENT_MIN_RUNTIME_VERSION);
-        LOGGER.info("External DB SSL enforcement {} permitted for runtime version {}", permitted ? "is" : "is NOT", runtime);
-        return permitted;
     }
 
     private Map<String, String> getUserDefinedTags(Stack stack) {

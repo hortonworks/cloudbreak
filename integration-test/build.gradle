@@ -135,8 +135,8 @@ dependencies {
   }
   implementation group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev20220705-2.0.0'
   implementation group: 'com.google.auth',               name: 'google-auth-library-oauth2-http',            version: '1.11.0'
-  implementation group: 'com.google.http-client',        name: 'google-http-client-jackson2',                version: '1.42.3'
-  implementation group: 'com.google.cloud',              name: 'google-cloud-storage',           version: '2.15.1'
+  implementation group: 'com.google.http-client',        name: 'google-http-client-jackson2',                version: '1.42.2'
+  implementation group: 'com.google.cloud',              name: 'google-cloud-storage',           version: '2.13.0'
   implementation group: 'com.microsoft.azure',           name: 'azure-storage',                  version: azureStorageSdkVersion
   implementation group: 'com.microsoft.azure',           name: 'azure-data-lake-store-sdk',      version: '2.1.5'
 
@@ -151,7 +151,9 @@ dependencies {
   implementation group:  'javax.el',                     name: 'javax.el-api',                   version: '3.0.0'
   implementation group:  'org.apache.commons',           name: 'commons-lang3',                  version: '3.4'
   implementation group:  'org.opentest4j',               name: 'opentest4j',                     version: '1.2.0'
-
+  implementation(group:  'org.apache.sshd',              name: 'sshd-core',                      version: '1.2.0') {
+    exclude group: 'ch.qos.logback'
+  }
   implementation(group: "org.junit.vintage",             name: "junit-vintage-engine",           version: junitJupiterVersion) {
     exclude group: "org.hamcrest", module: "hamcrest-core"
   }
@@ -182,6 +184,7 @@ dependencies {
   }
   implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
 
+  runtimeOnly group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
 }
 
 test {

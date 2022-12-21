@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -78,16 +77,13 @@ public class TemplateValidatorTest {
     @Mock
     private LocationService locationService;
 
-    @Mock
-    private ResourceDiskPropertyCalculator resourceDiskPropertyCalculator;
-
     @InjectMocks
     private InstanceGroup instanceGroup;
 
     private Stack stack;
 
     @InjectMocks
-    private TemplateValidatorAndUpdater underTest = new TemplateValidatorAndUpdater();
+    private TemplateValidator underTest = new TemplateValidator();
 
     @BeforeEach
     public void setUp() {
@@ -123,7 +119,7 @@ public class TemplateValidatorTest {
 
         platformDisks = new PlatformDisks(new HashMap<>(), new HashMap<>(), diskMappings, new HashMap<>());
         when(cloudParameterService.getDiskTypes()).thenReturn(platformDisks);
-        doNothing().when(resourceDiskPropertyCalculator).updateWithResourceDiskAttached(any(), any(), any());
+
         when(locationService.location(anyString(), isNull())).thenReturn(location);
     }
 
@@ -334,7 +330,7 @@ public class TemplateValidatorTest {
 
         if (createIDBroker) {
             instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, awsTemplate);
-            instanceGroup.setGroupName(TemplateValidatorAndUpdater.GROUP_NAME_ID_BROKER);
+            instanceGroup.setGroupName(TemplateValidator.GROUP_NAME_ID_BROKER);
         } else if (createCompute) {
             instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, awsTemplate);
             instanceGroup.setGroupName("compute");

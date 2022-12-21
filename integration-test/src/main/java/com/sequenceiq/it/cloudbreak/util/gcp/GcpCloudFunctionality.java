@@ -137,18 +137,4 @@ public class GcpCloudFunctionality implements CloudFunctionality {
         LOGGER.debug("Currently not implemented for GCP!");
         return null;
     }
-
-    @Override
-    public Boolean isCloudFormationExistForStack(String name) {
-        LOGGER.warn("CloudFormation is only available at AWS. So validation on GCP is not possible!");
-        Log.then(LOGGER, "CloudFormation is only available at AWS. So validation on GCP is not possible! ");
-        return true;
-    }
-
-    @Override
-    public Boolean isFreeipaCfStackExistForEnvironment(String environmentCrn) {
-        LOGGER.warn("CloudFormation is only available at AWS. So validation on GCP is not possible!");
-        Log.then(LOGGER, "CloudFormation is only available at AWS. So validation on GCP is not possible! ");
-        return true;
-    }
 }

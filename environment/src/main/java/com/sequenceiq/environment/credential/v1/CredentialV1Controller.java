@@ -131,7 +131,10 @@ public class CredentialV1Controller extends NotificationController implements Cr
         LOGGER.debug("Create credential request has received: {}", createCredentialRequest);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         credentialEntitlementService.checkAzureEntitlement(accountId, createCredentialRequest.getAzure());
-        Credential createdCredential = credentialService.create(createCredentialRequest, accountId, ThreadBasedUserCrnProvider.getUserCrn(), ENVIRONMENT);
+        String creator = ThreadBasedUserCrnProvider.getUserCrn();
+        Credential credential = credentialRequestConverter.convert(createCredentialRequest);
+        credential.setType(ENVIRONMENT);
+        Credential createdCredential = credentialService.create(credential, accountId, creator, ENVIRONMENT);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         LOGGER.debug("Credential has been created: {}", createdCredential);
         return credentialResponseConverter.convert(createdCredential);

@@ -2,8 +2,6 @@ import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 
 buildscript {
-  apply from: 'dependencies.gradle'
-
   repositories {
     maven { url = "$repoMirrorUrl" }
     maven { url = "$repoUrl" }
@@ -131,7 +129,7 @@ subprojects {
 
   dependencies {
     checkstyle('com.puppycrawl.tools:checkstyle:10.3.4')
-    deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.1.0.RELEASE")
+    deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE")
     testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_11;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
@@ -13,9 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
@@ -33,8 +30,6 @@ public class OozieRoleConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private static final String OOZIE_DATABASE_PASSWORD = "oozie_database_password";
 
-    private static final String OOZIE_DATABASE_JDBC_URL = "oozie.service.JPAService.jdbc.url";
-
     private static final String OOZIE_CONFIG_SAFETY_VALVE = "oozie_config_safety_valve";
 
     @Override
@@ -42,23 +37,12 @@ public class OozieRoleConfigProvider extends AbstractRdsRoleConfigProvider {
         switch (roleType) {
             case OozieRoles.OOZIE_SERVER:
                 RdsView oozieRdsView = getRdsView(source);
-                String cmVersion = ConfigUtils.getCmVersion(source);
-                StringBuilder ozzieSafetyVale = new StringBuilder();
-                List<ApiClusterTemplateConfig> config = new ArrayList<>();
-                if (oozieRdsView.isUseSsl()
-                        && CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_2)) {
-                    ozzieSafetyVale.append(ConfigUtils
-                            .getSafetyValveProperty(OOZIE_DATABASE_JDBC_URL, oozieRdsView.getConnectionURL()));
-                } else {
-                    config.add(config(OOZIE_DATABASE_HOST, oozieRdsView.getHost()));
-                    config.add(config(OOZIE_DATABASE_NAME, oozieRdsView.getDatabaseName()));
-                }
-                config.add(config(OOZIE_DATABASE_TYPE, oozieRdsView.getSubprotocol()));
-                config.add(config(OOZIE_DATABASE_USER, oozieRdsView.getConnectionUserName()));
-                config.add(config(OOZIE_DATABASE_PASSWORD, oozieRdsView.getConnectionPassword()));
-                if (!ozzieSafetyVale.toString().isEmpty()) {
-                    config.add(config(OOZIE_CONFIG_SAFETY_VALVE, ozzieSafetyVale.toString()));
-                }
+                List<ApiClusterTemplateConfig> config = new ArrayList<>(List.of(
+                    config(OOZIE_DATABASE_HOST, oozieRdsView.getHost()),
+                    config(OOZIE_DATABASE_NAME, oozieRdsView.getDatabaseName()),
+                    config(OOZIE_DATABASE_TYPE, oozieRdsView.getSubprotocol()),
+                    config(OOZIE_DATABASE_USER, oozieRdsView.getConnectionUserName()),
+                    config(OOZIE_DATABASE_PASSWORD, oozieRdsView.getConnectionPassword())));
                 return config;
             default:
                 return List.of();

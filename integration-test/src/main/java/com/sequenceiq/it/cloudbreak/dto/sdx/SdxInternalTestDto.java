@@ -157,11 +157,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return this;
     }
 
-    public SdxInternalTestDto withVariant(String variant) {
-        getRequest().getStackV4Request().setVariant(variant);
-        return this;
-    }
-
     public SdxInternalTestDto withRuntimeVersion(String runtimeVersion) {
         getRequest().setRuntime(runtimeVersion);
         return this;
@@ -175,14 +170,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto withCloudStorage(SdxCloudStorageRequest cloudStorage) {
         getRequest().setCloudStorage(cloudStorage);
         return this;
-    }
-
-    public SdxInternalTestDto withCloudStorage() {
-        SdxCloudStorageTestDto cloudStorage = getCloudProvider().cloudStorage(given(SdxCloudStorageTestDto.class));
-        if (cloudStorage == null) {
-            throw new IllegalArgumentException("SDX Cloud Storage does not exist!");
-        }
-        return withCloudStorage(cloudStorage.getRequest());
     }
 
     public SdxInternalTestDto withStackRequest(StackV4Request stackV4Request) {
@@ -224,18 +211,14 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto withDefaultSDXSettings(Optional<Integer> gatewayPort) {
         StackTestDto stack = getTestContext().given(StackTestDto.class);
-        Boolean clusterIsGiven = getTestContext().get(ClusterTestDto.class.getSimpleName()) == null;
         ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
-        if (clusterIsGiven) {
-            cluster = getTestContext().given(ClusterTestDto.class);
-            cluster.withName(cluster.getName())
-                    .withBlueprintName(commonClusterManagerProperties.getInternalSdxBlueprintName())
-                    .withValidateBlueprint(Boolean.FALSE);
-        }
 
         getTestContext()
                 .given("master", InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
                 .given("idbroker", InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1);
+        cluster.withName(cluster.getName())
+                .withBlueprintName(commonClusterManagerProperties.getInternalSdxBlueprintName())
+                .withValidateBlueprint(Boolean.FALSE);
         stack.withName(stack.getName())
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
                 .withInstanceGroups(MASTER.getName(), IDBROKER.getName())

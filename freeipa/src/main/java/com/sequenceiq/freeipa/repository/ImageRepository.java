@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.repository;
 
-import java.util.List;
-
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Query;
@@ -20,9 +18,4 @@ public interface ImageRepository extends CrudRepository<ImageEntity, Long> {
             "LEFT JOIN i.stack s " +
             "WHERE s.id = :stackId")
     ImageEntity getByStackId(@Param("stackId") Long stackId);
-
-    @Query("SELECT i FROM image i " +
-            "LEFT JOIN i.stack s " +
-            "WHERE (s.terminated = -1 OR s.terminated >= :thresholdTimestamp)")
-    List<ImageEntity> findImagesOfAliveStacks(@Param("thresholdTimestamp") long thresholdTimestamp);
 }

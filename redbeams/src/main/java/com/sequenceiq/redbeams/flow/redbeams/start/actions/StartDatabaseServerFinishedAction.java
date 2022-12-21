@@ -13,13 +13,13 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent;
-import com.sequenceiq.redbeams.flow.redbeams.start.event.CertRotateInRedbeamsSuccess;
+import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerSuccess;
 import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 
 @Component("REDBEAMS_START_FINISHED_STATE")
-public class StartDatabaseServerFinishedAction extends AbstractRedbeamsStartAction<CertRotateInRedbeamsSuccess> {
+public class StartDatabaseServerFinishedAction extends AbstractRedbeamsStartAction<StartDatabaseServerSuccess> {
 
     @Inject
     private DBStackStatusUpdater dbStackStatusUpdater;
@@ -28,11 +28,11 @@ public class StartDatabaseServerFinishedAction extends AbstractRedbeamsStartActi
     private RedbeamsMetricService metricService;
 
     public StartDatabaseServerFinishedAction() {
-        super(CertRotateInRedbeamsSuccess.class);
+        super(StartDatabaseServerSuccess.class);
     }
 
     @Override
-    protected void prepareExecution(CertRotateInRedbeamsSuccess payload, Map<Object, Object> variables) {
+    protected void prepareExecution(StartDatabaseServerSuccess payload, Map<Object, Object> variables) {
         Optional<DBStack> dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.STARTED);
         metricService.incrementMetricCounter(MetricType.DB_START_FINISHED, dbStack);
     }

@@ -71,7 +71,6 @@ import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -200,11 +199,11 @@ public class ClusterService {
         return repository.findOneByStackId(stackId);
     }
 
-    public Cluster updateClusterManagerClientConfig(Long clusterId, HttpClientConfig clusterManagerClientConfig) {
+    public Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig) {
         Cluster cluster = getCluster(clusterId);
-        cluster.setClusterManagerIp(clusterManagerClientConfig.getApiAddress());
+        cluster.setClusterManagerIp(ambariClientConfig.getApiAddress());
         cluster = repository.save(cluster);
-        LOGGER.info("Updated cluster: [clusterManagerIp: '{}'].", clusterManagerClientConfig.getApiAddress());
+        LOGGER.info("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
         return cluster;
     }
 
@@ -498,11 +497,5 @@ public class ClusterService {
 
     public Cluster getClusterReference(Long id) {
         return repository.getById(id);
-    }
-
-    public void updateDbSslCert(Long clusterId, RedbeamsDbCertificateProvider.RedbeamsDbSslDetails relatedSslCerts) {
-        Set<String> rootSslCerts = relatedSslCerts.getSslCerts();
-        String allCerts = String.join("\n", rootSslCerts);
-        repository.updateDbSslCert(clusterId, allCerts, relatedSslCerts.isSslEnabledForStack());
     }
 }

@@ -33,22 +33,30 @@ public class FreeIpaStackHealthDetailsService {
     private StackService stackService;
 
     @Inject
-    private FreeIpaSafeInstanceHealthDetailsService healthDetailsService;
+    private FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
 
     public HealthDetailsFreeIpaResponse getHealthDetails(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
         List<InstanceMetaData> instances = stack.getAllInstanceMetaDataList();
-
         HealthDetailsFreeIpaResponse response = new HealthDetailsFreeIpaResponse();
+
         for (InstanceMetaData instance: instances) {
-            NodeHealthDetails nodeResponse;
             if (shouldRunHealthCheck(instance)) {
-                nodeResponse = healthDetailsService.getInstanceHealthDetails(stack, instance);
+                try {
+                    NodeHealthDetails nodeHealthDetails = freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(stack, instance);
+                    response.addNodeHealthDetailsFreeIpaResponses(nodeHealthDetails);
+                } catch (Exception e) {
+                    addUnreachableResponse(instance, response, e.getLocalizedMessage());
+                    LOGGER.error(String.format("Unable to check the health of FreeIPA instance: %s", instance.getInstanceId()), e);
+                }
             } else {
-                String issue = "Unable to check health as instance is " + instance.getInstanceStatus().name();
-                nodeResponse = healthDetailsService.createNodeResponseWithStatusAndIssue(instance, instance.getInstanceStatus(), issue);
+                NodeHealthDetails nodeResponse = new NodeHealthDetails();
+                response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
+                nodeResponse.setName(instance.getDiscoveryFQDN());
+                nodeResponse.setStatus(instance.getInstanceStatus());
+                nodeResponse.setInstanceId(instance.getInstanceId());
+                nodeResponse.addIssue("Unable to check health as instance is " + instance.getInstanceStatus().name());
             }
-            response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
         }
         return updateResponse(stack, response);
     }
@@ -57,6 +65,15 @@ public class FreeIpaStackHealthDetailsService {
         return !(instance.isTerminated() ||
                 instance.isDeletedOnProvider() ||
                 CACHEABLE_INSTANCE_STATUS.contains(instance.getInstanceStatus()));
+    }
+
+    private void addUnreachableResponse(InstanceMetaData instance, HealthDetailsFreeIpaResponse response, String issue) {
+        NodeHealthDetails nodeResponse = new NodeHealthDetails();
+        response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
+        nodeResponse.setName(instance.getDiscoveryFQDN());
+        nodeResponse.setStatus(InstanceStatus.UNREACHABLE);
+        nodeResponse.setInstanceId(instance.getInstanceId());
+        nodeResponse.addIssue(issue);
     }
 
     private HealthDetailsFreeIpaResponse updateResponse(Stack stack, HealthDetailsFreeIpaResponse response) {

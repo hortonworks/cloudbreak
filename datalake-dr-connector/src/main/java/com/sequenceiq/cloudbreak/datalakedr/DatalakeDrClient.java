@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc.datalakeDRBlockingStub;
-import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo;
@@ -25,7 +24,6 @@ import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatala
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
-import com.sequenceiq.cloudbreak.datalakedr.converter.DatalakeDataInfoJsonToObjectConverter;
 import com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
@@ -52,9 +50,6 @@ public class DatalakeDrClient {
     @Qualifier("datalakeDrManagedChannelWrapper")
     @Inject
     private ManagedChannelWrapper channelWrapper;
-
-    @Inject
-    private DatalakeDataInfoJsonToObjectConverter datalakeDataInfoJsonToObjectConverter;
 
     public DatalakeDrClient(DatalakeDrConfig datalakeDrConfig, GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter statusConverter, Tracer tracer) {
         this.datalakeDrConfig = datalakeDrConfig;
@@ -323,20 +318,6 @@ public class DatalakeDrClient {
                     .findFirst().orElse(null);
         }
         return datalakeBackupInfo;
-    }
-
-    public datalakeDRProto.SubmitDatalakeDataInfoResponse submitDatalakeDataInfo(String operationId, String inputJson, String actorCrn) {
-        if (!datalakeDrConfig.isConfigured()) {
-            return null;
-        }
-
-        checkNotNull(operationId);
-        checkNotNull(inputJson);
-        checkNotNull(actorCrn, "actorCrn should not be null.");
-
-        datalakeDRProto.DatalakeDataInfoObject datalakeDataInfoObject = datalakeDataInfoJsonToObjectConverter.convert(operationId, inputJson);
-        return newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
-                .submitDatalakeDataInfo(datalakeDataInfoObject);
     }
 
     /**

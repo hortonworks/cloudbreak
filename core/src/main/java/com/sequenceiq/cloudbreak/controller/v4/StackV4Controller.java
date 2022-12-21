@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -610,10 +609,5 @@ public class StackV4Controller extends NotificationController implements StackV4
         return new UsedSubnetsByEnvironmentResponse(allUsedSubnets
                 .stream().map(s -> new UsedSubnetWithResourceResponse(s.getName(), s.getSubnetId(), s.getResourceCrn(), s.getType().name()))
                 .collect(Collectors.toList()));
-    }
-
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
-    public void determineDatalakeDataSizes(Long workspaceId, @ResourceName String name, String operationId) {
-        stackOperations.determineDatalakeDataSizes(restRequestThreadLocalService.getRequestedWorkspaceId(), NameOrCrn.ofName(name), operationId);
     }
 }

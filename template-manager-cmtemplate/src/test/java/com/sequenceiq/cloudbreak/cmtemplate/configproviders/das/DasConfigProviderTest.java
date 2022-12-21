@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
-import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 
 public class DasConfigProviderTest {
 
@@ -53,11 +52,7 @@ public class DasConfigProviderTest {
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
 
-        TemplatePreparationObject tpo = new Builder().withRdsViews(Set.of(rdsConfig)
-                .stream()
-                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                .collect(Collectors.toSet()))
-                .build();
+        TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
         Map<String, String> paramToVariable =
@@ -104,11 +99,7 @@ public class DasConfigProviderTest {
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        TemplatePreparationObject tpo = new Builder().withRdsViews(Set.of(rdsConfig)
-                .stream()
-                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                .collect(Collectors.toSet())
-        ).build();
+        TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
         assertThat(result).isTrue();
@@ -126,11 +117,7 @@ public class DasConfigProviderTest {
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        TemplatePreparationObject tpo = new Builder().withRdsViews(Set.of(rdsConfig)
-                .stream()
-                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                .collect(Collectors.toSet())
-        ).build();
+        TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
         assertThat(result).isFalse();

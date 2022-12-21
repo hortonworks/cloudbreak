@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
-import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -37,15 +35,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.core.AttemptResults;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
@@ -59,43 +50,24 @@ import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalDatabaseServiceTest {
 
     private static final CloudPlatform CLOUD_PLATFORM = CloudPlatform.AZURE;
 
-    private static final String ACCOUNT_ID = "accountId";
-
-    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:envResourceId";
+    private static final String ENV_CRN = "envCRN";
 
     private static final String RDBMS_CRN = "rdbmsCRN";
 
     private static final String CLUSTER_CRN = "clusterCRN";
 
     private static final String RDBMS_FLOW_ID = "flowId";
-
-    private static final String INSTANCE_TYPE = "instance";
-
-    private static final String VENDOR = "vendor";
-
-    private static final long VOLUME_SIZE = 1234L;
-
-    private static final String BLUEPRINT_TEXT = "blueprintText";
-
-    private static final String STACK_VERSION_GOOD_MINIMAL = "7.2.2";
-
-    private static final String STACK_VERSION_GOOD = "7.2.15";
-
-    private static final String STACK_VERSION_BAD = "7.2.1";
 
     @Mock
     private RedbeamsClientService redbeamsClient;
@@ -114,30 +86,17 @@ class ExternalDatabaseServiceTest {
     @Mock
     private DatabaseServerParameterDecorator dbServerParameterDecorator;
 
-    @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
-    private ExternalDatabaseConfig externalDatabaseConfig;
-
-    @Mock
-    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
     private ExternalDatabaseService underTest;
 
     private DetailedEnvironmentResponse environmentResponse;
 
-    @Mock
-    private CmTemplateProcessor cmTemplateProcessor;
-
     @BeforeEach
     void setUp() {
-        underTest = new ExternalDatabaseService(redbeamsClient, clusterRepository, dbConfigs, parameterDecoratorMap, databaseObtainerService,
-                entitlementService, externalDatabaseConfig, cmTemplateProcessorFactory);
+        underTest = new ExternalDatabaseService(redbeamsClient, clusterRepository, dbConfigs, parameterDecoratorMap, databaseObtainerService);
         environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform(CLOUD_PLATFORM.name());
         environmentResponse.setCrn(ENV_CRN);
-        dbConfigs.put(CLOUD_PLATFORM, new DatabaseStackConfig(INSTANCE_TYPE, VENDOR, VOLUME_SIZE));
+        dbConfigs.put(CLOUD_PLATFORM, new DatabaseStackConfig("instance", "vendor", 1234));
         lenient().when(parameterDecoratorMap.get(CLOUD_PLATFORM)).thenReturn(dbServerParameterDecorator);
     }
 
@@ -151,8 +110,8 @@ class ExternalDatabaseServiceTest {
 
     @ParameterizedTest
     @EnumSource(DatabaseAvailabilityType.class)
-    void provisionDatabase(DatabaseAvailabilityType availability) throws JsonProcessingException {
-        Assumptions.assumeTrue(!availability.isEmbedded());
+    void provisionDatabase(DatabaseAvailabilityType availabilty) throws JsonProcessingException {
+        Assumptions.assumeTrue(!availabilty.isEmbedded());
 
         DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
         createResponse.setResourceCrn(RDBMS_CRN);
@@ -164,7 +123,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-        underTest.provisionDatabase(cluster, availability, environmentResponse);
+        underTest.provisionDatabase(cluster, availabilty, environmentResponse);
 
         ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
         verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
@@ -173,7 +132,7 @@ class ExternalDatabaseServiceTest {
         verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture());
         verify(clusterRepository).save(cluster);
         DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
-        assertThat(paramValue.isHighlyAvailable()).isEqualTo(availability == DatabaseAvailabilityType.HA);
+        assertThat(paramValue.isHighlyAvailable()).isEqualTo(availabilty == DatabaseAvailabilityType.HA);
     }
 
     @ParameterizedTest
@@ -207,14 +166,7 @@ class ExternalDatabaseServiceTest {
 
         verify(redbeamsClient, never()).getByClusterCrn(nullable(String.class), nullable(String.class));
         ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
-
-        ArgumentCaptor<AllocateDatabaseServerV4Request> allocateRequestCaptor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
-        verify(redbeamsClient).create(allocateRequestCaptor.capture());
-        AllocateDatabaseServerV4Request allocateRequest = allocateRequestCaptor.getValue();
-        assertThat(allocateRequest).isNotNull();
-        assertThat(allocateRequest.getTags()).isNotNull();
-        assertThat(allocateRequest.getTags()).isEmpty();
-
+        verify(redbeamsClient).create(any(AllocateDatabaseServerV4Request.class));
         verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
         verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture());
         verify(clusterRepository).save(cluster);
@@ -243,146 +195,6 @@ class ExternalDatabaseServiceTest {
     }
 
     @Test
-    void provisionDatabaseTestSslWhenUnsupportedCloudPlatform() throws JsonProcessingException {
-        when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(false);
-
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(BLUEPRINT_TEXT);
-        when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
-        when(cmTemplateProcessor.getStackVersion()).thenReturn(STACK_VERSION_GOOD);
-
-        provisionDatabaseTestSslInternal(blueprint, false);
-
-        verify(entitlementService, never()).databaseWireEncryptionDatahubEnabled(anyString());
-    }
-
-    private void provisionDatabaseTestSslInternal(Blueprint blueprint, boolean sslEnabledExpected) throws JsonProcessingException {
-        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
-        createResponse.setResourceCrn(RDBMS_CRN);
-        Cluster cluster = new Cluster();
-        Stack stack = new Stack();
-        stack.setResourceCrn(CLUSTER_CRN);
-        Map<String, String> userDefinedTags = Map.ofEntries(entry("key1", "value1"), entry("key2", "value2"));
-        StackTags stackTags = new StackTags(userDefinedTags, Map.of(), Map.of());
-        stack.setTags(new Json(stackTags));
-        cluster.setStack(stack);
-        cluster.setBlueprint(blueprint);
-        cluster.setEnvironmentCrn(ENV_CRN);
-
-        when(redbeamsClient.getByClusterCrn(ENV_CRN, CLUSTER_CRN)).thenReturn(null);
-        when(redbeamsClient.create(any(AllocateDatabaseServerV4Request.class))).thenReturn(createResponse);
-        when(databaseObtainerService.obtainAttemptResult(cluster, DatabaseOperation.CREATION, RDBMS_CRN, true))
-                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-
-        underTest.provisionDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
-
-        assertThat(cluster.getDatabaseServerCrn()).isEqualTo(RDBMS_CRN);
-        verify(clusterRepository).save(cluster);
-
-        ArgumentCaptor<DatabaseServerV4StackRequest> databaseServerCaptor = ArgumentCaptor.forClass(DatabaseServerV4StackRequest.class);
-        ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
-        verify(dbServerParameterDecorator).setParameters(databaseServerCaptor.capture(), serverParameterCaptor.capture());
-
-        DatabaseServerParameter serverParameter = serverParameterCaptor.getValue();
-        assertThat(serverParameter).isNotNull();
-        assertThat(serverParameter.isHighlyAvailable()).isTrue();
-
-        ArgumentCaptor<AllocateDatabaseServerV4Request> allocateRequestCaptor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
-        verify(redbeamsClient).create(allocateRequestCaptor.capture());
-        AllocateDatabaseServerV4Request allocateRequest = allocateRequestCaptor.getValue();
-        assertThat(allocateRequest).isNotNull();
-        assertThat(allocateRequest.getEnvironmentCrn()).isEqualTo(ENV_CRN);
-        assertThat(allocateRequest.getClusterCrn()).isEqualTo(CLUSTER_CRN);
-
-        DatabaseServerV4StackRequest databaseServer = databaseServerCaptor.getValue();
-        assertThat(allocateRequest.getDatabaseServer()).isSameAs(databaseServer);
-        assertThat(databaseServer).isNotNull();
-        assertThat(databaseServer.getInstanceType()).isEqualTo(INSTANCE_TYPE);
-        assertThat(databaseServer.getDatabaseVendor()).isEqualTo(VENDOR);
-        assertThat(databaseServer.getStorageSize()).isEqualTo(VOLUME_SIZE);
-
-        Map<String, String> tags = allocateRequest.getTags();
-        assertThat(tags).isNotNull();
-        assertThat(tags).isEqualTo(userDefinedTags);
-
-        SslConfigV4Request sslConfig = allocateRequest.getSslConfig();
-        if (sslEnabledExpected) {
-            assertThat(sslConfig).isNotNull();
-            assertThat(sslConfig.getSslMode()).isEqualTo(SslMode.ENABLED);
-        } else {
-            assertThat(sslConfig).isNull();
-        }
-    }
-
-    @Test
-    void provisionDatabaseTestSslWhenNoBlueprint() throws JsonProcessingException {
-        when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-
-        provisionDatabaseTestSslInternal(null, false);
-
-        verify(cmTemplateProcessorFactory, never()).get(anyString());
-        verify(cmTemplateProcessor, never()).getStackVersion();
-        verify(entitlementService, never()).databaseWireEncryptionDatahubEnabled(anyString());
-    }
-
-    @Test
-    void provisionDatabaseTestSslWhenNoBlueprintText() throws JsonProcessingException {
-        when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(null);
-
-        provisionDatabaseTestSslInternal(blueprint, false);
-
-        verify(cmTemplateProcessorFactory, never()).get(anyString());
-        verify(cmTemplateProcessor, never()).getStackVersion();
-        verify(entitlementService, never()).databaseWireEncryptionDatahubEnabled(anyString());
-    }
-
-    @ParameterizedTest(name = "runtime={0}")
-    @ValueSource(strings = {"", " ", STACK_VERSION_BAD})
-    @NullSource
-    void provisionDatabaseTestSslWhenBadRuntime(String runtime) throws JsonProcessingException {
-        when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(BLUEPRINT_TEXT);
-        when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
-        when(cmTemplateProcessor.getStackVersion()).thenReturn(runtime);
-
-        provisionDatabaseTestSslInternal(blueprint, false);
-
-        verify(entitlementService, never()).databaseWireEncryptionDatahubEnabled(anyString());
-    }
-
-    @Test
-    void provisionDatabaseTestSslWhenNotEntitled() throws JsonProcessingException {
-        when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(BLUEPRINT_TEXT);
-        when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
-        when(cmTemplateProcessor.getStackVersion()).thenReturn(STACK_VERSION_GOOD);
-        when(entitlementService.databaseWireEncryptionDatahubEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        provisionDatabaseTestSslInternal(blueprint, false);
-    }
-
-    @ParameterizedTest(name = "runtime={0}")
-    @ValueSource(strings = {STACK_VERSION_GOOD_MINIMAL, STACK_VERSION_GOOD})
-    void provisionDatabaseTestSslWhenSslEnabled(String runtime) throws JsonProcessingException {
-        when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(BLUEPRINT_TEXT);
-        when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
-        when(cmTemplateProcessor.getStackVersion()).thenReturn(runtime);
-        when(entitlementService.databaseWireEncryptionDatahubEnabled(ACCOUNT_ID)).thenReturn(true);
-
-        provisionDatabaseTestSslInternal(blueprint, true);
-    }
-
-    @Test
     void terminateDatabaseWhenCrnNull() {
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn(null);
@@ -399,7 +211,7 @@ class ExternalDatabaseServiceTest {
         DatabaseServerV4Response deleteResponse = new DatabaseServerV4Response();
         deleteResponse.setCrn(RDBMS_CRN);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.START), eq(RDBMS_CRN), eq(false)))
-                .thenReturn(AttemptResults.finishWith(deleteResponse));
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
 
         underTest.startDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
 

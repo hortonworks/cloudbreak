@@ -143,17 +143,4 @@ public class AzureCloudFunctionality implements CloudFunctionality {
         LOGGER.info("not implemented for azure");
         return null;
     }
-
-    @Override
-    public Boolean isCloudFormationExistForStack(String name) {
-        LOGGER.warn("CloudFormation is only available at AWS. So validation on AZURE is not possible!");
-        Log.then(LOGGER, "CloudFormation is only available at AWS. So validation on AZURE is not possible! ");
-        return true;
-    }
-
-    @Override
-    public Boolean isFreeipaCfStackExistForEnvironment(String environmentCrn) {
-        LOGGER.warn("CloudFormation is only available at AWS. So validation on AZURE is not possible!");
-        Log.then(LOGGER, "CloudFormation is only available at AWS. So validation on AZURE is not possible! ");
-        return true;    }
 }

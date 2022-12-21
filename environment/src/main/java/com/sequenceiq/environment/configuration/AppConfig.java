@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
-import com.sequenceiq.environment.environment.dto.credential.CloudPlatformAwareCredentialDetailsConverter;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
@@ -52,9 +51,6 @@ public class AppConfig {
 
     @Inject
     private List<EnvironmentParametersConverter> environmentParametersConverters;
-
-    @Inject
-    private List<CloudPlatformAwareCredentialDetailsConverter> credentialDetailsConverters;
 
     @Inject
     private Tracer tracer;
@@ -110,13 +106,6 @@ public class AppConfig {
         return environmentParametersConverters
                 .stream()
                 .collect(Collectors.toMap(EnvironmentParametersConverter::getCloudPlatform, Function.identity()));
-    }
-
-    @Bean
-    public Map<CloudPlatform, CloudPlatformAwareCredentialDetailsConverter> cloudPlatformAwareCredentialDetailsConverterMap() {
-        return credentialDetailsConverters
-                .stream()
-                .collect(Collectors.toMap(CloudPlatformAwareCredentialDetailsConverter::getCloudPlatform, Function.identity()));
     }
 
     @Bean

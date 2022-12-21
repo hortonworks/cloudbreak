@@ -62,9 +62,9 @@ public class YarnResourceManagerRoleConfigProviderTest {
                 sc -> StringUtils.equals(sc.getName(), "resourcemanager_config_safety_valve")).findFirst().get();
         assertEquals("<property>" +
                 "<name>yarn.resourcemanager.am.placement-preference-with-node-attributes</name>" +
-                "<value>ORDER NODES IN NodeInstanceType WITH worker &gt; compute</value></property><property>" +
+                "<value>ORDER NODES IN NodeInstanceType WITH worker > compute</value></property><property>" +
                 "<name>yarn.resourcemanager.non-am.placement-preference-with-node-attributes</name>" +
-                "<value>ORDER NODES IN NodeInstanceType WITH compute &gt; worker</value></property>",
+                "<value>ORDER NODES IN NodeInstanceType WITH compute > worker</value></property>",
                 rmSafetyValve.getValue());
     }
 

@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.cloudformation.model.Stack;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.action.EC2ClientActions;
 
 @Component
@@ -49,13 +48,4 @@ public class AmazonEC2Util {
     public Map<String, String> listLaunchTemplatesUserData(String name) {
         return ec2ClientActions.listLaunchTemplatesUserData(name);
     }
-
-    public Boolean isCloudFormationExistForStack(String name) {
-        return ec2ClientActions.isCloudFormationExistForStack(name);
-    }
-
-    public List<Stack> listStacksByEnvironmentCrn(String crn) {
-        return ec2ClientActions.listCfStacksByEnvironment(crn);
-    }
-
 }

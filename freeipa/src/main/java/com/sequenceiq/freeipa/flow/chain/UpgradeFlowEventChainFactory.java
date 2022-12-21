@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
+import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
@@ -51,7 +52,8 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradeEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, event.getOperationId()));
+        flowEventChain.add(new SaltUpdateTriggerEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted(), true, false)
+                .withOperationId(event.getOperationId()));
         flowEventChain.add(new ImageChangeEvent(IMAGE_CHANGE_EVENT.event(), event.getResourceId(), event.getImageSettingsRequest())
                 .withOperationId(event.getOperationId()));
 
@@ -61,7 +63,8 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         Set<String> groupNames = instanceGroupService.findGroupNamesByStackId(event.getResourceId());
         flowEventChain.addAll(createScaleEventsForNonPgwInstances(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
         flowEventChain.addAll(createScaleEventsAndChangePgw(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
-        flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, true, event.getOperationId()));
+        flowEventChain.add(new SaltUpdateTriggerEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted(), true, true)
+                .withOperationId(event.getOperationId()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 

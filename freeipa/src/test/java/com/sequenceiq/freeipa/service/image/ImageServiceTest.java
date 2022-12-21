@@ -8,8 +8,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
@@ -41,13 +38,9 @@ public class ImageServiceTest {
 
     private static final String DEFAULT_PLATFORM = "aws";
 
-    private static final String REGION = "eu-west-1";
-
-    private static final String DEFAULT_REGION = "default";
+    private static final String DEFAULT_REGION = "eu-west-1";
 
     private static final String EXISTING_ID = "ami-09fea90f257c85513";
-
-    private static final String DEFAULT_REGION_EXISTING_ID = "ami-09fea90f257c85514";
 
     private static final String FAKE_ID = "fake-ami-0a6931aea1415eb0e";
 
@@ -58,8 +51,6 @@ public class ImageServiceTest {
     private static final String DEFAULT_OS = "redhat7";
 
     private static final String IMAGE_UUID = "UUID";
-
-    private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
 
     @Mock
     private ImageProviderFactory imageProviderFactory;
@@ -72,9 +63,6 @@ public class ImageServiceTest {
 
     @Mock
     private ImageRevisionReaderService imageRevisionReaderService;
-
-    @Mock
-    private Clock clock;
 
     @InjectMocks
     private ImageService underTest;
@@ -90,26 +78,15 @@ public class ImageServiceTest {
 
     @Test
     public void tesDetermineImageNameFound() {
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
 
-        String imageName = underTest.determineImageName(DEFAULT_PLATFORM, REGION, image);
+        String imageName = underTest.determineImageName(DEFAULT_PLATFORM, DEFAULT_REGION, image);
         assertEquals("ami-09fea90f257c85513", imageName);
     }
 
     @Test
-    public void tesDetermineImageNameFoundDefaultPreferred() {
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM,
-                Map.of(
-                        REGION, EXISTING_ID,
-                        DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
-
-        String imageName = underTest.determineImageName(DEFAULT_PLATFORM, REGION, image);
-        assertEquals("ami-09fea90f257c85514", imageName);
-    }
-
-    @Test
     public void tesDetermineImageNameNotFound() {
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
 
         Exception exception = assertThrows(RuntimeException.class, () ->
                 underTest.determineImageName(DEFAULT_PLATFORM, "fake-region", image));
@@ -125,10 +102,10 @@ public class ImageServiceTest {
         imageSettings.setOs(DEFAULT_OS);
 
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
-        when(imageProvider.getImage(imageSettings, REGION, DEFAULT_PLATFORM)).thenReturn(Optional.empty());
+        when(imageProvider.getImage(imageSettings, DEFAULT_REGION, DEFAULT_PLATFORM)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(RuntimeException.class, () ->
-                underTest.getImage(imageSettings, REGION, DEFAULT_PLATFORM));
+                underTest.getImage(imageSettings, DEFAULT_REGION, DEFAULT_PLATFORM));
         String exceptionMessage = "Could not find any image with id: 'fake-ami-0a6931aea1415eb0e' in region 'eu-west-1' with OS 'redhat7'.";
         assertEquals(exceptionMessage, exception.getMessage());
     }
@@ -137,12 +114,12 @@ public class ImageServiceTest {
     public void testImageChange() {
         Stack stack = new Stack();
         stack.setCloudPlatform(DEFAULT_PLATFORM);
-        stack.setRegion(REGION);
+        stack.setRegion(DEFAULT_REGION);
         ImageSettingsRequest imageRequest = new ImageSettingsRequest();
         when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
         when(imageProvider.getImage(imageRequest, stack.getRegion(), stack.getCloudPlatform()))
                 .thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
         when(imageRepository.getByStack(stack)).thenReturn(new ImageEntity());
         when(image.getUuid()).thenReturn(IMAGE_UUID);
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
@@ -205,7 +182,7 @@ public class ImageServiceTest {
     @Test
     void testGenerateForStack() {
         Stack stack = new Stack();
-        stack.setRegion(REGION);
+        stack.setRegion(DEFAULT_REGION);
         stack.setCloudPlatform(DEFAULT_PLATFORM);
         ImageEntity imageEntity = new ImageEntity();
         imageEntity.setImageId(IMAGE_UUID);
@@ -221,7 +198,7 @@ public class ImageServiceTest {
 
         ImageCatalog result = underTest.generateImageCatalogForStack(stack);
 
-        verify(imageProvider).getImage(imageSettingsRequestCaptor.capture(), eq(REGION), eq(DEFAULT_PLATFORM));
+        verify(imageProvider).getImage(imageSettingsRequestCaptor.capture(), eq(DEFAULT_REGION), eq(DEFAULT_PLATFORM));
         assertThat(imageSettingsRequestCaptor.getValue())
                 .returns(IMAGE_CATALOG, ImageSettingsBase::getCatalog)
                 .returns(IMAGE_UUID, ImageSettingsBase::getId);
@@ -229,25 +206,5 @@ public class ImageServiceTest {
         assertThat(result.getImages().getFreeipaImages())
                 .containsExactly(image);
         assertThat(result.getVersions()).isNull();
-    }
-
-    @Test
-    void getImagesOfAliveStacksWithNoThresholdShouldCallRepositoryWithCurrentTimestamp() {
-        when(clock.getCurrentLocalDateTime()).thenReturn(MOCK_NOW);
-
-        underTest.getImagesOfAliveStacks(null);
-
-        verify(imageRepository).findImagesOfAliveStacks(Timestamp.valueOf(MOCK_NOW).getTime());
-    }
-
-    @Test
-    void getImagesOfAliveStacksWithThresholdShouldCallRepositoryWithModifiedTimestamp() {
-        final int thresholdInDays = 180;
-        final LocalDateTime thresholdTime = MOCK_NOW.minusDays(thresholdInDays);
-        when(clock.getCurrentLocalDateTime()).thenReturn(MOCK_NOW);
-
-        underTest.getImagesOfAliveStacks(thresholdInDays);
-
-        verify(imageRepository).findImagesOfAliveStacks(Timestamp.valueOf(thresholdTime).getTime());
     }
 }

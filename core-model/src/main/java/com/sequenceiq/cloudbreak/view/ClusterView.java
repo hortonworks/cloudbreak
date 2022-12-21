@@ -90,10 +90,6 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     Boolean getEmbeddedDatabaseOnAttachedDisk();
 
-    String getDbSslRootCertBundle();
-
-    Boolean getDbSslEnabled();
-
     default String getPassword() {
         return getIfNotNull(getPasswordSecret(), Secret::getRaw);
     }

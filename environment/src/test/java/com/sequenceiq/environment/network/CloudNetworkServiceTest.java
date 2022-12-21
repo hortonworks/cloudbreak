@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.network;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -42,13 +40,9 @@ class CloudNetworkServiceTest {
 
     private static final byte AMOUNT_OF_SUBNETS = 2;
 
-    private static final String TEST_SUBNET_ID = "test-subnet-id";
+    private static final Set<String> DEFAULT_TEST_SUBNET_ID_SET = Set.of("test-subnet-id");
 
-    private static final Set<String> DEFAULT_TEST_SUBNET_ID_SET = Set.of(TEST_SUBNET_ID);
-
-    private static final String TEST_PUBLIC_SUBNET_ID = "test-public-subnet-id";
-
-    private static final Set<String> DEFAULT_TEST_PUBLIC_SUBNET_ID_SET = Set.of(TEST_PUBLIC_SUBNET_ID);
+    private static final Set<String> DEFAULT_TEST_PUBLIC_SUBNET_ID_SET = Set.of("test-public-subnet-id");
 
     private static final String DEFAULT_TEST_VPC_ID = "test-vpc-id";
 
@@ -119,16 +113,11 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAwsThenWeShouldFetchTheCloudNetworksFromProvider() {
         AwsParams awsParams = NetworkTestUtils.getAwsParams(DEFAULT_TEST_VPC_ID);
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet),
+        CloudSubnet cloudSubnet = new CloudSubnet(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), "someSubnet");
+        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
-        CloudSubnet cloudSubnet2 = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork2 = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet2),
-                Collections.emptyMap());
-        Map<String, Set<CloudNetwork>> cloudNetworksFromProvider2 = new LinkedHashMap<>();
-        cloudNetworksFromProvider2.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork2));
 
         when(testNetworkDto.getSubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
         when(testNetworkDto.getEndpointGatewaySubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
@@ -137,24 +126,20 @@ class CloudNetworkServiceTest {
         when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider);
 
         Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironmentDto, testNetworkDto);
-
-        when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider2);
         Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironmentDto, testNetworkDto);
 
         byte expectedAmountOfResultCloudSubnet = 1;
 
         assertNotNull(result);
         assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), result.get(result.keySet().iterator().next()).getId());
 
         assertNotNull(gatewayResult);
         assertEquals(expectedAmountOfResultCloudSubnet, gatewayResult.size(),
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
         verify(platformParameterService, times(2)).getCloudNetworks(any());
-        assertThat(result.get(TEST_SUBNET_ID).getDeploymentRestrictions()).containsExactlyElementsOf(DeploymentRestriction.ALL);
-        assertThat(gatewayResult.get(TEST_SUBNET_ID).getDeploymentRestrictions()).containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
     }
 
     @Test
@@ -163,8 +148,8 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAwsAndNoEndpointSubnetsAreProvided() {
         AwsParams awsParams = NetworkTestUtils.getAwsParams(DEFAULT_TEST_VPC_ID);
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
+        CloudSubnet cloudSubnet = new CloudSubnet(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), "someSubnet");
+        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), Set.of(cloudSubnet),
             Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
@@ -183,14 +168,13 @@ class CloudNetworkServiceTest {
 
         assertNotNull(result);
         assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), result.get(result.keySet().iterator().next()).getId());
 
         assertNotNull(gatewayResult);
         assertEquals(expectedAmountOfResultCloudEndpointSubnet, gatewayResult.size(),
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudEndpointSubnet);
 
         verify(platformParameterService, times(1)).getCloudNetworks(any());
-        assertThat(result.get(TEST_SUBNET_ID).getDeploymentRestrictions()).containsExactlyElementsOf(DeploymentRestriction.ALL);
     }
 
     @Test
@@ -199,14 +183,14 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAwsAndDifferentEndpointSubnetsAreProvided() {
         AwsParams awsParams = NetworkTestUtils.getAwsParams(DEFAULT_TEST_VPC_ID);
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
+        CloudSubnet cloudSubnet = new CloudSubnet(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), "someSubnet");
+        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), Set.of(cloudSubnet),
             Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
 
-        CloudSubnet publicCloudSubnet = new CloudSubnet(TEST_PUBLIC_SUBNET_ID, "someSubnet");
-        CloudNetwork publicCloudNetwork = new CloudNetwork("someCloudNetwork", TEST_PUBLIC_SUBNET_ID, Set.of(publicCloudSubnet),
+        CloudSubnet publicCloudSubnet = new CloudSubnet(DEFAULT_TEST_PUBLIC_SUBNET_ID_SET.iterator().next(), "someSubnet");
+        CloudNetwork publicCloudNetwork = new CloudNetwork("someCloudNetwork", DEFAULT_TEST_PUBLIC_SUBNET_ID_SET.iterator().next(), Set.of(publicCloudSubnet),
             Collections.emptyMap());
         Map<String, Set<CloudNetwork>> publicCloudNetworksFromProvider = new LinkedHashMap<>();
         publicCloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(publicCloudNetwork));
@@ -227,18 +211,14 @@ class CloudNetworkServiceTest {
 
         assertNotNull(result);
         assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), result.get(result.keySet().iterator().next()).getId());
 
         assertNotNull(gatewayResult);
         assertEquals(expectedAmountOfResultCloudSubnet, gatewayResult.size(),
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_PUBLIC_SUBNET_ID, gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_PUBLIC_SUBNET_ID_SET.iterator().next(), gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
         verify(platformParameterService, times(2)).getCloudNetworks(any());
-        assertThat(result.get(TEST_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS);
-        assertThat(gatewayResult.get(TEST_PUBLIC_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
     }
 
     @Test
@@ -247,16 +227,11 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAzureThenWeShouldFetchTheCloudNetworksFromProvider() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams();
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
+        CloudSubnet cloudSubnet = new CloudSubnet(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), "someSubnet");
+        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
-        CloudSubnet cloudSubnet2 = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork2 = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet2),
-                Collections.emptyMap());
-        Map<String, Set<CloudNetwork>> cloudNetworksFromProvider2 = new LinkedHashMap<>();
-        cloudNetworksFromProvider2.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork2));
 
         when(testNetworkDto.getSubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
         when(testNetworkDto.getEndpointGatewaySubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
@@ -265,26 +240,20 @@ class CloudNetworkServiceTest {
         when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider);
 
         Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironmentDto, testNetworkDto);
-
-        when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider2);
         Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironmentDto, testNetworkDto);
 
         byte expectedAmountOfResultCloudSubnet = 1;
 
         assertNotNull(result);
         assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), result.get(result.keySet().iterator().next()).getId());
 
         assertNotNull(gatewayResult);
         assertEquals(expectedAmountOfResultCloudSubnet, gatewayResult.size(),
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
         verify(platformParameterService, times(2)).getCloudNetworks(any());
-        assertThat(result.get(TEST_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ALL);
-        assertThat(gatewayResult.get(TEST_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
     }
 
     @Test
@@ -293,8 +262,8 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAzureAndNoEndpointSubnetsAreProvided() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams();
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
+        CloudSubnet cloudSubnet = new CloudSubnet(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), "someSubnet");
+        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), Set.of(cloudSubnet),
             Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
@@ -313,15 +282,13 @@ class CloudNetworkServiceTest {
 
         assertNotNull(result);
         assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), result.get(result.keySet().iterator().next()).getId());
 
         assertNotNull(gatewayResult);
         assertEquals(expectedAmountOfResultCloudEndpointSubnet, gatewayResult.size(),
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudEndpointSubnet);
 
         verify(platformParameterService, times(1)).getCloudNetworks(any());
-        assertThat(result.get(TEST_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ALL);
     }
 
     @Test
@@ -330,14 +297,14 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsAzureAndDifferentEndpointSubnetsAreProvided() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams();
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
+        CloudSubnet cloudSubnet = new CloudSubnet(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), "someSubnet");
+        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), Set.of(cloudSubnet),
             Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
 
-        CloudSubnet publicCloudSubnet = new CloudSubnet(TEST_PUBLIC_SUBNET_ID, "someSubnet");
-        CloudNetwork publicCloudNetwork = new CloudNetwork("someCloudNetwork", TEST_PUBLIC_SUBNET_ID, Set.of(publicCloudSubnet),
+        CloudSubnet publicCloudSubnet = new CloudSubnet(DEFAULT_TEST_PUBLIC_SUBNET_ID_SET.iterator().next(), "someSubnet");
+        CloudNetwork publicCloudNetwork = new CloudNetwork("someCloudNetwork", DEFAULT_TEST_PUBLIC_SUBNET_ID_SET.iterator().next(), Set.of(publicCloudSubnet),
             Collections.emptyMap());
         Map<String, Set<CloudNetwork>> publicCloudNetworksFromProvider = new LinkedHashMap<>();
         publicCloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(publicCloudNetwork));
@@ -358,18 +325,14 @@ class CloudNetworkServiceTest {
 
         assertNotNull(result);
         assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), result.get(result.keySet().iterator().next()).getId());
 
         assertNotNull(gatewayResult);
         assertEquals(expectedAmountOfResultCloudSubnet, gatewayResult.size(),
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_PUBLIC_SUBNET_ID, gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_PUBLIC_SUBNET_ID_SET.iterator().next(), gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
         verify(platformParameterService, times(2)).getCloudNetworks(any());
-        assertThat(result.get(TEST_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS);
-        assertThat(gatewayResult.get(TEST_PUBLIC_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
     }
 
     @Test
@@ -386,12 +349,12 @@ class CloudNetworkServiceTest {
 
         assertNotNull(result);
         assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), result.get(result.keySet().iterator().next()).getId());
 
         assertNotNull(gatewayResult);
         assertEquals(expectedAmountOfResultCloudSubnet, gatewayResult.size(),
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_PUBLIC_SUBNET_ID, gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_PUBLIC_SUBNET_ID_SET.iterator().next(), gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
         verify(platformParameterService, times(0)).getCloudNetworks(any());
     }
@@ -402,7 +365,7 @@ class CloudNetworkServiceTest {
         when(testNetworkDto.getSubnetIds()).thenReturn(Collections.emptySet());
         when(testNetworkDto.getEndpointGatewaySubnetIds()).thenReturn(Collections.emptySet());
         Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironment, testNetworkDto);
-        Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironment, testNetworkDto);
+        Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironmentDto, testNetworkDto);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -427,43 +390,34 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentWhenPlatformIsAwsThenWeShouldFetchTheCloudNetworksFromProvider() {
         AwsParams awsParams = NetworkTestUtils.getAwsParams(DEFAULT_TEST_VPC_ID);
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
+        CloudSubnet cloudSubnet = new CloudSubnet(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), "someSubnet");
+        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
-        CloudSubnet cloudSubnet2 = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork2 = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet2),
-                Collections.emptyMap());
-        Map<String, Set<CloudNetwork>> cloudNetworksFromProvider2 = new LinkedHashMap<>();
-        cloudNetworksFromProvider2.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork2));
 
         when(testNetworkDto.getSubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
         when(testNetworkDto.getEndpointGatewaySubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
         when(testNetworkDto.getAws()).thenReturn(awsParams);
         when(testEnvironment.getCloudPlatform()).thenReturn(AWS_CLOUD_PLATFORM);
+        when(testEnvironmentDto.getCloudPlatform()).thenReturn(AWS_CLOUD_PLATFORM);
         when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider);
-        Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironment, testNetworkDto);
 
-        when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider2);
-        Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironment, testNetworkDto);
+        Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironment, testNetworkDto);
+        Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironmentDto, testNetworkDto);
 
         byte expectedAmountOfResultCloudSubnet = 1;
 
         assertNotNull(result);
         assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), result.get(result.keySet().iterator().next()).getId());
 
         assertNotNull(gatewayResult);
         assertEquals(expectedAmountOfResultCloudSubnet, gatewayResult.size(),
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
         verify(platformParameterService, times(2)).getCloudNetworks(any());
-        assertThat(result.get(TEST_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ALL);
-        assertThat(gatewayResult.get(TEST_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
     }
 
     @Test
@@ -472,43 +426,34 @@ class CloudNetworkServiceTest {
     void testRetrieveSubnetMetadataByEnvironmentWhenPlatformIsAzureThenWeShouldFetchTheCloudNetworksFromProvider() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams();
 
-        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
+        CloudSubnet cloudSubnet = new CloudSubnet(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), "someSubnet");
+        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), Set.of(cloudSubnet),
                 Collections.emptyMap());
         Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
         cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
-        CloudSubnet cloudSubnet2 = new CloudSubnet(TEST_SUBNET_ID, "someSubnet");
-        CloudNetwork cloudNetwork2 = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet2),
-                Collections.emptyMap());
-        Map<String, Set<CloudNetwork>> cloudNetworksFromProvider2 = new LinkedHashMap<>();
-        cloudNetworksFromProvider2.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork2));
 
         when(testNetworkDto.getSubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
         when(testNetworkDto.getEndpointGatewaySubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
         when(testNetworkDto.getAzure()).thenReturn(azureParams);
         when(testEnvironment.getCloudPlatform()).thenReturn(AZURE_CLOUD_PLATFORM);
+        when(testEnvironmentDto.getCloudPlatform()).thenReturn(AZURE_CLOUD_PLATFORM);
         when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider);
-        Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironment, testNetworkDto);
 
-        when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider2);
-        Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironment, testNetworkDto);
+        Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironment, testNetworkDto);
+        Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironmentDto, testNetworkDto);
 
         byte expectedAmountOfResultCloudSubnet = 1;
 
         assertNotNull(result);
         assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), result.get(result.keySet().iterator().next()).getId());
 
         assertNotNull(gatewayResult);
         assertEquals(expectedAmountOfResultCloudSubnet, gatewayResult.size(),
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
         verify(platformParameterService, times(2)).getCloudNetworks(any());
-        assertThat(result.get(TEST_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ALL);
-        assertThat(gatewayResult.get(TEST_SUBNET_ID).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
     }
 
     @Test
@@ -519,18 +464,18 @@ class CloudNetworkServiceTest {
         when(testNetworkDto.getEndpointGatewaySubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
 
         Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironment, testNetworkDto);
-        Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironment, testNetworkDto);
+        Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironmentDto, testNetworkDto);
 
         byte expectedAmountOfResultCloudSubnet = 1;
 
         assertNotNull(result);
         assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), result.get(result.keySet().iterator().next()).getId());
 
         assertNotNull(gatewayResult);
         assertEquals(expectedAmountOfResultCloudSubnet, gatewayResult.size(),
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
-        assertEquals(TEST_SUBNET_ID, gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
+        assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
         verify(platformParameterService, times(0)).getCloudNetworks(any());
     }

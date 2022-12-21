@@ -512,32 +512,6 @@ message CDPCloudbreakClusterStatus {
   }
 }
 
-// The type of the credential
-message CDPCredentialType {
-  enum Value {
-    // Unknown credential type
-    UNKNOWN = 0;
-    // Aws key based credential type
-    AWS_KEY_BASED = 1;
-    // Aws role based credential type
-    AWS_ROLE_BASED = 2;
-    // Gcp json credential type
-    GCP_JSON = 3;
-    // Gcp p12 credential type
-    GCP_P12 = 4;
-    // Azure codegrantflow credential type
-    AZURE_CODEGRANTFLOW = 5;
-    // Azure app based with certificate credential type
-    AZURE_APPBASED_CERTIFICATE = 6;
-    // Azure app based with secret credential type
-    AZURE_APPBASED_SECRET = 7;
-    // Yarn credential type
-    YARN = 8;
-    // Mock credential type
-    MOCK = 9;
-  }
-}
-
 // Generated when a valid CDP Datalake cluster creation request has
 // been made.
 message CDPDatalakeClusterRequested {
@@ -1273,8 +1247,6 @@ message CDPLiftieClusterStatusChanged {
   repeated string entitlements = 19;
   // the workload crn
   string workloadCrn = 20;
-  // the Liftie app version.
-  string liftieVersion = 21;
 }
 
 // States of the nodes in a Liftie Cluster
@@ -1656,8 +1628,6 @@ message CDPEnvironmentDetails {
   string userTags = 8;
   // GCP specific details of the environment
   CDPEnvironmentGcpDetails gcpDetails = 9;
-  // Credential details of the environment
-  CDPCredentialDetails credentialDetails = 10;
 }
 
 // CDP FreeIPA details closely related to the CDP Environment
@@ -1735,11 +1705,6 @@ message CDPNetworkDetails {
   string domain = 10;
   // If the customer is using their own DNS zones for some services
   CDPOwnDnsZones ownDnsZones= 11;
-}
-
-message CDPCredentialDetails {
-  // The type of the used credential
-  CDPCredentialType.Value credentialType = 1;
 }
 
 // Generated when Environment creation has been requested or finished
@@ -3752,12 +3717,11 @@ message CDPTrialEnvironment {
 
 // The pattern and status for CDP Trial workloads.
 message CDPTrialWorkload {
-  // Pattern used by the trial workload. Currently supported CDP trial workload patterns are CDPONE_SELF_SERVICE_EXPLORATORY_ANALYTICS, CDPONE_BI_AT_SCALE, CDPONE_REAL_TIME_OPERATIONAL_INSIGHTS, CDPONE_OPEN_DATA_LAKEHOUSE, CDPONE_LOW_CODE_ANALYTICS_APP.
+  // Pattern used by the trial workload. Currently supported CDP trial workload patterns are CDPONE_SELF_SERVICE_EXPLORATORY_ANALYTICS, CDPONE_BI_AT_SCALE, CDPONE_REAL_TIME_OPERATIONAL_INSIGHTS, CDPONE_OPEN_DATA_LAKEHOUSE.
   // CDPONE_SELF_SERVICE_EXPLORATORY_ANALYTICS - Indicates self-service exploratory analytics pattern for CDPOne.
   // CDPONE_BI_AT_SCALE - Indicates business intelligence at scale pattern for CDPOne.
   // CDPONE_REAL_TIME_OPERATIONAL_INSIGHTS - Indicates real-time operational insights pattern for CDPOne.
   // CDPONE_OPEN_DATA_LAKEHOUSE - Indicates open data lakehouse pattern for CDPOne.
-  // CDPONE_LOW_CODE_ANALYTICS_APP - Indicates Low Code Analytics App(Studio) pattern for CDPOne.
   string pattern = 1;
   // Status of the workload deployment for the trial.
   CDPTrialWorkloadStatus.Value status = 2;

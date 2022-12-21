@@ -3,8 +3,6 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -28,12 +26,11 @@ public class SdxConverterTest {
         Assertions.assertNull(sdxRequest);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = SdxClusterStatusResponse.class, names = {"RUNNING", "DATALAKE_BACKUP_INPROGRESS"})
-    public void testGetSharedServiceWhenSdxIsAvailable(SdxClusterStatusResponse status) {
+    @Test
+    public void testGetSharedServiceWhenSdxIsRunning() {
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         sdxClusterResponse.setName("some-sdx");
-        sdxClusterResponse.setStatus(status);
+        sdxClusterResponse.setStatus(SdxClusterStatusResponse.RUNNING);
 
         SharedServiceV4Request sdxRequest = underTest.getSharedService(sdxClusterResponse);
 

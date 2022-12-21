@@ -488,14 +488,6 @@ public class SdxController implements SdxEndpoint {
         return verticalScaleService.verticalScaleDatalake(sdxCluster, updateRequest, userCrn);
     }
 
-    @Override
-    @InternalOnly
-    public void submitDatalakeDataSizesInternal(@TenantAwareParam String crn, String operationId, String dataSizesJson,
-            @InitiatorUserCrn String initiatorUserCrn) {
-        SdxCluster sdxCluster = sdxService.getByCrn(crn);
-        sdxService.submitDatalakeDataSizes(sdxCluster, operationId, dataSizesJson);
-    }
-
     private SdxCluster getSdxClusterByName(String name) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);

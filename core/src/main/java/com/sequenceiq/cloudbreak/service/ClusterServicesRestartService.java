@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
-import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.validation.AllRoleTypes;
 
 @Service
@@ -64,9 +63,6 @@ public class ClusterServicesRestartService {
 
     @Inject
     private RedbeamsDbCertificateProvider dbCertificateProvider;
-
-    @Inject
-    private RdsViewProvider rdsViewProvider;
 
     public boolean isRDCRefreshNeeded(Stack stack, Stack datalakeStack) {
         // Re-configuring DH using the Remote Data Context of Data lake.
@@ -122,7 +118,7 @@ public class ClusterServicesRestartService {
     }
 
     private Map<String, String> getRdsConfigMap(RdsConfigWithoutCluster rdsConfig) {
-        RdsView hiveRdsView = rdsViewProvider.getRdsView(rdsConfig, dbCertificateProvider.getSslCertsFilePath());
+        RdsView hiveRdsView = new RdsView(rdsConfig, dbCertificateProvider.getSslCertsFilePath());
         Map<String, String> configs = new HashMap<String, String>();
         configs.put(HIVE_METASTORE_DATABASE_HOST, hiveRdsView.getHost());
         configs.put(HIVE_METASTORE_DATABASE_NAME, hiveRdsView.getDatabaseName());

@@ -145,16 +145,4 @@ public interface CloudFunctionality {
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
     Map<String, String> getLaunchTemplateUserData(String name);
-
-    @Retryable(
-            maxAttempts = ATTEMPTS,
-            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
-    )
-    Boolean isCloudFormationExistForStack(String name);
-
-    @Retryable(
-            maxAttempts = ATTEMPTS,
-            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
-    )
-    Boolean isFreeipaCfStackExistForEnvironment(String environmentCrn);
 }

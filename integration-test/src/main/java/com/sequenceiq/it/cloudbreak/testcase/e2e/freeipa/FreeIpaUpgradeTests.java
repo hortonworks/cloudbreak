@@ -44,6 +44,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
@@ -85,15 +86,17 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
         sdxDatabaseRequest.setCreate(false);
 
         testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs()
                 .given(freeIpa, FreeIpaTestDto.class)
                 .withTelemetry("telemetry")
-
                 .withUpgradeCatalogAndImage()
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .given(SdxTestDto.class)
-                    .withCloudStorage()
-                    .withExternalDatabase(sdxDatabaseRequest)
+                .withCloudStorage()
+                .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(freeIpa, FreeIpaTestDto.class)
@@ -123,22 +126,25 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
         sdxDatabaseRequest.setCreate(false);
 
         testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs()
                 .given(freeIpa, FreeIpaTestDto.class)
-                    .withFreeIpaHa(1, 3)
-                    .withTelemetry("telemetry")
-                    .withUpgradeCatalogAndImage()
+                .withFreeIpaHa(1, 3)
+                .withTelemetry("telemetry")
+                .withUpgradeCatalogAndImage()
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .given(SdxTestDto.class)
-                    .withCloudStorage()
-                    .withExternalDatabase(sdxDatabaseRequest)
+                .withCloudStorage()
+                .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(freeIpa, FreeIpaTestDto.class)
                 .when(freeIpaTestClient.upgrade())
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .given(FreeIpaOperationStatusTestDto.class)
-                    .withOperationId(((FreeIpaTestDto) testContext.get(freeIpa)).getOperationId())
+                .withOperationId(((FreeIpaTestDto) testContext.get(freeIpa)).getOperationId())
                 .then((tc, testDto, freeIpaClient) -> testFreeIpaAvailabilityDuringUpgrade(tc, testDto, freeIpaClient, freeIpa))
                 .await(COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE).withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(TWO_HOURS_IN_SEC)))
                 .given(freeIpa, FreeIpaTestDto.class)

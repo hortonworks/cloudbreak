@@ -7,8 +7,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.sequenceiq.cloudbreak.util.FipsOpenSSLLoaderUtil;
-
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
@@ -19,7 +17,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class EnvironmentApplication {
 
     public static void main(String[] args) {
-        FipsOpenSSLLoaderUtil.registerOpenSSLJniProvider();
         SpringApplication.run(EnvironmentApplication.class, args);
     }
 

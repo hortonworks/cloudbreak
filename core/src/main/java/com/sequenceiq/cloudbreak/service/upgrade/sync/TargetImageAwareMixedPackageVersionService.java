@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_NEWER_FAILED;
 
@@ -93,7 +92,7 @@ public class TargetImageAwareMixedPackageVersionService {
     }
 
     private String getCmVersion(Map<String, String> packageVersions) {
-        return String.format("%s-%s", packageVersions.get(CM.getKey()), packageVersions.get(CM_BUILD_NUMBER.getKey()));
+        return packageVersions.get(CM.getKey());
     }
 
     private void sendNotification(Long stackId, ResourceEvent resourceEvent, List<String> args) {

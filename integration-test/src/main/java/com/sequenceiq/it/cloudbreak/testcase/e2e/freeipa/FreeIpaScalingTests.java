@@ -26,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDownscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
@@ -51,8 +52,11 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
         Set<String> primaryGatewayInstanceId = new HashSet<>();
 
         testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs()
                 .given(freeIpa, FreeIpaTestDto.class)
-                    .withTelemetry("telemetry")
+                .withTelemetry("telemetry")
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
@@ -62,7 +66,7 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
                 })
 
                 .given(FreeIpaUpscaleTestDto.class)
-                    .withAvailabilityType(AvailabilityType.HA)
+                .withAvailabilityType(AvailabilityType.HA)
                 .when(freeIpaTestClient.upscale(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
@@ -73,7 +77,7 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
                 })
 
                 .given(FreeIpaDownscaleTestDto.class)
-                    .withAvailabilityType(AvailabilityType.TWO_NODE_BASED)
+                .withAvailabilityType(AvailabilityType.TWO_NODE_BASED)
                 .when(freeIpaTestClient.downscale())
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
@@ -84,7 +88,7 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
                 })
 
                 .given(FreeIpaUpscaleTestDto.class)
-                    .withAvailabilityType(AvailabilityType.HA)
+                .withAvailabilityType(AvailabilityType.HA)
                 .when(freeIpaTestClient.upscale(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {

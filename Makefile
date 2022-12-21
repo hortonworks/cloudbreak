@@ -55,8 +55,3 @@ create-rc-version-tag:
 
 create-dev-version-tag:
 	 ./scripts/create-dev-version-tag.sh
-
-enable-gitconfig-local:
-	 git config --local include.path ../.gitconfig
-
-

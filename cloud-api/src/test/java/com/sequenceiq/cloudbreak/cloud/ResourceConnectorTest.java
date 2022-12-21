@@ -118,7 +118,7 @@ class ResourceConnectorTest {
         }
 
         @Override
-        public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
+        public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
             return null;
         }
 

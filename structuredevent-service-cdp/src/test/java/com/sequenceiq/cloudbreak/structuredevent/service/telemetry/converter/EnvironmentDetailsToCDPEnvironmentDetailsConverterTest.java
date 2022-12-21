@@ -10,14 +10,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -25,8 +21,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -81,7 +75,6 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         assertNotNull(cdpEnvironmentDetails.getAwsDetails());
         assertNotNull(cdpEnvironmentDetails.getAzureDetails());
         assertEquals("", cdpEnvironmentDetails.getUserTags());
-        assertEquals(UsageProto.CDPCredentialType.Value.UNKNOWN, cdpEnvironmentDetails.getCredentialDetails().getCredentialType());
     }
 
     @Test
@@ -339,38 +332,5 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
         assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", cdpEnvironmentDetails.getUserTags());
-    }
-
-    @ParameterizedTest
-    @MethodSource("credentialTypes")
-    void testCredentialDetails(CredentialType credentialType, UsageProto.CDPCredentialType.Value cdpCredentialType) {
-        CredentialDetails credentialDetails = CredentialDetails.builder()
-                .withCredentialType(credentialType)
-                .build();
-        when(environmentDetails.getCredentialDetails()).thenReturn(credentialDetails);
-        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
-        assertEquals(cdpCredentialType, cdpEnvironmentDetails.getCredentialDetails().getCredentialType());
-    }
-
-    @Test
-    void testCredentialDetailsWhenNull() {
-        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
-        assertEquals(UsageProto.CDPCredentialType.Value.UNKNOWN, cdpEnvironmentDetails.getCredentialDetails().getCredentialType());
-    }
-
-    private static Stream<Arguments> credentialTypes() {
-        return Stream.of(
-                Arguments.of(CredentialType.AWS_KEY_BASED, UsageProto.CDPCredentialType.Value.AWS_KEY_BASED),
-                Arguments.of(CredentialType.AWS_ROLE_BASED, UsageProto.CDPCredentialType.Value.AWS_ROLE_BASED),
-                Arguments.of(CredentialType.AZURE_CODEGRANTFLOW, UsageProto.CDPCredentialType.Value.AZURE_CODEGRANTFLOW),
-                Arguments.of(CredentialType.AZURE_APPBASED_SECRET, UsageProto.CDPCredentialType.Value.AZURE_APPBASED_SECRET),
-                Arguments.of(CredentialType.AZURE_APPBASED_CERTIFICATE, UsageProto.CDPCredentialType.Value.AZURE_APPBASED_CERTIFICATE),
-                Arguments.of(CredentialType.GCP_JSON, UsageProto.CDPCredentialType.Value.GCP_JSON),
-                Arguments.of(CredentialType.GCP_P12, UsageProto.CDPCredentialType.Value.GCP_P12),
-                Arguments.of(CredentialType.YARN, UsageProto.CDPCredentialType.Value.YARN),
-                Arguments.of(CredentialType.MOCK, UsageProto.CDPCredentialType.Value.MOCK),
-                Arguments.of(CredentialType.UNKNOWN, UsageProto.CDPCredentialType.Value.UNKNOWN),
-                Arguments.of(null, UsageProto.CDPCredentialType.Value.UNKNOWN)
-        );
     }
 }

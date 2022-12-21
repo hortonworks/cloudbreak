@@ -9,8 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
-import com.sequenceiq.cloudbreak.util.FipsOpenSSLLoaderUtil;
-
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
@@ -21,7 +19,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class PeriscopeApplication {
 
     public static void main(String[] args) {
-        FipsOpenSSLLoaderUtil.registerOpenSSLJniProvider();
         if (!versionedApplication().showVersionInfo(args)) {
             if (args.length == 0) {
                 SpringApplication.run(PeriscopeApplication.class);

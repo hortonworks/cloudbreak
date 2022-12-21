@@ -91,8 +91,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
                 "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
-                "configStrategy", "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "customConfigurations",
-                "dbSslEnabled", "dbSslRootCertBundle"));
+                "configStrategy", "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "customConfigurations"));
     }
 
     @Test
@@ -111,8 +110,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
                 "clusterManagerIp", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
-                "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "configStrategy", "customConfigurations",
-                "dbSslEnabled", "dbSslRootCertBundle"));
+                "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "configStrategy", "customConfigurations"));
     }
 
     @Test
@@ -128,7 +126,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
                 "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
                 "configStrategy", "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn",
-                "customConfigurations", "dbSslEnabled", "dbSslRootCertBundle"));
+                "customConfigurations"));
         assertNull(result.getGateway());
     }
 

@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -47,14 +49,12 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.CredentialType;
-import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
-import com.sequenceiq.environment.credential.v1.converter.CreateCredentialRequestToCredentialConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.environment.environment.verification.CDPServicePolicyVerification;
@@ -74,9 +74,6 @@ public class CredentialService extends AbstractCredentialService implements Comp
 
     @Inject
     private CredentialValidator credentialValidator;
-
-    @Inject
-    private CreateCredentialRequestToCredentialConverter credentialRequestConverter;
 
     @Inject
     private ServiceProviderCredentialAdapter credentialAdapter;
@@ -203,31 +200,19 @@ public class CredentialService extends AbstractCredentialService implements Comp
         return original;
     }
 
-    public Credential create(CredentialRequest createCredentialRequest, @Nonnull String accountId, @Nonnull String creatorUserCrn,
-            @Nonnull CredentialType type) {
-        LOGGER.debug("Create credential request has received: {}", createCredentialRequest);
-
-        LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", createCredentialRequest.getCloudPlatform(), creatorUserCrn);
-        credentialValidator.validateCredentialCloudPlatform(createCredentialRequest.getCloudPlatform(), creatorUserCrn, type);
-
-        LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", createCredentialRequest.getCloudPlatform(), creatorUserCrn);
-        credentialValidator.validateCreate(createCredentialRequest);
-
-        Credential credential = credentialRequestConverter.convert(createCredentialRequest);
-        credential.setType(type);
-        if (type == AUDIT) {
-            // Permission verification is disabled due to CB-9955
-            credential.setVerifyPermissions(false);
-        }
-        return create(credential, accountId, creatorUserCrn);
+    @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
+    public void createWithRetry(Credential credential, String accountId, String creatorUserCrn) {
+        create(credential, accountId, creatorUserCrn, ENVIRONMENT);
     }
 
-    public Credential create(Credential credential, @Nonnull String accountId, @Nonnull String creatorUserCrn) {
-        repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms(), credential.getType())
+    public Credential create(Credential credential, @Nonnull String accountId, @Nonnull String creatorUserCrn, CredentialType type) {
+        repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms(), type)
                 .map(Credential::getName)
                 .ifPresent(name -> {
                     throw new BadRequestException("Credential already exists with name: " + name);
                 });
+        LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
+        credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn, type);
         LOGGER.debug("Validating credential parameters for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
         credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()));
         String credentialCrn = createCRN(accountId);

@@ -4,9 +4,9 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static java.lang.String.format;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +116,7 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
     private int maxRetry;
 
-    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 3 : ${integrationtest.testsuite.maxRetryCount:5}}")
+    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 3 : ${integrationtest.testsuite.maxRetryCount:3}}")
     private int maxRetryCount;
 
     @Value("${integrationtest.ums.host:localhost}")
@@ -166,10 +166,6 @@ public abstract class TestContext implements ApplicationContextAware {
     private boolean initialized;
 
     private CloudbreakUser actingUser;
-
-    public TestParameter getTestParameter() {
-        return testParameter;
-    }
 
     public Map<String, CloudbreakTestDto> getResourceNames() {
         return resourceNames;
@@ -456,18 +452,18 @@ public abstract class TestContext implements ApplicationContextAware {
         Log.as(LOGGER, cloudbreakUser.toString());
         setActingUser(cloudbreakUser);
         if (clients.get(cloudbreakUser.getAccessKey()) == null) {
-            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(getTestParameter(), cloudbreakUser,
+            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, cloudbreakUser,
                     regionAwareInternalCrnGeneratorFactory.iam());
-            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(getTestParameter(), cloudbreakUser,
+            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, cloudbreakUser,
                     regionAwareInternalCrnGeneratorFactory.iam());
-            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(getTestParameter(), cloudbreakUser,
+            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, cloudbreakUser,
                     regionAwareInternalCrnGeneratorFactory.iam());
-            SdxClient sdxClient = SdxClient.createProxySdxClient(getTestParameter(), cloudbreakUser);
+            SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, cloudbreakUser);
             UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost, umsPort);
             SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(tracer, umsHost, regionAwareInternalCrnGeneratorFactory);
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(tracer,
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
-            RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(getTestParameter(), cloudbreakUser);
+            RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, cloudbreakUser);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
                     CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient,
@@ -485,18 +481,18 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private void initMicroserviceClientsForUMSAccountAdmin(CloudbreakUser accountAdmin) {
         if (clients.get(accountAdmin.getAccessKey()) == null) {
-            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(getTestParameter(), accountAdmin,
+            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, accountAdmin,
                     regionAwareInternalCrnGeneratorFactory.iam());
-            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(getTestParameter(), accountAdmin,
+            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, accountAdmin,
                     regionAwareInternalCrnGeneratorFactory.iam());
-            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(getTestParameter(), accountAdmin,
+            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, accountAdmin,
                     regionAwareInternalCrnGeneratorFactory.iam());
-            SdxClient sdxClient = SdxClient.createProxySdxClient(getTestParameter(), accountAdmin);
+            SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, accountAdmin);
             UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost, umsPort);
             SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(tracer, umsHost, regionAwareInternalCrnGeneratorFactory);
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(tracer,
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
-            RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(getTestParameter(), accountAdmin);
+            RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, accountAdmin);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
                     CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient,
@@ -537,7 +533,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public String getActingUserAccessKey() {
         if (this.actingUser == null) {
-            return getTestParameter().get(CloudbreakTest.ACCESS_KEY);
+            return testParameter.get(CloudbreakTest.ACCESS_KEY);
         }
         return actingUser.getAccessKey();
     }
@@ -586,8 +582,8 @@ public abstract class TestContext implements ApplicationContextAware {
      * - environment variable: INTEGRATIONTEST_USER_CRN
      */
     private Optional<Crn> getUserParameterCrn() {
-        if (StringUtils.isNotBlank(getTestParameter().get(CloudbreakTest.USER_CRN))) {
-            return Optional.ofNullable(Crn.fromString(getTestParameter().get(CloudbreakTest.USER_CRN)));
+        if (StringUtils.isNotBlank(testParameter.get(CloudbreakTest.USER_CRN))) {
+            return Optional.ofNullable(Crn.fromString(testParameter.get(CloudbreakTest.USER_CRN)));
         }
         return Optional.empty();
     }
@@ -636,8 +632,8 @@ public abstract class TestContext implements ApplicationContextAware {
      * - environment variable: INTEGRATIONTEST_USER_NAME
      */
     private Optional<String> getUserParameterName() {
-        if (StringUtils.isNotBlank(getTestParameter().get(CloudbreakTest.USER_NAME))) {
-            return Optional.of(getTestParameter().get(CloudbreakTest.USER_NAME));
+        if (StringUtils.isNotBlank(testParameter.get(CloudbreakTest.USER_NAME))) {
+            return Optional.of(testParameter.get(CloudbreakTest.USER_NAME));
         }
         return Optional.empty();
     }
@@ -692,7 +688,7 @@ public abstract class TestContext implements ApplicationContextAware {
     public CloudbreakUser getActingUser() {
         if (actingUser == null) {
             LOGGER.info(" Requested acting user is NULL. So we are falling back to Default user with \nACCESS_KEY: {} \nSECRET_KEY: {}",
-                    getTestParameter().get(CloudbreakTest.ACCESS_KEY), getTestParameter().get(CloudbreakTest.SECRET_KEY));
+                    testParameter.get(CloudbreakTest.ACCESS_KEY), testParameter.get(CloudbreakTest.SECRET_KEY));
             setActingUser(cloudbreakActor.defaultUser());
         } else {
             LOGGER.info(" Found acting user is present with details:: \nDisplay Name: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {}" +
@@ -751,7 +747,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public String getCreationTimestampTag() {
-        return String.valueOf(Instant.now().getEpochSecond());
+        return String.valueOf(new Date().getTime());
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {

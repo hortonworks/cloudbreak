@@ -73,7 +73,7 @@ class CurrentImageUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(createImage(CURRENT_IMAGE_ID), false, null, null, null, CURRENT_STACK_ID, null, null, null, null, false);
+        return new ImageFilterParams(createImage(CURRENT_IMAGE_ID), false, null, null, null, CURRENT_STACK_ID, null, null, null, null);
     }
 
     private Image createImage(String imageId) {

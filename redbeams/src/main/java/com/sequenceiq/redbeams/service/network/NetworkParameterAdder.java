@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.common.model.PrivateEndpointType;
@@ -105,7 +104,7 @@ public class NetworkParameterAdder {
                 .stream()
                 .findFirst()
                 .map(csn -> subnetListerService.expandAzureResourceId(csn, detailedEnvironmentResponse, subscriptionId))
-                .map(CloudSubnet::getId).orElseThrow(() -> new RedbeamsException("It is not possible to create private endpoints for database: " +
+                .map(sn -> sn.getId()).orElseThrow(() -> new RedbeamsException("It is not possible to create private endpoints for database: " +
                         "there are no subnets with privateEndpointNetworkPolicies disabled"));
     }
 }

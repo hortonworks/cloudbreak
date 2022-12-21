@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -978,7 +977,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
         when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
 
-        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, CUSTOM_CATALOG_NAME, IMAGE_CATALOG_PLATFORM, false);
+        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, CUSTOM_CATALOG_NAME, IMAGE_CATALOG_PLATFORM);
 
         assertEquals(1, actual.getImages().size());
         assertEquals(image, actual.getImages().get(0));
@@ -995,24 +994,10 @@ public class ImageCatalogServiceTest {
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(Collections.singleton("3cba3cd0-a169-4d62-8bc5-709df5f73b50"), emptySet(), emptySet());
         when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
 
-        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, "catalog", IMAGE_CATALOG_PLATFORM, false);
+        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, "catalog", IMAGE_CATALOG_PLATFORM);
 
         assertEquals(1, actual.getImages().size());
         assertEquals("3cba3cd0-a169-4d62-8bc5-709df5f73b50", actual.getImages().get(0).getUuid());
-    }
-
-    @Test
-    public void testImageCatalogImageFilterResultWithGetAllImages() throws CloudbreakImageCatalogException, IOException {
-        ImageCatalog imageCatalog = new ImageCatalog();
-        imageCatalog.setImageCatalogUrl(DEFAULT_CATALOG_URL);
-
-        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V3_CB_CATALOG_FILE);
-        when(imageCatalogRepository.findByNameAndWorkspaceId("catalog", WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
-
-        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, "catalog", IMAGE_CATALOG_PLATFORM, true);
-
-        assertEquals(8, actual.getImages().size());
-        verifyNoInteractions(prefixMatcherService);
     }
 
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {

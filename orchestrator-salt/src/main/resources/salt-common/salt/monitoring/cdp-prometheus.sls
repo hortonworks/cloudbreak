@@ -76,13 +76,6 @@ remove_prometheus_pwd:
   {%- endif %}
 {%- endif %}
 
-/var/log/cdp-prometheus:
-  file.directory:
-    - user: "root"
-    - group: "root"
-    - makedirs: True
-    - mode: 755
-
 start_cdp_prometheus:
   service.running:
     - enable: True

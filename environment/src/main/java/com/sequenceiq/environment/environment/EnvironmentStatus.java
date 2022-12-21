@@ -1,11 +1,6 @@
 package com.sequenceiq.environment.environment;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.ImmutableSet;
 
 public enum EnvironmentStatus {
 
@@ -181,16 +176,6 @@ public enum EnvironmentStatus {
             FREEIPA_CREATION_IN_PROGRESS,
             AVAILABLE);
 
-    public static final Set<EnvironmentStatus> CREATE_IN_PROGRESS_STATES = Set.of(
-            CREATION_INITIATED,
-            NETWORK_CREATION_IN_PROGRESS,
-            PUBLICKEY_CREATE_IN_PROGRESS,
-            ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS,
-            ENVIRONMENT_VALIDATION_IN_PROGRESS,
-            ENVIRONMENT_INITIALIZATION_IN_PROGRESS,
-            FREEIPA_CREATION_IN_PROGRESS
-    );
-
     public static final Set<EnvironmentStatus> DELETE_IN_PROGRESS_STATES = Set.of(
             NETWORK_DELETE_IN_PROGRESS,
             FREEIPA_DELETE_IN_PROGRESS,
@@ -203,7 +188,6 @@ public enum EnvironmentStatus {
             DATAHUB_CLUSTERS_DELETE_IN_PROGRESS,
             DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
             PUBLICKEY_DELETE_IN_PROGRESS,
-            EVENT_CLEANUP_IN_PROGRESS,
             EXPERIENCE_DELETE_IN_PROGRESS,
             ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS,
             ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED
@@ -229,17 +213,6 @@ public enum EnvironmentStatus {
 
     EnvironmentStatus(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus) {
         this.responseStatus = responseStatus;
-    }
-
-    public static List<EnvironmentStatus> skipFromStatusChecker() {
-        return ImmutableSet.of(
-                        Set.of(ARCHIVED,
-                                CREATE_FAILED,
-                                DELETE_FAILED,
-                                FREEIPA_DELETED_ON_PROVIDER_SIDE),
-                        DELETE_IN_PROGRESS_STATES,
-                        CREATE_IN_PROGRESS_STATES)
-                .stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     public com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus getResponseStatus() {

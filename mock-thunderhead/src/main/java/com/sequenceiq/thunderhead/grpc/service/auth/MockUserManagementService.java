@@ -23,11 +23,8 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_JUMPGATE;
@@ -67,6 +64,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_SELECT_INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
@@ -111,7 +109,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_USERSYNC_ROUTING;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -251,7 +248,6 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
 import com.sequenceiq.thunderhead.model.AltusToken;
-import com.sequenceiq.thunderhead.service.MockUmsService;
 import com.sequenceiq.thunderhead.util.CrnHelper;
 import com.sequenceiq.thunderhead.util.IniUtil;
 import com.sequenceiq.thunderhead.util.JsonUtil;
@@ -269,7 +265,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockUserManagementService.class);
 
-    private static final MacSigner SIGNATURE_VERIFIER = new MacSigner(MockUmsService.MAC_SIGNER_SECRET_KEY);
+    private static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
 
     private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
 
@@ -394,8 +390,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.azure.marketplace.images.only.enable}")
     private boolean enableAzureMarketplaceImagesOnly;
 
-    @Value("${auth.mock.cloudidentitymapping.enable}")
-    private boolean enableCloudIdentityMapping;
+    @Value("${auth.mock.cloudidentitymappinng.enable}")
+    private boolean enableCloudIdentityMappinng;
 
     @Value("${auth.mock.upgrade.internalrepo.enable}")
     private boolean enableInternalRepositoryForUpgrade;
@@ -411,9 +407,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.database.wire.encryption.enable}")
     private boolean enableDatabaseWireEncryption;
-
-    @Value("${auth.mock.database.wire.encryption.datahub.enable}")
-    private boolean enableDatabaseWireEncryptionDatahub;
 
     @Value("${auth.mock.datalake.loadbalancer.enable}")
     private boolean datalakeLoadBalancerEnabled;
@@ -496,9 +489,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.workloadiam.sync.enable}")
     private boolean enableWorkloadIamSync;
 
-    @Value("${auth.mock.workloadiam.sync.routing.enable}")
-    private boolean enableWorkloadIamSyncRouting;
-
     @Value("${auth.mock.postgres.upgrade.embedded.enable}")
     private boolean enablePostgresUpgradeEmbedded;
 
@@ -516,14 +506,14 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private String cbLicense;
 
-    private AltusCredential telemetryPublisherCredential;
+    private AltusCredential telemetyPublisherCredential;
 
     private AltusCredential fluentCredential;
 
     private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
 
     @Value("${auth.mock.event-generation.expiration-minutes:10}")
-    private long eventGenerationExpirationMinutes;
+    private long eventGenerationExirationMinutes;
 
     private LoadingCache<String, GetEventGenerationIdsResponse> eventGenerationIdsCache;
 
@@ -611,10 +601,10 @@ public class MockUserManagementService extends UserManagementImplBase {
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
-        telemetryPublisherCredential = getAltusCredential(databusTpCredentialFile, databusTpCredentialProfile);
+        telemetyPublisherCredential = getAltusCredential(databusTpCredentialFile, databusTpCredentialProfile);
         fluentCredential = getAltusCredential(databusFluentCredentialFile, databusFluentCredentialProfile);
         eventGenerationIdsCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(eventGenerationExpirationMinutes, TimeUnit.MINUTES)
+                .expireAfterWrite(eventGenerationExirationMinutes, TimeUnit.MINUTES)
                 .build(new CacheLoader<>() {
                     @Override
                     public GetEventGenerationIdsResponse load(String key) {
@@ -657,9 +647,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     public void getUser(GetUserRequest request, StreamObserver<GetUserResponse> responseObserver) {
         LOGGER.info("Get user: {}", request.getUserIdOrCrn());
         String userIdOrCrn = request.getUserIdOrCrn();
-        String[] splitCrn = userIdOrCrn.split(":");
-        String userName = splitCrn[6];
-        String accountId = splitCrn[4];
+        String[] splittedCrn = userIdOrCrn.split(":");
+        String userName = splittedCrn[6];
+        String accountId = splittedCrn[4];
         accountUsers.computeIfAbsent(accountId, key -> newSetFromMap(new ConcurrentHashMap<>())).add(userName);
         responseObserver.onNext(
                 GetUserResponse.newBuilder()
@@ -685,9 +675,9 @@ public class MockUserManagementService extends UserManagementImplBase {
             responseObserver.onNext(userBuilder.build());
         } else {
             String userIdOrCrn = request.getUserIdOrCrn(0);
-            String[] splitCrn = userIdOrCrn.split(":");
-            String userName = splitCrn[6];
-            String accountId = splitCrn[4];
+            String[] splittedCrn = userIdOrCrn.split(":");
+            String userName = splittedCrn[6];
+            String accountId = splittedCrn[4];
             responseObserver.onNext(
                     userBuilder
                             .addUser(createUser(accountId, userName))
@@ -780,7 +770,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<ListWorkloadAdministrationGroupsForMemberResponse> responseObserver) {
         String memberCrn = request.getMemberCrn();
         String accountId = Crn.fromString(memberCrn).getAccountId();
-        LOGGER.info("List workload administration groups for member: {}, accountId: {}", memberCrn, accountId);
+        LOGGER.info("List workload administration groups for member: {}, accountid: {}", memberCrn, accountId);
         Set<String> groups = mockGroupManagementService.getOrCreateWorkloadGroups(accountId).stream().map(Group::getGroupName).collect(Collectors.toSet());
         ListWorkloadAdministrationGroupsForMemberResponse.Builder responseBuilder = ListWorkloadAdministrationGroupsForMemberResponse.newBuilder();
         responseBuilder.addAllWorkloadAdministrationGroupName(groups);
@@ -810,12 +800,12 @@ public class MockUserManagementService extends UserManagementImplBase {
             responseObserver.onNext(ListMachineUsersResponse.newBuilder().build());
         } else {
             String machineUserIdOrCrn = request.getMachineUserNameOrCrn(0);
-            String[] splitCrn = machineUserIdOrCrn.split(":");
+            String[] splittedCrn = machineUserIdOrCrn.split(":");
             String userName;
             String accountId = request.getAccountId();
             String crnString;
-            if (splitCrn.length > 1) {
-                userName = splitCrn[6];
+            if (splittedCrn.length > 1) {
+                userName = splittedCrn[6];
                 crnString = machineUserIdOrCrn;
             } else {
                 userName = machineUserIdOrCrn;
@@ -878,8 +868,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (verticalScaleEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_AWS_VERTICAL_SCALE));
-            builder.addEntitlements(createEntitlement(CDP_CB_AZURE_VERTICAL_SCALE));
-            builder.addEntitlements(createEntitlement(CDP_CB_GCP_VERTICAL_SCALE));
         }
         if (ccmV2UseOneWayTls) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2_USE_ONE_WAY_TLS));
@@ -911,7 +899,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableAzureMarketplaceImagesOnly) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_IMAGE_MARKETPLACE_ONLY));
         }
-        if (enableCloudIdentityMapping) {
+        if (enableCloudIdentityMappinng) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_IDENTITY_MAPPING));
         }
         if (enableInternalRepositoryForUpgrade) {
@@ -928,9 +916,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDatabaseWireEncryption) {
             builder.addEntitlements(createEntitlement(CDP_CB_DATABASE_WIRE_ENCRYPTION));
-        }
-        if (enableDatabaseWireEncryptionDatahub) {
-            builder.addEntitlements(createEntitlement(CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB));
         }
         if (datalakeLoadBalancerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_DATA_LAKE_LOAD_BALANCER));
@@ -1061,9 +1046,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableWorkloadIamSync) {
             builder.addEntitlements(createEntitlement(WORKLOAD_IAM_SYNC));
         }
-        if (enableWorkloadIamSyncRouting) {
-            builder.addEntitlements(createEntitlement(WORKLOAD_IAM_USERSYNC_ROUTING));
-        }
         if (enableSdxSaasIntegration) {
             builder.addEntitlements(createEntitlement(CDP_SAAS_SDX_INTEGRATION));
         }
@@ -1112,6 +1094,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .setClouderaManagerLicenseKey(cbLicense)
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
                                 .addEntitlements(createEntitlement(CDP_AZURE))
+                                .addEntitlements(createEntitlement(CDP_GCP))
                                 .addEntitlements(createEntitlement(CDP_CB_AWS_NATIVE))
                                 .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))
                                 .addEntitlements(createEntitlement(DATAHUB_AZURE_AUTOSCALING))
@@ -1160,15 +1143,15 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void verifyInteractiveUserSessionToken(VerifyInteractiveUserSessionTokenRequest request,
             StreamObserver<VerifyInteractiveUserSessionTokenResponse> responseObserver) {
-        LOGGER.trace("Verify interactive user session token: {}", request.getSessionToken());
+        LOGGER.trace("Verify interative user session token: {}", request.getSessionToken());
         String sessionToken = request.getSessionToken();
         Jwt token = decodeAndVerify(sessionToken, SIGNATURE_VERIFIER);
         AltusToken introspectResponse = jsonUtil.toObject(token.getClaims(), AltusToken.class);
         String userIdOrCrn = introspectResponse.getSub();
-        String[] splitCrn = userIdOrCrn.split(":");
+        String[] splittedCrn = userIdOrCrn.split(":");
         responseObserver.onNext(
                 VerifyInteractiveUserSessionTokenResponse.newBuilder()
-                        .setAccountId(splitCrn[4])
+                        .setAccountId(splittedCrn[4])
                         .setAccountType(AccountType.REGULAR)
                         .setUserCrn(userIdOrCrn)
                         .build());
@@ -1220,7 +1203,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<GetAssigneeAuthorizationInformationResponse> responseObserver) {
         LOGGER.info("Get assignee authorization information for crn: {}", request.getAssigneeCrn());
         responseObserver.onNext(GetAssigneeAuthorizationInformationResponse.newBuilder()
-                .setResourceAssignment(0, createResourceAssignment(request.getAssigneeCrn()))
+                .setResourceAssignment(0, createResourceAssigment(request.getAssigneeCrn()))
                 .build());
         responseObserver.onCompleted();
     }
@@ -1230,7 +1213,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<ListResourceAssigneesResponse> responseObserver) {
         LOGGER.info("List resource assignees for resource: {}", request.getResourceCrn());
         responseObserver.onNext(ListResourceAssigneesResponse.newBuilder()
-                .setResourceAssignee(0, createResourceAssignee())
+                .setResourceAssignee(0, createResourceAssignee(request.getResourceCrn()))
                 .build());
         responseObserver.onCompleted();
     }
@@ -1250,7 +1233,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         String accessKeyId;
         String privateKey;
         AltusCredential altusCredential = AccessKeyType.Value.UNSET.equals(request.getType())
-                ? telemetryPublisherCredential : fluentCredential;
+                ? telemetyPublisherCredential : fluentCredential;
         if (altusCredential != null) {
             accessKeyId = altusCredential.getAccessKey();
             privateKey = new String(altusCredential.getPrivateKey());
@@ -1511,14 +1494,14 @@ public class MockUserManagementService extends UserManagementImplBase {
                 .build();
     }
 
-    private ResourceAssignee createResourceAssignee() {
+    private ResourceAssignee createResourceAssignee(String resourceCrn) {
         return ResourceAssignee.newBuilder()
                 .setAssigneeCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
                 .setResourceRoleCrn("crn:altus:iam:us-west-1:altus:resourceRole:WorkspaceManager")
                 .build();
     }
 
-    private ResourceAssignment createResourceAssignment(String assigneeCrn) {
+    private ResourceAssignment createResourceAssigment(String assigneeCrn) {
         String resourceCrn = mockCrnService.createCrn(assigneeCrn, CrnResourceDescriptor.CREDENTIAL, Crn.fromString(assigneeCrn).getAccountId()).toString();
         return ResourceAssignment.newBuilder()
                 .setResourceCrn(resourceCrn)

@@ -30,7 +30,7 @@ dependencies {
   }
   implementation group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: micrometerVersion
   api group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
-  api group: 'commons-net',                           name: 'commons-net',                    version: '3.9.0'
+  api group: 'commons-net',                           name: 'commons-net',                    version: '3.6'
   api group: 'org.apache.commons',                    name: 'commons-collections4',           version: commonsCollections4Version
   api group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
   api group: 'com.google.code.gson',                  name: 'gson',                           version: gsonVersion
@@ -42,7 +42,7 @@ dependencies {
   implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'net.jcip',                              name: 'jcip-annotations',               version: '1.0'
   api group: 'com.github.spotbugs',                   name: 'spotbugs-annotations',           version: '4.7.3'
-  api group: 'org.reflections',                       name: 'reflections',                    version: '0.10.2'
+  api group: 'org.reflections',                       name: 'reflections',                    version: '0.9.11'
 
   implementation group: 'com.github.ben-manes.caffeine',         name: 'caffeine',                       version: caffeineVersion
   implementation group: 'org.glassfish.jersey.core',             name: 'jersey-client',                  version: jerseyCoreVersion
@@ -88,7 +88,6 @@ dependencies {
   api group: 'org.springframework.security',        name: 'spring-security-jwt',              version: '1.0.8.RELEASE'
   api group: 'org.springframework.security',        name: 'spring-security-core',             version: springSecurityVersion
   api group: 'org.springframework.security',        name: 'spring-security-config',           version: springSecurityVersion
-  api group: 'com.cloudera.crypto',                 name: 'openssl-provider',                 version: clouderaCryptoOpenSslProviderVersion
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springBootVersion

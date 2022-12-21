@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.ccm.SdxCcmUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.database.SdxDatabaseServerUpgradeService;
@@ -286,21 +285,6 @@ class SdxUpgradeControllerTest {
 
         assertEquals(response, sdxUpgradeDatabaseServerResponse);
         verify(sdxDatabaseServerUpgradeService).upgrade(NameOrCrn.ofName(CLUSTER_NAME), targetMajorVersion);
-    }
-
-    @Test
-    void testUpgradeDatabaseServerByNameSdxClusterDoesNotExist() {
-        SdxUpgradeDatabaseServerRequest request = new SdxUpgradeDatabaseServerRequest();
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
-        request.setTargetMajorVersion(targetMajorVersion);
-
-        doThrow(new NotFoundException("SDX cluster 'testCluster' not found."))
-                .when(sdxDatabaseServerUpgradeService).upgrade(eq(NameOrCrn.ofName(CLUSTER_NAME)), eq(targetMajorVersion));
-
-        NotFoundException exception = doAs(USER_CRN, () -> Assertions.assertThrows(NotFoundException.class,
-                () -> underTest.upgradeDatabaseServerByName(CLUSTER_NAME, request)));
-
-        assertEquals(exception.getMessage(), "SDX cluster 'testCluster' not found.");
     }
 
     @Test

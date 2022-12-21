@@ -22,7 +22,5 @@ public class CoreRoles {
 
     public static final String STUB_DFS_SERVICE_ROLE_STORAGEOPERATIONS_REF_NAME = "stub_dfs-STORAGEOPERATIONS-BASE";
 
-    public static final String HADOOP_RPC_PROTECTION = "hadoop_rpc_protection";
-
     private CoreRoles() { }
 }

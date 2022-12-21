@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -79,10 +80,11 @@ class UpgradeRdsServiceTest {
 
     @Test
     public void testRdsUpgradeFinished() {
-        underTest.rdsUpgradeFinished(STACK_ID, CLUSTER_ID);
+        underTest.rdsUpgradeFinished(STACK_ID, CLUSTER_ID, TargetMajorVersion.VERSION_11);
 
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.AVAILABLE), eq("RDS upgrade finished"));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(AVAILABLE.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_FINISHED));
+
     }
 
     @Test

@@ -5,13 +5,9 @@ import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.isFlowInFail
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -134,29 +130,14 @@ public class FlowService {
             LOGGER.info("Checking if there is an active flow based on flow chain id {}", chainId);
             List<FlowChainLog> relatedChains = flowChainLogService.getRelatedFlowChainLogs(flowChains);
             Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
-            List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(relatedChainIds);
+            Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
+            List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(relatedFlowIds);
             flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
             flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(relatedFlowLogs, failHandledEvents));
-            setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
+            return flowCheckResponse;
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
-        }
-        return flowCheckResponse;
-    }
-
-    public void setEndTimeOnFlowCheckResponse(FlowCheckResponse flowCheckResponse, List<FlowLogWithoutPayload> relatedFlowLogs) {
-        if (!flowCheckResponse.getHasActiveFlow() && !relatedFlowLogs.isEmpty()) {
-            Map<String, Optional<FlowLogWithoutPayload>> latestFlowsByCreatedMap = relatedFlowLogs.stream()
-                    .filter(s -> !Objects.equals(s.getCurrentState(), "FINISHED"))
-                    .collect(Collectors.groupingBy(FlowLogWithoutPayload::getFlowId,
-                        Collectors.reducing(BinaryOperator.maxBy(Comparator.comparing(FlowLogWithoutPayload::getCreated)))));
-            List<FlowLogWithoutPayload> flowLogForEndTime = latestFlowsByCreatedMap.values().stream()
-                    .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
-            Optional<Long> flowEndTime = flowLogForEndTime.stream().map(FlowLogWithoutPayload::getEndTime)
-                    .filter(Objects::nonNull).max(Long::compareTo);
-            if (flowEndTime.isPresent()) {
-                flowCheckResponse.setEndTime(flowEndTime.get());
-            }
+            return flowCheckResponse;
         }
     }
 
@@ -168,14 +149,16 @@ public class FlowService {
             LOGGER.info("Checking if there is an active flow based on flow chain id {}", chainId);
             List<FlowChainLog> relatedChains = flowChainLogService.getRelatedFlowChainLogs(flowChains);
             Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
-            List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(relatedChainIds);
+            Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
+            List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(relatedFlowIds);
             validateResourceId(relatedFlowLogs, resourceIdList);
             flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
             flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(relatedFlowLogs, failHandledEvents));
+            return flowCheckResponse;
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
+            return flowCheckResponse;
         }
-        return flowCheckResponse;
     }
 
     private void validateResourceId(List<FlowLogWithoutPayload> flowLogs, List<Long> resourceIdList) {

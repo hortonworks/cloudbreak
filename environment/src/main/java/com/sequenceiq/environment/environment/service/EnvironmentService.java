@@ -422,7 +422,37 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     }
 
     public List<JobResource> findAllForAutoSync() {
-        return environmentRepository.findAllRunningAndStatusNotIn(EnvironmentStatus.skipFromStatusChecker());
+        return environmentRepository.findAllRunningAndStatusIn(List.of(
+                EnvironmentStatus.AVAILABLE,
+                EnvironmentStatus.UPDATE_FAILED,
+                EnvironmentStatus.START_DATAHUB_FAILED,
+                EnvironmentStatus.START_DATALAKE_FAILED,
+                EnvironmentStatus.START_FREEIPA_FAILED,
+                EnvironmentStatus.START_DATAHUB_STARTED,
+                EnvironmentStatus.START_DATALAKE_STARTED,
+                EnvironmentStatus.START_FREEIPA_STARTED,
+                EnvironmentStatus.START_SYNCHRONIZE_USERS_STARTED,
+                EnvironmentStatus.START_SYNCHRONIZE_USERS_FAILED,
+                EnvironmentStatus.STOP_DATAHUB_FAILED,
+                EnvironmentStatus.STOP_DATALAKE_FAILED,
+                EnvironmentStatus.STOP_FREEIPA_FAILED,
+                EnvironmentStatus.STOP_DATAHUB_STARTED,
+                EnvironmentStatus.STOP_DATALAKE_STARTED,
+                EnvironmentStatus.STOP_FREEIPA_STARTED,
+                EnvironmentStatus.ENV_STOPPED,
+                EnvironmentStatus.UPGRADE_CCM_FAILED,
+                EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS,
+                EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_FAILED,
+                EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS,
+                EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_FAILED,
+                EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS,
+                EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_FAILED,
+                EnvironmentStatus.UPGRADE_CCM_TUNNEL_UPDATE_IN_PROGRESS,
+                EnvironmentStatus.UPGRADE_CCM_TUNNEL_UPDATE_FAILED,
+                EnvironmentStatus.UPGRADE_CCM_VALIDATION_IN_PROGRESS,
+                EnvironmentStatus.UPGRADE_CCM_VALIDATION_FAILED,
+                EnvironmentStatus.UPGRADE_CCM_ROLLING_BACK
+        ));
     }
 
     @Override

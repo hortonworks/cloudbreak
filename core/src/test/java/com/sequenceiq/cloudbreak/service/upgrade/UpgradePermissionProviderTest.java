@@ -58,7 +58,7 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage(componentVersion, "2001");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION, false);
+                CLOUD_PLATFORM, REGION);
 
         when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(true);
         when(supportedRuntimes.isSupported("7.2.1")).thenReturn(true);
@@ -77,7 +77,7 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage(componentVersion, "2001");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION, false);
+                CLOUD_PLATFORM, REGION);
 
         when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(false);
         when(supportedRuntimes.isSupported("7.2.1")).thenReturn(true);
@@ -97,7 +97,7 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage(targetVersion, "2001");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION, false);
+                CLOUD_PLATFORM, REGION);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
         when(upgradeMatrixService.permitByUpgradeMatrix(currentVersion, targetVersion)).thenReturn(true);
@@ -119,7 +119,7 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage(targetVersion, "2001");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION, false);
+                CLOUD_PLATFORM, REGION);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(false);
         when(supportedRuntimes.isSupported("7.1.2")).thenReturn(true);
@@ -139,7 +139,7 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage(targetVersion, "2001");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION, false);
+                CLOUD_PLATFORM, REGION);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
         when(upgradeMatrixService.permitByUpgradeMatrix(currentVersion, targetVersion)).thenReturn(false);
@@ -161,7 +161,7 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage(targetVersion, "2001");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), StackType.WORKLOAD, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION, false);
+                CLOUD_PLATFORM, REGION);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
         when(supportedRuntimes.isSupported("7.2.2")).thenReturn(true);
@@ -182,7 +182,7 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage(targetVersion, "2001");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION, false);
+                CLOUD_PLATFORM, REGION);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
 
@@ -200,7 +200,7 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage("7.2.1", null);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION, false);
+                CLOUD_PLATFORM, REGION);
 
         when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(false);
         when(supportedRuntimes.isSupported("7.2.1")).thenReturn(true);
@@ -220,7 +220,7 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage(targetVersion, "2010");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION, false);
+                CLOUD_PLATFORM, REGION);
 
         when(supportedRuntimes.isSupported("7.2.10")).thenReturn(false);
 

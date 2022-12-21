@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.domain.FlowChainLog;
@@ -20,11 +20,11 @@ public interface FlowLogService {
 
     Iterable<FlowLog> saveAll(Iterable<FlowLog> entities);
 
-    FlowLog close(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams) throws TransactionExecutionException;
+    FlowLog close(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams) throws TransactionService.TransactionExecutionException;
 
-    FlowLog cancel(Long resourceId, String flowId) throws TransactionExecutionException;
+    FlowLog cancel(Long resourceId, String flowId) throws TransactionService.TransactionExecutionException;
 
-    FlowLog terminate(Long resourceId, String flowId) throws TransactionExecutionException;
+    FlowLog terminate(Long resourceId, String flowId) throws TransactionService.TransactionExecutionException;
 
     void saveChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue chain, String flowTriggerUserCrn);
 
@@ -72,7 +72,5 @@ public interface FlowLogService {
 
     List<FlowLogWithoutPayload> findAllWithoutPayloadByFlowIdOrderByCreatedDesc(String flowId);
 
-    List<FlowLogWithoutPayload> getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(Set<String> relatedFlowIds);
-
-    List<FlowLog> findAllFlowByFlowChainId(Set<String> chainIds);
+    List<FlowLogWithoutPayload> getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(Set<String> relatedFlowIds);
 }

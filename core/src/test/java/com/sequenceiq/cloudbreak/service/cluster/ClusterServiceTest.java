@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.HEALTHY;
 import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.UNHEALTHY;
 import static com.sequenceiq.common.api.type.CertExpirationState.HOST_CERT_EXPIRING;
 import static com.sequenceiq.common.api.type.CertExpirationState.VALID;
-import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,7 +20,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,7 +54,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -68,8 +65,6 @@ import com.sequenceiq.common.api.type.CertExpirationState;
 class ClusterServiceTest {
 
     private static final long STACK_ID = 1L;
-
-    private static final long CLUSTER_ID = 12L;
 
     private static final String STATUS_REASON_SERVER = "statusReasonFromServer";
 
@@ -198,33 +193,6 @@ class ClusterServiceTest {
         when(clusterModificationService.isServicePresent(anyString(), eq(RANGER_RAZ))).thenReturn(false);
 
         assertFalse(underTest.isRangerRazEnabledOnCluster(stack));
-    }
-
-    @Test
-    void testUpdateDbSslCertWhenCertIsEmpty() {
-        RedbeamsDbCertificateProvider.RedbeamsDbSslDetails relatedCerts = new RedbeamsDbCertificateProvider.RedbeamsDbSslDetails(emptySet(), false);
-        underTest.updateDbSslCert(CLUSTER_ID, relatedCerts);
-        verify(repository).updateDbSslCert(CLUSTER_ID, "", false);
-    }
-
-    @Test
-    void testUpdateDbSslCertWhenHasCertsButDisabled() {
-        Set<String> certs = new LinkedHashSet<>();
-        certs.add("cert1");
-        certs.add("cert2");
-        RedbeamsDbCertificateProvider.RedbeamsDbSslDetails relatedCerts = new RedbeamsDbCertificateProvider.RedbeamsDbSslDetails(certs, false);
-        underTest.updateDbSslCert(CLUSTER_ID, relatedCerts);
-        verify(repository).updateDbSslCert(CLUSTER_ID, "cert1\ncert2", false);
-    }
-
-    @Test
-    void testUpdateDbSslCertWhenHasCertsAndEnabled() {
-        Set<String> certs = new LinkedHashSet<>();
-        certs.add("cert1");
-        certs.add("cert2");
-        RedbeamsDbCertificateProvider.RedbeamsDbSslDetails relatedCerts = new RedbeamsDbCertificateProvider.RedbeamsDbSslDetails(certs, true);
-        underTest.updateDbSslCert(CLUSTER_ID, relatedCerts);
-        verify(repository).updateDbSslCert(CLUSTER_ID, "cert1\ncert2", true);
     }
 
     private StackDto setupStack(long stackId) {

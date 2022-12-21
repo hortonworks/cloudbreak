@@ -1,26 +1,18 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.DEFAULT_REGION;
-import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.INVALID_PLATFORM;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.PLATFORM;
-import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.REGION;
 import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,8 +26,6 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -44,7 +34,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 public class ImageServiceTest {
@@ -62,10 +51,6 @@ public class ImageServiceTest {
     private static final long USER_ID = 1000L;
 
     private static final String USER_ID_STRING = "aUserId";
-
-    private static final String EXISTING_ID = "ami-09fea90f257c85513";
-
-    private static final String DEFAULT_REGION_EXISTING_ID = "ami-09fea90f257c85514";
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -114,9 +99,6 @@ public class ImageServiceTest {
         imageSettingsV4Request.setOs(OS);
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(STACK_VERSION);
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, "aCatalog")).thenReturn(getImageCatalog());
-        CloudConnector connector = mock(CloudConnector.class);
-        when(cloudPlatformConnectors.getDefault(Platform.platform(PLATFORM))).thenReturn(connector);
-        when(connector.regionToDisplayName(REGION)).thenReturn(REGION);
     }
 
     @Test
@@ -330,59 +312,6 @@ public class ImageServiceTest {
                 image -> true);
         assertEquals("uuid", statedImage.getImage().getUuid());
         assertTrue(statedImage.getImage().isPrewarmed());
-    }
-
-    @Test
-    public void tesDetermineImageNameFound() throws CloudbreakImageNotFoundException {
-        Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
-
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
-
-        String imageName = underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
-        assertEquals("ami-09fea90f257c85513", imageName);
-    }
-
-    @Test
-    public void tesDetermineImageNameFoundDefaultPreferred() throws CloudbreakImageNotFoundException {
-        Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
-
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM,
-                Map.of(
-                        REGION, EXISTING_ID,
-                        DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
-
-        String imageName = underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
-        assertEquals("ami-09fea90f257c85514", imageName);
-    }
-
-    @Test
-    public void tesDetermineImageNameNotFound() {
-        Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
-
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
-
-        Exception exception = assertThrows(CloudbreakImageNotFoundException.class, () ->
-                underTest.determineImageName(PLATFORM, imageCatalogPlatform, "fake-region", image));
-        String exceptionMessage = "Virtual machine image couldn't be found in image";
-        MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(exceptionMessage));
-    }
-
-    @Test
-    public void tesDetermineImageNameImageForPlatformNotFound() {
-        Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
-
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(INVALID_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
-        when(image.toString()).thenReturn("Image");
-
-        Exception exception = assertThrows(CloudbreakImageNotFoundException.class, () ->
-                underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image));
-        String exceptionMessage = "The selected image: 'Image' "
-                + "doesn't contain virtual machine image for the selected platform: 'ImageCatalogPlatform{platform='azure'}'.";
-        MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(exceptionMessage));
     }
 
     private ImageCatalog getImageCatalog() {

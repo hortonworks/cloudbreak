@@ -81,27 +81,6 @@ class SaltJobIdTrackerTest {
         verify(saltStateService).jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
         verify(saltJobRunner, times(2)).getJobState();
-        verify(saltJobRunner, times(2)).setJobState(JobState.IN_PROGRESS);
-    }
-
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
-    @Test
-    void callWithNotStartedAndJobIsRunningFailsThenJobStateIsSet() throws Exception {
-        String jobId = "1";
-        SaltJobRunner saltJobRunner = Mockito.mock(SaltJobRunner.class);
-        when(saltStateService.jobIsRunning(any(), any())).thenThrow(new RuntimeException());
-        RunningJobsResponse jobsResponse = new RunningJobsResponse();
-        jobsResponse.setResult(List.of());
-        when(saltStateService.getRunningJobs(saltConnector)).thenReturn(jobsResponse);
-
-        when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
-        when(saltJobRunner.getJobState()).thenReturn(JobState.NOT_STARTED, JobState.IN_PROGRESS);
-        when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
-        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(saltStateService, saltConnector, saltJobRunner);
-
-        assertThatThrownBy(saltJobIdTracker::call)
-                .isInstanceOf(RuntimeException.class);
-        verify(saltJobRunner).setJobState(JobState.IN_PROGRESS);
     }
 
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")

@@ -51,6 +51,8 @@ dependencies {
   implementation     ('io.swagger:swagger-jersey2-jaxrs') {
     exclude group: 'org.yaml'
   }
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api'
+  implementation     group: 'org.glassfish.jaxb',        name: 'jaxb-runtime',                         version: '2.3.1'
   implementation     group: 'javax.activation',          name: 'activation',                           version: '1.1.1'
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
@@ -78,7 +80,7 @@ dependencies {
   }
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.12.19'
+  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.9.12'
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
@@ -98,6 +100,7 @@ dependencies {
     implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
     implementation     group: 'io.springfox',              name: 'springfox-boot-starter',         version: swaggerSpringFoxVersion
     implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
+    implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
     implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: jerseyCoreVersion
     implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: mybatisMigrationVersion
     implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
@@ -114,7 +117,6 @@ dependencies {
   implementation project(":structuredevent-service-cdp")
   implementation project(':structuredevent-model')
   implementation project(':audit-connector')
-  implementation project(':wiam-connector')
   implementation project(':authorization-common')
   implementation project(':auth-distributor-connector')
   implementation project(':cloud-reactor-api')

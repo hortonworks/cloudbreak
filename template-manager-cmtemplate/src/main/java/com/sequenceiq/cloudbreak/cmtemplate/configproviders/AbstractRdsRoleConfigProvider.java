@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getRdsViewOfType;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getRdsConfigOfType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
@@ -13,16 +14,16 @@ public abstract class AbstractRdsRoleConfigProvider extends AbstractRoleConfigPr
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return getRdsView(source) != null
+        return getRdsConfig(source) != null
                 && super.isConfigurationNeeded(cmTemplateProcessor, source);
     }
 
+    protected RdsConfigWithoutCluster getRdsConfig(TemplatePreparationObject source) {
+        return getRdsConfigOfType(dbType(), source);
+    }
+
     protected RdsView getRdsView(TemplatePreparationObject source) {
-        RdsView rdsViewOfType = getRdsViewOfType(dbType(), source);
-        if (rdsViewOfType != null) {
-            rdsViewOfType.setSslCertificateFilePath(source.getRdsSslCertificateFilePath());
-        }
-        return rdsViewOfType;
+        return new RdsView(getRdsConfig(source), source.getRdsSslCertificateFilePath());
     }
 
     protected String getCdhVersion(TemplatePreparationObject source) {

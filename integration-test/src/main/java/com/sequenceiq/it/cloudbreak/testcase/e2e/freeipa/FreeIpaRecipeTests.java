@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
@@ -76,6 +77,9 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                 .when(recipeTestClient.createV4(), key("post1")).getResponse().getName();
 
         testContext
+                .given("telemetry", TelemetryTestDto.class)
+                    .withLogging()
+                    .withReportClusterLogs()
                 .given(FreeIpaTestDto.class)
                     .withFreeIpaHa(INSTANCEGROUP_COUNT, INSTANCE_COUNT_BY_GROUP)
                     .withTelemetry("telemetry")
@@ -113,6 +117,9 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                 .when(recipeTestClient.createV4(), key("post2")).getResponse().getName();
 
         testContext
+                .given("telemetry", TelemetryTestDto.class)
+                    .withLogging()
+                    .withReportClusterLogs()
                 .given(FreeIpaTestDto.class)
                     .withTelemetry("telemetry")
                     .withRecipes(Set.of(preRecipeName, postInstallRecipeName))
@@ -123,7 +130,7 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(POST_INSTALL_FILEPATH, POST_INSTALL_FILENAME, 1, sshJUtil))
                 .when(freeIpaTestClient.detachRecipes(List.of(preRecipeName, postInstallRecipeName)))
                 .given(FreeIpaUpscaleTestDto.class)
-                    .withAvailabilityType(AvailabilityType.HA)
+                .withAvailabilityType(AvailabilityType.HA)
                 .when(freeIpaTestClient.upscale())
                 .await(Status.AVAILABLE)
                 .given(FreeIpaTestDto.class)

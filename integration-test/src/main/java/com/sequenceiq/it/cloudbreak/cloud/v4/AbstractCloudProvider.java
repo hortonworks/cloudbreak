@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -59,8 +58,6 @@ public abstract class AbstractCloudProvider implements CloudProvider {
             + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
             + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
             + " centos";
-
-    private static final int OBJECT_NAME_MAX_LENGTH = 63;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCloudProvider.class);
 
@@ -374,31 +371,5 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Override
     public EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network) {
         return network;
-    }
-
-    protected String getSuiteName() {
-        String suiteName = trimObjectName(getTestLabels()[0]);
-        if (StringUtils.isBlank(suiteName)) {
-            throw new IllegalArgumentException("Cloud Storage base location path cannot be generated, because of the Test Suite Name is null or empty!");
-        } else {
-            return suiteName;
-        }
-    }
-
-    protected String getTestName() {
-        String testName = trimObjectName(getTestLabels()[1]);
-        if (StringUtils.isBlank(testName)) {
-            throw new IllegalArgumentException("Cloud Storage base location path cannot be generated, because of the Test Name is null or empty!");
-        } else {
-            return testName;
-        }
-    }
-
-    protected String[] getTestLabels() {
-        return StringUtils.split(StringUtils.lowerCase(MDC.get("testlabel")), ".");
-    }
-
-    protected String trimObjectName(String name) {
-        return (name.length() > OBJECT_NAME_MAX_LENGTH) ? name.substring(0, OBJECT_NAME_MAX_LENGTH) : name;
     }
 }

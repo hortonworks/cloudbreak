@@ -23,12 +23,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentAccessCheckerTest {
@@ -38,10 +39,10 @@ class EnvironmentAccessCheckerTest {
     private static final String NOT_CRN = "not:a:crn:";
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:"
-            + ACCOUNT_ID + ":environment:" + UUID.randomUUID();
+            + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
 
     private static final String MEMBER_CRN = "crn:cdp:environments:us-west-1:"
-            + ACCOUNT_ID + ":user:" + UUID.randomUUID();
+            + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
     @Mock
     private GrpcUmsClient grpcUmsClient;
@@ -88,8 +89,8 @@ class EnvironmentAccessCheckerTest {
     void testEnvironmentAccessCheckerCreatesRightEnvironmentAccessRights() {
         EnvironmentAccessChecker underTest = environmentAccessCheckerFactory.create(ENV_CRN);
 
-        for (boolean hasAccess : new boolean[]{false, true}) {
-            for (boolean ipaAdmin : new boolean[]{false, true}) {
+        for (boolean hasAccess : new boolean[] { false, true}) {
+            for (boolean ipaAdmin : new boolean[] { false, true}) {
                 when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any()))
                         .thenReturn(List.of(hasAccess, ipaAdmin));
 
@@ -105,7 +106,7 @@ class EnvironmentAccessCheckerTest {
     void testEnvironmentAccessCheckerNoAccessIfMemberNotFound() {
         EnvironmentAccessChecker underTest = environmentAccessCheckerFactory.create(ENV_CRN);
 
-        Throwable ex = new UnauthorizedException();
+        Throwable ex = new StatusRuntimeException(Status.Code.NOT_FOUND.toStatus());
         when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any()))
                 .thenThrow(ex);
 

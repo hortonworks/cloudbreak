@@ -175,15 +175,6 @@ integrationtest:
     location: West US 2
     verticalScale:
       supported: false
-      datalake:
-        group: master
-        instanceType: Standard_D8s_v3
-      datahub:
-        group: master
-        instanceType: Standard_D8s_v3
-      freeipa:
-        group: master
-        instanceType: Standard_D8s_v3
     network:
       networkId: cloud-daily
       noPublicIp: true
@@ -221,8 +212,8 @@ integrationtest:
         loggerIdentity:
       secure: false
     resourcegroup:
-      usage: SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT
-      name: cb-e2e-westus2-tmp
+      usage: MULTIPLE
+      name:
     marketplace:
       freeipa:
         image:
@@ -247,15 +238,6 @@ integrationtest:
     location: europe-west2
     verticalScale:
       supported: false
-      datalake:
-        group: master
-        instanceType: n1-standard-16
-      datahub:
-        group: master
-        instanceType: n1-standard-16
-      freeipa:
-        group: master
-        instanceType: n1-standard-16
     network:
       sharedProjectId:
       networkId:

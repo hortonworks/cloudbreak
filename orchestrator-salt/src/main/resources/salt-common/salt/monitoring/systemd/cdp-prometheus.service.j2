@@ -9,7 +9,7 @@ After=network-online.target
 Type=simple
 User=root
 Group=root
-ExecStart=/bin/sh -c "/opt/cdp-prometheus/prometheus \
+ExecStart=/opt/cdp-prometheus/prometheus \
      --enable-feature=agent \
      --storage.agent.path=/opt/cdp-prometheus/data-agent \
      --storage.agent.wal-compression \
@@ -25,8 +25,7 @@ ExecStart=/bin/sh -c "/opt/cdp-prometheus/prometheus \
      --storage.agent.no-lockfile \
      --config.file=/opt/cdp-prometheus/prometheus.yml \
      --web.config.file=/opt/cdp-prometheus/prometheus-web-config.yml \
-     --web.listen-address=:{{ monitoring.agentPort }} \
-     >>/var/log/cdp-prometheus/cdp-prometheus.log 2>&1"
+     --web.listen-address=:{{ monitoring.agentPort }}
 Restart=always
 
 [Install]

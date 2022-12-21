@@ -124,27 +124,6 @@ public class Image {
         this.sourceImageId = sourceImageId;
     }
 
-    public Image(Image that, Map<String, Map<String, String>> imageSetsByProvider) {
-        this.date = that.date;
-        this.created = that.created;
-        this.published = that.published;
-        this.description = that.description;
-        this.os = that.os;
-        this.uuid = that.uuid;
-        this.version = that.version;
-        this.repo = (that.repo == null) ? Collections.emptyMap() : that.repo;
-        this.imageSetsByProvider = imageSetsByProvider;
-        this.stackDetails = that.stackDetails;
-        this.osType = that.osType;
-        this.packageVersions = that.packageVersions;
-        this.preWarmParcels = (that.preWarmParcels == null) ? Collections.emptyList() : that.preWarmParcels;
-        this.preWarmCsd = (that.preWarmCsd == null) ? Collections.emptyList() : that.preWarmCsd;
-        this.cmBuildNumber = that.cmBuildNumber;
-        this.advertised = that.advertised;
-        this.baseParcelUrl = that.baseParcelUrl;
-        this.sourceImageId = that.sourceImageId;
-    }
-
     @JsonProperty(DATE)
     public String getDate() {
         return date;

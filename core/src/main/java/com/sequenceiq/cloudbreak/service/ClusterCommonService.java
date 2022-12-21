@@ -306,15 +306,7 @@ public class ClusterCommonService {
     public FlowIdentifier updateSalt(NameOrCrn nameOrCrn, String accountId) {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        Status status = stack.getStatus();
-        if (status.isStopState() || status.isTerminatedOrDeletionInProgress()) {
-            String message = String.format("SaltStack update cannot be initiated as stack '%s' is currently in '%s' state.",
-                    stack.getName(), status);
-            LOGGER.info(message);
-            throw new BadRequestException(message);
-        } else {
-            return clusterOperationService.updateSalt(stack.getId());
-        }
+        return clusterOperationService.updateSalt(stack.getId());
     }
 
     public FlowIdentifier updatePillarConfiguration(NameOrCrn nameOrCrn, String accountId) {

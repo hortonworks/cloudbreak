@@ -1,6 +1,6 @@
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 
-{% if postgresql.root_certs_enabled == True %}
+{% if postgresql.ssl_enabled == True %}
 create-root-certs-file:
   file.managed:
     - name: {{ postgresql.root_certs_file }}

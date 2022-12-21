@@ -78,6 +78,8 @@ dependencies {
   implementation     ("io.swagger:swagger-jersey2-jaxrs:$swaggerVersion") {
     exclude group: 'org.yaml'
   }
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                        version: '2.3.1'
+  implementation     group: 'org.glassfish.jaxb',        name: 'jaxb-runtime',                    version: '2.3.1'
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                   version: jerseyCoreVersion
   implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',       version: jerseyCoreVersion
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations',              version: mybatisMigrationVersion
@@ -93,7 +95,7 @@ dependencies {
   implementation     group: 'com.cloudera.api.swagger',    name: 'cloudera-manager-api-swagger',  version: cmClientVersion
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: '1.12.19'
+  implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: '1.9.12'
 
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')

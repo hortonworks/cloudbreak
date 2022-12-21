@@ -5,10 +5,10 @@ import java.util.regex.Pattern;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
-import com.github.jknack.handlebars.internal.text.StringEscapeUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
@@ -56,8 +56,8 @@ public class ConfigUtils {
         return new ApiClusterTemplateVariable().name(name).value(value);
     }
 
-    public static RdsView getRdsViewOfType(DatabaseType databaseType, TemplatePreparationObject source) {
-        return source.getRdsView(databaseType);
+    public static RdsConfigWithoutCluster getRdsConfigOfType(DatabaseType databaseType, TemplatePreparationObject source) {
+        return source.getRdsConfig(databaseType);
     }
 
     public static Optional<StorageLocationView> getStorageLocationForServiceProperty(TemplatePreparationObject source, String serviceProperty) {
@@ -67,7 +67,7 @@ public class ConfigUtils {
     }
 
     public static String getSafetyValveProperty(String key, String value) {
-        return String.format(CM_SAFETY_VALVE_PROPERTY_FORMAT, key, StringEscapeUtils.escapeXml11(value));
+        return String.format(CM_SAFETY_VALVE_PROPERTY_FORMAT, key, value);
     }
 
     public static String getSafetyValveConfiguration(String value) {

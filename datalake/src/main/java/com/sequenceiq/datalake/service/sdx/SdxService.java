@@ -1290,9 +1290,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public PayloadContext getPayloadContext(Long resourceId) {
         try {
             SdxCluster sdxCluster = getById(resourceId);
-            DetailedEnvironmentResponse envResp = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> environmentClientService.getByCrn(sdxCluster.getEnvCrn()));
+            DetailedEnvironmentResponse envResp = environmentClientService.getByCrn(sdxCluster.getEnvCrn());
             return PayloadContext.create(sdxCluster.getCrn(), envResp.getCloudPlatform());
         } catch (NotFoundException ignored) {
             // skip
@@ -1383,19 +1381,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public FlowIdentifier updateSalt(SdxCluster sdxCluster) {
-        SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(sdxCluster);
-        DatalakeStatusEnum status = sdxStatus.getStatus();
-        if (status.isStopState() || status.isDeleteInProgressOrCompleted()) {
-            String message = String.format("SaltStack update cannot be initiated as datalake '%s' is currently in '%s' state.",
-                    sdxCluster.getName(), status);
-            LOGGER.info(message);
-            throw new BadRequestException(message);
-        } else {
-            return sdxReactorFlowManager.triggerSaltUpdate(sdxCluster);
-        }
-    }
-
-    public void submitDatalakeDataSizes(SdxCluster sdxCluster, String operationId, String dataSizesJSON) {
-        sdxReactorFlowManager.triggerSubmitDatalakeDataInfoFlow(sdxCluster, operationId, dataSizesJSON);
+        return sdxReactorFlowManager.triggerSaltUpdate(sdxCluster);
     }
 }

@@ -30,17 +30,4 @@ public class DataLakeStatusCheckerService {
             throw new BadRequestException("This action requires the Data Lake to be available, but the status is " + sdxCluster.getStatusReason());
         }
     }
-
-    public void validateAvailableState(StackView stack) {
-        if (StackType.WORKLOAD.equals(stack.getType())) {
-            sdxClientService
-                    .getByEnvironmentCrn(stack.getEnvironmentCrn())
-                    .forEach(sdxClusterResponse -> {
-                        if (!sdxClusterResponse.getStatus().isAvailable()) {
-                            throw new BadRequestException("This action requires the Data Lake to be available, but the status is "
-                                    + sdxClusterResponse.getStatusReason());
-                        }
-                    });
-        }
-    }
 }

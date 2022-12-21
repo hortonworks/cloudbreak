@@ -25,7 +25,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateInstancesHealthEvent;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.service.stack.FreeIpaSafeInstanceHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -38,7 +38,7 @@ class ValidateInstancesHealthHandlerTest {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private FreeIpaSafeInstanceHealthDetailsService healthService;
+    private FreeIpaInstanceHealthDetailsService healthService;
 
     @Mock
     private StackService stackService;
@@ -112,6 +112,33 @@ class ValidateInstancesHealthHandlerTest {
         assertTrue(result.getSuccess().contains("im1"));
         assertEquals(1, result.getFailureDetails().size());
         assertEquals("bad", result.getFailureDetails().get("im2"));
+        assertEquals("Unhealthy instances found: [im2]", result.getException().getMessage());
+    }
+
+    @Test
+    public void testExceptionDuringHealthCheck() throws FreeIpaClientException {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        when(stackService.getStackById(1L)).thenReturn(stack);
+        List<String> instanceIds = List.of("im1", "im2");
+        InstanceMetaData im1 = new InstanceMetaData();
+        im1.setInstanceId("im1");
+        im1.setDiscoveryFQDN("im1Fqdn");
+        InstanceMetaData im2 = new InstanceMetaData();
+        im2.setInstanceId("im2");
+        im2.setDiscoveryFQDN("im2Fqdn");
+        when(instanceMetaDataService.getNotTerminatedByInstanceIds(1L, instanceIds)).thenReturn(Set.of(im1, im2));
+        when(healthService.getInstanceHealthDetails(stack, im1)).thenReturn(createHealthyNodeDetail(im1));
+        when(healthService.getInstanceHealthDetails(stack, im2)).thenThrow(new FreeIpaClientException("nono"));
+
+        ValidateInstancesHealthEvent validateInstancesHealthEvent = new ValidateInstancesHealthEvent(1L, instanceIds);
+        UpscaleFailureEvent result = (UpscaleFailureEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(validateInstancesHealthEvent)));
+
+        assertEquals(1L, result.getResourceId());
+        assertEquals(PHASE, result.getFailedPhase());
+        assertTrue(result.getSuccess().contains("im1"));
+        assertEquals(1, result.getFailureDetails().size());
+        assertEquals("nono", result.getFailureDetails().get("im2"));
         assertEquals("Unhealthy instances found: [im2]", result.getException().getMessage());
     }
 

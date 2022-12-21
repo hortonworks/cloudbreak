@@ -75,7 +75,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesBaseEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OSUpgradeByUpgradeSetsTriggerEvent;
@@ -434,11 +433,6 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerClusterProxyConfigReRegistration(Long stackId) {
         String selector = ClusterProxyReRegistrationEvent.CLUSTER_PROXY_RE_REGISTRATION_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
-    }
-
-    public void triggerDetermineDatalakeDataSizes(Long stackId, String operationId) {
-        String selector = FlowChainTriggers.DETERMINE_DATALAKE_DATA_SIZES_CHAIN_TRIGGER_EVENT;
-        reactorNotifier.notify(stackId, selector, new DetermineDatalakeDataSizesBaseEvent(selector, stackId, operationId));
     }
 
     private NetworkScaleDetails getStackNetworkScaleDetails(InstanceGroupAdjustmentV4Request instanceGroupAdjustment) {

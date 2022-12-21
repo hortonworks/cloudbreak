@@ -19,8 +19,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterDbCertRotationRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterDbCertRotationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartFailedRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateResult;
@@ -47,21 +45,11 @@ public class ClusterStartActions {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    @Bean(name = "CLUSTER_DB_CERT_ROTATION_STATE")
-    public Action<?, ?> clusterDbCertRotation() {
+    @Bean(name = "CLUSTER_START_UPDATE_PILLAR_CONFIG_STATE")
+    public Action<?, ?> startingClusterPillarConfigUpdate() {
         return new AbstractClusterAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
-                sendEvent(context, new ClusterDbCertRotationRequest(context.getStackId()));
-            }
-        };
-    }
-
-    @Bean(name = "CLUSTER_START_UPDATE_PILLAR_CONFIG_STATE")
-    public Action<?, ?> startingClusterPillarConfigUpdate() {
-        return new AbstractClusterAction<>(ClusterDbCertRotationResult.class) {
-            @Override
-            protected void doExecute(ClusterViewContext context, ClusterDbCertRotationResult payload, Map<Object, Object> variables) {
                 sendEvent(context, new ClusterStartPillarConfigUpdateRequest(context.getStackId()));
             }
 

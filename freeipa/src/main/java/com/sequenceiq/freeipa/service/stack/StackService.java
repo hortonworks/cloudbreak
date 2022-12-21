@@ -1,12 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETED_ON_PROVIDER_SIDE;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REQUESTED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STACK_AVAILABLE;
-
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -14,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -22,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -39,6 +36,7 @@ import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
@@ -46,6 +44,9 @@ import com.sequenceiq.freeipa.repository.StackRepository;
 public class StackService implements EnvironmentPropertyProvider, PayloadContextProvider, MonitoringEnablementService<Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
+
+    @VisibleForTesting
+    Supplier<LocalDateTime> nowSupplier = LocalDateTime::now;
 
     @Inject
     private StackRepository stackRepository;
@@ -62,13 +63,19 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
     }
 
     public List<JobResource> findAllForAutoSync() {
-        return stackRepository.findAllRunningAndStatusNotIn(List.of(
-                REQUESTED,
-                CREATE_IN_PROGRESS,
-                STACK_AVAILABLE,
-                DELETE_IN_PROGRESS,
-                DELETE_COMPLETED,
-                DELETED_ON_PROVIDER_SIDE));
+        return stackRepository.findAllRunningAndStatusIn(List.of(
+                Status.AVAILABLE,
+                Status.UPDATE_FAILED,
+                Status.START_FAILED,
+                Status.STOP_FAILED,
+                Status.UNREACHABLE,
+                Status.UNHEALTHY,
+                Status.UNKNOWN,
+                Status.STOPPED,
+                Status.START_IN_PROGRESS,
+                Status.STOP_IN_PROGRESS,
+                Status.STOP_REQUESTED,
+                Status.START_REQUESTED));
     }
 
     public Stack getByIdWithListsInTransaction(Long id) {
@@ -243,6 +250,13 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
     @Override
     public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.FREEIPA, Crn.ResourceType.ENVIRONMENT);
+    }
+
+    public List<ImageEntity> getImagesOfAliveStacks(Integer thresholdInDays) {
+        final LocalDateTime thresholdDate = nowSupplier.get()
+                .minusDays(Optional.ofNullable(thresholdInDays).orElse(0));
+        final long thresholdTimestamp = Timestamp.valueOf(thresholdDate).getTime();
+        return stackRepository.findImagesOfAliveStacks(thresholdTimestamp);
     }
 
     public Stack getFreeIpaStackWithMdcContext(String envCrn, String accountId) {

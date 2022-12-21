@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
-import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsStackNameCommonUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCloudStackView;
@@ -81,9 +80,6 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Inject
     private VolumeBuilderUtil volumeBuilderUtil;
-
-    @Inject
-    private AwsStackNameCommonUtil awsStackNameCommonUtil;
 
     @Inject
     private SecurityGroupBuilderUtil securityGroupBuilderUtil;
@@ -128,7 +124,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
                     com.amazonaws.services.ec2.model.ResourceType.Instance);
             tagSpecification.withTags(
-                    new Tag().withKey("Name").withValue(awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId)),
+                    new Tag().withKey("Name").withValue(cloudResource.getName()),
                     new Tag().withKey("instanceGroup").withValue(group.getName())
             );
             RunInstancesRequest request = new RunInstancesRequest()
@@ -153,8 +149,8 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     }
 
     @Override
-    public CloudResource update(AwsContext context, CloudResource cloudResource, CloudInstance instance,
-        AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+    public List<CloudResource> update(AwsContext context, CloudInstance instance, long privateId,
+        AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
         Optional<Instance> existedOpt = resourceById(amazonEc2Client, instance.getInstanceId());
         Instance awsInstance;
@@ -173,7 +169,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             }
 
         }
-        return null;
+        return List.of();
     }
 
     Collection<BlockDeviceMapping> blocks(Group group, CloudStack cloudStack, AuthenticatedContext ac) {

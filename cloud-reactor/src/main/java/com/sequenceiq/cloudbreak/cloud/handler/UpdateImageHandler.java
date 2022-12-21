@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
@@ -51,7 +50,7 @@ public class UpdateImageHandler implements CloudPlatformEventHandler<UpdateImage
             cloudResources.stream().filter(resource -> resource.getType().getCommonResourceType() == CommonResourceType.TEMPLATE)
                     .forEach(resource -> resource.putParameter(CloudResource.IMAGE, stack.getImage().getImageName()));
 
-            connector.resources().update(auth, stack, cloudResources, UpdateType.IMAGE_UPDATE);
+            connector.resources().update(auth, stack, cloudResources);
             UpdateImageResult result = new UpdateImageResult(request.getResourceId());
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

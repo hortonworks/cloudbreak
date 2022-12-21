@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -113,8 +111,8 @@ public class AzurePlatformResources implements PlatformResources {
     public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
-        String networkId = filters.get(NETWORK_ID);
-        String resourceGroupName = filters.get(RESOURCE_GROUP_NAME);
+        String networkId = filters.get("networkId");
+        String resourceGroupName = filters.get("resourceGroupName");
         if (!StringUtils.isEmpty(networkId) && !StringUtils.isEmpty(resourceGroupName)) {
             LOGGER.info("Query network with id '{}' and resource group {}", networkId, resourceGroupName);
             Network network = client.getNetworkByResourceGroup(resourceGroupName, networkId);
@@ -244,23 +242,23 @@ public class AzurePlatformResources implements PlatformResources {
         VmType defaultVmType = null;
         Set<String> vmTypesWithoutResourceDisks = new HashSet<>();
         for (VirtualMachineSize virtualMachineSize : vmTypes) {
-            float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
-            VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder().withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
-            for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
-                if (volumeParameterType.in(MAGNETIC, SSD)) {
-                    volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount(), maxDiskSize);
-                }
-            }
             if (virtualMachineSize.resourceDiskSizeInMB() != NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE) {
-                builder.withResourceDiskAttached(true);
-            } else {
-                builder.withResourceDiskAttached(false);
-            }
+                float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
+                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder().withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
 
-            VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
-            types.add(vmType);
-            if (virtualMachineSize.name().equals(armVmDefault)) {
-                defaultVmType = vmType;
+                for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
+                    if (volumeParameterType.in(MAGNETIC, SSD)) {
+                        volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount(), maxDiskSize);
+                    }
+                }
+
+                VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
+                types.add(vmType);
+                if (virtualMachineSize.name().equals(armVmDefault)) {
+                    defaultVmType = vmType;
+                }
+            } else {
+                vmTypesWithoutResourceDisks.add(virtualMachineSize.name());
             }
         }
         LOGGER.debug("The following Azure VM types have been filtered out, because there is no resource disk available with them: {}",

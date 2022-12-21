@@ -75,7 +75,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         super(eventSender);
         this.validatorService = validatorService;
         this.environmentService = environmentService;
-        this.webApplicationExceptionMessageExtractor = messageExtractor;
+        webApplicationExceptionMessageExtractor = messageExtractor;
         this.eventBus = eventBus;
         this.eventSenderService = eventSenderService;
         this.cloudStorageValidator = cloudStorageValidator;
@@ -91,16 +91,14 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                 .ifPresentOrElse(environment -> {
                             LOGGER.debug("Environment validation flow step started.");
                             try {
-                                LOGGER.debug("Validate environment related data.");
                                 validateEnvironment(environmentValidationDto, environment);
-                                LOGGER.debug("Validate cloud storage related data.");
                                 validateCloudStorage(environmentDto);
                                 goToNextState(environmentDtoEvent, environmentDto);
                             } catch (WebApplicationException e) {
                                 String responseMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-                                goToFailedStateWithException(environmentDtoEvent, e.getMessage() + ". " + responseMessage, e);
+                                goToFailedState(environmentDtoEvent, e.getMessage() + ". " + responseMessage);
                             } catch (Exception e) {
-                                goToFailedStateWithException(environmentDtoEvent, e.getMessage(), e);
+                                goToFailedState(environmentDtoEvent, e.getMessage());
                             }
                         }, () -> goToFailedState(environmentDtoEvent, String.format("Environment was not found with id '%s'.", environmentDto.getId()))
                 );
@@ -148,22 +146,8 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         validationBuilder.merge(validatorService.validateAwsKeysPresent(environmentValidationDto));
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
-            String formattedErrors = validationResult.getFormattedErrors();
-            LOGGER.debug("Validation failed for environment {} with {}.", environment.getId(), formattedErrors);
-            throw new EnvironmentServiceException(formattedErrors);
+            throw new EnvironmentServiceException(validationResult.getFormattedErrors());
         }
-    }
-
-    private void goToFailedStateWithException(Event<EnvironmentValidationDto> environmentDtoEvent, String message, Exception e) {
-        LOGGER.warn("Environment validation failed: {}", message, e);
-        EnvironmentDto environmentDto = environmentDtoEvent.getData().getEnvironmentDto();
-        EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
-                environmentDto.getId(),
-                environmentDto.getName(),
-                new BadRequestException(message, e),
-                environmentDto.getResourceCrn());
-
-        eventBus.notify(failureEvent.selector(), new Event<>(environmentDtoEvent.getHeaders(), failureEvent));
     }
 
     private void goToFailedState(Event<EnvironmentValidationDto> environmentDtoEvent, String message) {

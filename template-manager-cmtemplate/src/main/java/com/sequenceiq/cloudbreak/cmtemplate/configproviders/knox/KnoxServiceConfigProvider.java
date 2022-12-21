@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isKnoxDatabaseSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static java.util.Collections.emptyList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +34,6 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
     private static final String DATABASE_USER = "knox_gateway_database_user";
 
     private static final String DATABASE_PASSWORD = "knox_gateway_database_password";
-
-    private static final String GATEWAY_DATABASE_SSL_ENABLED = "gateway_database_ssl_enabled";
-
-    private static final String GATEWAY_DATABASE_SSL_TRUSTSTORE_FILE = "gateway_database_ssl_truststore_file";
 
     @Override
     public String getServiceType() {
@@ -78,16 +75,7 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-        List<ApiClusterTemplateConfig> configList = new ArrayList<>();
-        if (source.getProductDetailsView() != null
-                && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), getCdhProduct(source), getCdhPatchVersion(source))) {
-            RdsView knoxGatewayRdsView = getRdsView(source);
-            if (knoxGatewayRdsView.isUseSsl()) {
-                configList.add(config(GATEWAY_DATABASE_SSL_ENABLED, "true"));
-                configList.add(config(GATEWAY_DATABASE_SSL_TRUSTSTORE_FILE, knoxGatewayRdsView.getSslCertificateFilePath()));
-            }
-        }
-        return configList;
+        return emptyList();
     }
 
 }

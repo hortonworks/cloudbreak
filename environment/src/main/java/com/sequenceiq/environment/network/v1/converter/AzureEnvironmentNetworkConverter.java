@@ -1,9 +1,8 @@
 package com.sequenceiq.environment.network.v1.converter;
 
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.AKS_PRIVATE_DNS_ZONE_ID;
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE_DNS_ZONE_ID;
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
-import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.DATABASE_PRIVATE_DS_ZONE_ID;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.RG_NAME;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +46,6 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             azureNetwork.setNetworkId(azureParams.getNetworkId());
             azureNetwork.setResourceGroupName(azureParams.getResourceGroupName());
             azureNetwork.setNoPublicIp(azureParams.isNoPublicIp());
-            azureNetwork.setAksPrivateDnsZoneId(azureParams.getAksPrivateDnsZoneId());
             if (ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT.equals(network.getServiceEndpointCreation())) {
                 azureNetwork.setDatabasePrivateDnsZoneId(azureParams.getDatabasePrivateDnsZoneId());
             }
@@ -101,7 +99,6 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 .withResourceGroupName(azureNetwork.getResourceGroupName())
                                 .withNoPublicIp(azureNetwork.getNoPublicIp())
                                 .withDatabasePrivateDnsZoneId(azureNetwork.getDatabasePrivateDnsZoneId())
-                                .withAksPrivateDnsZoneId(azureNetwork.getAksPrivateDnsZoneId())
                                 .build())
                 .build();
     }
@@ -130,10 +127,9 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     public Network convertToNetwork(BaseNetwork baseNetwork) {
         AzureNetwork azureNetwork = (AzureNetwork) baseNetwork;
         Map<String, Object> param = new HashMap<>();
-        param.put(RESOURCE_GROUP_NAME, azureNetwork.getResourceGroupName());
+        param.put(RG_NAME, azureNetwork.getResourceGroupName());
         param.put(NETWORK_ID, azureNetwork.getNetworkId());
-        param.put(DATABASE_PRIVATE_DNS_ZONE_ID, azureNetwork.getDatabasePrivateDnsZoneId());
-        param.put(AKS_PRIVATE_DNS_ZONE_ID, azureNetwork.getAksPrivateDnsZoneId());
+        param.put(DATABASE_PRIVATE_DS_ZONE_ID, azureNetwork.getDatabasePrivateDnsZoneId());
         return new Network(null, param);
     }
 }

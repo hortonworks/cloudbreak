@@ -46,7 +46,7 @@ dependencies {
     implementation (group: 'com.google.auth',               name: 'google-auth-library-oauth2-http',            version: '1.2.2') {
         exclude group: 'com.google.http-client', module:'google-http-client'
     }
-    implementation (group: 'com.google.http-client',        name: 'google-http-client-jackson2',                version: '1.42.3') {
+    implementation (group: 'com.google.http-client',        name: 'google-http-client-jackson2',                version: '1.40.1') {
         exclude group: 'com.google.http-client', module:'google-http-client'
     }
     implementation (group: 'com.google.api-client',        name: 'google-api-client',                version: '1.35.2') {
@@ -59,7 +59,7 @@ dependencies {
     testImplementation        group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
     // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-    implementation group: 'net.bytebuddy',          name: 'byte-buddy',                   version: '1.12.19'
+    implementation group: 'net.bytebuddy',          name: 'byte-buddy',                   version: '1.9.12'
 
     //to be able to mock final class(es)
     testImplementation group: 'org.mockito',        name: 'mockito-inline',               version: mockitoVersion

@@ -54,7 +54,6 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConvert
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.StackV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -76,8 +75,6 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
-import com.sequenceiq.cloudbreak.template.views.RdsView;
-import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -216,9 +213,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Mock
     private StackV4RequestToGatewayConverter stackV4RequestToGatewayConverter;
 
-    @Mock
-    private RdsViewProvider rdsViewProvider;
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -274,7 +268,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(source);
 
-        assertTrue(result.getRdsViews().isEmpty());
+        assertTrue(result.getRdsConfigs().isEmpty());
     }
 
     @Test
@@ -283,17 +277,14 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(cluster.getDatabases()).thenReturn(rdsConfigNames);
         int i = 0;
         Set<RdsConfigWithoutCluster> rdsConfigs = new HashSet<>();
-        RdsViewProvider realRdsViewProvider = new RdsViewProvider();
         for (String rdsConfigName : rdsConfigNames) {
-            RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.values()[i++], RdsSslMode.DISABLED);
+            RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.values()[i++]);
             rdsConfigs.add(rdsConfig);
-            RdsView rdsView = realRdsViewProvider.getRdsView(rdsConfig);
-            when(rdsViewProvider.getRdsView(rdsConfig)).thenReturn(rdsView);
             when(rdsConfig.getName()).thenReturn(rdsConfigName);
         }
         when(rdsConfigWithoutClusterService.findAllByNamesAndWorkspaceId(rdsConfigNames, workspace)).thenReturn(rdsConfigs);
         TemplatePreparationObject result = underTest.convert(source);
-        assertEquals(rdsConfigNames.size(), result.getRdsViews().size());
+        assertEquals(rdsConfigNames.size(), result.getRdsConfigs().size());
     }
 
     @Test

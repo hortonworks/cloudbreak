@@ -210,16 +210,6 @@ Cloudbreak Deployer is unable to determine the IP address on a Linux machine. Th
 export PUBLIC_IP=127.0.0.1
 ```
 
-## Enable gitconfig, githooks
-
-We have some quality of life configurations and scripts that helps you submit a pull-request in a proper format.
-
-Running the following command will enable them for you:
-```
-make enable-gitconfig
-```
-This will update the .git/config directory to apply configs from the .gitconfig file in the root of the project.
-
 ## IDEA
 
 ### Check Out the Cloudbreak Repository

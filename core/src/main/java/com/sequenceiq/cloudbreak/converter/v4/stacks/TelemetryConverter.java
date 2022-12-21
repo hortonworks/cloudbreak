@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -59,14 +58,10 @@ public class TelemetryConverter {
 
     private final boolean useSharedAltusCredential;
 
-    private final MonitoringUrlResolver monitoringUrlResolver;
-
-    public TelemetryConverter(
-            TelemetryConfiguration configuration,
+    public TelemetryConverter(TelemetryConfiguration configuration,
             EntitlementService entitlementService,
             @Value("${cb.cm.telemetrypublisher.enabled:false}") boolean telemetryPublisherEnabled,
-            @Value("${cb.cm.telemetrypublisher.default:true}") boolean telemetryPublisherDefaultValue,
-            MonitoringUrlResolver monitoringUrlResolver) {
+            @Value("${cb.cm.telemetrypublisher.default:true}") boolean telemetryPublisherDefaultValue) {
         this.entitlementService = entitlementService;
         this.telemetryPublisherEnabled = telemetryPublisherEnabled;
         this.telemetryPublisherDefaultValue = telemetryPublisherDefaultValue;
@@ -74,7 +69,6 @@ public class TelemetryConverter {
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
         this.meteringEnabled = configuration.getMeteringConfiguration().isEnabled();
         this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
-        this.monitoringUrlResolver = monitoringUrlResolver;
     }
 
     public TelemetryResponse convert(Telemetry telemetry) {
@@ -100,7 +94,7 @@ public class TelemetryConverter {
         LOGGER.debug("Converting telemetry request to telemetry object");
         if (request != null) {
             Logging logging = createLoggingFromRequest(request);
-            Monitoring monitoring = createMonitoringFromRequest(accountId, request);
+            Monitoring monitoring = createMonitoringFromRequest(request);
             WorkloadAnalytics workloadAnalytics = createWorkloadAnalyticsFromRequest(request);
             telemetry.setLogging(logging);
             telemetry.setMonitoring(monitoring);
@@ -127,7 +121,7 @@ public class TelemetryConverter {
     }
 
     public TelemetryRequest convert(TelemetryResponse response,
-                                    SdxClusterResponse sdxClusterResponse) {
+            SdxClusterResponse sdxClusterResponse) {
         LOGGER.debug("Creating telemetry request based on datalake and environment responses.");
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         FeaturesRequest featuresRequest = new FeaturesRequest();
@@ -315,16 +309,13 @@ public class TelemetryConverter {
         return logging;
     }
 
-    private Monitoring createMonitoringFromRequest(String accountId, TelemetryRequest request) {
+    private Monitoring createMonitoringFromRequest(TelemetryRequest request) {
         Monitoring monitoring = null;
-        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
+        if (request.getMonitoring() != null) {
+            LOGGER.debug("Create monitoring telemetry settings from monitoring request.");
+            MonitoringRequest monitoringRequest = request.getMonitoring();
             monitoring = new Monitoring();
-            if (request.getMonitoring() != null && StringUtils.isNotBlank(request.getMonitoring().getRemoteWriteUrl())) {
-                LOGGER.debug("Create monitoring telemetry settings from monitoring request.");
-                monitoring.setRemoteWriteUrl(monitoringUrlResolver.resolve(accountId, request.getMonitoring().getRemoteWriteUrl()));
-            } else {
-                monitoring.setRemoteWriteUrl(monitoringUrlResolver.resolve(accountId, entitlementService.isCdpSaasEnabled(accountId)));
-            }
+            monitoring.setRemoteWriteUrl(monitoringRequest.getRemoteWriteUrl());
         }
         return monitoring;
     }

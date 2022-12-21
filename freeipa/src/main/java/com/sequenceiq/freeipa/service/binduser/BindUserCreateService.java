@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
@@ -21,7 +22,6 @@ import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserE
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.FreeIpaStatusValidator;
 
 @Service
 public class BindUserCreateService {
@@ -40,13 +40,10 @@ public class BindUserCreateService {
     @Inject
     private StackService stackService;
 
-    @Inject
-    private FreeIpaStatusValidator statusValidator;
-
     public OperationStatus createBindUser(String accountId, BindUserCreateRequest request) {
-        Stack stack = stackService.getFreeIpaStackWithMdcContext(request.getEnvironmentCrn(), accountId);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start 'BIND_USER_CREATE' operation from request: {}", request);
-        statusValidator.throwBadRequestIfFreeIpaIsUnreachable(stack);
         Operation operation = operationService.startOperation(accountId, OperationType.BIND_USER_CREATE, List.of(request.getEnvironmentCrn()),
                 List.of(request.getBindUserNameSuffix()));
         if (RUNNING == operation.getStatus()) {
