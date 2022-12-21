@@ -85,7 +85,8 @@ class ModifyProxyConfigOrchestratorServiceTest {
     private static InstanceMetaData createInstance(long privateId, boolean primaryGateway) {
         InstanceMetaData instance = new InstanceMetaData();
         instance.setPrivateId(privateId);
-        instance.setDiscoveryFQDN("i-" + privateId);
+        instance.setDiscoveryFQDN("fqdn-" + privateId);
+        instance.setInstanceId("id-" + privateId);
         instance.setInstanceMetadataType(primaryGateway ? InstanceMetadataType.GATEWAY_PRIMARY : InstanceMetadataType.GATEWAY);
         return instance;
     }
@@ -119,7 +120,9 @@ class ModifyProxyConfigOrchestratorServiceTest {
 
         Assertions.assertThatThrownBy(() -> underTest.applyModifyProxyState(STACK_ID))
                 .isInstanceOf(CloudbreakOrchestratorFailedException.class)
-                .hasMessage("Health check failed after proxy config modification for instance %s: %s", I_2.getDiscoveryFQDN(), issue);
+                .hasMessage("Health check failed on instance %s after proxy configuration modification. " +
+                                "Please either fix your proxy configuration settings and try the operation again, or repair the failed instance. Details: %s",
+                        I_2.getInstanceId(), issue);
 
         verify(orchestratorStateParamsProvider)
                 .createStateParamsForSingleTarget(stack, I_2.getDiscoveryFQDN(), ModifyProxyConfigOrchestratorService.MODIFY_PROXY_STATE);

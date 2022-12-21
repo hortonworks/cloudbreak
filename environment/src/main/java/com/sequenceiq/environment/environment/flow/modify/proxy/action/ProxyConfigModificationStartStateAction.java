@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.modify.proxy.action;
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -31,7 +32,8 @@ public class ProxyConfigModificationStartStateAction extends AbstractEnvProxyMod
         LOGGER.info("Env proxy modification flow started");
 
         environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
-                EnvironmentStatus.PROXY_CONFIG_MODIFICATION_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_STARTED,
+                EnvironmentStatus.PROXY_CONFIG_MODIFICATION_IN_PROGRESS,
+                ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_STARTED, List.of(getProxyConfigName(context)),
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_START_STATE);
 
         String selector = EnvProxyModificationHandlerSelectors.SAVE_NEW_PROXY_ASSOCIATION_HANDLER_EVENT.selector();

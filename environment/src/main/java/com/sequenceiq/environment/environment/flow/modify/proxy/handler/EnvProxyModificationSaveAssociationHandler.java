@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.flow.modify.proxy.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -16,6 +18,8 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
 @Component
 public class EnvProxyModificationSaveAssociationHandler extends EventSenderAwareHandler<EnvProxyModificationDefaultEvent> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvProxyModificationSaveAssociationHandler.class);
 
     private final ProxyConfigService proxyConfigService;
 
@@ -36,6 +40,7 @@ public class EnvProxyModificationSaveAssociationHandler extends EventSenderAware
     public void accept(Event<EnvProxyModificationDefaultEvent> event) {
         EnvProxyModificationDefaultEvent eventData = event.getData();
         try {
+            LOGGER.info("Saving proxy config {} for env {}", eventData.getProxyConfigCrn(), eventData.getResourceCrn());
             ProxyConfig proxyConfig = eventData.getProxyConfigCrn() != null
                     ? proxyConfigService.getByCrn(eventData.getProxyConfigCrn())
                     : null;

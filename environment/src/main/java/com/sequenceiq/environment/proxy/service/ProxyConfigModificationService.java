@@ -50,20 +50,20 @@ public class ProxyConfigModificationService {
 
     public void validateModify(EnvironmentDto environment) {
         if (!entitlementService.isEditProxyConfigEnabled(environment.getAccountId())) {
-            throw new BadRequestException("Proxy config editing is not enabled in your account");
+            throw new BadRequestException("Modifying proxy config is not enabled in your account");
         }
         DescribeFreeIpaResponse freeIpaResponse = freeIpaService.describe(environment.getResourceCrn())
                 .orElseThrow(() -> new IllegalStateException("FreeIpa not found for environment " + environment.getResourceCrn()));
         if (!freeIpaResponse.getStatus().isAvailable()) {
-            throw new BadRequestException("Proxy config editing is not supported when FreeIpa is not available");
+            throw new BadRequestException("Modifying proxy config is not supported when FreeIpa is not available");
         }
         List<SdxClusterResponse> sdxClusters = sdxService.list(environment.getResourceCrn());
         if (sdxClusters.stream().anyMatch(sdxClusterResponse -> !sdxClusterResponse.getStatus().isRunning())) {
-            throw new BadRequestException("Proxy config editing is not supported when Data Lake is not running");
+            throw new BadRequestException("Modifying proxy config is not supported when Data Lake is not running");
         }
         StackViewV4Responses stackViewV4Responses = datahubService.list(environment.getResourceCrn());
         if (stackViewV4Responses.getResponses().stream().anyMatch(stackViewV4Response -> !stackViewV4Response.getStatus().isAvailable())) {
-            throw new BadRequestException("Proxy config editing is not supported when not all Data Hubs are available");
+            throw new BadRequestException("Modifying proxy config is not supported when any of the Data Hubs are not available");
         }
     }
 }
