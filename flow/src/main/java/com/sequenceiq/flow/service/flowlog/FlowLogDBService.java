@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.service.flowlog;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -304,8 +305,9 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public int purgeFinalizedFlowLogs() {
-        return flowLogRepository.purgeFinalizedFlowLogs();
+    public int purgeFinalizedFlowLogs(int retentionPeriodHours) {
+        long endTimeUpperBound = clock.nowMinus(Duration.ofHours(retentionPeriodHours)).toEpochMilli();
+        return flowLogRepository.purgeFinalizedFlowLogs(endTimeUpperBound);
     }
 
     @Override

@@ -43,6 +43,7 @@ dependencies {
   testImplementation group: 'org.springframework.security',      name: 'spring-security-web',            version: springSecurityVersion
   testImplementation group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.awaitility',                    name: 'awaitility',                     version: awaitilityVersion
+  testImplementation group: 'com.h2database',                    name: 'h2',                             version: h2databaseVersion
   testImplementation group: 'org.testcontainers',                name: 'postgresql',                     version: testContainersVersion
   testImplementation group: 'org.testcontainers',                name: 'junit-jupiter',                  version: testContainersVersion
   testImplementation project(path: ':authorization-common', configuration: 'tests')
