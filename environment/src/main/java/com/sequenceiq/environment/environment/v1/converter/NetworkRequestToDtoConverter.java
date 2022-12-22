@@ -47,6 +47,7 @@ public class NetworkRequestToDtoConverter {
                     .withResourceGroupName(network.getAzure().getResourceGroupName())
                     .withDatabasePrivateDnsZoneId(network.getAzure().getDatabasePrivateDnsZoneId())
                     .withAksPrivateDnsZoneId(network.getAzure().getAksPrivateDnsZoneId())
+                    .withNoOutboundLoadBalancer(network.getAzure().isNoOutboundLoadBalancer())
                     .build();
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());

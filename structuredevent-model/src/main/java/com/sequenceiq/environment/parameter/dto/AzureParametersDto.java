@@ -10,12 +10,9 @@ public class AzureParametersDto {
 
     private final AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto;
 
-    private final boolean noOutboundLoadBalancer;
-
     private AzureParametersDto(Builder builder) {
         azureResourceGroupDto = builder.azureResourceGroupDto;
         azureResourceEncryptionParametersDto = builder.azureResourceEncryptionParametersDto;
-        noOutboundLoadBalancer = builder.noOutboundLoadBalancer;
     }
 
     public AzureResourceGroupDto getAzureResourceGroupDto() {
@@ -24,10 +21,6 @@ public class AzureParametersDto {
 
     public AzureResourceEncryptionParametersDto getAzureResourceEncryptionParametersDto() {
         return azureResourceEncryptionParametersDto;
-    }
-
-    public boolean isNoOutboundLoadBalancer() {
-        return noOutboundLoadBalancer;
     }
 
     public static Builder builder() {
@@ -39,7 +32,6 @@ public class AzureParametersDto {
         return "AzureParametersDto{"
                 + "azureResourceGroupDto=" + azureResourceGroupDto
                 + ", azureResourceEncryptionParametersDto=" + azureResourceEncryptionParametersDto
-                + ", isNoOutboundLoadBalancer=" + noOutboundLoadBalancer
                 + '}';
     }
 
@@ -50,8 +42,6 @@ public class AzureParametersDto {
 
         private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto;
 
-        private boolean noOutboundLoadBalancer;
-
         public Builder withAzureResourceGroupDto(AzureResourceGroupDto azureResourceGroupDto) {
             this.azureResourceGroupDto = azureResourceGroupDto;
             return this;
@@ -59,11 +49,6 @@ public class AzureParametersDto {
 
         public Builder withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto) {
             this.azureResourceEncryptionParametersDto = azureResourceEncryptionParametersDto;
-            return this;
-        }
-
-        public Builder withNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
-            this.noOutboundLoadBalancer = noOutboundLoadBalancer;
             return this;
         }
 

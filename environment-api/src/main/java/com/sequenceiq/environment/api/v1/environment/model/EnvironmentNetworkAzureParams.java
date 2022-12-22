@@ -36,6 +36,9 @@ public class EnvironmentNetworkAzureParams {
     @ApiModelProperty(EnvironmentModelDescription.AZURE_NO_PUBLIC_IP)
     private Boolean noPublicIp;
 
+    @ApiModelProperty(EnvironmentModelDescription.NO_OUTBOUND_LOAD_BALANCER)
+    private boolean noOutboundLoadBalancer;
+
     public String getNetworkId() {
         return networkId;
     }
@@ -76,6 +79,14 @@ public class EnvironmentNetworkAzureParams {
         this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     }
 
+    public boolean isNoOutboundLoadBalancer() {
+        return noOutboundLoadBalancer;
+    }
+
+    public void setNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
+        this.noOutboundLoadBalancer = noOutboundLoadBalancer;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentNetworkAzureParams{" +
@@ -84,6 +95,7 @@ public class EnvironmentNetworkAzureParams {
                 ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
                 ", aksPrivateDnsZoneId='" + aksPrivateDnsZoneId + '\'' +
                 ", noPublicIp=" + noPublicIp +
+                ", noOutboundLoadBalancer=" + noOutboundLoadBalancer +
                 '}';
     }
 
@@ -97,6 +109,8 @@ public class EnvironmentNetworkAzureParams {
         private String databasePrivateDnsZoneId;
 
         private String aksPrivateDnsZoneId;
+
+        private boolean noOutboundLoadBalancer;
 
         private EnvironmentNetworkAzureParamsBuilder() {
         }
@@ -130,6 +144,11 @@ public class EnvironmentNetworkAzureParams {
             return this;
         }
 
+        public EnvironmentNetworkAzureParamsBuilder withNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
+            this.noOutboundLoadBalancer = noOutboundLoadBalancer;
+            return this;
+        }
+
         public EnvironmentNetworkAzureParams build() {
             EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
             environmentNetworkAzureParams.setNetworkId(networkId);
@@ -137,6 +156,7 @@ public class EnvironmentNetworkAzureParams {
             environmentNetworkAzureParams.setNoPublicIp(noPublicIp);
             environmentNetworkAzureParams.setDatabasePrivateDnsZoneId(databasePrivateDnsZoneId);
             environmentNetworkAzureParams.setAksPrivateDnsZoneId(aksPrivateDnsZoneId);
+            environmentNetworkAzureParams.setNoOutboundLoadBalancer(noOutboundLoadBalancer);
             return environmentNetworkAzureParams;
         }
     }

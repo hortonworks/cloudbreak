@@ -43,9 +43,6 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
     @Column(name = "encryption_key_resource_group_name")
     private String encryptionKeyResourceGroupName;
 
-    @Column(name = "no_outbound_load_balancer")
-    private boolean noOutboundLoadBalancer;
-
     public String getResourceGroupName() {
         return resourceGroupName;
     }
@@ -97,13 +94,5 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
 
     public void setEncryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
         this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
-    }
-
-    public boolean isNoOutboundLoadBalancer() {
-        return noOutboundLoadBalancer;
-    }
-
-    public void setNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
-        this.noOutboundLoadBalancer = noOutboundLoadBalancer;
     }
 }

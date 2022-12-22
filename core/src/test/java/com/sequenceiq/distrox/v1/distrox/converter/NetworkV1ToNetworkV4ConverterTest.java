@@ -63,6 +63,8 @@ public class NetworkV1ToNetworkV4ConverterTest {
 
     private static final String PUBLIC_SUBNET_ID = "public-subnet-123";
 
+    private static final boolean NO_OUTBOUND_LOAD_BALANCER = true;
+
     @InjectMocks
     private NetworkV1ToNetworkV4Converter underTest;
 
@@ -202,6 +204,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
         assertEquals(networkV4Request.createAzure().getNetworkId(), VPC_ID);
         assertEquals(networkV4Request.createAzure().getResourceGroupName(), GROUP_NAME);
         assertEquals(networkV4Request.createAzure().getSubnetId(), SUBNET_ID);
+        assertEquals(networkV4Request.createAzure().isNoOutboundLoadBalancer(), NO_OUTBOUND_LOAD_BALANCER);
     }
 
     @Test
@@ -216,6 +219,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
         assertEquals(networkV4Request.createAzure().getNetworkId(), VPC_ID);
         assertEquals(networkV4Request.createAzure().getResourceGroupName(), GROUP_NAME);
         assertTrue(SUBNET_IDS.contains(networkV4Request.createAzure().getSubnetId()));
+        assertEquals(networkV4Request.createAzure().isNoOutboundLoadBalancer(), NO_OUTBOUND_LOAD_BALANCER);
     }
 
     @Test
@@ -388,7 +392,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
         EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
         environmentNetworkAzureParams.setNetworkId(VPC_ID);
         environmentNetworkAzureParams.setResourceGroupName(GROUP_NAME);
-
+        environmentNetworkAzureParams.setNoOutboundLoadBalancer(NO_OUTBOUND_LOAD_BALANCER);
 
         environmentNetworkResponse.setAzure(environmentNetworkAzureParams);
 

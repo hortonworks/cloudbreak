@@ -14,6 +14,8 @@ public class AzureConstants {
 
     public static final String AKS_PRIVATE_DNS_ZONE_ID = "aksPrivateDnsZoneId";
 
+    public static final String NO_OUTBOUND_LOAD_BALANCER = "noOutboundLoadBalancer";
+
     private AzureConstants() {
     }
 

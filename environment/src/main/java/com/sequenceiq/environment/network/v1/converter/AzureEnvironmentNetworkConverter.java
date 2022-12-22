@@ -3,6 +3,7 @@ package com.sequenceiq.environment.network.v1.converter;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.AKS_PRIVATE_DNS_ZONE_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE_DNS_ZONE_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_OUTBOUND_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
 
 import java.util.HashMap;
@@ -48,6 +49,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             azureNetwork.setResourceGroupName(azureParams.getResourceGroupName());
             azureNetwork.setNoPublicIp(azureParams.isNoPublicIp());
             azureNetwork.setAksPrivateDnsZoneId(azureParams.getAksPrivateDnsZoneId());
+            azureNetwork.setNoOutboundLoadBalancer(azureParams.isNoOutboundLoadBalancer());
             if (ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT.equals(network.getServiceEndpointCreation())) {
                 azureNetwork.setDatabasePrivateDnsZoneId(azureParams.getDatabasePrivateDnsZoneId());
             }
@@ -102,6 +104,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 .withNoPublicIp(azureNetwork.getNoPublicIp())
                                 .withDatabasePrivateDnsZoneId(azureNetwork.getDatabasePrivateDnsZoneId())
                                 .withAksPrivateDnsZoneId(azureNetwork.getAksPrivateDnsZoneId())
+                                .withNoOutboundLoadBalancer(azureNetwork.isNoOutboundLoadBalancer())
                                 .build())
                 .build();
     }
@@ -134,6 +137,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         param.put(NETWORK_ID, azureNetwork.getNetworkId());
         param.put(DATABASE_PRIVATE_DNS_ZONE_ID, azureNetwork.getDatabasePrivateDnsZoneId());
         param.put(AKS_PRIVATE_DNS_ZONE_ID, azureNetwork.getAksPrivateDnsZoneId());
+        param.put(NO_OUTBOUND_LOAD_BALANCER, azureNetwork.isNoOutboundLoadBalancer());
         return new Network(null, param);
     }
 }

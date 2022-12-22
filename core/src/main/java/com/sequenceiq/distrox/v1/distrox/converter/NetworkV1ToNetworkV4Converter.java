@@ -132,6 +132,7 @@ public class NetworkV1ToNetworkV4Converter {
             response.setResourceGroupName(networkAzureParams.getResourceGroupName());
             response.setDatabasePrivateDnsZoneId(networkAzureParams.getDatabasePrivateDnsZoneId());
             response.setAksPrivateDnsZoneId(networkAzureParams.getAksPrivateDnsZoneId());
+            response.setNoOutboundLoadBalancer(networkAzureParams.isNoOutboundLoadBalancer());
             String subnetId = azureNetworkV1Parameters.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(subnetId);

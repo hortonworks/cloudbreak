@@ -447,7 +447,6 @@ public class EnvironmentApiConverterTest {
                 actual.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
         assertEquals(request.getAzure().getResourceEncryptionParameters().getEncryptionKeyResourceGroupName(),
                 actual.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
-        assertEquals(request.getAzure().isNoOutboundLoadBalancer(), actual.getAzureParametersDto().isNoOutboundLoadBalancer());
     }
 
     private void assertAwsParameters(EnvironmentRequest request, ParametersDto actual) {
@@ -546,7 +545,6 @@ public class EnvironmentApiConverterTest {
                         .withEncryptionKeyResourceGroupName(KEY_URL_RESOURCE_GROUP)
                         .build()
         );
-        azureEnvironmentParameters.setNoOutboundLoadBalancer(false);
         return azureEnvironmentParameters;
     }
 

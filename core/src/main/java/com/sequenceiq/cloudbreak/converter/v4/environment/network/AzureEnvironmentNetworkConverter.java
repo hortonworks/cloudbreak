@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.environment.network;
 
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE_DNS_ZONE_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_OUTBOUND_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_PUBLIC_IP;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
 
@@ -30,7 +31,8 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                 NETWORK_ID, azure.getNetworkId(),
                 RESOURCE_GROUP_NAME, azure.getResourceGroupName(),
                 NO_PUBLIC_IP, azure.getNoPublicIp(),
-                DATABASE_PRIVATE_DNS_ZONE_ID, getDatabasePrivateDnsZoneId(azure)
+                DATABASE_PRIVATE_DNS_ZONE_ID, getDatabasePrivateDnsZoneId(azure),
+                NO_OUTBOUND_LOAD_BALANCER, azure.isNoOutboundLoadBalancer()
         );
     }
 

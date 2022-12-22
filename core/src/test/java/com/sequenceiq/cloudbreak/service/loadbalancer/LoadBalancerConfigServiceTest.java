@@ -62,7 +62,7 @@ import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -1220,11 +1220,11 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
     private DetailedEnvironmentResponse createAzureEnvironment(CloudSubnet subnet, boolean enableEndpointGateway, boolean noOutboundLoadBalancer) {
         DetailedEnvironmentResponse environment = createEnvironment(subnet, enableEndpointGateway, AZURE);
-        AzureEnvironmentParameters azureParameters = new AzureEnvironmentParameters()
-                .builder()
+        EnvironmentNetworkAzureParams azureParameters = EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder
+                .anEnvironmentNetworkAzureParams()
                 .withNoOutboundLoadBalancer(noOutboundLoadBalancer)
                 .build();
-        environment.setAzure(azureParameters);
+        environment.getNetwork().setAzure(azureParameters);
         return environment;
     }
 }

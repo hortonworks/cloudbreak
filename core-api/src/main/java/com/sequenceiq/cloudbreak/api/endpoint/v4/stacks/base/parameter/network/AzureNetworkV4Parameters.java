@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.AKS_PRIVATE_DNS_ZONE_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE_DNS_ZONE_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_OUTBOUND_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_PUBLIC_IP;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.SUBNET_ID;
@@ -42,6 +43,9 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
 
     @ApiModelProperty
     private String aksPrivateDnsZoneId;
+
+    @ApiModelProperty
+    private boolean noOutboundLoadBalancer;
 
     public Boolean getNoPublicIp() {
         return noPublicIp;
@@ -91,6 +95,14 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     }
 
+    public boolean isNoOutboundLoadBalancer() {
+        return noOutboundLoadBalancer;
+    }
+
+    public void setNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
+        this.noOutboundLoadBalancer = noOutboundLoadBalancer;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
@@ -100,6 +112,7 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         putIfValueNotNull(map, SUBNET_ID, subnetId);
         putIfValueNotNull(map, DATABASE_PRIVATE_DNS_ZONE_ID, databasePrivateDnsZoneId);
         putIfValueNotNull(map, AKS_PRIVATE_DNS_ZONE_ID, aksPrivateDnsZoneId);
+        putIfValueNotNull(map, NO_OUTBOUND_LOAD_BALANCER, noOutboundLoadBalancer);
         return map;
     }
 
@@ -118,5 +131,6 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         subnetId = getParameterOrNull(parameters, SUBNET_ID);
         databasePrivateDnsZoneId = getParameterOrNull(parameters, DATABASE_PRIVATE_DNS_ZONE_ID);
         aksPrivateDnsZoneId = getParameterOrNull(parameters, AKS_PRIVATE_DNS_ZONE_ID);
+        noOutboundLoadBalancer = getBoolean(parameters, NO_OUTBOUND_LOAD_BALANCER);
     }
 }

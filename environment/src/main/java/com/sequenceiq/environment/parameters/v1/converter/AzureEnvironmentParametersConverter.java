@@ -52,9 +52,6 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                 .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                 .map(AzureResourceEncryptionParametersDto::getEncryptionKeyResourceGroupName)
                 .orElse(null));
-        azureParameters.setNoOutboundLoadBalancer(azureParametersDto
-                .map(AzureParametersDto::isNoOutboundLoadBalancer)
-                .orElse(false));
     }
 
     @Override
@@ -74,8 +71,6 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                                 .withDiskEncryptionSetId(azureParameters.getDiskEncryptionSetId())
                                 .withEncryptionKeyResourceGroupName(azureParameters.getEncryptionKeyResourceGroupName())
                                 .build())
-                .withNoOutboundLoadBalancer(
-                        azureParameters.isNoOutboundLoadBalancer())
                 .build());
     }
 }

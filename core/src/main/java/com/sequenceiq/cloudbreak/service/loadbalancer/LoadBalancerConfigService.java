@@ -59,7 +59,7 @@ import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.TargetGroupType;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -343,7 +343,7 @@ public class LoadBalancerConfigService {
 
             if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
                 setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PRIVATE);
-                if (shouldCreateOutboundLoadBalancer(createPublicLb, stack, sku, environment)) {
+                if (shouldCreateOutboundLoadBalancer(createPublicLb, stack, sku, environment.getNetwork())) {
                     LOGGER.debug("Found private only Azure load balancer configuration; creating outbound public load balancer for egress.");
                     setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.OUTBOUND);
                 }
@@ -360,13 +360,13 @@ public class LoadBalancerConfigService {
         }
     }
 
-    private boolean shouldCreateOutboundLoadBalancer(boolean createPublicLb, Stack stack, LoadBalancerSku sku, DetailedEnvironmentResponse environment) {
+    private boolean shouldCreateOutboundLoadBalancer(boolean createPublicLb, Stack stack, LoadBalancerSku sku, EnvironmentNetworkResponse network) {
         return !createPublicLb
                 && AZURE.equalsIgnoreCase(stack.getCloudPlatform())
                 && LoadBalancerSku.STANDARD.equals(sku)
-                && !Optional.of(environment)
-                            .map(DetailedEnvironmentResponse::getAzure)
-                            .map(AzureEnvironmentParameters::isNoOutboundLoadBalancer)
+                && !Optional.of(network)
+                            .map(EnvironmentNetworkResponse::getAzure)
+                            .map(EnvironmentNetworkAzureParams::isNoOutboundLoadBalancer)
                             .orElse(false);
     }
 
