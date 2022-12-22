@@ -120,7 +120,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public List<CloudResource> build(GcpContext context, CloudInstance cloudInstance, long privateId, AuthenticatedContext auth,
-        Group group, List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
+            Group group, List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         String projectId = context.getProjectId();
         String location = cloudInstance.getAvailabilityZone();
@@ -364,7 +364,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public CloudResource update(GcpContext context, CloudResource resource, CloudInstance cloudInstance,
-        AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+            AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
         String projectId = gcpStackUtil.getProjectId(auth.getCloudCredential());
         String availabilityZone = cloudInstance.getAvailabilityZone();
         Compute compute = context.getCompute();
@@ -484,7 +484,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private List<CloudResource> filterGroupFromName(List<CloudResource> resources, String filterString) {
         return Optional.ofNullable(resources).orElseGet(List::of).stream()
-                .filter(resource -> resource.getName().endsWith(filterString))
+                .filter(resource ->
+                        StringUtils.equals(filterString, getResourceNameService().decodeInstanceGroupResourceNameFromString(resource.getName()).getGroupName()))
                 .collect(Collectors.toList());
     }
 
@@ -516,7 +517,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private Operation executeStartOperation(String projectId, String availabilityZone, Compute compute, String instanceId, InstanceTemplate template,
-                                            List<AttachedDisk> disks) throws IOException {
+            List<AttachedDisk> disks) throws IOException {
 
         if (customGcpDiskEncryptionService.hasCustomEncryptionRequested(template)) {
             LOGGER.info("Start the instance with custom encryption: {}", instanceId);
