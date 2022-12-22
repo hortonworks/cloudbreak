@@ -73,12 +73,12 @@ public class AbstractFreeIpaAddOperationTest {
         THROWS_OTHER_EXCEPTION
     }
 
-    private class FreeIpaAddOperation extends AbstractFreeIpaAddOperation<Object> {
+    private static class FreeIpaAddOperation extends AbstractFreeIpaAddOperation<Object> {
 
-        private FreeIpaAddOperationBehaviour behaviour;
+        private final FreeIpaAddOperationBehaviour behaviour;
 
         private FreeIpaAddOperation(String name, AbstractFreeipaOperation<Object> getOperation, FreeIpaAddOperationBehaviour behaviour) {
-            super(name, getOperation);
+            super(name, getOperation, Object.class);
             this.behaviour = behaviour;
         }
 
@@ -90,11 +90,6 @@ public class AbstractFreeIpaAddOperationTest {
         @Override
         public String getOperationName() {
             return OPERATION_NAME;
-        }
-
-        @Override
-        public Optional<Object> invoke(FreeIpaClient freeipaClient) throws FreeIpaClientException {
-            return invokeAdd(freeIpaClient, Object.class);
         }
 
         @Override

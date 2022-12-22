@@ -1,7 +1,9 @@
 package com.sequenceiq.freeipa.service.binduser;
 
+import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants.ADMINS_GROUP;
+
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -15,23 +17,19 @@ import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigRespo
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
-import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.client.model.User;
+import com.sequenceiq.freeipa.client.operation.GroupAddMemberOperation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.ldap.LdapConfig;
 import com.sequenceiq.freeipa.ldap.LdapConfigConverter;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
 import com.sequenceiq.freeipa.ldap.v1.LdapConfigV1Service;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 
 @Service
 public class UserSyncBindUserService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(UserSyncBindUserService.class);
 
     private static final String USERSYNC_USER_POSTFIX = "usersync";
-
-    private static final String USER_ADMINISTRATOR_ROLE = "User Administrator";
 
     @Inject
     private LdapConfigV1Service ldapConfigV1Service;
@@ -43,29 +41,23 @@ public class UserSyncBindUserService {
     private LdapBindUserNameProvider userNameProvider;
 
     @Inject
-    private FreeIpaClientFactory ipaClientFactory;
-
-    @Inject
     private LdapConfigConverter ldapConfigConverter;
 
-    public void createUserAndLdapConfig(Stack stack) throws FreeIpaClientException {
+    public void createUserAndLdapConfig(Stack stack, FreeIpaClient client) throws FreeIpaClientException {
         cleanupAlreadyExistingLdapConfig(stack.getEnvironmentCrn(), stack.getAccountId());
         ldapConfigV1Service.createNewLdapConfig(stack.getEnvironmentCrn(), createUserSyncBindUserPostfix(stack.getEnvironmentCrn()), stack, true);
-        addUserAdminRoleForBindUser(stack);
+        addBindUserToAdminGroup(stack, client);
     }
 
-    public boolean doesBindUserAndConfigAlreadyExist(Stack stack) throws FreeIpaClientException {
+    public boolean doesBindUserAndConfigAlreadyExist(Stack stack, FreeIpaClient client) throws FreeIpaClientException {
         Optional<LdapConfig> ldapConfig =
                 ldapConfigService.find(stack.getEnvironmentCrn(), stack.getAccountId(), createUserSyncBindUserPostfix(stack.getEnvironmentCrn()));
         if (ldapConfig.isPresent()) {
             LOGGER.info("LdapConfig for usersync bind user exists");
-            FreeIpaClient client = ipaClientFactory.getFreeIpaClientForStack(stack);
             String bindUserName = getUserSyncBindUserName(stack.getEnvironmentCrn());
             Optional<User> user = client.userFind(bindUserName);
             LOGGER.info("Bind user in FreeIPA {}", user.isPresent() ? "exists" : "doesn't exist");
-            Optional<Role> role = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(
-                    () -> client.showRole(USER_ADMINISTRATOR_ROLE), "[{}] role is missing", USER_ADMINISTRATOR_ROLE);
-            return user.isPresent() && role.isPresent() && role.get().getMemberUser().contains(bindUserName);
+            return user.isPresent();
         } else {
             LOGGER.info("LdapConfig for usersync bind user doesn't exist");
             return false;
@@ -92,12 +84,12 @@ public class UserSyncBindUserService {
         }
     }
 
-    private void addUserAdminRoleForBindUser(Stack stack) throws FreeIpaClientException {
+    public void addBindUserToAdminGroup(Stack stack, FreeIpaClient client) throws FreeIpaClientException {
         String bindUserName = getUserSyncBindUserName(stack.getEnvironmentCrn());
-        LOGGER.info("Add [{}] role for [{}]", USER_ADMINISTRATOR_ROLE, bindUserName);
-        FreeIpaClient client = ipaClientFactory.getFreeIpaClientForStack(stack);
+        LOGGER.info("Add [{}] user to [{}]", bindUserName, ADMINS_GROUP);
         FreeIpaClientExceptionUtil.ignoreEmptyModExceptionWithValue(
-                () -> client.addRoleMember(USER_ADMINISTRATOR_ROLE, Set.of(bindUserName), Set.of(), Set.of(), Set.of(), Set.of()), null);
+                () -> GroupAddMemberOperation.create(ADMINS_GROUP, List.of(bindUserName), null).invoke(client),
+                "[{}] already added to [{}}", bindUserName, ADMINS_GROUP);
     }
 
     private void cleanupAlreadyExistingLdapConfig(String environmentCrn, String accountId) {

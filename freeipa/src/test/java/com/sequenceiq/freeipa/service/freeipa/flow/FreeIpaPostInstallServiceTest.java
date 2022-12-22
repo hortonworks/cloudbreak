@@ -97,19 +97,21 @@ class FreeIpaPostInstallServiceTest {
     @Test
     public void postInstallFreeIpaExecutePostServiceDeploymentRecipes() throws Exception {
         Stack stack = mock(Stack.class);
+        FreeIpaClient ipaClient = mock(FreeIpaClient.class);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(ipaClient);
         Set<Node> nodes = Set.of(mock(Node.class));
         when(freeIpaNodeUtilService.mapInstancesToNodes(anySet())).thenReturn(nodes);
         when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(true);
-        when(userSyncBindUserService.doesBindUserAndConfigAlreadyExist(stack)).thenReturn(false);
+        when(userSyncBindUserService.doesBindUserAndConfigAlreadyExist(stack, ipaClient)).thenReturn(false);
 
         underTest.postInstallFreeIpa(1L, false);
 
         verify(hostOrchestrator).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
-        verify(userSyncBindUserService).doesBindUserAndConfigAlreadyExist(stack);
-        verify(userSyncBindUserService).createUserAndLdapConfig(stack);
+        verify(userSyncBindUserService).doesBindUserAndConfigAlreadyExist(stack, ipaClient);
+        verify(userSyncBindUserService).createUserAndLdapConfig(stack, ipaClient);
         verifyNoInteractions(wiamClient, userSyncService);
     }
 
@@ -192,7 +194,7 @@ class FreeIpaPostInstallServiceTest {
     private void verifyUsersyncCommanPart(Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes, FreeIpaClient ipaClient, User user)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException, FreeIpaClientException {
         verify(hostOrchestrator, never()).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
-        verify(userSyncBindUserService).createUserAndLdapConfig(stack);
+        verify(userSyncBindUserService).createUserAndLdapConfig(stack, ipaClient);
         verify(ipaClient).addPasswordExpirationPermission("Set Password Expiration");
         verify(ipaClient).addPermissionToPrivilege("User Administrators", "Set Password Expiration");
         verify(freeIpaPermissionService).setPermissions(stack, ipaClient);
@@ -204,16 +206,19 @@ class FreeIpaPostInstallServiceTest {
     @Test
     public void postInstallFreeIpaExecutePostInstallRecipesButNoRecipes() throws Exception {
         Stack stack = mock(Stack.class);
+        FreeIpaClient ipaClient = mock(FreeIpaClient.class);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(ipaClient);
         Set<Node> nodes = Set.of(mock(Node.class));
         when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(false);
-        when(userSyncBindUserService.doesBindUserAndConfigAlreadyExist(stack)).thenReturn(true);
+        when(userSyncBindUserService.doesBindUserAndConfigAlreadyExist(stack, ipaClient)).thenReturn(true);
 
         underTest.postInstallFreeIpa(1L, false);
 
         verify(hostOrchestrator, times(0)).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
-        verify(userSyncBindUserService, never()).createUserAndLdapConfig(stack);
+        verify(userSyncBindUserService, never()).createUserAndLdapConfig(stack, ipaClient);
+        verify(userSyncBindUserService).addBindUserToAdminGroup(stack, ipaClient);
         verifyNoInteractions(wiamClient, userSyncService);
     }
 
