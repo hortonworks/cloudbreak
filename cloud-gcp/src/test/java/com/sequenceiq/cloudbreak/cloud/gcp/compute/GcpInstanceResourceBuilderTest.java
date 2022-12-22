@@ -403,7 +403,7 @@ public class GcpInstanceResourceBuilderTest {
         CloudResource instanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
-                .withName(group.getName())
+                .withName("test-master-1")
                 .withGroup(group.getName())
                 .build();
         context.addGroupResources(group.getName(), Collections.singletonList(instanceGroup));
@@ -412,7 +412,7 @@ public class GcpInstanceResourceBuilderTest {
         InstanceGroups.List list = mock(InstanceGroups.List.class);
         when(instanceGroups.list(anyString(), anyString())).thenReturn(list);
         InstanceGroupList instanceGroupList = new InstanceGroupList();
-        instanceGroupList.setItems(singletonList(new InstanceGroup().setName(group.getName())));
+        instanceGroupList.setItems(singletonList(new InstanceGroup().setName("test-master-1")));
         when(list.execute()).thenReturn(instanceGroupList);
         when(addInstances.execute()).thenReturn(addOperation);
 
@@ -440,35 +440,38 @@ public class GcpInstanceResourceBuilderTest {
 
         Operation addOperation = new Operation();
         addOperation.setName("operation");
-        CloudResource instanceGroup = CloudResource.builder()
+        CloudResource masterInstanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
-                .withName(group.getName())
+                .withName("test-master-1")
                 .withGroup(group.getName())
                 .build();
-        CloudResource instanceGroup2 = CloudResource.builder()
+        CloudResource gatewayInstanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
-                .withName("gateway")
+                .withName("test-gateway-1")
+                .withGroup(group.getName())
                 .build();
-        CloudResource instanceGroup3 = CloudResource.builder()
+        CloudResource idBrokerInstanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
-                .withName("idbroker")
+                .withName("test-idbroker-1")
+                .withGroup(group.getName())
                 .build();
-        CloudResource instanceGroup4 = CloudResource.builder()
+        CloudResource master0InstanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
-                .withName("free-master0")
+                .withName("test-master0-1")
+                .withGroup(group.getName())
                 .build();
-        context.addGroupResources(group.getName(), List.of(instanceGroup4, instanceGroup2, instanceGroup, instanceGroup3));
+        context.addGroupResources(group.getName(), List.of(master0InstanceGroup, gatewayInstanceGroup, masterInstanceGroup, idBrokerInstanceGroup));
         when(compute.instanceGroups()).thenReturn(instanceGroups);
         ArgumentCaptor<String> groupName = ArgumentCaptor.forClass(String.class);
         when(instanceGroups.addInstances(anyString(), anyString(), groupName.capture(), any())).thenReturn(addInstances);
         InstanceGroups.List list = mock(InstanceGroups.List.class);
         when(instanceGroups.list(anyString(), anyString())).thenReturn(list);
         InstanceGroupList instanceGroupList = new InstanceGroupList();
-        instanceGroupList.setItems(singletonList(new InstanceGroup().setName(group.getName())));
+        instanceGroupList.setItems(singletonList(new InstanceGroup().setName(masterInstanceGroup.getName())));
         when(list.execute()).thenReturn(instanceGroupList);
         when(addInstances.execute()).thenReturn(addOperation);
 
@@ -477,7 +480,7 @@ public class GcpInstanceResourceBuilderTest {
 
         // THEN
         verify(compute).instances();
-        assertEquals("master", groupName.getValue());
+        assertEquals(masterInstanceGroup.getName(), groupName.getValue());
         verify(instances).insert(anyString(), anyString(), instanceArg.capture());
         assertNull(instanceArg.getValue().getHostname());
     }

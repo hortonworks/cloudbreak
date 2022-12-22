@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.cloud.gcp.service;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.gcp.service.naming.GcpInstanceGroupResourceName;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -20,6 +22,10 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
     private static final String FIREWALL_IN_NAME_SUFFIX = "in";
 
     private static final int ATTACHED_DISKS_PART_COUNT = 4;
+
+    private static final int INSTANCE_GROUP_NO_STACK_PART_COUNT = 2;
+
+    private static final int INSTANCE_GROUP_WITH_STACK_PART_COUNT = 3;
 
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
@@ -73,6 +79,19 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
                 throw new IllegalStateException("Unsupported resource type: " + resourceType);
         }
         return resourceName;
+    }
+
+    public GcpInstanceGroupResourceName decodeInstanceGroupResourceNameFromString(String cloudResourceName) {
+        String[] parts = StringUtils.split(cloudResourceName, '-');
+        if (parts.length == INSTANCE_GROUP_NO_STACK_PART_COUNT) {
+            LOGGER.warn("old instance group naming pattern discovered {}", cloudResourceName);
+            return new GcpInstanceGroupResourceName(parts[0], parts[1], "");
+        }
+        if (parts.length == INSTANCE_GROUP_WITH_STACK_PART_COUNT) {
+            return new GcpInstanceGroupResourceName(parts[0], parts[1], parts[2]);
+        }
+        LOGGER.error("instance group name '{}' is not normalized, must follow the structure CONTEXT-GROUP-NUMBER", cloudResourceName);
+        throw new IllegalArgumentException("instance group name '{}' is not normalized, must follow the structure CONTEXT-GROUP-NUMBER");
     }
 
     private String attachedDiskResourceName(Object[] parts) {
@@ -150,13 +169,15 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
     }
 
     private String gcpGroupResourceName(Object[] parts) {
-        checkArgs(2, parts);
+        checkArgs(INSTANCE_GROUP_WITH_STACK_PART_COUNT, parts);
         String name;
         String stackName = String.valueOf(parts[0]);
         String groupName = String.valueOf(parts[1]);
+        String datalake = String.valueOf(parts[2]);
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(groupName));
+        name = appendPart(name, normalize(datalake));
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
