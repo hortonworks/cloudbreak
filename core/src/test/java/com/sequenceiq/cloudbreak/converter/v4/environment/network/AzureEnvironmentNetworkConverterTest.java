@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,6 +42,8 @@ class AzureEnvironmentNetworkConverterTest {
     private static final String RESOURCE_GROUP_NAME_KEY = "resourceGroupName";
 
     private static final String NO_PUBLIC_IP_KEY = "noPublicIp";
+
+    private static final String NO_OUTBOUND_LOAD_BALANCER_KEY = "noOutboundLoadBalancer";
 
     @Mock
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -81,14 +84,16 @@ class AzureEnvironmentNetworkConverterTest {
         when(azure.getResourceGroupName()).thenReturn(RESOURCE_GROUP_NAME);
         when(azure.getNoPublicIp()).thenReturn(true);
         when(azure.getDatabasePrivateDnsZoneId()).thenReturn(DATABASE_PRIVATE_DNS_ZONE_ID);
+        when(azure.isNoOutboundLoadBalancer()).thenReturn(true);
 
         Map<String, Object> result = converter.getAttributesForLegacyNetwork(environmentNetworkResponse);
 
-        assertThat(result).hasSize(4);
+        assertThat(result).hasSize(5);
         assertEquals(NETWORK_ID, result.get(NETWORK_ID_KEY));
         assertEquals(RESOURCE_GROUP_NAME, result.get(RESOURCE_GROUP_NAME_KEY));
         assertEquals(true, result.get(NO_PUBLIC_IP_KEY));
         assertEquals(DATABASE_PRIVATE_DNS_ZONE_ID, result.get(DATABASE_PRIVATE_DNS_ZONE_ID_KEY));
+        assertTrue((Boolean) result.get(NO_OUTBOUND_LOAD_BALANCER_KEY));
     }
 
     @Test

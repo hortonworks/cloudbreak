@@ -255,9 +255,6 @@ public class EnvironmentResponseConverter {
         return AzureEnvironmentParameters.builder()
                 .withAzureResourceGroup(getIfNotNull(resourceGroupDto, this::azureParametersToAzureResourceGroup))
                 .withResourceEncryptionParameters(getIfNotNull(resourceEncryptionParametersDto, this::azureParametersToAzureResourceEncryptionParameters))
-                .withNoOutboundLoadBalancer(Optional.ofNullable(parameters.getAzureParametersDto())
-                                                    .map(AzureParametersDto::isNoOutboundLoadBalancer)
-                                                    .orElse(false))
                 .build();
     }
 

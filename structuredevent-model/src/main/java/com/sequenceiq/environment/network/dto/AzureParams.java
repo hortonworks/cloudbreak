@@ -16,11 +16,14 @@ public class AzureParams {
 
     private String aksPrivateDnsZoneId;
 
+    private boolean noOutboundLoadBalancer;
+
     private AzureParams(Builder builder) {
         networkId = builder.networkId;
         resourceGroupName = builder.resourceGroupName;
         noPublicIp = builder.noPublicIp;
         databasePrivateDnsZoneId = builder.databasePrivateDnsZoneId;
+        noOutboundLoadBalancer = builder.noOutboundLoadBalancer;
         aksPrivateDnsZoneId = builder.aksPrivateDnsZoneId;
     }
 
@@ -64,6 +67,14 @@ public class AzureParams {
         this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     }
 
+    public boolean isNoOutboundLoadBalancer() {
+        return noOutboundLoadBalancer;
+    }
+
+    public void setNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
+        this.noOutboundLoadBalancer = noOutboundLoadBalancer;
+    }
+
     @Override
     public String toString() {
         return "AzureParams{" +
@@ -72,6 +83,7 @@ public class AzureParams {
                 ", noPublicIp=" + noPublicIp +
                 ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
                 ", aksPrivateDnsZoneId='" + aksPrivateDnsZoneId + '\'' +
+                ", noOutboundLoadBalancer='" + noOutboundLoadBalancer + '\'' +
                 '}';
     }
 
@@ -90,6 +102,8 @@ public class AzureParams {
         private String databasePrivateDnsZoneId;
 
         private String aksPrivateDnsZoneId;
+
+        private boolean noOutboundLoadBalancer;
 
         private Builder() {
         }
@@ -116,6 +130,11 @@ public class AzureParams {
 
         public Builder withAksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
             this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
+            return this;
+        }
+
+        public Builder withNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
+            this.noOutboundLoadBalancer = noOutboundLoadBalancer;
             return this;
         }
 

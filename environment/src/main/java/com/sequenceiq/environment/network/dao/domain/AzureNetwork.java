@@ -16,6 +16,8 @@ public class AzureNetwork extends BaseNetwork {
 
     private String aksPrivateDnsZoneId;
 
+    private boolean noOutboundLoadBalancer;
+
     @Override
     public String getNetworkId() {
         return networkId;
@@ -57,6 +59,14 @@ public class AzureNetwork extends BaseNetwork {
         this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     }
 
+    public boolean isNoOutboundLoadBalancer() {
+        return noOutboundLoadBalancer;
+    }
+
+    public void setNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
+        this.noOutboundLoadBalancer = noOutboundLoadBalancer;
+    }
+
     @Override
     public String toString() {
         return "AzureNetwork{" +
@@ -65,6 +75,7 @@ public class AzureNetwork extends BaseNetwork {
                 ", noPublicIp=" + noPublicIp +
                 ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
                 ", aksPrivateDnsZoneId='" + aksPrivateDnsZoneId + '\'' +
+                ", noOutboundLoadBalancer='" + noOutboundLoadBalancer + '\'' +
                 "} " + super.toString();
     }
 }
