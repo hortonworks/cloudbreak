@@ -4,6 +4,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.group;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,7 +52,7 @@ public class GcpInstanceGroupResourceBuilderTest {
     @Mock
     private GcpContext gcpContext;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private AuthenticatedContext authenticatedContext;
 
     @Mock
@@ -123,6 +125,7 @@ public class GcpInstanceGroupResourceBuilderTest {
         when(gcpContext.getLocation()).thenReturn(location);
         when(location.getAvailabilityZone()).thenReturn(availabilityZone);
         when(availabilityZone.value()).thenReturn("zone");
+        when(authenticatedContext.getCloudContext().getId()).thenReturn(111L);
 
         CloudResource cloudResource = underTest.create(gcpContext, authenticatedContext, group, network);
 
@@ -130,16 +133,22 @@ public class GcpInstanceGroupResourceBuilderTest {
     }
 
     @Test
-    public void testBuild() throws Exception {
+    public void testCloudResourceBoundToStack() throws Exception {
+
         when(gcpContext.getName()).thenReturn("name");
         when(group.getName()).thenReturn("group");
         when(gcpContext.getLocation()).thenReturn(location);
         when(location.getAvailabilityZone()).thenReturn(availabilityZone);
         when(availabilityZone.value()).thenReturn("zone");
+        when(authenticatedContext.getCloudContext().getId()).thenReturn(111L);
 
-        CloudResource cloudResource = underTest.create(gcpContext, authenticatedContext, group, network);
+        CloudResource cloudResource1 = underTest.create(gcpContext, authenticatedContext, group, network);
 
-        Assertions.assertTrue(cloudResource.getName().startsWith("name-group"));
+        reset(authenticatedContext);
+        when(authenticatedContext.getCloudContext().getId()).thenReturn(222L);
+        CloudResource cloudResource2 = underTest.create(gcpContext, authenticatedContext, group, network);
+
+        Assertions.assertNotEquals(cloudResource1.getName(), cloudResource2.getName());
     }
 
     @Test
