@@ -83,8 +83,8 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     void updateLastLogStatusInFlow(@Param("id") Long id, @Param("stateStatus") StateStatus stateStatus, @Param("endTime") Long endTime);
 
     @Modifying
-    @Query("DELETE FROM FlowLog fl WHERE fl.finalized = TRUE")
-    int purgeFinalizedFlowLogs();
+    @Query("DELETE FROM FlowLog fl WHERE fl.finalized = TRUE AND fl.endTime <= :endTime")
+    int purgeFinalizedFlowLogs(@Param("endTime") Long endTime);
 
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId);
 

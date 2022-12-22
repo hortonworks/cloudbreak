@@ -35,6 +35,9 @@ public class FlowCleanupJob extends TracedQuartzJob {
     private FlowChainLogService flowChainLogService;
 
     @Inject
+    private FlowCleanupConfig flowCleanupConfig;
+
+    @Inject
     private FlowRegister runningFlows;
 
     @Inject
@@ -52,7 +55,7 @@ public class FlowCleanupJob extends TracedQuartzJob {
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         try {
-            purgeFinalisedFlowLogs();
+            purgeFinalisedFlowLogs(flowCleanupConfig.getRetentionPeriodInHours());
             purgeFlowStatCache();
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Transaction failed for flow cleanup.", e);
@@ -64,10 +67,10 @@ public class FlowCleanupJob extends TracedQuartzJob {
         flowStatCache.cleanOldCacheEntries(runningFlows.getRunningFlowIdsSnapshot());
     }
 
-    public void purgeFinalisedFlowLogs() throws TransactionService.TransactionExecutionException {
+    public void purgeFinalisedFlowLogs(int retentionPeriodHours) throws TransactionService.TransactionExecutionException {
         transactionService.required(() -> {
             LOGGER.debug("Cleaning finalised flowlogs");
-            int purgedFinalizedFlowLogs = flowLogService.purgeFinalizedFlowLogs();
+            int purgedFinalizedFlowLogs = flowLogService.purgeFinalizedFlowLogs(retentionPeriodHours);
             LOGGER.debug("Deleted flowlog count: {}", purgedFinalizedFlowLogs);
             LOGGER.debug("Cleaning orphan flowchainlogs");
             int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFlowChainLogs();
