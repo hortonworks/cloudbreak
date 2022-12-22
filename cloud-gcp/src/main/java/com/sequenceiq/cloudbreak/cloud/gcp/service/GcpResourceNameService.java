@@ -149,14 +149,17 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         return subnetName;
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     private String gcpGroupResourceName(Object[] parts) {
-        checkArgs(2, parts);
+        checkArgs(3, parts);
         String name;
         String stackName = String.valueOf(parts[0]);
         String groupName = String.valueOf(parts[1]);
+        String datalake = String.valueOf(parts[2]);
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(groupName));
+        name = appendPart(name, normalize(datalake));
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
