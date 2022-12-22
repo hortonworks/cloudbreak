@@ -14,7 +14,6 @@ base:
     - ntp
     - postgresql.root-certs
     - sshd
-    - modifyproxy
 
   'G@roles:ad_member and G@os_family:RedHat':
     - match: compound
