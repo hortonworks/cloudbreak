@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -48,6 +49,7 @@ public class FlowChains {
     @Inject
     private FlowChainLogService flowChainLogService;
 
+    @Lazy
     @Inject
     private FlowStatCache flowStatCache;
 
