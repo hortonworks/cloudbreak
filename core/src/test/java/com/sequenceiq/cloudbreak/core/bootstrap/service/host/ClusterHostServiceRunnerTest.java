@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -389,6 +390,21 @@ class ClusterHostServiceRunnerTest {
         assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn3", node.getHostname())));
         assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
+    }
+
+    @Test
+    void testRedeployGatewayCertificate() throws CloudbreakOrchestratorException {
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("gateway3"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
+        List<GatewayConfig> gwConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
+        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
+
+        setupMocksForRunClusterServices();
+        underTest.redeployGatewayCertificate(stack);
+        verify(hostOrchestrator, times(1)).initServiceRun(eq(stack), eq(gwConfigs), eq(nodes), eq(nodes), any(), any(), eq(CloudPlatform.AWS.name()));
+        verify(hostOrchestrator).runService(eq(gwConfigs), eq(nodes), any(), any());
     }
 
     @Test

@@ -373,7 +373,7 @@ public class ClusterHostServiceRunner {
             List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
             SaltConfig saltConfig = createSaltConfig(stackDto, grainsProperties);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getStack().getId(), stackDto.getCluster().getId());
-            hostOrchestrator.uploadGatewayPillar(gatewayConfigs, allNodes, exitCriteriaModel, saltConfig);
+            hostOrchestrator.initServiceRun(stackDto, gatewayConfigs, allNodes, reachableNodes, saltConfig, exitCriteriaModel, stackDto.getCloudPlatform());
             hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
