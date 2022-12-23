@@ -3,15 +3,20 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -44,6 +49,9 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
     @Inject
     private AwsCloudFunctionality cloudFunctionality;
 
+    @Inject
+    private AwsCloudProvider awsCloudProvider;
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak, and freeipa with cloudformation",
@@ -55,15 +63,23 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         sdxDatabaseRequest.setCreate(false);
 
+        NetworkRequest networkRequest = new NetworkRequest();
+        AwsNetworkParameters params = new AwsNetworkParameters();
+        networkRequest.setAws(params);
+        params.setVpcId(awsCloudProvider.getVpcId());
+
+
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
-                .withReportClusterLogs()
-                .given(freeIpa, FreeIpaTestDto.class)
+                .withReportClusterLogs();
+        FreeIpaTestDto freeipa = testContext.given(freeIpa, FreeIpaTestDto.class)
+                .withNetwork(networkRequest)
                 .withTelemetry("telemetry")
                 .withVariant("AWS")
-                .withUpgradeCatalogAndImage()
-                .when(freeIpaTestClient.create(), key(freeIpa))
+                .withUpgradeCatalogAndImage();
+        freeipa.getRequest().getInstanceGroups().stream().forEach(igr -> igr.getNetwork().getAws().setSubnetIds(List.of()));
+        freeipa.when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .then(freeIpaCloudFromationStackDoesExist())
                 .given(SdxTestDto.class)
