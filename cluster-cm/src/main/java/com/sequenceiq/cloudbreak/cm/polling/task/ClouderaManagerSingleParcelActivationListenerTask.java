@@ -1,20 +1,16 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Set;
 
-import com.cloudera.api.swagger.ParcelResourceApi;
-import com.cloudera.api.swagger.client.ApiClient;
-import com.cloudera.api.swagger.client.ApiException;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 
-public class ClouderaManagerSingleParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerSingleParcelActivationListenerTask extends AbstractClouderaManagerParcelListenerTask {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerSingleParcelActivationListenerTask.class);
+    private static final Set<ParcelStatus> ACTIVATED_STATUSES = Set.of(ParcelStatus.ACTIVATED);
 
     private final ClouderaManagerProduct product;
 
@@ -25,21 +21,23 @@ public class ClouderaManagerSingleParcelActivationListenerTask extends AbstractC
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
-        ApiClient apiClient = pollerObject.getApiClient();
-        ParcelResourceApi parcelResourceApi = clouderaManagerApiPojoFactory.getParcelResourceApi(apiClient);
-        String parcelStatus = getParcelStatus(pollerObject, parcelResourceApi);
-        if (ParcelStatus.ACTIVATED.name().equals(parcelStatus)) {
-            LOGGER.debug("{} parcel is activated.", product.getName());
-            return true;
-        } else {
-            LOGGER.debug("{} [{}] parcel is not yet activated. Current status: {}.", product.getName(), product.getVersion(), parcelStatus);
-            return false;
-        }
+    protected String getClusterName(ClouderaManagerCommandPollerObject pollerObject) {
+        return pollerObject.getStack().getName();
     }
 
-    private String getParcelStatus(ClouderaManagerCommandPollerObject pollerObject, ParcelResourceApi parcelResourceApi) throws ApiException {
-        return parcelResourceApi.readParcel(pollerObject.getStack().getName(), product.getName(), product.getVersion()).getStage();
+    @Override
+    protected String getProduct() {
+        return product.getName();
+    }
+
+    @Override
+    protected String getVersion() {
+        return product.getVersion();
+    }
+
+    @Override
+    protected Set<ParcelStatus> getExpectedParcelStatuses() {
+        return ACTIVATED_STATUSES;
     }
 
     @Override
