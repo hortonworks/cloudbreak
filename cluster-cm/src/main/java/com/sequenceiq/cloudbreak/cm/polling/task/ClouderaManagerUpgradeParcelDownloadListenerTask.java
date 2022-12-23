@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Set;
 
-import com.cloudera.api.swagger.ParcelResourceApi;
-import com.cloudera.api.swagger.client.ApiClient;
+import org.apache.commons.io.FileUtils;
+
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelState;
@@ -16,16 +14,17 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 
-public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractClouderaManagerParcelListenerTask {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerUpgradeParcelDownloadListenerTask.class);
+    private static final Set<ParcelStatus> DOWNLOADED_STATUSES = Set.of(
+            ParcelStatus.DOWNLOADED,
+            ParcelStatus.DISTRIBUTED,
+            ParcelStatus.DISTRIBUTING,
+            ParcelStatus.ACTIVATED,
+            ParcelStatus.ACTIVATING
+    );
 
-    private ParcelResource parcelResource;
-
-    public ClouderaManagerUpgradeParcelDownloadListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            ClusterEventService clusterEventService) {
-        super(clouderaManagerApiPojoFactory, clusterEventService);
-    }
+    private final ParcelResource parcelResource;
 
     public ClouderaManagerUpgradeParcelDownloadListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
             ClusterEventService clusterEventService, ParcelResource parcelResource) {
@@ -34,21 +33,23 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
+    protected String getClusterName(ClouderaManagerCommandPollerObject pollerObject) {
+        return parcelResource.getClusterName();
+    }
 
-        ApiParcel apiParcel = getApiParcel(pollerObject);
-        String parcelStage = apiParcel.getStage();
+    @Override
+    protected String getProduct() {
+        return parcelResource.getProduct();
+    }
 
-        if (!ParcelStatus.DOWNLOADED.name().equals(parcelStage)
-                && !ParcelStatus.DISTRIBUTED.name().equals(parcelStage)
-                && !ParcelStatus.DISTRIBUTING.name().equals(parcelStage)
-                && !ParcelStatus.ACTIVATED.name().equals(parcelStage)
-                && !ParcelStatus.ACTIVATING.name().equals(parcelStage)) {
-            LOGGER.warn("Expected parcel status is {}, received status is: {}", ParcelStatus.DOWNLOADED.name(), parcelStage);
-            return false;
-        } else {
-            return true;
-        }
+    @Override
+    protected String getVersion() {
+        return parcelResource.getVersion();
+    }
+
+    @Override
+    protected Set<ParcelStatus> getExpectedParcelStatuses() {
+        return DOWNLOADED_STATUSES;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
         // and the total number of bytes needed to be downloaded respectively.
         String baseMessage = "Operation timed out. Failed to download parcel in time.";
         try {
-            ApiParcel apiParcel = getApiParcel(pollerObject);
+            ApiParcel apiParcel = getApiParcel(pollerObject, parcelResource.getClusterName(), parcelResource.getProduct(), parcelResource.getVersion());
             ApiParcelState parcelState = apiParcel.getState();
             String progress = FileUtils.byteCountToDisplaySize(parcelState.getProgress().toBigInteger());
             String totalProgress = FileUtils.byteCountToDisplaySize(parcelState.getTotalProgress().toBigInteger());
@@ -66,12 +67,6 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
         } catch (ApiException e) {
             throw new ClouderaManagerOperationFailedException(baseMessage);
         }
-    }
-
-    private ApiParcel getApiParcel(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
-        ApiClient apiClient = pollerObject.getApiClient();
-        ParcelResourceApi parcelResourceApi = clouderaManagerApiPojoFactory.getParcelResourceApi(apiClient);
-        return parcelResourceApi.readParcel(parcelResource.getClusterName(), parcelResource.getProduct(), parcelResource.getVersion());
     }
 
     @Override
