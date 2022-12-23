@@ -46,8 +46,6 @@ public class AzurePrivateEndpointValidatorTest {
 
     private static final String EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
 
-    private static final String EXISTING_AKS_PRIVATE_DNS_ZONE_ID = "existingAksPrivateDnsZoneId";
-
     @Mock
     private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
 
@@ -177,7 +175,7 @@ public class AzurePrivateEndpointValidatorTest {
     void testCheckNewPrivateDnsZoneWhenExistingDnsZone() {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         EnvironmentDto environmentDto = getEnvironmentDto(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
-        AzureParams azureParams = getAzureParams(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID, null);
+        AzureParams azureParams = getAzureParams(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID);
 
         underTest.checkNewPrivateDnsZone(validationResultBuilder, environmentDto, getNetworkDto(azureParams));
 
@@ -202,13 +200,13 @@ public class AzurePrivateEndpointValidatorTest {
     }
 
     @Test
-    void testCheckExistingServicePrivateDnsZoneWhenNoExistingDnsZonesProvided() {
+    void testCheckExistingPrivateDnsZoneWhenNoExistingDnsZonesProvided() {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         EnvironmentDto environmentDto = getEnvironmentDto(null, ResourceGroupUsagePattern.USE_SINGLE);
         NetworkDto networkDto = getNetworkDto(getAzureParams(), ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT);
-        when(azureExistingPrivateDnsZonesService.hasNoExistingServiceZones(networkDto)).thenReturn(true);
+        when(azureExistingPrivateDnsZonesService.hasNoExistingZones(networkDto)).thenReturn(true);
 
-        underTest.checkExistingServicePrivateDnsZone(validationResultBuilder, environmentDto, networkDto);
+        underTest.checkExistingPrivateDnsZone(validationResultBuilder, environmentDto, networkDto);
 
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(azureClientService, never()).getClient(any());
@@ -216,13 +214,13 @@ public class AzurePrivateEndpointValidatorTest {
     }
 
     @Test
-    void testCheckExistingServicePrivateDnsZoneWhenNotPrivateEndpoint() {
+    void testCheckExistingPrivateDnsZoneWhenNotPrivateEndpoint() {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        AzureParams azureParams = getAzureParams(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID, null);
+        AzureParams azureParams = getAzureParams(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID);
         NetworkDto networkDto = getNetworkDto(azureParams, ServiceEndpointCreation.DISABLED);
-        when(azureExistingPrivateDnsZonesService.hasNoExistingServiceZones(networkDto)).thenReturn(false);
+        when(azureExistingPrivateDnsZonesService.hasNoExistingZones(networkDto)).thenReturn(false);
 
-        underTest.checkExistingServicePrivateDnsZone(validationResultBuilder, new EnvironmentDto(), networkDto);
+        underTest.checkExistingPrivateDnsZone(validationResultBuilder, new EnvironmentDto(), networkDto);
 
         assertTrue(validationResultBuilder.build().hasError());
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
@@ -231,60 +229,29 @@ public class AzurePrivateEndpointValidatorTest {
     }
 
     @Test
-    void testCheckExistingServicePrivateDnsZoneWhenPrivateEndpoint() {
+    void testCheckExistingPrivateDnsZoneWhenPrivateEndpoint() {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        AzureParams azureParams = getAzureParams(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID, null);
+        AzureParams azureParams = getAzureParams(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID);
         NetworkDto networkDto = getNetworkDto(azureParams);
-        when(azureExistingPrivateDnsZonesService.hasNoExistingServiceZones(networkDto)).thenReturn(false);
+        when(azureExistingPrivateDnsZonesService.hasNoExistingZones(networkDto)).thenReturn(false);
 
-        underTest.checkExistingServicePrivateDnsZone(validationResultBuilder, new EnvironmentDto(), networkDto);
+        underTest.checkExistingPrivateDnsZone(validationResultBuilder, new EnvironmentDto(), networkDto);
 
         assertFalse(validationResultBuilder.build().hasError());
         verify(credentialToCloudCredentialConverter).convert(any());
         verify(azureClientService).getClient(any());
-        verify(azureExistingPrivateDnsZoneValidatorService).validate(any(), any(), any(), any(), eq(validationResultBuilder));
-    }
-
-    @Test
-    void testCheckExistingRegisteredOnlyPrivateDnsZoneWhenNoRegisteredOnlyZones() {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        AzureParams azureParams = getAzureParams(null, null);
-        NetworkDto networkDto = getNetworkDto(azureParams);
-        when(azureExistingPrivateDnsZonesService.hasNoExistingRegisteredOnlyZones(networkDto)).thenReturn(true);
-
-        underTest.checkExistingRegisteredOnlyPrivateDnsZone(validationResultBuilder, new EnvironmentDto(), networkDto);
-
-        assertFalse(validationResultBuilder.build().hasError());
-        verify(credentialToCloudCredentialConverter, never()).convert(any());
-        verify(azureClientService, never()).getClient(any());
-        verify(azureExistingPrivateDnsZoneValidatorService, never()).validate(any(), any(), any(), any(), any());
-    }
-
-    @Test
-    void testCheckExistingRegisteredOnlyPrivateDnsZoneWhenExistingRegisteredDnsZoneProvided() {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        AzureParams azureParams = getAzureParams(null, EXISTING_AKS_PRIVATE_DNS_ZONE_ID);
-        NetworkDto networkDto = getNetworkDto(azureParams);
-        when(azureExistingPrivateDnsZonesService.hasNoExistingRegisteredOnlyZones(networkDto)).thenReturn(false);
-
-        underTest.checkExistingRegisteredOnlyPrivateDnsZone(validationResultBuilder, new EnvironmentDto(), networkDto);
-
-        assertFalse(validationResultBuilder.build().hasError());
-        verify(credentialToCloudCredentialConverter).convert(any());
-        verify(azureClientService).getClient(any());
-        verify(azureExistingPrivateDnsZoneValidatorService).validate(any(), any(), any(), any(), eq(validationResultBuilder));
+        verify(azureExistingPrivateDnsZoneValidatorService).validate(any(), any(), any(), any(), any());
     }
 
     private AzureParams getAzureParams() {
-        return getAzureParams(null, null);
+        return getAzureParams(null);
     }
 
-    private AzureParams getAzureParams(String databasePrivateDnsZoneId, String aksPrivateDnsZoneId) {
+    private AzureParams getAzureParams(String databasePrivateDnsZoneId) {
         return AzureParams.builder()
                 .withNetworkId(NETWORK_ID)
                 .withResourceGroupName("networkResourceGroupName")
                 .withDatabasePrivateDnsZoneId(databasePrivateDnsZoneId)
-                .withAksPrivateDnsZoneId(aksPrivateDnsZoneId)
                 .build();
     }
 
