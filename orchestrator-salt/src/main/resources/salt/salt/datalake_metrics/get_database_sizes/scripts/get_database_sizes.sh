@@ -36,14 +36,15 @@ errorExit() {
 
 runPSQLCommand() {
   CMD=$1
-  psql --host="$PSQL_HOST" --port="$PSQL_PORT" --dbname="postgres" \
+  DB=$2
+  psql --host="$PSQL_HOST" --port="$PSQL_PORT" --dbname="$DB" \
     --username="$PSQL_USERNAME" -c "$CMD" -At 2> >(doLog)
 }
 
 doesDatabaseExist() {
   DESIRED_DB=$1
   doLog "Checking the existence of database ${DESIRED_DB}"
-  FOUND_DB=$(runPSQLCommand "SELECT datname FROM pg_catalog.pg_database WHERE datname = '${DESIRED_DB}';")
+  FOUND_DB=$(runPSQLCommand "SELECT datname FROM pg_catalog.pg_database WHERE datname = '${DESIRED_DB}';" "postgres")
   if [[ "$FOUND_DB" != "$DESIRED_DB" ]]; then
     doLog "Database ${DESIRED_DB} does not exist! Skipping it for this process."
     return 1
@@ -59,7 +60,7 @@ getDataSizesForDatabases() {
   for DB in $DATABASES; do
     TRIMMED_DB=$(echo "$DB" | tr -d '"')
     if doesDatabaseExist "$TRIMMED_DB" ; then
-      CUR_DB_SIZE=$(runPSQLCommand "SELECT pg_database_size('${TRIMMED_DB}');")
+      CUR_DB_SIZE=$(runPSQLCommand "select sum(pg_table_size(quote_ident(tablename)::regclass)) from pg_tables where schemaname not in ('pg_catalog','information_schema');" "$TRIMMED_DB")
       RESULT="${RESULT}${DB}:${CUR_DB_SIZE},"
       doLog "Size of database ${DB} is ${CUR_DB_SIZE} bytes."
     fi
