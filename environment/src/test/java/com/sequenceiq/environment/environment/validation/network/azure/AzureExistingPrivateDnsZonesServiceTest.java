@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneRegistrationEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -19,69 +17,29 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @ExtendWith(MockitoExtension.class)
 public class AzureExistingPrivateDnsZonesServiceTest {
 
-    private static final String POSTGRES_PRIVATE_DNS_ZONE_ID = "postgresPrivateDnsZoneId";
-
-    private static final String AKS_PRIVATE_DNS_ZONE_ID = "aksPrivateDnsZoneId";
-
     private final AzureExistingPrivateDnsZonesService underTest = new AzureExistingPrivateDnsZonesService();
 
     @Test
-    void testGetExistingServiceZonesWhenPostgresPresent() {
-        NetworkDto networkDto = getNetworkDto(POSTGRES_PRIVATE_DNS_ZONE_ID, null);
+    void testGetExistingZonesWhenPostgresPresent() {
+        NetworkDto networkDto = getNetworkDto("postgresPrivateDnsZoneId");
 
-        Map<AzurePrivateDnsZoneServiceEnum, String> existingZones = underTest.getExistingServiceZones(networkDto);
+        Map<AzurePrivateDnsZoneServiceEnum, String> existingZones = underTest.getExistingZones(networkDto);
 
-        assertEquals(POSTGRES_PRIVATE_DNS_ZONE_ID, existingZones.get(AzurePrivateDnsZoneServiceEnum.POSTGRES));
+        assertEquals("postgresPrivateDnsZoneId", existingZones.get(AzurePrivateDnsZoneServiceEnum.POSTGRES));
     }
 
     @Test
-    void testGetExistingServiceZonesWhenPostgresNotPresent() {
-        NetworkDto networkDto = getNetworkDto(null, null);
+    void testGetExistingZonesWhenPostgresNotPresent() {
+        NetworkDto networkDto = getNetworkDto(null);
 
-        Map<AzurePrivateDnsZoneServiceEnum, String> existingZones = underTest.getExistingServiceZones(networkDto);
-
-        assertThat(existingZones).isEmpty();
-    }
-
-    @Test
-    void testGetExistingServiceZonesAsDescriptorsWhenPostgresPresent() {
-        NetworkDto networkDto = getNetworkDto(POSTGRES_PRIVATE_DNS_ZONE_ID, null);
-
-        Map<AzurePrivateDnsZoneDescriptor, String> existingZones = underTest.getExistingServiceZonesAsDescriptors(networkDto);
-
-        assertEquals(POSTGRES_PRIVATE_DNS_ZONE_ID, existingZones.get(AzurePrivateDnsZoneServiceEnum.POSTGRES));
-    }
-
-    @Test
-    void testGetExistingServiceZonesAsDescriptorsWhenPostgresNotPresent() {
-        NetworkDto networkDto = getNetworkDto(null, null);
-
-        Map<AzurePrivateDnsZoneDescriptor, String> existingZones = underTest.getExistingServiceZonesAsDescriptors(networkDto);
-
-        assertThat(existingZones).isEmpty();
-    }
-
-    @Test
-    void testGetExistingRegisteredOnlyZonesAsDescriptorsWhenAksPresent() {
-        NetworkDto networkDto = getNetworkDto(null, AKS_PRIVATE_DNS_ZONE_ID);
-
-        Map<AzurePrivateDnsZoneDescriptor, String> existingZones = underTest.getExistingRegisteredOnlyZonesAsDescriptors(networkDto);
-
-        assertEquals(AKS_PRIVATE_DNS_ZONE_ID, existingZones.get(AzurePrivateDnsZoneRegistrationEnum.AKS));
-    }
-
-    @Test
-    void testGetExistingRegisteredOnlyZonesAsDescriptorsWhenAksNotPresent() {
-        NetworkDto networkDto = getNetworkDto(null, null);
-
-        Map<AzurePrivateDnsZoneDescriptor, String> existingZones = underTest.getExistingRegisteredOnlyZonesAsDescriptors(networkDto);
+        Map<AzurePrivateDnsZoneServiceEnum, String> existingZones = underTest.getExistingZones(networkDto);
 
         assertThat(existingZones).isEmpty();
     }
 
     @Test
     void testGetServicesWithExistingZonesWhenPostgresWithExistingPrivateDnsZone() {
-        NetworkDto networkDto = getNetworkDto(POSTGRES_PRIVATE_DNS_ZONE_ID, null);
+        NetworkDto networkDto = getNetworkDto("postgresPrivateDnsZoneId");
 
         Set<AzurePrivateDnsZoneServiceEnum> servicesWithPrivateDnsZones = underTest.getServicesWithExistingZones(networkDto);
 
@@ -91,7 +49,7 @@ public class AzureExistingPrivateDnsZonesServiceTest {
 
     @Test
     void testGetServicesWithExistingZonesWhenNoServicesWithExistingPrivateDnsZone() {
-        NetworkDto networkDto = getNetworkDto(null, null);
+        NetworkDto networkDto = getNetworkDto(null);
 
         Set<AzurePrivateDnsZoneServiceEnum> servicesWithPrivateDnsZones = underTest.getServicesWithExistingZones(networkDto);
 
@@ -100,7 +58,7 @@ public class AzureExistingPrivateDnsZonesServiceTest {
 
     @Test
     void testGetServiceNamesWithExistingZonesWhenPostgresWithExistingPrivateDnsZone() {
-        NetworkDto networkDto = getNetworkDto(POSTGRES_PRIVATE_DNS_ZONE_ID, null);
+        NetworkDto networkDto = getNetworkDto("postgresPrivateDnsZoneId");
 
         Set<String> servicesWithPrivateDnsZones = underTest.getServiceNamesWithExistingZones(networkDto);
 
@@ -110,29 +68,18 @@ public class AzureExistingPrivateDnsZonesServiceTest {
 
     @Test
     void testGetServiceNamesWithExistingZonesWhenNoServicesWithExistingPrivateDnsZone() {
-        NetworkDto networkDto = getNetworkDto(null, null);
+        NetworkDto networkDto = getNetworkDto(null);
 
         Set<String> servicesWithPrivateDnsZones = underTest.getServiceNamesWithExistingZones(networkDto);
 
         assertThat(servicesWithPrivateDnsZones).isEmpty();
     }
 
-    @Test
-    void testGetExistingRegisteredOnlyZonesAsDescriptors() {
-        NetworkDto networkDto = getNetworkDto(null, AKS_PRIVATE_DNS_ZONE_ID);
-
-        Set<String> servicesWithPrivateDnsZones = underTest.getServiceNamesWithExistingZones(networkDto);
-
-        assertThat(servicesWithPrivateDnsZones).isEmpty();
-
-    }
-
-    private NetworkDto getNetworkDto(String postgresPrivateDnsZoneId, String aksPrivateDnsZoneId) {
+    private NetworkDto getNetworkDto(String postgresPrivateDnsZoneId) {
         return NetworkDto.builder()
                 .withAzure(
                         AzureParams.builder()
                                 .withDatabasePrivateDnsZoneId(postgresPrivateDnsZoneId)
-                                .withAksPrivateDnsZoneId(aksPrivateDnsZoneId)
                                 .build()
                 )
                 .build();
