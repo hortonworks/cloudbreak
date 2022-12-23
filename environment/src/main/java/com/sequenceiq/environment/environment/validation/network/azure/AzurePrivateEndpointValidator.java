@@ -89,9 +89,8 @@ public class AzurePrivateEndpointValidator {
         }
     }
 
-    public void checkExistingServicePrivateDnsZone(ValidationResult.ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
-            NetworkDto networkDto) {
-        if (azureExistingPrivateDnsZonesService.hasNoExistingServiceZones(networkDto)) {
+    public void checkExistingPrivateDnsZone(ValidationResult.ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto, NetworkDto networkDto) {
+        if (azureExistingPrivateDnsZonesService.hasNoExistingZones(networkDto)) {
             LOGGER.debug("No existing private DNS zones are used, nothing to do.");
             return;
         }
@@ -103,22 +102,8 @@ public class AzurePrivateEndpointValidator {
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environmentDto.getCredential());
             AzureClient azureClient = azureClientService.getClient(cloudCredential);
             azureExistingPrivateDnsZoneValidatorService.validate(azureClient, networkDto.getAzure().getResourceGroupName(), networkDto.getAzure().getNetworkId(),
-                    azureExistingPrivateDnsZonesService.getExistingServiceZonesAsDescriptors(networkDto), resultBuilder);
+                    azureExistingPrivateDnsZonesService.getExistingZones(networkDto), resultBuilder);
         }
-    }
-
-    public void checkExistingRegisteredOnlyPrivateDnsZone(ValidationResult.ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
-            NetworkDto networkDto) {
-        if (azureExistingPrivateDnsZonesService.hasNoExistingRegisteredOnlyZones(networkDto)) {
-            LOGGER.debug("No existing private DNS zones are used, nothing to do.");
-            return;
-        }
-
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environmentDto.getCredential());
-        AzureClient azureClient = azureClientService.getClient(cloudCredential);
-        azureExistingPrivateDnsZoneValidatorService.validate(azureClient, networkDto.getAzure().getResourceGroupName(), networkDto.getAzure().getNetworkId(),
-                azureExistingPrivateDnsZonesService.getExistingRegisteredOnlyZonesAsDescriptors(networkDto), resultBuilder);
-
     }
 
     public void checkNewPrivateDnsZone(ValidationResult.ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto, NetworkDto networkDto) {
