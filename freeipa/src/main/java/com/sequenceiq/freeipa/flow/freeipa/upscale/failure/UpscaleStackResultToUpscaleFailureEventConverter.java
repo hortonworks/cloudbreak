@@ -3,6 +3,8 @@ package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
@@ -16,7 +18,8 @@ public class UpscaleStackResultToUpscaleFailureEventConverter implements Payload
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         UpscaleStackResult result = (UpscaleStackResult) payload;
-        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Adding instances", Set.of(), Map.of(),
+        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Adding instances", Set.of(),
+                StringUtils.isNotEmpty(result.getStatusReason()) ? Map.of("statusReason", result.getStatusReason()) : Map.of(),
                 new Exception("Payload failed: " + payload));
         return event;
     }
