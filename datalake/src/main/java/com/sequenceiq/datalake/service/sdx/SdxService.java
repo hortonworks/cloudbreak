@@ -12,7 +12,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -1224,33 +1223,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw new BadRequestException(String.format("Can not find external database for Data Lake, but it was requested: %s. Please use force delete.",
                     sdxCluster.getClusterName()));
         }
-        Collection<StackViewV4Response> attachedDistroXClusters = Collections.emptyList();
-        try {
-            attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
-        } catch (Exception ex) {
-            if (!forced) {
-                throw ex;
-            }
-        }
-
-        // If there are no attached data hubs, we can just return from this function. Nothing else to check.
-        if (attachedDistroXClusters.isEmpty()) {
-            return;
-        }
-
-        Collection<StackViewV4Response> runningDistroXClusters = attachedDistroXClusters.stream()
-                .filter(cluster -> !cluster.getStatus().isStopped()).collect(Collectors.toList());
-
-        if (!runningDistroXClusters.isEmpty()) {
-            throw new BadRequestException(String.format("The following Data Hub cluster(s) must be stopped before attempting SDX deletion [%s].",
-                    runningDistroXClusters.stream().map(StackViewV4Response::getName).collect(Collectors.joining(", "))));
-        }
-
-        // If we reach here, it means that all the DistroX clusters are stopped. We will allow SDX delete if and only if
-        // the "force" option is used.
-        if (!forced) {
-            throw new BadRequestException(String.format("The following stopped Data Hubs clusters(s) must be terminated " +
-                            "before SDX deleting [%s]. Use --force to skip this check.",
+        Collection<StackViewV4Response> attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
+        if (!attachedDistroXClusters.isEmpty()) {
+            throw new BadRequestException(String.format("The following Data Hub(s) cluster(s) must be terminated " +
+                            "before deletion of SDX cluster: [%s].",
                     attachedDistroXClusters.stream().map(StackViewV4Response::getName).collect(Collectors.joining(", "))));
         }
     }
