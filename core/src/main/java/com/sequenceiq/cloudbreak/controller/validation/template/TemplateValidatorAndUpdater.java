@@ -118,7 +118,7 @@ public class TemplateValidatorAndUpdater {
                     }
                 }
                 if (vmType == null) {
-                    validationBuilder.error(getInvalidVmTypeErrorMessage(value.getInstanceType(), platform.value()));
+                    validationBuilder.error(getInvalidVmTypeErrorMessage(value.getInstanceType(), platform.value(), stack.getRegion()));
                 }
             }
 
@@ -270,13 +270,13 @@ public class TemplateValidatorAndUpdater {
         return volumeParameterType != VolumeParameterType.EPHEMERAL || value != null;
     }
 
-    private String getInvalidVmTypeErrorMessage(String instanceType, String platform) {
-        String baseMsg = "Our platform currently not supporting the '%s' instance type for '%s'.";
+    private String getInvalidVmTypeErrorMessage(String instanceType, String platform, String region) {
+        String baseMsg = "Our platform currently not supporting the '%s' instance type for '%s' in %s.";
         if (isEmpty(supportedVmTypesDocPageLink)) {
-            return String.format(baseMsg, instanceType, platform);
+            return String.format(baseMsg, instanceType, platform, region);
         }
-        return String.format("Our platform currently not supporting the '%s' instance type for '%s'." +
-                " You can find the supported types here: %s", instanceType, platform, supportedVmTypesDocPageLink);
+        return String.format("Our platform currently not supporting the '%s' instance type for '%s' in %s." +
+                " You can find the supported types here: %s", instanceType, platform, region, supportedVmTypesDocPageLink);
     }
 
 }
