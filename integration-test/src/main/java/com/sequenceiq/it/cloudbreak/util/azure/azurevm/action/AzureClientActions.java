@@ -22,6 +22,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
+import com.microsoft.azure.management.compute.VirtualMachines;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -66,11 +67,18 @@ public class AzureClientActions {
                 .onInstances(instanceIds)
                 .withInstanceAction(id -> {
                     String resourceGroup = getResourceGroupName(clusterName, id);
-                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-                    LOGGER.info("Before deleting, vm {} power state is {}", id, vm.powerState());
-                    return azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, id)
-                            .doOnError(throwable -> Log.error(LOGGER, "Error when deleting instance {}: {}", id, throwable))
-                            .subscribeOn(Schedulers.io());
+                    VirtualMachines virtualMachines = azure.virtualMachines();
+                    if (virtualMachines != null) {
+                        VirtualMachine vm = virtualMachines.getByResourceGroup(resourceGroup, id);
+                        LOGGER.info("Before deleting, vm {} power state is {}", id, vm.powerState());
+                        return virtualMachines.deleteByResourceGroupAsync(resourceGroup, id)
+                                .doOnError(throwable -> Log.error(LOGGER, "Error when deleting instance {}: {}", id, throwable))
+                                .subscribeOn(Schedulers.io());
+                    } else {
+                        String message = format("Azure instance list was null for clustername %s and instanceids %s.", clusterName, instanceIds);
+                        LOGGER.error(message);
+                        throw new TestFailException(message);
+                    }
                 })
                 .withInstanceStatusCheck(id -> {
                     String resourceGroup = getResourceGroupName(clusterName, id);
