@@ -22,6 +22,7 @@ base:
   'G@roles:ipa_member and G@os_family:RedHat':
     - match: compound
     - sssd.ipa
+    - faillock
 
   'G@roles:manager_upgrade and G@roles:manager_server':
     - match: compound
