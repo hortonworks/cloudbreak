@@ -51,6 +51,7 @@ public class OperationDescriptions {
         public static final String REPAIR_CLUSTER_IN_WORKSPACE = "repairs the stack by name in workspace";
         public static final String REPAIR_CLUSTER_IN_WORKSPACE_INTERNAL = "repairs the stack by name in workspace, internal only";
         public static final String UPGRADE_CLUSTER_IN_WORKSPACE = "upgrades the stack by name in workspace";
+        public static final String UPGRADE_OS_IN_WORKSPACE = "Upgrades the cluster OS by name and upgrades sets internal";
         public static final String UPGRADE_CLUSTER_IN_WORKSPACE_INTERNAL = "upgrades the stack by name in workspace, internal only";
         public static final String RECOVER_CLUSTER_IN_WORKSPACE_INTERNAL = "recovers the stack by name in workspace, internal only";
         public static final String REFRESH_RECIPES_IN_WORKSPACE = "refresh recipes on the cluster by name in workspace";
