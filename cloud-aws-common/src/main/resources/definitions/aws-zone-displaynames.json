@@ -17,6 +17,10 @@
       "displayName": "EU (Ireland)"
     },
     {
+      "name": "eu-south-2",
+      "displayName": "EU (Spain)"
+    },
+    {
       "name": "eu-north-1",
       "displayName": "EU (Stockholm)"
     },
