@@ -117,7 +117,7 @@ class AwsUpdateServiceTest {
         CloudResource cf = CloudResource.builder()
                 .withName("cf")
                 .withType(ResourceType.CLOUDFORMATION_STACK)
-                .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
 
         underTest.updateUserData(ac, stack, List.of(cf), userData);

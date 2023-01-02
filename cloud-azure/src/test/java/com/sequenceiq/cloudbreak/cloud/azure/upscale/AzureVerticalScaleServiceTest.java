@@ -147,7 +147,7 @@ public class AzureVerticalScaleServiceTest {
                 .withStatus(status)
                 .withType(resourceType)
                 .withInstanceId(instanceId)
-                .withParams(PARAMETERS)
+                .withParameters(PARAMETERS)
                 .build();
     }
 }
