@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import static com.sequenceiq.periscope.utils.MockStackResponseGenerator.getBasicMockStackResponse;
+import static com.sequenceiq.periscope.utils.MockStackResponseGenerator.getMockStackResponseWithDependentHostGroup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,8 +13,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,9 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -40,6 +37,7 @@ import com.sequenceiq.periscope.monitor.event.ClusterStatusSyncEvent;
 import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DependentHostGroupsService;
+import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterStatusSyncHandlerTest {
@@ -67,6 +65,9 @@ class ClusterStatusSyncHandlerTest {
     @Mock
     private ClouderaManagerCommunicator cmCommunicator;
 
+    @Mock
+    private StackResponseUtils stackResponseUtils;
+
     @InjectMocks
     private ClusterStatusSyncHandler underTest;
 
@@ -74,9 +75,7 @@ class ClusterStatusSyncHandlerTest {
     void testOnApplicationEventWhenCBStatusDeleted() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(Status.DELETE_COMPLETED));
-        when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.DELETE_COMPLETED));
         when(clusterService.countByEnvironmentCrn("testEnvironmentCrn")).thenReturn(2);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
@@ -93,9 +92,7 @@ class ClusterStatusSyncHandlerTest {
         cluster.setMachineUserCrn("testMachineUserCrn");
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(clusterService.countByEnvironmentCrn("testEnvironmentCrn")).thenReturn(1);
-        when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(Status.DELETE_COMPLETED));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.DELETE_COMPLETED));
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -110,9 +107,7 @@ class ClusterStatusSyncHandlerTest {
     void testOnApplicationEventWhenCBStatusStoppedAndPeriscopeClusterRunning() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(Status.STOPPED));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.STOPPED));
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -125,9 +120,7 @@ class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.SUSPENDED);
         cluster.setState(ClusterState.SUSPENDED);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(Status.STOPPED));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.STOPPED));
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -139,10 +132,9 @@ class ClusterStatusSyncHandlerTest {
     void testOnApplicationEventWhenCBStatusRunningAndPeriscopeClusterRunning() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(true);
         when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
-        when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(Status.AVAILABLE));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.AVAILABLE));
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -154,9 +146,8 @@ class ClusterStatusSyncHandlerTest {
     void testOnApplicationEventWhenCBStatusRunningAndPeriscopeClusterStopped() {
         Cluster cluster = getACluster(ClusterState.SUSPENDED);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(Status.AVAILABLE));
-        when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.AVAILABLE));
+        when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(true);
         when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
@@ -169,9 +160,7 @@ class ClusterStatusSyncHandlerTest {
     void testOnApplicationEventWhenCBStatusUnreachable() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(Status.UNREACHABLE));
-        when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.UNREACHABLE));
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -183,9 +172,7 @@ class ClusterStatusSyncHandlerTest {
     void testOnApplicationEventWhenCBStatusNodeFailure() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(Status.NODE_FAILURE));
-        when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.NODE_FAILURE));
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -210,9 +197,7 @@ class ClusterStatusSyncHandlerTest {
     void testOnApplicationEventWhenCBStatusNotAvailable() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(null));
-        when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(null));
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -227,10 +212,11 @@ class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(Status.AVAILABLE));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.AVAILABLE));
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
         when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
+        when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(true);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -245,10 +231,11 @@ class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponse(Status.AVAILABLE));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.AVAILABLE));
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getUndefinedDependentHostGroupResponse("compute"));
         when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
+        when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(true);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -262,8 +249,10 @@ class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponseWithDependentHostGroup(Status.AVAILABLE,
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE,
                 Set.of("gateway1"), InstanceStatus.SERVICES_UNHEALTHY));
+        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
+                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
 
@@ -278,8 +267,10 @@ class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponseWithDependentHostGroup(Status.AVAILABLE,
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE,
                 Set.of("master", "gateway1"), InstanceStatus.SERVICES_UNHEALTHY));
+        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
+                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
 
@@ -294,11 +285,14 @@ class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.SUSPENDED);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponseWithDependentHostGroup(Status.AVAILABLE, Set.of("master", "gateway1"),
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE, Set.of("master", "gateway1"),
                 InstanceStatus.SERVICES_HEALTHY));
+        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
+                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
         when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
+        when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(true);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -311,11 +305,14 @@ class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponseWithDependentHostGroup(Status.NODE_FAILURE, Set.of("master", "gateway1"),
-                InstanceStatus.SERVICES_HEALTHY));
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.NODE_FAILURE,
+                Set.of("master", "gateway1"), InstanceStatus.SERVICES_HEALTHY));
+        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
+                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
         when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
+        when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(true);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -328,11 +325,33 @@ class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponseWithDependentHostGroup(Status.AVAILABLE, Set.of("master", "gateway1"),
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE, Set.of("master", "gateway1"),
                 InstanceStatus.SERVICES_HEALTHY));
+        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
+                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
         when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(false);
+        when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(true);
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+
+        verify(clusterService).setState(AUTOSCALE_CLUSTER_ID, ClusterState.SUSPENDED);
+        verify(cloudbreakCommunicator).getByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
+    @Test
+    void testOnApplicationEventWhenStopStartScalingEnabledAndDependentHostsHealthyButPrimaryGatewayUnhealthy() {
+        Cluster cluster = getACluster(ClusterState.RUNNING);
+        cluster.setStopStartScalingEnabled(Boolean.TRUE);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE, Set.of("master", "gateway1"),
+                InstanceStatus.SERVICES_HEALTHY));
+        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
+                anyString())).thenCallRealMethod();
+        when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
+                .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
+        when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(false);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -345,8 +364,10 @@ class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponseWithDependentHostGroup(Status.STOP_IN_PROGRESS, Set.of("master",
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.STOP_IN_PROGRESS, Set.of("master",
                 "gateway1"), InstanceStatus.SERVICES_HEALTHY));
+        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
+                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
 
@@ -359,10 +380,12 @@ class ClusterStatusSyncHandlerTest {
     @Test
     void testOnApplicationEventWhenStopStartScalingEnabledAndCBStatusUpdateInProgressAndCmAndDependentHostGroupsHealthy() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
-        cluster.setStopStartScalingEnabled(Boolean.FALSE);
+        cluster.setStopStartScalingEnabled(Boolean.TRUE);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getStackResponseWithDependentHostGroup(Status.UPDATE_IN_PROGRESS, Set.of("master",
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.UPDATE_IN_PROGRESS, Set.of("master",
                 "gateway1"), InstanceStatus.SERVICES_HEALTHY));
+        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
+                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
 
@@ -370,35 +393,6 @@ class ClusterStatusSyncHandlerTest {
 
         verify(clusterService).setState(AUTOSCALE_CLUSTER_ID, ClusterState.SUSPENDED);
         verify(cloudbreakCommunicator).getByCrn(CLOUDBREAK_STACK_CRN);
-    }
-
-    private StackV4Response getStackResponse(Status clusterStatus) {
-        StackV4Response stackResponse = new StackV4Response();
-        stackResponse.setStatus(clusterStatus);
-        ClusterV4Response clusterResponse = new ClusterV4Response();
-        clusterResponse.setStatus(clusterStatus);
-        stackResponse.setCluster(clusterResponse);
-        return stackResponse;
-    }
-
-    private StackV4Response getStackResponseWithDependentHostGroup(Status clusterStatus,
-            Set<String> dependentHostGroups, InstanceStatus instanceStatus) {
-        StackV4Response stackResponse = new StackV4Response();
-        List<InstanceGroupV4Response> instanceGroupV4Responses = new ArrayList<>();
-        dependentHostGroups.forEach(hg -> {
-            InstanceMetaDataV4Response metaData = new InstanceMetaDataV4Response();
-            metaData.setDiscoveryFQDN("fqdn-" + hg);
-            metaData.setInstanceId("test_instanceid" + hg);
-            metaData.setInstanceGroup(hg);
-            metaData.setInstanceStatus(instanceStatus);
-            instanceGroupV4Responses.add(createInstanceGroupResponseFromMetaData(hg, Set.of(metaData)));
-        });
-        stackResponse.setInstanceGroups(instanceGroupV4Responses);
-        stackResponse.setStatus(clusterStatus);
-        ClusterV4Response clusterResponse = new ClusterV4Response();
-        clusterResponse.setStatus(clusterStatus);
-        stackResponse.setCluster(clusterResponse);
-        return stackResponse;
     }
 
     private DependentHostGroupsV4Response getDependentHostGroupsResponse(String policyHostGroup, String... dependentHostGroups) {
@@ -441,13 +435,5 @@ class ClusterStatusSyncHandlerTest {
         clusterPertain.setTenant(TEST_TENANT);
         cluster.setClusterPertain(clusterPertain);
         return cluster;
-    }
-
-    private InstanceGroupV4Response createInstanceGroupResponseFromMetaData(String hostGroupName,
-            Set<InstanceMetaDataV4Response> instanceMetaDataV4Responses) {
-        InstanceGroupV4Response instanceGroup = new InstanceGroupV4Response();
-        instanceGroup.setName(hostGroupName);
-        instanceGroup.setMetadata(instanceMetaDataV4Responses);
-        return instanceGroup;
     }
 }
