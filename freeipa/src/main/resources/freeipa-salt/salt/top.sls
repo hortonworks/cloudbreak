@@ -32,6 +32,7 @@ base:
              - nodestatus
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
+             - faillock
 
            'roles:freeipa_replica':
              - match: grain
@@ -42,6 +43,7 @@ base:
              - nodestatus
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
+             - faillock
 
            'roles:freeipa_primary_replacement':
              - match: grain
@@ -53,6 +55,7 @@ base:
              - nodestatus
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
+             - faillock
 
            'recipes:post-cluster-install':
              - match: grain
