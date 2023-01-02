@@ -96,7 +96,7 @@ public class DistroXUpgradeService {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         Crn crn = Crn.safeFromString(stack.getResourceCrn());
         ImageChangeDto imageChangeDto = deteremineImageChangeDto(nameOrCrn, imageId, stack, crn.getAccountId());
-        return upgradeService.osUpgradeByUpgradeSets(stack, imageChangeDto, upgradeSets);
+        return upgradeService.upgradeOsByUpgradeSets(stack, imageChangeDto, upgradeSets);
     }
 
     private ImageChangeDto deteremineImageChangeDto(NameOrCrn nameOrCrn, String imageId, Stack stack, String accountId) {

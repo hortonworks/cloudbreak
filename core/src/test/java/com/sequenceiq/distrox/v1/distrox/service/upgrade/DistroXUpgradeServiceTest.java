@@ -366,7 +366,7 @@ class DistroXUpgradeServiceTest {
                 internalUpgradeSettingsArgumentCaptor.capture(), eq(true));
         assertFalse(internalUpgradeSettingsArgumentCaptor.getValue().isSkipValidations());
         ArgumentCaptor<ImageChangeDto> imageChangeDtoCaptor = ArgumentCaptor.forClass(ImageChangeDto.class);
-        verify(upgradeService, times(1)).osUpgradeByUpgradeSets(eq(stack), imageChangeDtoCaptor.capture(), eq(upgradeSets));
+        verify(upgradeService, times(1)).upgradeOsByUpgradeSets(eq(stack), imageChangeDtoCaptor.capture(), eq(upgradeSets));
         assertEquals("imageID", imageChangeDtoCaptor.getValue().getImageId());
         assertEquals("imageID", imageChangeRequestArgumentCaptor.getValue().getImageId());
     }
