@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
@@ -23,15 +26,19 @@ public class MockStackResponseGenerator {
 
         InstanceMetaDataV4Response master1 = new InstanceMetaDataV4Response();
         master1.setDiscoveryFQDN("master1");
+        master1.setInstanceType(InstanceMetadataType.GATEWAY_PRIMARY);
+        master1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         master1.setInstanceId("test_instanceid" + "master1");
         instanceGroupV4Responses.add(instanceGroup("master", awsTemplate(), Set.of(master1)));
 
         InstanceMetaDataV4Response worker1 = new InstanceMetaDataV4Response();
         worker1.setDiscoveryFQDN("worker1");
         worker1.setInstanceId("test_instanceid" + "worker1");
+        worker1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         InstanceMetaDataV4Response worker2 = new InstanceMetaDataV4Response();
         worker2.setDiscoveryFQDN("worker2");
         worker2.setInstanceId("test_instanceid" + "worker2");
+        worker2.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         instanceGroupV4Responses.add(instanceGroup("worker", awsTemplate(), Set.of(worker1, worker2)));
 
         Set fqdnToInstanceIds = new HashSet();
@@ -68,14 +75,18 @@ public class MockStackResponseGenerator {
         InstanceMetaDataV4Response master1 = new InstanceMetaDataV4Response();
         master1.setDiscoveryFQDN("master1");
         master1.setInstanceId("test_instanceid" + "master1");
+        master1.setInstanceType(InstanceMetadataType.GATEWAY_PRIMARY);
+        master1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         instanceGroupV4Responses.add(instanceGroup("master", awsTemplate(), Set.of(master1)));
 
         InstanceMetaDataV4Response worker1 = new InstanceMetaDataV4Response();
         worker1.setDiscoveryFQDN("worker1");
         worker1.setInstanceId("test_instanceid" + "worker1");
+        worker1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         InstanceMetaDataV4Response worker2 = new InstanceMetaDataV4Response();
         worker2.setDiscoveryFQDN("worker2");
         worker2.setInstanceId("test_instanceid" + "worker2");
+        worker2.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         instanceGroupV4Responses.add(instanceGroup("worker", awsTemplate(), Set.of(worker1, worker2)));
 
         Set<InstanceMetaDataV4Response> instanceMetadata = new HashSet<>();
@@ -105,6 +116,44 @@ public class MockStackResponseGenerator {
         mockResponse.setNodeCount(instanceGroupV4Responses.stream().flatMap(ig -> ig.getMetadata().stream()).collect(Collectors.toSet()).size());
         mockResponse.setCloudPlatform(CloudPlatform.AWS);
         return mockResponse;
+    }
+
+    public static StackV4Response getBasicMockStackResponse(Status clusterStatus) {
+        StackV4Response stackResponse = new StackV4Response();
+        stackResponse.setStatus(clusterStatus);
+        ClusterV4Response clusterResponse = new ClusterV4Response();
+        clusterResponse.setStatus(clusterStatus);
+        stackResponse.setCluster(clusterResponse);
+        return stackResponse;
+    }
+
+    public static StackV4Response getMockStackResponseWithDependentHostGroup(Status clusterStatus,
+            Set<String> dependentHostGroups, InstanceStatus instanceStatus) {
+        StackV4Response stackResponse = new StackV4Response();
+        List<InstanceGroupV4Response> instanceGroupV4Responses = new ArrayList<>();
+        dependentHostGroups.forEach(hg -> {
+            InstanceMetaDataV4Response metaData = new InstanceMetaDataV4Response();
+            metaData.setDiscoveryFQDN("fqdn-" + hg);
+            metaData.setInstanceId("test_instanceid" + hg);
+            metaData.setInstanceGroup(hg);
+            metaData.setInstanceStatus(instanceStatus);
+            metaData.setInstanceType(InstanceMetadataType.GATEWAY_PRIMARY);
+            instanceGroupV4Responses.add(createInstanceGroupResponseFromMetaData(hg, Set.of(metaData)));
+        });
+        stackResponse.setInstanceGroups(instanceGroupV4Responses);
+        stackResponse.setStatus(clusterStatus);
+        ClusterV4Response clusterResponse = new ClusterV4Response();
+        clusterResponse.setStatus(clusterStatus);
+        stackResponse.setCluster(clusterResponse);
+        return stackResponse;
+    }
+
+    public static InstanceGroupV4Response createInstanceGroupResponseFromMetaData(String hostGroupName,
+            Set<InstanceMetaDataV4Response> instanceMetaDataV4Responses) {
+        InstanceGroupV4Response instanceGroup = new InstanceGroupV4Response();
+        instanceGroup.setName(hostGroupName);
+        instanceGroup.setMetadata(instanceMetaDataV4Responses);
+        return instanceGroup;
     }
 
     public static InstanceTemplateV4Response awsTemplate() {

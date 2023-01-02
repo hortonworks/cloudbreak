@@ -1,5 +1,9 @@
 package com.sequenceiq.periscope.utils;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
+import static java.util.stream.Collectors.toSet;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,7 +16,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateHostTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -23,9 +27,14 @@ public class StackResponseUtils {
 
     public Optional<InstanceMetaDataV4Response> getNotTerminatedPrimaryGateways(StackV4Response stackResponse) {
         return stackResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream()).filter(
-                im -> im.getInstanceType() == InstanceMetadataType.GATEWAY_PRIMARY
+                im -> im.getInstanceType() == GATEWAY_PRIMARY
                         && im.getInstanceStatus() != InstanceStatus.TERMINATED
         ).findFirst();
+    }
+
+    public boolean primaryGatewayHealthy(StackV4Response stackResponse) {
+        return stackResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream())
+                .anyMatch(im -> GATEWAY_PRIMARY.equals(im.getInstanceType()) && SERVICES_HEALTHY.equals(im.getInstanceStatus()));
     }
 
     public Map<String, String> getCloudInstanceIdsForHostGroup(StackV4Response stackResponse, String hostGroup) {
@@ -42,7 +51,7 @@ public class StackResponseUtils {
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(hostGroup))
                 .flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
-                .filter(instanceMetaData -> InstanceStatus.SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
+                .filter(instanceMetaData -> SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
                 .map(InstanceMetaDataV4Response::getInstanceId)
                 .collect(Collectors.toList());
     }
@@ -91,5 +100,16 @@ public class StackResponseUtils {
                                 " HostGroup '%s', Cluster '%s'", serviceType, roleType, hostGroupName, stackResponse.getCrn())));
 
         return roleReferenceName;
+    }
+
+    public Set<String> getUnhealthyDependentHosts(StackV4Response stackResponse, DependentHostGroupsV4Response dependentHostGroupsResponse,
+            String policyHostGroup) {
+        return stackResponse.getInstanceGroups().stream()
+                .flatMap(ig -> ig.getMetadata().stream())
+                .filter(im -> dependentHostGroupsResponse.getDependentHostGroups().getOrDefault(policyHostGroup, Set.of())
+                        .contains(im.getInstanceGroup()))
+                .filter(im -> !InstanceStatus.SERVICES_HEALTHY.equals(im.getInstanceStatus()))
+                .map(InstanceMetaDataV4Response::getDiscoveryFQDN)
+                .collect(toSet());
     }
 }

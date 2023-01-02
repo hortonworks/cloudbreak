@@ -18,9 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -31,6 +29,7 @@ import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DependentHostGroupsService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
+import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 @Component
 public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStatusSyncEvent> {
@@ -45,6 +44,9 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
     @Inject
     private CloudbreakCommunicator cloudbreakCommunicator;
+
+    @Inject
+    private StackResponseUtils stackResponseUtils;
 
     @Inject
     private ClouderaManagerCommunicator cmCommunicator;
@@ -65,17 +67,17 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         LoggingUtils.buildMdcContext(cluster);
 
         StackV4Response stackResponse = cloudbreakCommunicator.getByCrn(cluster.getStackCrn());
-        Set<String> policyHostGroups = extractPolicyHostGroups(cluster);
-        DependentHostGroupsV4Response dependentHostGroupsResponse = dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(cluster.getStackCrn(),
-                policyHostGroups);
 
-        boolean clusterAvailable = determineClusterAvailability(cluster, stackResponse, dependentHostGroupsResponse, policyHostGroups) &&
-                cmCommunicator.isClusterManagerRunning(cluster);
+        boolean clusterAvailable = determineClusterAvailability(cluster, stackResponse) && determineCmAvailability(cluster, stackResponse);
 
         LOGGER.info("Computed clusterAvailable: {}", clusterAvailable);
         LOGGER.info("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", stackResponse, cluster.getStackCrn(), clusterAvailable);
 
         updateClusterState(cluster, stackResponse, clusterAvailable);
+    }
+
+    private boolean determineCmAvailability(Cluster cluster, StackV4Response stackResponse) {
+        return stackResponseUtils.primaryGatewayHealthy(stackResponse) && cmCommunicator.isClusterManagerRunning(cluster);
     }
 
     private void updateClusterState(Cluster cluster, StackV4Response stackResponse, boolean clusterAvailable) {
@@ -96,26 +98,27 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         }
     }
 
-    private boolean determineClusterAvailability(Cluster cluster, StackV4Response stackResponse, DependentHostGroupsV4Response dependentHostGroupsResponse,
-            Set<String> policyHostGroups) {
-        if (!Boolean.TRUE.equals(cluster.isStopStartScalingEnabled()) || undefinedDependencyPresent(dependentHostGroupsResponse, policyHostGroups)) {
+    private boolean determineClusterAvailability(Cluster cluster, StackV4Response stackResponse) {
+        if (!Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
             return Optional.ofNullable(stackResponse.getStatus()).map(Status::isAvailable).orElse(false);
+        } else {
+            Set<String> policyHostGroups = extractPolicyHostGroups(cluster);
+            DependentHostGroupsV4Response dependentHostGroupsResponse =
+                    dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(cluster.getStackCrn(), policyHostGroups);
+
+            if (undefinedDependencyPresent(dependentHostGroupsResponse, policyHostGroups)) {
+                return Optional.ofNullable(stackResponse.getStatus()).map(Status::isAvailable).orElse(false);
+            }
+
+            boolean dependentHostsUnhealthy = policyHostGroups.stream().anyMatch(hg -> dependentHostsUnhealthy(dependentHostGroupsResponse, stackResponse, hg));
+
+            return !(stackDeletionInProgress(stackResponse) || stackStatusInProgress(stackResponse) || stackStopped(stackResponse)
+                    || dependentHostsUnhealthy);
         }
-
-        boolean dependentHostsUnhealthy = policyHostGroups.stream().anyMatch(hg -> dependentHostsUnhealthy(dependentHostGroupsResponse, stackResponse, hg));
-
-        return !(stackDeletionInProgress(stackResponse) || stackStatusInProgress(stackResponse) || stackStopped(stackResponse)
-                || dependentHostsUnhealthy);
     }
 
     private boolean dependentHostsUnhealthy(DependentHostGroupsV4Response dependentHostGroupsResponse, StackV4Response stackResponse, String policyHostGroup) {
-        Set<String> unhealthyDependentHosts = stackResponse.getInstanceGroups().stream()
-                .flatMap(ig -> ig.getMetadata().stream())
-                .filter(im -> dependentHostGroupsResponse.getDependentHostGroups().getOrDefault(policyHostGroup, Set.of())
-                        .contains(im.getInstanceGroup()))
-                .filter(im -> !InstanceStatus.SERVICES_HEALTHY.equals(im.getInstanceStatus()))
-                .map(InstanceMetaDataV4Response::getDiscoveryFQDN)
-                .collect(toSet());
+        Set<String> unhealthyDependentHosts = stackResponseUtils.getUnhealthyDependentHosts(stackResponse, dependentHostGroupsResponse, policyHostGroup);
         logUnhealthyHostNamesIfPresent(unhealthyDependentHosts, policyHostGroup);
         return !unhealthyDependentHosts.isEmpty();
     }
