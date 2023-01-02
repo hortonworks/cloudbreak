@@ -43,7 +43,7 @@ dependencies {
   implementation 'com.microsoft.azure.marketplaceordering.v2015_06_01:azure-mgmt-marketplaceordering:1.0.0-beta'
 
   constraints {
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.25.6'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.27'
   }
 
   testImplementation project(path: ':core-model', configuration: 'tests')
