@@ -43,6 +43,10 @@
     "zoneid": "eu-central-1",
     "defaultvm": "i2.4xlarge"
   },
+  "EU (Spain)": {
+    "zoneid": "eu-south-2",
+    "defaultvm": "i2.4xlarge"
+  },
   "EU (Ireland)": {
     "zoneid": "eu-west-1",
     "defaultvm": "i2.4xlarge"

@@ -17,6 +17,14 @@
       ]
     },
     {
+      "name": "eu-south-2",
+      "zones": [
+        "eu-south-2a",
+        "eu-south-2b",
+        "eu-south-2c"
+      ]
+    },
+    {
       "name": "eu-north-1",
       "zones": [
         "eu-north-1a",

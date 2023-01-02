@@ -29,6 +29,13 @@
       "k8sSupported": true
     },
     {
+      "name": "eu-south-2",
+      "displayName": "EU (Spain)",
+      "latitude": "41.6500",
+      "longitude": "-0.875673",
+      "k8sSupported": true
+    },
+    {
       "name": "eu-west-3",
       "displayName": "EU (Paris)",
       "latitude": "48.86669293",
