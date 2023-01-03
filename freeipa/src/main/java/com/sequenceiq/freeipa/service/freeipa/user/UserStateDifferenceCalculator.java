@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -106,8 +108,8 @@ public class UserStateDifferenceCalculator {
     }
 
     public ImmutableSet<String> calculateUsersToRemove(UmsUsersState umsState, UsersState ipaState) {
-        Collection<String> umsStateUsers = umsState.getUsersState().getGroupMembership().get(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP);
-        Collection<String> ipaStateUsers = ipaState.getGroupMembership().get(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP);
+        Collection<String> umsStateUsers = umsState.getUsersState().getGroupMembership().get(CDP_USERSYNC_INTERNAL_GROUP);
+        Collection<String> ipaStateUsers = ipaState.getGroupMembership().get(CDP_USERSYNC_INTERNAL_GROUP);
 
         ImmutableSet<String> usersToRemove = ImmutableSet.copyOf(ipaStateUsers.stream()
                 .filter(ipaUser -> !umsStateUsers.contains(ipaUser))
@@ -154,7 +156,9 @@ public class UserStateDifferenceCalculator {
     public ImmutableMultimap<String, String> calculateGroupMembershipToRemove(UmsUsersState umsState, UsersState ipaState) {
         Multimap<String, String> groupMembershipToRemove = HashMultimap.create();
         ipaState.getGroupMembership().forEach((group, user) -> {
-            if (!FreeIpaChecks.IPA_UNMANAGED_GROUPS.contains(group) && !umsState.getUsersState().getGroupMembership().containsEntry(group, user)) {
+            if (!FreeIpaChecks.IPA_UNMANAGED_GROUPS.contains(group) &&
+                    ipaState.getGroupMembership().containsEntry(CDP_USERSYNC_INTERNAL_GROUP, user) &&
+                    !umsState.getUsersState().getGroupMembership().containsEntry(group, user)) {
                 LOGGER.debug("removing user : {} to group : {}", user, group);
                 groupMembershipToRemove.put(group, user);
             }

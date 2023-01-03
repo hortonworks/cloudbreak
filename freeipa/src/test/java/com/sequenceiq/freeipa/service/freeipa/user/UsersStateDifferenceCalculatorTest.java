@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -90,20 +91,20 @@ class UsersStateDifferenceCalculatorTest {
         UmsUsersState umsUsersState = new UmsUsersState.Builder()
                 .setUsersState(new UsersState.Builder()
                         .addUser(userUms)
-                        .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userUms.getName())
+                        .addMemberToGroup(CDP_USERSYNC_INTERNAL_GROUP, userUms.getName())
                         .addUser(userBoth)
-                        .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userBoth.getName())
+                        .addMemberToGroup(CDP_USERSYNC_INTERNAL_GROUP, userBoth.getName())
                         .build())
                 .build();
 
         UsersState ipaUsersState = new UsersState.Builder()
                 .addUser(userBoth)
-                .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userBoth.getName())
+                .addMemberToGroup(CDP_USERSYNC_INTERNAL_GROUP, userBoth.getName())
                 .addUser(userIPA)
-                .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userIPA.getName())
+                .addMemberToGroup(CDP_USERSYNC_INTERNAL_GROUP, userIPA.getName())
                 .addUser(userIPA2)
                 .addUser(userProtected)
-                .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userProtected.getName())
+                .addMemberToGroup(CDP_USERSYNC_INTERNAL_GROUP, userProtected.getName())
                 .build();
 
         ImmutableSet<String> usersToRemove = new UserStateDifferenceCalculator().calculateUsersToRemove(umsUsersState, ipaUsersState);
@@ -312,6 +313,7 @@ class UsersStateDifferenceCalculatorTest {
         String userUms = "userUms";
         String userBoth = "userBoth";
         String userIPA = "userIPA";
+        String userNonUsersync = "userNonUsersync";
 
         UmsUsersState umsUsersState = new UmsUsersState.Builder()
                 .setUsersState(new UsersState.Builder()
@@ -322,8 +324,11 @@ class UsersStateDifferenceCalculatorTest {
 
         UsersState ipaUsersState = new UsersState.Builder()
                 .addMemberToGroup(group, userBoth)
+                .addMemberToGroup(CDP_USERSYNC_INTERNAL_GROUP, userBoth)
                 .addMemberToGroup(group, userIPA)
-                .addMemberToGroup(unmanagedGroup, userUms)
+                .addMemberToGroup(CDP_USERSYNC_INTERNAL_GROUP, userIPA)
+                .addMemberToGroup(unmanagedGroup, userIPA)
+                .addMemberToGroup(group, userNonUsersync)
                 .build();
 
         ImmutableMultimap<String, String> groupMembershipsToRemove = new UserStateDifferenceCalculator()
@@ -332,10 +337,12 @@ class UsersStateDifferenceCalculatorTest {
         // group that exists only in IPA will be removed
         assertTrue(groupMembershipsToRemove.get(group).contains(userIPA));
         // unmanaged groups will be ignored
-        assertFalse(groupMembershipsToRemove.get(unmanagedGroup).contains(userUms));
-        // groups that exist in both or only ums will not be added
+        assertFalse(groupMembershipsToRemove.get(unmanagedGroup).contains(userIPA));
+        // groups that exist in both or only ums will not be removed
         assertFalse(groupMembershipsToRemove.get(group).contains(userBoth));
         assertFalse(groupMembershipsToRemove.get(group).contains(userUms));
+        // user that is not in CDP_USERSYNC_INTERNAL_GROUP will not be removed
+        assertFalse(groupMembershipsToRemove.get(group).contains(userNonUsersync));
     }
 
     @Test
@@ -425,7 +432,7 @@ class UsersStateDifferenceCalculatorTest {
     private void addUserWithState(String username, UsersState.Builder userStateBuilder, FmsUser.State state) {
         userStateBuilder
                 .addUser(new FmsUser().withName(username).withState(state))
-                .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, username);
+                .addMemberToGroup(CDP_USERSYNC_INTERNAL_GROUP, username);
     }
 
     @Test
