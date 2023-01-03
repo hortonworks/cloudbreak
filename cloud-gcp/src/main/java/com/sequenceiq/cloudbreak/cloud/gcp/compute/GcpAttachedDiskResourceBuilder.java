@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
 import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -180,7 +181,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
             resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
             resourceNotifier.notifyUpdate(resource, auth.getCloudContext());
-            throw new InterruptedException("Resource will be preserved for later reattachment.");
+            throw new PreserveResourceException("Resource will be preserved for later reattachment.");
         }
 
         List<String> operations = new ArrayList<>();

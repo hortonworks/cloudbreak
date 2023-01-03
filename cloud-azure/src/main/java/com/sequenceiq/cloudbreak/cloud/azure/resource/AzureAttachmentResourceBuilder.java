@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -95,8 +96,8 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
     }
 
     @Override
-    public CloudResource delete(AzureContext context, AuthenticatedContext auth, CloudResource resource) throws InterruptedException {
-        throw new InterruptedException("Resource will be preserved for later reattachment.");
+    public CloudResource delete(AzureContext context, AuthenticatedContext auth, CloudResource resource) throws PreserveResourceException {
+        throw new PreserveResourceException("Resource will be preserved for later reattachment.");
     }
 
     @Override
