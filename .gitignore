@@ -13,6 +13,7 @@ gradle
 *.ipr
 *.iws
 .shelf/
+.run/
 
 .jpb/
 .nb-gradle-properties
