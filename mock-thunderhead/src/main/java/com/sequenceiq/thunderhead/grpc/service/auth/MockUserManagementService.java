@@ -20,7 +20,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_VERTICAL_SCALE;
@@ -878,7 +877,6 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2_JUMPGATE));
         }
         if (verticalScaleEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_AWS_VERTICAL_SCALE));
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_VERTICAL_SCALE));
             builder.addEntitlements(createEntitlement(CDP_CB_GCP_VERTICAL_SCALE));
         }

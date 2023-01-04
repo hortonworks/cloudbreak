@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.verification.VerificationMode;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -61,65 +59,27 @@ class EnvironmentVerticalScaleServiceTest {
     @Mock
     private EnvironmentService mockEnvironmentService;
 
-    @Mock
-    private EntitlementService mockEntitlementService;
-
     private EnvironmentVerticalScaleService underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new EnvironmentVerticalScaleService(mockEnvironmentReactorFlowManager, mockEnvironmentService, mockEntitlementService);
+        underTest = new EnvironmentVerticalScaleService(mockEnvironmentReactorFlowManager, mockEnvironmentService);
         lenient().when(mockEnvironmentDto.getAccountId()).thenReturn(ACCOUNT);
         lenient().when(mockEnvironmentDto.getName()).thenReturn(ENV_NAME);
         lenient().when(mockEnvironmentService.getByCrnAndAccountId(ENV_CRN, ACCOUNT)).thenReturn(mockEnvironmentDto);
         lenient().when(mockEnvironmentService.getByNameAndAccountId(ENV_NAME, ACCOUNT)).thenReturn(mockEnvironmentDto);
     }
 
-    @Test
-    void testVerticalScaleByCrnWhenEntitlementIsNotGranted() {
-        when(mockEntitlementService.awsVerticalScaleEnabled(ACCOUNT)).thenReturn(NOT_ENTITLED_FOR_VERTICAL_SCALE);
-
-        BadRequestException expectedException = assertThrows(BadRequestException.class,
-                () -> doAs(USER_CRN, () -> underTest.verticalScaleByCrn(ENV_CRN, TEST_VERTICAL_SCALE_REQUEST)));
-
-        assertEquals(EXCEPTION_MSG_UPON_NOT_GRANTED_ENTITLEMENT, expectedException.getMessage());
-
-        verify(mockEntitlementService, CALLED_ONCE).awsVerticalScaleEnabled(ACCOUNT);
-        verifyNoMoreInteractions(mockEntitlementService);
-        verify(mockEnvironmentService, CALLED_ONCE).getByCrnAndAccountId(ENV_CRN, ACCOUNT);
-        verifyNoMoreInteractions(mockEnvironmentService);
-        verifyNoInteractions(mockEnvironmentReactorFlowManager);
-    }
-
-    @Test
-    void testVerticalScaleByNameWhenEntitlementIsNotGranted() {
-        when(mockEntitlementService.awsVerticalScaleEnabled(ACCOUNT)).thenReturn(NOT_ENTITLED_FOR_VERTICAL_SCALE);
-
-        BadRequestException expectedException = assertThrows(BadRequestException.class,
-                () -> doAs(USER_CRN, () -> underTest.verticalScaleByName(ENV_NAME, TEST_VERTICAL_SCALE_REQUEST)));
-
-        assertEquals(EXCEPTION_MSG_UPON_NOT_GRANTED_ENTITLEMENT, expectedException.getMessage());
-
-        verify(mockEntitlementService, CALLED_ONCE).awsVerticalScaleEnabled(ACCOUNT);
-        verifyNoMoreInteractions(mockEntitlementService);
-        verify(mockEnvironmentService, CALLED_ONCE).getByNameAndAccountId(ENV_NAME, ACCOUNT);
-        verifyNoMoreInteractions(mockEnvironmentService);
-        verifyNoInteractions(mockEnvironmentReactorFlowManager);
-    }
-
     @ParameterizedTest
     @MethodSource("getInvalidStates")
-    void testVerticalScaleByCrnWhenEntitlementIsGrantedButStatusIsNotAppropriate(EnvironmentStatus status) {
+    void testVerticalScaleByCrnWhenStatusIsNotAppropriate(EnvironmentStatus status) {
         when(mockEnvironmentDto.getStatus()).thenReturn(status);
-        when(mockEntitlementService.awsVerticalScaleEnabled(ACCOUNT)).thenReturn(ENTITLED_FOR_VERTICAL_SCALE);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> doAs(USER_CRN, () -> underTest.verticalScaleByCrn(ENV_CRN, TEST_VERTICAL_SCALE_REQUEST)));
 
         assertEquals(String.format(STATUS_ISSUE_MESSAGE_FORMAT, ENV_NAME, status.name()), exception.getMessage());
 
-        verify(mockEntitlementService, CALLED_ONCE).awsVerticalScaleEnabled(ACCOUNT);
-        verifyNoMoreInteractions(mockEntitlementService);
         verify(mockEnvironmentService, CALLED_ONCE).getByCrnAndAccountId(ENV_CRN, ACCOUNT);
         verifyNoMoreInteractions(mockEnvironmentService);
         verifyNoInteractions(mockEnvironmentReactorFlowManager);
@@ -127,14 +87,11 @@ class EnvironmentVerticalScaleServiceTest {
 
     @ParameterizedTest
     @MethodSource("getValidStates")
-    void testVerticalScaleByCrnWhenEntitlementIsGranted(EnvironmentStatus status) {
+    void testVerticalScaleByCrnWhenStatusIsAppropriate(EnvironmentStatus status) {
         when(mockEnvironmentDto.getStatus()).thenReturn(status);
-        when(mockEntitlementService.awsVerticalScaleEnabled(ACCOUNT)).thenReturn(ENTITLED_FOR_VERTICAL_SCALE);
 
         doAs(USER_CRN, () -> underTest.verticalScaleByCrn(ENV_CRN, TEST_VERTICAL_SCALE_REQUEST));
 
-        verify(mockEntitlementService, CALLED_ONCE).awsVerticalScaleEnabled(ACCOUNT);
-        verifyNoMoreInteractions(mockEntitlementService);
         verify(mockEnvironmentService, CALLED_ONCE).getByCrnAndAccountId(ENV_CRN, ACCOUNT);
         verifyNoMoreInteractions(mockEnvironmentService);
         verify(mockEnvironmentReactorFlowManager, CALLED_ONCE).triggerVerticalScaleFlow(mockEnvironmentDto, USER_CRN, TEST_VERTICAL_SCALE_REQUEST);
@@ -145,12 +102,9 @@ class EnvironmentVerticalScaleServiceTest {
     @MethodSource("getValidStates")
     void testVerticalScaleByNameWhenEntitlementIsGranted(EnvironmentStatus status) {
         when(mockEnvironmentDto.getStatus()).thenReturn(status);
-        when(mockEntitlementService.awsVerticalScaleEnabled(ACCOUNT)).thenReturn(ENTITLED_FOR_VERTICAL_SCALE);
 
         doAs(USER_CRN, () -> underTest.verticalScaleByName(ENV_NAME, TEST_VERTICAL_SCALE_REQUEST));
 
-        verify(mockEntitlementService, CALLED_ONCE).awsVerticalScaleEnabled(ACCOUNT);
-        verifyNoMoreInteractions(mockEntitlementService);
         verify(mockEnvironmentService, CALLED_ONCE).getByNameAndAccountId(ENV_NAME, ACCOUNT);
         verifyNoMoreInteractions(mockEnvironmentService);
         verify(mockEnvironmentReactorFlowManager, CALLED_ONCE).triggerVerticalScaleFlow(mockEnvironmentDto, USER_CRN, TEST_VERTICAL_SCALE_REQUEST);
@@ -159,17 +113,14 @@ class EnvironmentVerticalScaleServiceTest {
 
     @ParameterizedTest
     @MethodSource("getInvalidStates")
-    void testVerticalScaleByNameWhenEntitlementIsGrantedButStatusIsNotAppropriate(EnvironmentStatus status) {
+    void testVerticalScaleByNameWhenStatusIsNotAppropriate(EnvironmentStatus status) {
         when(mockEnvironmentDto.getStatus()).thenReturn(status);
-        when(mockEntitlementService.awsVerticalScaleEnabled(ACCOUNT)).thenReturn(ENTITLED_FOR_VERTICAL_SCALE);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> doAs(USER_CRN,
                 () -> underTest.verticalScaleByName(ENV_NAME, TEST_VERTICAL_SCALE_REQUEST)));
 
         assertEquals(String.format(STATUS_ISSUE_MESSAGE_FORMAT, ENV_NAME, status.name()), exception.getMessage());
 
-        verify(mockEntitlementService, CALLED_ONCE).awsVerticalScaleEnabled(ACCOUNT);
-        verifyNoMoreInteractions(mockEntitlementService);
         verify(mockEnvironmentService, CALLED_ONCE).getByNameAndAccountId(ENV_NAME, ACCOUNT);
         verifyNoMoreInteractions(mockEnvironmentService);
         verifyNoInteractions(mockEnvironmentReactorFlowManager);
