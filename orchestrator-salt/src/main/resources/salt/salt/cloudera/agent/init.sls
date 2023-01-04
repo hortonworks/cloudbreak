@@ -24,7 +24,7 @@ install-cloudera-manager-agent:
 
 {% endif %}
 
-{%- if not salt['pkg.version']('python-psycopg2') and not salt['pkg.version']('python2-psycopg2') %}
+{%- if not salt['pkg.version']('python-psycopg2') and not salt['pkg.version']('python2-psycopg2') and not salt['pkg.version']('python38-psycopg2') %}
 install-psycopg2:
   cmd.run:
     - name: pip install psycopg2==2.7.5 --ignore-installed
