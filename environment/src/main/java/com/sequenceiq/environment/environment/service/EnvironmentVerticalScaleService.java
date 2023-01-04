@@ -3,7 +3,6 @@ package com.sequenceiq.environment.environment.service;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
@@ -17,13 +16,9 @@ public class EnvironmentVerticalScaleService {
 
     private final EnvironmentService environmentService;
 
-    private final EntitlementService entitlementService;
-
-    public EnvironmentVerticalScaleService(EnvironmentReactorFlowManager reactorFlowManager,
-        EnvironmentService environmentService, EntitlementService entitlementService) {
+    public EnvironmentVerticalScaleService(EnvironmentReactorFlowManager reactorFlowManager, EnvironmentService environmentService) {
         this.reactorFlowManager = reactorFlowManager;
         this.environmentService = environmentService;
-        this.entitlementService = entitlementService;
     }
 
     public FlowIdentifier verticalScaleByName(String name, VerticalScaleRequest updateRequest) {
@@ -39,25 +34,16 @@ public class EnvironmentVerticalScaleService {
     }
 
     private FlowIdentifier verticalScale(EnvironmentDto environment, VerticalScaleRequest updateRequest) {
-        validateEntitlements(environment);
         validateUpgrade(environment);
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return reactorFlowManager.triggerVerticalScaleFlow(environment, userCrn, updateRequest);
     }
 
-    private void validateEntitlements(EnvironmentDto environment) {
-        if (!entitlementService.awsVerticalScaleEnabled(environment.getAccountId())) {
-            throw new BadRequestException(
-                    String.format("The account is not entitled for Vertical Scaling.",
-                            environment.getName(), environment.getTunnel()));
-        }
-    }
-
     private void validateUpgrade(EnvironmentDto environment) {
         if (!environment.getStatus().isVerticalScaleAllowed()) {
             throw new BadRequestException(
-                String.format("Environment '%s' is not in a vertical scalable state. The environment state is %s", environment.getName(),
-                        environment.getStatus()));
+                    String.format("Environment '%s' is not in a vertical scalable state. The environment state is %s", environment.getName(),
+                            environment.getStatus()));
         }
     }
 
