@@ -62,6 +62,10 @@ periscope:
       enabled: true
     delete-monitor:
       enabled: true
+    cleanup-monitor:
+      enabled: true
+  scaling-activity:
+    cleanup-event-age.hours: 24
 
 cb:
   server:

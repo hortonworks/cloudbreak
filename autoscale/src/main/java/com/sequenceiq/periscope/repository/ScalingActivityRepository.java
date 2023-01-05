@@ -45,6 +45,13 @@ public interface ScalingActivityRepository extends CrudRepository<ScalingActivit
     List<ScalingActivity> findAllByClusterBetweenInterval(@Param("clusterId") Long clusterId, @Param("startTimeFrom") Date startTimeFrom,
             @Param("startTimeUntil") Date startTimeUntil);
 
+    @Query("SELECT st.id FROM ScalingActivity st WHERE st.endTime <= :endTimeBefore")
+    List<Long> findAllIdsWithEndTimeBefore(@Param("endTimeBefore") Date endTimeBefore);
+
+    @Query("SELECT st.id FROM ScalingActivity st WHERE st.activityStatus IN :statuses AND st.startTime <= :startTimeBefore")
+    List<Long> findAllIdsInActivityStatusesWithStartTimeBefore(@Param("statuses") Collection<ActivityStatus> statuses,
+            @Param("startTimeBefore") Date startTimeBefore);
+
     @Modifying
     @Query("DELETE FROM ScalingActivity st WHERE st.cluster.id = :clusterId")
     void deleteAllByCluster(@Param("clusterId") Long clusterId);

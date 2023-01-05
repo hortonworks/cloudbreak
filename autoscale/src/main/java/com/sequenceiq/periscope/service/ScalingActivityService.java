@@ -15,8 +15,11 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
@@ -28,6 +31,8 @@ import com.sequenceiq.periscope.repository.ScalingActivityRepository;
 
 @Service
 public class ScalingActivityService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScalingActivityService.class);
 
     @Inject
     private ScalingActivityRepository scalingActivityRepository;
@@ -42,6 +47,7 @@ public class ScalingActivityService {
         scalingActivity.setActivityStatus(activityStatus);
         scalingActivity.setScalingActivityReason(reason);
         scalingActivity.setStartTime(new Date(creationTimestamp));
+        LOGGER.info("Creating ScalingActivity with creation timestamp: {} for cluster: {}", creationTimestamp, cluster.getStackCrn());
         return scalingActivityRepository.save(scalingActivity);
     }
 
@@ -49,14 +55,17 @@ public class ScalingActivityService {
         ScalingActivity scalingActivity = findByCrn(activityCrn);
         scalingActivity.setFlowId(flowIdentifier.getPollableId());
         scalingActivity.setActivityStatus(activityStatus);
+        LOGGER.info("Updating ScalingActivity: {} with FlowInformation and ActivityStatus: {}", activityCrn, activityStatus);
         save(scalingActivity);
     }
 
     public ScalingActivity findByCrn(String activityCrn) {
+        LOGGER.info("Retrieving ScalingActivity by crn: {}", activityCrn);
         return scalingActivityRepository.findByActivityCrn(activityCrn).orElseThrow(notFound("ScalingActivity", activityCrn));
     }
 
     public List<ScalingActivity> findAllForCluster(Long clusterId) {
+        LOGGER.info("Retrieving all ScalingActivity for clusterId: {}", clusterId);
         return scalingActivityRepository.findAllByCluster(clusterId);
     }
 
@@ -82,12 +91,19 @@ public class ScalingActivityService {
         return scalingActivityRepository.findAllByClusterAndActivityStatusBetweenInterval(cluster.getId(), status, startTimeFrom, startTimeUntil);
     }
 
-    public void deleteScalingActivityForCluster(Long clusterId) {
-        scalingActivityRepository.deleteAllByCluster(clusterId);
+    public Set<Long> findAllInStatusesThatStartedBefore(Collection<ActivityStatus> statuses, long durationInHours) {
+        Date startTimeFrom = new Date(Instant.now().minus(durationInHours, ChronoUnit.HOURS).toEpochMilli());
+        return Sets.newConcurrentHashSet(scalingActivityRepository.findAllIdsInActivityStatusesWithStartTimeBefore(statuses, startTimeFrom));
     }
 
-    public void deleteScalingActivity(Set<Long> activityIds) {
+    public void deleteScalingActivityByIds(Set<Long> activityIds) {
+        LOGGER.info("Deleting {} scalingActivities by their Ids", activityIds.size());
         scalingActivityRepository.deleteAllById(activityIds);
+    }
+
+    public void deleteScalingActivityForCluster(Long clusterId) {
+        LOGGER.info("Deleting all scaling activity for clusterId: {}", clusterId);
+        scalingActivityRepository.deleteAllByCluster(clusterId);
     }
 
     public void save(ScalingActivity scalingActivity) {
