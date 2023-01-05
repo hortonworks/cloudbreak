@@ -166,7 +166,7 @@ dependencies {
   implementation (group: 'com.hierynomus',                name: 'sshj',                           version: '0.33.0') {
     exclude group: "net.i2p.crypto"
   }
-  implementation group: 'org.jetbrains',                 name: 'annotations',                    version: '20.1.0'
+  implementation group: 'org.jetbrains',                 name: 'annotations',                    version: '23.1.0'
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
