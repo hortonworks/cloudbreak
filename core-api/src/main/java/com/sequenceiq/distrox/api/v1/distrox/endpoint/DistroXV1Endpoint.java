@@ -32,6 +32,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST_FLOW_PROGRESS;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MODIFY_PROXY_CONFIG_INTERNAL;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RENEW_CERTIFICATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_CRN;
@@ -577,4 +578,12 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "validates if the distrox cluster is recoverable or not", nickname = "getClusterRecoverableByCrn")
     RecoveryValidationV4Response getClusterRecoverableByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+
+    @PUT
+    @Path("crn/{crn}/modify_proxy")
+    @ApiOperation(value = MODIFY_PROXY_CONFIG_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.MODIFY_PROXY_CONFIG_NOTES,
+            nickname = "modifyProxyConfigDistroXInternalV1ByCrn")
+    FlowIdentifier modifyProxyInternal(@ValidCrn(resource = {CrnResourceDescriptor.DATAHUB}) @PathParam("crn") String crn,
+            @ValidCrn(resource = {CrnResourceDescriptor.PROXY}) @QueryParam("previousProxyConfigCrn") String previousProxyConfigCrn,
+            String initiatorUserCrn);
 }

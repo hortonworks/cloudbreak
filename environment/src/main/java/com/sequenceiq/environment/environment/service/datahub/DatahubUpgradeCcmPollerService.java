@@ -40,7 +40,7 @@ public class DatahubUpgradeCcmPollerService {
             Polling.stopAfterAttempt(attempt)
                     .stopIfException(true)
                     .waitPeriodly(sleeptime, TimeUnit.SECONDS)
-                    .run(pollerProvider.upgradeCcmPoller(envId, upgradeFlows));
+                    .run(pollerProvider.multipleFlowsPoller(envId, upgradeFlows));
         } catch (PollerStoppedException e) {
             LOGGER.info("Data Hubs Upgrade CCM timed out or error happened.", e);
             throw new DatahubOperationFailedException("Data Hub upgrade of Cluster Connectivity Manager timed out or error happened: " + e.getMessage());

@@ -71,11 +71,11 @@ public class DatahubPollerProvider {
         };
     }
 
-    public AttemptMaker<Void> upgradeCcmPoller(Long envId, List<FlowIdentifier> upgradeFlows) {
-        List<FlowIdentifier> mutableFlowIds = new ArrayList<>(upgradeFlows);
+    public AttemptMaker<Void> multipleFlowsPoller(Long envId, List<FlowIdentifier> flowIdentifiers) {
+        List<FlowIdentifier> mutableFlowIds = new ArrayList<>(flowIdentifiers);
         return () -> {
             List<FlowIdentifier> remaining = new ArrayList<>();
-            List<AttemptResult<Void>> results = collectUpgradeCcmResults(mutableFlowIds, remaining, envId);
+            List<AttemptResult<Void>> results = collectFlowResults(mutableFlowIds, remaining, envId);
             mutableFlowIds.retainAll(remaining);
             return flowResultPollerEvaluator.evaluateResult(results);
         };
@@ -168,20 +168,20 @@ public class DatahubPollerProvider {
                 && cluster.getStatus().isStopped();
     }
 
-    private List<AttemptResult<Void>> collectUpgradeCcmResults(List<FlowIdentifier> mutableFlowIds, List<FlowIdentifier> remainingFlowIds, Long envId) {
+    private List<AttemptResult<Void>> collectFlowResults(List<FlowIdentifier> mutableFlowIds, List<FlowIdentifier> remainingFlowIds, Long envId) {
         if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
-            String message = "Datahub polling cancelled in inmemory store, id: " + envId;
+            String message = "Datahub flow polling cancelled in inmemory store, env id: " + envId;
             LOGGER.info(message);
             throw new PollerStoppedException(message);
         }
 
         return mutableFlowIds.stream()
-                .map(flowId -> fetchUpgradeCcmResult(remainingFlowIds, flowId))
+                .map(flowId -> fetchFlowResult(remainingFlowIds, flowId))
                 .collect(Collectors.toList());
     }
 
-    private AttemptResult<Void> fetchUpgradeCcmResult(List<FlowIdentifier> remainingFlowIds, FlowIdentifier flowId) {
-        LOGGER.debug("Flow being checked for upgrade CCM result: {}", flowId);
+    private AttemptResult<Void> fetchFlowResult(List<FlowIdentifier> remainingFlowIds, FlowIdentifier flowId) {
+        LOGGER.debug("Datahub flow being checked for result: {}", flowId);
         FlowCheckResponse flowCheckResponse;
         switch (flowId.getType()) {
             case FLOW:
@@ -200,16 +200,16 @@ public class DatahubPollerProvider {
             default:
                 throw new IllegalStateException("Unexpected Flow type: " + flowId.getType());
         }
-        AttemptResult<Void> upgradeFlowStatus = checkUpgradeCcmStatus(flowCheckResponse);
+        AttemptResult<Void> upgradeFlowStatus = checkFlowStatus(flowCheckResponse);
         if (AttemptState.FINISH != upgradeFlowStatus.getState()) {
             remainingFlowIds.add(flowId);
         }
         return upgradeFlowStatus;
     }
 
-    private AttemptResult<Void> checkUpgradeCcmStatus(FlowCheckResponse flowCheckResponse) {
+    private AttemptResult<Void> checkFlowStatus(FlowCheckResponse flowCheckResponse) {
         if (Boolean.TRUE.equals(flowCheckResponse.getLatestFlowFinalizedAndFailed())) {
-            LOGGER.error("Datahub upgrade CCM flow {} in flowchain {} failed", flowCheckResponse.getFlowChainId(), flowCheckResponse.getFlowId());
+            LOGGER.error("Datahub flow {} in flowchain {} failed", flowCheckResponse.getFlowChainId(), flowCheckResponse.getFlowId());
             return AttemptResults.justFinish();
         }
         if (Boolean.TRUE.equals(flowCheckResponse.getHasActiveFlow())) {

@@ -51,40 +51,40 @@ class DatahubUpgradeCcmPollerServiceTest {
     @Test
     void waitForUpgradeCcm() {
         AttemptMaker<Void> attemptMaker = AttemptResults::justFinish;
-        when(pollerProvider.upgradeCcmPoller(ENV_ID, flowIds)).thenReturn(attemptMaker);
+        when(pollerProvider.multipleFlowsPoller(ENV_ID, flowIds)).thenReturn(attemptMaker);
         when(multipleFlowsResultEvaluator.anyFailed(flowIds)).thenReturn(false);
         underTest.waitForUpgradeOnFlowIds(ENV_ID, flowIds);
-        verify(pollerProvider).upgradeCcmPoller(ENV_ID, flowIds);
+        verify(pollerProvider).multipleFlowsPoller(ENV_ID, flowIds);
     }
 
     @Test
     void waitForUpgradeCcmNoFlows() {
         AttemptMaker<Void> attemptMaker = AttemptResults::justFinish;
-        when(pollerProvider.upgradeCcmPoller(ENV_ID, List.of())).thenReturn(attemptMaker);
+        when(pollerProvider.multipleFlowsPoller(ENV_ID, List.of())).thenReturn(attemptMaker);
         when(multipleFlowsResultEvaluator.anyFailed(List.of())).thenReturn(false);
         underTest.waitForUpgradeOnFlowIds(ENV_ID, List.of());
-        verify(pollerProvider).upgradeCcmPoller(ENV_ID, List.of());
+        verify(pollerProvider).multipleFlowsPoller(ENV_ID, List.of());
     }
 
     @Test
     void pollerException() {
-        when(pollerProvider.upgradeCcmPoller(ENV_ID, flowIds))
+        when(pollerProvider.multipleFlowsPoller(ENV_ID, flowIds))
                 .thenReturn(() -> {
                     throw new IllegalStateException("error");
                 });
         assertThatThrownBy(() -> underTest.waitForUpgradeOnFlowIds(ENV_ID, flowIds))
                 .isInstanceOf(DatahubOperationFailedException.class);
-        verify(pollerProvider).upgradeCcmPoller(ENV_ID, flowIds);
+        verify(pollerProvider).multipleFlowsPoller(ENV_ID, flowIds);
     }
 
     @Test
     void waitForUpgradeCcmAnyFlowFailed() {
         AttemptMaker<Void> attemptMaker = AttemptResults::justFinish;
-        when(pollerProvider.upgradeCcmPoller(ENV_ID, flowIds)).thenReturn(attemptMaker);
+        when(pollerProvider.multipleFlowsPoller(ENV_ID, flowIds)).thenReturn(attemptMaker);
         when(multipleFlowsResultEvaluator.anyFailed(flowIds)).thenReturn(true);
         assertThatThrownBy(() -> underTest.waitForUpgradeOnFlowIds(ENV_ID, flowIds))
                 .isInstanceOf(DatahubOperationFailedException.class);
-        verify(pollerProvider).upgradeCcmPoller(ENV_ID, flowIds);
+        verify(pollerProvider).multipleFlowsPoller(ENV_ID, flowIds);
     }
 
     private FlowIdentifier createFlowIdentifier() {

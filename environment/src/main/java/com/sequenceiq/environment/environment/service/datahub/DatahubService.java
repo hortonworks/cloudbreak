@@ -19,6 +19,7 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class DatahubService {
@@ -105,5 +106,17 @@ public class DatahubService {
             throw new DatahubOperationFailedException(errorMessage, e);
         }
 
+    }
+
+    public FlowIdentifier modifyProxy(String datahubCrn, String previousProxyConfigCrn) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    initiatorUserCrn -> distroXV1Endpoint.modifyProxyInternal(datahubCrn, previousProxyConfigCrn, initiatorUserCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to trigger modify proxy config for Data Hub CRN '%s' due to '%s'.", datahubCrn, errorMessage);
+            LOGGER.error(message, e);
+            throw new DatahubOperationFailedException(message, e);
+        }
     }
 }

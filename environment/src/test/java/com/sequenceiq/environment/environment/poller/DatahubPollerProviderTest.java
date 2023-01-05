@@ -124,7 +124,7 @@ class DatahubPollerProviderTest {
         when(flowEndpoint.hasFlowRunningByFlowId(flowId2.getPollableId())).thenReturn(checkResponse2);
 
         List<FlowIdentifier> flows = List.of(flowId1, flowId2);
-        AttemptResult<Void> result = underTest.upgradeCcmPoller(ENV_ID, flows).process();
+        AttemptResult<Void> result = underTest.multipleFlowsPoller(ENV_ID, flows).process();
         assertThat(result.getState()).isEqualTo(expectedResult);
     }
 

@@ -91,6 +91,7 @@ public class Notes {
     public static final String RENEW_CERTIFICATE_NOTES = "Trigger a certificate renewal on the specified cluster.";
     public static final String FLOW_OPERATION_PROGRESS_NOTES = "Flow operation progress";
     public static final String DATAHUB_AUDIT_EVENTS = "Data Hub audit events";
+    public static final String MODIFY_PROXY_CONFIG_NOTES = "Trigger modify proxy config for the stack";
 
     public static final String CLUSTER_COST_NOTES = "Costs of clusters";
 

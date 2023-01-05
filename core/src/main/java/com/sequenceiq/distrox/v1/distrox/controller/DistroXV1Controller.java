@@ -737,4 +737,10 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         return stackOperations.restartClusterServices(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
     }
 
+    @Override
+    @InternalOnly
+    public FlowIdentifier modifyProxyInternal(@TenantAwareParam String crn, String previousProxyConfigCrn, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperationService.modifyProxyConfig(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), previousProxyConfigCrn);
+    }
+
 }
