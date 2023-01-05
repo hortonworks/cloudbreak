@@ -67,6 +67,28 @@ init-services-db-remote:
     - group: root
     - mode: 755
 
+{%- if postgresql.ssl_enabled == True %}
+
+/opt/salt/scripts/create_embeddeddb_certificate.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: postgres
+    - mode: 750
+    - source: salt://postgresql/scripts/create_embeddeddb_certificate.sh
+    - template: jinja
+    - context:
+        postgres_directory: {{ postgres_directory }}
+
+create_embeddeddb_certificate:
+  cmd.run:
+    - name: /opt/salt/scripts/create_embeddeddb_certificate.sh
+    - require:
+      - file: /opt/salt/scripts/create_embeddeddb_certificate.sh
+    - unless: test -f {{ postgres_directory }}/certs/postgres.cert
+
+{%- endif %}
+
 {%- endif %}
 
 {%- if salt['pillar.get']('postgres:postgres_version', '10') | int == 11 %}
