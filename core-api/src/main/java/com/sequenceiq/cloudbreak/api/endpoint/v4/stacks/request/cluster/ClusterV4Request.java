@@ -30,9 +30,10 @@ public class ClusterV4Request implements JsonEntity {
     @ApiModelProperty(hidden = true)
     private String name;
 
-    @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
+    @Size(max = 15, min = 5, message = "The length of the username has to be in the range of 5 to 15 characters")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
-            message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+            message = "The username may only contain lowercase alphanumeric characters and hyphens, has to start with a letter and end with an " +
+                    "alphanumeric character")
     @ApiModelProperty(value = StackModelDescription.USERNAME)
     private String userName;
 
@@ -40,7 +41,7 @@ public class ClusterV4Request implements JsonEntity {
             @Pattern(regexp = "^.*[a-zA-Z].*$", message = "The password should contain at least one letter."),
             @Pattern(regexp = "^.*[0-9].*$", message = "The password should contain at least one number.")
     })
-    @Size(max = 100, min = 8, message = "The length of the password has to be in range of 8 to 100")
+    @Size(max = 100, min = 8, message = "The length of the password has to be in the range of 8 to 100 characters")
     @ApiModelProperty(value = StackModelDescription.PASSWORD)
     private String password;
 
