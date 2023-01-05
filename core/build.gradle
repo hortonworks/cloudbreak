@@ -145,7 +145,7 @@ dependencyManagement {
     dependency (group: 'io.swagger',                        name: 'swagger-jersey2-jaxrs',       version: swaggerVersion) {
       exclude 'org.yaml:snakeyaml'
     }
-    dependency group: 'dnsjava',                            name: 'dnsjava',                     version: '2.1.7'
+    dependency group: 'dnsjava',                            name: 'dnsjava',                     version: '3.5.2'
 
     dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: '1.2.0.RELEASE'
     dependency group: 'org.springframework',                name: 'spring-context-support',      version: springFrameworkVersion
