@@ -72,7 +72,7 @@ dependencies {
 
   implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                          version: okhttpVersion
   implementation     group: 'com.google.code.gson',      name: 'gson',                            version: gsonVersion
-  implementation     group: 'dnsjava',                   name: 'dnsjava',                         version: '2.1.7'
+  implementation     group: 'dnsjava',                   name: 'dnsjava',                         version: '3.5.2'
   implementation     group: 'com.dyngr',                 name: 'polling',                         version: dyngrPollingVersion
   implementation     group: 'io.springfox',              name: 'springfox-boot-starter',          version: swaggerSpringFoxVersion
   implementation     ("io.swagger:swagger-jersey2-jaxrs:$swaggerVersion") {
