@@ -236,7 +236,9 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<PolicyType, String> initCBPolicyJson() {
         String resourceDefinition = resourceDefinition("cb-policy");
-        return getPolicyJson(resourceDefinition);
+        String govResourceDefinition = resourceDefinition("gov-cb-policy");
+
+        return getPolicyJson(resourceDefinition, Optional.of(govResourceDefinition));
     }
 
     private Map<PolicyType, String> initAuditPolicyJson() {
@@ -275,16 +277,28 @@ public class AwsPlatformParameters implements PlatformParameters {
     }
 
     private Map<PolicyType, String> getPolicyJson(String resourceDefinition) {
+        return getPolicyJson(resourceDefinition, Optional.empty());
+    }
+
+    private Map<PolicyType, String> getPolicyJson(String resourceDefinition, Optional<String> govResourceDefinition) {
         String minified = JsonUtil.minify(resourceDefinition);
-        if (JsonUtil.INVALID_JSON_CONTENT.equals(minified)) {
-            String message = String.format("Cannot initialize Cloudbreak's policies JSON for AWS: %s", minified);
+        String govMinified = minified;
+        if (govResourceDefinition.isPresent()) {
+            govMinified = JsonUtil.minify(govResourceDefinition.get());
+        }
+        if (JsonUtil.INVALID_JSON_CONTENT.equals(minified) || JsonUtil.INVALID_JSON_CONTENT.equals(govMinified)) {
+            String message = String.format("Cannot initialize Cloudbreak's policies JSON for AWS: %s and AWS_GOV: %s", minified, govMinified);
             LOGGER.info(message);
             throw new CloudConnectorException(message);
         }
         Map<PolicyType, String> policy = new HashMap<>();
-        policy.put(PolicyType.GOV, Base64.encodeBase64String(minified.replaceAll(":aws:", ":aws-us-gov:").getBytes()));
+        policy.put(PolicyType.GOV, Base64.encodeBase64String(tranformToGovCloud(govMinified).getBytes()));
         policy.put(PolicyType.PUBLIC, Base64.encodeBase64String(minified.getBytes()));
         return policy;
+    }
+
+    private String tranformToGovCloud(String minified) {
+        return minified.replaceAll(":aws:", ":aws-us-gov:");
     }
 
 }
