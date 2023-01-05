@@ -48,8 +48,18 @@ public class DBStackUpdaterTest {
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         Set<SslCertificateEntry> certificateEntries = new LinkedHashSet<>();
-        certificateEntries.add(new SslCertificateEntry(0, "cloudPlatform", "certPem0", X_509_CERT));
-        certificateEntries.add(new SslCertificateEntry(1, "cloudPlatform", "certPem1", X_509_CERT));
+        certificateEntries.add(new SslCertificateEntry(0,
+                "cloudkey",
+                "cloudPlatform",
+                "cloudPlatform",
+                "certPem0",
+                X_509_CERT));
+        certificateEntries.add(new SslCertificateEntry(1,
+                "cloudkey",
+                "cloudPlatform",
+                "cloudPlatform",
+                "certPem1",
+                X_509_CERT));
         Set<String> certPems = new LinkedHashSet<>();
         certPems.add("certPem0");
         certPems.add("certPem1");
@@ -74,7 +84,12 @@ public class DBStackUpdaterTest {
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         Set<SslCertificateEntry> certificateEntries = new LinkedHashSet<>();
-        certificateEntries.add(new SslCertificateEntry(0, "cloudPlatform", "certPem0", X_509_CERT));
+        certificateEntries.add(new SslCertificateEntry(0,
+                "cloudkey",
+                "cloudPlatform",
+                "cloudPlatform",
+                "certPem0",
+                X_509_CERT));
         when(dbStackService.findById(STACK_ID)).thenReturn(Optional.of(dbStack));
         when(dbStack.getSslConfig()).thenReturn(sslConfig);
         when(dbStack.getCloudPlatform()).thenReturn("cloudPlatform");
