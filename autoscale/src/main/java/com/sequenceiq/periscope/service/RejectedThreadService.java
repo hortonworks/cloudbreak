@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.periscope.model.RejectedThread;
+import com.sequenceiq.periscope.model.ScalingActivities;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 
 @Service
@@ -40,8 +41,10 @@ public class RejectedThreadService {
             rejectedThread = createOrUpdateRejectedThread(data, stackId);
         } else if (data instanceof Long) {
             rejectedThread = createOrUpdateRejectedThread(Collections.singletonMap("id", data), (Long) data);
+        } else if (data instanceof ScalingActivities) {
+            rejectedThread = createOrUpdateRejectedThread(data, ((ScalingActivities) data).getId());
         } else {
-            throw new IllegalArgumentException("The given data is not match to AutoscaleStackResponse or Long, not possible to create");
+            throw new IllegalArgumentException("The given data does not match AutoscaleStackResponse, Long or ScalingActivities, not possible to create");
         }
 
         LOGGER.debug("Rejected task: {}, count: {}", rejectedThread.getJson(), rejectedThread.getRejectedCount());
@@ -66,10 +69,12 @@ public class RejectedThreadService {
         RejectedThread removed;
         if (data instanceof AutoscaleStackV4Response) {
             removed = rejectedThreads.remove(((AutoscaleStackV4Response) data).getStackId());
+        } else if (data instanceof ScalingActivities) {
+            removed = rejectedThreads.remove(((ScalingActivities) data).getId());
         } else if (data instanceof Long) {
             removed = rejectedThreads.remove(data);
         } else {
-            throw new IllegalArgumentException("The given data is not match to AutoscaleStackResponse or Long, so not removable");
+            throw new IllegalArgumentException("The given data does not match AutoscaleStackResponse, Long or ScalingActivities so not removable");
         }
         if (removed != null) {
             LOGGER.debug("Rejected thread removed {} with count {}", removed.getJson(), removed.getRejectedCount());

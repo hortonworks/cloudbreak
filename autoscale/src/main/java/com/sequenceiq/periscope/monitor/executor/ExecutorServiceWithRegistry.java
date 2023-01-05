@@ -24,16 +24,16 @@ public class ExecutorServiceWithRegistry {
     @Qualifier("periscopeListeningScheduledExecutorService")
     private ExecutorService executorService;
 
-    public void submitIfAbsent(EvaluatorExecutor evaluatorExecutor, long clusterId) {
-        if (evaluatorExecutorRegistry.putIfAbsent(evaluatorExecutor, clusterId)) {
+    public void submitIfAbsent(EvaluatorExecutor evaluatorExecutor, long resourceId) {
+        if (evaluatorExecutorRegistry.putIfAbsent(evaluatorExecutor, resourceId)) {
             try {
                 executorService.submit(evaluatorExecutor);
             } catch (RejectedExecutionException e) {
-                evaluatorExecutorRegistry.remove(evaluatorExecutor, clusterId);
+                evaluatorExecutorRegistry.remove(evaluatorExecutor, resourceId);
                 throw e;
             }
         } else {
-            LOGGER.info("Evaluator {} is not accepted for cluster {}", evaluatorExecutor.getName(), clusterId);
+            LOGGER.info("Evaluator {} is not accepted for resource {}", evaluatorExecutor.getName(), resourceId);
         }
     }
 

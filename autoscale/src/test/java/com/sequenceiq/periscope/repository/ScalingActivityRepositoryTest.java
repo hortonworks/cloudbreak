@@ -1,11 +1,12 @@
 package com.sequenceiq.periscope.repository;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -80,7 +81,7 @@ class ScalingActivityRepositoryTest {
 
         List<ScalingActivity> result = underTest.findAllByCluster(testCluster.getId());
 
-        assertThat(result).hasSize(2).hasSameElementsAs(Arrays.asList(testScalingActivity, scalingActivity2));
+        assertThat(result).hasSize(2).hasSameElementsAs(asList(testScalingActivity, scalingActivity2));
     }
 
     @Test
@@ -116,7 +117,7 @@ class ScalingActivityRepositoryTest {
         List<ScalingActivity> result = underTest.findAllByClusterWithStartTimeAfter(testCluster.getId(),
                 new Date(now.minus(10, MINUTES).toEpochMilli()));
 
-        assertThat(result).hasSize(3).hasSameElementsAs(Arrays.asList(testScalingActivity, scalingActivity1, scalingActivity2));
+        assertThat(result).hasSize(3).hasSameElementsAs(asList(testScalingActivity, scalingActivity1, scalingActivity2));
     }
 
     @Test
@@ -159,7 +160,7 @@ class ScalingActivityRepositoryTest {
 
         List<ScalingActivity> result = underTest.findAllByClusterAndInStatuses(testCluster.getId(), statuses);
 
-        assertThat(result).hasSize(3).hasSameElementsAs(Arrays.asList(scalingActivity2, scalingActivity3, scalingActivity4));
+        assertThat(result).hasSize(3).hasSameElementsAs(asList(scalingActivity2, scalingActivity3, scalingActivity4));
     }
 
     @Test
@@ -181,7 +182,7 @@ class ScalingActivityRepositoryTest {
 
         List<ScalingActivity> result = underTest.findAllByClusterBetweenInterval(testCluster.getId(), start, end);
 
-        assertThat(result).hasSize(2).hasSameElementsAs(Arrays.asList(testScalingActivity, scalingActivity1));
+        assertThat(result).hasSize(2).hasSameElementsAs(asList(testScalingActivity, scalingActivity1));
     }
 
     @Test
@@ -207,7 +208,47 @@ class ScalingActivityRepositoryTest {
         List<ScalingActivity> undeleted = underTest.findAllByCluster(cluster.getId());
 
         assertThat(postDelete).isEmpty();
-        assertThat(undeleted).hasSize(2).hasSameElementsAs(Arrays.asList(scalingActivity3, scalingActivity4));
+        assertThat(undeleted).hasSize(2).hasSameElementsAs(asList(scalingActivity3, scalingActivity4));
+    }
+
+    @Test
+    void testFindAllThatEndedBefore() {
+        Instant now = Instant.now();
+
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                now.minus(8, MINUTES).toEpochMilli());
+        scalingActivity1.setEndTime(new Date(now.minus(5, MINUTES).toEpochMilli()));
+
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_SUCCESS,
+                now.minus(4, MINUTES).toEpochMilli());
+        scalingActivity2.setEndTime(new Date(now.minus(2, MINUTES).toEpochMilli()));
+
+        saveScalingActivity(testCluster, scalingActivity1, scalingActivity2);
+
+        List<Long> result = underTest.findAllIdsWithEndTimeBefore(new Date(now.minus(5, MINUTES).toEpochMilli()));
+
+        assertThat(result).hasSize(1).hasSameElementsAs(List.of(scalingActivity1.getId()));
+    }
+
+    @Test
+    void testFindAllIdsInStatusesThatStartedBefore() {
+        Instant now = Instant.now();
+
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.SCALING_FLOW_FAILED,
+                now.minus(20, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.SCALING_FLOW_SUCCESS,
+                now.minus(30, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_SUCCESS,
+                now.minus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity4 = createScalingActivity(testCluster, ActivityStatus.SCALING_FLOW_SUCCESS,
+                now.minus(5, MINUTES).toEpochMilli());
+
+        saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3, scalingActivity4);
+
+        List<Long> result = underTest.findAllIdsInActivityStatusesWithStartTimeBefore(EnumSet.of(ActivityStatus.SCALING_FLOW_FAILED,
+                ActivityStatus.SCALING_FLOW_SUCCESS), new Date(now.minus(8, MINUTES).toEpochMilli()));
+
+        assertThat(result).hasSize(2).hasSameElementsAs(asList(scalingActivity1.getId(), scalingActivity2.getId()));
     }
 
     private Cluster getACluster() {
@@ -239,7 +280,7 @@ class ScalingActivityRepositoryTest {
     private void saveScalingActivity(Cluster cluster, ScalingActivity... scalingActivities) {
         clusterPertainRepository.save(cluster.getClusterPertain());
         clusterRepository.save(cluster);
-        underTest.saveAll(Arrays.asList(scalingActivities));
+        underTest.saveAll(asList(scalingActivities));
     }
 
 }
