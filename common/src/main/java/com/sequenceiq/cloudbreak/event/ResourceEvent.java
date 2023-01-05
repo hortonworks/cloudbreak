@@ -184,6 +184,7 @@ public enum ResourceEvent {
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_STARTED("environment.proxy.modification.started"),
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_FREEIPA_STARTED("environment.proxy.modification.freeipa.started"),
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_DATALAKE_STARTED("environment.proxy.modification.datalake.started"),
+    ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_DATAHUBS_STARTED("environment.proxy.modification.datahubs.started"),
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED("environment.proxy.modification.failed"),
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FINISHED("environment.proxy.modification.finished"),
 

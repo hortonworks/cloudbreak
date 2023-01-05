@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.modify.proxy.config;
 
 import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.FINAL_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.INIT_STATE;
+import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_DATAHUBS_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_DATALAKE_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FINISHED_STATE;
@@ -11,6 +12,7 @@ import static com.sequenceiq.environment.environment.flow.modify.proxy.event.Env
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.FINALIZE_MODIFY_PROXY_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.HANDLE_FAILED_MODIFY_PROXY_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.MODIFY_PROXY_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.MODIFY_PROXY_DATALAKE_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.MODIFY_PROXY_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.MODIFY_PROXY_START_EVENT;
@@ -42,7 +44,10 @@ public class EnvProxyModificationFlowConfig extends
                     .from(PROXY_CONFIG_MODIFICATION_FREEIPA_STATE).to(PROXY_CONFIG_MODIFICATION_DATALAKE_STATE)
                     .event(MODIFY_PROXY_DATALAKE_EVENT).defaultFailureEvent()
 
-                    .from(PROXY_CONFIG_MODIFICATION_DATALAKE_STATE).to(PROXY_CONFIG_MODIFICATION_FINISHED_STATE)
+                    .from(PROXY_CONFIG_MODIFICATION_DATALAKE_STATE).to(PROXY_CONFIG_MODIFICATION_DATAHUBS_STATE)
+                    .event(MODIFY_PROXY_DATAHUBS_EVENT).defaultFailureEvent()
+
+                    .from(PROXY_CONFIG_MODIFICATION_DATAHUBS_STATE).to(PROXY_CONFIG_MODIFICATION_FINISHED_STATE)
                     .event(FINISH_MODIFY_PROXY_EVENT).defaultFailureEvent()
 
                     .from(PROXY_CONFIG_MODIFICATION_FINISHED_STATE).to(FINAL_STATE)

@@ -136,4 +136,14 @@ class DistroXV1ControllerTest {
 
         verify(stackOperations).updateSalt(NameOrCrn.ofCrn(CRN), ACCOUNT_ID);
     }
+
+    @Test
+    void testModifyProxyInternal() {
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+        String previousProxyConfigCrn = "prev-proxy-crn";
+
+        distroXV1Controller.modifyProxyInternal(CRN, previousProxyConfigCrn, "user-crn");
+
+        verify(stackOperationService).modifyProxyConfig(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, previousProxyConfigCrn);
+    }
 }
