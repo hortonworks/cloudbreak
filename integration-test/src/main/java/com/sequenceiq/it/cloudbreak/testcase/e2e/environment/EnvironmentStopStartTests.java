@@ -156,6 +156,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .when(environmentTestClient.create())
                 .then(this::getTelemetryStorageLocation)
                 .given(SdxInternalTestDto.class)
+                    .withTelemetry("telemetry")
                 .addTags(SDX_TAGS)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
@@ -166,6 +167,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.describe())
                 .then(validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
                 .given(SdxInternalTestDto.class)
+                    .withTelemetry("telemetry")
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(cloudProviderSideTagAssertion.verifyInternalSdxTags(SDX_TAGS))
                 .given("dx1", DistroXTestDto.class)
@@ -209,7 +211,11 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .withFreeipaVerticalScale()
                     .withGroup(TARGET_INSTANCE_GROUP_TYPE)
                     .withInstanceType(UPGRADED_FREEIPA_INSTANCE_TYPE)
+                    .given("telemetry", TelemetryTestDto.class)
+                    .withLogging()
+                    .withReportClusterLogs()
                     .given(EnvironmentTestDto.class)
+                    .withTelemetry("telemetry")
                     .when(environmentTestClient.verticalScale(FREEIPA_VERTICAL_SCALE_KEY))
                     .await(EnvironmentStatus.ENV_STOPPED)
 
@@ -218,6 +224,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .withGroup(TARGET_INSTANCE_GROUP_TYPE)
                     .withInstanceType(UPGRADED_DATALAKE_INSTANCE_TYPE)
                     .given(SdxInternalTestDto.class)
+                    .withTelemetry("telemetry")
                     .when(sdxTestClient.verticalScale(SDX_VERTICAL_SCALE_KEY))
                     .await(SdxClusterStatusResponse.STOPPED)
 
@@ -240,10 +247,15 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
             LOGGER.debug("Vertical scaling verification result initiated since the cloud platform '{}' suppots such operation.",
                     testContext.getCloudPlatform());
             testContext
+                    .given("telemetry", TelemetryTestDto.class)
+                        .withLogging()
+                        .withReportClusterLogs()
                     .given(FreeIpaTestDto.class)
+                        .withTelemetry("telemetry")
                     .when(freeIpaTestClient.describe())
                     .then(this::validateFreeIpaInstanceType)
                     .given(SdxInternalTestDto.class)
+                        .withTelemetry("telemetry")
                     .when(sdxTestClient.detailedDescribeInternal())
                     .then(this::validateDataLakeInstanceType)
                     .given("dx1", DistroXTestDto.class)

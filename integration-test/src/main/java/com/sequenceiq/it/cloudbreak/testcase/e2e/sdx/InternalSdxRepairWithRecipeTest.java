@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
@@ -74,6 +75,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         String fileName = "post-cm-start";
         String masterInstanceGroup = "master";
         String idbrokerInstanceGroup = "idbroker";
+        String telemetry = "telemetry";
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
@@ -107,10 +109,14 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .withCluster(cluster)
                 .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .withImageSettings(imageSettings)
+                .given(telemetry, TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs()
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withDatabase(sdxDatabaseRequest)
                 .withStackRequest(key(cluster), key(stack))
+                .withTelemetry(telemetry)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()

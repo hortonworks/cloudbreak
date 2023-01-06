@@ -59,6 +59,7 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
@@ -246,6 +247,14 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
         sdxInternalTestDto.withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
         return sdxInternalTestDto;
+    }
+
+    public SdxInternalTestDto withTelemetry(String telemetry) {
+        TelemetryTestDto telemetryTestDto = getTestContext().get(telemetry);
+        if (telemetryTestDto != null) {
+            getRequest().getStackV4Request().setTelemetry(telemetryTestDto.getRequest());
+        }
+        return this;
     }
 
     public SdxInternalTestDto withTemplate(String template) {
