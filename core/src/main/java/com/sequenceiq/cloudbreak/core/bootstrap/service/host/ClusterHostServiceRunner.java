@@ -105,7 +105,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
-import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
+import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
@@ -220,7 +220,7 @@ public class ClusterHostServiceRunner {
     private HostAttributeDecorator hostAttributeDecorator;
 
     @Inject
-    private LoadBalancerConfigService loadBalancerConfigService;
+    private LoadBalancerFqdnUtil loadBalancerFqdnUtil;
 
     @Inject
     private IdBrokerService idBrokerService;
@@ -788,7 +788,7 @@ public class ClusterHostServiceRunner {
             gateway.put("userfacingcert", stackDto.getSecurityConfig().getUserFacingCert());
         }
 
-        String fqdn = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(stack.getId());
+        String fqdn = loadBalancerFqdnUtil.getLoadBalancerUserFacingFQDN(stack.getId());
         fqdn = isEmpty(fqdn) ? cluster.getFqdn() : fqdn;
 
         if (isNotEmpty(fqdn)) {

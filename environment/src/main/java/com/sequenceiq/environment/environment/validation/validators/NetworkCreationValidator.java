@@ -3,7 +3,7 @@ package com.sequenceiq.environment.environment.validation.validators;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +94,7 @@ public class NetworkCreationValidator {
 
     private void validateNetworkCidrAndEndpointGatewaySubnet(NetworkDto network, ValidationResultBuilder resultBuilder) {
         if (Objects.nonNull(network) && StringUtils.isNotEmpty(network.getNetworkCidr()) &&
-                !SetUtils.emptyIfNull(network.getEndpointGatewaySubnetIds()).isEmpty()) {
+                CollectionUtils.isNotEmpty(network.getEndpointGatewaySubnetIds())) {
 
             String message = String.format("The Endpoint Gateway Subnet IDs must not be defined if CIDR ('%s') is present!", network.getNetworkCidr());
             LOGGER.info(message);

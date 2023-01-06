@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,27 +44,12 @@ public class SubnetSelector {
         if (StringUtils.isNotEmpty(preferredSubnetId)) {
             cloudSubnet = findSubnetById(subnetMetas, preferredSubnetId);
         } else if (StringUtils.isNotEmpty(availabilityZone)) {
-            LOGGER.debug("Choosing subnet by availability zone {}", availabilityZone);
-            if (SelectionVisibilityStrategy.PREFER_PUBLIC.equals(visibilityStrategy)) {
-                LOGGER.debug("Attempting to select a public subnet in availability zone {} from the provided list.", availabilityZone);
-                cloudSubnet = subnetMetas.values().stream()
-                    .filter(s -> StringUtils.isNotEmpty(s.getAvailabilityZone()) &&
-                        s.getAvailabilityZone().equals(availabilityZone) &&
-                        !s.isPrivateSubnet())
-                    .findFirst();
-                if (cloudSubnet.isEmpty()) {
-                    LOGGER.debug("Public subnet in availability zone {} was not found.", availabilityZone);
-                }
-            }
+            cloudSubnet = tryGetPublicSubnetFromAz(subnetMetas, availabilityZone, visibilityStrategy);
             if (cloudSubnet.isEmpty()) {
-                LOGGER.debug("Searching for subnet in availabilty zone {}; no preference for public vs. private subnet", availabilityZone);
-                cloudSubnet = subnetMetas.values().stream()
-                    .filter(s -> StringUtils.isNotEmpty(s.getAvailabilityZone()) &&
-                        s.getAvailabilityZone().equals(availabilityZone))
-                    .findFirst();
+                cloudSubnet = tryGetAnySubnetFromAz(subnetMetas, availabilityZone);
             }
         } else if (SelectionFallbackStrategy.ALLOW_FALLBACK.equals(fallbackStrategy)) {
-            LOGGER.debug("Fallback to choose random subnet");
+            LOGGER.debug("Fallback to choose random subnet from any availability zone");
             cloudSubnet = subnetMetas.values().stream().findFirst();
         }
 
@@ -74,25 +60,52 @@ public class SubnetSelector {
         return cloudSubnet;
     }
 
+    private Optional<CloudSubnet> tryGetPublicSubnetFromAz(Map<String, CloudSubnet> subnetMetas, String availabilityZone,
+            SelectionVisibilityStrategy visibilityStrategy) {
+        LOGGER.debug("Choosing subnet by availability zone {}", availabilityZone);
+        Optional<CloudSubnet> cloudSubnet = Optional.empty();
+        if (SelectionVisibilityStrategy.PREFER_PUBLIC.equals(visibilityStrategy)) {
+            LOGGER.debug("Attempting to select a public subnet in availability zone {} from the provided list.", availabilityZone);
+            cloudSubnet = subnetMetas.values().stream()
+                .filter(s -> StringUtils.isNotEmpty(s.getAvailabilityZone()) &&
+                    s.getAvailabilityZone().equals(availabilityZone) &&
+                    !s.isPrivateSubnet())
+                .findFirst();
+            if (cloudSubnet.isEmpty()) {
+                LOGGER.debug("Public subnet in availability zone {} was not found.", availabilityZone);
+            }
+        }
+        return cloudSubnet;
+    }
+
+    private Optional<CloudSubnet> tryGetAnySubnetFromAz(Map<String, CloudSubnet> subnetMetas, String availabilityZone) {
+        LOGGER.debug("Searching for subnet in availabilty zone {}; no preference for public vs. private subnet", availabilityZone);
+        return subnetMetas.values().stream()
+                .filter(s -> StringUtils.isNotEmpty(s.getAvailabilityZone()) &&
+                        s.getAvailabilityZone().equals(availabilityZone))
+                .findFirst();
+    }
+
     public Optional<CloudSubnet> chooseSubnetForEndpointGateway(EnvironmentNetworkResponse source, String baseSubnetId) {
         MDCBuilder.buildMdcContext(source);
         Optional<CloudSubnet> endpointGatewayCloudSubnet = Optional.empty();
-        if (source.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED) {
+        if (source.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED ||
+                entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
             Optional<CloudSubnet> baseSubnet = findSubnetById(source.getSubnetMetas(), baseSubnetId);
             if (baseSubnet.isEmpty()) {
                 LOGGER.error("Unable to find subnet with id {}", baseSubnet);
             } else {
                 String selectedAZ = baseSubnet.get().getAvailabilityZone();
                 Map<String, CloudSubnet> subnetsToParse;
-                if (source.getGatewayEndpointSubnetMetas() == null || source.getGatewayEndpointSubnetMetas().isEmpty()) {
+                if (MapUtils.isEmpty(source.getGatewayEndpointSubnetMetas())) {
                     subnetsToParse = source.getSubnetMetas();
                 } else {
                     subnetsToParse = source.getGatewayEndpointSubnetMetas();
                 }
 
                 Map<String, CloudSubnet> publicSubnetMetas;
-                if (entitlementService.endpointGatewaySkipValidation(ThreadBasedUserCrnProvider.getAccountId())
-                        || entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+                if (entitlementService.endpointGatewaySkipValidation(ThreadBasedUserCrnProvider.getAccountId()) ||
+                        entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
                     LOGGER.debug("Endpoint gateway subnet targeting is enabled. Will use provided subnets for selection.");
                     publicSubnetMetas = subnetsToParse;
                 } else {

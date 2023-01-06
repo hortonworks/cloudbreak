@@ -168,11 +168,13 @@ public class AwsNativeLoadBalancerLaunchService {
                     .orElseThrow()
                     .getLoadBalancerArn();
             context.setLoadBalancerArn(loadBalancerArn);
+            Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES, awsLoadBalancer.getScheme().getLoadBalancerType());
             loadBalancerResource = new CloudResource.Builder()
                     .withName(loadBalancerName)
                     .withType(ResourceType.ELASTIC_LOAD_BALANCER)
                     .withReference(loadBalancerArn)
                     .withStatus(CommonStatus.CREATED)
+                    .withParameters(params)
                     .build();
             context.getPersistenceNotifier().notifyAllocation(loadBalancerResource, context.getCloudContext());
         }

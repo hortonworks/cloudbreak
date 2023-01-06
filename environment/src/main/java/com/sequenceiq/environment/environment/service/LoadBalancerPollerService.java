@@ -18,6 +18,7 @@ import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
@@ -53,23 +54,27 @@ public class LoadBalancerPollerService {
 
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    private final EntitlementService entitlementService;
+
     public LoadBalancerPollerService(
             DatahubService datahubService,
             SdxService sdxService,
             StackService stackService,
             FlowEndpoint flowEndpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
+            EntitlementService entitlementService) {
         this.datahubService = datahubService;
         this.sdxService = sdxService;
         this.stackService = stackService;
         this.flowEndpoint = flowEndpoint;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
+        this.entitlementService = entitlementService;
     }
 
-    public void updateStackWithLoadBalancer(Long environmentId, String environmentCrn, String environmentName,
-            PublicEndpointAccessGateway endpointAccessGateway) {
+    public void updateStackWithLoadBalancer(String accountId, String environmentCrn, String environmentName,
+            PublicEndpointAccessGateway endpointAccessGateway, boolean hasEndpointGatewaySubnet) {
         Set<String> stackNames;
-        if (PublicEndpointAccessGateway.ENABLED.equals(endpointAccessGateway)) {
+        if (PublicEndpointAccessGateway.ENABLED.equals(endpointAccessGateway) || isTargetingEndpointGateway(accountId, hasEndpointGatewaySubnet)) {
             LOGGER.debug("Updating load balancers for endpoint gateway on Data Lake and Data Hubs.");
             stackNames = getDataLakeAndDataHubNames(environmentCrn, environmentName);
             LOGGER.debug("Found {} Data Lake and Data Hub clusters to update for environment {}.", stackNames.size(), environmentName);
@@ -92,6 +97,10 @@ public class LoadBalancerPollerService {
                 throw new UpdateFailedException("Stack update poller reached timeout.", e);
             }
         }
+    }
+
+    private boolean isTargetingEndpointGateway(String accountId, boolean hasEndpointGatewaySubnet) {
+        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(accountId) && hasEndpointGatewaySubnet;
     }
 
     private List<FlowIdentifier> waitStackLoadBalancerUpdate(PollingConfig pollingConfig, Set<String> stackNames, String environmentName) {

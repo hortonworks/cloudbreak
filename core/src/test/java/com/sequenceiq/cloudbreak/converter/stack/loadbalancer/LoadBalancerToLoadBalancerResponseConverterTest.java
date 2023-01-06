@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGrou
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerNamesDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpTargetGroupConfigDb;
-import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
+import com.sequenceiq.cloudbreak.service.loadbalancer.TargetGroupPortProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
@@ -83,7 +83,7 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
     private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private LoadBalancerConfigService loadBalancerConfigService;
+    private TargetGroupPortProvider targetGroupPortProvider;
 
     @InjectMocks
     private LoadBalancerToLoadBalancerResponseConverter underTest;
@@ -93,7 +93,7 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         MockitoAnnotations.initMocks(this);
         when(instanceGroupService.findByTargetGroupId(any())).thenReturn(List.of(new InstanceGroup()));
         when(instanceMetaDataService.findAliveInstancesInInstanceGroup(any())).thenReturn(ceateInstanceMetadata());
-        when(loadBalancerConfigService.getTargetGroupPortPairs(any())).thenReturn(Set.of(new TargetGroupPortPair(PORT, PORT)));
+        when(targetGroupPortProvider.getTargetGroupPortPairs(any())).thenReturn(Set.of(new TargetGroupPortPair(PORT, PORT)));
     }
 
     @Test

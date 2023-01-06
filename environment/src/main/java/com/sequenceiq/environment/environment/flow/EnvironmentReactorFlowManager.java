@@ -7,11 +7,13 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.common.api.type.DataHubStartAction;
@@ -54,11 +56,14 @@ public class EnvironmentReactorFlowManager {
 
     private final StackService stackService;
 
+    private final EntitlementService entitlementService;
+
     public EnvironmentReactorFlowManager(EventSender eventSender,
-            FlowCancelService flowCancelService, StackService stackService) {
+            FlowCancelService flowCancelService, StackService stackService, EntitlementService entitlementService) {
         this.eventSender = eventSender;
         this.flowCancelService = flowCancelService;
         this.stackService = stackService;
+        this.entitlementService = entitlementService;
     }
 
     public FlowIdentifier triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
@@ -162,11 +167,12 @@ public class EnvironmentReactorFlowManager {
     }
 
     public FlowIdentifier triggerLoadBalancerUpdateFlow(EnvironmentDto environmentDto, Long envId, String envName, String envCrn,
-            PublicEndpointAccessGateway endpointAccessGateway, Set<String> subnetIds, String userCrn) {
+            PublicEndpointAccessGateway endpointAccessGateway, Set<String> endpointGatewaySubnetIds, String userCrn) {
         LOGGER.info("Load balancer update flow triggered.");
-        if (PublicEndpointAccessGateway.ENABLED.equals(endpointAccessGateway)) {
-            if (subnetIds != null && !subnetIds.isEmpty()) {
-                LOGGER.debug("Adding Endpoint Gateway with subnet ids {}", subnetIds);
+        if (PublicEndpointAccessGateway.ENABLED.equals(endpointAccessGateway) ||
+                entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(environmentDto.getAccountId())) {
+            if (CollectionUtils.isNotEmpty(endpointGatewaySubnetIds)) {
+                LOGGER.debug("Adding Endpoint Gateway with subnet ids {}", endpointGatewaySubnetIds);
             } else {
                 LOGGER.debug("Adding Endpoint Gateway using environment subnets.");
             }
@@ -179,7 +185,7 @@ public class EnvironmentReactorFlowManager {
                 .withResourceCrn(envCrn)
                 .withEnvironmentDto(environmentDto)
                 .withEndpointAccessGateway(endpointAccessGateway)
-                .withSubnetIds(subnetIds)
+                .withSubnetIds(endpointGatewaySubnetIds)
                 .build();
 
         return eventSender.sendEvent(loadBalancerUpdateEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));

@@ -4,6 +4,9 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
@@ -54,7 +56,7 @@ public class EnvironmentLoadBalancerService {
             getIfNotNull(environmentDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetIds));
 
         if (!isLoadBalancerEnabledForDatalake(ThreadBasedUserCrnProvider.getAccountId(), environmentDto.getCloudPlatform(),
-            environmentLbDto.getEndpointAccessGateway())) {
+                getIfNotNull(environmentDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetIds))) {
             throw new BadRequestException("Neither Endpoint Gateway nor Data Lake load balancer is enabled. Nothing to do.");
         }
 
@@ -72,10 +74,10 @@ public class EnvironmentLoadBalancerService {
                 environmentLbDto.getEndpointAccessGateway(), environmentLbDto.getEndpointGatewaySubnetIds(), userCrn);
     }
 
-    private boolean isLoadBalancerEnabledForDatalake(String accountId, String cloudPlatform, PublicEndpointAccessGateway endpointEnum) {
+    private boolean isLoadBalancerEnabledForDatalake(String accountId, String cloudPlatform, Set<String> endpointGatewaySubnetIds) {
         return !isLoadBalancerEntitlementRequiredForCloudProvider(cloudPlatform) ||
                 entitlementService.datalakeLoadBalancerEnabled(accountId) ||
-                PublicEndpointAccessGateway.ENABLED.equals(endpointEnum);
+                CollectionUtils.isNotEmpty(endpointGatewaySubnetIds);
     }
 
     private boolean isLoadBalancerEntitlementRequiredForCloudProvider(String cloudPlatform) {

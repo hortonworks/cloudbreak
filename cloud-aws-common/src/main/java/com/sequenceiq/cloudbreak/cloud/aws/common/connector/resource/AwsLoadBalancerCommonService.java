@@ -50,7 +50,7 @@ public class AwsLoadBalancerCommonService {
                 .map(lb -> lb.getType().name())
                 .collect(Collectors.toSet());
         Set<String> awsTypes = awsLoadBalancers.stream()
-                .map(lb -> AwsLoadBalancerScheme.INTERNAL.awsScheme().equals(lb.getAwsScheme()) ? "PRIVATE" : "PUBLIC")
+                .map(lb -> lb.getScheme().getLoadBalancerType().name())
                 .collect(Collectors.toSet());
         if (!requestedTypes.equals(awsTypes)) {
             throw new CloudConnectorException(String.format("Can not create all requested AWS load balancers. " +
@@ -86,7 +86,7 @@ public class AwsLoadBalancerCommonService {
             LOGGER.debug("Private load balancer detected. Using instance subnet for load balancer creation.");
             populateSubnetIds(awsNetworkView, cloudLoadBalancer, subnetIds);
         } else {
-            LOGGER.debug("Public load balancer detected. Using endpoint gateway subnet for load balancer creation.");
+            LOGGER.debug("{} load balancer detected. Using endpoint gateway subnet for load balancer creation.", type);
             subnetIds.addAll(awsNetworkView.getEndpointGatewaySubnetList());
             subnetIds.addAll(getEndpointGatewayMultiAZSubnets(cloudLoadBalancer));
             if (subnetIds.isEmpty()) {
