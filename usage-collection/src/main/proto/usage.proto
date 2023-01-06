@@ -1903,6 +1903,10 @@ message CDPClusterDetails {
   string applicationTags = 7;
   // A CDP vertical scale status.
   CDPVerticalScaleDetails cdpVerticalScaleDetails = 8;
+  // If the given Datalake is going to use external DB or not.
+  bool usingExternalDatabase = 10;
+  // If the SSL connection is being used upon the database communication.
+  bool sslEnabled = 11;
 }
 
 message CDPStatusDetails {

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
@@ -8,20 +11,29 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCloudProviderVariantType.Value;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterShape;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPImageDetails;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPVersionDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class StructuredEventToCDPClusterDetailsConverterTest {
 
     @InjectMocks
@@ -41,12 +53,12 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
 
     @BeforeEach
     public void setUp() {
-        doReturn(UsageProto.CDPClusterShape.newBuilder().build()).when(clusterShapeConverter).convert((StructuredFlowEvent) any());
-        doReturn(UsageProto.CDPClusterShape.newBuilder().build()).when(clusterShapeConverter).convert((StructuredSyncEvent) any());
-        doReturn(UsageProto.CDPImageDetails.newBuilder().build()).when(imageDetailsConverter).convert((StructuredFlowEvent) any());
-        doReturn(UsageProto.CDPImageDetails.newBuilder().build()).when(imageDetailsConverter).convert((StructuredSyncEvent) any());
-        doReturn(UsageProto.CDPVersionDetails.newBuilder().build()).when(versionDetailsConverter).convert((StructuredFlowEvent) any());
-        doReturn(UsageProto.CDPVersionDetails.newBuilder().build()).when(versionDetailsConverter).convert((StructuredSyncEvent) any());
+        doReturn(CDPClusterShape.newBuilder().build()).when(clusterShapeConverter).convert((StructuredFlowEvent) any());
+        doReturn(CDPClusterShape.newBuilder().build()).when(clusterShapeConverter).convert((StructuredSyncEvent) any());
+        doReturn(CDPImageDetails.newBuilder().build()).when(imageDetailsConverter).convert((StructuredFlowEvent) any());
+        doReturn(CDPImageDetails.newBuilder().build()).when(imageDetailsConverter).convert((StructuredSyncEvent) any());
+        doReturn(CDPVersionDetails.newBuilder().build()).when(versionDetailsConverter).convert((StructuredFlowEvent) any());
+        doReturn(CDPVersionDetails.newBuilder().build()).when(versionDetailsConverter).convert((StructuredSyncEvent) any());
     }
 
     @Test
@@ -59,15 +71,15 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
     public void testUserTagsConversionWithNullStackDetails() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(null);
-        UsageProto.CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
+        CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals("", clusterDetails.getUserTags());
+        assertEquals("", clusterDetails.getUserTags());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(null);
         clusterDetails = underTest.convert(structuredSyncEvent);
 
-        Assertions.assertEquals("", clusterDetails.getUserTags());
+        assertEquals("", clusterDetails.getUserTags());
     }
 
     @Test
@@ -77,15 +89,15 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
 
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(stackDetails);
-        UsageProto.CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
+        CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals("", clusterDetails.getUserTags());
+        assertEquals("", clusterDetails.getUserTags());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(stackDetails);
         clusterDetails = underTest.convert(structuredSyncEvent);
 
-        Assertions.assertEquals("", clusterDetails.getUserTags());
+        assertEquals("", clusterDetails.getUserTags());
     }
 
     @Test
@@ -95,15 +107,15 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
 
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(stackDetails);
-        UsageProto.CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
+        CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals(UsageProto.CDPCloudProviderVariantType.Value.UNSET, clusterDetails.getCloudProviderVariant());
+        assertEquals(Value.UNSET, clusterDetails.getCloudProviderVariant());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(stackDetails);
         clusterDetails = underTest.convert(structuredSyncEvent);
 
-        Assertions.assertEquals(0, clusterDetails.getCloudProviderVariantValue());
+        assertEquals(0, clusterDetails.getCloudProviderVariantValue());
     }
 
     @Test
@@ -114,16 +126,16 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
 
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(stackDetails);
-        UsageProto.CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
+        CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals(UsageProto.CDPCloudProviderVariantType.Value.AWS_NATIVE, clusterDetails.getCloudProviderVariant());
+        assertEquals(Value.AWS_NATIVE, clusterDetails.getCloudProviderVariant());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(stackDetails);
         clusterDetails = underTest.convert(structuredSyncEvent);
 
-        Assertions.assertEquals(2, clusterDetails.getCloudProviderVariantValue());
-        Assertions.assertEquals(true, clusterDetails.getMultiAz());
+        assertEquals(2, clusterDetails.getCloudProviderVariantValue());
+        assertEquals(true, clusterDetails.getMultiAz());
     }
 
     @Test
@@ -133,17 +145,17 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
 
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(stackDetails);
-        UsageProto.CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
+        CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals("", clusterDetails.getUserTags());
-        Assertions.assertEquals("", clusterDetails.getApplicationTags());
+        assertEquals("", clusterDetails.getUserTags());
+        assertEquals("", clusterDetails.getApplicationTags());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(stackDetails);
         clusterDetails = underTest.convert(structuredSyncEvent);
 
-        Assertions.assertEquals("", clusterDetails.getUserTags());
-        Assertions.assertEquals("", clusterDetails.getApplicationTags());
+        assertEquals("", clusterDetails.getUserTags());
+        assertEquals("", clusterDetails.getApplicationTags());
     }
 
     @Test
@@ -159,16 +171,77 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
 
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(stackDetails);
-        UsageProto.CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
+        CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", clusterDetails.getUserTags());
-        Assertions.assertEquals("{\"appKey1\":\"appValue1\",\"appKey2\":\"appValue2\"}", clusterDetails.getApplicationTags());
+        assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", clusterDetails.getUserTags());
+        assertEquals("{\"appKey1\":\"appValue1\",\"appKey2\":\"appValue2\"}", clusterDetails.getApplicationTags());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(stackDetails);
         clusterDetails = underTest.convert(structuredSyncEvent);
 
-        Assertions.assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", clusterDetails.getUserTags());
-        Assertions.assertEquals("{\"appKey1\":\"appValue1\",\"appKey2\":\"appValue2\"}", clusterDetails.getApplicationTags());
+        assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", clusterDetails.getUserTags());
+        assertEquals("{\"appKey1\":\"appValue1\",\"appKey2\":\"appValue2\"}", clusterDetails.getApplicationTags());
     }
+
+    @Test
+    void testExternalDbAndSslEnablementWhenClusterIsNull() {
+        CDPClusterDetails result = underTest.convert(new StructuredFlowEvent());
+
+        assertFalse(result.getSslEnabled());
+        assertFalse(result.getUsingExternalDatabase());
+    }
+
+    @Test
+    @DisplayName("Test when ClusterDetails exists but the DbSslEnabled field is false then the result CDPClusterDetails should also contain false, for " +
+            "the designated field")
+    void testWhenClusterIsNotNullAndDbSslEnabledIsFalse() {
+        StructuredFlowEvent event = new StructuredFlowEvent();
+        ClusterDetails clusterDetails = new ClusterDetails();
+        clusterDetails.setDbSslEnabled(false);
+        event.setCluster(clusterDetails);
+        CDPClusterDetails result = underTest.convert(event);
+
+        assertFalse(result.getSslEnabled());
+    }
+
+    @Test
+    @DisplayName("Test when ClusterDetails exists and the DbSslEnabled field is true then the result CDPClusterDetails should also contain true, for " +
+            "the designated field")
+    void testWhenClusterIsNotNullAndDbSslEnabledIsTrue() {
+        StructuredFlowEvent event = new StructuredFlowEvent();
+        ClusterDetails clusterDetails = new ClusterDetails();
+        clusterDetails.setDbSslEnabled(true);
+        event.setCluster(clusterDetails);
+        CDPClusterDetails result = underTest.convert(event);
+
+        assertTrue(result.getSslEnabled());
+    }
+
+    @Test
+    @DisplayName("Test when ClusterDetails exists but the ExternalDatabase field is false then the result CDPClusterDetails should also contain false, for " +
+            "the designated field")
+    void testWhenClusterIsNotNullAndExternalDatabaseIsFalse() {
+        StructuredFlowEvent event = new StructuredFlowEvent();
+        ClusterDetails clusterDetails = new ClusterDetails();
+        clusterDetails.setExternalDatabase(false);
+        event.setCluster(clusterDetails);
+        CDPClusterDetails result = underTest.convert(event);
+
+        assertFalse(result.getUsingExternalDatabase());
+    }
+
+    @Test
+    @DisplayName("Test when ClusterDetails exists and the ExternalDatabase field is true then the result CDPClusterDetails should also contain true, for " +
+            "the designated field")
+    void testWhenClusterIsNotNullAndExternalDatabaseIsTrue() {
+        StructuredFlowEvent event = new StructuredFlowEvent();
+        ClusterDetails clusterDetails = new ClusterDetails();
+        clusterDetails.setExternalDatabase(true);
+        event.setCluster(clusterDetails);
+        CDPClusterDetails result = underTest.convert(event);
+
+        assertTrue(result.getUsingExternalDatabase());
+    }
+
 }

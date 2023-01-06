@@ -37,6 +37,7 @@ public class StructuredFlowEventToCDPDatalakeRequestedConverter {
         cdpDatalakeRequested.setClusterDetails(clusterDetailsConverter.convert(structuredFlowEvent));
 
         UsageProto.CDPDatalakeRequested ret = cdpDatalakeRequested.build();
+
         LOGGER.debug("Converted CDPDatalakeRequested telemetry event: {}", ret);
         return ret;
     }
