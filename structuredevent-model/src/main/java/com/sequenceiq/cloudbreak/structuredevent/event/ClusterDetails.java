@@ -59,6 +59,16 @@ public class ClusterDetails implements Serializable {
 
     private boolean razEnabled;
 
+    private Boolean dbSslEnabled;
+
+    public Boolean isDbSslEnabled() {
+        return dbSslEnabled;
+    }
+
+    public void setDbSslEnabled(Boolean dbSslEnabled) {
+        this.dbSslEnabled = dbSslEnabled;
+    }
+
     public Long getId() {
         return id;
     }

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import static java.lang.Boolean.FALSE;
+
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -53,6 +56,7 @@ public class ClusterToClusterDetailsConverter {
                     rdsConfigs.stream()
                             .map(e -> rdsConfigToRdsDetailsConverter.convert(e))
                             .collect(Collectors.toList()));
+            clusterDetails.setDbSslEnabled(Optional.ofNullable(source.getDbSslEnabled()).orElse(FALSE));
         }
     }
 
@@ -71,4 +75,5 @@ public class ClusterToClusterDetailsConverter {
             clusterDetails.setFileSystemType(fileSystem.getType().name());
         }
     }
+
 }
