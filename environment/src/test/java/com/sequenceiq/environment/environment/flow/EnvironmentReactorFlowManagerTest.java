@@ -2,15 +2,20 @@ package com.sequenceiq.environment.environment.flow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -19,10 +24,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateEvent;
+import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateStateSelectors;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
 import com.sequenceiq.environment.environment.service.stack.StackService;
@@ -41,6 +50,8 @@ class EnvironmentReactorFlowManagerTest {
 
     private static final String ENVIRONMENT_NAME = "environmentName";
 
+    private static final String ENVIRONMENT_CRN = "envCrn";
+
     private static final String USER_CRN = "userCrn";
 
     private static final String ENVIRONMENT_CRN = "envCrn";
@@ -54,6 +65,9 @@ class EnvironmentReactorFlowManagerTest {
     @Mock
     private StackService stackService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private EnvironmentReactorFlowManager underTest;
 
@@ -65,6 +79,9 @@ class EnvironmentReactorFlowManagerTest {
 
     @Captor
     private ArgumentCaptor<EnvProxyModificationDefaultEvent> envProxyModificationDefaultEventCaptor;
+
+    @Captor
+    private ArgumentCaptor<LoadBalancerUpdateEvent> loadbalancerUpdateEventCaptor;
 
     @Captor
     private ArgumentCaptor<Event.Headers> headersCaptor;
@@ -122,6 +139,41 @@ class EnvironmentReactorFlowManagerTest {
                 .returns(ENVIRONMENT_ID, EnvProxyModificationDefaultEvent::getResourceId)
                 .returns("proxy-crn", EnvProxyModificationDefaultEvent::getProxyConfigCrn);
         verifyHeaders();
+    }
+
+    @ParameterizedTest
+    @MethodSource("triggerLoadBalancerUpdateFlowScenarios")
+    void triggerLoadBalancerUpdateFlow(boolean targetingEntitled, PublicEndpointAccessGateway peag) {
+        EnvironmentDto environmentDto = mock(EnvironmentDto.class);
+        lenient().when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(targetingEntitled);
+        when(eventSender.sendEvent(any(LoadBalancerUpdateEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
+
+        Set<String> subnets = Set.of("subnetId1", "subnetId2");
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.triggerLoadBalancerUpdateFlow(environmentDto, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN,
+                        peag, subnets, USER_CRN));
+
+        assertThat(result).isEqualTo(flowIdentifier);
+        verify(eventSender).sendEvent(loadbalancerUpdateEventCaptor.capture(), headersCaptor.capture());
+        LoadBalancerUpdateEvent event = loadbalancerUpdateEventCaptor.getValue();
+        assertThat(event)
+                .returns(LoadBalancerUpdateStateSelectors.LOAD_BALANCER_UPDATE_START_EVENT.selector(), BaseFlowEvent::selector)
+                .returns(environmentDto, LoadBalancerUpdateEvent::getEnvironmentDto)
+                .returns(ENVIRONMENT_CRN, LoadBalancerUpdateEvent::getResourceCrn)
+                .returns(ENVIRONMENT_ID, LoadBalancerUpdateEvent::getResourceId)
+                .returns(ENVIRONMENT_NAME, LoadBalancerUpdateEvent::getResourceName)
+                .returns(peag, LoadBalancerUpdateEvent::getEndpointAccessGateway)
+                .returns(subnets, LoadBalancerUpdateEvent::getSubnetIds);
+        verifyHeaders();
+    }
+
+    public static Stream<Arguments> triggerLoadBalancerUpdateFlowScenarios() {
+        return Stream.of(
+                Arguments.of(true, PublicEndpointAccessGateway.ENABLED),
+                Arguments.of(false, PublicEndpointAccessGateway.ENABLED),
+                Arguments.of(true, PublicEndpointAccessGateway.DISABLED),
+                Arguments.of(false, PublicEndpointAccessGateway.DISABLED)
+        );
     }
 
     private void verifyEnvDeleteEvent(boolean forcedExpected, String selectorExpected) {

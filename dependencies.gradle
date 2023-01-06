@@ -84,7 +84,7 @@ ext {
   hamcrestVersion = '2.2'
   junitVersion = '4.13.2'
   junitJupiterVersion = '5.7.0'
-  mockitoVersion = '3.6.28'
+  mockitoVersion = '3.12.4'
   openPojoVersion = '0.8.12'
   testContainersVersion = '1.16.0'
   testNgVersion = '7.3.0'

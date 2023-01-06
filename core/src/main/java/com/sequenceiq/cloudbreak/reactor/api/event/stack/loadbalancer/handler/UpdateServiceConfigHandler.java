@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.UpdateServ
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.UpdateServiceConfigRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.UpdateServiceConfigSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
+import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -47,7 +47,7 @@ public class UpdateServiceConfigHandler extends ExceptionCatcherEventHandler<Upd
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
-    private LoadBalancerConfigService loadBalancerConfigService;
+    private LoadBalancerFqdnUtil loadBalancerFqdnUtil;
 
     @Override
     public String selector() {
@@ -73,7 +73,7 @@ public class UpdateServiceConfigHandler extends ExceptionCatcherEventHandler<Upd
                 proxyhosts.add(stackDto.getPrimaryGatewayInstance().getDiscoveryFQDN());
                 proxyhosts.add(stackDto.getCluster().getFqdn());
             }
-            String loadBalancerFqdn = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(stack.getId());
+            String loadBalancerFqdn = loadBalancerFqdnUtil.getLoadBalancerUserFacingFQDN(stack.getId());
             if (StringUtils.isNotEmpty(loadBalancerFqdn)) {
                 proxyhosts.add(loadBalancerFqdn);
             }

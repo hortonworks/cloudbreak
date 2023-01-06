@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -14,8 +15,6 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.G
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -49,7 +49,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @ExtendWith(MockitoExtension.class)
-public class NetworkV1ToNetworkV4ConverterTest {
+class NetworkV1ToNetworkV4ConverterTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
@@ -59,7 +59,9 @@ public class NetworkV1ToNetworkV4ConverterTest {
 
     private static final String SUBNET_ID = "subnet-123";
 
-    private static final Set<String> SUBNET_IDS = Sets.newHashSet("subnet-123", "subnet-456");
+    private static final String SUBNET2_ID = "subnet-456";
+
+    private static final Set<String> SUBNET_IDS = Sets.newHashSet(SUBNET_ID, SUBNET2_ID);
 
     private static final String PUBLIC_SUBNET_ID = "public-subnet-123";
 
@@ -74,8 +76,11 @@ public class NetworkV1ToNetworkV4ConverterTest {
     @Mock
     private EndpointGatewayNetworkValidator endpointGatewayNetworkValidator;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @Test
-    public void testConvertToStackRequestWhenAwsPresentedWithSubnet() {
+    void testConvertToStackRequestWhenAwsPresentedWithSubnet() {
         NetworkV1Request networkV1Request = awsNetworkV1Request();
         DetailedEnvironmentResponse environmentNetworkResponse = awsEnvironmentNetwork();
 
@@ -95,7 +100,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
         DetailedEnvironmentResponse input = createGcpEnvironment();
         input.setCloudPlatform(null);
 
-        IllegalStateException expectedException = Assertions.assertThrows(IllegalStateException.class, () ->
+        IllegalStateException expectedException = assertThrows(IllegalStateException.class, () ->
                 underTest.convertToNetworkV4Request(new ImmutablePair<>(null, input)));
 
         assertEquals("Unable to determine cloud platform for network since it has not been set!", expectedException.getMessage());
@@ -107,10 +112,10 @@ public class NetworkV1ToNetworkV4ConverterTest {
         NetworkV4Request result = underTest
                 .convertToNetworkV4Request(new ImmutablePair<>(null, input));
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         GcpNetworkV4Parameters gcpNetworkResult = result.getGcp();
         EnvironmentNetworkGcpParams inputGcpNetwork = input.getNetwork().getGcp();
-        Assertions.assertNotNull(gcpNetworkResult);
+        assertNotNull(gcpNetworkResult);
         assertEquals(inputGcpNetwork.getNetworkId(), gcpNetworkResult.getNetworkId());
         assertEquals(inputGcpNetwork.getNoPublicIp(), gcpNetworkResult.getNoPublicIp());
         assertEquals(inputGcpNetwork.getSharedProjectId(), gcpNetworkResult.getSharedProjectId());
@@ -123,16 +128,16 @@ public class NetworkV1ToNetworkV4ConverterTest {
         NetworkV4Request result = underTest
                 .convertToNetworkV4Request(new ImmutablePair<>(null, input));
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         MockNetworkV4Parameters mockNetworkResult = result.getMock();
-        Assertions.assertNotNull(mockNetworkResult);
-        Assertions.assertNull(mockNetworkResult.getVpcId());
-        Assertions.assertNull(mockNetworkResult.getInternetGatewayId());
+        assertNotNull(mockNetworkResult);
+        assertNull(mockNetworkResult.getVpcId());
+        assertNull(mockNetworkResult.getInternetGatewayId());
         assertTrue(StringUtils.isNotEmpty(mockNetworkResult.getSubnetId()));
     }
 
     @Test
-    public void testConvertToStackRequestWhenAwsPresentedWithoutSubnet() {
+    void testConvertToStackRequestWhenAwsPresentedWithoutSubnet() {
         NetworkV1Request networkV1Request = awsEmptyNetworkV1Request();
         DetailedEnvironmentResponse environmentNetworkResponse = awsEnvironmentNetwork();
 
@@ -141,8 +146,6 @@ public class NetworkV1ToNetworkV4ConverterTest {
             networkV4Request[0] = underTest
                     .convertToNetworkV4Request(new ImmutablePair<>(networkV1Request, environmentNetworkResponse));
         });
-
-
 
         assertEquals(networkV4Request[0].createAws().getVpcId(), VPC_ID);
         assertTrue(SUBNET_IDS.contains(networkV4Request[0].createAws().getSubnetId()));
@@ -193,7 +196,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
     }
 
     @Test
-    public void testConvertToStackRequestWhenAzurePresentedWithSubnet() {
+    void testConvertToStackRequestWhenAzurePresentedWithSubnet() {
         NetworkV1Request networkV1Request = azureNetworkV1Request();
         DetailedEnvironmentResponse environmentNetworkResponse = azureEnvironmentNetwork();
 
@@ -208,7 +211,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
     }
 
     @Test
-    public void testConvertToStackRequestWhenAzurePresentedWithoutSubnet() {
+    void testConvertToStackRequestWhenAzurePresentedWithoutSubnet() {
         NetworkV1Request networkV1Request = azureEmptyNetworkV1Request();
         DetailedEnvironmentResponse environmentNetworkResponse = azureEnvironmentNetwork();
 
@@ -223,14 +226,14 @@ public class NetworkV1ToNetworkV4ConverterTest {
     }
 
     @Test
-    public void testConvertToStackRequestWhenYarnPresented() {
+    void testConvertToStackRequestWhenYarnPresented() {
         NetworkV1Request networkV1Request = yarnNetworkV1Request();
         DetailedEnvironmentResponse environmentNetworkResponse = yarnEnvironmentNetwork();
 
         NetworkV4Request networkV4Request = underTest
                 .convertToNetworkV4Request(new ImmutablePair<>(networkV1Request, environmentNetworkResponse));
 
-        assertTrue(networkV4Request.createYarn().asMap().size() == 1);
+        assertEquals(1, networkV4Request.createYarn().asMap().size());
     }
 
     private NetworkV4Request createNetworkV4Request() {
@@ -306,7 +309,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
     }
 
     @Test
-    public void testConvertToStackRequestWhenAwsPresentedWithEndpointGateway() {
+    void testConvertToStackRequestWhenAwsPresentedWithEndpointGateway() {
         NetworkV1Request networkV1Request = awsNetworkV1Request();
         DetailedEnvironmentResponse environmentNetworkResponse = awsEnvironmentNetwork();
         EnvironmentNetworkResponse network = environmentNetworkResponse.getNetwork();
@@ -322,13 +325,37 @@ public class NetworkV1ToNetworkV4ConverterTest {
                 .convertToNetworkV4Request(new ImmutablePair<>(networkV1Request, environmentNetworkResponse));
         });
 
-        Assert.assertEquals(networkV4Request[0].createAws().getVpcId(), VPC_ID);
-        Assert.assertEquals(networkV4Request[0].createAws().getSubnetId(), SUBNET_ID);
-        Assert.assertEquals(networkV4Request[0].createAws().getEndpointGatewaySubnetId(), PUBLIC_SUBNET_ID);
+        assertEquals(networkV4Request[0].createAws().getVpcId(), VPC_ID);
+        assertEquals(networkV4Request[0].createAws().getSubnetId(), SUBNET_ID);
+        assertEquals(networkV4Request[0].createAws().getEndpointGatewaySubnetId(), PUBLIC_SUBNET_ID);
     }
 
     @Test
-    public void testConvertToStackRequestWhenAwsPresentedWithEndpointGatewayMissingSubnet() {
+    void testConvertToStackRequestWhenAwsPresentedWithPrivateEndpointGateway() {
+        NetworkV1Request networkV1Request = awsNetworkV1Request();
+        DetailedEnvironmentResponse environmentNetworkResponse = awsEnvironmentNetwork();
+        EnvironmentNetworkResponse network = environmentNetworkResponse.getNetwork();
+        network.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
+        network.setEndpointGatewaySubnetIds(Set.of(SUBNET2_ID));
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(true);
+        CloudSubnet privateSubnet = new CloudSubnet(SUBNET2_ID, "name", "az-1", "cidr", true, false, false, SubnetType.PRIVATE);
+
+        when(subnetSelector.chooseSubnetForEndpointGateway(any(), any())).thenReturn(Optional.of(privateSubnet));
+        when(endpointGatewayNetworkValidator.validate(any())).thenReturn(ValidationResult.empty());
+
+        NetworkV4Request[] networkV4Request = new NetworkV4Request[1];
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            networkV4Request[0] = underTest
+                    .convertToNetworkV4Request(new ImmutablePair<>(networkV1Request, environmentNetworkResponse));
+        });
+
+        assertEquals(networkV4Request[0].createAws().getVpcId(), VPC_ID);
+        assertEquals(networkV4Request[0].createAws().getSubnetId(), SUBNET_ID);
+        assertEquals(networkV4Request[0].createAws().getEndpointGatewaySubnetId(), SUBNET2_ID);
+    }
+
+    @Test
+    void testConvertToStackRequestWhenAwsPresentedWithEndpointGatewayMissingSubnetNoTargeting() {
         NetworkV1Request networkV1Request = awsNetworkV1Request();
         DetailedEnvironmentResponse environmentNetworkResponse = awsEnvironmentNetwork();
         EnvironmentNetworkResponse network = environmentNetworkResponse.getNetwork();
@@ -342,7 +369,27 @@ public class NetworkV1ToNetworkV4ConverterTest {
             });
         });
 
-        assert exception.getMessage().startsWith("Endpoint gateway subnet validation failed:");
+        assertThat(exception.getMessage()).startsWith("Endpoint gateway subnet validation failed:");
+    }
+
+    @Test
+    void testConvertToStackRequestWhenAwsPresentedWithEndpointGatewayWithTargetingInvalid() {
+        NetworkV1Request networkV1Request = awsNetworkV1Request();
+        DetailedEnvironmentResponse environmentNetworkResponse = awsEnvironmentNetwork();
+        EnvironmentNetworkResponse network = environmentNetworkResponse.getNetwork();
+        network.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
+        network.setEndpointGatewaySubnetIds(Set.of(SUBNET_ID));
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(true);
+
+        when(endpointGatewayNetworkValidator.validate(any())).thenReturn(ValidationResult.builder().error("error").build());
+
+        Exception exception = assertThrows(BadRequestException.class, () -> {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+                underTest.convertToNetworkV4Request(new ImmutablePair<>(networkV1Request, environmentNetworkResponse));
+            });
+        });
+
+        assertThat(exception.getMessage()).startsWith("Endpoint gateway subnet validation failed:");
     }
 
     private DetailedEnvironmentResponse awsEnvironmentNetwork() {

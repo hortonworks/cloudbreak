@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -11,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -36,6 +39,9 @@ public class EndpointGatewayNetworkValidator implements Validator<Pair<String, E
     @Inject
     private SubnetSelector subnetSelector;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public ValidationResult validate(Pair<String, EnvironmentNetworkResponse> subject) {
         String baseSubnetId = subject.getLeft();
@@ -45,7 +51,7 @@ public class EndpointGatewayNetworkValidator implements Validator<Pair<String, E
         if (network == null) {
             LOGGER.debug("No network provided; public endpoint access gateway is disabled.");
         } else {
-            if (PublicEndpointAccessGateway.ENABLED.equals(network.getPublicEndpointAccessGateway())) {
+            if (PublicEndpointAccessGateway.ENABLED.equals(network.getPublicEndpointAccessGateway()) || isTargetingEndpointGateway(network)) {
                 if (Strings.isNullOrEmpty(baseSubnetId)) {
                     resultBuilder.error(NO_BASE_SUBNET);
                 } else {
@@ -54,7 +60,7 @@ public class EndpointGatewayNetworkValidator implements Validator<Pair<String, E
                         resultBuilder.error(String.format(NO_BASE_SUBNET_META, baseSubnetId));
                     } else {
                         String error;
-                        if (!MapUtils.isEmpty(network.getGatewayEndpointSubnetMetas())) {
+                        if (MapUtils.isNotEmpty(network.getGatewayEndpointSubnetMetas())) {
                             LOGGER.debug("Attempting to validate endpoint gateway subnet using provided endpoint subnets.");
                             error = NO_USABLE_SUBNET_IN_ENDPOINT_GATEWAY;
                         } else {
@@ -69,5 +75,10 @@ public class EndpointGatewayNetworkValidator implements Validator<Pair<String, E
             }
         }
         return resultBuilder.build();
+    }
+
+    private boolean isTargetingEndpointGateway(EnvironmentNetworkResponse network) {
+        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
+                CollectionUtils.isNotEmpty(network.getEndpointGatewaySubnetIds());
     }
 }

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -389,19 +390,24 @@ class AwsNativeMetadataCollectorTest {
     void collectLoadBalancerMetadataWhenTheSpecifiedArnsExists() {
         List<LoadBalancerType> loadBalancerTypes = List.of();
         CloudResource cloudResource = getCloudResource("aCrn", "lbname", null, ELASTIC_LOAD_BALANCER);
+        cloudResource.putParameter(CloudResource.ATTRIBUTES, LoadBalancerType.PRIVATE);
         CloudResource secondCloudResource = getCloudResource("secondCrn", "lbnamesecond", null, ELASTIC_LOAD_BALANCER);
+        secondCloudResource.putParameter(CloudResource.ATTRIBUTES, LoadBalancerType.GATEWAY_PRIVATE);
         List<CloudResource> cloudResources = List.of(cloudResource, secondCloudResource);
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
         LoadBalancer loadBalancer = new LoadBalancer();
         loadBalancer.setScheme(LoadBalancerSchemeEnum.Internal);
         when(loadBalancingClient.describeLoadBalancers(any()))
                 .thenReturn(new DescribeLoadBalancersResult().withLoadBalancers(loadBalancer));
+        when(loadBalancerTypeConverter.convert(LoadBalancerSchemeEnum.Internal.toString())).thenReturn(LoadBalancerType.PRIVATE);
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
 
         verify(loadBalancingClient, times(2)).describeLoadBalancers(any());
         assertFalse(cloudLoadBalancerMetadata.isEmpty());
         assertEquals(cloudResources.size(), cloudLoadBalancerMetadata.size());
+        assertThat(cloudLoadBalancerMetadata.stream().map(CloudLoadBalancerMetadata::getType).collect(Collectors.toSet()))
+                .containsExactlyInAnyOrder(LoadBalancerType.PRIVATE, LoadBalancerType.GATEWAY_PRIVATE);
     }
 
     @Test

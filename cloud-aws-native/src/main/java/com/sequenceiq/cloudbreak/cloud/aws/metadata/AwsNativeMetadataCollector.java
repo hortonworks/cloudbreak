@@ -109,8 +109,8 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
         AmazonElasticLoadBalancingClient loadBalancingClient = awsClient.createElasticLoadBalancingClient(awsCredential, region);
         LOGGER.info("Collect AWS load balancer metadata, in region '{}' with ARNs: '{}'", region, String.join(", ", loadBalancerArns));
 
-        for (String loadBalancerArn : loadBalancerArns) {
-            Optional<CloudLoadBalancerMetadata> collectedLoadBalancer = collectLoadBalancerMetadata(loadBalancingClient, loadBalancerArn, resources);
+        for (CloudResource loadBalancer : loadBalancers) {
+            Optional<CloudLoadBalancerMetadata> collectedLoadBalancer = collectLoadBalancerMetadata(loadBalancingClient, loadBalancer, resources);
             collectedLoadBalancer.ifPresent(result::add);
         }
         return result;
@@ -225,44 +225,49 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     }
 
     private Optional<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AmazonElasticLoadBalancingClient loadBalancingClient,
-            String loadBalancerArn, List<CloudResource> resources) {
+            CloudResource loadBalancer, List<CloudResource> resources) {
         Optional<CloudLoadBalancerMetadata> result = Optional.empty();
         try {
-            result = describeLoadBalancer(loadBalancerArn, loadBalancingClient, resources);
+            result = describeLoadBalancer(loadBalancer, loadBalancingClient, resources);
         } catch (AmazonServiceException awsException) {
             if (StringUtils.isNotEmpty(awsException.getErrorCode()) && LOAD_BALANCER_NOT_FOUND_ERROR_CODE.equals(awsException.getErrorCode())) {
-                LOGGER.info("Load balancers with ARN '{}' could not be found due to:", loadBalancerArn, awsException);
+                LOGGER.info("Load balancers with ARN '{}' could not be found due to:", loadBalancer.getReference(), awsException);
             } else {
-                LOGGER.warn("Metadata collection failed for load balancer '{}'", loadBalancerArn, awsException);
+                LOGGER.warn("Metadata collection failed for load balancer '{}'", loadBalancer.getReference(), awsException);
                 throw new CloudConnectorException("Metadata collection of load balancers failed", awsException);
             }
         } catch (RuntimeException e) {
-            LOGGER.warn("Unable to fetch metadata for load balancer '{}'", loadBalancerArn, e);
+            LOGGER.warn("Unable to fetch metadata for load balancer '{}'", loadBalancer.getReference(), e);
             throw new CloudConnectorException("Metadata collection of load balancers failed", e);
         }
         return result;
     }
 
-    private Optional<CloudLoadBalancerMetadata> describeLoadBalancer(String loadBalancerArn, AmazonElasticLoadBalancingClient loadBalancingClient,
+    private Optional<CloudLoadBalancerMetadata> describeLoadBalancer(CloudResource loadBalancer, AmazonElasticLoadBalancingClient loadBalancingClient,
             List<CloudResource> resources) {
         DescribeLoadBalancersRequest describeLoadBalancersRequest = new DescribeLoadBalancersRequest()
-                .withLoadBalancerArns(loadBalancerArn);
+                .withLoadBalancerArns(loadBalancer.getReference());
         DescribeLoadBalancersResult describeLoadBalancersResult = loadBalancingClient.describeLoadBalancers(describeLoadBalancersRequest);
 
         return describeLoadBalancersResult.getLoadBalancers().stream()
                 .findFirst()
-                .map(loadBalancer -> {
-                    LoadBalancerType type = loadBalancerTypeConverter.convert(loadBalancer.getScheme());
-                    Map<String, Object> parameters = awsNativeLbMetadataCollector.getParameters(loadBalancerArn, resources);
+                .map(awsLb -> {
+                    LoadBalancerType type = loadBalancerTypeConverter.convert(awsLb.getScheme());
+                    Map<String, Object> parameters = awsNativeLbMetadataCollector.getParameters(loadBalancer.getReference(), resources);
+                    LoadBalancerType resourceLbType = loadBalancer.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class);
+                    if (type == LoadBalancerType.PRIVATE && resourceLbType == LoadBalancerType.GATEWAY_PRIVATE) {
+                        LOGGER.debug("GATEWAY_PRIVATE LoadBalancer selected");
+                        type = LoadBalancerType.GATEWAY_PRIVATE;
+                    }
                     CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
                             .withType(type)
-                            .withCloudDns(loadBalancer.getDNSName())
-                            .withHostedZoneId(loadBalancer.getCanonicalHostedZoneId())
-                            .withName(loadBalancer.getLoadBalancerName())
+                            .withCloudDns(awsLb.getDNSName())
+                            .withHostedZoneId(awsLb.getCanonicalHostedZoneId())
+                            .withName(awsLb.getLoadBalancerName())
                             .withParameters(parameters)
                             .build();
-                    LOGGER.info("Saved metadata for load balancer {}: DNS {}, zone ID {}", loadBalancer.getLoadBalancerName(), loadBalancer.getDNSName(),
-                            loadBalancer.getCanonicalHostedZoneId());
+                    LOGGER.info("Saved metadata for load balancer {}: DNS {}, zone ID {}", awsLb.getLoadBalancerName(), awsLb.getDNSName(),
+                            awsLb.getCanonicalHostedZoneId());
                     return loadBalancerMetadata;
                 });
     }

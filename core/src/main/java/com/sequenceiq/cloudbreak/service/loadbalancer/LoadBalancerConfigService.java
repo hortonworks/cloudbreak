@@ -1,16 +1,10 @@
 package com.sequenceiq.cloudbreak.service.loadbalancer;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_11;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie.OozieHAConfigProvider.OOZIE_HTTPS_PORT;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static java.util.Map.entry;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -18,26 +12,22 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.NetworkV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AvailabilitySetNameService;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie.OozieRoles;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -46,15 +36,10 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
-import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
@@ -72,23 +57,6 @@ public class LoadBalancerConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoadBalancerConfigService.class);
 
-    private static final String ENDPOINT_SUFFIX = "gateway";
-
-    @Value("${cb.https.port:443}")
-    private String httpsPort;
-
-    @Value("${cb.knox.port:8443}")
-    private String knoxServicePort;
-
-    @Value("${cb.loadBalancer.supportedPlatforms:}")
-    private String supportedPlatforms;
-
-    @Inject
-    private LoadBalancerPersistenceService loadBalancerPersistenceService;
-
-    @Inject
-    private EntitlementService entitlementService;
-
     @Inject
     private SubnetSelector subnetSelector;
 
@@ -98,120 +66,46 @@ public class LoadBalancerConfigService {
     @Inject
     private AvailabilitySetNameService availabilitySetNameService;
 
-    public Set<String> getKnoxGatewayGroups(Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Fetching list of instance groups with Knox gateway installed");
-        Set<String> groupNames = new HashSet<>();
-        Cluster cluster = stack.getCluster();
-        if (cluster != null) {
-            LOGGER.debug("Checking if Knox gateway is explicitly defined");
-            CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
-            groupNames = cmTemplateProcessor.getHostGroupsWithComponent(KnoxRoles.KNOX_GATEWAY);
-        }
-        Set<String> gatewayGroupNames = stack.getInstanceGroups().stream()
-                .filter(i -> InstanceGroupType.isGateway(i.getInstanceGroupType()))
-                .map(InstanceGroup::getGroupName)
-                .collect(Collectors.toSet());
+    @Inject
+    private LoadBalancerEnabler loadBalancerEnabler;
 
-        if (groupNames.isEmpty()) {
-            LOGGER.debug("Knox gateway is not explicitly defined; searching for CM gateway hosts");
-            groupNames = gatewayGroupNames;
-        } else if (!gatewayGroupNames.containsAll(groupNames)) {
-            LOGGER.error("KNOX can only be installed on instance group where type is GATEWAY. As per the template " + cluster.getBlueprint().getName() +
-                    " KNOX_GATEWAY role config is present in groups " + groupNames  + " while the GATEWAY nodeType is available for instance group " +
-                    gatewayGroupNames);
-            throw new CloudbreakServiceException("KNOX can only be installed on instance group where type is GATEWAY. As per the template " +
-                    cluster.getBlueprint().getName() + " KNOX_GATEWAY role config is present in groups " + groupNames  +
-                    " while the GATEWAY nodeType is available for instance group " + gatewayGroupNames);
-        }
+    @Inject
+    private KnoxGroupDeterminer knoxGroupDeterminer;
 
-        if (groupNames.isEmpty()) {
-            LOGGER.info("No Knox gateway instance groups found");
-        }
-        return groupNames;
-    }
+    @Inject
+    private OozieTargetGroupProvisioner oozieTargetGroupProvisioner;
 
-    public Set<String> getOozieGroups(CmTemplateProcessor cmTemplateProcessor) {
-        LOGGER.debug("Fetching list of instance groups with Oozie installed");
-        Set<String> groupNames = cmTemplateProcessor.getHostGroupsWithComponent(OozieRoles.OOZIE_SERVER);
-        LOGGER.info("Oozie instance groups are {}", groupNames);
-        return groupNames;
-    }
-
-    public String generateLoadBalancerEndpoint(StackView stack) {
-        StringBuilder name = new StringBuilder()
-                .append(stack.getName())
-                .append('-')
-                .append(ENDPOINT_SUFFIX);
-        return name.toString();
-    }
-
-    public Set<TargetGroupPortPair> getTargetGroupPortPairs(TargetGroup targetGroup) {
-        switch (targetGroup.getType()) {
-            case KNOX:
-                return Set.of(new TargetGroupPortPair(Integer.parseInt(httpsPort), Integer.parseInt(knoxServicePort)));
-            case OOZIE:
-                return Set.of(new TargetGroupPortPair(Integer.parseInt(OOZIE_HTTPS_PORT), Integer.parseInt(OOZIE_HTTPS_PORT)));
-            case OOZIE_GCP:
-                return Set.of(new TargetGroupPortPair(Integer.parseInt(OOZIE_HTTPS_PORT), Integer.parseInt(knoxServicePort)));
-            default:
-                return Set.of();
-        }
-    }
-
-    /*
-     * favors public over private
-     */
-    public String getLoadBalancerUserFacingFQDN(Long stackId) {
-        Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId).stream()
-                .filter(lb -> StringUtils.isNotBlank(lb.getDns()) ||
-                        StringUtils.isNotBlank(lb.getIp()) || StringUtils.isNotBlank(lb.getFqdn()))
-                .collect(Collectors.toSet());
-
-        return findPublicLbName(loadBalancers)
-                .orElseGet(() -> findPrivateLbNameOrNull(loadBalancers));
-    }
-
-    private Optional<String> findPublicLbName(Set<LoadBalancer> loadBalancers) {
-        return loadBalancers.stream()
-                .filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType()))
-                .findAny().map(this::getBestAddressable);
-    }
-
-    private String findPrivateLbNameOrNull(Set<LoadBalancer> loadBalancers) {
-        return loadBalancers.stream().findAny()
-                .map(this::getBestAddressable).orElse(null);
-    }
-
-    private String getBestAddressable(LoadBalancer lb) {
-        if (StringUtils.isNotBlank(lb.getFqdn())) {
-            return lb.getFqdn();
-        }
-        if (StringUtils.isNotBlank(lb.getDns())) {
-            return lb.getDns();
-        }
-        return lb.getIp();
-    }
+    @Inject
+    private EntitlementService entitlementService;
 
     public Optional<LoadBalancer> selectLoadBalancerForFrontend(Set<LoadBalancer> loadBalancers, LoadBalancerType preferredType) {
         Preconditions.checkNotNull(preferredType);
-        Optional<LoadBalancer> loadBalancerOptional = loadBalancers.stream()
-                .filter(lb -> preferredType.equals(lb.getType()))
-                .findFirst();
+        Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerForType(loadBalancers, preferredType);
         if (loadBalancerOptional.isPresent()) {
             LOGGER.debug("Found load balancer of type {}", preferredType);
-        } else {
+        }
+        if (loadBalancerOptional.isEmpty()) {
+            loadBalancerOptional = getLoadBalancerForType(loadBalancers, LoadBalancerType.GATEWAY_PRIVATE);
+            loadBalancerOptional.ifPresent(loadBalancer ->
+                    LOGGER.debug("Could not find load balancer of preferred type {}. Using type {}", preferredType, loadBalancer.getType()));
+        }
+        if (loadBalancerOptional.isEmpty()) {
             loadBalancerOptional = loadBalancers.stream()
                     .filter(lb -> lb.getType() != null && !LoadBalancerType.OUTBOUND.equals(lb.getType()))
                     .findFirst();
             loadBalancerOptional.ifPresent(loadBalancer ->
                     LOGGER.debug("Could not find load balancer of preferred type {}. Using type {}", preferredType, loadBalancer.getType()));
         }
-
         if (loadBalancerOptional.isEmpty()) {
             LOGGER.debug("Unable to find load balancer");
         }
         return loadBalancerOptional;
+    }
+
+    private Optional<LoadBalancer> getLoadBalancerForType(Set<LoadBalancer> loadBalancers, LoadBalancerType preferredType) {
+        return loadBalancers.stream()
+                .filter(lb -> preferredType.equals(lb.getType()))
+                .findFirst();
     }
 
     public boolean isLoadBalancerCreationConfigured(Stack stack, DetailedEnvironmentResponse environment) {
@@ -223,7 +117,7 @@ public class LoadBalancerConfigService {
         boolean azureLoadBalancerDisabled = CloudPlatform.AZURE.toString().equalsIgnoreCase(stack.getCloudPlatform()) &&
                 LoadBalancerSku.NONE.equals(sku);
         if (azureLoadBalancerDisabled) {
-            Optional<TargetGroup> oozieTargetGroup = setupOozieHATargetGroup(stack, true);
+            Optional<TargetGroup> oozieTargetGroup = oozieTargetGroupProvisioner.setupOozieHATargetGroup(stack, true);
             if (oozieTargetGroup.isPresent()) {
                 throw new CloudbreakServiceException("Unsupported setup: Load balancers are disabled, but Oozie HA is configured. " +
                         "Either enable Azure load balancers, or use a non-HA Oozie setup.");
@@ -237,7 +131,7 @@ public class LoadBalancerConfigService {
 
         if (stack.getCloudPlatform().equalsIgnoreCase(CloudPlatform.AZURE.toString())) {
             configureLoadBalancerAvailabilitySets(stack.getName(), loadBalancers);
-            configureLoadBalancerSku(source, loadBalancers);
+            configureLoadBalancerSku(sku, loadBalancers);
         }
         return loadBalancers;
     }
@@ -249,7 +143,7 @@ public class LoadBalancerConfigService {
      * @param availabilitySetPrefix A string prefix. Should be a stack name normally.
      * @param loadBalancers         the list of load balancers to look up target groups from.
      */
-    public void configureLoadBalancerAvailabilitySets(String availabilitySetPrefix, Set<LoadBalancer> loadBalancers) {
+    private void configureLoadBalancerAvailabilitySets(String availabilitySetPrefix, Set<LoadBalancer> loadBalancers) {
         getKnoxInstanceGroups(loadBalancers)
                 .forEach(instanceGroup -> attachAvailabilitySetParameters(availabilitySetPrefix, instanceGroup));
         getOozieInstanceGroupsForAzure(loadBalancers)
@@ -282,17 +176,16 @@ public class LoadBalancerConfigService {
     }
 
     /**
-     * Sets the SKU of each load balancer to either the SKU provided in the Azure stack request, or
-     * to the default SKU value.
+     * Sets the SKU of each load balancer to the SKU provided
      *
-     * @param source        The original StackV4Request for this stack.
+     * @param sku           The SKU extracted earlier for the stack.
      * @param loadBalancers The list of load balancers to update.
      */
-    public void configureLoadBalancerSku(StackV4Request source, Set<LoadBalancer> loadBalancers) {
-        loadBalancers.forEach(lb -> lb.setSku(getLoadBalancerSku(source)));
+    private void configureLoadBalancerSku(LoadBalancerSku sku, Set<LoadBalancer> loadBalancers) {
+        loadBalancers.forEach(lb -> lb.setSku(sku));
     }
 
-    public LoadBalancerSku getLoadBalancerSku(StackV4Request source) {
+    private LoadBalancerSku getLoadBalancerSku(StackV4Request source) {
         return Optional.ofNullable(source)
                 .map(StackV4Request::getAzure)
                 .map(AzureStackV4Parameters::getLoadBalancerSku)
@@ -300,7 +193,8 @@ public class LoadBalancerConfigService {
                 .orElse(LoadBalancerSku.getDefault());
     }
 
-    public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled,
+    @VisibleForTesting
+    Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled,
             LoadBalancerSku sku) {
         MDCBuilder.buildMdcContext(environment);
         if (dryRun) {
@@ -310,7 +204,7 @@ public class LoadBalancerConfigService {
         }
         Set<LoadBalancer> loadBalancers = new HashSet<>();
 
-        if (isLoadBalancerEnabled(stack.getType(), stack.getCloudPlatform(), environment, loadBalancerFlagEnabled)) {
+        if (loadBalancerEnabler.isLoadBalancerEnabled(stack.getType(), stack.getCloudPlatform(), environment, loadBalancerFlagEnabled)) {
             if (!loadBalancerFlagEnabled) {
                 LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
             } else {
@@ -327,7 +221,7 @@ public class LoadBalancerConfigService {
     }
 
     private void setupOozieLoadbalancing(Stack stack, boolean dryRun, Set<LoadBalancer> loadBalancers) {
-        Optional<TargetGroup> oozieTargetGroup = setupOozieHATargetGroup(stack, dryRun);
+        Optional<TargetGroup> oozieTargetGroup = oozieTargetGroupProvisioner.setupOozieHATargetGroup(stack, dryRun);
         if (oozieTargetGroup.isPresent()) {
             setupLoadBalancer(dryRun, stack, loadBalancers, oozieTargetGroup.get(), LoadBalancerType.PRIVATE);
         } else {
@@ -339,19 +233,22 @@ public class LoadBalancerConfigService {
             boolean dryRun, Set<LoadBalancer> loadBalancers, LoadBalancerSku sku) {
         Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack, dryRun);
         if (knoxTargetGroup.isPresent() && environment != null) {
-            boolean createPublicLb = shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform());
+            boolean createExternalLb = shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform(),
+                    environment.getAccountId());
 
             if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
                 setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PRIVATE);
-                if (shouldCreateOutboundLoadBalancer(createPublicLb, stack, sku, environment.getNetwork())) {
+                if (shouldCreateOutboundLoadBalancer(createExternalLb, stack, sku, environment.getNetwork())) {
                     LOGGER.debug("Found private only Azure load balancer configuration; creating outbound public load balancer for egress.");
                     setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.OUTBOUND);
                 }
             } else {
                 LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
             }
-            if (createPublicLb) {
-                setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PUBLIC);
+            if (createExternalLb) {
+                LoadBalancerType loadBalancerType = isPrivateEndpointGatewayNetwork(environment) ? LoadBalancerType.GATEWAY_PRIVATE : LoadBalancerType.PUBLIC;
+                LOGGER.debug("{} Endpoint Access Gateway is selected", loadBalancerType);
+                setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), loadBalancerType);
             } else {
                 LOGGER.debug("External load balancer creation is disabled.");
             }
@@ -360,8 +257,17 @@ public class LoadBalancerConfigService {
         }
     }
 
-    private boolean shouldCreateOutboundLoadBalancer(boolean createPublicLb, Stack stack, LoadBalancerSku sku, EnvironmentNetworkResponse network) {
-        return !createPublicLb
+    private boolean isPrivateEndpointGatewayNetwork(DetailedEnvironmentResponse environment) {
+        Map<String, CloudSubnet> gatewayEndpointSubnetMetas = environment.getNetwork().getGatewayEndpointSubnetMetas();
+        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(environment.getAccountId())
+                && (MapUtils.isNotEmpty(gatewayEndpointSubnetMetas)
+                && gatewayEndpointSubnetMetas.entrySet().stream()
+                .allMatch(e -> e.getValue().getType() == SubnetType.PRIVATE)
+                || PublicEndpointAccessGateway.ENABLED != environment.getNetwork().getPublicEndpointAccessGateway());
+    }
+
+    private boolean shouldCreateOutboundLoadBalancer(boolean createExternalLb, Stack stack, LoadBalancerSku sku, EnvironmentNetworkResponse network) {
+        return !createExternalLb
                 && AZURE.equalsIgnoreCase(stack.getCloudPlatform())
                 && LoadBalancerSku.STANDARD.equals(sku)
                 && !Optional.of(network)
@@ -435,60 +341,15 @@ public class LoadBalancerConfigService {
         return networkV4Base;
     }
 
-    private boolean isLoadBalancerEnabled(StackType type, String cloudPlatform, DetailedEnvironmentResponse environment, boolean flagEnabled) {
-        return !type.equals(StackType.TEMPLATE) &&
-                getSupportedPlatforms().contains(cloudPlatform) &&
-                !isLoadBalancerDisabled(environment) &&
-                (flagEnabled || isLoadBalancerEnabledForDatalake(type, environment) || isLoadBalancerEnabledForDatahub(type, environment));
-    }
-
-    private boolean isLoadBalancerDisabled(DetailedEnvironmentResponse environment) {
-        return environment != null && environment.getNetwork() != null &&
-                LoadBalancerCreation.DISABLED.equals(environment.getNetwork().getLoadBalancerCreation());
-    }
-
-    private boolean isLoadBalancerEnabledForDatalake(StackType type, DetailedEnvironmentResponse environment) {
-        return StackType.DATALAKE.equals(type) && environment != null &&
-                (isdatalakeLoadBalancerEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), environment.getCloudPlatform()) ||
-                        !isLoadBalancerEntitlementRequiredForCloudProvider(environment.getCloudPlatform()) ||
-                        isEndpointGatewayEnabled(environment.getNetwork()));
-    }
-
-    private boolean isdatalakeLoadBalancerEntitlementEnabled(String accountId, String cloudPlatform) {
-        if (AZURE.equalsIgnoreCase(cloudPlatform)) {
-            return entitlementService.azureDatalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId());
-        } else {
-            return entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId());
-        }
-    }
-
-    private boolean isLoadBalancerEntitlementRequiredForCloudProvider(String cloudPlatform) {
-        return !(AWS.equalsIgnoreCase(cloudPlatform));
-    }
-
-    private boolean isLoadBalancerEnabledForDatahub(StackType type, DetailedEnvironmentResponse environment) {
-        return StackType.WORKLOAD.equals(type) && environment != null && isEndpointGatewayEnabled(environment.getNetwork());
-    }
-
-    private boolean shouldCreateExternalKnoxLoadBalancer(Network network, EnvironmentNetworkResponse envNetwork, String cloudPlatform) {
+    private boolean shouldCreateExternalKnoxLoadBalancer(Network network, EnvironmentNetworkResponse envNetwork, String cloudPlatform, String accountId) {
         return CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform) ||
-                isEndpointGatewayEnabled(envNetwork) ||
+                loadBalancerEnabler.isEndpointGatewayEnabled(accountId, envNetwork) ||
                 isNetworkUsingPublicSubnet(network, envNetwork);
-    }
-
-    private boolean isEndpointGatewayEnabled(EnvironmentNetworkResponse network) {
-        boolean result = network != null && network.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED;
-        if (result) {
-            LOGGER.debug("Public endpoint access gateway is enabled. A public load balancer will be created.");
-        } else {
-            LOGGER.debug("Public endpoint access gateway is disabled.");
-        }
-        return result;
     }
 
     private Optional<TargetGroup> setupKnoxTargetGroup(Stack stack, boolean dryRun) {
         TargetGroup knoxTargetGroup = null;
-        Set<String> knoxGatewayGroupNames = getKnoxGatewayGroups(stack);
+        Set<String> knoxGatewayGroupNames = knoxGroupDeterminer.getKnoxGatewayGroupNames(stack);
         Set<InstanceGroup> knoxGatewayInstanceGroups = stack.getInstanceGroups().stream()
                 .filter(ig -> knoxGatewayGroupNames.contains(ig.getGroupName()))
                 .collect(Collectors.toSet());
@@ -511,47 +372,6 @@ public class LoadBalancerConfigService {
         return Optional.ofNullable(knoxTargetGroup);
     }
 
-    private Optional<TargetGroup> setupOozieHATargetGroup(Stack stack, boolean dryRun) {
-        Optional<InstanceGroup> oozieInstanceGroup = getOozieHAInstanceGroup(stack);
-
-        if (oozieInstanceGroup.isPresent()) {
-            LOGGER.info("Oozie HA instance group found; enabling Oozie load balancer configuration.");
-            TargetGroup oozieTargetGroup = new TargetGroup();
-            if (CloudPlatform.GCP.equalsIgnoreCase(stack.getCloudPlatform())) {
-                oozieTargetGroup.setType(TargetGroupType.OOZIE_GCP);
-            } else {
-                oozieTargetGroup.setType(TargetGroupType.OOZIE);
-            }
-            oozieTargetGroup.setInstanceGroups(Set.of(oozieInstanceGroup.get()));
-            if (!dryRun) {
-                LOGGER.debug("Adding target group to Oozie HA instance group.");
-                oozieInstanceGroup.get().addTargetGroup(oozieTargetGroup);
-            } else {
-                LOGGER.debug("Dry run, skipping instance group/target group linkage for Oozie.");
-            }
-            return Optional.of(oozieTargetGroup);
-        } else {
-            LOGGER.info("Oozie HA instance group not found; not enabling Oozie load balancer configuration.");
-            return Optional.empty();
-        }
-    }
-
-    private Optional<InstanceGroup> getOozieHAInstanceGroup(Stack stack) {
-        Cluster cluster = stack.getCluster();
-        if (cluster != null) {
-            CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
-            String cdhVersion = cmTemplateProcessor.getStackVersion();
-            if (cdhVersion != null && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_11)) {
-                Set<String> oozieGroupNames = getOozieGroups(cmTemplateProcessor);
-                return stack.getInstanceGroups().stream()
-                        .filter(ig -> oozieGroupNames.contains(ig.getGroupName()))
-                        .filter(ig -> ig.getNodeCount() > 1)
-                        .findFirst();
-            }
-        }
-        return Optional.empty();
-    }
-
     private LoadBalancer createLoadBalancerIfNotExists(Set<LoadBalancer> loadBalancers, LoadBalancerType type, Stack stack) {
         LoadBalancer loadBalancer;
         Optional<LoadBalancer> existingLoadBalancer = loadBalancers.stream()
@@ -571,9 +391,5 @@ public class LoadBalancerConfigService {
     private void setupLoadBalancerWithTargetGroup(LoadBalancer loadBalancer, TargetGroup targetGroup) {
         loadBalancer.addTargetGroup(targetGroup);
         targetGroup.addLoadBalancer(loadBalancer);
-    }
-
-    private List<String> getSupportedPlatforms() {
-        return supportedPlatforms == null ? List.of() : Arrays.asList(supportedPlatforms.split(","));
     }
 }

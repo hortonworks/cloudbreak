@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -42,13 +44,13 @@ public class NetworkMetadataValidationService {
 
     public Map<String, CloudSubnet> getEndpointGatewaySubnetMetadata(Environment environment, EnvironmentDto environmentDto) {
         LOGGER.debug("Fetching subnet metadata for from cloud providers.");
-        Map<String, CloudSubnet> endpointGatewaySubnetMetas = removePrivateSubnets(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(
+        Map<String, CloudSubnet> endpointGatewaySubnetMetas = removePrivateSubnetsOrSkip(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(
                 environmentDto, environmentDto.getNetwork()));
         validateSubnetsIfProvided(environment, environmentDto.getNetwork().getSubnetMetas(), endpointGatewaySubnetMetas);
         return endpointGatewaySubnetMetas;
     }
 
-    private Map<String, CloudSubnet> removePrivateSubnets(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
+    private Map<String, CloudSubnet> removePrivateSubnetsOrSkip(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
         if (entitlementService.endpointGatewaySkipValidation(ThreadBasedUserCrnProvider.getAccountId())
                 || entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
             LOGGER.debug("Targeting Subnets for Endpoint Access Gateway is enabled, private subnets are allowed.");
@@ -66,29 +68,35 @@ public class NetworkMetadataValidationService {
 
     private void validateSubnetsIfProvided(Environment environment, Map<String, CloudSubnet> subnetMetas,
             Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
-        if (shouldValidateEndpointGatewaySubnets(environment, subnetMetas)) {
-            if (endpointGatewaySubnetMetas != null && !endpointGatewaySubnetMetas.isEmpty()) {
+        if (shouldValidateEndpointGatewaySubnets(environment, subnetMetas, endpointGatewaySubnetMetas)) {
+            if (MapUtils.isNotEmpty(endpointGatewaySubnetMetas)) {
                 LOGGER.info("Validation of endpoint gateway subnets: gateway subnets should share availability " +
                         "zones with the provided environment subnets.");
-                valildateProvidedEndpointGatewaySubnets(subnetMetas, endpointGatewaySubnetMetas);
+                validateAwsEndpointGatewaySubnets(environment, endpointGatewaySubnetMetas);
+                validateProvidedEndpointGatewaySubnets(subnetMetas, endpointGatewaySubnetMetas);
             } else {
                 LOGGER.info("Validation of endpoint gateway subnets: Please make sure to provide a public " +
                         "subnet for every availability zone where the environment has a private subnet.");
-                valildateEnvironmentSubnetsForEndpointGateway(subnetMetas);
+                validateEnvironmentSubnetsForEndpointGateway(subnetMetas);
             }
         }
     }
 
-    private boolean shouldValidateEndpointGatewaySubnets(Environment environment, Map<String, CloudSubnet> subnetMetas) {
-        return !entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
-            hasSupportedNetwork(environment) &&
-            environment.getNetwork().getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED &&
+    private boolean shouldValidateEndpointGatewaySubnets(Environment environment, Map<String, CloudSubnet> subnetMetas,
+            Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
+        return hasSupportedNetwork(environment) &&
+            (environment.getNetwork().getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED ||
+                    isTargetingEndpointGateway(endpointGatewaySubnetMetas)) &&
             environment.getNetwork().getRegistrationType() != RegistrationType.CREATE_NEW &&
-            subnetMetas != null &&
-            !subnetMetas.isEmpty();
+            MapUtils.isNotEmpty(subnetMetas);
     }
 
-    private void valildateProvidedEndpointGatewaySubnets(Map<String, CloudSubnet> subnetMetas, Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
+    private boolean isTargetingEndpointGateway(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
+        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
+                MapUtils.isNotEmpty(endpointGatewaySubnetMetas);
+    }
+
+    private void validateProvidedEndpointGatewaySubnets(Map<String, CloudSubnet> subnetMetas, Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
         LOGGER.debug("Verifying that provided endpoint gateway subnets share availability zones with provided environment subnets.");
         Set<String> subnetAZs = subnetMetas.values().stream()
             .map(CloudSubnet::getAvailabilityZone)
@@ -101,7 +109,7 @@ public class NetworkMetadataValidationService {
         }
     }
 
-    private void valildateEnvironmentSubnetsForEndpointGateway(Map<String, CloudSubnet> subnetMetas) {
+    private void validateEnvironmentSubnetsForEndpointGateway(Map<String, CloudSubnet> subnetMetas) {
         LOGGER.debug("Verifying that public subnets in availability zones that match the private subnets were provided.");
         Set<String> privateAZs = subnetMetas.values().stream()
             .filter(CloudSubnet::isPrivateSubnet)
@@ -113,6 +121,17 @@ public class NetworkMetadataValidationService {
             .collect(Collectors.toSet());
         if (!publicAZs.containsAll(privateAZs)) {
             throw new BadRequestException(String.format(UNMATCHED_AZ, privateAZs));
+        }
+    }
+
+    private void validateAwsEndpointGatewaySubnets(Environment environment, Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
+        if (AWS.equalsIgnoreCase(environment.getCloudPlatform()) &&
+                MapUtils.isNotEmpty(endpointGatewaySubnetMetas) &&
+                endpointGatewaySubnetMetas.values().stream().allMatch(sn -> SubnetType.PRIVATE == sn.getType()) &&
+                PublicEndpointAccessGateway.ENABLED == environment.getNetwork().getPublicEndpointAccessGateway()) {
+
+            throw new BadRequestException("All subnets that are provided as Endpoint Access Gateway Subnet are PRIVATE, " +
+                    "internet-facing load balancer could not be created.");
         }
     }
 

@@ -24,12 +24,14 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 
 /**
  * Abstract class for ResourceBuilders that operate based off of the configuration of the loadbalancers in a given stack
- *
- * GCP:a forwarding rule is the tuple (type, external IP(assigneable), service port(s), backend service { health check port ,instancegroups{instances}}
- * each entry value here needs to be it's own backend service and then have 1 forwarding rule for all entries that have the same service port
+ * <p>
+ * GCP:a forwarding rule is the tuple (type, external IP(assigneable), service port(s), backend service { health check port ,instancegroups{instances}})
+ * each entry value here needs to be its own backend service and then have 1 forwarding rule for all entries that have the same service port
  * this covers a situation where instance A and B are both set to service port X, but have different health check ports
- * */
+ */
 public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResourceBuilder implements LoadBalancerResourceBuilder<GcpContext> {
+
+    public static final String LOADBALANCER_TYPE = "loadBalancerType";
 
     static final String TRAFFICPORT = "trafficport";
 
@@ -61,7 +63,7 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
 
     protected List<CloudResource> getCloudResourcesForFrontendAndBackendCreate(GcpContext context, CloudLoadBalancer loadBalancer) {
         List<CloudResource> resources = new ArrayList<>();
-        if (loadBalancer.getType() == LoadBalancerType.PRIVATE) {
+        if (loadBalancer.getType() == LoadBalancerType.PRIVATE || loadBalancer.getType() == LoadBalancerType.GATEWAY_PRIVATE) {
             Map<Integer, List<Integer>> hcPortToTrafficPorts = new HashMap<>();
             loadBalancer.getPortToTargetGroupMapping().keySet().forEach(targetGroupPortPair -> {
                 Integer healthCheckPort = targetGroupPortPair.getHealthCheckPort();
@@ -76,7 +78,7 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
             });
             hcPortToTrafficPorts.forEach((healthCheckPort, trafficPorts) -> {
                 String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
-                Map<String, Object> parameters = Map.of(TRAFFICPORTS, trafficPorts, HCPORT, healthCheckPort);
+                Map<String, Object> parameters = Map.of(TRAFFICPORTS, trafficPorts, HCPORT, healthCheckPort, LOADBALANCER_TYPE, loadBalancer.getType().name());
                 resources.add(new CloudResource.Builder().withType(resourceType())
                         .withName(resourceName)
                         .withParameters(parameters)
@@ -86,7 +88,8 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
             loadBalancer.getPortToTargetGroupMapping().keySet().forEach(targetGroupPortPair -> {
                 Integer healthCheckPort = targetGroupPortPair.getHealthCheckPort();
                 String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
-                Map<String, Object> parameters = Map.of(TRAFFICPORT, targetGroupPortPair.getTrafficPort(), HCPORT, healthCheckPort);
+                Map<String, Object> parameters = Map.of(TRAFFICPORT, targetGroupPortPair.getTrafficPort(), HCPORT, healthCheckPort,
+                        LOADBALANCER_TYPE, loadBalancer.getType().name());
                 resources.add(new CloudResource.Builder().withType(resourceType())
                         .withName(resourceName)
                         .withParameters(parameters)
