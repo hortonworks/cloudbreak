@@ -150,6 +150,7 @@ public class MonitoringTests extends AbstractE2ETest {
                 .given(SdxInternalTestDto.class)
                     .withEnvironment()
                     .withDatabase(sdxDatabaseRequest)
+                    .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()

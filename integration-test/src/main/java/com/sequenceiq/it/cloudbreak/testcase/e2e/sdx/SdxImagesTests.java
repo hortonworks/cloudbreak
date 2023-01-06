@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
@@ -77,6 +78,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
         String stack = resourcePropertyProvider().getName();
         String masterInstanceGroup = "master";
         String idbrokerInstanceGroup = "idbroker";
+        String telemetry = "telemetry";
         CloudProvider cloudProvider = testContext.getCloudProvider();
         AtomicReference<String> selectedImageID = new AtomicReference<>();
 
@@ -107,10 +109,14 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                     .withCluster(cluster)
                     .withImageSettings(imageSettings)
                     .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
+                .given(telemetry, TelemetryTestDto.class)
+                    .withLogging()
+                    .withReportClusterLogs()
                 .given(sdxInternal, SdxInternalTestDto.class)
                     .withDatabase(sdxDatabaseRequest)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withStackRequest(key(cluster), key(stack))
+                    .withTelemetry(telemetry)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()

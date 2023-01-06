@@ -149,6 +149,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .given(SdxInternalTestDto.class)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withEnableMultiAz()
+                    .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal())
                 .validate();
     }
@@ -171,6 +172,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                     .withDatabase(database)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withEnableMultiAz()
+                    .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()

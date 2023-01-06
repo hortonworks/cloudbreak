@@ -14,6 +14,7 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.resize.SdxResizeTestValidator;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
@@ -49,10 +50,14 @@ public class SdxResizeRecoveryTests extends PreconditionSdxE2ETest {
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         return testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs()
                 .given(sdxKey, SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withClusterShape(SdxClusterShape.CUSTOM)
+                .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal(), key(sdxKey))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
                 .awaitForHealthyInstances()
