@@ -54,7 +54,7 @@ public class TargetedUpscaleSupportService {
     public DnsResolverType getActualDnsResolverType(StackDto stackDto) {
         StackView stack = stackDto.getStack();
         LOGGER.debug("Original value of domainDnsResolver field for stack {} is {}", stack.getResourceCrn(), stack.getDomainDnsResolver());
-        if (!isUnboundEliminationSupported(stack.getResourceCrn())) {
+        if (!isUnboundEliminationSupported(Crn.fromString(stack.getResourceCrn()).getAccountId())) {
             LOGGER.debug("Since unbound elimination is not supported, then targeted upscale also won't be supported, " +
                     "thus all 00-cluster.conf will be regenerated for all nodes of stack {}.", stack.getResourceCrn());
             return DnsResolverType.LOCAL_UNBOUND;

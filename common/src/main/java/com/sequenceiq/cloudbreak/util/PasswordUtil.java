@@ -1,12 +1,17 @@
 package com.sequenceiq.cloudbreak.util;
 
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
 public class PasswordUtil {
 
-    private static final int PWD_LENGTH = 26;
+    private static final int PWD_PREFIX_LENGTH = 6;
+
+    private static final int PWD_PART_LENGTH = 10;
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -14,11 +19,13 @@ public class PasswordUtil {
     }
 
     public static String generatePassword() {
-        return getRandomLettersAndNumbers(PWD_LENGTH);
-    }
-
-    public static String getRandomLettersAndNumbers(int count) {
-        return generate(count, true, true);
+        String prefix = PasswordUtil.getRandomAlphabetic(PWD_PREFIX_LENGTH);
+        String letters = PasswordUtil.getRandomAlphabetic(PWD_PART_LENGTH);
+        String numbers = PasswordUtil.getRandomNumeric(PWD_PART_LENGTH);
+        String raw = letters.concat(numbers);
+        List<String> list = Arrays.asList(raw.split(""));
+        Collections.shuffle(list, SECURE_RANDOM);
+        return prefix.concat(String.join("", list));
     }
 
     public static String getRandomAlphabetic(int count) {
@@ -32,4 +39,5 @@ public class PasswordUtil {
     private static String generate(int count, boolean letters, boolean numbers) {
         return RandomStringUtils.random(count, 0, 0, letters, numbers, null, SECURE_RANDOM);
     }
+
 }

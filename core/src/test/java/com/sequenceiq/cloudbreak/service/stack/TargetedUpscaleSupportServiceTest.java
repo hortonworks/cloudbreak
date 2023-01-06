@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,7 +37,9 @@ import com.sequenceiq.cloudbreak.view.StackView;
 @ExtendWith(MockitoExtension.class)
 public class TargetedUpscaleSupportServiceTest {
 
-    private static final String DATAHUB_CRN = "crn:cdp:datahub:eu-1:1234:user:91011";
+    private static final String ACCOUNT_ID = "1234";
+
+    private static final String DATAHUB_CRN = "crn:cdp:datahub:eu-1:" + ACCOUNT_ID + ":user:91011";
 
     @Mock
     private EntitlementService entitlementService;
@@ -62,8 +65,8 @@ public class TargetedUpscaleSupportServiceTest {
         when(entitlementService.targetedUpscaleSupported(any())).thenReturn(Boolean.FALSE);
         assertFalse(underTest.targetedUpscaleOperationSupported(getStack(DnsResolverType.UNKNOWN)));
 
-        verify(entitlementService, times(2)).targetedUpscaleSupported(any());
-        verify(entitlementService, times(1)).isUnboundEliminationSupported(any());
+        verify(entitlementService, times(2)).targetedUpscaleSupported(eq(ACCOUNT_ID));
+        verify(entitlementService, times(1)).isUnboundEliminationSupported(eq(ACCOUNT_ID));
     }
 
     @Test
@@ -71,6 +74,9 @@ public class TargetedUpscaleSupportServiceTest {
         when(entitlementService.targetedUpscaleSupported(any())).thenReturn(Boolean.TRUE);
         when(entitlementService.isUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
         assertTrue(underTest.targetedUpscaleOperationSupported(getStack(DnsResolverType.FREEIPA_FOR_ENV)));
+
+        verify(entitlementService, times(1)).targetedUpscaleSupported(eq(ACCOUNT_ID));
+        verify(entitlementService, times(1)).isUnboundEliminationSupported(eq(ACCOUNT_ID));
     }
 
     @Test
@@ -78,12 +84,17 @@ public class TargetedUpscaleSupportServiceTest {
         when(entitlementService.targetedUpscaleSupported(any())).thenReturn(Boolean.TRUE);
         when(entitlementService.isUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
         assertFalse(underTest.targetedUpscaleOperationSupported(getStack(DnsResolverType.LOCAL_UNBOUND)));
+
+        verify(entitlementService, times(1)).targetedUpscaleSupported(eq(ACCOUNT_ID));
+        verify(entitlementService, times(1)).isUnboundEliminationSupported(eq(ACCOUNT_ID));
     }
 
     @Test
     public void testIfThereIsAnyError() {
         when(entitlementService.targetedUpscaleSupported(any())).thenThrow(new InternalServerErrorException("error"));
         assertFalse(underTest.targetedUpscaleOperationSupported(getStack(DnsResolverType.UNKNOWN)));
+
+        verify(entitlementService, times(1)).targetedUpscaleSupported(eq(ACCOUNT_ID));
     }
 
     @ParameterizedTest(name = "unboundConfigPresentOnAnyNodes {0}, " +
@@ -96,6 +107,8 @@ public class TargetedUpscaleSupportServiceTest {
         when(entitlementService.isUnboundEliminationSupported(any())).thenReturn(unboundEliminationSupported);
 
         assertEquals(result, underTest.getActualDnsResolverType(getStackDto()));
+
+        verify(entitlementService, times(1)).isUnboundEliminationSupported(eq(ACCOUNT_ID));
     }
 
     private static Stream<Arguments> testUpdatingStackDnsResolverData() {
