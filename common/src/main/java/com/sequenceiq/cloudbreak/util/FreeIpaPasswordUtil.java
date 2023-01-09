@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.util;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class FreeIpaPasswordUtil {
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private static final int PWD_PREFIX_LENGTH = 3;
 
@@ -22,7 +25,8 @@ public class FreeIpaPasswordUtil {
         String numbers = PasswordUtil.getRandomNumeric(PWD_PART_LENGTH);
         String raw = upperCaseLetters.concat(lowerCaseLetters).concat(numbers).concat(SPECIAL_CHARS);
         List<String> list = Arrays.asList(raw.split(""));
-        Collections.shuffle(list);
+        Collections.shuffle(list, SECURE_RANDOM);
         return pwdPrefix.concat(String.join("", list));
     }
+
 }
