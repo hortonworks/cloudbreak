@@ -23,29 +23,32 @@ public class SaltRunner {
     @Value("${cb.max.salt.new.service.retry}")
     private int maxRetry;
 
-    public Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel, int maxRetry,
-            boolean usingErrorCount) {
-        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, SLEEP_TIME,
-                usingErrorCount ? maxRetryOnError : maxRetry);
+    public Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
+        return runner(bootstrap, exitCriteria, exitCriteriaModel, maxRetry, maxRetry);
     }
 
-    public Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
-        return runner(bootstrap, exitCriteria, exitCriteriaModel, maxRetry, false);
+    public Callable<Boolean> runnerWithConfiguredErrorCount(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
+        return runner(bootstrap, exitCriteria, exitCriteriaModel, maxRetry, maxRetryOnError);
+    }
+
+    public Callable<Boolean> runnerWithCalculatedErrorCount(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
+            int maxRetry) {
+        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, SLEEP_TIME,
+                calculateMaxRetryOnError(maxRetry));
     }
 
     public Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel, int maxRetry,
             int maxRetryOnError) {
-        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, SLEEP_TIME,
-                maxRetryOnError);
-    }
-
-    public Callable<Boolean> runnerWithUsingErrorCount(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
-        return runner(bootstrap, exitCriteria, exitCriteriaModel, maxRetry, true);
+        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, SLEEP_TIME, maxRetryOnError);
     }
 
     public Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
             OrchestratorStateRetryParams orchestratorStateRetryParams) {
         return runner(bootstrap, exitCriteria, exitCriteriaModel, orchestratorStateRetryParams.getMaxRetry(),
                 orchestratorStateRetryParams.getMaxRetryOnError());
+    }
+
+    private int calculateMaxRetryOnError(int maxRetry) {
+        return Math.min(maxRetry, maxRetryOnError);
     }
 }

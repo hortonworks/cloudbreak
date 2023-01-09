@@ -163,8 +163,8 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private void runValidation(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws Exception {
         OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, baseSaltJobRunner, true);
-        Callable<Boolean> saltJobRunBootstrapRunner =
-                saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, telemetrySaltRetryConfig.getCloudStorageValidation(), false);
+        Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithCalculatedErrorCount(saltJobIdTracker, exitCriteria, exitCriteriaModel,
+                telemetrySaltRetryConfig.getCloudStorageValidation());
         saltJobRunBootstrapRunner.call();
     }
 
@@ -310,7 +310,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             ParameterizedStateRunner stateRunner = new ParameterizedStateRunner(saltStateService, targetHostnames, METERING_UPGRADE, upgradeParameters);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner, false);
             Callable<Boolean> saltJobRunBootstrapRunner =
-                    saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, telemetrySaltRetryConfig.getMeteringUpgrade(), false);
+                    saltRunner.runnerWithCalculatedErrorCount(saltJobIdTracker, exitCriteria, exitModel, telemetrySaltRetryConfig.getMeteringUpgrade());
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during metering upgrade.", e);
@@ -343,7 +343,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             StateRunner stateRunner = new StateRunner(saltStateService, targetHostnames, saltState);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner, retryOnFail);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, retryCount, false);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithCalculatedErrorCount(saltJobIdTracker, exitCriteria, exitModel, retryCount);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.debug(errorMessage, e);
@@ -362,7 +362,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             ConcurrentParameterizedStateRunner stateRunner =
                     new ConcurrentParameterizedStateRunner(saltStateService, targetHostnames, saltState, parameters);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner, retryOnFail);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, retryCount, false);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithCalculatedErrorCount(saltJobIdTracker, exitCriteria, exitModel, retryCount);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.debug(errorMessage, e);
@@ -399,7 +399,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         try {
             OrchestratorBootstrap saltUpload = new SaltUploadWithPermission(saltConnector, targets, remoteFolder,
                     fileName, permission, content);
-            Callable<Boolean> saltUploadRunner = saltRunner.runner(saltUpload, exitCriteria, exitCriteriaModel);
+            Callable<Boolean> saltUploadRunner = saltRunner.runnerWithConfiguredErrorCount(saltUpload, exitCriteria, exitCriteriaModel);
             saltUploadRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during file distribute to gateway nodes", e);

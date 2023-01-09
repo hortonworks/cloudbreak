@@ -316,7 +316,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                     new SaltPillarProperties("/mount/disk.sls", Collections.singletonMap("mount_data", hostnameDiskMountMap));
 
             OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(sc, gatewayTargetIpAddresses, mounDiskProperties);
-            saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
+            saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(pillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
             saltCommandRunner.runModifyGrainCommand(sc,
@@ -348,7 +348,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void saveHostsPillar(OrchestratorAware stack, ExitCriteriaModel exitModel,
             Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
         OrchestratorBootstrap hostSave = PillarSave.createHostsPillar(sc, gatewayTargetIpAddresses, stack.getAllNodes());
-        Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
+        Callable<Boolean> saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(hostSave, exitCriteria, exitModel);
         saltPillarRunner.call();
     }
 
@@ -520,7 +520,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
         for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
             OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(sc, gatewayTargetIpAddresses, propertiesEntry.getValue());
-            Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
+            Callable<Boolean> saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(pillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
         }
     }
@@ -647,7 +647,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void runValidation(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws Exception {
         OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, baseSaltJobRunner, true);
         Callable<Boolean> saltJobRunBootstrapRunner =
-                saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxCloudStorageValidationRetry, false);
+                saltRunner.runnerWithCalculatedErrorCount(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxCloudStorageValidationRetry);
         saltJobRunBootstrapRunner.call();
     }
 
@@ -810,7 +810,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
             StateRunner stateRunner = new StateRunner(saltStateService, target, CM_SERVER_RESTART);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltJobIdTracker, exitCriteria, exitCriteriaModel);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.error("Error occurred during CM Server restart", e);
@@ -861,7 +861,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
             StateRunner stateRunner = new StateRunner(saltStateService, target, CM_AGENT_CERTDIR_PERMISSION);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltJobIdTracker, exitCriteria, exitCriteriaModel);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.error("Error occurred during CM Agent certdir permission update", e);
@@ -877,7 +877,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             for (Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave =
                         PillarSave.createCustomPillar(sc, Sets.newHashSet(gatewayConfig.getPrivateAddress()), propertiesEntry.getValue());
-                Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitCriteriaModel);
+                Callable<Boolean> saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(pillarSave, exitCriteria, exitCriteriaModel);
                 saltPillarRunner.call();
             }
 
@@ -1036,7 +1036,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             OrchestratorBootstrap scriptPillarSave = PillarSave.createRecipesPillar(sc, gatewayTargets, recipes, calculateRecipeExecutionTimeout());
-            Callable<Boolean> saltPillarRunner = saltRunner.runner(scriptPillarSave, exitCriteria, exitModel);
+            Callable<Boolean> saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(scriptPillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
             for (List<RecipeModel> recipeList : recipes.values()) {
@@ -1067,7 +1067,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
             SaltPillarProperties saltPillarProperties = new SaltPillarProperties("/kerberos/keytab.sls", Collections.singletonMap("keytab", properties));
             OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(sc, gatewayTargets, saltPillarProperties);
-            Callable<Boolean> runner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
+            Callable<Boolean> runner = saltRunner.runnerWithConfiguredErrorCount(pillarSave, exitCriteria, exitModel);
             runner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during keytab upload", e);
@@ -1217,7 +1217,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void runSyncAll(SaltConnector sc, Set<String> targetHostnames, Set<Node> allNode, ExitCriteriaModel exitCriteriaModel) throws Exception {
         SaltJobIdTracker syncAllTracker = new SaltJobIdTracker(saltStateService, sc, new SyncAllRunner(saltStateService, targetHostnames, allNode));
-        saltRunner.runner(syncAllTracker, exitCriteria, exitCriteriaModel, maxRetry, true).call();
+        saltRunner.runnerWithConfiguredErrorCount(syncAllTracker, exitCriteria, exitCriteriaModel).call();
     }
 
     @Override
@@ -1228,7 +1228,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGatewayConfig)) {
             SaltPillarProperties gatewayPillarProperties = saltConfig.getServicePillarConfig().get("gateway");
             OrchestratorBootstrap gatewayPillarSave = PillarSave.createCustomPillar(sc, gatewayTargets, gatewayPillarProperties);
-            Callable<Boolean> saltPillarRunner = saltRunner.runnerWithUsingErrorCount(gatewayPillarSave, exitCriteria, exitModel);
+            Callable<Boolean> saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(gatewayPillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during gateway pillar upload", e);
@@ -1253,7 +1253,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                         exitCriteriaModel, maxRetryLeave, exitCriteria);
                 Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
                 SaltJobIdTracker syncAllTracker = new SaltJobIdTracker(saltStateService, sc, new SyncAllRunner(saltStateService, allHostnames, allNodes));
-                saltRunner.runner(syncAllTracker, exitCriteria, exitCriteriaModel, maxRetryLeave, false).call();
+                saltRunner.runnerWithCalculatedErrorCount(syncAllTracker, exitCriteria, exitCriteriaModel, maxRetryLeave).call();
                 runNewService(sc, new HighStateAllRunner(saltStateService, allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, true);
             }
         } catch (Exception e) {
@@ -1426,7 +1426,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel, int maxRetry, boolean retryOnFail)
             throws Exception {
         OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, baseSaltJobRunner, retryOnFail);
-        Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, true);
+        Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithCalculatedErrorCount(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry);
         saltJobRunBootstrapRunner.call();
     }
 
@@ -1508,7 +1508,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             int maxRetry, SaltConnector sc, Set<String> targetHostnames) throws Exception {
         StateRunner stateAllRunner = new StateRunner(saltStateService, targetHostnames, "recipes." + phase.value());
         OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
-        Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, false);
+        Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithCalculatedErrorCount(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry);
         saltJobRunBootstrapRunner.call();
     }
 
@@ -1558,7 +1558,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             String path, String fileName, byte[] content) throws CloudbreakOrchestratorFailedException {
         try {
             OrchestratorBootstrap saltUpload = new SaltUpload(saltConnector, targets, path, fileName, content);
-            Callable<Boolean> saltUploadRunner = saltRunner.runner(saltUpload, exitCriteria, exitCriteriaModel);
+            Callable<Boolean> saltUploadRunner = saltRunner.runnerWithConfiguredErrorCount(saltUpload, exitCriteria, exitCriteriaModel);
             saltUploadRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during file distribute to gateway nodes", e);
@@ -1570,7 +1570,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             String path, String fileName, byte[] content) throws CloudbreakOrchestratorFailedException {
         try {
             OrchestratorBootstrap saltUpload = new SaltUploadWithPermission(saltConnector, targets, path, fileName, PERMISSION, content);
-            Callable<Boolean> saltUploadRunner = saltRunner.runner(saltUpload, exitCriteria, exitCriteriaModel);
+            Callable<Boolean> saltUploadRunner = saltRunner.runnerWithConfiguredErrorCount(saltUpload, exitCriteria, exitCriteriaModel);
             saltUploadRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during file distribute to gateway nodes", e);
@@ -1647,7 +1647,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             if (createUserHomeCronStateExists) {
                 StateRunner stateRunner = new StateRunner(saltStateService, targets, CREATE_USER_HOME_CRON);
                 OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
-                Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
+                Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltJobIdTracker, exitCriteria, exitModel);
                 saltJobRunBootstrapRunner.call();
             } else {
                 LOGGER.debug("{} state not exists, the related cron will be created during post cluster install recipe execution.", CREATE_USER_HOME_CRON);

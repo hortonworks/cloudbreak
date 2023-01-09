@@ -30,14 +30,14 @@ public class SaltCommandRunner {
     public void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel, ExitCriteria exitCriteria)
             throws Exception {
         OrchestratorBootstrap saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
-        Callable<Boolean> saltCommandRunBootstrapRunner = saltRunner.runner(saltCommandTracker, exitCriteria, exitCriteriaModel);
+        Callable<Boolean> saltCommandRunBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltCommandTracker, exitCriteria, exitCriteriaModel);
         saltCommandRunBootstrapRunner.call();
     }
 
     public void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel, int retry,
             ExitCriteria exitCriteria) throws Exception {
         OrchestratorBootstrap saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
-        Callable<Boolean> saltCommandRunBootstrapRunner = saltRunner.runner(saltCommandTracker, exitCriteria, exitCriteriaModel, retry, false);
+        Callable<Boolean> saltCommandRunBootstrapRunner = saltRunner.runnerWithCalculatedErrorCount(saltCommandTracker, exitCriteria, exitCriteriaModel, retry);
         saltCommandRunBootstrapRunner.call();
     }
 
