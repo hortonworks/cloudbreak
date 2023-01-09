@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.ResourceType;
 
 /**
- * Responsible for CRUD operations of a GCP Backend Service Resource
+ * Responsible for CRUD opertaions of a GCP Backend Service Resource
  * A backend service could have multiple definitions, but currently the only one used is based on instance groups
  * Set the health check mentod to be used for the related instance groups
  */
@@ -93,7 +93,7 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
                 TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(trafficPort, hcPort);
                 groups.addAll(loadBalancer.getPortToTargetGroupMapping().get(targetGroupPortPair));
             }
-            makeBackendForTargetGroup(context, auth, loadBalancer, projectId, zone, groups, backends);
+            makeBackendForTargetGroup(context, loadBalancer, projectId, zone, groups, backends);
 
             backendService.setBackends(backends);
             backendService.setName(buildableResource.getName());
@@ -126,12 +126,11 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
                 .collect(Collectors.toList());
     }
 
-    private void makeBackendForTargetGroup(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, String projectId, String zone,
+    private void makeBackendForTargetGroup(GcpContext context, CloudLoadBalancer loadBalancer, String projectId, String zone,
             Set<Group> groups, List<Backend> backends) {
         for (Group group : groups) {
             Backend backend = new Backend();
-            String groupname = getResourceNameService()
-                    .resourceName(ResourceType.GCP_INSTANCE_GROUP, context.getName(), group.getName(), auth.getCloudContext().getId());
+            String groupname = getResourceNameService().resourceName(ResourceType.GCP_INSTANCE_GROUP, context.getName(), group.getName());
             backend.setGroup(String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT,
                     projectId, zone, groupname));
             backend.setBalancingMode(CONNECTION);

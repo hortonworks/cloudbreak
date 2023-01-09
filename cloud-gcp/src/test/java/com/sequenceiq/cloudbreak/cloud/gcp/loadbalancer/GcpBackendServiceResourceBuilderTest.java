@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,7 +50,7 @@ public class GcpBackendServiceResourceBuilderTest {
     @Mock
     private GcpContext gcpContext;
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    @Mock
     private AuthenticatedContext authenticatedContext;
 
     @Mock
@@ -117,7 +116,7 @@ public class GcpBackendServiceResourceBuilderTest {
     }
 
     @Test
-    public void testBuildWithSeparateHCPort() throws Exception {
+    public void testBuildWithSeperateHCPort() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 80);
@@ -164,7 +163,6 @@ public class GcpBackendServiceResourceBuilderTest {
         when(operation.getName()).thenReturn("name");
         when(operation.getHttpErrorStatusCode()).thenReturn(null);
         when(gcpLoadBalancerTypeConverter.getScheme(any(CloudLoadBalancer.class))).thenCallRealMethod();
-        when(authenticatedContext.getCloudContext().getId()).thenReturn(111L);
 
         List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
@@ -224,7 +222,6 @@ public class GcpBackendServiceResourceBuilderTest {
         when(operation.getName()).thenReturn("name");
         when(operation.getHttpErrorStatusCode()).thenReturn(null);
         when(gcpLoadBalancerTypeConverter.getScheme(any(CloudLoadBalancer.class))).thenCallRealMethod();
-        when(authenticatedContext.getCloudContext().getId()).thenReturn(111L);
 
         List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);

@@ -35,7 +35,7 @@ public class GcpInstanceGroupResourceBuilder extends AbstractGcpGroupBuilder {
 
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Group group, Network network) {
-        String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), group.getName(), auth.getCloudContext().getId());
+        String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), group.getName());
         return createNamedResource(resourceType(), resourceName, context.getLocation().getAvailabilityZone().value());
     }
 
