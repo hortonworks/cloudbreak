@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyList;
@@ -104,8 +103,9 @@ class SaltTelemetryOrchestratorTest {
         lenient().when(telemetrySaltRetryConfig.getDiagnosticsCollect()).thenReturn(MAX_DIAGNOSTICS_COLLECTION_RETRY);
         when(saltService.getPrimaryGatewayConfig(gatewayConfigs)).thenReturn(gatewayConfig);
         when(saltService.createSaltConnector(gatewayConfig)).thenReturn(saltConnector);
-        lenient().when(saltRunner.runner(orchestratorBootstrapArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean())).thenReturn(callable);
+        lenient().when(saltRunner.runnerWithCalculatedErrorCount(orchestratorBootstrapArgumentCaptor.capture(), any(), any(), anyInt())).thenReturn(callable);
         lenient().when(saltRunner.runner(orchestratorBootstrapArgumentCaptor.capture(), any(), any())).thenReturn(callable);
+        lenient().when(saltRunner.runnerWithConfiguredErrorCount(orchestratorBootstrapArgumentCaptor.capture(), any(), any())).thenReturn(callable);
     }
 
     @Test
@@ -137,7 +137,7 @@ class SaltTelemetryOrchestratorTest {
         assertEquals(SaltTelemetryOrchestrator.FILECOLLECTOR_COLLECT, saltJobRunner.getState());
         verify(callable, times(1)).call();
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
-        verify(saltRunner, times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+        verify(saltRunner, times(1)).runnerWithCalculatedErrorCount(any(), any(), any(), anyInt());
         verify(telemetrySaltRetryConfig, times(1)).getDiagnosticsCollect();
     }
 
@@ -201,7 +201,7 @@ class SaltTelemetryOrchestratorTest {
         verify(telemetrySaltRetryConfig, times(1)).getLoggingAgentStop();
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+        verify(saltRunner, times(1)).runnerWithCalculatedErrorCount(any(), any(), any(), anyInt());
     }
 
     @Test
@@ -220,7 +220,7 @@ class SaltTelemetryOrchestratorTest {
         verify(telemetrySaltRetryConfig, times(1)).getTelemetryUpgrade();
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+        verify(saltRunner, times(1)).runnerWithCalculatedErrorCount(any(), any(), any(), anyInt());
     }
 
     @Test
@@ -237,7 +237,7 @@ class SaltTelemetryOrchestratorTest {
         verify(telemetrySaltRetryConfig, times(1)).getNodeStatusCollect();
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+        verify(saltRunner, times(1)).runnerWithCalculatedErrorCount(any(), any(), any(), anyInt());
     }
 
     @Test
@@ -282,8 +282,8 @@ class SaltTelemetryOrchestratorTest {
         }
         verify(saltService, times(3)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(3)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(2)).runner(any(), any(), any(), anyInt(), anyBoolean());
-        verify(saltRunner, times(2)).runner(any(), any(), any());
+        verify(saltRunner, times(2)).runnerWithCalculatedErrorCount(any(), any(), any(), anyInt());
+        verify(saltRunner, times(2)).runnerWithConfiguredErrorCount(any(), any(), any());
     }
 
     @Test
@@ -310,7 +310,7 @@ class SaltTelemetryOrchestratorTest {
         assertEquals(SaltTelemetryOrchestrator.METERING_UPGRADE, saltJobRunner.getState());
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+        verify(saltRunner, times(1)).runnerWithCalculatedErrorCount(any(), any(), any(), anyInt());
     }
 
     @Test
@@ -325,7 +325,7 @@ class SaltTelemetryOrchestratorTest {
         }
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(2)).runner(any(), any(), any());
+        verify(saltRunner, times(2)).runnerWithConfiguredErrorCount(any(), any(), any());
     }
 
     @Test
@@ -341,7 +341,7 @@ class SaltTelemetryOrchestratorTest {
         assertNotNull(cloudbreakOrchestratorFailedException);
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(2)).runner(any(), any(), any());
+        verify(saltRunner, times(2)).runnerWithConfiguredErrorCount(any(), any(), any());
     }
 
     @Test
@@ -360,7 +360,7 @@ class SaltTelemetryOrchestratorTest {
         assertNotNull(cloudbreakOrchestratorFailedException);
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(2)).runner(any(), any(), any());
+        verify(saltRunner, times(2)).runnerWithConfiguredErrorCount(any(), any(), any());
     }
 
     private Map<String, Object> getParametersMap() {

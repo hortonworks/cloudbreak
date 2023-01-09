@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -172,9 +171,12 @@ class SaltOrchestratorTest {
 
         lenient().when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
         lenient().when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
-        lenient().when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt(), anyBoolean()))
+        lenient().when(saltRunner.runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
                 .thenReturn(callable);
-        lenient().when(saltRunner.runnerWithUsingErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
+        lenient().when(saltRunner.runnerWithCalculatedErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class),
+                        any(ExitCriteriaModel.class), anyInt()))
+                .thenReturn(callable);
+        lenient().when(saltRunner.runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
                 .thenReturn(callable);
         lenient().when(callable.call()).thenReturn(true);
         lenient().when(saltService.createSaltConnector(any(GatewayConfig.class))).thenReturn(saltConnector);
@@ -194,7 +196,8 @@ class SaltOrchestratorTest {
 
         saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel);
 
-        verify(saltRunner, times(4)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(1)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(3)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         // salt.zip, master_sign.pem, master_sign.pub
         verify(saltBootstrapFactory, times(1)).of(eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets),
                 eq(bootstrapParams));
@@ -268,7 +271,8 @@ class SaltOrchestratorTest {
 
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
-        verify(saltRunner, times(4)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(1)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(3)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verify(saltBootstrapFactory, times(1))
                 .of(eq(saltConnector), eq(saltConnectors), eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
@@ -349,7 +353,8 @@ class SaltOrchestratorTest {
 
         when(saltStateService.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
         Callable<Boolean> callable = mock(Callable.class);
-        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
+        when(saltRunner.runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
+                .thenReturn(callable);
 
         Node remainingNode = mock(Node.class);
         when(remainingNode.getPrivateIp()).thenReturn("10.0.0.1");
@@ -418,14 +423,14 @@ class SaltOrchestratorTest {
         SaltPillarProperties gatewayPath = new SaltPillarProperties(gatewayPillarPath, Map.of());
         Callable<Boolean> callable = mock(Callable.class);
         when(saltConfig.getServicePillarConfig().get("gateway")).thenReturn(gatewayPath);
-        when(saltRunner.runnerWithUsingErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
+        when(saltRunner.runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
                 .thenReturn(callable);
         ArgumentCaptor<PillarSave> pillarSaveArgumentCaptor =
                 ArgumentCaptor.forClass(PillarSave.class);
 
         saltOrchestrator.uploadGatewayPillar(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel, saltConfig);
 
-        verify(saltRunner).runnerWithUsingErrorCount(pillarSaveArgumentCaptor.capture(), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner).runnerWithConfiguredErrorCount(pillarSaveArgumentCaptor.capture(), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         PillarSave capturedPillarSave = pillarSaveArgumentCaptor.getValue();
         Pillar pillar = (Pillar) ReflectionTestUtils.getField(capturedPillarSave, "pillar");
         assertEquals(gatewayPillarPath, pillar.getPath());
@@ -456,9 +461,10 @@ class SaltOrchestratorTest {
         allNodes.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg", "fqdn3", null));
         allNodes.addAll(downscaleTargets);
 
+        when(saltRunner.runnerWithConfiguredErrorCount(any(SaltJobIdTracker.class), any(), any())).thenReturn(mock(Callable.class));
         Callable pillarSaveCallable = mock(Callable.class);
-        when(saltRunner.runner(any(), any(), any())).thenReturn(pillarSaveCallable);
-        when(saltRunner.runner(any(), any(), any(), anyInt(), anyBoolean())).thenReturn(mock(Callable.class));
+        when(saltRunner.runnerWithConfiguredErrorCount(any(PillarSave.class), any(), any())).thenReturn(pillarSaveCallable);
+        when(saltRunner.runnerWithCalculatedErrorCount(any(), any(), any(), anyInt())).thenReturn(mock(Callable.class));
 
         OrchestratorAware orchestratorAware = mock(OrchestratorAware.class);
         when(orchestratorAware.getAllNodes()).thenReturn(allNodes);
@@ -477,11 +483,12 @@ class SaltOrchestratorTest {
         assertEquals("roles", modifyGrainBase.getKey());
         assertEquals("cloudera_manager_agent_stop", modifyGrainBase.getValue());
 
-        inOrder.verify(saltRunner).runner(pillarSaveArgumentCaptor.capture(), any(), any());
+        inOrder.verify(saltRunner).runnerWithConfiguredErrorCount(any(SaltJobIdTracker.class), any(), any());
+        inOrder.verify(saltRunner).runnerWithConfiguredErrorCount(pillarSaveArgumentCaptor.capture(), any(), any());
         PillarSave capturedPillarSave = pillarSaveArgumentCaptor.getValue();
 
         ArgumentCaptor<SaltJobIdTracker> saltJobIdCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
-        inOrder.verify(saltRunner).runner(saltJobIdCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+        inOrder.verify(saltRunner).runnerWithCalculatedErrorCount(saltJobIdCaptor.capture(), any(), any(), anyInt());
 
         inOrder.verify(saltCommandRunner).runModifyGrainCommand(any(), modifyGrainBaseArgumentCaptor.capture(), any(), any());
         inOrder.verifyNoMoreInteractions();
@@ -512,14 +519,14 @@ class SaltOrchestratorTest {
                 .thenReturn(Map.of())
                 .thenReturn(Map.of())
                 .thenReturn(Map.of());
-        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt(), anyBoolean()))
+        when(saltRunner.runnerWithCalculatedErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt()))
                 .thenReturn(callable);
         ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerArgumentCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
 
         saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway),
                 Set.of(primaryNode), exitCriteriaModel);
 
-        verify(saltRunner, times(1)).runner(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+        verify(saltRunner, times(1)).runnerWithCalculatedErrorCount(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt());
         List<SaltJobIdTracker> jobIdTrackers = saltJobIdTrackerArgumentCaptor.getAllValues();
         assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
     }
@@ -548,7 +555,7 @@ class SaltOrchestratorTest {
         saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway, replica1Config, replica2Config),
                 Set.of(primaryNode, replica1Node, replica2Node), exitCriteriaModel);
 
-        verify(saltRunner, times(2)).runner(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+        verify(saltRunner, times(2)).runnerWithCalculatedErrorCount(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt());
         List<SaltJobIdTracker> jobIdTrackers = saltJobIdTrackerArgumentCaptor.getAllValues();
         assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
         assertEquals(Set.of("replica1.example.com", "replica2.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
@@ -578,7 +585,7 @@ class SaltOrchestratorTest {
         saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway, replicaConfig, newReplicaConfig),
                 Set.of(primaryNode, replicaNode, newReplicaNode), exitCriteriaModel);
 
-        verify(saltRunner, times(3)).runner(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+        verify(saltRunner, times(3)).runnerWithCalculatedErrorCount(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt());
         List<SaltJobIdTracker> jobIdTrackers = saltJobIdTrackerArgumentCaptor.getAllValues();
         assertEquals(Set.of("replica.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
         assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
@@ -609,7 +616,7 @@ class SaltOrchestratorTest {
         saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway, newReplica1Config, newReplica2Config),
                 Set.of(primaryNode, newReplica1Node, newReplica2Node), exitCriteriaModel);
 
-        verify(saltRunner, times(2)).runner(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+        verify(saltRunner, times(2)).runnerWithCalculatedErrorCount(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt());
         List<SaltJobIdTracker> jobIdTrackers = saltJobIdTrackerArgumentCaptor.getAllValues();
         assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
         assertEquals(Set.of("new_replica1.example.com", "new_replica2.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
@@ -669,7 +676,8 @@ class SaltOrchestratorTest {
         assertEquals(Set.of("replica1.domain"), removeReplicaRole.getTargetHostnames());
 
         ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
-        verify(saltRunner, times(3)).runner(saltJobIdTrackerCaptor.capture(), eq(exitCriteria), eq(exitCriteriaModel), anyInt(), anyBoolean());
+        verify(saltRunner, times(3)).runnerWithCalculatedErrorCount(saltJobIdTrackerCaptor.capture(), eq(exitCriteria),
+                eq(exitCriteriaModel), anyInt());
         List<SaltJobIdTracker> saltJobIdTrackers = saltJobIdTrackerCaptor.getAllValues();
         HighStateRunner highStateRunner = (HighStateRunner) saltJobIdTrackers.get(0).getSaltJobRunner();
         assertTrue(highStateRunner.getTargetHostnames().contains("replica1.domain")
@@ -729,7 +737,7 @@ class SaltOrchestratorTest {
         assertEquals(Set.of("newInstance.domain"), removeReplicaRole.getTargetHostnames());
 
         ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
-        verify(saltRunner, times(2)).runner(saltJobIdTrackerCaptor.capture(), eq(exitCriteria), eq(exitCriteriaModel), anyInt(), anyBoolean());
+        verify(saltRunner, times(2)).runnerWithCalculatedErrorCount(saltJobIdTrackerCaptor.capture(), eq(exitCriteria), eq(exitCriteriaModel), anyInt());
         List<SaltJobIdTracker> saltJobIdTrackers = saltJobIdTrackerCaptor.getAllValues();
         HighStateRunner highStateRunner = (HighStateRunner) saltJobIdTrackers.get(0).getSaltJobRunner();
         assertTrue(highStateRunner.getTargetHostnames().contains("replica2.domain"));
@@ -785,7 +793,7 @@ class SaltOrchestratorTest {
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
         saltOrchestrator.uploadStates(allGatewayConfigs, exitCriteriaModel);
         ArgumentCaptor<SaltUpload> saltUploadCaptor = ArgumentCaptor.forClass(SaltUpload.class);
-        verify(saltRunner).runner(saltUploadCaptor.capture(), eq(exitCriteria), eq(exitCriteriaModel));
+        verify(saltRunner).runnerWithConfiguredErrorCount(saltUploadCaptor.capture(), eq(exitCriteria), eq(exitCriteriaModel));
         verify(callable).call();
         SaltUpload saltUpload = saltUploadCaptor.getValue();
         assertEquals(Set.of(gatewayConfig.getPrivateAddress()), saltUpload.getTargets());
@@ -834,7 +842,7 @@ class SaltOrchestratorTest {
 
         verify(callable).call();
         ArgumentCaptor<OrchestratorBootstrap> saltJobIdTrackerCaptor = ArgumentCaptor.forClass(OrchestratorBootstrap.class);
-        verify(saltRunner, times(1)).runner(saltJobIdTrackerCaptor.capture(), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(1)).runnerWithConfiguredErrorCount(saltJobIdTrackerCaptor.capture(), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         assertThat(saltJobIdTrackerCaptor.getValue()).isInstanceOf(SaltJobIdTracker.class);
         SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) saltJobIdTrackerCaptor.getValue();
         SaltJobRunner saltJobRunner = saltJobIdTracker.getSaltJobRunner();
