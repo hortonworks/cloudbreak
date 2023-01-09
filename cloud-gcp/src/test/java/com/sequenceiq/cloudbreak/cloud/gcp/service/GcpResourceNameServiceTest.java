@@ -149,13 +149,14 @@ public class GcpResourceNameServiceTest {
     @Test
     public void shouldGenerateGcpInstanceGroupResourceWehenPartsProvided() {
         // GIVEN
-        Object[] parts = {"stack", "group", "1234"};
+        Object[] parts = {"stack", "group"};
 
         // WHEN
         String resourceName = subject.resourceName(ResourceType.GCP_INSTANCE_GROUP, parts);
 
         // THEN
-        Assert.assertEquals("The instance group resource name should include stack name, stack id and a group name",
-                "stack-group-1234", resourceName);
+        Assert.assertNotNull("The generated name must not be null!", resourceName);
+        Assert.assertEquals("Should have both parts", 2L, resourceName.split("-").length);
+        Assert.assertTrue("The resource name is not the expected one!", resourceName.startsWith("stack-group"));
     }
 }
