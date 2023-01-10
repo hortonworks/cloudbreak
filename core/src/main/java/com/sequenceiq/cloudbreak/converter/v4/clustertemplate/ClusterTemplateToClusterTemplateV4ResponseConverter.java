@@ -48,6 +48,7 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter {
                 StackV4Request stackV4Request;
                 try {
                     stackV4Request = stackToStackV4RequestConverter.convert(stack.get());
+                    stackV4Request.setEnableLoadBalancer(source.isEnableLoadBalancer());
                 } catch (Exception e) {
                     stackV4Request = null;
                 }
