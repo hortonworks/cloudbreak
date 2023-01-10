@@ -69,6 +69,8 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
 
     private String clouderaRuntimeVersion;
 
+    private boolean enableLoadBalancer;
+
     private Long created = System.currentTimeMillis();
 
     public ClusterTemplate() {
@@ -198,4 +200,13 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     public void setClouderaRuntimeVersion(String clouderaRuntimeVersion) {
         this.clouderaRuntimeVersion = clouderaRuntimeVersion;
     }
+
+    public boolean isEnableLoadBalancer() {
+        return enableLoadBalancer;
+    }
+
+    public void setEnableLoadBalancer(boolean enableLoadBalancer) {
+        this.enableLoadBalancer = enableLoadBalancer;
+    }
+
 }

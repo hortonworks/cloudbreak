@@ -94,6 +94,7 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter {
         clusterTemplate.setFeatureState(FeatureState.RELEASED);
         clusterTemplate.setStatus(ResourceStatus.USER_MANAGED);
         checkStackWhetherItsCapableOfProvidingCldrRuntimeVersion(stack);
+        clusterTemplate.setEnableLoadBalancer(source.getDistroXTemplate().isEnableLoadBalancer());
         clusterTemplate.setClouderaRuntimeVersion(stack.getCluster().getBlueprint().getStackVersion());
         if (source.getType() == null) {
             clusterTemplate.setType(ClusterTemplateV4Type.OTHER);
