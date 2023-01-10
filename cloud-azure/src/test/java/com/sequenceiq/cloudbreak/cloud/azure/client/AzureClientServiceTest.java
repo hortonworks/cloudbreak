@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.microsoft.rest.LogLevel;
-import com.sequenceiq.cloudbreak.cloud.azure.tracing.AzureOkHttp3TracingInterceptor;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -26,9 +25,6 @@ class AzureClientServiceTest {
 
     @Mock
     private AuthenticationContextProvider authenticationContextProvider;
-
-    @Mock
-    private AzureOkHttp3TracingInterceptor tracingInterceptor;
 
     @Mock
     private AzureAuthExceptionHandler azureAuthExceptionHandler;

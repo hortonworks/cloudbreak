@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
-import io.opentracing.Tracer;
 
 @Component
 public class AuditClient {
@@ -50,19 +49,16 @@ public class AuditClient {
 
     private final ActorUtil actorUtil;
 
-    private final Tracer tracer;
-
     @Qualifier("auditManagedChannelWrapper")
     @Inject
     private ManagedChannelWrapper channelWrapper;
 
     public AuditClient(AuditConfig auditConfig, AuditEventToGrpcAuditEventConverter auditEventConverter,
-            AttemptAuditEventResultToGrpcAttemptAuditEventResultConverter resultConverter, ActorUtil actorUtil, Tracer tracer) {
+            AttemptAuditEventResultToGrpcAttemptAuditEventResultConverter resultConverter, ActorUtil actorUtil) {
         this.auditConfig = auditConfig;
         this.auditEventConverter = auditEventConverter;
         this.resultConverter = resultConverter;
         this.actorUtil = actorUtil;
-        this.tracer = tracer;
     }
 
     @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
@@ -107,7 +103,6 @@ public class AuditClient {
         return AuditGrpc.newBlockingStub(channel)
                 .withInterceptors(
                         GrpcUtil.getTimeoutInterceptor(auditConfig.getGrpcTimeoutSec()),
-                        GrpcUtil.getTracingInterceptor(tracer),
                         new AltusMetadataInterceptor(requestId, actorCrn)
                 );
     }

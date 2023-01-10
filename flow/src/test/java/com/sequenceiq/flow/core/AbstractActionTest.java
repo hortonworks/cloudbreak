@@ -7,7 +7,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
@@ -37,10 +36,6 @@ import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.SpanContext;
-import io.opentracing.Tracer;
 
 @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
 public class AbstractActionTest {
@@ -49,7 +44,7 @@ public class AbstractActionTest {
 
     public static final String FLOW_TRIGGER_USERCRN = "crn:cdp:iam:us-west-1:cloudera:user:ausername";
 
-    public static final FlowParameters FLOW_PARAMETERS = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USERCRN, null);
+    public static final FlowParameters FLOW_PARAMETERS = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USERCRN);
 
     @InjectMocks
     private TestAction underTest;
@@ -65,21 +60,6 @@ public class AbstractActionTest {
 
     @Mock
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
-
-    @Mock
-    private Tracer tracer;
-
-    @Mock
-    private Tracer.SpanBuilder spanBuilder;
-
-    @Mock
-    private Span span;
-
-    @Mock
-    private Scope scope;
-
-    @Mock
-    private SpanContext spanContext;
 
     private StateMachine<State, Event> stateMachine;
 
@@ -101,13 +81,6 @@ public class AbstractActionTest {
         transitionBuilder.withExternal().source(State.INIT).target(State.DOING).event(Event.DOIT);
         stateMachine = new ObjectStateMachineFactory<>(configurationBuilder.build(), transitionBuilder.build(), stateBuilder.build()).getStateMachine();
         stateMachine.start();
-
-        when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
-        when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
-        when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);
-        when(spanBuilder.start()).thenReturn(span);
-        when(tracer.activateSpan(span)).thenReturn(scope);
-        when(span.context()).thenReturn(spanContext);
     }
 
     @Test

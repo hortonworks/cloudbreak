@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import org.jetbrains.annotations.NotNull;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.sqladmin.SQLAdmin;
@@ -19,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
 public abstract class GcpDatabaseServerBaseService extends AbstractGcpDatabaseBaseResourceChecker {
-    @NotNull
     protected Optional<DatabaseInstance> getDatabaseInstance(String deploymentName, SQLAdmin sqlAdmin, String projectId) throws IOException {
         InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
         Optional<DatabaseInstance> databaseInstance = Optional.empty();

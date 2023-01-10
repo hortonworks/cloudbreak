@@ -56,9 +56,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.util.JaxRSUtil;
 
-import io.opentracing.Tracer;
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-
 public class SaltConnector implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltConnector.class);
@@ -93,21 +90,17 @@ public class SaltConnector implements Closeable {
 
     private final String hostname;
 
-    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug, Tracer tracer,
+    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug,
             int connectTimeoutMs, OptionalInt readTimeout) {
         try {
             restClient = RestClientUtil.createClient(gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(),
                     connectTimeoutMs, readTimeout, debug);
             this.hostname = gatewayConfig.getHostname();
-            ClientTracingFeature tracingFeature = new ClientTracingFeature.Builder(tracer)
-                    .withTraceSerialization(false)
-                    .withDecorators(List.of(new TracingClientSpanDecorator())).build();
             String saltBootPasswd = Optional.ofNullable(gatewayConfig.getSaltBootPassword()).orElse(SALT_BOOT_PASSWORD);
             saltTarget = restClient.target(gatewayConfig.getGatewayUrl())
                     .register(HttpAuthenticationFeature.basic(SALT_BOOT_USER, saltBootPasswd))
                     .register(new DisableProxyAuthFeature())
-                    .register(new SetProxyTimeoutFeature(PROXY_TIMEOUT))
-                    .register(tracingFeature);
+                    .register(new SetProxyTimeoutFeature(PROXY_TIMEOUT));
             saltPassword = Optional.ofNullable(gatewayConfig.getSaltPassword()).orElse(SALT_PASSWORD);
             signatureKey = gatewayConfig.getSignatureKey();
             this.saltErrorResolver = saltErrorResolver;
@@ -116,8 +109,8 @@ public class SaltConnector implements Closeable {
         }
     }
 
-    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug, Tracer tracer) {
-        this(gatewayConfig, saltErrorResolver, debug, tracer, CONNECT_TIMEOUT_MS, OptionalInt.empty());
+    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug) {
+        this(gatewayConfig, saltErrorResolver, debug, CONNECT_TIMEOUT_MS, OptionalInt.empty());
     }
 
     @Measure(SaltConnector.class)

@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -58,7 +56,6 @@ public class AwsAvailabilityZoneAssertion implements Assertion<DistroXTestDto, C
         return alma.entrySet().stream().mapToInt(Map.Entry::getValue).max().getAsInt();
     }
 
-    @NotNull
     private Map<String, Integer> getSubtotalByAvailabilityZone(Set<InstanceMetaDataV4Response> instances) {
         Map<String, Integer> alma = new HashMap<String, Integer>();
         instances.forEach(instance -> {

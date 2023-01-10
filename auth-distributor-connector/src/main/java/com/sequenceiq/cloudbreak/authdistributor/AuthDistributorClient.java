@@ -16,12 +16,10 @@ import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.Upd
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
-import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.opentracing.Tracer;
 
 public class AuthDistributorClient {
 
@@ -29,13 +27,10 @@ public class AuthDistributorClient {
 
     private final ManagedChannel channel;
 
-    private final Tracer tracer;
-
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public AuthDistributorClient(ManagedChannel channel, Tracer tracer, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public AuthDistributorClient(ManagedChannel channel, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.channel = channel;
-        this.tracer = tracer;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
@@ -85,7 +80,6 @@ public class AuthDistributorClient {
         checkNotNull(requestId, "requestId should not be null.");
         return AuthDistributorGrpc.newBlockingStub(channel)
                 .withInterceptors(
-                        GrpcUtil.getTracingInterceptor(tracer),
                         new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()));
     }
 }

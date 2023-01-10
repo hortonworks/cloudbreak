@@ -48,7 +48,7 @@ public class UsageHttpRecordWorkerTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new UsageHttpRecordWorker("sample", "service", recordProcessor, processingQueue, configuration, null);
+        underTest = new UsageHttpRecordWorker("sample", "service", recordProcessor, processingQueue, configuration);
     }
 
     @Test

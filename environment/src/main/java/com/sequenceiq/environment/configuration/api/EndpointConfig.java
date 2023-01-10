@@ -31,8 +31,6 @@ import com.sequenceiq.environment.util.v1.UtilController;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
@@ -69,8 +67,7 @@ public class EndpointConfig extends ResourceConfig {
 
     public EndpointConfig(@Value("${info.app.version:unspecified}") String applicationVersion,
             @Value("${environment.structuredevent.rest.enabled}") Boolean auditEnabled,
-            List<ExceptionMapper<?>> exceptionMappers, ServerTracingDynamicFeature serverTracingDynamicFeature,
-            ClientTracingFeature clientTracingFeature) {
+            List<ExceptionMapper<?>> exceptionMappers) {
 
         this.applicationVersion = applicationVersion;
         this.auditEnabled = auditEnabled;
@@ -79,8 +76,6 @@ public class EndpointConfig extends ResourceConfig {
         registerEndpoints();
         registerExceptionMappers();
         registerSwagger();
-        register(serverTracingDynamicFeature);
-        register(clientTracingFeature);
     }
 
     private void registerSwagger() {

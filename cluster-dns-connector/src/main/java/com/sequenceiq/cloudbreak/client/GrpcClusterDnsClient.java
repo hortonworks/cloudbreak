@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
-import io.opentracing.Tracer;
 
 @Component
 public class GrpcClusterDnsClient {
@@ -30,9 +29,6 @@ public class GrpcClusterDnsClient {
     @Qualifier("clusterDnsManagedChannelWrapper")
     @Inject
     private ManagedChannelWrapper channelWrapper;
-
-    @Inject
-    private Tracer tracer;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -114,6 +110,6 @@ public class GrpcClusterDnsClient {
     }
 
     private ClusterDnsClient makeClient(ManagedChannel channel, String accountId) {
-        return new ClusterDnsClient(channel, accountId, tracer);
+        return new ClusterDnsClient(channel, accountId);
     }
 }

@@ -14,8 +14,6 @@ import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-
 @Configuration
 public class CloudbreakClientConfiguration {
 
@@ -27,9 +25,6 @@ public class CloudbreakClientConfiguration {
     private String cbRootContextPath;
 
     @Inject
-    private ClientTracingFeature clientTracingFeature;
-
-    @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Bean
@@ -39,7 +34,6 @@ public class CloudbreakClientConfiguration {
                 .withIgnorePreValidation(true)
                 .withDebug(true)
                 .build();
-        client.registerClientTracingFeature(clientTracingFeature);
         return client;
     }
 

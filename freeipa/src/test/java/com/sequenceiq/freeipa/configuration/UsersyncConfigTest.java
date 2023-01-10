@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -26,7 +25,6 @@ import com.sequenceiq.freeipa.configuration.UsersyncConfigTest.UsersyncConfigTes
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import io.opentracing.Tracer;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { UsersyncConfig.class, UsersyncConfigTestConfig.class })
@@ -43,9 +41,6 @@ class UsersyncConfigTest {
     @Inject
     @Qualifier(UsersyncConfig.USERSYNC_EXTERNAL_TASK_EXECUTOR)
     ExecutorService usersyncTaskExecutor;
-
-    @MockBean
-    Tracer tracer;
 
     @Test
     void testAsyncTaskExecutorDecoration() {

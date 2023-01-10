@@ -43,8 +43,6 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowLogService;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestAppContext.class)
 class SdxClusterStatusCheckerJobTest {
@@ -67,9 +65,6 @@ class SdxClusterStatusCheckerJobTest {
 
     @MockBean
     private SdxStatusService sdxStatusService;
-
-    @MockBean
-    private Tracer tracer;
 
     @MockBean
     private FlowLogService flowLogService;

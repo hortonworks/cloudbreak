@@ -24,11 +24,6 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.SpanContext;
-import io.opentracing.Tracer;
-
 public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload> implements Action<S, E> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAction.class);
@@ -52,9 +47,6 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
-
-    @Inject
-    private Tracer tracer;
 
     private final Class<P> payloadClass;
 
@@ -83,25 +75,8 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 Map<Object, Object> variables = context.getExtendedState().getVariables();
                 prepareExecution(payload, variables);
                 String flowStateName = String.valueOf(variables.get(FLOW_STATE_NAME));
-                Span activeSpan = tracer.activeSpan();
-                String operationName = context.getEvent().name();
-                SpanContext spanContext = flowParameters.getSpanContext();
-                if (FlowTracingUtil.isActiveSpanReusable(activeSpan, spanContext, operationName)) {
-                    LOGGER.debug("Reusing existing span. {}", activeSpan.context());
-                    flowContext = createFlowContext(flowParameters, context, payload);
-                    executeAction(context, payload, flowContext, variables, flowStateName);
-                } else {
-                    Span span = FlowTracingUtil.getSpan(tracer, operationName, spanContext, flowParameters.getFlowId(),
-                            null, flowParameters.getFlowTriggerUserCrn());
-                    spanContext = FlowTracingUtil.useOrCreateSpanContext(spanContext, span);
-                    flowParameters.setSpanContext(spanContext);
-                    try (Scope ignored = tracer.activateSpan(span)) {
-                        flowContext = createFlowContext(flowParameters, context, payload);
-                        executeAction(context, payload, flowContext, variables, flowStateName);
-                    } finally {
-                        span.finish();
-                    }
-                }
+                flowContext = createFlowContext(flowParameters, context, payload);
+                executeAction(context, payload, flowContext, variables, flowStateName);
             } catch (Exception ex) {
                 LOGGER.error("Error during execution of " + getClass().getName(), ex);
                 if (failureEvent != null) {
@@ -165,7 +140,6 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         Map<String, Object> headers = new HashMap<>();
         headers.put(FlowConstants.FLOW_ID, flowParameters.getFlowId());
         headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, flowParameters.getFlowTriggerUserCrn());
-        headers.put(FlowConstants.SPAN_CONTEXT, flowParameters.getSpanContext());
         headers.put(FlowConstants.FLOW_OPERATION_TYPE, flowParameters.getFlowOperationType());
         String flowChainId = runningFlows.getFlowChainId(flowParameters.getFlowId());
         if (flowChainId != null) {

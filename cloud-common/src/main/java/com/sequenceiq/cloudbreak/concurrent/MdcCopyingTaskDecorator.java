@@ -7,31 +7,18 @@ import org.springframework.core.task.TaskDecorator;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.Tracer;
-
-public class TracingAndMdcCopyingTaskDecorator implements TaskDecorator {
-
-    private final Tracer tracer;
-
-    public TracingAndMdcCopyingTaskDecorator(Tracer tracer) {
-        this.tracer = tracer;
-    }
+public class MdcCopyingTaskDecorator implements TaskDecorator {
 
     @Override
     public Runnable decorate(Runnable runnable) {
 
         // Originating thread, where the executor is called from 2
-        final Span activeSpan = tracer.activeSpan();
         Map<String, String> copyOfContextMap = MDC.getCopyOfContextMap();
 
         return () -> {
             // Thread of the executed task
             MDC.setContextMap(copyOfContextMap);
-            try (Scope ignored = tracer.activateSpan(activeSpan)) {
-                runnable.run();
-            }
+            runnable.run();
             MDCBuilder.cleanupMdc();
         };
     }

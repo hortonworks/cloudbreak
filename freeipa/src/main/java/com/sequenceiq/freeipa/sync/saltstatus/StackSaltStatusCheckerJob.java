@@ -24,8 +24,6 @@ import com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.sync.InterruptSyncingException;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class StackSaltStatusCheckerJob extends StatusCheckerJob {
@@ -43,10 +41,6 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private RotateSaltPasswordService rotateSaltPasswordService;
-
-    public StackSaltStatusCheckerJob(Tracer tracer) {
-        super(tracer, "Stack Salt Status Checker Job");
-    }
 
     @Override
     protected Optional<Object> getMdcContextObject() {

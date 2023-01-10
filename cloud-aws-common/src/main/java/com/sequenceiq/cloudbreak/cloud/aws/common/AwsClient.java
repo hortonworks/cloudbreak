@@ -50,7 +50,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
-import com.sequenceiq.cloudbreak.cloud.aws.common.tracing.AwsTracingRequestHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -60,8 +59,6 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationEx
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.service.Retry;
-
-import io.opentracing.Tracer;
 
 public abstract class AwsClient {
 
@@ -84,9 +81,6 @@ public abstract class AwsClient {
 
     @Inject
     private Retry retry;
-
-    @Inject
-    private Tracer tracer;
 
     @Inject
     private SdkClientExceptionMapper sdkClientExceptionMapper;
@@ -136,8 +130,7 @@ public abstract class AwsClient {
     AmazonEC2 createAccessWithClientConfiguration(AwsCredentialView awsCredential, String regionName, ClientConfiguration clientConfiguration) {
         AmazonEC2ClientBuilder clientBuilder = AmazonEC2Client.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
-                .withClientConfiguration(clientConfiguration)
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer));
+                .withClientConfiguration(clientConfiguration);
         awsEndpointProvider.setupEndpoint(clientBuilder, AmazonEC2.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
         return proxy(clientBuilder.build(), awsCredential, regionName);
     }
@@ -145,8 +138,7 @@ public abstract class AwsClient {
     public AmazonCloudWatchClient createCloudWatchClient(AwsCredentialView awsCredential, String regionName) {
         AmazonCloudWatchClientBuilder clientBuilder = com.amazonaws.services.cloudwatch.AmazonCloudWatchClient.builder()
                 .withClientConfiguration(getDefaultClientConfiguration())
-                .withCredentials(getCredentialProvider(awsCredential))
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer));
+                .withCredentials(getCredentialProvider(awsCredential));
         awsEndpointProvider.setupEndpoint(clientBuilder, AmazonCloudWatch.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
         return new AmazonCloudWatchClient(proxy(clientBuilder.build(), awsCredential, regionName));
     }
@@ -159,8 +151,7 @@ public abstract class AwsClient {
     public AmazonSecurityTokenServiceClient createSecurityTokenService(AwsCredentialView awsCredential, String regionName) {
         AWSSecurityTokenServiceClientBuilder clientBuilder = com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
-                .withClientConfiguration(getDefaultClientConfiguration())
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer));
+                .withClientConfiguration(getDefaultClientConfiguration());
         awsEndpointProvider.setupEndpoint(clientBuilder, AWSSecurityTokenService.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
         return new AmazonSecurityTokenServiceClient(proxy(clientBuilder.build(), awsCredential, regionName));
     }
@@ -168,7 +159,6 @@ public abstract class AwsClient {
     public AmazonIdentityManagementClient createAmazonIdentityManagement(AwsCredentialView awsCredential) {
         String region = awsDefaultZoneProvider.getDefaultZone(awsCredential);
         AmazonIdentityManagementClientBuilder clientBuilder = AmazonIdentityManagementClientBuilder.standard()
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential));
         awsEndpointProvider.setupEndpoint(clientBuilder, AmazonIdentityManagement.ENDPOINT_PREFIX, region, awsCredential.isGovernmentCloudEnabled());
@@ -177,7 +167,6 @@ public abstract class AwsClient {
 
     public AmazonKmsClient createAWSKMS(AwsCredentialView awsCredential, String regionName) {
         AWSKMSClientBuilder clientBuilder = AWSKMSClientBuilder.standard()
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredential));
         awsEndpointProvider.setupEndpoint(clientBuilder, AWSKMS.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
         return new AmazonKmsClient(proxy(clientBuilder.build(), awsCredential, regionName));
@@ -186,7 +175,6 @@ public abstract class AwsClient {
     public AmazonElasticLoadBalancingClient createElasticLoadBalancingClient(AwsCredentialView awsCredential, String regionName) {
         AmazonElasticLoadBalancingClientBuilder clientBuilder = com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withClientConfiguration(getDefaultClientConfiguration());
         awsEndpointProvider.setupEndpoint(clientBuilder, AmazonElasticLoadBalancing.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
         return new AmazonElasticLoadBalancingClient(proxy(clientBuilder.build(), awsCredential, regionName));
@@ -194,8 +182,7 @@ public abstract class AwsClient {
 
     public AmazonEfsClient createElasticFileSystemClient(AwsCredentialView awsCredential, String regionName) {
         AmazonElasticFileSystemClientBuilder clientBuilder = com.amazonaws.services.elasticfilesystem.AmazonElasticFileSystemClient.builder()
-                .withCredentials(getCredentialProvider(awsCredential))
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer));
+                .withCredentials(getCredentialProvider(awsCredential));
         awsEndpointProvider.setupEndpoint(clientBuilder, AmazonElasticFileSystem.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
         return new AmazonEfsClient(proxy(clientBuilder.build(), awsCredential, regionName), retry);
     }
@@ -203,7 +190,6 @@ public abstract class AwsClient {
     public AmazonS3Client createS3Client(AwsCredentialView awsCredential) {
         String regionName = awsDefaultZoneProvider.getDefaultZone(awsCredential);
         AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard()
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withForceGlobalBucketAccessEnabled(Boolean.TRUE);
         awsEndpointProvider.setupEndpoint(clientBuilder, AmazonS3.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
@@ -212,7 +198,6 @@ public abstract class AwsClient {
 
     public AmazonDynamoDBClient createDynamoDbClient(AwsCredentialView awsCredential, String regionName) {
         AmazonDynamoDBClientBuilder clientBuilder = AmazonDynamoDBClientBuilder.standard()
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withClientConfiguration(getDynamoDbClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential));
         awsEndpointProvider.setupEndpoint(clientBuilder, AmazonDynamoDB.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
@@ -221,7 +206,6 @@ public abstract class AwsClient {
 
     public AmazonRdsClient createRdsClient(AwsCredentialView awsCredential, String regionName) {
         AmazonRDSClientBuilder clientBuilder = AmazonRDSClientBuilder.standard()
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withClientConfiguration(getDefaultClientConfiguration());
         awsEndpointProvider.setupEndpoint(clientBuilder, AmazonRDS.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());

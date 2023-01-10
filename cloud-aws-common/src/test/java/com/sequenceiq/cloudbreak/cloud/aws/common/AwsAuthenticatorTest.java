@@ -41,8 +41,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.RetryService;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(SpringExtension.class)
 class AwsAuthenticatorTest {
 
@@ -60,9 +58,6 @@ class AwsAuthenticatorTest {
 
     @Mock
     private InstanceProfileCredentialsProvider instanceProfileCredentialsProvider;
-
-    @MockBean
-    private Tracer tracer;
 
     @MockBean
     private SdkClientExceptionMapper sdkClientExceptionMapper;

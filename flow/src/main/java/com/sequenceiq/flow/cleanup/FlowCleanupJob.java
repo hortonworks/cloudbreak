@@ -12,16 +12,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
-import com.sequenceiq.cloudbreak.quartz.TracedQuartzJob;
+import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
-import io.opentracing.Tracer;
-
 @Component
-public class FlowCleanupJob extends TracedQuartzJob {
+public class FlowCleanupJob extends MdcQuartzJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowCleanupJob.class);
 
@@ -42,10 +40,6 @@ public class FlowCleanupJob extends TracedQuartzJob {
 
     @Inject
     private FlowStatCache flowStatCache;
-
-    public FlowCleanupJob(Tracer tracer) {
-        super(tracer, "Flow Cleanup Job");
-    }
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {

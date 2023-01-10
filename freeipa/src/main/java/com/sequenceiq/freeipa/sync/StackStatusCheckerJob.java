@@ -31,8 +31,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
@@ -68,10 +66,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
-
-    public StackStatusCheckerJob(Tracer tracer) {
-        super(tracer, "Stack Status Checker Job");
-    }
 
     @Override
     protected Optional<Object> getMdcContextObject() {

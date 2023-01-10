@@ -11,8 +11,6 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 
-import io.opentracing.Tracer;
-
 public class AuthDistributorClient<E extends Enum<E>, W extends WaitObject> extends MicroserviceClient<GrpcAuthDistributorClient, Void, E, W> {
 
     public static final String AUTH_DISTRIBUTOR_CLIENT = "AUTH_DISTRIBUTOR_CLIENT";
@@ -42,11 +40,11 @@ public class AuthDistributorClient<E extends Enum<E>, W extends WaitObject> exte
         return grpcAuthDistributorClient;
     }
 
-    public static synchronized AuthDistributorClient createProxyAuthDistributorClient(Tracer tracer,
+    public static synchronized AuthDistributorClient createProxyAuthDistributorClient(
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory, String host) {
         AuthDistributorClient clientEntity = new AuthDistributorClient();
         clientEntity.grpcAuthDistributorClient = GrpcAuthDistributorClient.createClient(
-                AuthDistributorConfig.newManagedChannelWrapper(host, 8982), tracer, regionAwareInternalCrnGeneratorFactory);
+                AuthDistributorConfig.newManagedChannelWrapper(host, 8982), regionAwareInternalCrnGeneratorFactory);
         return clientEntity;
     }
 

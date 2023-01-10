@@ -20,8 +20,6 @@ import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.configuration.EndpointConfig;
 import com.sequenceiq.redbeams.configuration.SwaggerConfig;
 
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.swagger.jaxrs.Reader;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
@@ -35,12 +33,6 @@ public class SwaggerGenerator {
 
     @MockBean
     private ExceptionMapper<?> exceptionMapper;
-
-    @MockBean
-    private ServerTracingDynamicFeature serverTracingDynamicFeature;
-
-    @MockBean
-    private ClientTracingFeature clientTracingFeature;
 
     @Autowired
     private EndpointConfig endpointConfig;

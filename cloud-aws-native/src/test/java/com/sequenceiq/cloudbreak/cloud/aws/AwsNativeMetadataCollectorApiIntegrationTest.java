@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
@@ -62,8 +61,6 @@ import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
-import io.opentracing.Tracer;
-
 /*
     This is an integration test to check our API integration in case of missing resources during metadata collection.
     The properties `cb.aws.native.test.accesskey` and `cb.aws.native.test.secretkey` are required for operation.
@@ -82,9 +79,6 @@ import io.opentracing.Tracer;
 })
 @EnabledIf(expression = "#{environment['cb.aws.native.test.accesskey'] != '' && environment['cb.aws.native.test.secretkey'] != ''}", loadContext = true)
 class AwsNativeMetadataCollectorApiIntegrationTest {
-
-    @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
-    private Tracer tracer;
 
     @MockBean
     private AwsPlatformResources awsPlatformResources;

@@ -73,10 +73,6 @@ import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.SpanContext;
-import io.opentracing.Tracer;
 
 @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
 class Flow2HandlerTest {
@@ -157,21 +153,6 @@ class Flow2HandlerTest {
     private ApplicationFlowInformation applicationFlowInformation;
 
     @Mock
-    private Tracer tracer;
-
-    @Mock
-    private Tracer.SpanBuilder spanBuilder;
-
-    @Mock
-    private Span span;
-
-    @Mock
-    private Scope scope;
-
-    @Mock
-    private SpanContext spanContext;
-
-    @Mock
     private NodeConfig nodeConfig;
 
     @Mock
@@ -201,12 +182,6 @@ class Flow2HandlerTest {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
         }).when(transactionService).required(any(Runnable.class));
-        when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
-        when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
-        when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);
-        when(spanBuilder.start()).thenReturn(span);
-        when(tracer.activateSpan(span)).thenReturn(scope);
-        when(span.context()).thenReturn(spanContext);
     }
 
     @Test
@@ -224,7 +199,7 @@ class Flow2HandlerTest {
         verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
         verify(flowLogService, times(1))
                 .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
-        verify(flow, times(1)).sendEvent(anyString(), isNull(), any(), any(), eq(UNKNOWN_OP_TYPE));
+        verify(flow, times(1)).sendEvent(anyString(), isNull(), any(), eq(UNKNOWN_OP_TYPE));
     }
 
     @Test
@@ -246,7 +221,7 @@ class Flow2HandlerTest {
         verify(flowLogService, times(1))
                 .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
         verify(runningFlows, times(1)).remove(anyString());
-        verify(flow, times(0)).sendEvent(anyString(), isNull(), any(), any(), eq(UNKNOWN_OP_TYPE));
+        verify(flow, times(0)).sendEvent(anyString(), isNull(), any(), eq(UNKNOWN_OP_TYPE));
     }
 
     @Test
@@ -274,7 +249,7 @@ class Flow2HandlerTest {
                 .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
         verify(runningFlows, times(0)).remove(anyString());
         verify(flowChains, times(0)).cleanFlowChain(anyString(), anyString());
-        verify(flow, times(0)).sendEvent(anyString(), anyString(), isNull(), any(), any());
+        verify(flow, times(0)).sendEvent(anyString(), anyString(), isNull(), any());
         verify(flowFinalizerCallback, times(1)).onFinalize(eq(payload.getResourceId()));
     }
 
@@ -301,7 +276,7 @@ class Flow2HandlerTest {
         verify(flowLogService, times(0))
                 .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
         verify(runningFlows, times(0)).remove(anyString());
-        verify(flow, times(0)).sendEvent(anyString(), anyString(), isNull(), any(), any());
+        verify(flow, times(0)).sendEvent(anyString(), anyString(), isNull(), any());
         verify(flowFinalizerCallback, times(1)).onFinalize(eq(payload.getResourceId()));
     }
 
@@ -323,7 +298,7 @@ class Flow2HandlerTest {
         verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
         verify(flowLogService, times(1)).save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(),
                 ArgumentMatchers.eq(helloWorldFlowConfig.getClass()), eq(flowState));
-        verify(flow, times(1)).sendEvent(anyString(), anyString(), any(), any(), eq(UNKNOWN_OP_TYPE));
+        verify(flow, times(1)).sendEvent(anyString(), anyString(), any(), eq(UNKNOWN_OP_TYPE));
     }
 
     @Test
@@ -353,7 +328,7 @@ class Flow2HandlerTest {
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1))
                 .save(flowParamsCaptor.capture(), nullable(String.class), eq("KEY"), any(Payload.class), anyMap(), nullable(Class.class), eq(flowState));
-        verify(flow, times(1)).sendEvent(eq("KEY"), isNull(), any(), any(), any());
+        verify(flow, times(1)).sendEvent(eq("KEY"), isNull(), any(), any());
         FlowParameters flowParameters = flowParamsCaptor.getValue();
         assertEquals(FLOW_ID, flowParameters.getFlowId());
         assertNull(flowParameters.getFlowTriggerUserCrn());
@@ -375,7 +350,7 @@ class Flow2HandlerTest {
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1))
                 .save(flowParamsCaptor.capture(), nullable(String.class), eq("KEY"), any(Payload.class), anyMap(), nullable(Class.class), eq(flowState));
-        verify(flow, times(1)).sendEvent(eq("KEY"), isNull(), any(), any(), any());
+        verify(flow, times(1)).sendEvent(eq("KEY"), isNull(), any(), any());
         FlowParameters flowParameters = flowParamsCaptor.getValue();
         assertEquals(FLOW_ID, flowParameters.getFlowId());
         assertNull(flowParameters.getFlowTriggerUserCrn());
@@ -397,7 +372,7 @@ class Flow2HandlerTest {
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
         verify(flowLogService, never()).save(any(), any(), any(), any(), any(), any(), any());
-        verify(flow, never()).sendEvent(any(), any(), any(), any(), any());
+        verify(flow, never()).sendEvent(any(), any(), any(), any());
         verify(inMemoryCleanup, times(1)).cancelFlowWithoutDbUpdate(FLOW_ID);
     }
 
@@ -420,7 +395,7 @@ class Flow2HandlerTest {
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1))
                 .updateLastFlowLogPayload(lastFlowLog, payload, variables);
-        verify(flow, times(1)).sendEvent(eq("KEY"), isNull(), any(), any(), any());
+        verify(flow, times(1)).sendEvent(eq("KEY"), isNull(), any(), any());
     }
 
     @Test
@@ -429,7 +404,7 @@ class Flow2HandlerTest {
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
         verify(flowLogService, never()).save(any(FlowParameters.class), anyString(), anyString(), any(Payload.class), anyMap(), any(), any(FlowState.class));
-        verify(flow, never()).sendEvent(anyString(), anyString(), any(), any(), any());
+        verify(flow, never()).sendEvent(anyString(), anyString(), any(), any());
     }
 
     @Test

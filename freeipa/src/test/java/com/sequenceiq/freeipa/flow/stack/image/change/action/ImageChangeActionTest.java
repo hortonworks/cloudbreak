@@ -62,7 +62,7 @@ class ImageChangeActionTest {
             StackContext stackContext = mock(StackContext.class);
             Stack stack = new Stack();
             when(stackContext.getStack()).thenReturn(stack);
-            when(stackContext.getFlowParameters()).thenReturn(new FlowParameters("flid", "userCrn", null));
+            when(stackContext.getFlowParameters()).thenReturn(new FlowParameters("flid", "userCrn"));
             ImageEntity imageEntity = new ImageEntity();
             imageEntity.setId(IMAGE_ENTITY_ID);
             when(imageService.getByStackId(1L)).thenReturn(imageEntity);
@@ -89,7 +89,7 @@ class ImageChangeActionTest {
             StackContext stackContext = mock(StackContext.class);
             Stack stack = new Stack();
             when(stackContext.getStack()).thenReturn(stack);
-            when(stackContext.getFlowParameters()).thenReturn(new FlowParameters("flid", "userCrn", null));
+            when(stackContext.getFlowParameters()).thenReturn(new FlowParameters("flid", "userCrn"));
             ImageEntity imageEntity = new ImageEntity();
             imageEntity.setId(2L);
             when(imageService.getByStackId(1L)).thenReturn(imageEntity);
@@ -117,7 +117,7 @@ class ImageChangeActionTest {
             StackContext stackContext = mock(StackContext.class);
             Stack stack = new Stack();
             when(stackContext.getStack()).thenReturn(stack);
-            when(stackContext.getFlowParameters()).thenReturn(new FlowParameters("flid", "userCrn", null));
+            when(stackContext.getFlowParameters()).thenReturn(new FlowParameters("flid", "userCrn"));
             ImageEntity imageEntity = new ImageEntity();
             imageEntity.setId(2L);
             ImageSettingsRequest request = new ImageSettingsRequest();

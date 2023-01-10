@@ -69,7 +69,6 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.opentracing.Tracer;
 
 /**
  * A simple wrapper to the GRPC user management service. This handles setting up
@@ -83,21 +82,17 @@ public class UmsClient {
 
     private final UmsClientConfig umsClientConfig;
 
-    private final Tracer tracer;
-
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     /**
      * Constructor.
      *
      * @param channel the managed channel.
-     * @param tracer  tracer
      */
-    UmsClient(ManagedChannel channel, UmsClientConfig umsClientConfig, Tracer tracer,
+    UmsClient(ManagedChannel channel, UmsClientConfig umsClientConfig,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.channel = checkNotNull(channel, "channel should not be null.");
         this.umsClientConfig = checkNotNull(umsClientConfig, "umsClientConfig should not be null.");
-        this.tracer = tracer;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
@@ -932,7 +927,6 @@ public class UmsClient {
         return UserManagementGrpc.newBlockingStub(channel)
                 .withInterceptors(
                         GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcTimeoutSec()),
-                        GrpcUtil.getTracingInterceptor(tracer),
                         new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),
                         new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
     }

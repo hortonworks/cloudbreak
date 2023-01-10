@@ -24,15 +24,10 @@ import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequestContext;
 import com.sequenceiq.cloudbreak.streaming.model.StreamProcessingException;
 import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(MockitoExtension.class)
 public class DatabusRecordWorkerTest {
 
     private DatabusRecordWorker<AbstractDatabusStreamConfiguration> underTest;
-
-    @Mock
-    private Tracer tracer;
 
     @Mock
     private BlockingDeque<DatabusRequest> processingQueue;
@@ -48,7 +43,7 @@ public class DatabusRecordWorkerTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new DatabusRecordWorker<>("thread-name", processingQueue, databusRecordProcessor, tracer,
+        underTest = new DatabusRecordWorker<>("thread-name", processingQueue, databusRecordProcessor,
                 regionAwareInternalCrnGeneratorFactory);
     }
 

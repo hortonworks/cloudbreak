@@ -36,8 +36,6 @@ import com.sequenceiq.datalake.controller.util.UtilController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.sdx.api.SdxApi;
 
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
@@ -77,19 +75,11 @@ public class EndpointConfig extends ResourceConfig {
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
 
-    @Inject
-    private ServerTracingDynamicFeature serverTracingDynamicFeature;
-
-    @Inject
-    private ClientTracingFeature clientTracingFeature;
-
     @PostConstruct
     private void init() {
         register(CDPRestAuditFilter.class);
         registerEndpoints();
         registerExceptionMappers();
-        register(serverTracingDynamicFeature);
-        register(clientTracingFeature);
     }
 
     @PostConstruct

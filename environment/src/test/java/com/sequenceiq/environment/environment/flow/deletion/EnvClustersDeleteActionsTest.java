@@ -52,11 +52,6 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory.HEADERS;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.SpanContext;
-import io.opentracing.Tracer;
-
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)
 class EnvClustersDeleteActionsTest {
@@ -143,26 +138,11 @@ class EnvClustersDeleteActionsTest {
     private EnvDeleteEvent actionPayload;
 
     @Mock
-    private Tracer tracer;
-
-    @Mock
-    private Tracer.SpanBuilder spanBuilder;
-
-    @Mock
-    private Span span;
-
-    @Mock
-    private Scope scope;
-
-    @Mock
-    private SpanContext spanContext;
-
-    @Mock
     private FlowEvent flowEvent;
 
     @BeforeEach
     void setUp() {
-        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
         actionPayload = new EnvDeleteEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN, true);
 
         when(stateContext.getMessageHeader(HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
@@ -171,15 +151,6 @@ class EnvClustersDeleteActionsTest {
         when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
-
-        when(stateContext.getEvent()).thenReturn(flowEvent);
-        when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
-        when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
-        when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);
-        when(spanBuilder.start()).thenReturn(span);
-        when(tracer.activateSpan(span)).thenReturn(scope);
-        when(span.context()).thenReturn(spanContext);
-        when(flowEvent.name()).thenReturn("eventName");
     }
 
     @Test
@@ -332,7 +303,6 @@ class EnvClustersDeleteActionsTest {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
-        ReflectionTestUtils.setField(action, null, tracer, Tracer.class);
     }
 
     private Action<?, ?> configureAction(Supplier<Action<?, ?>> actionSupplier) {

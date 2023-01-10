@@ -20,16 +20,11 @@ import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-
 @Configuration
 public class SdxApiClientConfig {
 
     @Inject
     private ApiClientRequestFilter apiClientRequestFilter;
-
-    @Inject
-    private ClientTracingFeature clientTracingFeature;
 
     @Bean
     @ConditionalOnBean(SdxApiClientParams.class)
@@ -40,7 +35,6 @@ public class SdxApiClientConfig {
                 .withDebug(sdxApiClientParams.isRestDebug())
                 .withClientRequestFilter(apiClientRequestFilter)
                 .withApiRoot(SdxApi.API_ROOT_CONTEXT)
-                .withTracer(clientTracingFeature)
                 .build();
     }
 

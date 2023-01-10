@@ -21,8 +21,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.archive.ArchiveInstanceMetaDataException;
 import com.sequenceiq.cloudbreak.service.stack.archive.ArchiveInstanceMetaDataService;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class ArchiveInstanceMetaDataJob extends StatusCheckerJob {
@@ -41,10 +39,6 @@ public class ArchiveInstanceMetaDataJob extends StatusCheckerJob {
 
     @Inject
     private ArchiveInstanceMetaDataService archiveInstanceMetaDataService;
-
-    public ArchiveInstanceMetaDataJob(Tracer tracer) {
-        super(tracer, "Archive InstanceMetaData Job");
-    }
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {

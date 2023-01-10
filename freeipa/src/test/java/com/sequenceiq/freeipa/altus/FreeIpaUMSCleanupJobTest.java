@@ -26,8 +26,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaUMSCleanupJobTest {
 
@@ -46,12 +44,9 @@ public class FreeIpaUMSCleanupJobTest {
     @Mock
     private JobExecutionContext jobExecutionContext;
 
-    @Mock
-    private Tracer tracer;
-
     @BeforeEach
     public void setUp() {
-        underTest = new FreeIpaUMSCleanupJob(umsCleanupConfig, altusMachineUserService, stackService, tracer);
+        underTest = new FreeIpaUMSCleanupJob(umsCleanupConfig, altusMachineUserService, stackService);
     }
 
     @Test

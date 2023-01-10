@@ -28,7 +28,6 @@ import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
-import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 import com.sequenceiq.cloudbreak.util.CheckedTimeoutRunnable;
 import com.sequenceiq.freeipa.client.model.Ca;
 import com.sequenceiq.freeipa.client.model.Cert;
@@ -62,10 +61,6 @@ import com.sequenceiq.freeipa.client.operation.UserEnableOperation;
 import com.sequenceiq.freeipa.client.operation.UserModOperation;
 import com.sequenceiq.freeipa.client.operation.UserRemoveOperation;
 
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.Tracer;
-
 public class FreeIpaClient {
 
     public static final String MAX_PASSWORD_EXPIRATION_DATETIME = "20380101000000Z";
@@ -92,18 +87,15 @@ public class FreeIpaClient {
 
     private final String hostname;
 
-    private final Tracer tracer;
-
-    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiAddress, String hostname, Tracer tracer) {
-        this(jsonRpcHttpClient, DEFAULT_API_VERSION, apiAddress, hostname, tracer);
+    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiAddress, String hostname) {
+        this(jsonRpcHttpClient, DEFAULT_API_VERSION, apiAddress, hostname);
     }
 
-    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiVersion, String apiAddress, String hostname, Tracer tracer) {
+    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiVersion, String apiAddress, String hostname) {
         this.jsonRpcHttpClient = jsonRpcHttpClient;
         this.apiVersion = apiVersion;
         this.apiAddress = apiAddress;
         this.hostname = hostname;
-        this.tracer = tracer;
     }
 
     public String getApiAddress() {
@@ -578,8 +570,7 @@ public class FreeIpaClient {
         ParameterizedType type = TypeUtils
                 .parameterize(RPCResponse.class, resultType);
 
-        Span span = TracingUtil.initSpan(tracer, "FreeIpa", method);
-        try (Scope ignored = tracer.activateSpan(span)) {
+        try {
             RPCResponse<T> response = (RPCResponse<T>) jsonRpcHttpClient.invoke(method, List.of(flags, parameterMap), type);
             LOGGER.debug("Response object: {}", response);
             if (response == null) {
@@ -592,24 +583,16 @@ public class FreeIpaClient {
             String message = String.format("Invoke FreeIPA failed: %s", e.getLocalizedMessage());
             LOGGER.warn(message);
             OptionalInt responseCode = extractResponseCode(e);
-            span.setTag(TracingUtil.ERROR, true);
-            span.setTag(TracingUtil.MESSAGE, e.getLocalizedMessage());
             throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e, responseCode));
         } catch (Exception e) {
             String message = String.format("Invoke FreeIPA failed: %s", e.getLocalizedMessage());
             LOGGER.warn(message);
             OptionalInt responseCode = extractResponseCode(e);
-            span.setTag(TracingUtil.ERROR, true);
-            span.setTag(TracingUtil.MESSAGE, e.getLocalizedMessage());
             throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e, responseCode));
         } catch (Throwable throwable) {
             String message = String.format("Invoke FreeIPA failed: %s", throwable.getLocalizedMessage());
             LOGGER.warn(message);
-            span.setTag(TracingUtil.ERROR, true);
-            span.setTag(TracingUtil.MESSAGE, throwable.getLocalizedMessage());
             throw new FreeIpaClientException(message, throwable);
-        } finally {
-            span.finish();
         }
     }
 

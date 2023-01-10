@@ -29,12 +29,6 @@ import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.notification.NotificationService;
 
-import io.jaegertracing.internal.JaegerTracer;
-import io.jaegertracing.internal.reporters.InMemoryReporter;
-import io.jaegertracing.internal.samplers.ConstSampler;
-import io.jaegertracing.spi.Reporter;
-import io.jaegertracing.spi.Sampler;
-
 @Profile("integration-test")
 @TestConfiguration
 @ComponentScan(basePackages = {
@@ -84,16 +78,6 @@ public class FlowIntegrationTestConfig {
 
     @MockBean
     private StackStatusFinalizer stackStatusFinalizer;
-
-    @Bean
-    public io.opentracing.Tracer jaegerTracer() {
-        final Reporter reporter = new InMemoryReporter();
-        final Sampler sampler = new ConstSampler(false);
-        return new JaegerTracer.Builder("untraced-service")
-                .withReporter(reporter)
-                .withSampler(sampler)
-                .build();
-    }
 
     @Bean
     public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor) {

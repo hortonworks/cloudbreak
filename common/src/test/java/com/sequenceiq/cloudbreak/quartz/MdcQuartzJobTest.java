@@ -13,12 +13,12 @@ import org.quartz.JobExecutionContext;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 
 @ExtendWith(MockitoExtension.class)
-public class TracedQuartzJobTest {
+public class MdcQuartzJobTest {
 
     @Test
     public void testFillMdcContextWhenNoBuilderImplemented() {
         JobExecutionContext context = mock(JobExecutionContext.class);
-        TracedQuartzJobTestClass underTest = new TracedQuartzJobTestClass();
+        MdcQuartzJobTestClass underTest = new MdcQuartzJobTestClass();
         IllegalArgumentException actual = Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.fillMdcContext(context));
         Assertions.assertEquals("Please implement one of them: getMdcContextObject() or getMdcContextConfigProvider()", actual.getMessage());
     }
@@ -26,7 +26,7 @@ public class TracedQuartzJobTest {
     @Test
     public void testFillMdcContextWhenProviderBuilderImplementedButEmptyAndNoException() {
         JobExecutionContext context = mock(JobExecutionContext.class);
-        TracedQuartzJobTestClass underTest = new TracedQuartzJobTestClass() {
+        MdcQuartzJobTestClass underTest = new MdcQuartzJobTestClass() {
             @Override
             protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
                 return Optional.empty();
@@ -38,7 +38,7 @@ public class TracedQuartzJobTest {
     @Test
     public void testFillMdcContextWhenObjectBuilderImplementedButEmptyAndNoException() {
         JobExecutionContext context = mock(JobExecutionContext.class);
-        TracedQuartzJobTestClass underTest = new TracedQuartzJobTestClass() {
+        MdcQuartzJobTestClass underTest = new MdcQuartzJobTestClass() {
             @Override
             protected Optional<Object> getMdcContextObject() {
                 return Optional.empty();

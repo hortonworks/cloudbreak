@@ -20,14 +20,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.MdcCopyingTaskDecorator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteria;
 import com.sequenceiq.freeipa.service.filter.NetworkFilterProvider;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
-import io.opentracing.Tracer;
 
 @Configuration
 @EnableRetry
@@ -47,9 +46,6 @@ public class AppConfig {
     private List<NetworkFilterProvider> networkFilterProviders;
 
     @Inject
-    private Tracer tracer;
-
-    @Inject
     private MeterRegistry meterRegistry;
 
     @Bean
@@ -59,7 +55,7 @@ public class AppConfig {
         executor.setCorePoolSize(intermediateCorePoolSize);
         executor.setQueueCapacity(intermediateQueueCapacity);
         executor.setThreadNamePrefix("intermediateBuilderExecutor-");
-        executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
+        executor.setTaskDecorator(new MdcCopyingTaskDecorator());
         executor.initialize();
         return executor;
     }

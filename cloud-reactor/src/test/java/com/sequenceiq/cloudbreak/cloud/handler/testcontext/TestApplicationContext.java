@@ -63,8 +63,6 @@ import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
-import io.opentracing.Tracer;
-
 @MockBeans({@MockBean(ApplicationFlowInformation.class), @MockBean(FlowLogDBService.class), @MockBean(FlowRegister.class)})
 @Configuration
 @Import({ParameterGenerator.class, EventBusConfig.class, CloudPlatformInitializer.class})
@@ -118,9 +116,6 @@ public class TestApplicationContext {
     private ResourceRetriever resourceRetriever;
 
     @Mock
-    private Tracer tracer;
-
-    @Mock
     private ManagedChannelWrapper managedChannelWrapper;
 
     @MockBean
@@ -166,11 +161,6 @@ public class TestApplicationContext {
     public CloudPlatformConnectors cloudPlatformConnectors() {
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         return cloudPlatformConnectors;
-    }
-
-    @Bean
-    public Tracer tracer() {
-        return tracer;
     }
 
     @Bean

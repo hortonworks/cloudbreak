@@ -12,7 +12,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -75,12 +74,10 @@ public class RestLoggerFilter extends OncePerRequestFilter {
         return requestPath.contains("/credential");
     }
 
-    @NotNull
     private ContentCachingResponseWrapper getWrappedResponse(HttpServletResponse response) {
         return new ContentCachingResponseWrapper(response);
     }
 
-    @NotNull
     private ContentCachingRequestWrapper getWrappedRequest(HttpServletRequest request) {
         return new ContentCachingRequestWrapper(request);
     }

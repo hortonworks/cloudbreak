@@ -3,7 +3,6 @@ package com.sequenceiq.consumption.configuration;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
-import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 
 import org.slf4j.Logger;
@@ -18,18 +17,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
-
-import io.opentracing.Tracer;
+import com.sequenceiq.cloudbreak.concurrent.MdcCopyingTaskDecorator;
 
 @Configuration
 @EnableRetry
 public class AppConfig {
 
     private static final Logger LOGGER = getLogger(AppConfig.class);
-
-    @Inject
-    private Tracer tracer;
 
     @Value("${rest.debug:false}")
     private boolean restDebug;
@@ -53,7 +47,7 @@ public class AppConfig {
         executor.setCorePoolSize(intermediateCorePoolSize);
         executor.setQueueCapacity(intermediateQueueCapacity);
         executor.setThreadNamePrefix("intermediateBuilderExecutor-");
-        executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
+        executor.setTaskDecorator(new MdcCopyingTaskDecorator());
         executor.initialize();
         return executor;
     }

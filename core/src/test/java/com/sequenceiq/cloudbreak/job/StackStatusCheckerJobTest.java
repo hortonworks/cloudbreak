@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -75,8 +74,6 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.FlowLogService;
-
-import io.opentracing.Tracer;
 
 @ExtendWith(MockitoExtension.class)
 public class StackStatusCheckerJobTest {
@@ -178,8 +175,7 @@ public class StackStatusCheckerJobTest {
 
     @BeforeEach
     public void init() {
-        Tracer tracer = Mockito.mock(Tracer.class);
-        underTest = new StackStatusCheckerJob(tracer);
+        underTest = new StackStatusCheckerJob();
         MockitoAnnotations.openMocks(this);
         lenient().when(flowLogService.isOtherFlowRunning(anyLong())).thenReturn(Boolean.FALSE);
         underTest.setLocalId("1");

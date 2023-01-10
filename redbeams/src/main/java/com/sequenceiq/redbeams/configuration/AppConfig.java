@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.security.Security;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +16,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
-
-import io.opentracing.Tracer;
+import com.sequenceiq.cloudbreak.concurrent.MdcCopyingTaskDecorator;
 
 @Configuration
 @EnableRetry
@@ -34,9 +31,6 @@ public class AppConfig implements ResourceLoaderAware {
     private static final int BEAN_ORDER_REQUEST_ID_GENERATING_FILTER = 100;
 
     private static final int BEAN_ORDER_REQUEST_ID_FILTER = 110;
-
-    @Inject
-    private Tracer tracer;
 
     @Value("${redbeams.etc.config.dir}")
     private String etcConfigDir;
@@ -78,7 +72,7 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setCorePoolSize(intermediateCorePoolSize);
         executor.setQueueCapacity(intermediateQueueCapacity);
         executor.setThreadNamePrefix("intermediateBuilderExecutor-");
-        executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
+        executor.setTaskDecorator(new MdcCopyingTaskDecorator());
         executor.initialize();
         return executor;
     }
@@ -89,7 +83,7 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setCorePoolSize(corePoolSize);
         executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("resourceBuilderExecutor-");
-        executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
+        executor.setTaskDecorator(new MdcCopyingTaskDecorator());
         executor.initialize();
         return executor;
     }

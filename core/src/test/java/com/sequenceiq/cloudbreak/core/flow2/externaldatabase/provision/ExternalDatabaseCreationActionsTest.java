@@ -51,11 +51,6 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.SpanContext;
-import io.opentracing.Tracer;
-
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)
 class ExternalDatabaseCreationActionsTest {
@@ -129,21 +124,6 @@ class ExternalDatabaseCreationActionsTest {
     private Flow flow;
 
     @Mock
-    private Tracer tracer;
-
-    @Mock
-    private Tracer.SpanBuilder spanBuilder;
-
-    @Mock
-    private Span span;
-
-    @Mock
-    private Scope scope;
-
-    @Mock
-    private SpanContext spanContext;
-
-    @Mock
     private FlowEvent flowEvent;
 
     @Mock
@@ -154,7 +134,7 @@ class ExternalDatabaseCreationActionsTest {
 
     @BeforeEach
     void setup() {
-        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
         when(stack.getId()).thenReturn(STACK_ID);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
         when(stateContext.getExtendedState()).thenReturn(extendedState);
@@ -163,15 +143,6 @@ class ExternalDatabaseCreationActionsTest {
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
         when(stackDtoService.getStackViewById(any())).thenReturn(stack);
-
-        when(stateContext.getEvent()).thenReturn(flowEvent);
-        when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
-        when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
-        when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);
-        when(spanBuilder.start()).thenReturn(span);
-        when(tracer.activateSpan(span)).thenReturn(scope);
-        when(span.context()).thenReturn(spanContext);
-        when(flowEvent.name()).thenReturn("eventName");
     }
 
     @Test
@@ -248,6 +219,5 @@ class ExternalDatabaseCreationActionsTest {
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
         ReflectionTestUtils.setField(action, null, stackDtoService, StackDtoService.class);
         ReflectionTestUtils.setField(action, null, metricService, MetricService.class);
-        ReflectionTestUtils.setField(action, null, tracer, Tracer.class);
     }
 }

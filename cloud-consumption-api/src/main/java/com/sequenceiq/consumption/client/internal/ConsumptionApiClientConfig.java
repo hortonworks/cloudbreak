@@ -10,18 +10,13 @@ import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.consumption.api.v1.ConsumptionApi;
 
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-
 @Configuration
 public class ConsumptionApiClientConfig {
 
     private final ApiClientRequestFilter apiClientRequestFilter;
 
-    private final ClientTracingFeature clientTracingFeature;
-
-    public ConsumptionApiClientConfig(ApiClientRequestFilter apiClientRequestFilter, ClientTracingFeature clientTracingFeature) {
+    public ConsumptionApiClientConfig(ApiClientRequestFilter apiClientRequestFilter) {
         this.apiClientRequestFilter = apiClientRequestFilter;
-        this.clientTracingFeature = clientTracingFeature;
     }
 
     @Bean
@@ -33,7 +28,6 @@ public class ConsumptionApiClientConfig {
                 .withDebug(consumptionApiClientParams.isRestDebug())
                 .withClientRequestFilter(apiClientRequestFilter)
                 .withApiRoot(ConsumptionApi.API_ROOT_CONTEXT)
-                .withTracer(clientTracingFeature)
                 .build();
     }
 

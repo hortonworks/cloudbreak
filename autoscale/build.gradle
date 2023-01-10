@@ -168,7 +168,6 @@ dependencies {
 
     implementation group: 'io.springfox',                  name: 'springfox-boot-starter'
 
-    implementation group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
     implementation group: 'com.dyngr',                 name: 'polling',                                  version: dyngrPollingVersion
 
     implementation     ('io.swagger:swagger-jersey2-jaxrs') {

@@ -144,7 +144,6 @@ dependencies {
   implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
   implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
   implementation group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
-  implementation group: 'io.opentracing.contrib',         name: 'opentracing-spring-jaeger-starter',      version: opentracingSpringJaegerStarterVersion
 
   implementation group:  'org.apache.velocity',          name: 'velocity',                       version: '1.7'
   implementation group:  'org.testng',                   name: 'testng',                         version: testNgVersion
@@ -166,7 +165,6 @@ dependencies {
   implementation (group: 'com.hierynomus',                name: 'sshj',                           version: '0.33.0') {
     exclude group: "net.i2p.crypto"
   }
-  implementation group: 'org.jetbrains',                 name: 'annotations',                    version: '20.1.0'
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {

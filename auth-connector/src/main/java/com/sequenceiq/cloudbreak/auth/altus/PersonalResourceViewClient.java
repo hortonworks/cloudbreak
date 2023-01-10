@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.opentracing.Tracer;
 
 /**
  * A simple wrapper to the GRPC user management service. This handles setting up
@@ -35,20 +34,16 @@ public class PersonalResourceViewClient {
 
     private final UmsClientConfig umsClientConfig;
 
-    private final Tracer tracer;
-
     /**
      * Constructor.
      *
      * @param channel  the managed channel.
      * @param actorCrn the actor CRN.
-     * @param tracer   tracer
      */
-    PersonalResourceViewClient(ManagedChannel channel, String actorCrn, UmsClientConfig umsClientConfig, Tracer tracer) {
+    PersonalResourceViewClient(ManagedChannel channel, String actorCrn, UmsClientConfig umsClientConfig) {
         this.channel = checkNotNull(channel, "channel should not be null.");
         this.actorCrn = checkNotNull(actorCrn, "actorCrn should not be null.");
         this.umsClientConfig = checkNotNull(umsClientConfig, "umsClientConfig should not be null.");
-        this.tracer = tracer;
     }
 
     public List<Boolean> hasRightOnResources(String actorCrn, String right, Iterable<String> resources) {
@@ -89,7 +84,6 @@ public class PersonalResourceViewClient {
         String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
         return PersonalResourceViewGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
-                GrpcUtil.getTracingInterceptor(tracer),
                 new AltusMetadataInterceptor(requestId, actorCrn),
                 new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName())
         );

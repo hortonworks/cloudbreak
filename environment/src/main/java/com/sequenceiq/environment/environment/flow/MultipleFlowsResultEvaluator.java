@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.flow;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,7 +32,6 @@ public class MultipleFlowsResultEvaluator {
         return flowIds.stream().anyMatch(this::isFlowNotFinishedOrFailed);
     }
 
-    @NotNull
     private Boolean isFlowNotFinishedOrFailed(FlowIdentifier flowId) {
         FlowCheckResponse flowCheckResponse;
         switch (flowId.getType()) {

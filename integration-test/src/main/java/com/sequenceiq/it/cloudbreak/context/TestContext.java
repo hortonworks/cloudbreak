@@ -63,8 +63,6 @@ import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ResourceAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceAwait;
 
-import io.opentracing.Tracer;
-
 public abstract class TestContext implements ApplicationContextAware {
 
     public static final String OUTPUT_FAILURE_TYPE = "outputFailureType";
@@ -151,9 +149,6 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private ErrorLogMessageProvider errorLogMessageProvider;
-
-    @Inject
-    private Tracer tracer;
 
     @Inject
     private CloudbreakActor cloudbreakActor;
@@ -463,9 +458,9 @@ public abstract class TestContext implements ApplicationContextAware {
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(getTestParameter(), cloudbreakUser,
                     regionAwareInternalCrnGeneratorFactory.iam());
             SdxClient sdxClient = SdxClient.createProxySdxClient(getTestParameter(), cloudbreakUser);
-            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost, umsPort);
-            SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(tracer, umsHost, regionAwareInternalCrnGeneratorFactory);
-            AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(tracer,
+            UmsClient umsClient = UmsClient.createProxyUmsClient(umsHost, umsPort);
+            SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(umsHost, regionAwareInternalCrnGeneratorFactory);
+            AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(getTestParameter(), cloudbreakUser);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
@@ -492,9 +487,9 @@ public abstract class TestContext implements ApplicationContextAware {
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(getTestParameter(), accountAdmin,
                     regionAwareInternalCrnGeneratorFactory.iam());
             SdxClient sdxClient = SdxClient.createProxySdxClient(getTestParameter(), accountAdmin);
-            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost, umsPort);
-            SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(tracer, umsHost, regionAwareInternalCrnGeneratorFactory);
-            AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(tracer,
+            UmsClient umsClient = UmsClient.createProxyUmsClient(umsHost, umsPort);
+            SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(umsHost, regionAwareInternalCrnGeneratorFactory);
+            AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(getTestParameter(), accountAdmin);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(

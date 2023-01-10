@@ -33,8 +33,6 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
-import io.opentracing.SpanContext;
-
 @ExtendWith(MockitoExtension.class)
 public class CheckImageActionTest {
 
@@ -88,7 +86,7 @@ public class CheckImageActionTest {
 
     @Test
     void testWhenCreateFinishedThenSendEvent() {
-        FlowParameters flowParameters = new FlowParameters("flowId", "flowTriggerUserCrn", mock(SpanContext.class));
+        FlowParameters flowParameters = new FlowParameters("flowId", "flowTriggerUserCrn");
         when(stackContext.getStackId()).thenReturn(STACK_ID);
         when(stackContext.getFlowParameters()).thenReturn(flowParameters);
         when(reactorEventFactory.createEvent(any(Map.class), any())).thenReturn(mock(Event.class));

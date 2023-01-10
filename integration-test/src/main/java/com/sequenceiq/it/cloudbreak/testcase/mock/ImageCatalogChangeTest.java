@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
@@ -101,7 +100,6 @@ public class ImageCatalogChangeTest extends AbstractMockTest {
                 .validate();
     }
 
-    @NotNull
     private String createNewImageCatalog(MockedTestContext testContext, StackImageV4Response image) {
         final String newImageCatalogName = image.getCatalogName() + "-changed";
         final String newImageCatalogUrl = image.getCatalogUrl() + "&changed=true";

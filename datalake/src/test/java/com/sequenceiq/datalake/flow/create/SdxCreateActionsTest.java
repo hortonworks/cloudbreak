@@ -50,8 +50,6 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
-import io.opentracing.SpanContext;
-
 @ExtendWith(MockitoExtension.class)
 class SdxCreateActionsTest {
 
@@ -101,9 +99,6 @@ class SdxCreateActionsTest {
     @Mock
     private EventBus eventBus;
 
-    @Mock
-    private SpanContext spanContext;
-
     private FlowParameters flowParameters;
 
     @Mock
@@ -119,7 +114,7 @@ class SdxCreateActionsTest {
 
     @BeforeEach
     void setUp() {
-        flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, spanContext);
+        flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
         detailedEnvironmentResponse = DetailedEnvironmentResponse.builder().build();
 
         lenient().when(runningFlows.getFlowChainId(FLOW_ID)).thenReturn(FLOW_CHAIN_ID);
@@ -186,8 +181,7 @@ class SdxCreateActionsTest {
         Map<String, Object> headers = headersCaptor.getValue();
         assertThat(headers).isNotNull();
         assertThat(headers).containsOnly(entry(FlowConstants.FLOW_ID, FLOW_ID), entry(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USER_CRN),
-                entry(FlowConstants.SPAN_CONTEXT, spanContext), entry(FlowConstants.FLOW_OPERATION_TYPE, "UNKNOWN"),
-                entry(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID));
+                entry(FlowConstants.FLOW_OPERATION_TYPE, "UNKNOWN"), entry(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID));
     }
 
     @Test

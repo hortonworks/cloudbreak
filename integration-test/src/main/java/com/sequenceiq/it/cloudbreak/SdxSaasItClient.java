@@ -14,8 +14,6 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 
-import io.opentracing.Tracer;
-
 public class SdxSaasItClient<E extends Enum<E>, W extends WaitObject> extends MicroserviceClient<GrpcSdxSaasClient, Void, E, W> {
 
     private GrpcSdxSaasClient sdxSaasClient;
@@ -43,7 +41,7 @@ public class SdxSaasItClient<E extends Enum<E>, W extends WaitObject> extends Mi
         return sdxSaasClient;
     }
 
-    public static synchronized SdxSaasItClient createProxySdxSaasClient(Tracer tracer, String host,
+    public static synchronized SdxSaasItClient createProxySdxSaasClient(String host,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         SdxSaasItClient clientEntity = new SdxSaasItClient();
         SdxSaasChannelConfig sdxSaasChannelConfig = new SdxSaasChannelConfig();
@@ -53,7 +51,7 @@ public class SdxSaasItClient<E extends Enum<E>, W extends WaitObject> extends Mi
         Field port = ReflectionUtils.findField(SdxSaasChannelConfig.class, "port");
         ReflectionUtils.makeAccessible(port);
         ReflectionUtils.setField(port, sdxSaasChannelConfig, 8982);
-        clientEntity.sdxSaasClient = GrpcSdxSaasClient.createClient(SdxSaasChannelConfig.newManagedChannelWrapper(host, 8982), sdxSaasChannelConfig, tracer);
+        clientEntity.sdxSaasClient = GrpcSdxSaasClient.createClient(SdxSaasChannelConfig.newManagedChannelWrapper(host, 8982), sdxSaasChannelConfig);
         Field crnFactory = ReflectionUtils.findField(GrpcSdxSaasClient.class, "regionAwareInternalCrnGeneratorFactory");
         ReflectionUtils.makeAccessible(crnFactory);
         ReflectionUtils.setField(crnFactory, clientEntity.sdxSaasClient, regionAwareInternalCrnGeneratorFactory);

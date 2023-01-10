@@ -14,34 +14,17 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
-import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.Tracer;
+public abstract class MdcQuartzJob extends QuartzJobBean {
 
-public abstract class TracedQuartzJob extends QuartzJobBean {
-
-    private static final Logger LOGGER = getLogger(TracedQuartzJob.class);
-
-    private final String jobName;
-
-    private final Tracer tracer;
-
-    public TracedQuartzJob(Tracer tracer, String jobName) {
-        this.tracer = tracer;
-        this.jobName = jobName;
-    }
+    private static final Logger LOGGER = getLogger(MdcQuartzJob.class);
 
     @Override
     protected final void executeInternal(JobExecutionContext context) throws JobExecutionException {
         fillMdcContext(context);
-        Span span = TracingUtil.initSpan(tracer, "Quartz", jobName);
-        TracingUtil.setTagsFromMdc(span);
-        try (Scope ignored = tracer.activateSpan(span)) {
+        try {
             executeTracedJob(context);
         } finally {
-            span.finish();
             MDCBuilder.cleanupMdc();
         }
     }
@@ -64,7 +47,7 @@ public abstract class TracedQuartzJob extends QuartzJobBean {
     }
 
     /**
-     * @deprecated use {@link TracedQuartzJob#getMdcContextConfigProvider()} instead for type-safety
+     * @deprecated use {@link MdcQuartzJob#getMdcContextConfigProvider()} instead for type-safety
      */
     @Nullable
     @Deprecated

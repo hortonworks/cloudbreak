@@ -14,11 +14,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.sequenceiq.cloudbreak.concurrent.ActorCrnTaskDecorator;
 import com.sequenceiq.cloudbreak.concurrent.CompositeTaskDecorator;
-import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.MdcCopyingTaskDecorator;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
-import io.opentracing.Tracer;
 
 @Configuration
 public class UsersyncConfig {
@@ -36,9 +35,6 @@ public class UsersyncConfig {
     private int usersyncQueueCapacity;
 
     @Inject
-    private Tracer tracer;
-
-    @Inject
     private MeterRegistry meterRegistry;
 
     @Bean(name = USERSYNC_EXTERNAL_TASK_EXECUTOR)
@@ -49,7 +45,7 @@ public class UsersyncConfig {
         executor.setThreadNamePrefix("usersyncExecutor-external-");
         executor.setTaskDecorator(
                 new CompositeTaskDecorator(
-                        List.of(new TracingAndMdcCopyingTaskDecorator(tracer), new ActorCrnTaskDecorator())));
+                        List.of(new MdcCopyingTaskDecorator(), new ActorCrnTaskDecorator())));
         executor.initialize();
         return ExecutorServiceMetrics.monitor(meterRegistry, executor.getThreadPoolExecutor(), USERSYNC_EXTERNAL_TASK_EXECUTOR, "threadpool");
     }
@@ -62,7 +58,7 @@ public class UsersyncConfig {
         executor.setThreadNamePrefix("usersyncExecutor-internal-");
         executor.setTaskDecorator(
                 new CompositeTaskDecorator(
-                        List.of(new TracingAndMdcCopyingTaskDecorator(tracer), new ActorCrnTaskDecorator())));
+                        List.of(new MdcCopyingTaskDecorator(), new ActorCrnTaskDecorator())));
         executor.initialize();
         return ExecutorServiceMetrics.monitor(meterRegistry, executor.getThreadPoolExecutor(), USERSYNC_INTERNAL_TASK_EXECUTOR, "threadpool");
     }

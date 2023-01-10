@@ -20,7 +20,7 @@ export ENVIRONMENT_AUTOSYNC_ENABLED=false
 export ENVIRONMENT_FREEIPA_SYNCHRONIZEONSTART=false
 export ENVIRONMENT_EXPERIENCE_SCAN_ENABLED=true
 export DATALAKE_DR_ENABLED=true
-export CB_LOCAL_DEV_LIST=jaeger,environments2-api,audit-api,distrox-api,thunderhead-api,datalake-api,datalake-dr
+export CB_LOCAL_DEV_LIST=environments2-api,audit-api,distrox-api,thunderhead-api,datalake-api,datalake-dr
 
 export ALTUS_AUDIT_ENDPOINT=thunderhead-mock
 export INTEGRATIONTEST_AUTHDISTRIBUTOR_HOST=thunderhead-mock

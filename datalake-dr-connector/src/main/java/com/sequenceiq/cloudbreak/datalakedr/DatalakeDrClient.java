@@ -33,10 +33,8 @@ import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
-import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
-import io.opentracing.Tracer;
 
 @Component
 public class DatalakeDrClient {
@@ -49,8 +47,6 @@ public class DatalakeDrClient {
 
     private final GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter statusConverter;
 
-    private final Tracer tracer;
-
     @Qualifier("datalakeDrManagedChannelWrapper")
     @Inject
     private ManagedChannelWrapper channelWrapper;
@@ -58,10 +54,9 @@ public class DatalakeDrClient {
     @Inject
     private DatalakeDataInfoJsonToObjectConverter datalakeDataInfoJsonToObjectConverter;
 
-    public DatalakeDrClient(DatalakeDrConfig datalakeDrConfig, GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter statusConverter, Tracer tracer) {
+    public DatalakeDrClient(DatalakeDrConfig datalakeDrConfig, GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter statusConverter) {
         this.datalakeDrConfig = datalakeDrConfig;
         this.statusConverter = statusConverter;
-        this.tracer = tracer;
     }
 
     public DatalakeBackupStatusResponse triggerBackup(String datalakeName, String backupLocation, String backupName, String actorCrn,
@@ -352,7 +347,7 @@ public class DatalakeDrClient {
     private datalakeDRBlockingStub newStub(ManagedChannel channel, String requestId, String actorCrn) {
         checkNotNull(requestId, "requestId should not be null.");
         return datalakeDRGrpc.newBlockingStub(channel)
-                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer), new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
     private DatalakeBackupStatusResponse missingConnectorResponseOnBackup() {

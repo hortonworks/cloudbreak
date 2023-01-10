@@ -52,9 +52,7 @@ import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-import io.opentracing.contrib.spring.tracer.configuration.TracerAutoConfiguration;
-
-@ContextConfiguration(classes = {IntegrationTestConfiguration.class, TracerAutoConfiguration.class},
+@ContextConfiguration(classes = {IntegrationTestConfiguration.class},
         initializers = ConfigFileApplicationContextInitializer.class)
 public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
 

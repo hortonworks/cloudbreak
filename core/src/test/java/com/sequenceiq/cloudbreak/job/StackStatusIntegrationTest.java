@@ -98,8 +98,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.FlowLogService;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = StackStatusIntegrationTest.TestAppContext.class)
 class StackStatusIntegrationTest {
@@ -136,9 +134,6 @@ class StackStatusIntegrationTest {
 
     @MockBean
     private ReactorFlowManager flowManager;
-
-    @MockBean
-    private Tracer tracer;
 
     @MockBean
     private MetricsClient metricsClient;
