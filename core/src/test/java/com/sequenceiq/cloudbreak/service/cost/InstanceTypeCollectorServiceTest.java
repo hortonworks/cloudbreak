@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cost;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -19,9 +20,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.cloud.aws.common.cost.AwsPricingCache;
-import com.sequenceiq.cloudbreak.cloud.azure.cost.AzurePricingCache;
+import com.sequenceiq.cloudbreak.cloud.PricingCache;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.cloudera.ClouderaCostCache;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -55,10 +57,10 @@ public class InstanceTypeCollectorServiceTest {
     private CredentialClientService credentialClientService;
 
     @Mock
-    private AwsPricingCache awsPricingCache;
+    private Map<CloudPlatform, PricingCache> pricingCaches;
 
     @Mock
-    private AzurePricingCache azurePricingCache;
+    private PricingCache pricingCache;
 
     @Mock
     private ClouderaCostCache clouderaCostCache;
@@ -70,29 +72,17 @@ public class InstanceTypeCollectorServiceTest {
     void setup() {
         when(instanceMetaDataService.countByInstanceGroupId(420L)).thenReturn(2);
         when(clouderaCostCache.getPriceByType(any())).thenReturn(0.5);
+        when(pricingCaches.containsKey(any())).thenReturn(Boolean.TRUE);
+        when(pricingCaches.get(any())).thenReturn(pricingCache);
     }
 
     @Test
-    void getAllInstanceTypesAWS() {
-        when(awsPricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
-        when(awsPricingCache.getCpuCountForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(8);
-        when(awsPricingCache.getMemoryForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(16);
-        when(awsPricingCache.getStoragePricePerGBHour(REGION, "gp2")).thenReturn(MAGIC_PRICE_PER_DISK_GB);
+    void getAllInstanceTypes() {
+        when(pricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
+        when(pricingCache.getCpuCountForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(8);
+        when(pricingCache.getMemoryForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(16);
+        when(pricingCache.getStoragePricePerGBHour(eq(REGION), any(), anyInt())).thenReturn(MAGIC_PRICE_PER_DISK_GB);
         when(instanceGroupService.getInstanceGroupViewByStackId(69L)).thenReturn(List.of(getInstanceGroup("gp2")));
-        when(credentialClientService.getByEnvironmentCrn(any())).thenReturn(getCredential("AWS"));
-
-        ClusterCostDto clusterCostDto = underTest.getAllInstanceTypes(getStack("AWS"));
-
-        assertions(clusterCostDto);
-    }
-
-    @Test
-    void getAllInstanceTypesAzure() {
-        when(azurePricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
-        when(azurePricingCache.getCpuCountForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(8);
-        when(azurePricingCache.getMemoryForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(16);
-        when(azurePricingCache.getStoragePricePerGBHour(REGION, "StandardSSD_LRS", 250)).thenReturn(MAGIC_PRICE_PER_DISK_GB);
-        when(instanceGroupService.getInstanceGroupViewByStackId(69L)).thenReturn(List.of(getInstanceGroup("StandardSSD_LRS")));
         when(credentialClientService.getByEnvironmentCrn(any())).thenReturn(getCredential("AZURE"));
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
@@ -121,6 +111,7 @@ public class InstanceTypeCollectorServiceTest {
         stack.setRegion(REGION);
         stack.setCloudPlatform(cloudPlatform);
         stack.setStackStatus(new StackStatus(stack, Status.AVAILABLE, "Status reason.", DetailedStackStatus.AVAILABLE));
+        stack.setInstanceGroups(Set.of(getInstanceGroup("standard")));
         return stack;
     }
 
@@ -135,6 +126,7 @@ public class InstanceTypeCollectorServiceTest {
         volumeTemplate.setVolumeType(volumeType);
         template.setVolumeTemplates(Set.of(volumeTemplate));
         instanceGroup.setTemplate(template);
+        instanceGroup.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData()));
         return instanceGroup;
     }
 

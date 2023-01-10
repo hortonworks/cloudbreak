@@ -16,7 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.PricingCache;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.usd.UsdCalculatorService;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -37,11 +39,15 @@ public class FreeIpaCostServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private Map<CloudPlatform, PricingCache> pricingCacheMap;
+
     @InjectMocks
     private FreeIpaCostService underTest;
 
     @Test
     void getCosts() {
+        when(pricingCacheMap.containsKey(any())).thenReturn(Boolean.TRUE);
         when(entitlementService.isUsdCostCalculationEnabled(any())).thenReturn(true);
         when(stackService.getMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(any(), any())).thenReturn(List.of(getStack()));
         when(usdCalculatorService.calculateProviderCost(any())).thenReturn(0.5);
@@ -63,6 +69,7 @@ public class FreeIpaCostServiceTest {
         stack.setEnvironmentCrn("ENVIRONMENT_CRN");
         stack.setName("RESOURCE_NAME");
         stack.setResourceCrn("RESOURCE_CRN");
+        stack.setCloudPlatform("AWS");
         return stack;
     }
 }

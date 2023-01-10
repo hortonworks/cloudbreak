@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.sequenceiq.cloudbreak.cloud.PricingCache;
 import com.sequenceiq.cloudbreak.cloud.azure.cost.model.PriceResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -33,12 +34,13 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.model.PricingCacheKey;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service("azurePricingCache")
-public class AzurePricingCache {
+public class AzurePricingCache implements PricingCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzurePricingCache.class);
 
@@ -95,7 +97,7 @@ public class AzurePricingCache {
                 throw new RuntimeException("Failed to load Azure storage price json!", e);
             }
         }
-        throw new RuntimeException("Failed to load Azure storage price json!");
+        throw new RuntimeException("Azure storage price json file could not found!");
     }
 
     private static Map<String, Map<String, Map<String, Integer>>> loadAzureDiskSizes() {
@@ -109,7 +111,7 @@ public class AzurePricingCache {
                 throw new RuntimeException("Failed to load Azure disk size json!", e);
             }
         }
-        throw new RuntimeException("Failed to load Azure disk size json!");
+        throw new RuntimeException("Azure disk price json file could not found!");
     }
 
     public double getPriceForInstanceType(String region, String instanceType) {
@@ -200,4 +202,9 @@ public class AzurePricingCache {
         LOGGER.info("Retryable GET for PriceResponse called with max retries [{}] and backoff delay [{}].", MAX_ATTEMPTS, BACKOFF_DELAY);
         return invocationBuilder.get(PriceResponse.class);
     }
+
+        @Override
+        public CloudPlatform getCloudPlatform() {
+            return CloudPlatform.AZURE;
+        }
 }

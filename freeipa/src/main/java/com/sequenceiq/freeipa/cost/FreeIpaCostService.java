@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.cost;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.PricingCache;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.CostCalculationNotEnabledException;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.usd.UsdCalculatorService;
@@ -36,6 +39,9 @@ public class FreeIpaCostService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private Map<CloudPlatform, PricingCache> pricingCacheMap;
+
     private boolean usdCalculationEnabled;
 
     public Map<String, RealTimeCost> getCosts(List<String> environmentCrns) {
@@ -44,7 +50,10 @@ public class FreeIpaCostService {
         Map<String, RealTimeCost> realTimeCosts = new HashMap<>();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
 
-        List<Stack> stacks = stackService.getMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(environmentCrns, accountId);
+        List<Stack> stacks = stackService.getMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(environmentCrns, accountId)
+                .stream()
+                .filter(stack -> pricingCacheMap.containsKey(CloudPlatform.valueOf(stack.getCloudPlatform())))
+                .collect(Collectors.toList());
         for (Stack stack : stacks) {
             ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypes(stack);
             RealTimeCost realTimeCost = new RealTimeCost();

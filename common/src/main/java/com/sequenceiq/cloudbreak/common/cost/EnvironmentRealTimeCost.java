@@ -60,17 +60,17 @@ public class EnvironmentRealTimeCost implements Serializable {
         this.datahubs = datahubs;
     }
 
-    public EnvironmentRealTimeCost add(String resourceCrn, RealTimeCost realTimeCost) {
+    public EnvironmentRealTimeCost addCostByType(String resourceCrn, RealTimeCost realTimeCost) {
         this.hourlyProviderUsd += realTimeCost.getHourlyProviderUsd();
         this.hourlyClouderaUsd += realTimeCost.getHourlyClouderaUsd();
 
         if (realTimeCost.getType() != null) {
             switch (realTimeCost.getType()) {
                 case "FREEIPA":
-                    freeipa = realTimeCost;
+                    setFreeipa(realTimeCost);
                     break;
                 case "DATALAKE":
-                    datalake = realTimeCost;
+                    setDatalake(realTimeCost);
                     break;
                 case "WORKLOAD":
                     datahubs.put(resourceCrn, realTimeCost);

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cost;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.PricingCache;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.CostCalculationNotEnabledException;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.usd.UsdCalculatorService;
@@ -37,6 +40,9 @@ public class ClusterCostService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private Map<CloudPlatform, PricingCache> pricingCacheMap;
+
     private boolean usdCalculationEnabled;
 
     public Map<String, RealTimeCost> getCosts(List<String> clusterCrns) {
@@ -44,7 +50,10 @@ public class ClusterCostService {
         errorIfCostCalculationFeatureIsNotEnabled();
         Map<String, RealTimeCost> realTimeCosts = new HashMap<>();
 
-        List<StackView> stacks = stackDtoService.findNotTerminatedByCrns(clusterCrns);
+        List<StackView> stacks = stackDtoService.findNotTerminatedByCrns(clusterCrns)
+                .stream()
+                .filter(stackView -> pricingCacheMap.containsKey(CloudPlatform.valueOf(stackView.getCloudPlatform())))
+                .collect(Collectors.toList());
         for (StackView stack : stacks) {
             Status stackStatus = stack.getStatus();
             if (stackStatus == Status.DELETE_COMPLETED || stackStatus == Status.DELETED_ON_PROVIDER_SIDE) {
