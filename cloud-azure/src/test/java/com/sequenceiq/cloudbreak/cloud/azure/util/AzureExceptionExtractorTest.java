@@ -1,8 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.of;
+
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class AzureExceptionExtractorTest {
 
@@ -42,11 +48,20 @@ class AzureExceptionExtractorTest {
         assertThat(underTest.extractErrorMessage(e)).isEqualTo(simplemessage);
     }
 
-    @Test
-    void rootCauseValidJsonMsgReturned() {
-        String simplemessage = "{\"error_description\":\"message\",\"key\":\"value\"}";
-        Exception rc = new Exception(simplemessage);
+    @ParameterizedTest
+    @MethodSource("errorMessageProvider")
+    void rootCauseValidJsonMsgReturned(String exceptionMessage, String extractedMessage) {
+        Exception rc = new Exception(exceptionMessage);
         Exception e = new Exception(rc);
-        assertThat(underTest.extractErrorMessage(e)).isEqualTo("message");
+        assertThat(underTest.extractErrorMessage(e)).isEqualTo(extractedMessage);
+    }
+
+    public static Stream<Arguments> errorMessageProvider() {
+        return Stream.of(
+                of("{\"error_description\":\"message\",\"key\":\"value\"}", "error_description: message"),
+                of("{\"error_description\":\"message\",\"error\":\"error\",\"error_uri\":\"error_uri\",\"key\":\"value\"}",
+                        "error_description: message, error: error, error_uri: error_uri"),
+                of("{\"error_description\":\"message\",\"error_uri\":\"error_uri\",\"key\":\"value\"}", "error_description: message, error_uri: error_uri"),
+                of("{\"key\":\"value\"}", "{\"key\":\"value\"}"));
     }
 }

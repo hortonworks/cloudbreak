@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
@@ -90,7 +91,7 @@ public class AzureCredentialConnector implements CredentialConnector {
             LOGGER.warn(exceptionMessage, e);
             String errorMessage = Objects.requireNonNullElse(exceptionExtractor.extractErrorMessage(e),
                     String.format("Could not verify the credential on Azure. Original message: %s", exceptionMessage));
-            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, new CloudConnectorException(errorMessage), errorMessage);
         }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
     }
