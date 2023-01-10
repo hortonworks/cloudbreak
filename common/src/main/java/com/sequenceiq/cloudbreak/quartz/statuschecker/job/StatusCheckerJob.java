@@ -1,18 +1,12 @@
 package com.sequenceiq.cloudbreak.quartz.statuschecker.job;
 
-import com.sequenceiq.cloudbreak.quartz.TracedQuartzJob;
+import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
 
-import io.opentracing.Tracer;
-
-public abstract class StatusCheckerJob extends TracedQuartzJob {
+public abstract class StatusCheckerJob extends MdcQuartzJob {
 
     private String localId;
 
     private String remoteResourceCrn;
-
-    public StatusCheckerJob(Tracer tracer, String jobName) {
-        super(tracer, jobName);
-    }
 
     public String getLocalId() {
         return localId;

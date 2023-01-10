@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.http.HttpStatus;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -126,7 +125,6 @@ public class GcpInstanceStateChecker {
                 && (ex.getDetails().get(ERROR_CODE).equals(HttpStatus.SC_NOT_FOUND) || ex.getDetails().get(ERROR_CODE).equals(HttpStatus.SC_FORBIDDEN));
     }
 
-    @NotNull
     private InstanceStatus getInstanceStatusFromGcpInstance(Instance gcpInstance) {
         InstanceStatus status;
         switch (gcpInstance.getStatus()) {

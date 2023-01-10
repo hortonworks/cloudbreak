@@ -153,7 +153,6 @@ public class ComponentTestConfig {
                     "spring.datasource.url=" + POSTGRES_CONTAINER.getJdbcUrl(),
                     "spring.datasource.username=" + POSTGRES_CONTAINER.getUsername(),
                     "spring.datasource.password=" + POSTGRES_CONTAINER.getPassword(),
-                    "opentracing.allowed-header-tags=mytag",
                     "spring.quartz.auto-startup=false",
                     "statuschecker.enabled=false",
                     "instance.node.id=aaa",

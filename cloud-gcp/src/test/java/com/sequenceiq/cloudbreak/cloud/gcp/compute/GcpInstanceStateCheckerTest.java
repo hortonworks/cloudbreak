@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -277,7 +276,6 @@ class GcpInstanceStateCheckerTest {
         when(gcpContext.getCompute()).thenReturn(gcpCompute);
     }
 
-    @NotNull
     private Operation getOperation(String anOperationIdentifier, String status, String operationType) {
         Operation operation = new Operation();
         operation.setName(anOperationIdentifier);

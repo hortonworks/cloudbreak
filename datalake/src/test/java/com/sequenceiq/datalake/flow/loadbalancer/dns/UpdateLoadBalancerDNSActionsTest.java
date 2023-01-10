@@ -92,7 +92,7 @@ class UpdateLoadBalancerDNSActionsTest {
     @Test
     public void updateLoadBalancerDNSActionNotResizeRecovery() throws Exception {
         SdxCluster sdxCluster = genCluster();
-        FlowParameters flowParameters = new FlowParameters(FLOW_ID, null, null);
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, null);
         when(sdxService.getById(eq(SDX_ID))).thenReturn(sdxCluster);
         StartUpdateLoadBalancerDNSEvent event = new StartUpdateLoadBalancerDNSEvent(UPDATE_LOAD_BALANCER_DNS_EVENT.event(), SDX_ID, USER_CRN, new Promise<>());
         AbstractAction action = (AbstractAction) underTest.updateLoadBalancerDNSAction();
@@ -113,7 +113,7 @@ class UpdateLoadBalancerDNSActionsTest {
     @Test
     public void updateLoadBalancerDNSActionResizeRecovery() throws Exception {
         SdxCluster sdxCluster = genCluster();
-        FlowParameters flowParameters = new FlowParameters(FLOW_ID, null, null);
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, null);
         when(sdxService.getById(eq(SDX_ID))).thenReturn(sdxCluster);
         FlowLogWithoutPayload flowLogWithoutPayload = mock(FlowLogWithoutPayload.class);
         when(flowLogService.getLastFlowLog(eq(FLOW_ID)))

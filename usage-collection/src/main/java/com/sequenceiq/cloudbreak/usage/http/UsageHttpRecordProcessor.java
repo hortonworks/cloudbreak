@@ -11,8 +11,6 @@ import com.sequenceiq.cloudbreak.streaming.model.StreamProcessingException;
 import com.sequenceiq.cloudbreak.streaming.processor.AbstractRecordProcessor;
 import com.sequenceiq.cloudbreak.usage.strategy.LoggingUsageProcessingStrategy;
 
-import io.opentracing.Tracer;
-
 @Component
 public class UsageHttpRecordProcessor extends AbstractRecordProcessor<UsageHttpConfiguration, UsageHttpRecordRequest, UsageHttpRecordWorker> {
 
@@ -20,18 +18,15 @@ public class UsageHttpRecordProcessor extends AbstractRecordProcessor<UsageHttpC
 
     private final LoggingUsageProcessingStrategy loggingUsageProcessingStrategy;
 
-    private final Tracer tracer;
-
-    public UsageHttpRecordProcessor(EdhHttpConfiguration edhHttpConfiguration, LoggingUsageProcessingStrategy loggingUsageProcessingStrategy, Tracer tracer) {
+    public UsageHttpRecordProcessor(EdhHttpConfiguration edhHttpConfiguration, LoggingUsageProcessingStrategy loggingUsageProcessingStrategy) {
         super(new UsageHttpConfiguration(edhHttpConfiguration.isEnabled(), edhHttpConfiguration.getWorkers(), edhHttpConfiguration.getQueueSizeLimit(),
                 edhHttpConfiguration.getEndpoint()));
         this.loggingUsageProcessingStrategy = loggingUsageProcessingStrategy;
-        this.tracer = tracer;
     }
 
     @Override
     public UsageHttpRecordWorker createWorker(String threadName, BlockingDeque<UsageHttpRecordRequest> processingQueue) {
-        return new UsageHttpRecordWorker(threadName, getServiceName(), this, processingQueue, getConfiguration(), tracer);
+        return new UsageHttpRecordWorker(threadName, getServiceName(), this, processingQueue, getConfiguration());
     }
 
     @Override

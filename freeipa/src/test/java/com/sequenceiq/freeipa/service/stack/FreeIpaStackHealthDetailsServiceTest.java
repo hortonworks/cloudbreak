@@ -29,8 +29,6 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(MockitoExtension.class)
 class FreeIpaStackHealthDetailsServiceTest {
     private static final String ENVIRONMENT_ID = "crn:cdp:environments:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:12345-6789";
@@ -44,9 +42,6 @@ class FreeIpaStackHealthDetailsServiceTest {
     private static final String INSTANCE_ID1 = "i-0123456789";
 
     private static final String INSTANCE_ID2 = "i-9876543210";
-
-    @Mock
-    private Tracer tracer;
 
     @Mock
     private StackService stackService;

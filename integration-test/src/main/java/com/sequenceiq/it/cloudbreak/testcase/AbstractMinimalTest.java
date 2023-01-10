@@ -45,9 +45,7 @@ import com.sequenceiq.it.config.AuditBeanConfig;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
-import io.opentracing.contrib.spring.tracer.configuration.TracerAutoConfiguration;
-
-@ContextConfiguration(classes = {IntegrationTestConfiguration.class, AuditBeanConfig.class, TracerAutoConfiguration.class},
+@ContextConfiguration(classes = {IntegrationTestConfiguration.class, AuditBeanConfig.class},
         initializers = ConfigFileApplicationContextInitializer.class)
 public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTests {
 

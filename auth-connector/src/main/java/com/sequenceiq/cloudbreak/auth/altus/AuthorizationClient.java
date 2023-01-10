@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.opentracing.Tracer;
 
 /**
  * A simple wrapper to the GRPC user management service. This handles setting up
@@ -34,8 +33,6 @@ public class AuthorizationClient {
 
     private final ManagedChannel channel;
 
-    private final Tracer tracer;
-
     private final UmsClientConfig umsClientConfig;
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -43,14 +40,12 @@ public class AuthorizationClient {
     /**
      * Constructor.
      *
-     * @param channel  the managed channel.
-     * @param tracer   tracer
+     * @param channel the managed channel.
      */
-    AuthorizationClient(ManagedChannel channel, UmsClientConfig umsClientConfig, Tracer tracer,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    AuthorizationClient(ManagedChannel channel, UmsClientConfig umsClientConfig,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.channel = checkNotNull(channel, "channel should not be null.");
         this.umsClientConfig = checkNotNull(umsClientConfig, "umsClientConfig should not be null.");
-        this.tracer = tracer;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
@@ -106,7 +101,6 @@ public class AuthorizationClient {
         String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
         return AuthorizationGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
-                GrpcUtil.getTracingInterceptor(tracer),
                 new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),
                 new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName())
         );

@@ -151,7 +151,7 @@ class UpgradeRdsActionsTest {
         ClusterView cluster = mock(ClusterView.class);
         lenient().when(upgradeRdsService.shouldRunDataBackupRestore(stack, cluster)).thenReturn(shouldRunDataBackupRestore);
         lenient().when(upgradeRdsService.shouldStopStartServices(stack)).thenReturn(shouldStopServices);
-        UpgradeRdsContext context =  new UpgradeRdsContext(new FlowParameters(FLOW_ID, FLOW_ID, null), stack, cluster, TargetMajorVersion.VERSION_11);
+        UpgradeRdsContext context =  new UpgradeRdsContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster, TargetMajorVersion.VERSION_11);
 
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         Map<Object, Object> variables = new HashMap<>();

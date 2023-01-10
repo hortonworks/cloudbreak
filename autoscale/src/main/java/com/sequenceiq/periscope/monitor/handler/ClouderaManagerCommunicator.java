@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.cm.client.tracing.CmOkHttpTracingInterceptor;
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmRequestIdProviderInterceptor;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.aspects.RequestLogging;
@@ -46,9 +45,6 @@ public class ClouderaManagerCommunicator {
 
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
-
-    @Inject
-    private CmOkHttpTracingInterceptor cmOkHttpTracingInterceptor;
 
     @Inject
     private CmRequestIdProviderInterceptor cmRequestIdProviderInterceptor;
@@ -88,7 +84,6 @@ public class ClouderaManagerCommunicator {
         Map<String, ApiConfig> roleConfigProperties = requestLogging.logResponseTime(() -> {
             try {
                 ApiClient client = createApiClient(cluster);
-                client.getHttpClient().interceptors().add(cmOkHttpTracingInterceptor);
                 client.getHttpClient().interceptors().add(cmRequestIdProviderInterceptor);
                 RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);
 

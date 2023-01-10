@@ -9,7 +9,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -361,7 +360,6 @@ public class StackRequestManifester {
         }
     }
 
-    @Nullable
     private CloudStorageRequest getCloudStorage(StackV4Request stackRequest) {
         return stackRequest.getCluster() == null ? null : stackRequest.getCluster().getCloudStorage();
     }

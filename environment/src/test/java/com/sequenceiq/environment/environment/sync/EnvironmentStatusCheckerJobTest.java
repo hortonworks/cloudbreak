@@ -21,8 +21,6 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.flow.core.FlowLogService;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(MockitoExtension.class)
 public class EnvironmentStatusCheckerJobTest {
 
@@ -44,10 +42,8 @@ public class EnvironmentStatusCheckerJobTest {
 
     private final AutoSyncConfig autoSyncConfig = Mockito.mock(AutoSyncConfig.class);
 
-    private final Tracer tracer = Mockito.mock(Tracer.class);
-
     private final EnvironmentStatusCheckerJob underTest = new EnvironmentStatusCheckerJob(environmentService, flowLogService, environmentSyncService,
-            environmentStatusUpdateService, environmentJobService, autoSyncConfig, tracer, regionAwareInternalCrnGeneratorFactory);
+            environmentStatusUpdateService, environmentJobService, autoSyncConfig, regionAwareInternalCrnGeneratorFactory);
 
     @Test
     void testSyncAnEnvSameStatus() {

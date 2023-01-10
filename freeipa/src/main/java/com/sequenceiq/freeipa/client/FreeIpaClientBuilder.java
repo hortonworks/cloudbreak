@@ -53,8 +53,6 @@ import com.sequenceiq.freeipa.client.auth.InvalidUserOrRealmException;
 import com.sequenceiq.freeipa.client.auth.PasswordExpiredException;
 import com.sequenceiq.freeipa.util.FreeIpaCookieStore;
 
-import io.opentracing.Tracer;
-
 public class FreeIpaClientBuilder {
 
     public static final String DEFAULT_BASE_PATH = "/ipa";
@@ -91,19 +89,16 @@ public class FreeIpaClientBuilder {
 
     private final RequestListener rpcRequestListener;
 
-    private final Tracer tracer;
-
     private final Map<String, String> additionalHeaders;
 
     public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, String hostname, int port, String basePath,
-            Map<String, String> additionalHeaders, RequestListener rpcRequestListener, Tracer tracer)
+            Map<String, String> additionalHeaders, RequestListener rpcRequestListener)
             throws Exception {
         this.user = user;
         this.pass = pass;
         this.clientConfig = clientConfig;
         this.port = port;
         this.hostname = hostname;
-        this.tracer = tracer;
 
         if (clientConfig.hasSSLConfigs()) {
             this.sslContext =
@@ -126,8 +121,8 @@ public class FreeIpaClientBuilder {
         this.rpcRequestListener = rpcRequestListener;
     }
 
-    public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, int port, String hostname, Tracer tracer) throws Exception {
-        this(user, pass, clientConfig, hostname, port, DEFAULT_BASE_PATH, Map.of(), null, tracer);
+    public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, int port, String hostname) throws Exception {
+        this(user, pass, clientConfig, hostname, port, DEFAULT_BASE_PATH, Map.of(), null);
     }
 
     public FreeIpaClient build(boolean withPing) throws URISyntaxException, IOException, FreeIpaClientException, FreeIpaHostNotAvailableException {
@@ -179,7 +174,7 @@ public class FreeIpaClientBuilder {
             jsonRpcHttpClient.setHostNameVerifier(HOSTNAME_VERIFIER);
             jsonRpcHttpClient.setReadTimeoutMillis(READ_TIMEOUT_MILLIS);
             jsonRpcHttpClient.setRequestListener(rpcRequestListener);
-            return new FreeIpaClient(jsonRpcHttpClient, clientConfig.getApiAddress(), hostname, tracer);
+            return new FreeIpaClient(jsonRpcHttpClient, clientConfig.getApiAddress(), hostname);
         } catch (IOException e) {
             String msg = "Unable to connect to FreeIPA";
             LOGGER.debug(msg, e);

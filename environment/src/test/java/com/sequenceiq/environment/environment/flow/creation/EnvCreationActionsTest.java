@@ -54,11 +54,6 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.SpanContext;
-import io.opentracing.Tracer;
-
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)
 class EnvCreationActionsTest {
@@ -135,26 +130,11 @@ class EnvCreationActionsTest {
     private ArgumentCaptor<Object> payloadArgumentCaptor;
 
     @Mock
-    private Tracer tracer;
-
-    @Mock
-    private Tracer.SpanBuilder spanBuilder;
-
-    @Mock
-    private Span span;
-
-    @Mock
-    private Scope scope;
-
-    @Mock
-    private SpanContext spanContext;
-
-    @Mock
     private FlowEvent flowEvent;
 
     @BeforeEach
     void setUp() {
-        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
         actionPayload = new EnvCreationEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
@@ -163,15 +143,6 @@ class EnvCreationActionsTest {
         when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
-
-        when(stateContext.getEvent()).thenReturn(flowEvent);
-        when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
-        when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
-        when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);
-        when(spanBuilder.start()).thenReturn(span);
-        when(tracer.activateSpan(span)).thenReturn(scope);
-        when(span.context()).thenReturn(spanContext);
-        when(flowEvent.name()).thenReturn("eventName");
     }
 
     @Test
@@ -300,7 +271,6 @@ class EnvCreationActionsTest {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
-        ReflectionTestUtils.setField(action, null, tracer, Tracer.class);
     }
 
     private void verifyFailureEvent() {

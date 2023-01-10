@@ -28,8 +28,6 @@ import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class StackSaltStatusCheckerJob extends StatusCheckerJob {
@@ -94,10 +92,6 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private SaltPasswordStatusService saltPasswordStatusService;
-
-    public StackSaltStatusCheckerJob(Tracer tracer) {
-        super(tracer, "Stack Salt Status Checker Job");
-    }
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {

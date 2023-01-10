@@ -40,15 +40,10 @@ import com.sequenceiq.cloudbreak.service.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(MockitoExtension.class)
 class StackSaltStatusCheckerJobTest {
 
     private static final Long STACK_ID = 1L;
-
-    @Mock
-    private Tracer tracer;
 
     @Mock
     private StackSaltStatusCheckerJobService jobService;

@@ -36,8 +36,6 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = EnvironmentStatusTest.TestAppContext.class)
 class EnvironmentStatusTest {
@@ -58,9 +56,6 @@ class EnvironmentStatusTest {
 
     @MockBean
     private EnvironmentStatusUpdateService environmentStatusUpdateService;
-
-    @MockBean
-    private Tracer tracer;
 
     @MockBean
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;

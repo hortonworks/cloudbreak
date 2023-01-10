@@ -13,8 +13,6 @@ public class FlowConstants {
 
     public static final String FLOW_TRIGGER_USERCRN = "FLOW_TRIGGER_USERCRN";
 
-    public static final String SPAN_CONTEXT = "SPAN_CONTEXT";
-
     public static final String OPERATION_NAME = "OPERATION_NAME";
 
     public static final String FLOW_PARAMETERS = "FLOW_PARAMETERS";

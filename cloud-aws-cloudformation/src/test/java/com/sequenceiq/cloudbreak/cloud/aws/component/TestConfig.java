@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.TemplateException;
-import io.opentracing.Tracer;
 
 @TestConfiguration
 @ComponentScan(basePackages = {
@@ -81,9 +80,6 @@ public class TestConfig {
 
     @MockBean
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
-
-    @MockBean
-    private Tracer tracer;
 
     static Answer<?> getAnswer() {
         return invocation -> {

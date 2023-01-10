@@ -33,13 +33,10 @@ import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfigur
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.opentracing.Tracer;
 
 public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SigmaDatabusClient.class);
-
-    private final Tracer tracer;
 
     private final SigmaDatabusConfig sigmaDatabusConfig;
 
@@ -49,11 +46,9 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
 
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public SigmaDatabusClient(Tracer tracer,
-            SigmaDatabusConfig sigmaDatabusConfig,
+    public SigmaDatabusClient(SigmaDatabusConfig sigmaDatabusConfig,
             D databusStreamConfiguration,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        this.tracer = tracer;
         this.sigmaDatabusConfig = sigmaDatabusConfig;
         this.databusStreamConfiguration = databusStreamConfiguration;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
@@ -135,8 +130,7 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
         checkNotNull(requestId, "requestId should not be null.");
         return SigmaDbusGrpc.newBlockingStub(channel)
                 .withInterceptors(GrpcUtil.getTimeoutInterceptor(sigmaDatabusConfig.getGrpcTimeoutSec().longValue()))
-                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
-                        new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
     @Override

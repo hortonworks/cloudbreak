@@ -25,15 +25,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.MdcCopyingTaskDecorator;
 import com.sequenceiq.environment.environment.dto.credential.CloudPlatformAwareCredentialDetailsConverter;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
-
-import io.opentracing.Tracer;
 
 @Configuration
 @EnableRetry
@@ -55,9 +53,6 @@ public class AppConfig {
 
     @Inject
     private List<CloudPlatformAwareCredentialDetailsConverter> credentialDetailsConverters;
-
-    @Inject
-    private Tracer tracer;
 
     @Value("${rest.debug:false}")
     private boolean restDebug;
@@ -126,7 +121,7 @@ public class AppConfig {
         executor.setCorePoolSize(intermediateCorePoolSize);
         executor.setQueueCapacity(intermediateQueueCapacity);
         executor.setThreadNamePrefix("intermediateBuilderExecutor-");
-        executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
+        executor.setTaskDecorator(new MdcCopyingTaskDecorator());
         executor.initialize();
         return executor;
     }

@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.opentracing.Tracer;
 
 @ExtendWith(MockitoExtension.class)
 public class GrpcUmsClientTest {
@@ -68,9 +67,6 @@ public class GrpcUmsClientTest {
 
     @Mock
     private UmsClientConfig umsClientConfig;
-
-    @Mock
-    private Tracer tracer;
 
     @InjectMocks
     private GrpcUmsClient rawGrpcUmsClient;

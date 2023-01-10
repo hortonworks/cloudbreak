@@ -73,11 +73,6 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory.HEADERS;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.SpanContext;
-import io.opentracing.Tracer;
-
 public class StackImageUpdateActionsTest {
 
     private static final String EVENT_NAME = "eventName";
@@ -154,21 +149,6 @@ public class StackImageUpdateActionsTest {
     @Mock
     private StackFailureContext failureContext;
 
-    @Mock
-    private Tracer tracer;
-
-    @Mock
-    private Tracer.SpanBuilder spanBuilder;
-
-    @Mock
-    private Span span;
-
-    @Mock
-    private Scope scope;
-
-    @Mock
-    private SpanContext spanContext;
-
     @InjectMocks
     private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());
 
@@ -195,7 +175,7 @@ public class StackImageUpdateActionsTest {
     @Before
     public void setup() throws CloudbreakImageNotFoundException {
         MockitoAnnotations.initMocks(this);
-        when(stateContext.getMessageHeader(HEADERS.FLOW_PARAMETERS.name())).thenReturn(new FlowParameters("flowId", "usercrn", null));
+        when(stateContext.getMessageHeader(HEADERS.FLOW_PARAMETERS.name())).thenReturn(new FlowParameters("flowId", "usercrn"));
         when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
@@ -203,13 +183,6 @@ public class StackImageUpdateActionsTest {
         when(runningFlows.getFlowChainId(anyString())).thenReturn("flowchainid");
         when(reactorEventFactory.createEvent(any(Map.class), any(Object.class))).thenReturn(new Event("dummy"));
         when(imageService.getImage(anyLong())).thenReturn(image);
-
-        when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
-        when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
-        when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);
-        when(spanBuilder.start()).thenReturn(span);
-        when(tracer.activateSpan(span)).thenReturn(scope);
-        when(span.context()).thenReturn(spanContext);
 
         User user = new User();
         user.setUserId("horton@hortonworks.com");

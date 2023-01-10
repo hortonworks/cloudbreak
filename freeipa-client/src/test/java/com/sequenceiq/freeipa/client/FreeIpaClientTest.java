@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 
-import io.opentracing.Tracer;
-
 class FreeIpaClientTest {
 
     private FreeIpaClient underTest;
@@ -20,8 +18,8 @@ class FreeIpaClientTest {
                 mock(JsonRpcHttpClient.class),
                 "apiVersion",
                 "apiAddress",
-                "hostname",
-                mock(Tracer.class));
+                "hostname"
+        );
     }
 
     @Test

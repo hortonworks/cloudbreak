@@ -7,11 +7,9 @@ import java.util.Map;
 import com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementGrpc;
 import com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
-import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 
 import io.grpc.ManagedChannel;
-import io.opentracing.Tracer;
 
 /**
  * <p>
@@ -29,12 +27,9 @@ class IdbmmsClient {
 
     private final String actorCrn;
 
-    private final Tracer tracer;
-
-    IdbmmsClient(ManagedChannel channel, String actorCrn, Tracer tracer) {
+    IdbmmsClient(ManagedChannel channel, String actorCrn) {
         this.channel = checkNotNull(channel, "channel should not be null.");
         this.actorCrn = checkNotNull(actorCrn, "actorCrn should not be null.");
-        this.tracer = tracer;
     }
 
     /**
@@ -85,8 +80,7 @@ class IdbmmsClient {
     private IdBrokerMappingManagementGrpc.IdBrokerMappingManagementBlockingStub newStub(String requestId) {
         checkNotNull(requestId, "requestId should not be null.");
         return IdBrokerMappingManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
-                        new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
 }

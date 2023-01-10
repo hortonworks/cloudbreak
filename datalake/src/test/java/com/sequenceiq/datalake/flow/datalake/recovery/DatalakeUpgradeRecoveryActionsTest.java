@@ -85,7 +85,7 @@ public class DatalakeUpgradeRecoveryActionsTest {
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         DatalakeRecoveryStartEvent datalakeRecoveryStartEvent = new DatalakeRecoveryStartEvent(DATALAKE_RECOVERY_EVENT.event(),
                 SDX_ID, USER_CRN, SdxRecoveryType.RECOVER_WITHOUT_DATA);
-        SdxContext sdxContext = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID, null), datalakeRecoveryStartEvent);
+        SdxContext sdxContext = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID), datalakeRecoveryStartEvent);
         when(runningFlows.getFlowChainId(anyString())).thenReturn(FLOW_ID);
         testSupport.doExecute(sdxContext, datalakeRecoveryStartEvent, new HashMap<>());
         verify(sdxRecoveryService).recoverCluster(anyLong());
@@ -104,7 +104,7 @@ public class DatalakeUpgradeRecoveryActionsTest {
         initActionPrivateFields(action);
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         DatalakeRecoverySuccessEvent successEvent = new DatalakeRecoverySuccessEvent(SDX_ID, USER_CRN);
-        SdxContext sdxContext = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID, null), successEvent);
+        SdxContext sdxContext = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID), successEvent);
         when(runningFlows.getFlowChainId(anyString())).thenReturn(FLOW_ID);
 
         testSupport.doExecute(sdxContext, successEvent, new HashMap<>());

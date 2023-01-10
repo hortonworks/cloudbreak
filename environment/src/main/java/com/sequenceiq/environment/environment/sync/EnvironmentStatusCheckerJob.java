@@ -20,8 +20,6 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.flow.core.FlowLogService;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
@@ -44,9 +42,8 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
 
     public EnvironmentStatusCheckerJob(EnvironmentService environmentService, FlowLogService flowLogService,
             EnvironmentSyncService environmentSyncService, EnvironmentStatusUpdateService environmentStatusUpdateService,
-            EnvironmentJobService environmentJobService, AutoSyncConfig autoSyncConfig, Tracer tracer,
+            EnvironmentJobService environmentJobService, AutoSyncConfig autoSyncConfig,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        super(tracer, "Environment Status Checker Job");
         this.environmentService = environmentService;
         this.flowLogService = flowLogService;
         this.environmentSyncService = environmentSyncService;

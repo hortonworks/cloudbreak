@@ -24,8 +24,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-import io.opentracing.Tracer;
-
 @Component
 public class FreeIpaUMSCleanupJob extends UMSCleanupJob {
 
@@ -38,8 +36,7 @@ public class FreeIpaUMSCleanupJob extends UMSCleanupJob {
     private final StackService stackService;
 
     public FreeIpaUMSCleanupJob(UMSCleanupConfig umsCleanupConfig, AltusMachineUserService altusMachineUserService,
-            StackService stackService, Tracer tracer) {
-        super(tracer, "FreeIpa UMS Cleanup Job");
+            StackService stackService) {
         this.umsCleanupConfig = umsCleanupConfig;
         this.altusMachineUserService = altusMachineUserService;
         this.stackService = stackService;

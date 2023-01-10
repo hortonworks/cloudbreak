@@ -3,17 +3,7 @@ package com.sequenceiq.cloudbreak.quartz;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import io.opentracing.Tracer;
-
-public class TracedQuartzJobTestClass extends TracedQuartzJob {
-
-    public TracedQuartzJobTestClass() {
-        super(null, null);
-    }
-
-    public TracedQuartzJobTestClass(Tracer tracer, String jobName) {
-        super(tracer, jobName);
-    }
+public class MdcQuartzJobTestClass extends MdcQuartzJob {
 
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {

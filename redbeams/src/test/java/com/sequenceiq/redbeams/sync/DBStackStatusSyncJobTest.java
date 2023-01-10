@@ -20,8 +20,6 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(MockitoExtension.class)
 public class DBStackStatusSyncJobTest {
 
@@ -43,9 +41,6 @@ public class DBStackStatusSyncJobTest {
 
     @Mock
     private DBStack dbStack;
-
-    @Mock
-    private Tracer tracer;
 
     @Mock
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;

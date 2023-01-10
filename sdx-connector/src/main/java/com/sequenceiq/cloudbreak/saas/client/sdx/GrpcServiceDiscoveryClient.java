@@ -12,8 +12,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.saas.client.sdx.config.ServiceDiscoveryChannelConfig;
 
-import io.opentracing.Tracer;
-
 @Component
 public class GrpcServiceDiscoveryClient {
 
@@ -27,16 +25,11 @@ public class GrpcServiceDiscoveryClient {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    @Inject
-    private Tracer tracer;
-
-    public static GrpcServiceDiscoveryClient createClient(ManagedChannelWrapper channelWrapper, ServiceDiscoveryChannelConfig serviceDiscoveryChannelConfig,
-            Tracer tracer) {
+    public static GrpcServiceDiscoveryClient createClient(ManagedChannelWrapper channelWrapper, ServiceDiscoveryChannelConfig serviceDiscoveryChannelConfig) {
         GrpcServiceDiscoveryClient client = new GrpcServiceDiscoveryClient();
         client.channelWrapper = Preconditions.checkNotNull(channelWrapper, "channelWrapper should not be null.");
         client.serviceDiscoveryChannelConfig = Preconditions.checkNotNull(serviceDiscoveryChannelConfig,
                 "serviceDiscoveryChannelConfig should not be null.");
-        client.tracer = Preconditions.checkNotNull(tracer, "tracer should not be null.");
         return client;
     }
 
@@ -46,6 +39,6 @@ public class GrpcServiceDiscoveryClient {
     }
 
     ServiceDiscoveryClient makeClient() {
-        return new ServiceDiscoveryClient(channelWrapper.getChannel(), tracer, regionAwareInternalCrnGeneratorFactory);
+        return new ServiceDiscoveryClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
     }
 }

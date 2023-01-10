@@ -18,20 +18,15 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.streaming.model.StreamProcessingException;
 import com.sequenceiq.cloudbreak.streaming.processor.RecordWorker;
 
-import io.opentracing.Tracer;
-
 public class UsageHttpRecordWorker extends RecordWorker<UsageHttpRecordProcessor, UsageHttpConfiguration, UsageHttpRecordRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UsageHttpRecordWorker.class);
 
-    private final Tracer tracer;
-
     private final HttpClient httpClient;
 
     public UsageHttpRecordWorker(String name, String serviceName, UsageHttpRecordProcessor recordProcessor,
-            BlockingDeque<UsageHttpRecordRequest> processingQueue, UsageHttpConfiguration configuration, Tracer tracer) {
+            BlockingDeque<UsageHttpRecordRequest> processingQueue, UsageHttpConfiguration configuration) {
         super(name, serviceName, recordProcessor, processingQueue, configuration);
-        this.tracer = tracer;
         this.httpClient = HttpClient.newHttpClient();
     }
 

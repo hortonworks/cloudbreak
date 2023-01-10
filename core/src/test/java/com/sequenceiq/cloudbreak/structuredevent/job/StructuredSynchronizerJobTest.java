@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobExecutionContext;
@@ -25,8 +24,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredSyncEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
-
-import io.opentracing.Tracer;
 
 @ExtendWith(MockitoExtension.class)
 public class StructuredSynchronizerJobTest {
@@ -53,8 +50,7 @@ public class StructuredSynchronizerJobTest {
 
     @BeforeEach
     public void init() {
-        Tracer tracer = Mockito.mock(Tracer.class);
-        underTest = new StructuredSynchronizerJob(tracer);
+        underTest = new StructuredSynchronizerJob();
         MockitoAnnotations.initMocks(this);
         underTest.setLocalId("1");
 

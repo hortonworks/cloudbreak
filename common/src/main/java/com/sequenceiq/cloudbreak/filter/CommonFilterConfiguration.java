@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.filter;
 
-import javax.servlet.DispatcherType;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +11,6 @@ import com.sequenceiq.cloudbreak.common.metrics.RequestHeaderMetricFilter;
 import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
 import com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter;
 import com.sequenceiq.cloudbreak.logger.RestLoggerFilter;
-
-import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
 
 @Configuration
 public class CommonFilterConfiguration {
@@ -56,17 +52,6 @@ public class CommonFilterConfiguration {
         registrationBean.setFilter(filter);
         registrationBean.setOrder(FilterOrderConstants.REQUEST_RESPONSE_LOGGER_FILTER_ORDER);
         return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean spanFinishingFilter() {
-        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
-        filterRegistrationBean.setFilter(new SpanFinishingFilter());
-        filterRegistrationBean.setAsyncSupported(true);
-        filterRegistrationBean.setOrder(FilterOrderConstants.SPAN_FINISHING_ORDER);
-        filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST);
-        filterRegistrationBean.addUrlPatterns("*");
-        return filterRegistrationBean;
     }
 
     @Bean

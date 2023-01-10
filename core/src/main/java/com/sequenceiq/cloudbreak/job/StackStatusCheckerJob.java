@@ -68,8 +68,6 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowLogService;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
@@ -126,10 +124,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private ServiceStatusCheckerLogLocationDecorator serviceStatusCheckerLogLocationDecorator;
-
-    public StackStatusCheckerJob(Tracer tracer) {
-        super(tracer, "Stack Status Checker Job");
-    }
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {

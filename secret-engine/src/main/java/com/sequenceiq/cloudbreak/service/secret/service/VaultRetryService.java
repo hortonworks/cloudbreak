@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.secret.service;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
@@ -12,11 +11,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.tracing.TracingUtil;
-
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.Tracer;
 
 @Service
 public class VaultRetryService {
@@ -25,11 +19,8 @@ public class VaultRetryService {
 
     private final MetricService metricService;
 
-    private final Tracer tracer;
-
-    public VaultRetryService(MetricService metricService, Tracer tracer) {
+    public VaultRetryService(MetricService metricService) {
         this.metricService = metricService;
-        this.tracer = tracer;
     }
 
     @Retryable(
@@ -40,7 +31,7 @@ public class VaultRetryService {
                     maxDelayExpression = "${vault.retry.maxdelay:10000}")
     )
     public <T> T tryReadingVault(Supplier<T> action) throws Retry.ActionFailedException {
-        return executeVaultOperationWithTrace(action, "read", MetricType.VAULT_READ_FAILED);
+        return executeVaultOperation(action, "read", MetricType.VAULT_READ_FAILED);
     }
 
     @Retryable(
@@ -51,25 +42,16 @@ public class VaultRetryService {
                     maxDelayExpression = "${vault.retry.maxdelay:10000}")
     )
     public <T> T tryWritingVault(Supplier<T> action) throws Retry.ActionFailedException {
-        return executeVaultOperationWithTrace(action, "write", MetricType.VAULT_WRITE_FAILED);
+        return executeVaultOperation(action, "write", MetricType.VAULT_WRITE_FAILED);
     }
 
-    private <T> T executeVaultOperationWithTrace(Supplier<T> action, String operation, MetricType metricType) {
-        Optional<Span> optionalSpan = TracingUtil.initOptionalSpan(tracer, "Vault", operation);
-        try (Scope ignored = optionalSpan.map(tracer::activateSpan).orElse(null)) {
+    private <T> T executeVaultOperation(Supplier<T> action, String operation, MetricType metricType) {
             try {
                 return action.get();
             } catch (RuntimeException e) {
-                optionalSpan.ifPresent(span -> {
-                    span.setTag(TracingUtil.ERROR, true);
-                    span.setTag(TracingUtil.MESSAGE, e.getLocalizedMessage());
-                });
                 LOGGER.error("Exception during vault " + operation, e);
                 metricService.incrementMetricCounter(metricType);
                 throw new Retry.ActionFailedException(e.getMessage());
             }
-        } finally {
-            optionalSpan.ifPresent(Span::finish);
-        }
     }
 }

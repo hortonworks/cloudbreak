@@ -19,8 +19,6 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 public class DBStackStatusSyncJob extends StatusCheckerJob {
 
@@ -37,10 +35,6 @@ public class DBStackStatusSyncJob extends StatusCheckerJob {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public DBStackStatusSyncJob(Tracer tracer) {
-        super(tracer, "DB Stack Status Sync Job");
-    }
 
     @Override
     protected Optional<Object> getMdcContextObject() {

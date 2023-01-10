@@ -13,8 +13,6 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.saas.client.sdx.config.SdxSaasChannelConfig;
 
-import io.opentracing.Tracer;
-
 @Component
 public class GrpcSdxSaasClient {
 
@@ -28,14 +26,10 @@ public class GrpcSdxSaasClient {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    @Inject
-    private Tracer tracer;
-
-    public static GrpcSdxSaasClient createClient(ManagedChannelWrapper channelWrapper, SdxSaasChannelConfig sdxSaasChannelConfig, Tracer tracer) {
+    public static GrpcSdxSaasClient createClient(ManagedChannelWrapper channelWrapper, SdxSaasChannelConfig sdxSaasChannelConfig) {
         GrpcSdxSaasClient client = new GrpcSdxSaasClient();
         client.channelWrapper = Preconditions.checkNotNull(channelWrapper, "channelWrapper should not be null.");
         client.sdxSaasChannelConfig = Preconditions.checkNotNull(sdxSaasChannelConfig, "sdxSaasChannelConfig should not be null.");
-        client.tracer = Preconditions.checkNotNull(tracer, "tracer should not be null.");
         return client;
     }
 
@@ -56,6 +50,6 @@ public class GrpcSdxSaasClient {
     }
 
     SdxSaasClient makeClient() {
-        return new SdxSaasClient(channelWrapper.getChannel(), tracer, regionAwareInternalCrnGeneratorFactory);
+        return new SdxSaasClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
     }
 }

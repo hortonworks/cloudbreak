@@ -68,7 +68,7 @@ public class DatahubRefreshActionsTest {
         AbstractAction action = (AbstractAction) underTest.startDatahubRefreshAction();
         initActionPrivateFields(action);
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
-        SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, USER_CRN, null), event);
+        SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, USER_CRN), event);
         testSupport.doExecute(context, event, new HashMap());
 
         ArgumentCaptor<DatahubRefreshStartEvent> captor = ArgumentCaptor.forClass(DatahubRefreshStartEvent.class);

@@ -78,8 +78,6 @@ import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(SpringExtension.class)
     @TestPropertySource(properties = "cb.max.aws.resource.name.length=5")
 @Import(SdkClientExceptionMapper.class)
@@ -103,9 +101,6 @@ class AwsValidatorsTest {
 
     @SpyBean
     private AwsCloudFormationClient awsClient;
-
-    @MockBean
-    private Tracer tracer;
 
     @MockBean
     private AwsEncodedAuthorizationFailureMessageDecoder awsEncodedAuthorizationFailureMessageDecoder;

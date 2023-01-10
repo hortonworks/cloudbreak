@@ -98,7 +98,7 @@ public class DatalakeRestoreActionsTest {
         AbstractAction action = (AbstractAction) underTest.triggerDatalakeRestore();
         initActionPrivateFields(action);
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
-        SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID, null), event);
+        SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID), event);
         testSupport.doExecute(context, event, new HashMap());
 
         ArgumentCaptor<DatalakeDatabaseRestoreStartEvent> captor = ArgumentCaptor.forClass(DatalakeDatabaseRestoreStartEvent.class);
@@ -112,7 +112,7 @@ public class DatalakeRestoreActionsTest {
     public void testGetNewSdxIdForResizeCreateFlowContext() throws Exception {
 
         SdxCluster sdxCluster = genCluster();
-        FlowParameters flowParameters = new FlowParameters(FLOW_ID, null, null);
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, null);
         when(sdxService.getByNameInAccount(eq(USER_CRN), eq(DATALAKE_NAME))).thenReturn(sdxCluster);
         when(flowLogService.getLastFlowLog(anyString())).thenReturn(Optional.of(mock(FlowLogWithoutPayload.class)));
         when(flowChainLogService.isFlowTriggeredByFlowChain(eq(DatalakeResizeFlowEventChainFactory.class.getSimpleName()), any())).thenReturn(true);
@@ -145,7 +145,7 @@ public class DatalakeRestoreActionsTest {
         AbstractAction action = (AbstractAction) underTest.triggerDatalakeRestore();
         initActionPrivateFields(action);
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
-        SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID, null), event);
+        SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID), event);
         testSupport.doExecute(context, event, new HashMap());
 
         ArgumentCaptor<DatalakeDatabaseRestoreStartEvent> captor = ArgumentCaptor.forClass(DatalakeDatabaseRestoreStartEvent.class);
@@ -164,7 +164,7 @@ public class DatalakeRestoreActionsTest {
         AbstractAction action = (AbstractAction) underTest.triggerDatalakeRestore();
         initActionPrivateFields(action);
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
-        SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID, null), event);
+        SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID), event);
         testSupport.doExecute(context, event, new HashMap());
 
         ArgumentCaptor<DatalakeDatabaseRestoreStartEvent> captor = ArgumentCaptor.forClass(DatalakeDatabaseRestoreStartEvent.class);

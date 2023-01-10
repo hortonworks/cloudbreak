@@ -10,8 +10,6 @@ import com.sequenceiq.cloudbreak.sigmadbus.config.SigmaDatabusConfig;
 import com.sequenceiq.cloudbreak.sigmadbus.processor.AbstractDatabusRecordProcessor;
 import com.sequenceiq.cloudbreak.telemetry.messagebroker.MessageBrokerConfiguration;
 
-import io.opentracing.Tracer;
-
 @Component
 public class MessageBrokerDatabusRecordProcessor extends AbstractDatabusRecordProcessor<MessageBrokerConfiguration> {
 
@@ -22,8 +20,8 @@ public class MessageBrokerDatabusRecordProcessor extends AbstractDatabusRecordPr
     private final Map<String, String> optionalUsageHeaders;
 
     public MessageBrokerDatabusRecordProcessor(SigmaDatabusConfig sigmaDatabusConfig, MessageBrokerConfiguration databusStreamConfiguration,
-            Tracer tracer, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        super(sigmaDatabusConfig, databusStreamConfiguration, tracer, regionAwareInternalCrnGeneratorFactory);
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        super(sigmaDatabusConfig, databusStreamConfiguration, regionAwareInternalCrnGeneratorFactory);
         optionalUsageHeaders = ImmutableMap.of(HEADER_USAGE_EVENTS_ORIGIN, databusStreamConfiguration.getOrigin(),
                 HEADER_USAGE_EVENTS_PROCESSOR, databusStreamConfiguration.getProcessor());
     }

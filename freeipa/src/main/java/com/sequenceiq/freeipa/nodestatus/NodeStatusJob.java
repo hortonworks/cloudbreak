@@ -30,8 +30,6 @@ import com.sequenceiq.freeipa.sync.InterruptSyncingException;
 import com.sequenceiq.node.health.client.model.CdpNodeStatusRequest;
 import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class NodeStatusJob extends StatusCheckerJob {
@@ -49,10 +47,6 @@ public class NodeStatusJob extends StatusCheckerJob {
 
     @Inject
     private NodeStatusJobService nodeStatusJobService;
-
-    public NodeStatusJob(Tracer tracer) {
-        super(tracer, "Node status checker job");
-    }
 
     @Override
     protected Optional<Object> getMdcContextObject() {

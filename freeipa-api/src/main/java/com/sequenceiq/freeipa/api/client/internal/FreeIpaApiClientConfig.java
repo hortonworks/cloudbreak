@@ -25,16 +25,11 @@ import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-
 @Configuration
 public class FreeIpaApiClientConfig {
 
     @Inject
     private ApiClientRequestFilter apiClientRequestFilter;
-
-    @Inject
-    private ClientTracingFeature clientTracingFeature;
 
     @Bean
     @ConditionalOnBean(FreeIpaApiClientParams.class)
@@ -44,7 +39,6 @@ public class FreeIpaApiClientConfig {
                 .withIgnorePreValidation(freeIpaApiClientParams.isIgnorePreValidation())
                 .withDebug(freeIpaApiClientParams.isRestDebug())
                 .withClientRequestFilter(apiClientRequestFilter)
-                .withTracer(clientTracingFeature)
                 .withApiRoot(FreeIpaApi.API_ROOT_CONTEXT)
                 .build();
     }

@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -165,7 +164,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         return reattachableVolumeSet;
     }
 
-    @NotNull
     private Optional<CloudResource> findVolumeSet(AuthenticatedContext auth, Group group, CloudResource instanceResource, CommonStatus commonStatus) {
         return resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(commonStatus, ResourceType.AWS_VOLUMESET, auth.getCloudContext().getId(),
                         group.getName())

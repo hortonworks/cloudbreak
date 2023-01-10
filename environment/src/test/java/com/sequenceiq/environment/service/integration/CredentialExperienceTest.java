@@ -87,8 +87,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.notification.HttpNotificationSenderService;
 import com.sequenceiq.notification.NotificationService;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(SpringExtension.class)
 public class CredentialExperienceTest {
 
@@ -309,9 +307,6 @@ public class CredentialExperienceTest {
 
         @MockBean
         private FreeIpaV1Endpoint freeIpaV1Endpoint;
-
-        @MockBean
-        private Tracer tracer;
 
         @MockBean
         private EnvironmentService environmentService;

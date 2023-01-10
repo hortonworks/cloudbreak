@@ -23,8 +23,6 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowLogService;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
@@ -48,10 +46,6 @@ public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private SdxStatusService sdxStatusService;
-
-    public SdxSaltStatusCheckerJob(Tracer tracer) {
-        super(tracer, "SDX salt status checker job");
-    }
 
     @Override
     protected Optional<Object> getMdcContextObject() {

@@ -71,17 +71,6 @@ dependencies {
   api group: 'org.jasypt',                            name: 'jasypt-hibernate4',              version: jasyptVersion
   api group: 'io.swagger',                            name: 'swagger-annotations',            version: swaggerVersion
   implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
-
-  api group: 'io.opentracing.contrib',                name: 'opentracing-jaxrs2',                     version: opentracingJaxrs2Version
-  implementation group: 'io.opentracing.contrib',                name: 'opentracing-jdbc',                       version: opentracingJdbcVersion
-  api group: 'io.opentracing.contrib',                name: 'opentracing-spring-web',                 version: opentracingSpringWebVersion
-  api group: 'io.opentracing.contrib',         name: 'opentracing-spring-jaeger-starter',      version: opentracingSpringJaegerStarterVersion
-  constraints {
-    api 'io.jaegertracing:jaeger-client:1.8.1'
-    api 'org.jetbrains.kotlin:kotlin-stdlib:1.6.21'
-    implementation 'io.jaegertracing:jaeger-client:1.8.1'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.6.21'
-  }
   implementation (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonDatabindVersion) {
     force = true
   }

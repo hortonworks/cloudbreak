@@ -32,7 +32,6 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.implementation.ComputeManager;
 import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.privatednsManager;
 import com.microsoft.rest.LogLevel;
-import com.sequenceiq.cloudbreak.cloud.azure.tracing.AzureOkHttp3TracingInterceptor;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -74,9 +73,6 @@ public class AzureClientCredentialsTest {
     @Mock
     private AuthenticationContextProvider authenticationContextProvider;
 
-    @Mock
-    private AzureOkHttp3TracingInterceptor tracingInterceptor;
-
     private AuthenticationResult authenticationResult;
 
     @BeforeEach
@@ -95,7 +91,7 @@ public class AzureClientCredentialsTest {
         when(credentialView.codeGrantFlow()).thenReturn(false);
 
         Optional<String> result = new AzureClientCredentials(credentialView, LOG_LEVEL,
-                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor)
+                cbRefreshTokenClientProvider, authenticationContextProvider)
                 .getRefreshToken();
 
         assertFalse(result.isPresent());
@@ -115,7 +111,7 @@ public class AzureClientCredentialsTest {
         when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()))).thenReturn(cbRefreshTokenClient);
 
         Optional<String> result = new AzureClientCredentials(credentialView, LOG_LEVEL,
-                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor)
+                cbRefreshTokenClientProvider, authenticationContextProvider)
                 .getRefreshToken();
 
         assertTrue(result.isPresent());
@@ -142,7 +138,7 @@ public class AzureClientCredentialsTest {
         when(credentialView.getAuthorizationCode()).thenReturn("someAuthCode");
 
         Optional<String> result = new AzureClientCredentials(credentialView, LOG_LEVEL,
-                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor)
+                cbRefreshTokenClientProvider, authenticationContextProvider)
                 .getRefreshToken();
 
         assertFalse(result.isPresent());
@@ -170,7 +166,7 @@ public class AzureClientCredentialsTest {
         when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()))).thenReturn(cbRefreshTokenClient);
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> {
-            new AzureClientCredentials(credentialView, LOG_LEVEL, cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor);
+            new AzureClientCredentials(credentialView, LOG_LEVEL, cbRefreshTokenClientProvider, authenticationContextProvider);
         });
 
         assertEquals(String.format("New token couldn't be obtain with refresh token for credential: %s", CREDENTIAL_NAME), exception.getMessage());
@@ -183,7 +179,7 @@ public class AzureClientCredentialsTest {
         when(cbRefreshTokenClientProvider.getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()))).thenReturn(cbRefreshTokenClient);
 
         Azure result = new AzureClientCredentials(credentialView, LOG_LEVEL,
-                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getAzure();
+                cbRefreshTokenClientProvider, authenticationContextProvider).getAzure();
 
         assertNotNull(result);
         assertEquals(SUBSCRIPTION_ID, result.subscriptionId());
@@ -207,7 +203,7 @@ public class AzureClientCredentialsTest {
     @Test
     public void testGetPrivateDnsManagerForSubscriptionId() {
         privatednsManager result = new AzureClientCredentials(credentialView, LOG_LEVEL,
-                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getPrivateDnsManager();
+                cbRefreshTokenClientProvider, authenticationContextProvider).getPrivateDnsManager();
         assertNotNull(result);
         assertEquals(SUBSCRIPTION_ID, result.subscriptionId());
     }
@@ -215,7 +211,7 @@ public class AzureClientCredentialsTest {
     @Test
     public void testGetComputeManagerForSubscriptionId() {
         ComputeManager result = new AzureClientCredentials(credentialView, LOG_LEVEL,
-                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getComputeManager();
+                cbRefreshTokenClientProvider, authenticationContextProvider).getComputeManager();
         assertNotNull(result);
         assertEquals(SUBSCRIPTION_ID, result.subscriptionId());
     }
@@ -223,7 +219,7 @@ public class AzureClientCredentialsTest {
     @Test
     public void testRegionAwareEndpointIsNotSet() {
         AzureTokenCredentials azureTokenCredentials = new AzureClientCredentials(cloudContext, credentialView, LOG_LEVEL,
-                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getAzureCredentials(Optional.empty());
+                cbRefreshTokenClientProvider, authenticationContextProvider).getAzureCredentials(Optional.empty());
         assertNotNull(azureTokenCredentials);
         assertEquals(AzureEnvironment.AZURE.resourceManagerEndpoint(), azureTokenCredentials.environment().resourceManagerEndpoint());
     }
@@ -232,7 +228,7 @@ public class AzureClientCredentialsTest {
     public void testRegionAwareEndpointIsSet() throws MalformedURLException {
         String originalResourceManagerEndpoint = AzureEnvironment.AZURE.resourceManagerEndpoint();
         AzureTokenCredentials azureTokenCredentials = new AzureClientCredentials(cloudContext, credentialView, LOG_LEVEL,
-                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getAzureCredentials(Optional.of(REGION));
+                cbRefreshTokenClientProvider, authenticationContextProvider).getAzureCredentials(Optional.of(REGION));
 
         URL resourceManagerEndpointUrl = new URL(originalResourceManagerEndpoint);
         String regionAwareUrl = String.format("%s://%s.%s",

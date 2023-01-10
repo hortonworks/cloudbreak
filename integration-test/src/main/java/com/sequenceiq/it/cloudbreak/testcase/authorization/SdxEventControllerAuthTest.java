@@ -10,7 +10,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 
-import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -118,7 +117,6 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @NotNull
     private Assertion<SdxEventTestDto, SdxClient> checkZipEndpointStatusManually(int expectedStatus) {
         return (context, testDto, client) -> {
             if (!testDto.getZippedResponseStatus().isPresent()) {

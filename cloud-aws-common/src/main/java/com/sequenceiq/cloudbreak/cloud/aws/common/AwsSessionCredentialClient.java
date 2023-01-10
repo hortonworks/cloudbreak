@@ -29,10 +29,7 @@ import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
 import com.amazonaws.services.securitytoken.model.Credentials;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cache.AwsCachingConfig;
-import com.sequenceiq.cloudbreak.cloud.aws.common.tracing.AwsTracingRequestHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
-
-import io.opentracing.Tracer;
 
 @Component
 public class AwsSessionCredentialClient {
@@ -52,9 +49,6 @@ public class AwsSessionCredentialClient {
 
     @Inject
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
-
-    @Inject
-    private Tracer tracer;
 
     @Cacheable(value = AwsCachingConfig.TEMPORARY_AWS_CREDENTIAL_CACHE, unless = "#awsCredential.getId() == null")
     public AwsSessionCredentials retrieveCachedSessionCredentials(AwsCredentialView awsCredential) {
@@ -111,7 +105,6 @@ public class AwsSessionCredentialClient {
                 .withEndpointConfiguration(getEndpointConfiguration(defaultZone))
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withCredentials(getCredential(awsCredential))
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .build();
     }
 

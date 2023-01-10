@@ -19,8 +19,6 @@ import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.flow.ConsumptionReactorFlowManager;
 import com.sequenceiq.consumption.service.ConsumptionService;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class StorageConsumptionJob extends StatusCheckerJob {
@@ -35,10 +33,6 @@ public class StorageConsumptionJob extends StatusCheckerJob {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public StorageConsumptionJob(Tracer tracer) {
-        super(tracer, "Storage Consumption Job");
-    }
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {

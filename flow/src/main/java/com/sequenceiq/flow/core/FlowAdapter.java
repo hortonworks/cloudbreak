@@ -9,8 +9,6 @@ import org.springframework.statemachine.support.DefaultStateMachineContext;
 
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 
-import io.opentracing.SpanContext;
-
 public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Flow {
     private final String flowId;
 
@@ -81,8 +79,8 @@ public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Fl
     }
 
     @Override
-    public void sendEvent(String key, String flowTriggerUserCrn, Object payload, SpanContext spanContext, String operationType) {
-        flowMachine.sendEvent(messageFactory.createMessage(flowId, flowTriggerUserCrn, eventConverter.convert(key), payload, spanContext, operationType));
+    public void sendEvent(String key, String flowTriggerUserCrn, Object payload, String operationType) {
+        flowMachine.sendEvent(messageFactory.createMessage(flowId, flowTriggerUserCrn, eventConverter.convert(key), payload, operationType));
     }
 
     @Override

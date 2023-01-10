@@ -26,8 +26,6 @@ import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchApplyExcep
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
 import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchService;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class ExistingStackPatcherJob extends StatusCheckerJob {
@@ -48,10 +46,6 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
 
     @Inject
     private StackPatchService stackPatchService;
-
-    public ExistingStackPatcherJob(Tracer tracer) {
-        super(tracer, "Existing Stack Patcher Job");
-    }
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {

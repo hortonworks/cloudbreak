@@ -91,12 +91,6 @@ ext {
 
   // Tracing
   micrometerVersion = '1.7.6'
-  opentracingAwsSdkVersion = '0.1.5'
-  opentracingGrpcVersion = '0.2.3'
-  opentracingJaxrs2Version = '1.0.0'
-  opentracingJdbcVersion = '0.2.11'
-  opentracingSpringWebVersion = '4.1.0'
-  opentracingSpringJaegerStarterVersion = '3.3.1'
 
   // TO REMOVE
   jasyptVersion = '1.9.2'

@@ -18,18 +18,13 @@ import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
 import com.sequenceiq.environment.api.v1.telemetry.endpoint.AccountTelemetryEndpoint;
 
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-
 @Configuration
 public class EnvironmentApiClientConfig {
 
     private final ApiClientRequestFilter apiClientRequestFilter;
 
-    private final ClientTracingFeature clientTracingFeature;
-
-    public EnvironmentApiClientConfig(ApiClientRequestFilter apiClientRequestFilter, ClientTracingFeature clientTracingFeature) {
+    public EnvironmentApiClientConfig(ApiClientRequestFilter apiClientRequestFilter) {
         this.apiClientRequestFilter = apiClientRequestFilter;
-        this.clientTracingFeature = clientTracingFeature;
     }
 
     @Bean
@@ -41,7 +36,6 @@ public class EnvironmentApiClientConfig {
                 .withDebug(environmentApiClientParams.isRestDebug())
                 .withClientRequestFilter(apiClientRequestFilter)
                 .withApiRoot(EnvironmentApi.API_ROOT_CONTEXT)
-                .withTracer(clientTracingFeature)
                 .build();
     }
 

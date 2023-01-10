@@ -25,8 +25,6 @@ import com.sequenceiq.cloudbreak.quartz.cleanup.job.UMSCleanupJob;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-import io.opentracing.Tracer;
-
 @Component
 public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
 
@@ -41,8 +39,7 @@ public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
     private final StackService stackService;
 
     public CloudbreakUMSCleanupJob(UMSCleanupConfig umsCleanupConfig, AltusMachineUserService altusMachineUserService,
-        StackService stackService, Tracer tracer) {
-        super(tracer, "UMS Cleanup");
+        StackService stackService) {
         this.umsCleanupConfig = umsCleanupConfig;
         this.altusMachineUserService = altusMachineUserService;
         this.stackService = stackService;

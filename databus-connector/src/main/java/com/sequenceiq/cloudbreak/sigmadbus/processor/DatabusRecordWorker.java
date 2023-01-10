@@ -14,8 +14,6 @@ import com.sequenceiq.cloudbreak.streaming.processor.RecordWorker;
 import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.streaming.CommonStreamingConfiguration;
 
-import io.opentracing.Tracer;
-
 /**
  * Worker class that uses sigma databus client for record processing. (with put record operation)
  * It process data in order from a blocking queue. Blocking queues and workers has a one-to-one relation.
@@ -26,23 +24,20 @@ public class DatabusRecordWorker<C extends AbstractDatabusStreamConfiguration>
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabusRecordWorker.class);
 
-    private final Tracer tracer;
-
     private SigmaDatabusClient<C> dataBusClient;
 
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public DatabusRecordWorker(String name, BlockingDeque<DatabusRequest> processingQueue,
-            AbstractDatabusRecordProcessor<C> databusRecordProcessor, Tracer tracer,
+            AbstractDatabusRecordProcessor<C> databusRecordProcessor,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         super(name, name, databusRecordProcessor, processingQueue, null);
-        this.tracer = tracer;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public SigmaDatabusClient<C> getClient() {
         if (dataBusClient == null) {
-            dataBusClient = new SigmaDatabusClient<C>(tracer, getRecordProcessor().getSigmaDatabusConfig(),
+            dataBusClient = new SigmaDatabusClient<C>(getRecordProcessor().getSigmaDatabusConfig(),
                     getRecordProcessor().getDatabusStreamConfiguration(), regionAwareInternalCrnGeneratorFactory);
         }
         return dataBusClient;

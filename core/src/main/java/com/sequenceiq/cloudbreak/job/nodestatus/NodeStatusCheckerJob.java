@@ -37,8 +37,6 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.node.health.client.model.CdpNodeStatusRequest;
 import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class NodeStatusCheckerJob extends StatusCheckerJob {
@@ -62,10 +60,6 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
-
-    public NodeStatusCheckerJob(Tracer tracer) {
-        super(tracer, "NodeStatus Checker Job");
-    }
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {

@@ -28,10 +28,8 @@ import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterC
 import com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
-import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
-import io.opentracing.Tracer;
 
 @Component
 public class GrpcCcmV2Client {
@@ -41,9 +39,6 @@ public class GrpcCcmV2Client {
     @Qualifier("ccmV2ManagedChannelWrapper")
     @Inject
     private ManagedChannelWrapper channelWrapper;
-
-    @Inject
-    private Tracer tracer;
 
     public InvertingProxy getOrCreateInvertingProxy(String requestId, String accountId, String actorCrn) {
         ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), requestId, actorCrn);
@@ -109,7 +104,6 @@ public class GrpcCcmV2Client {
 
     private ClusterConnectivityManagementV2BlockingStub makeClient(ManagedChannel channel, String requestId, String actorCrn) {
         return ClusterConnectivityManagementV2Grpc.newBlockingStub(channel)
-                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
-                        new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
     }
 }

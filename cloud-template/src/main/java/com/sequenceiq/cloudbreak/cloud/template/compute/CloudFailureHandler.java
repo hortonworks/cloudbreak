@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -161,7 +160,6 @@ public class CloudFailureHandler {
         }
     }
 
-    @NotNull
     private Map<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> getResourceBuilderMap(ResourceBuilders resourceBuilders, Variant variant) {
         List<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = resourceBuilders.compute(variant);
         Map<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> resourceBuilderMap = new HashMap<>();

@@ -35,8 +35,6 @@ import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
 
-import io.opentracing.Tracer;
-
 @Service
 public class FreeIpaClientFactory {
 
@@ -70,9 +68,6 @@ public class FreeIpaClientFactory {
 
     @Inject
     private ClusterProxyServiceAvailabilityChecker clusterProxyServiceAvailabilityChecker;
-
-    @Inject
-    private Tracer tracer;
 
     public FreeIpaClient getFreeIpaClientForStackId(Long stackId) throws FreeIpaClientException {
         LOGGER.debug("Retrieving stack for stack id {}", stackId);
@@ -195,8 +190,8 @@ public class FreeIpaClientFactory {
                 clusterProxyConfiguration.getClusterProxyPort(),
                 clusterProxyPath,
                 ADDITIONAL_CLUSTER_PROXY_HEADERS,
-                CLUSTER_PROXY_ERROR_LISTENER,
-                tracer);
+                CLUSTER_PROXY_ERROR_LISTENER
+        );
     }
 
     private FreeIpaClientBuilder getFreeIpaClientBuilderForDirectMode(Stack stack, InstanceMetaData instanceMetaData) throws Exception {
@@ -205,7 +200,7 @@ public class FreeIpaClientFactory {
                 stack, instanceMetaData.getPublicIpWrapper(), instanceMetaData);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         int gatewayPort = Optional.ofNullable(stack.getGatewayport()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
-        return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), httpClientConfig, gatewayPort, instanceMetaData.getDiscoveryFQDN(), tracer);
+        return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), httpClientConfig, gatewayPort, instanceMetaData.getDiscoveryFQDN());
     }
 
     private InvalidFreeIpaStateException createFreeIpaStateIsInvalidException(Status stackStatus) {

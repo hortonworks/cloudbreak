@@ -36,8 +36,6 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.node.health.client.model.CdpNodeStatusRequest;
 import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(MockitoExtension.class)
 public class NodeStatusJobTest {
 
@@ -52,9 +50,6 @@ public class NodeStatusJobTest {
 
     @Mock
     private NodeStatusJobService nodeStatusJobService;
-
-    @Mock
-    private Tracer tracer;
 
     @InjectMocks
     private NodeStatusJob underTest;
@@ -73,7 +68,7 @@ public class NodeStatusJobTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new NodeStatusJob(tracer);
+        underTest = new NodeStatusJob();
         MockitoAnnotations.openMocks(this);
         underTest.setLocalId("1");
         underTest.setRemoteResourceCrn("crn");

@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.Map;
@@ -20,9 +19,6 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-
-import io.opentracing.SpanContext;
-import io.opentracing.Tracer;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class ActionTest {
@@ -42,9 +38,6 @@ public abstract class ActionTest {
     protected ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
     @Mock
-    protected Tracer tracer;
-
-    @Mock
     protected FlowParameters flowParameters;
 
     @Mock
@@ -57,7 +50,6 @@ public abstract class ActionTest {
         lenient().when(context.getFlowParameters()).thenReturn(flowParameters);
         lenient().when(flowParameters.getFlowId()).thenReturn(FLOW_ID);
         lenient().when(flowParameters.getFlowTriggerUserCrn()).thenReturn("trigger-user-crn");
-        lenient().when(flowParameters.getSpanContext()).thenReturn(mock(SpanContext.class));
         lenient().when(flowParameters.getFlowOperationType()).thenReturn("flow-operation-type");
 
         lenient().when(runningFlows.get(FLOW_ID)).thenReturn(flow);

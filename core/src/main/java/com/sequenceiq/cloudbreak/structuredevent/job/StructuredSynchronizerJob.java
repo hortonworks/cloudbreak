@@ -24,8 +24,6 @@ import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventCli
 import com.sequenceiq.cloudbreak.structuredevent.StructuredSyncEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 
-import io.opentracing.Tracer;
-
 @DisallowConcurrentExecution
 @Component
 public class StructuredSynchronizerJob extends StatusCheckerJob {
@@ -46,10 +44,6 @@ public class StructuredSynchronizerJob extends StatusCheckerJob {
 
     @Inject
     private LegacyDefaultStructuredEventClient legacyDefaultStructuredEventClient;
-
-    public StructuredSynchronizerJob(Tracer tracer) {
-        super(tracer, "Structured Synchronizer Job");
-    }
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {

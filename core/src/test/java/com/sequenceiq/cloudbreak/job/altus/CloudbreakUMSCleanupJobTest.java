@@ -27,8 +27,6 @@ import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(MockitoExtension.class)
 public class CloudbreakUMSCleanupJobTest {
 
@@ -47,12 +45,9 @@ public class CloudbreakUMSCleanupJobTest {
     @Mock
     private JobExecutionContext jobExecutionContext;
 
-    @Mock
-    private Tracer tracer;
-
     @BeforeEach
     public void setUp() {
-        underTest = new CloudbreakUMSCleanupJob(umsCleanupConfig, altusMachineUserService, stackService, tracer);
+        underTest = new CloudbreakUMSCleanupJob(umsCleanupConfig, altusMachineUserService, stackService);
     }
 
     @Test

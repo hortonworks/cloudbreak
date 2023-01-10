@@ -35,8 +35,6 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.node.health.client.model.CdpNodeStatusRequest;
 import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(MockitoExtension.class)
 public class NodeStatusCheckerJobTest {
 
@@ -60,9 +58,6 @@ public class NodeStatusCheckerJobTest {
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
 
-    @Mock
-    private Tracer tracer;
-
     @InjectMocks
     private NodeStatusCheckerJob underTest;
 
@@ -77,7 +72,7 @@ public class NodeStatusCheckerJobTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new NodeStatusCheckerJob(tracer);
+        underTest = new NodeStatusCheckerJob();
         MockitoAnnotations.openMocks(this);
         underTest.setLocalId("1");
         underTest.setRemoteResourceCrn(DATAHUB_CRN);

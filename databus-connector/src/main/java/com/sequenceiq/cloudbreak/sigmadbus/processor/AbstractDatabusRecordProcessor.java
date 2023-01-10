@@ -16,8 +16,6 @@ import com.sequenceiq.cloudbreak.streaming.processor.AbstractRecordProcessor;
 import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.streaming.CommonStreamingConfiguration;
 
-import io.opentracing.Tracer;
-
 /**
  * Databus processor that holds processing queues that are used by round robin algorithm.
  * Sending new events to a blocking queue (round robin strategy), that will be picked up by a databus worker
@@ -37,16 +35,13 @@ public abstract class AbstractDatabusRecordProcessor<C extends AbstractDatabusSt
 
     private final C databusStreamConfiguration;
 
-    private final Tracer tracer;
-
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public AbstractDatabusRecordProcessor(SigmaDatabusConfig sigmaDatabusConfig, C databusStreamConfiguration, Tracer tracer,
+    public AbstractDatabusRecordProcessor(SigmaDatabusConfig sigmaDatabusConfig, C databusStreamConfiguration,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         super(databusStreamConfiguration);
         this.sigmaDatabusConfig = sigmaDatabusConfig;
         this.databusStreamConfiguration = databusStreamConfiguration;
-        this.tracer = tracer;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
@@ -85,13 +80,6 @@ public abstract class AbstractDatabusRecordProcessor<C extends AbstractDatabusSt
     }
 
     /**
-     * Tracer
-     */
-    public Tracer getTracer() {
-        return tracer;
-    }
-
-    /**
      * RegionAwareInternalCrnGeneratorFactory
      */
     public RegionAwareInternalCrnGeneratorFactory getRegionAwareInternalCrnGeneratorFactory() {
@@ -113,7 +101,7 @@ public abstract class AbstractDatabusRecordProcessor<C extends AbstractDatabusSt
      */
     @Override
     public DatabusRecordWorker<C> createWorker(String threadName, BlockingDeque<DatabusRequest> processingQueue) {
-        return new DatabusRecordWorker<>(threadName, processingQueue, this, getTracer(), getRegionAwareInternalCrnGeneratorFactory());
+        return new DatabusRecordWorker<>(threadName, processingQueue, this, getRegionAwareInternalCrnGeneratorFactory());
     }
 
     /**

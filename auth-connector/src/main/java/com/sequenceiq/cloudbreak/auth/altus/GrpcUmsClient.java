@@ -61,7 +61,6 @@ import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.opentracing.Tracer;
 
 @Component
 public class GrpcUmsClient {
@@ -83,14 +82,10 @@ public class GrpcUmsClient {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    @Inject
-    private Tracer tracer;
-
-    public static GrpcUmsClient createClient(ManagedChannelWrapper channelWrapper, UmsClientConfig clientConfig, Tracer tracer) {
+    public static GrpcUmsClient createClient(ManagedChannelWrapper channelWrapper, UmsClientConfig clientConfig) {
         GrpcUmsClient client = new GrpcUmsClient();
         client.channelWrapper = Preconditions.checkNotNull(channelWrapper, "channelWrapper should not be null.");
         client.umsClientConfig = Preconditions.checkNotNull(clientConfig, "clientConfig should not be null.");
-        client.tracer = Preconditions.checkNotNull(tracer, "tracer should not be null.");
         return client;
     }
 
@@ -639,7 +634,7 @@ public class GrpcUmsClient {
             return resourceCrns.stream().map(r -> true).collect(Collectors.toList());
         }
         LOGGER.debug("Check if {} has rights on resources {}", memberCrn, resourceCrns);
-        PersonalResourceViewClient client = new PersonalResourceViewClient(channelWrapper.getChannel(), memberCrn, umsClientConfig, tracer);
+        PersonalResourceViewClient client = new PersonalResourceViewClient(channelWrapper.getChannel(), memberCrn, umsClientConfig);
         List<Boolean> retVal = client.hasRightOnResources(memberCrn, right, resourceCrns);
         LOGGER.info("member {} has rights {}", memberCrn, retVal);
         return retVal;
@@ -793,12 +788,12 @@ public class GrpcUmsClient {
 
     @VisibleForTesting
     UmsClient makeClient(ManagedChannel channel, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        return new UmsClient(channel, umsClientConfig, tracer, regionAwareInternalCrnGeneratorFactory);
+        return new UmsClient(channel, umsClientConfig, regionAwareInternalCrnGeneratorFactory);
     }
 
     @VisibleForTesting
     AuthorizationClient makeAuthorizationClient(RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        return new AuthorizationClient(channelWrapper.getChannel(), umsClientConfig, tracer, regionAwareInternalCrnGeneratorFactory);
+        return new AuthorizationClient(channelWrapper.getChannel(), umsClientConfig, regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
@@ -936,7 +931,4 @@ public class GrpcUmsClient {
         return client.listRoles(accountId);
     }
 
-    public void setTracer(Tracer tracer) {
-        this.tracer = tracer;
-    }
 }

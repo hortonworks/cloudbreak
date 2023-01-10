@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.client.ApiClient;
-import com.sequenceiq.cloudbreak.cm.client.tracing.CmOkHttpTracingInterceptor;
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmRequestIdProviderInterceptor;
 
 // TODO Use ClouderaManagerApiClientProvider in client-cm instad of relying on this class
@@ -25,9 +24,6 @@ public class ClouderaManagerProxiedClientFactory {
     private String clusterProxyUrl;
 
     @Inject
-    private CmOkHttpTracingInterceptor cmOkHttpTracingInterceptor;
-
-    @Inject
     private CmRequestIdProviderInterceptor cmRequestIdProviderInterceptor;
 
     private String getClusterProxyCloderaManagerBasePath(String clusterCrn) {
@@ -36,7 +32,6 @@ public class ClouderaManagerProxiedClientFactory {
 
     public ApiClient getProxiedClouderaManagerClient(String clouderaManagerStackCrn) {
         ApiClient apiClient = new ApiClient();
-        apiClient.getHttpClient().interceptors().add(cmOkHttpTracingInterceptor);
         apiClient.getHttpClient().interceptors().add(cmRequestIdProviderInterceptor);
         apiClient.setBasePath(getClusterProxyCloderaManagerBasePath(clouderaManagerStackCrn));
         apiClient.setConnectTimeout(CM_READ_TIMEOUT_MS);

@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -112,7 +111,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .validate();
     }
 
-    @NotNull
     private SdxTestDto assertCronCreatedOnMasterNodesForUserHomeCreation(SdxTestDto testDto) {
         Map<String, Pair<Integer, String>> crontabListResultByIpsMap =
                 sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),

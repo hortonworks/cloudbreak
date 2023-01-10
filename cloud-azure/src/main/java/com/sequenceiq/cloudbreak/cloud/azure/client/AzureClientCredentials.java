@@ -20,7 +20,6 @@ import com.microsoft.azure.management.compute.implementation.ComputeManager;
 import com.microsoft.azure.management.marketplaceordering.v2015_06_01.implementation.MarketplaceOrderingManager;
 import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.privatednsManager;
 import com.microsoft.rest.LogLevel;
-import com.sequenceiq.cloudbreak.cloud.azure.tracing.AzureOkHttp3TracingInterceptor;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -46,21 +45,17 @@ public class AzureClientCredentials {
 
     private final AuthenticationContextProvider authenticationContextProvider;
 
-    private final AzureOkHttp3TracingInterceptor tracingInterceptor;
-
     public AzureClientCredentials(AzureCredentialView credentialView, LogLevel logLevel, CBRefreshTokenClientProvider cbRefreshTokenClientProvider,
-            AuthenticationContextProvider authenticationContextProvider, AzureOkHttp3TracingInterceptor tracingInterceptor) {
-        this(null, credentialView, logLevel, cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor);
+            AuthenticationContextProvider authenticationContextProvider) {
+        this(null, credentialView, logLevel, cbRefreshTokenClientProvider, authenticationContextProvider);
     }
 
     public AzureClientCredentials(CloudContext cloudContext, AzureCredentialView credentialView, LogLevel logLevel,
-            CBRefreshTokenClientProvider cbRefreshTokenClientProvider, AuthenticationContextProvider authenticationContextProvider,
-            AzureOkHttp3TracingInterceptor tracingInterceptor) {
+            CBRefreshTokenClientProvider cbRefreshTokenClientProvider, AuthenticationContextProvider authenticationContextProvider) {
         this.authenticationContextProvider = authenticationContextProvider;
         this.cbRefreshTokenClientProvider = cbRefreshTokenClientProvider;
         this.credentialView = credentialView;
         this.logLevel = logLevel;
-        this.tracingInterceptor = tracingInterceptor;
         azureClientCredentials = getAzureCredentials(Optional.ofNullable(cloudContext)
                 .map(CloudContext::getLocation)
                 .map(Location::getRegion));
@@ -69,7 +64,6 @@ public class AzureClientCredentials {
     public Azure getAzure() {
         return Azure
                 .configure()
-                .withInterceptor(tracingInterceptor)
                 .withProxyAuthenticator(new JavaNetAuthenticator())
                 .withLogLevel(logLevel)
                 .authenticate(azureClientCredentials)

@@ -75,8 +75,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.RetryService;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {
         "cb.aws.hostkey.verify=true",
@@ -105,9 +103,6 @@ class AwsInstanceConnectorTest {
 
     @Mock
     private InstanceProfileCredentialsProvider instanceProfileCredentialsProvider;
-
-    @MockBean
-    private Tracer tracer;
 
     @SpyBean
     private CommonAwsClient commonAwsClient;

@@ -14,8 +14,6 @@ import com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersRe
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
-import io.opentracing.Tracer;
-
 @Component
 public class GrpcWiamClient {
 
@@ -24,9 +22,6 @@ public class GrpcWiamClient {
     @Qualifier("wiamManagedChannelWrapper")
     @Inject
     private ManagedChannelWrapper channelWrapper;
-
-    @Inject
-    private Tracer tracer;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -40,6 +35,6 @@ public class GrpcWiamClient {
     }
 
     private WiamClient createClient() {
-        return new WiamClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), tracer);
+        return new WiamClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString());
     }
 }

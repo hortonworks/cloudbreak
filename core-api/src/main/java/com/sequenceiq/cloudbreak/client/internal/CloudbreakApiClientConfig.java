@@ -28,18 +28,13 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-
 @Configuration
 public class CloudbreakApiClientConfig {
 
     private final ApiClientRequestFilter apiClientRequestFilter;
 
-    private final ClientTracingFeature clientTracingFeature;
-
-    public CloudbreakApiClientConfig(ApiClientRequestFilter apiClientRequestFilter, ClientTracingFeature clientTracingFeature) {
+    public CloudbreakApiClientConfig(ApiClientRequestFilter apiClientRequestFilter) {
         this.apiClientRequestFilter = apiClientRequestFilter;
-        this.clientTracingFeature = clientTracingFeature;
     }
 
     @Bean
@@ -51,7 +46,6 @@ public class CloudbreakApiClientConfig {
                 .withDebug(cloudbreakApiClientParams.isRestDebug())
                 .withClientRequestFilter(apiClientRequestFilter)
                 .withApiRoot(CoreApi.API_ROOT_CONTEXT)
-                .withTracer(clientTracingFeature)
                 .build();
     }
 

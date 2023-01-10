@@ -46,8 +46,6 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
-import io.opentracing.Tracer;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = StackStatusTest.TestAppContext.class)
 class StackStatusTest {
@@ -89,9 +87,6 @@ class StackStatusTest {
 
     @MockBean
     private EntitlementService entitlementService;
-
-    @MockBean
-    private Tracer tracer;
 
     @MockBean
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
