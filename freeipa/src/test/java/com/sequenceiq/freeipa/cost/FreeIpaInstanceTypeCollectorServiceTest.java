@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -16,8 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.cloud.aws.common.cost.AwsPricingCache;
-import com.sequenceiq.cloudbreak.cloud.azure.cost.AzurePricingCache;
+import com.sequenceiq.cloudbreak.cloud.PricingCache;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.cloudera.ClouderaCostCache;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
@@ -45,10 +46,10 @@ public class FreeIpaInstanceTypeCollectorServiceTest {
     private CredentialService credentialService;
 
     @Mock
-    private AwsPricingCache awsPricingCache;
+    private Map<CloudPlatform, PricingCache> pricingCaches;
 
     @Mock
-    private AzurePricingCache azurePricingCache;
+    private PricingCache pricingCache;
 
     @Mock
     private ClouderaCostCache clouderaCostCache;
@@ -62,24 +63,13 @@ public class FreeIpaInstanceTypeCollectorServiceTest {
     }
 
     @Test
-    void getAllInstanceTypesAWS() {
-        when(awsPricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
-        when(awsPricingCache.getCpuCountForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(8);
-        when(awsPricingCache.getMemoryForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(16);
-        when(awsPricingCache.getStoragePricePerGBHour(REGION, "standard")).thenReturn(MAGIC_PRICE_PER_DISK_GB);
-        when(credentialService.getCredentialByEnvCrn(any())).thenReturn(getCredential("AWS"));
-
-        ClusterCostDto clusterCostDto = underTest.getAllInstanceTypes(getStack("AWS"));
-
-        assertions(clusterCostDto);
-    }
-
-    @Test
-    void getAllInstanceTypesAzure() {
-        when(azurePricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
-        when(azurePricingCache.getCpuCountForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(8);
-        when(azurePricingCache.getMemoryForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(16);
-        when(azurePricingCache.getStoragePricePerGBHour(eq(REGION), eq("standard"), anyInt())).thenReturn(MAGIC_PRICE_PER_DISK_GB);
+    void getAllInstanceTypes() {
+        when(pricingCaches.containsKey(any())).thenReturn(Boolean.TRUE);
+        when(pricingCaches.get(any())).thenReturn(pricingCache);
+        when(pricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
+        when(pricingCache.getCpuCountForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(8);
+        when(pricingCache.getMemoryForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(16);
+        when(pricingCache.getStoragePricePerGBHour(eq(REGION), any(), anyInt())).thenReturn(MAGIC_PRICE_PER_DISK_GB);
         when(credentialService.getCredentialByEnvCrn(any())).thenReturn(getCredential("AZURE"));
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {

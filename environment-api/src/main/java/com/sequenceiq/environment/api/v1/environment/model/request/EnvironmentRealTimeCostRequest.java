@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.api.client.util.Lists;
 
 import io.swagger.annotations.ApiModel;
 
@@ -11,11 +12,11 @@ import io.swagger.annotations.ApiModel;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentRealTimeCostRequest implements Serializable {
 
-    private List<String> environmentCrns;
+    private List<String> environmentCrns = Lists.newArrayList();
 
-    private List<String> datalakeCrns;
+    private List<String> datalakeCrns = Lists.newArrayList();
 
-    private List<String> datahubCrns;
+    private List<String> datahubCrns = Lists.newArrayList();
 
     public List<String> getEnvironmentCrns() {
         return environmentCrns;

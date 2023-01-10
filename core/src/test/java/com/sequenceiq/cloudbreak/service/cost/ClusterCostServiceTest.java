@@ -18,7 +18,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.PricingCache;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.usd.UsdCalculatorService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -40,11 +42,15 @@ public class ClusterCostServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private Map<CloudPlatform, PricingCache> pricingCacheMap;
+
     @InjectMocks
     private ClusterCostService underTest;
 
     @Test
     void getCosts() {
+        when(pricingCacheMap.containsKey(any())).thenReturn(Boolean.TRUE);
         when(entitlementService.isUsdCostCalculationEnabled(any())).thenReturn(true);
         when(stackDtoService.findNotTerminatedByCrns(any())).thenReturn(List.of(getStack()));
         when(usdCalculatorService.calculateProviderCost(any())).thenReturn(0.5);
@@ -67,6 +73,7 @@ public class ClusterCostServiceTest {
         stack.setEnvironmentCrn("ENVIRONMENT_CRN");
         stack.setName("RESOURCE_NAME");
         stack.setResourceCrn("RESOURCE_CRN");
+        stack.setCloudPlatform("AWS");
         stack.setType(StackType.WORKLOAD);
         return stack;
     }

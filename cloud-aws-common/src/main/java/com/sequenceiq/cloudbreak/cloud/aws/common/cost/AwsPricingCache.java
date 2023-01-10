@@ -22,13 +22,16 @@ import com.amazonaws.services.pricing.model.NotFoundException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.sequenceiq.cloudbreak.cloud.PricingCache;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.PriceListElement;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.model.PricingCacheKey;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service("awsPricingCache")
-public class AwsPricingCache {
+public class AwsPricingCache implements PricingCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsPricingCache.class);
 
@@ -68,7 +71,7 @@ public class AwsPricingCache {
                 throw new RuntimeException("Failed to load AWS storage price json!", e);
             }
         }
-        throw new RuntimeException("Failed to load AWS storage price json!");
+        throw new RuntimeException("AWS storage price json file could not found!");
     }
 
     public double getPriceForInstanceType(String region, String instanceType) {
@@ -80,18 +83,18 @@ public class AwsPricingCache {
                 .getPricePerUnit().getUsd();
     }
 
-    public int getCpuCountForInstanceType(String region, String instanceType) {
+    public int getCpuCountForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
         PriceListElement priceListElement = getPriceList(region, instanceType);
         return priceListElement.getProduct().getAttributes().getVcpu();
     }
 
-    public int getMemoryForInstanceType(String region, String instanceType) {
+    public int getMemoryForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
         PriceListElement priceListElement = getPriceList(region, instanceType);
         String memory = priceListElement.getProduct().getAttributes().getMemory();
         return Integer.parseInt(memory.replaceAll("\\D", ""));
     }
 
-    public double getStoragePricePerGBHour(String region, String storageType) {
+    public double getStoragePricePerGBHour(String region, String storageType, int volumeSize) {
         Map<String, Double> pricingForRegion = storagePricingCache.getOrDefault(region, Map.of());
         String checkedStorageType = storageType == null ? "standard" : storageType;
         double priceInGBMonth = pricingForRegion.getOrDefault(checkedStorageType, 0.0);
@@ -134,5 +137,11 @@ public class AwsPricingCache {
     @Bean
     public AWSPricing getAwsPricing() {
         return AWSPricingClientBuilder.standard().withRegion(PRICING_API_ENDPOINT_REGION).build();
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AWS;
+
     }
 }

@@ -54,14 +54,14 @@ public class AwsPricingCacheTest {
 
     @Test
     void getCpuCount() {
-        int cpu = underTest.getCpuCountForInstanceType(REGION, INSTANCE_TYPE);
+        int cpu = underTest.getCpuCountForInstanceType(REGION, INSTANCE_TYPE, null);
 
         Assertions.assertEquals(69, cpu);
     }
 
     @Test
     void getMemory() {
-        int memory = underTest.getMemoryForInstanceType(REGION, INSTANCE_TYPE);
+        int memory = underTest.getMemoryForInstanceType(REGION, INSTANCE_TYPE, null);
 
         Assertions.assertEquals(420, memory);
     }

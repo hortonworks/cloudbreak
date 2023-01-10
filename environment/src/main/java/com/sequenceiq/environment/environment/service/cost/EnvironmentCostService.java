@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -47,14 +48,17 @@ public class EnvironmentCostService {
         Map<String, RealTimeCost> totalCosts = new HashMap<>();
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
 
-        RealTimeCostResponse freeipaCostResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> freeIpaCostV1Endpoint.list(environmentCrns, initiatorUserCrn));
-        RealTimeCostResponse clusterCostResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> clusterCostV4Endpoint.list(clusterCrns, initiatorUserCrn));
-        totalCosts.putAll(freeipaCostResponse.getCost());
-        totalCosts.putAll(clusterCostResponse.getCost());
+        String internalCrn = regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString();
+        if (CollectionUtils.isNotEmpty(environmentCrns)) {
+            RealTimeCostResponse freeipaCostResponse = ThreadBasedUserCrnProvider.doAsInternalActor(internalCrn,
+                    () -> freeIpaCostV1Endpoint.list(environmentCrns, initiatorUserCrn));
+            totalCosts.putAll(freeipaCostResponse.getCost());
+        }
+        if (CollectionUtils.isNotEmpty(clusterCrns)) {
+            RealTimeCostResponse clusterCostResponse = ThreadBasedUserCrnProvider.doAsInternalActor(internalCrn,
+                    () -> clusterCostV4Endpoint.list(clusterCrns, initiatorUserCrn));
+            totalCosts.putAll(clusterCostResponse.getCost());
+        }
 
         LOGGER.debug("Total Costs: {}", totalCosts);
         for (Map.Entry<String, RealTimeCost> costEntry : totalCosts.entrySet()) {
@@ -63,7 +67,7 @@ public class EnvironmentCostService {
             String envCrn = costEntry.getValue().getEnvCrn();
 
             EnvironmentRealTimeCost cost = environmentCost.getOrDefault(envCrn, new EnvironmentRealTimeCost());
-            cost.add(key, realTimeCost);
+            cost.addCostByType(key, realTimeCost);
             environmentCost.put(envCrn, cost);
         }
         LOGGER.debug("Cost summed for environments: {}", environmentCost);

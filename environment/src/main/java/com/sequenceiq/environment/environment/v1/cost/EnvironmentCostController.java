@@ -3,13 +3,13 @@ package com.sequenceiq.environment.environment.v1.cost;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN_LIST;
 
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -33,8 +33,8 @@ public class EnvironmentCostController implements EnvironmentCostV1Endpoint {
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrns", type = CRN_LIST, action = DESCRIBE_ENVIRONMENT)
     public EnvironmentRealTimeCostResponse list(@RequestObject EnvironmentRealTimeCostRequest request) {
-        Map<String, EnvironmentRealTimeCost> costs = environmentCostService.getCosts(request.getEnvironmentCrns(),
-                Stream.concat(request.getDatalakeCrns().stream(), request.getDatahubCrns().stream()).collect(Collectors.toList()));
+        List<String> clusterCrns = ListUtils.union(ListUtils.emptyIfNull(request.getDatalakeCrns()), ListUtils.emptyIfNull(request.getDatahubCrns()));
+        Map<String, EnvironmentRealTimeCost> costs = environmentCostService.getCosts(ListUtils.emptyIfNull(request.getEnvironmentCrns()), clusterCrns);
         return new EnvironmentRealTimeCostResponse(costs);
     }
 }
