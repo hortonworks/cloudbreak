@@ -86,13 +86,14 @@ public class AzureSetup implements Setup {
         if (imageCopyDetailsOptional.isPresent()) {
             AzureImageCopyDetails imageCopyDetails = imageCopyDetailsOptional.get();
             String message = String.format("%s image copy failed. You may try to execute the copy manually, in that case please copy %s to the 'images' " +
-                            "container of the storage account '%s' in resource group '%s'. Reason of failure: %s",
+                            "container of the storage account '%s' in resource group '%s'. Reason of failure: %s - %s",
                     image.getImageName(), imageCopyDetails.getImageSource(), imageCopyDetails.getImageStorageName(),
-                    imageCopyDetails.getImageResourceGroupName(), ExceptionUtils.getRootCause(ex).getMessage());
+                    imageCopyDetails.getImageResourceGroupName(), ex.getMessage(), ExceptionUtils.getRootCause(ex).getMessage());
             LOGGER.debug("Added details to exception: {}", message, ex);
             throw new CloudConnectorException(message, ex);
         } else {
-            throw new CloudConnectorException(image.getImageName() + " image copy failed: " + ExceptionUtils.getRootCause(ex).getMessage(), ex);
+            throw new CloudConnectorException(image.getImageName() + " image copy failed: " + ex.getMessage() + '.' +
+                    ExceptionUtils.getRootCause(ex).getMessage(), ex);
         }
     }
 
