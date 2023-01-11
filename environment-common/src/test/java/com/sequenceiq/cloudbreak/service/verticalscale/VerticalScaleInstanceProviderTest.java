@@ -2,19 +2,27 @@ package com.sequenceiq.cloudbreak.service.verticalscale;
 
 
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
+import static java.util.Map.entry;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
@@ -24,6 +32,14 @@ import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 
 @ExtendWith(MockitoExtension.class)
 public class VerticalScaleInstanceProviderTest {
+
+    private static final String INSTANCE_TYPE_1 = "instanceType1";
+
+    private static final String INSTANCE_TYPE_2 = "instanceType2";
+
+    private static final String AVAILABILITY_ZONE_1 = "availabilityZone1";
+
+    private static final String AVAILABILITY_ZONE_2 = "availabilityZone2";
 
     @Mock
     private MinimalHardwareFilter minimalHardwareFilter;
@@ -35,14 +51,14 @@ public class VerticalScaleInstanceProviderTest {
     public void testRequestWhenWeAreRequestedSmallerMemoryInstancesShouldDropBadRequest() {
         String instanceTypeNameInStack = "m3.xlarge";
         String instanceTypeNameInRequest = "m2.xlarge";
-        Optional<VmType> current = vmType(
+        Optional<VmType> current = vmTypeOptional(
                         instanceTypeNameInStack,
                         1,
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
                 );
-        Optional<VmType> requested = vmType(
+        Optional<VmType> requested = vmTypeOptional(
                         instanceTypeNameInRequest,
                         0,
                         1,
@@ -58,7 +74,7 @@ public class VerticalScaleInstanceProviderTest {
             underTest.validInstanceTypeForVerticalScaling(current, requested);
         });
 
-        assertEquals("The requested instancetype m2.xlarge has less Memory then the minimum 16 GB.",
+        assertEquals("The requested instancetype m2.xlarge has less Memory than the minimum 16 GB.",
                 badRequestException.getMessage());
     }
 
@@ -66,14 +82,14 @@ public class VerticalScaleInstanceProviderTest {
     public void testRequestWhenWeAreRequestedSmallerCpuInstancesShouldDropBadRequest() {
         String instanceTypeNameInStack = "m3.xlarge";
         String instanceTypeNameInRequest = "m2.xlarge";
-        Optional<VmType> current = vmType(
+        Optional<VmType> current = vmTypeOptional(
                         instanceTypeNameInStack,
                         1,
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
                 );
-        Optional<VmType> requested = vmType(
+        Optional<VmType> requested = vmTypeOptional(
                         instanceTypeNameInRequest,
                         1,
                         0,
@@ -88,7 +104,7 @@ public class VerticalScaleInstanceProviderTest {
             underTest.validInstanceTypeForVerticalScaling(current, requested);
         });
 
-        assertEquals("The requested instancetype m2.xlarge has less Cpu then the minimum 4 core.",
+        assertEquals("The requested instancetype m2.xlarge has less Cpu than the minimum 4 core.",
                 badRequestException.getMessage());
     }
 
@@ -96,14 +112,14 @@ public class VerticalScaleInstanceProviderTest {
     public void testRequestWhenWeAreRequestedInstanceWithLessEphemeralShouldDropBadRequest() {
         String instanceTypeNameInStack = "m3.xlarge";
         String instanceTypeNameInRequest = "m2.xlarge";
-        Optional<VmType> current = vmType(
+        Optional<VmType> current = vmTypeOptional(
                         instanceTypeNameInStack,
                         1,
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
                 );
-        Optional<VmType> requested = vmType(
+        Optional<VmType> requested = vmTypeOptional(
                         instanceTypeNameInRequest,
                         1,
                         1,
@@ -118,7 +134,7 @@ public class VerticalScaleInstanceProviderTest {
             underTest.validInstanceTypeForVerticalScaling(current, requested);
         });
 
-        assertEquals("The current instancetype m3.xlarge has more Ephemeral Disk then the requested m2.xlarge.",
+        assertEquals("The current instancetype m3.xlarge has more Ephemeral Disk than the requested m2.xlarge.",
                 badRequestException.getMessage());
     }
 
@@ -126,14 +142,14 @@ public class VerticalScaleInstanceProviderTest {
     public void testRequestWhenWeAreRequestedInstanceWithLessAutoAttachedShouldDropBadRequest() {
         String instanceTypeNameInStack = "m3.xlarge";
         String instanceTypeNameInRequest = "m2.xlarge";
-        Optional<VmType> current = vmType(
+        Optional<VmType> current = vmTypeOptional(
                         instanceTypeNameInStack,
                         1,
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
                 );
-        Optional<VmType> requested = vmType(
+        Optional<VmType> requested = vmTypeOptional(
                         instanceTypeNameInRequest,
                         1,
                         1,
@@ -148,17 +164,159 @@ public class VerticalScaleInstanceProviderTest {
             underTest.validInstanceTypeForVerticalScaling(current, requested);
         });
 
-        assertEquals("The current instancetype m3.xlarge has more Auto Attached Disk then the requested m2.xlarge.",
+        assertEquals("The current instancetype m3.xlarge has more Auto Attached Disk than the requested m2.xlarge.",
                 badRequestException.getMessage());
     }
 
-    public Optional<VmType> vmType(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral) {
-        return Optional.of(vmTypeWithMeta(name,
+    @Test
+    void listInstanceTypesTestWhenNoCloudVmResponses() {
+        CloudVmTypes allVmTypes = new CloudVmTypes(Map.of(), Map.of());
+
+        CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getCloudVmResponses()).isEqualTo(Map.of());
+        assertThat(result.getDefaultCloudVmResponses()).isEqualTo(Map.of());
+    }
+
+    @ParameterizedTest(name = "availabilityZone=\"{0}\"")
+    @ValueSource(strings = {"", " "})
+    @NullSource
+    void listInstanceTypesTestWhenSuitableInstancesAndUnspecifiedAvailabilityZone(String availabilityZone) {
+        VmType current = vmType(
+                INSTANCE_TYPE_1,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+        );
+
+        CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
+                Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+
+        CloudVmTypes result = underTest.listInstanceTypes(availabilityZone, INSTANCE_TYPE_1, allVmTypes);
+
+        verifySuitableInstances(result);
+    }
+
+    private void verifySuitableInstances(CloudVmTypes result) {
+        assertThat(result).isNotNull();
+
+        Map<String, Set<VmType>> cloudVmResponses = result.getCloudVmResponses();
+        assertThat(cloudVmResponses).isNotNull();
+        assertThat(cloudVmResponses).hasSize(1);
+        Set<VmType> vmTypes = cloudVmResponses.get(AVAILABILITY_ZONE_1);
+        assertThat(vmTypes).isNotNull();
+        assertThat(vmTypes).hasSize(1);
+        VmType vmType = vmTypes.iterator().next();
+        assertThat(vmType.getValue()).isEqualTo(INSTANCE_TYPE_1);
+
+        Map<String, VmType> defaultCloudVmResponses = result.getDefaultCloudVmResponses();
+        assertThat(defaultCloudVmResponses).isNotNull();
+        assertThat(defaultCloudVmResponses).hasSize(1);
+        VmType vmTypeDefault = defaultCloudVmResponses.get(AVAILABILITY_ZONE_1);
+        assertThat(vmTypeDefault.getValue()).isEqualTo(INSTANCE_TYPE_1);
+    }
+
+    @Test
+    void listInstanceTypesTestWhenInvalidAvailabilityZone() {
+        VmType current = vmType(
+                INSTANCE_TYPE_1,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+        );
+
+        CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
+                Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
+
+        CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_2, INSTANCE_TYPE_1, allVmTypes);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getCloudVmResponses()).isEqualTo(Map.of(AVAILABILITY_ZONE_2, Set.of()));
+        assertThat(result.getDefaultCloudVmResponses()).isEqualTo(Map.of());
+    }
+
+    @Test
+    void listInstanceTypesTestWhenInvalidCurrentInstanceType() {
+        VmType current = vmType(
+                INSTANCE_TYPE_1,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+        );
+
+        CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
+                Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
+
+        CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_1, INSTANCE_TYPE_2, allVmTypes);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getCloudVmResponses()).isEqualTo(Map.of(AVAILABILITY_ZONE_1, Set.of()));
+        assertThat(result.getDefaultCloudVmResponses()).isEqualTo(Map.of());
+    }
+
+    @Test
+    void listInstanceTypesTestWhenNoSuitableInstances() {
+        VmType current = vmType(
+                INSTANCE_TYPE_1,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+        );
+
+        CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
+                Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(false);
+        when(minimalHardwareFilter.minCpu()).thenReturn(4);
+
+        CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getCloudVmResponses()).isEqualTo(Map.of(AVAILABILITY_ZONE_1, Set.of()));
+        assertThat(result.getDefaultCloudVmResponses()).isEqualTo(Map.of());
+    }
+
+    @Test
+    void listInstanceTypesTestWhenSuitableInstancesAndGivenAvailabilityZone() {
+        VmType current = vmType(
+                INSTANCE_TYPE_1,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+        );
+
+        CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
+                Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+
+        CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
+
+        verifySuitableInstances(result);
+    }
+
+    private Optional<VmType> vmTypeOptional(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral) {
+        return Optional.of(vmType(name, memory, cpu, autoAttached, ephemeral));
+    }
+
+    private VmType vmType(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral) {
+        return vmTypeWithMeta(name,
                 VmTypeMeta.VmTypeMetaBuilder.builder()
                         .withAutoAttachedConfig(autoAttached)
                         .withCpuAndMemory(cpu, memory)
                         .withEphemeralConfig(ephemeral)
                         .create(),
-                false));
+                false);
     }
+
 }
