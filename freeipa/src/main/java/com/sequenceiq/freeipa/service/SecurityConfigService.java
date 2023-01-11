@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.service;
 
+import static com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -9,11 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.repository.DisabledSaltSecurityConfigRepository;
+import com.sequenceiq.freeipa.repository.SaltSecurityConfigRepository;
 import com.sequenceiq.freeipa.repository.SecurityConfigRepository;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class SecurityConfigService {
@@ -24,7 +29,16 @@ public class SecurityConfigService {
     private SecurityConfigRepository securityConfigRepository;
 
     @Inject
-    private DisabledSaltSecurityConfigRepository disabledSaltSecurityConfigRepository;
+    private SaltSecurityConfigRepository saltSecurityConfigRepository;
+
+    @Inject
+    private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private TransactionService transactionService;
 
     public SecurityConfig save(SecurityConfig securityConfig) {
         return securityConfigRepository.save(securityConfig);
@@ -43,17 +57,33 @@ public class SecurityConfigService {
                 if (!saltSecurityConfig.getSaltBootSignPrivateKey().equals(saltSecurityConfig.getSaltBootSignPrivateKeyVault())) {
                     saltSecurityConfig.setSaltBootSignPrivateKeyVault(saltSecurityConfig.getSaltBootSignPrivateKey());
                 }
-                if (!saltSecurityConfig.getSaltSignPrivateKey().equals(saltSecurityConfig.getSaltPasswordVault())) {
+                if (!saltSecurityConfig.getSaltPassword().equals(saltSecurityConfig.getSaltPasswordVault())) {
                     saltSecurityConfig.setSaltPasswordVault(saltSecurityConfig.getSaltPassword());
                 }
                 if (!saltSecurityConfig.getSaltSignPrivateKey().equals(saltSecurityConfig.getSaltSignPrivateKeyVault())) {
                     saltSecurityConfig.setSaltSignPrivateKeyVault(saltSecurityConfig.getSaltSignPrivateKey());
                 }
-                saltSecurityConfig = disabledSaltSecurityConfigRepository.save(saltSecurityConfig);
+                saltSecurityConfig = saltSecurityConfigRepository.save(saltSecurityConfig);
                 securityConfig.setSaltSecurityConfig(saltSecurityConfig);
             }
         }
         return securityConfig;
+    }
+
+    public void createIfDoesntExists(Long stackId) throws TransactionExecutionException {
+        Stack stack = stackService.getStackById(stackId);
+        if (stack.getSecurityConfig() == null) {
+            LOGGER.debug("Create SecurityConfig for stack {}", stack.getResourceCrn());
+            SecurityConfig securityConfig = measure(() -> tlsSecurityService.generateSecurityKeys(stack.getAccountId()), LOGGER,
+                    "Generating security keys took {} ms for {}", stack.getName());
+            transactionService.required(() -> {
+                SecurityConfig savedSecurityConfig = securityConfigRepository.save(securityConfig);
+                stack.setSecurityConfig(savedSecurityConfig);
+                stackService.save(stack);
+            });
+        } else {
+            LOGGER.debug("SecurityConfig for stack {} already exists", stack.getResourceCrn());
+        }
     }
 
     public void changeSaltPassword(Stack stack, String password) {
@@ -61,6 +91,7 @@ public class SecurityConfigService {
                 .map(SecurityConfig::getSaltSecurityConfig)
                 .orElseThrow(() -> new IllegalStateException("Stack " + stack.getResourceCrn() + " does not yet have a salt security config"));
         saltSecurityConfig.setSaltPassword(password);
-        disabledSaltSecurityConfigRepository.save(saltSecurityConfig);
+        saltSecurityConfig.setSaltPasswordVault(password);
+        saltSecurityConfigRepository.save(saltSecurityConfig);
     }
 }
