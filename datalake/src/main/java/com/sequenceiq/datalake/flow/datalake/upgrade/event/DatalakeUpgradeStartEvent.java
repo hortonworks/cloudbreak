@@ -14,6 +14,8 @@ public class DatalakeUpgradeStartEvent extends SdxEvent {
 
     private final boolean rollingUpgradeEnabled;
 
+    private final boolean keepVariant;
+
     @JsonCreator
     public DatalakeUpgradeStartEvent(
             @JsonProperty("selector") String selector,
@@ -21,11 +23,13 @@ public class DatalakeUpgradeStartEvent extends SdxEvent {
             @JsonProperty("userId") String userId,
             @JsonProperty("imageId") String imageId,
             @JsonProperty("replaceVms") boolean replaceVms,
-            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
+            @JsonProperty("keepVariant") boolean keepVariant) {
         super(selector, sdxId, userId);
         this.imageId = imageId;
         this.replaceVms = replaceVms;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
+        this.keepVariant = keepVariant;
     }
 
     public String getImageId() {
@@ -38,6 +42,10 @@ public class DatalakeUpgradeStartEvent extends SdxEvent {
 
     public boolean isRollingUpgradeEnabled() {
         return rollingUpgradeEnabled;
+    }
+
+    public boolean isKeepVariant() {
+        return keepVariant;
     }
 
     @Override

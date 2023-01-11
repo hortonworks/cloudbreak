@@ -14,6 +14,10 @@ public class TestConstants {
 
     public static final String ENV_NAME = "someAwesomeEnv";
 
+    public static final boolean DISABLE_VARIANT_CHANGE = true;
+
+    public static final boolean DO_NOT_KEEP_VARIANT = !DISABLE_VARIANT_CHANGE;
+
     private TestConstants() {
     }
 

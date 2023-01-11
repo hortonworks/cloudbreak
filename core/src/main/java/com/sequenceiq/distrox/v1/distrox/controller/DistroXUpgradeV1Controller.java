@@ -130,8 +130,8 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     @Override
     @InternalOnly
     public DistroXUpgradeV1Response upgradeClusterByCrnInternal(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB)
-        @ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
-        @InitiatorUserCrn String initiatorUserCrn, Boolean rollingUpgradeEnabled) {
+        @ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest, @InitiatorUserCrn String initiatorUserCrn,
+            Boolean rollingUpgradeEnabled) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
         InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(true,
                 upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn),
@@ -187,6 +187,6 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     private void validateClusterName(String clusterName) {
         stackService.checkLiveStackExistenceByName(clusterName, restRequestThreadLocalService.getAccountId(), StackType.WORKLOAD);
-
     }
+
 }

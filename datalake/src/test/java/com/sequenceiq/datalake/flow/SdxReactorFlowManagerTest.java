@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
@@ -105,7 +106,7 @@ class SdxReactorFlowManagerTest {
         when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any(), eq(true))).thenReturn(true);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
         verify(reactor, times(1)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
@@ -115,13 +116,13 @@ class SdxReactorFlowManagerTest {
         when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any(), eq(true))).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
 
         when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any(), eq(true))).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
@@ -132,7 +133,7 @@ class SdxReactorFlowManagerTest {
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
@@ -144,7 +145,7 @@ class SdxReactorFlowManagerTest {
         when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_EVENT.event()), any(Event.class));
     }
 
@@ -155,7 +156,7 @@ class SdxReactorFlowManagerTest {
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, true,
-                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_EVENT.event()), any(Event.class));
     }
 

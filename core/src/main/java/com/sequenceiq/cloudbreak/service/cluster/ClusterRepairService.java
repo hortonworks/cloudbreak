@@ -133,7 +133,7 @@ public class ClusterRepairService {
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
-    public FlowIdentifier repairAll(StackView stackView, boolean upgrade) {
+    public FlowIdentifier repairAll(StackView stackView, boolean upgrade, boolean keepVariant) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.ALL, stackView.getId(), Set.of(), false);
         Set<String> repairableHostGroups;
@@ -147,7 +147,7 @@ public class ClusterRepairService {
             repairableHostGroups = Set.of();
         }
         String userCrn = restRequestThreadLocalService.getUserCrn();
-        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stackView, userCrn);
+        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stackView, userCrn, keepVariant);
         return triggerRepairOrThrowBadRequest(stackView.getId(), repairStart, true, false, repairableHostGroups, upgradeVariant, upgrade);
     }
 

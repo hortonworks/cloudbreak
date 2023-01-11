@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.dto.DistroXUpgradeDto;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -125,30 +126,31 @@ public class DistroXUpgradeService {
         boolean lockComponents = determineLockComponentsParam(request, targetImage, stack);
         ImageChangeDto imageChangeDto = createImageChangeDto(cluster, workspaceId, targetImage);
         return upgradePreparation ?
-                initUpgradePreparation(imageChangeDto, targetImage, upgradeV4Response.getUpgradeCandidates(), lockComponents, stack.getStack()) :
-                initUpgrade(upgradeV4Response, imageChangeDto, userCrn, targetImage, lockComponents, stack.getStack(),
-                        request.getInternalUpgradeSettings().isRollingUpgradeEnabled());
+                initUpgradePreparation(new DistroXUpgradeDto(upgradeV4Response, imageChangeDto, targetImage, lockComponents, stack),
+                        upgradeV4Response.getUpgradeCandidates()) :
+                initUpgrade(new DistroXUpgradeDto(upgradeV4Response, imageChangeDto, targetImage, lockComponents, stack), userCrn,
+                        request.getInternalUpgradeSettings().isRollingUpgradeEnabled(), request.isKeepVariant());
     }
 
-    private UpgradeV4Response initUpgrade(UpgradeV4Response upgradeV4Response, ImageChangeDto imageChangeDto, String userCrn,
-        ImageInfoV4Response targetImage, boolean lockComponents, StackView stack, boolean enableRollingUpgrade) {
-        boolean replaceVms = determineReplaceVmsParam(upgradeV4Response, lockComponents, stack);
+    private UpgradeV4Response initUpgrade(DistroXUpgradeDto upgradeDto, String userCrn, boolean enableRollingUpgrade, boolean keepVariant) {
+        boolean replaceVms = determineReplaceVmsParam(upgradeDto.getUpgradeV4Response(), upgradeDto.isLockComponents(), upgradeDto.getStackDto().getStack());
         LOGGER.debug("Initializing cluster upgrade. Target image: {}, lockComponents: {}, replaceVms: {}, enableRollingUpgrade: {}",
-                targetImage.getImageId(), lockComponents, replaceVms, enableRollingUpgrade);
-        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stack, userCrn);
-        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stack.getId(), imageChangeDto, replaceVms, lockComponents, upgradeVariant,
-                enableRollingUpgrade);
-        return new UpgradeV4Response("Upgrade started with Image: " + targetImage.getImageId(), flowIdentifier, replaceVms);
+                upgradeDto.getImageChangeDto().getImageId(), upgradeDto.isLockComponents(), replaceVms, enableRollingUpgrade);
+        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(upgradeDto.getStackDto().getStack(), userCrn, keepVariant);
+        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(upgradeDto.getStackDto().getStack().getId(), upgradeDto.getImageChangeDto(),
+                replaceVms, upgradeDto.isLockComponents(), upgradeVariant, enableRollingUpgrade);
+        return new UpgradeV4Response("Upgrade started with Image: " + upgradeDto.getImageChangeDto().getImageId(), flowIdentifier, replaceVms);
     }
 
-    private UpgradeV4Response initUpgradePreparation(ImageChangeDto imageChangeDto, ImageInfoV4Response targetImage,
-        List<ImageInfoV4Response> upgradeCandidates, boolean lockComponents, StackView stack) {
-        LOGGER.debug("Initializing cluster upgrade preparation. Target image: {}, lockComponents: {}", targetImage.getImageId(), lockComponents);
-        if (lockComponents) {
-            return new UpgradeV4Response(targetImage, upgradeCandidates, "Upgrade preparation is not necessary in case of OS upgrade.");
+    private UpgradeV4Response initUpgradePreparation(DistroXUpgradeDto upgradeDto, List<ImageInfoV4Response> upgradeCandidates) {
+        LOGGER.debug("Initializing cluster upgrade preparation. Target image: {}, lockComponents: {}", upgradeDto.getTargetImage().getImageId(),
+                upgradeDto.isLockComponents());
+        if (upgradeDto.isLockComponents()) {
+            return new UpgradeV4Response(upgradeDto.getTargetImage(), upgradeCandidates, "Upgrade preparation is not necessary in case of OS upgrade.");
         } else {
-            FlowIdentifier flowIdentifier = reactorFlowManager.triggerClusterUpgradePreparation(stack.getId(), imageChangeDto, lockComponents);
-            return new UpgradeV4Response("Upgrade preparation started with Image: " + targetImage.getImageId(), flowIdentifier, false);
+            FlowIdentifier flowIdentifier = reactorFlowManager.triggerClusterUpgradePreparation(upgradeDto.getStackDto().getId(),
+                    upgradeDto.getImageChangeDto(), upgradeDto.isLockComponents());
+            return new UpgradeV4Response("Upgrade preparation started with Image: " + upgradeDto.getTargetImage().getImageId(), flowIdentifier, false);
         }
     }
 

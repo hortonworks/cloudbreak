@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.util.TestConstants.DISABLE_VARIANT_CHANGE;
+import static com.sequenceiq.cloudbreak.util.TestConstants.DO_NOT_KEEP_VARIANT;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
@@ -9,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
@@ -40,6 +44,7 @@ public class StackUpgradeServiceTest {
     private Stack stack;
 
     @BeforeEach
+    @MockitoSettings(strictness = Strictness.LENIENT)
     public void setup() {
         stack = new Stack();
         stack.setId(STACK_ID);
@@ -54,7 +59,7 @@ public class StackUpgradeServiceTest {
     public void testCalculateUpgradeVariantWhenMigrationDisabled() {
         stack.setPlatformVariant("AWS");
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
-        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN);
+        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
         Assertions.assertEquals("AWS", actual);
     }
 
@@ -62,15 +67,21 @@ public class StackUpgradeServiceTest {
     public void testCalculateUpgradeVariantWhenMigrationEnabledAndVariantIsAws() {
         stack.setPlatformVariant("AWS");
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
-        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN);
+        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
         Assertions.assertEquals("AWS_NATIVE", actual);
+    }
+
+    @Test
+    public void testCalculateUpgradeVariantWhenMigrationEnabledAndVariantIsAwsButVariantChangeIsUnWelcomed() {
+        stack.setPlatformVariant("AWS");
+        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DISABLE_VARIANT_CHANGE);
+        Assertions.assertEquals("AWS", actual);
     }
 
     @Test
     public void testCalculateUpgradeVariantWhenMigrationEnabledWhenVariantIsNotAWS() {
         stack.setPlatformVariant("GCP");
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
-        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN);
+        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
         Assertions.assertEquals("GCP", actual);
     }
 

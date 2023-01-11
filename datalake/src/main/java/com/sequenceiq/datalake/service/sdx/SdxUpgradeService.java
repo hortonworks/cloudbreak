@@ -133,14 +133,14 @@ public class SdxUpgradeService {
         }
     }
 
-    public void upgradeOs(Long id) {
+    public void upgradeOs(Long id, boolean keepVariant) {
         SdxCluster cluster = sdxService.getById(id);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", cluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> stackV4Endpoint.upgradeOsInternal(0L, cluster.getClusterName(), initiatorUserCrn));
+                    () -> stackV4Endpoint.upgradeOsInternal(0L, cluster.getClusterName(), initiatorUserCrn, keepVariant));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
