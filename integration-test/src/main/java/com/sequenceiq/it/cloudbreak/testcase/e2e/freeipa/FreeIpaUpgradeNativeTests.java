@@ -24,7 +24,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
-import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -33,18 +32,11 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
 
     protected static final Status FREEIPA_AVAILABLE = Status.AVAILABLE;
 
-    private static final long FIVE_MINUTES_IN_SEC = 5L * 60;
-
-    private static final String CHECK_DNS_LOOKUPS_CMD = "ping -c 2 %s | grep -q '%s'";
-
     @Inject
     private SdxTestClient sdxTestClient;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
-
-    @Inject
-    private SshJClientActions sshJClientActions;
 
     @Inject
     private AwsCloudFunctionality cloudFunctionality;
@@ -59,32 +51,24 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
             then = "migration happens into native")
     public void testSingleFreeIpaNativeUpgrade(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        sdxDatabaseRequest.setCreate(false);
-
-        NetworkRequest networkRequest = new NetworkRequest();
-        AwsNetworkParameters params = new AwsNetworkParameters();
-        networkRequest.setAws(params);
-        params.setVpcId(awsCloudProvider.getVpcId());
-
+        String subnet = awsCloudProvider.getSubnetId();
 
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
                 .withReportClusterLogs();
         FreeIpaTestDto freeipa = testContext.given(freeIpa, FreeIpaTestDto.class)
-                .withNetwork(networkRequest)
+                .withNetwork(getNetworkRequest())
                 .withTelemetry("telemetry")
                 .withVariant("AWS")
                 .withUpgradeCatalogAndImage();
-        freeipa.getRequest().getInstanceGroups().stream().forEach(igr -> igr.getNetwork().getAws().setSubnetIds(List.of()));
+        freeipa.getRequest().getInstanceGroups().stream().forEach(igr -> igr.getNetwork().getAws().setSubnetIds(List.of(subnet)));
         freeipa.when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
-                .then(freeIpaCloudFromationStackDoesExist())
+                .then(freeIpaCloudFormationStackDoesExist())
                 .given(SdxTestDto.class)
                 .withCloudStorage()
-                .withExternalDatabase(sdxDatabaseRequest)
+                .withExternalDatabase(getDatabaseRequest())
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(freeIpa, FreeIpaTestDto.class)
@@ -94,7 +78,26 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
                 .validate();
     }
 
-    private Assertion<FreeIpaTestDto, FreeIpaClient> freeIpaCloudFromationStackDoesExist() {
+    private SdxDatabaseRequest getDatabaseRequest() {
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        sdxDatabaseRequest.setCreate(false);
+
+        return sdxDatabaseRequest;
+    }
+
+    private NetworkRequest getNetworkRequest() {
+        NetworkRequest networkRequest = new NetworkRequest();
+        AwsNetworkParameters params = new AwsNetworkParameters();
+        networkRequest.setAws(params);
+        params.setVpcId(awsCloudProvider.getVpcId());
+        String subnet = awsCloudProvider.getSubnetId();
+        params.setSubnetId(subnet);
+
+        return networkRequest;
+    }
+
+    private Assertion<FreeIpaTestDto, FreeIpaClient> freeIpaCloudFormationStackDoesExist() {
         return isFreeIpaCloudFromationStackDoesExist(true);
     }
 
