@@ -35,7 +35,6 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -164,9 +163,9 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                     createBindUser(testContext, ipaClient, environmentCrn);
                     generateHostKeyTab(ipaClient, environmentCrn);
                     generateServiceKeytab(ipaClient, environmentCrn);
-                    dnsLookups(testContext.given(SdxTestDto.class), testContext.getSdxClient());
+                    dnsLookups(testContext.given(SdxTestDto.class));
                     cleanUp(testContext, ipaClient, environmentCrn);
-                    kinit(testContext.given(SdxTestDto.class), testContext.getSdxClient(), ipaClient, environmentCrn);
+                    kinit(testContext.given(SdxTestDto.class), ipaClient, environmentCrn);
                     syncUsers(testContext, ipaClient, environmentCrn, accountId);
                 } catch (TestFailException e) {
                     if (firstTestFailure) {
@@ -312,6 +311,8 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
             cleanupRequest.setUsers(Set.of("kerberosbind-testuser", "ldapbind-testuser"));
             OperationStatus operationStatus = ipaClient.getFreeIpaV1Endpoint().cleanup(cleanupRequest);
             waitToCompleted(testContext, operationStatus.getOperationId(), "cleanupOperation");
+            String awaitExceptionKey = testContext.given("cleanupOperation", FreeIpaOperationStatusTestDto.class).getAwaitExceptionKey(COMPLETED);
+            testContext.getExceptionMap().remove(awaitExceptionKey);
         } catch (Exception e) {
             logger.error("CLEANUP test failed during upgrade", e);
 //            throw new TestFailException("CLEANUP test failed during upgrade with: " + e.getMessage(), e);
@@ -325,7 +326,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 .await(COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE).withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(FIVE_MINUTES_IN_SEC)));
     }
 
-    private void kinit(SdxTestDto sdxTestDto, SdxClient sdxClient, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn) {
+    private void kinit(SdxTestDto sdxTestDto, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn) {
         try {
             SyncOperationStatus lastSyncOperationStatus = ipaClient.getUserV1Endpoint().getLastSyncOperationStatus(environmentCrn);
             if (lastSyncOperationStatus.getStatus() == SynchronizationStatus.COMPLETED) {
@@ -342,7 +343,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
         }
     }
 
-    private void dnsLookups(SdxTestDto sdxTestDto, SdxClient sdxClient) {
+    private void dnsLookups(SdxTestDto sdxTestDto) {
         InstanceMetaDataV4Response instanceGroupMetadata = sdxTestDto.getResponse().getStackV4Response().getInstanceGroups().stream()
                 .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
                 .filter(metadata -> metadata.getInstanceGroup().equals("idbroker"))
