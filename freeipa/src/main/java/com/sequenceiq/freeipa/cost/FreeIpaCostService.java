@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.cost;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -42,47 +41,28 @@ public class FreeIpaCostService {
     @Inject
     private Map<CloudPlatform, PricingCache> pricingCacheMap;
 
-    private boolean usdCalculationEnabled;
-
     public Map<String, RealTimeCost> getCosts(List<String> environmentCrns) {
-        checkIfCostCalculationIsEnabled();
         errorIfCostCalculationFeatureIsNotEnabled();
         Map<String, RealTimeCost> realTimeCosts = new HashMap<>();
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
 
-        List<Stack> stacks = stackService.getMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(environmentCrns, accountId)
-                .stream()
-                .filter(stack -> pricingCacheMap.containsKey(CloudPlatform.valueOf(stack.getCloudPlatform())))
-                .collect(Collectors.toList());
+        List<Stack> stacks = stackService.getByEnvironmentCrnsAndCloudPlatforms(environmentCrns, pricingCacheMap.keySet());
         for (Stack stack : stacks) {
             ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypes(stack);
             RealTimeCost realTimeCost = new RealTimeCost();
             realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
             realTimeCost.setType("FREEIPA");
             realTimeCost.setResourceName(stack.getResourceName());
-
-            if (usdCalculationEnabled) {
-                realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost));
-                realTimeCost.setHourlyClouderaUsd(usdCalculatorService.calculateClouderaCost(clusterCost, realTimeCost.getType()));
-            }
-
+            realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost));
+            realTimeCost.setHourlyClouderaUsd(usdCalculatorService.calculateClouderaCost(clusterCost, realTimeCost.getType()));
             realTimeCosts.put(stack.getResourceCrn(), realTimeCost);
         }
 
         return realTimeCosts;
     }
 
-    private void checkIfCostCalculationIsEnabled() {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        usdCalculationEnabled = entitlementService.isUsdCostCalculationEnabled(accountId);
-
-        if (!usdCalculationEnabled) {
-            LOGGER.info("USD cost calculation feature is disabled!");
-        }
-    }
-
     private void errorIfCostCalculationFeatureIsNotEnabled() {
-        if (!usdCalculationEnabled) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        if (!entitlementService.isUsdCostCalculationEnabled(accountId)) {
             throw new CostCalculationNotEnabledException("Cost calculation features are not enabled!");
         }
     }

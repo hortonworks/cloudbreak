@@ -23,6 +23,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_VERTICAL_SCALE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
@@ -608,6 +609,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.azure.certificate.auth.enable}")
     private boolean azureCertificateAuth;
 
+    @Value("${auth.mock.cost.calculation.enable}")
+    private boolean costCalculationEnabled;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -1104,6 +1108,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (azureCertificateAuth) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_CERTIFICATE_AUTH));
+        }
+        if (costCalculationEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_COST_CALCULATION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

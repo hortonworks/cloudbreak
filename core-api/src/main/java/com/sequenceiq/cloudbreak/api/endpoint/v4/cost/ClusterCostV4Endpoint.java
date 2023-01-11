@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.cost;
 
-import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.ENVIRONMENT_NOTES;
-
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -11,9 +9,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cost.requests.ClusterCostV4Request;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCostResponse;
+import com.sequenceiq.cloudbreak.doc.Notes;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
-import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,6 +29,14 @@ public interface ClusterCostV4Endpoint {
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "listDistroXCostV1")
+    @ApiOperation(value = OperationDescriptions.CostOpDescription.LIST, produces = MediaType.APPLICATION_JSON,
+            notes = Notes.CLUSTER_COST_NOTES, nickname = "listClusterCostV4")
     RealTimeCostResponse list(List<String> clusterCrns, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("environment")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.CostOpDescription.LIST_BY_ENV, produces = MediaType.APPLICATION_JSON,
+            notes = Notes.CLUSTER_COST_NOTES, nickname = "listClusterCostByEnvV4")
+    RealTimeCostResponse listByEnv(ClusterCostV4Request clusterCostV4Request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

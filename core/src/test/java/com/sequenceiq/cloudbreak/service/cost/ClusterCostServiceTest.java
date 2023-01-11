@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cost;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -50,15 +51,16 @@ public class ClusterCostServiceTest {
 
     @Test
     void getCosts() {
-        when(pricingCacheMap.containsKey(any())).thenReturn(Boolean.TRUE);
+        lenient().when(pricingCacheMap.containsKey(any())).thenReturn(Boolean.TRUE);
         when(entitlementService.isUsdCostCalculationEnabled(any())).thenReturn(true);
-        when(stackDtoService.findNotTerminatedByCrns(any())).thenReturn(List.of(getStack()));
+        when(stackDtoService.findNotTerminatedByResourceCrnsAndCloudPlatforms(any(), any())).thenReturn(List.of(getStack()));
+        when(stackDtoService.findNotTerminatedByEnvironmentCrnsAndCloudPlatforms(any(), any())).thenReturn(List.of(getStack()));
         when(usdCalculatorService.calculateProviderCost(any())).thenReturn(0.5);
         when(usdCalculatorService.calculateClouderaCost(any(), any())).thenReturn(0.5);
         when(instanceTypeCollectorService.getAllInstanceTypes(any())).thenReturn(new ClusterCostDto());
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
-            Map<String, RealTimeCost> costs = underTest.getCosts(List.of("RESOURCE_CRN"));
+            Map<String, RealTimeCost> costs = underTest.getCosts(List.of("RESOURCE_CRN"), List.of("ENV_CRN"));
 
             Assertions.assertEquals(1, costs.size());
             RealTimeCost realTimeCost = costs.get("RESOURCE_CRN");

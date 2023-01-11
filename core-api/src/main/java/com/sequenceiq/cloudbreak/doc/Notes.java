@@ -92,6 +92,8 @@ public class Notes {
     public static final String FLOW_OPERATION_PROGRESS_NOTES = "Flow operation progress";
     public static final String DATAHUB_AUDIT_EVENTS = "Data Hub audit events";
 
+    public static final String CLUSTER_COST_NOTES = "Costs of clusters";
+
     private Notes() {
     }
 }

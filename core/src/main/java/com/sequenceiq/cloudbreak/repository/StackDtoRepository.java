@@ -136,6 +136,30 @@ public interface StackDtoRepository extends Repository<Stack, Long> {
     List<StackViewDelegate> findAllByResourceCrnIn(@Param("resourceCrns") Collection<String> resourceCrns);
 
     @Query(BASE_QUERY
+            + "WHERE s.resourceCrn in :resourceCrns "
+            + "AND s.terminated IS null"
+    )
+    List<StackViewDelegate> findNotTerminatedByResourceCrnIn(@Param("resourceCrns") Collection<String> resourceCrns);
+
+    @Query(BASE_QUERY
+            + "WHERE s.environmentCrn in :environmentCrns "
+            + "AND s.cloudPlatform in :cloudPlatforms "
+            + "AND s.terminated IS null"
+    )
+    List<StackViewDelegate> findNotTerminatedByEnvironmentCrnsAndCloudPlatforms(
+            @Param("environmentCrns") Collection<String> environmentCrns,
+            @Param("cloudPlatforms") Collection<String> cloudPlatforms);
+
+    @Query(BASE_QUERY
+            + "WHERE s.resourceCrn in :resourceCrns "
+            + "AND s.cloudPlatform in :cloudPlatforms "
+            + "AND s.terminated IS null"
+    )
+    List<StackViewDelegate> findNotTerminatedByResourceCrnsAndCloudPlatforms(
+            @Param("resourceCrns") Collection<String> resourceCrns,
+            @Param("cloudPlatforms") Collection<String> cloudPlatforms);
+
+    @Query(BASE_QUERY
             + "WHERE s.resourceCrn = :resourceCrn "
     )
     Optional<StackViewDelegate> findByResourceCrn(@Param("resourceCrn") String resourceCrn);

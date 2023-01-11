@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.cost.ClusterCostV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cost.requests.ClusterCostV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -54,11 +55,12 @@ public class EnvironmentCostService {
                     () -> freeIpaCostV1Endpoint.list(environmentCrns, initiatorUserCrn));
             totalCosts.putAll(freeipaCostResponse.getCost());
         }
-        if (CollectionUtils.isNotEmpty(clusterCrns)) {
-            RealTimeCostResponse clusterCostResponse = ThreadBasedUserCrnProvider.doAsInternalActor(internalCrn,
-                    () -> clusterCostV4Endpoint.list(clusterCrns, initiatorUserCrn));
-            totalCosts.putAll(clusterCostResponse.getCost());
-        }
+        ClusterCostV4Request request = new ClusterCostV4Request();
+        request.setEnvironmentCrns(environmentCrns);
+        request.setClusterCrns(clusterCrns);
+        RealTimeCostResponse clusterCostResponse = ThreadBasedUserCrnProvider.doAsInternalActor(internalCrn,
+                () -> clusterCostV4Endpoint.listByEnv(request, initiatorUserCrn));
+        totalCosts.putAll(clusterCostResponse.getCost());
 
         LOGGER.debug("Total Costs: {}", totalCosts);
         for (Map.Entry<String, RealTimeCost> costEntry : totalCosts.entrySet()) {
