@@ -115,6 +115,8 @@ public class ModelDescriptions {
 
     public static final String REPLACE_VMS = "Option to replace virtual machines  during the upgrade.";
 
+    public static final String KEEP_VARIANT = "Value which indicates that the internal cloud platform variant should not be changed during the operation.";
+
     public static final String LOAD_BALANCER_SKU = "Load balancer SKU type.";
 
     public static final String CURRENT_IMAGE = "Information about the image that the Data Lake cluster is using currently.";

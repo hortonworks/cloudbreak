@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.util.TestConstants.DO_NOT_KEEP_VARIANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -183,7 +184,7 @@ class DistroXUpgradeServiceTest {
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture()))
                 .thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
-        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN)).thenReturn("variant");
+        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
@@ -216,7 +217,7 @@ class DistroXUpgradeServiceTest {
                 .thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
-        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN)).thenReturn("variant");
+        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(), eq(false)))
                 .thenReturn(flowIdentifier);
@@ -250,7 +251,7 @@ class DistroXUpgradeServiceTest {
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
-        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN)).thenReturn("variant");
+        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
                 eq(ROLLING_UPGRADE_ENABLED))).thenReturn(flowIdentifier);
@@ -279,7 +280,7 @@ class DistroXUpgradeServiceTest {
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
-        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN)).thenReturn("variant");
+        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), anyBoolean(), anyString(), eq(false)))
@@ -326,7 +327,7 @@ class DistroXUpgradeServiceTest {
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
         when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
-        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN)).thenReturn("variant");
+        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),

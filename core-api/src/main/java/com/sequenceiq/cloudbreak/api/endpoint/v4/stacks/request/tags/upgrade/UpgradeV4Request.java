@@ -40,6 +40,9 @@ public class UpgradeV4Request {
     @ApiModelProperty(hidden = true)
     private InternalUpgradeSettings internalUpgradeSettings;
 
+    @ApiModelProperty(UpgradeModelDescription.KEEP_VARIANT)
+    private boolean keepVariant;
+
     public String getImageId() {
         return imageId;
     }
@@ -108,6 +111,14 @@ public class UpgradeV4Request {
         this.skipDataHubValidation = skipDataHubValidation;
     }
 
+    public void setKeepVariant(Boolean keepVariant) {
+        this.keepVariant = Boolean.TRUE.equals(keepVariant);
+    }
+
+    public boolean isKeepVariant() {
+        return keepVariant;
+    }
+
     public boolean isEmpty() {
         return isUnspecifiedUpgradeType() &&
                 !Boolean.TRUE.equals(dryRun) &&
@@ -148,6 +159,8 @@ public class UpgradeV4Request {
                 .add("skipDataHubValidation=" + skipDataHubValidation)
                 .add("showAvailableImages=" + showAvailableImages)
                 .add("internalUpgradeSettings=" + internalUpgradeSettings)
+                .add("keepVariant=" + keepVariant)
                 .toString();
     }
+
 }

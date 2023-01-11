@@ -51,6 +51,9 @@ public class SdxUpgradeRequest {
     @ApiModelProperty(ModelDescriptions.REPLACE_VMS)
     private SdxUpgradeReplaceVms replaceVms;
 
+    @ApiModelProperty(ModelDescriptions.KEEP_VARIANT)
+    private boolean keepVariant;
+
     public String getImageId() {
         return imageId;
     }
@@ -125,6 +128,14 @@ public class SdxUpgradeRequest {
 
     public void setReplaceVms(SdxUpgradeReplaceVms replaceVms) {
         this.replaceVms = replaceVms;
+    }
+
+    public boolean isKeepVariant() {
+        return keepVariant;
+    }
+
+    public void setKeepVariant(boolean keepVariant) {
+        this.keepVariant = keepVariant;
     }
 
     @ApiModelProperty(hidden = true)

@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox;
 
+import static com.sequenceiq.cloudbreak.util.TestConstants.DO_NOT_KEEP_VARIANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -112,8 +113,8 @@ class StackUpgradeOperationsTest {
 
     @Test
     void testUpgradeOsShouldCallUpgradeService() {
-        underTest.upgradeOs(nameOrCrn, ACCOUNT_ID);
-        verify(upgradeService).upgradeOs(ACCOUNT_ID, nameOrCrn);
+        underTest.upgradeOs(nameOrCrn, ACCOUNT_ID, DO_NOT_KEEP_VARIANT);
+        verify(upgradeService).upgradeOs(ACCOUNT_ID, nameOrCrn, DO_NOT_KEEP_VARIANT);
     }
 
     @Test

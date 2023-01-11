@@ -265,14 +265,14 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public FlowIdentifier upgradeOs(Long workspaceId, String name, @AccountId String accountId) {
-        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
+    public FlowIdentifier upgradeOs(Long workspaceId, String name, @AccountId String accountId, Boolean keepVariant) {
+        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), Boolean.TRUE.equals(keepVariant));
     }
 
     @Override
     @InternalOnly
-    public FlowIdentifier upgradeOsInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
+    public FlowIdentifier upgradeOsInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn, Boolean keepVariant) {
+        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), Boolean.TRUE.equals(keepVariant));
     }
 
     @Override

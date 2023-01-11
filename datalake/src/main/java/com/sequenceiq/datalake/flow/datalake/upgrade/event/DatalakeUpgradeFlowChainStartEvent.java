@@ -21,6 +21,9 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 
     private final boolean rollingUpgradeEnabled;
 
+    private final boolean keepVariant;
+
+    //CHECKSTYLE:OFF
     @JsonCreator
     public DatalakeUpgradeFlowChainStartEvent(
             @JsonProperty("selector") String selector,
@@ -30,14 +33,17 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
             @JsonProperty("replaceVms") boolean replaceVms,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions,
-            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
+            @JsonProperty("keepVariant") boolean keepVariant) {
         super(selector, sdxId, userId);
         this.imageId = imageId;
         this.replaceVms = replaceVms;
         this.backupLocation = backupLocation;
         this.skipOptions = skipOptions;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
+        this.keepVariant = keepVariant;
     }
+    //CHECKSTYLE:ON
 
     public String getImageId() {
         return imageId;
@@ -62,6 +68,10 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
     @Override
     public String selector() {
         return DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
+    }
+
+    public boolean isKeepVariant() {
+        return keepVariant;
     }
 
     @Override

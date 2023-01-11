@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -273,9 +274,9 @@ public class SdxRuntimeUpgradeServiceTest {
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false));
 
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
-                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED);
+                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
-                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED);
+                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
     }
 
@@ -302,7 +303,7 @@ public class SdxRuntimeUpgradeServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false));
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
-                skipOptions, ROLLING_UPGRADE_ENABLED);
+                skipOptions, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
     }
 
@@ -379,9 +380,9 @@ public class SdxRuntimeUpgradeServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false));
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
-                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED);
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
-                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED);
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
     }
 
@@ -426,9 +427,9 @@ public class SdxRuntimeUpgradeServiceTest {
 
 
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
-                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED);
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
-                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED);
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
     }
 
@@ -472,9 +473,9 @@ public class SdxRuntimeUpgradeServiceTest {
 
 
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
-                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED);
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
-                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED);
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
     }
 
@@ -517,9 +518,9 @@ public class SdxRuntimeUpgradeServiceTest {
         }
 
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
-                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED);
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
-                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED);
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
     }
 

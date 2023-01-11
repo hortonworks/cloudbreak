@@ -143,7 +143,8 @@ class DistroXUpgradeV1ControllerTest {
         when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, true, true))).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false)).thenReturn(upgradeV4Response);
+        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false))
+                .thenReturn(upgradeV4Response);
         when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest));
@@ -160,7 +161,8 @@ class DistroXUpgradeV1ControllerTest {
         when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, true, true))).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true)).thenReturn(upgradeV4Response);
+        when(upgradeService.triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true))
+                .thenReturn(upgradeV4Response);
         when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByName(CLUSTER_NAME, distroxUpgradeRequest));
@@ -178,7 +180,8 @@ class DistroXUpgradeV1ControllerTest {
         when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, true, true))).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true)).thenReturn(upgradeV4Response);
+        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true))
+                .thenReturn(upgradeV4Response);
         when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByCrn(CLUSTER_NAME, distroxUpgradeRequest));
@@ -197,7 +200,8 @@ class DistroXUpgradeV1ControllerTest {
         when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings)).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false)).thenReturn(upgradeV4Response);
+        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false))
+                .thenReturn(upgradeV4Response);
         when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest));
@@ -214,7 +218,8 @@ class DistroXUpgradeV1ControllerTest {
         InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(true, false, false, true);
         when(upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings)).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, INTERNAL_CRN, upgradeV4Request, false)).thenReturn(upgradeV4Response);
+        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, INTERNAL_CRN, upgradeV4Request, false))
+                .thenReturn(upgradeV4Response);
         when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
 
         ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> underTest.upgradeClusterByCrnInternal(CLUSTER_NAME, distroxUpgradeRequest, USER_CRN, true));

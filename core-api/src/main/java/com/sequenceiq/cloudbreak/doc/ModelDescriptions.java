@@ -826,6 +826,7 @@ public class ModelDescriptions {
         public static final String LOCK_COMPONENTS = "Upgrades to image with the same version of stack and clustermanager, if available";
         public static final String DRY_RUN = "Checks the eligibility of an image to upgrade";
         public static final String SHOW_AVAILABLE_IMAGES = "Returns the list of images that are eligible for the upgrade";
+        public static final String KEEP_VARIANT = "Value which indicates that the internal cloud platform variant should not be changed during the operation.";
         public static final String SKIP_DATAHUB_VALIDATION = "With this option, the Data Lake upgrade can be performed with running Data Hub clusters. " +
                 "The usage of this option can cause problems on the running Data Hub clusters during the Data Lake upgrade.";
     }

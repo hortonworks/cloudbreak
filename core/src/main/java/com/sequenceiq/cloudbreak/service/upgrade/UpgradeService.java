@@ -138,12 +138,12 @@ public class UpgradeService {
         }
     }
 
-    public FlowIdentifier upgradeOs(String accountId, NameOrCrn stackNameOrCrn) {
+    public FlowIdentifier upgradeOs(String accountId, NameOrCrn stackNameOrCrn, boolean keepVariant) {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(stackNameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         ClusterComponent clusterComponent = clusterBootstrapper.updateSaltComponent(stack);
         try {
-            FlowIdentifier flowIdentifier = clusterRepairService.repairAll(stack, true);
+            FlowIdentifier flowIdentifier = clusterRepairService.repairAll(stack, true, keepVariant);
             if (flowIdentifier != null && NOT_TRIGGERED == flowIdentifier.getType()) {
                 LOGGER.warn("Upgrade flow not triggered, reverting salt state upgrade");
                 clusterComponentConfigProvider.restorePreviousVersion(clusterComponent);

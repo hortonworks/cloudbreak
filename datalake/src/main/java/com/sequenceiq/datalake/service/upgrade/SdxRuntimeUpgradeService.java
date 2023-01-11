@@ -156,7 +156,7 @@ public class SdxRuntimeUpgradeService {
         boolean rollingUpgradeEnabled = request != null && Boolean.TRUE.equals(request.getRollingUpgradeEnabled());
         DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(skipAtlasMetadata, skipRangerAudits, skipRangerMetadata);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster, shouldReplaceVmsAfterUpgrade(request), skipBackup, skipOptions,
-                rollingUpgradeEnabled);
+                rollingUpgradeEnabled, request.isKeepVariant());
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), Collections.singletonList(imageId));
         return new SdxUpgradeResponse(message, flowIdentifier);
     }
@@ -200,8 +200,9 @@ public class SdxRuntimeUpgradeService {
     }
 
     private FlowIdentifier triggerDatalakeUpgradeFlow(String imageId, SdxCluster cluster, SdxUpgradeReplaceVms replaceVms,
-            boolean skipBackup, DatalakeDrSkipOptions skipOptions, boolean rollingUpgradeEnabled) {
-        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster, imageId, replaceVms, skipBackup, skipOptions, rollingUpgradeEnabled);
+            boolean skipBackup, DatalakeDrSkipOptions skipOptions, boolean rollingUpgradeEnabled, boolean keepVariant) {
+        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster, imageId, replaceVms, skipBackup, skipOptions, rollingUpgradeEnabled,
+                keepVariant);
     }
 
     private String determineImageId(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates) {

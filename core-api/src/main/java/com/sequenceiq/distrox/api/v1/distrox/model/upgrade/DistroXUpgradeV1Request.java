@@ -21,6 +21,8 @@ public class DistroXUpgradeV1Request {
 
     private DistroXUpgradeReplaceVms replaceVms;
 
+    private boolean disableVariantChange;
+
     public String getImageId() {
         return imageId;
     }
@@ -81,6 +83,14 @@ public class DistroXUpgradeV1Request {
         this.replaceVms = replaceVms;
     }
 
+    public void setDisableVariantChange(Boolean disableVariantChange) {
+        this.disableVariantChange = Boolean.TRUE.equals(disableVariantChange);
+    }
+
+    public boolean isVariantChangeDisabled() {
+        return disableVariantChange;
+    }
+
     @ApiModelProperty(hidden = true)
     public boolean isEmpty() {
         return isUnspecifiedUpgradeType() &&
@@ -119,6 +129,8 @@ public class DistroXUpgradeV1Request {
                 ", lockComponents=" + lockComponents +
                 ", dryRun=" + dryRun +
                 ", replaceVms=" + replaceVms +
+                ", disableVariantChange=" + disableVariantChange +
                 '}';
     }
+
 }

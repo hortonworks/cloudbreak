@@ -51,6 +51,8 @@ public class DatalakeUpgradeActions {
 
     private static final String REPLACE_VMS_AFTER_UPGRADE = "REPAIR_AFTER_UPGRADE";
 
+    private static final String KEEP_VARIANT = "KEEP_VARIANT";
+
     @Inject
     private SdxUpgradeService sdxUpgradeService;
 
@@ -71,6 +73,7 @@ public class DatalakeUpgradeActions {
                 super.prepareExecution(payload, variables);
                 variables.put(TARGET_IMAGE, payload.getImageId());
                 variables.put(REPLACE_VMS_AFTER_UPGRADE, payload.isReplaceVms());
+                variables.put(KEEP_VARIANT, payload.isKeepVariant());
             }
 
             @Override
@@ -174,7 +177,7 @@ public class DatalakeUpgradeActions {
             protected void doExecute(SdxContext context, DatalakeVmReplaceEvent payload, Map<Object, Object> variables) {
                 if ((boolean) variables.get(REPLACE_VMS_AFTER_UPGRADE)) {
                     LOGGER.info("Start Datalake upgrade vm replacement for {} ", payload.getResourceId());
-                    sdxUpgradeService.upgradeOs(payload.getResourceId());
+                    sdxUpgradeService.upgradeOs(payload.getResourceId(), Boolean.TRUE.equals(variables.get(KEEP_VARIANT)));
                     sendEvent(context, new SdxEvent(DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT.event(), context));
                 } else {
                     LOGGER.info("Vm replacement is not required for {} ", payload.getResourceId());

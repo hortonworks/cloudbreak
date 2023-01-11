@@ -316,7 +316,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = UPGRADE_CLUSTER_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_UPGRADE_NOTES,
             nickname = "upgradeOsInWorkspaceV4")
     FlowIdentifier upgradeOs(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @AccountId @QueryParam("accountId") String accountId);
+            @AccountId @QueryParam("accountId") String accountId, @QueryParam("keepVariant") Boolean keepVariant);
 
     @POST
     @Path("internal/{name}/upgrade")
@@ -324,7 +324,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = UPGRADE_CLUSTER_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_UPGRADE_NOTES,
             nickname = "upgradeOsInWorkspaceV4Internal")
     FlowIdentifier upgradeOsInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("keepVariant") Boolean keepVariant);
 
     @GET
     @Path("{name}/check_for_upgrade")

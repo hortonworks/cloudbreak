@@ -75,9 +75,9 @@ public class StackUpgradeOperations {
     @Inject
     private StackDtoService stackDtoService;
 
-    public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, String accountId) {
+    public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, String accountId, boolean keepVariant) {
         LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
-        return upgradeService.upgradeOs(accountId, nameOrCrn);
+        return upgradeService.upgradeOs(accountId, nameOrCrn, keepVariant);
     }
 
     public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId, Boolean rollingUpgradeEnabled) {
