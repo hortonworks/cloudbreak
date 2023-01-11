@@ -17,10 +17,6 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 @Component
 public class KuduVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
 
-    private static final String KUDU_FS_WAL_DIRS = "fs_wal_dir";
-
-    private static final String KUDU_FS_DATA_DIRS = "fs_data_dirs";
-
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
 
@@ -32,8 +28,8 @@ public class KuduVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
                 Integer walVolumeCount = hostGroupView.getVolumeCount() > 0 ? 1 : 0;
                 Integer dataDirVolumeIndex = hostGroupView.getVolumeCount() <= 1 ? 1 : 2;
                 return List.of(
-                        config(KUDU_FS_WAL_DIRS, buildVolumePathStringZeroVolumeHandled(walVolumeCount, directorySuffix)),
-                        config(KUDU_FS_DATA_DIRS,
+                        config(KuduConfigs.KUDU_FS_WAL_DIRS, buildVolumePathStringZeroVolumeHandled(walVolumeCount, directorySuffix)),
+                        config(KuduConfigs.KUDU_FS_DATA_DIRS,
                                 buildVolumePathFromVolumeIndexZeroVolumeHandled(dataDirVolumeIndex, hostGroupView.getVolumeCount(), directorySuffix))
                 );
             default:
