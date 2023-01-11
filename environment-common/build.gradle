@@ -15,5 +15,6 @@ dependencies {
     testImplementation project(":common-model")
     testImplementation project(":auth-connector")
 
-    testImplementation group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion
+    testImplementation group: "org.assertj",                   name: "assertj-core",                   version: assertjVersion
+    testImplementation group: "org.hamcrest",                  name: "hamcrest",                       version: hamcrestVersion
 }
