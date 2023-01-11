@@ -83,10 +83,12 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltBootSignPublicKey = saltBootSignPublicKey;
     }
 
+    @Deprecated
     public String getSaltPassword() {
         return saltPassword;
     }
 
+    @Deprecated
     public void setSaltPassword(String saltPassword) {
         this.saltPassword = saltPassword;
     }
@@ -115,10 +117,12 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltSignPublicKey = saltSignPublicKey;
     }
 
+    @Deprecated
     public String getSaltSignPrivateKey() {
         return saltSignPrivateKey;
     }
 
+    @Deprecated
     public void setSaltSignPrivateKey(String saltSignPrivateKey) {
         this.saltSignPrivateKey = saltSignPrivateKey;
     }
@@ -139,10 +143,12 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltSignPrivateKeyVault = saltSignPrivateKeyVault;
     }
 
+    @Deprecated
     public String getSaltBootPassword() {
         return saltBootPassword;
     }
 
+    @Deprecated
     public void setSaltBootPassword(String saltBootPassword) {
         this.saltBootPassword = saltBootPassword;
     }
@@ -163,10 +169,12 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltBootPasswordVault = new Secret(saltBootPasswordVault);
     }
 
+    @Deprecated
     public String getSaltBootSignPrivateKey() {
         return saltBootSignPrivateKey;
     }
 
+    @Deprecated
     public void setSaltBootSignPrivateKey(String saltBootSignPrivateKey) {
         this.saltBootSignPrivateKey = saltBootSignPrivateKey;
     }
