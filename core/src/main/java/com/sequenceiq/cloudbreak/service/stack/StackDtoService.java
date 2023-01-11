@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -312,6 +313,20 @@ public class StackDtoService {
 
     public List<StackView> findNotTerminatedByCrns(Collection<String> resourceCrns) {
         return new ArrayList<>(stackDtoRepository.findAllByResourceCrnIn(resourceCrns));
+    }
+
+    public List<StackView> findNotTerminatedByResourceCrns(Collection<String> resourceCrns) {
+        return new ArrayList<>(stackDtoRepository.findNotTerminatedByResourceCrnIn(resourceCrns));
+    }
+
+    public List<StackView> findNotTerminatedByResourceCrnsAndCloudPlatforms(Collection<String> resourceCrns, Collection<CloudPlatform> cloudPlatforms) {
+        return new ArrayList<>(stackDtoRepository.findNotTerminatedByResourceCrnsAndCloudPlatforms(resourceCrns,
+                cloudPlatforms.stream().map(CloudPlatform::name).collect(Collectors.toList())));
+    }
+
+    public List<StackView> findNotTerminatedByEnvironmentCrnsAndCloudPlatforms(Collection<String> environmentCrns, Collection<CloudPlatform> cloudPlatforms) {
+        return new ArrayList<>(stackDtoRepository.findNotTerminatedByEnvironmentCrnsAndCloudPlatforms(environmentCrns,
+                cloudPlatforms.stream().map(CloudPlatform::name).collect(Collectors.toList())));
     }
 
     public Optional<StackView> findNotTerminatedByCrn(String resourceCrn) {

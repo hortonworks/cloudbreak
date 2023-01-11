@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.cost;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -47,9 +48,9 @@ public class FreeIpaCostServiceTest {
 
     @Test
     void getCosts() {
-        when(pricingCacheMap.containsKey(any())).thenReturn(Boolean.TRUE);
+        lenient().when(pricingCacheMap.containsKey(any())).thenReturn(Boolean.TRUE);
         when(entitlementService.isUsdCostCalculationEnabled(any())).thenReturn(true);
-        when(stackService.getMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(any(), any())).thenReturn(List.of(getStack()));
+        when(stackService.getByEnvironmentCrnsAndCloudPlatforms(any(), any())).thenReturn(List.of(getStack()));
         when(usdCalculatorService.calculateProviderCost(any())).thenReturn(0.5);
         when(usdCalculatorService.calculateClouderaCost(any(), eq("FREEIPA"))).thenReturn(0.5);
         when(instanceTypeCollectorService.getAllInstanceTypes(any())).thenReturn(new ClusterCostDto());

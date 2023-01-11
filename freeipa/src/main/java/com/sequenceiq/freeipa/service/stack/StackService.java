@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.monitoring.MonitoringEnablementService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
@@ -149,6 +151,11 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
 
     public List<Stack> getMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(Collection<String> environmentCrns, String accountId) {
         return stackRepository.findMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(environmentCrns, accountId);
+    }
+
+    public List<Stack> getByEnvironmentCrnsAndCloudPlatforms(Collection<String> environmentCrns, Collection<CloudPlatform> cloudPlatforms) {
+        return stackRepository.getByEnvironmentCrnsAndCloudPlatforms(environmentCrns,
+                cloudPlatforms.stream().map(CloudPlatform::name).collect(Collectors.toList()));
     }
 
     public List<Stack> findAllByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {

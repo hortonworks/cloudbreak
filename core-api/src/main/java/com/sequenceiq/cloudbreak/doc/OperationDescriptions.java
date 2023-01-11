@@ -253,4 +253,10 @@ public class OperationDescriptions {
     public static class InfoOpDescription {
         public static final String INFO = "get info";
     }
+
+    public static class CostOpDescription {
+        public static final String LIST = "List costs based on cluster crns";
+
+        public static final String LIST_BY_ENV = "List costs based on cluster crns and environment crns";
+    }
 }

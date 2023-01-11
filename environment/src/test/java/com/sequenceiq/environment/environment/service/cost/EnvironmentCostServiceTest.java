@@ -47,7 +47,7 @@ public class EnvironmentCostServiceTest {
     @Test
     void getCosts() {
         when(entitlementService.isUsdCostCalculationEnabled(any())).thenReturn(true);
-        when(clusterCostV4Endpoint.list(any(), any())).thenReturn(getRealTimeCostResponseForClusters());
+        when(clusterCostV4Endpoint.listByEnv(any(), any())).thenReturn(getRealTimeCostResponseForClusters());
         when(freeIpaCostV1Endpoint.list(any(), any())).thenReturn(getRealTimeCostResponseForFreeipa());
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:iam:us-west-1:1234:user:1");

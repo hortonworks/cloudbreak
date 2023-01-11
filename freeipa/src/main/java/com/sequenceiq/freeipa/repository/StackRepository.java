@@ -93,6 +93,14 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
             @Param("environmentCrns") Collection<String> environmentCrns,
             @Param("accountId") String accountId);
 
+    @Query("SELECT DISTINCT s FROM Stack s "
+            + "LEFT JOIN FETCH s.instanceGroups ig "
+            + "LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE s.cloudPlatform IN :cloudPlatforms AND s.environmentCrn IN :environmentCrns AND s.terminated = -1")
+    List<Stack> getByEnvironmentCrnsAndCloudPlatforms(
+            @Param("environmentCrns") Collection<String> environmentCrns,
+            @Param("cloudPlatforms") Collection<String> cloudPlatforms);
+
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
     List<Stack> findAllByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
