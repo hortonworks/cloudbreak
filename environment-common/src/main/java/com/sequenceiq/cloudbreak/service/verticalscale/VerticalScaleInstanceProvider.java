@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
@@ -19,31 +21,58 @@ import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 @Service
 public class VerticalScaleInstanceProvider {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(VerticalScaleInstanceProvider.class);
+
     @Inject
     private MinimalHardwareFilter minimalHardwareFilter;
 
     public CloudVmTypes listInstanceTypes(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
-        String availabilityZoneForSelection = getAvailabilityZone(availabilityZone, allVmTypes);
-        Optional<VmType> currentInstance = getInstance(availabilityZoneForSelection, currentInstanceType, allVmTypes);
-        Set<VmType> collect = allVmTypes.getCloudVmResponses().get(availabilityZoneForSelection)
+        Map<String, Set<VmType>> cloudVmResponses = allVmTypes.getCloudVmResponses();
+        LOGGER.debug("cloudVmResponses: {}", cloudVmResponses);
+        if (cloudVmResponses.isEmpty()) {
+            LOGGER.warn("Empty cloudVmResponses.");
+            return new CloudVmTypes(Map.of(), Map.of());
+        }
+
+        String availabilityZoneForSelection = getAvailabilityZone(availabilityZone, cloudVmResponses);
+        LOGGER.debug("availabilityZoneForSelection: {}", availabilityZoneForSelection);
+        Set<VmType> vmTypes = cloudVmResponses.get(availabilityZoneForSelection);
+        if (vmTypes == null) {
+            LOGGER.warn("Invalid availabilityZoneForSelection; no corresponding key found in cloudVmResponses.");
+            return new CloudVmTypes(Map.of(availabilityZoneForSelection, Set.of()), Map.of());
+        }
+
+        Optional<VmType> currentInstance = getInstance(currentInstanceType, vmTypes);
+        LOGGER.debug("currentInstance: {}", currentInstance);
+        Set<VmType> suitableInstances = vmTypes
                 .stream()
                 .filter(e -> {
                     try {
                         validInstanceTypeForVerticalScaling(currentInstance, Optional.of(e));
                         return true;
                     } catch (BadRequestException ex) {
+                        LOGGER.debug("Validation error: {}", ex.getMessage());
                         return false;
                     }
                 })
                 .collect(Collectors.toSet());
-        CloudVmTypes cloudVmTypes  = new CloudVmTypes(
-                Map.of(availabilityZoneForSelection, collect),
-                Map.of(availabilityZoneForSelection, collect.stream().findFirst().get())
+        LOGGER.debug("suitableInstances: {}", suitableInstances);
+        if (suitableInstances.isEmpty()) {
+            LOGGER.warn("Empty suitableInstances.");
+            return new CloudVmTypes(Map.of(availabilityZoneForSelection, Set.of()), Map.of());
+        }
+
+        return new CloudVmTypes(
+                Map.of(availabilityZoneForSelection, suitableInstances),
+                Map.of(availabilityZoneForSelection, suitableInstances.stream().findFirst().get())
         );
-        return cloudVmTypes;
     }
 
     public void validInstanceTypeForVerticalScaling(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional) {
+        if (currentInstanceTypeOptional.isEmpty()) {
+            throw new BadRequestException("The current instancetype does not exist on provider side.");
+        }
+
         if (requestedInstanceTypeOptional.isPresent()) {
             VmType currentInstanceType = currentInstanceTypeOptional.get();
             VmType requestedInstanceType = requestedInstanceTypeOptional.get();
@@ -59,8 +88,7 @@ public class VerticalScaleInstanceProvider {
             validateAutoAttached(currentInstanceTypeName, requestedInstanceTypeName,
                     currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
         } else {
-            throw new BadRequestException(String.format(
-                    "The requested instancetype does not exist on provider side."));
+            throw new BadRequestException("The requested instancetype does not exist on provider side.");
         }
     }
 
@@ -89,19 +117,19 @@ public class VerticalScaleInstanceProvider {
         if (currentVolumeParameterConfig != null) {
             if (requestedVolumeParameterConfig == null) {
                 throw new BadRequestException(String.format(
-                        "The current instancetype %s has more %s Disk then the requested %s.",
+                        "The current instancetype %s has more %s Disk than the requested %s.",
                         currentInstanceTypeName, type, requestedInstanceTypeName));
             }
             if (currentVolumeParameterConfig.maximumNumber()
                     > requestedVolumeParameterConfig.maximumNumber()) {
                 throw new BadRequestException(String.format(
-                        "The current instancetype %s has more %s Disk then the requested %s.",
+                        "The current instancetype %s has more %s Disk than the requested %s.",
                         currentInstanceTypeName, type, requestedInstanceTypeName));
             }
             if (currentVolumeParameterConfig.minimumNumber()
                     > requestedVolumeParameterConfig.minimumNumber()) {
                 throw new BadRequestException(String.format(
-                        "The current instancetype %s has more %s Disk then the requested %s.",
+                        "The current instancetype %s has more %s Disk than the requested %s.",
                         currentInstanceTypeName, type, requestedInstanceTypeName));
             }
         }
@@ -110,7 +138,7 @@ public class VerticalScaleInstanceProvider {
     private void validateMemory(String requestedInstanceTypeName, VmTypeMeta requestedInstanceTypeMetaData) {
         if (!minimalHardwareFilter.suitableAsMinimumHardwareForMemory(requestedInstanceTypeMetaData.getMemoryInGb())) {
             throw new BadRequestException(String.format(
-                    "The requested instancetype %s has less Memory then the minimum %s GB.",
+                    "The requested instancetype %s has less Memory than the minimum %s GB.",
                     requestedInstanceTypeName, minimalHardwareFilter.minMemory()));
         }
     }
@@ -118,21 +146,22 @@ public class VerticalScaleInstanceProvider {
     private void validateCPU(String requestedInstanceTypeName, VmTypeMeta requestedInstanceTypeMetaData) {
         if (!minimalHardwareFilter.suitableAsMinimumHardwareForCpu(requestedInstanceTypeMetaData.getCPU())) {
             throw new BadRequestException(String.format(
-                    "The requested instancetype %s has less Cpu then the minimum %s core.",
+                    "The requested instancetype %s has less Cpu than the minimum %s core.",
                     requestedInstanceTypeName, minimalHardwareFilter.minCpu()));
         }
     }
 
-    private Optional<VmType> getInstance(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
-        return allVmTypes.getCloudVmResponses().get(availabilityZone)
+    private Optional<VmType> getInstance(String currentInstanceType, Set<VmType> vmTypes) {
+        return vmTypes
                 .stream()
                 .filter(e -> e.getValue().equals(currentInstanceType))
                 .findFirst();
     }
 
-    private String getAvailabilityZone(String availabilityZone, CloudVmTypes allVmTypes) {
+    private String getAvailabilityZone(String availabilityZone, Map<String, Set<VmType>> cloudVmResponses) {
         availabilityZone = availabilityZone == null || availabilityZone.isEmpty() || availabilityZone.isBlank() ?
-                allVmTypes.getCloudVmResponses().keySet().stream().findFirst().get() : availabilityZone;
+                cloudVmResponses.keySet().stream().findFirst().get() : availabilityZone;
         return availabilityZone;
     }
+
 }
