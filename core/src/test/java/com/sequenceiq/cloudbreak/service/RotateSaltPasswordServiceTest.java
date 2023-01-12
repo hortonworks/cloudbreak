@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,15 +25,16 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.SaltBootstrapVersionChecker;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -43,7 +45,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.quartz.saltstatuschecker.SaltStatusCheckerConfig;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
@@ -57,6 +58,10 @@ class RotateSaltPasswordServiceTest {
     private static final String ACCOUNT_ID = "0";
 
     private static final String OLD_PASSWORD = "old-password";
+
+    private static final String NEW_PASSWORD = "new-password";
+
+    private static final String FQDN = "fqdn";
 
     @Mock
     private UsageReporter usageReporter;
@@ -80,10 +85,7 @@ class RotateSaltPasswordServiceTest {
     private ClusterBootstrapper clusterBootstrapper;
 
     @Mock
-    private Clock clock;
-
-    @Mock
-    private SaltStatusCheckerConfig saltStatusCheckerConfig;
+    private SaltPasswordStatusService saltPasswordStatusService;
 
     @Mock
     private StackDto stack;
@@ -95,10 +97,10 @@ class RotateSaltPasswordServiceTest {
     private InstanceMetadataView instanceMetadataView;
 
     @Captor
-    private ArgumentCaptor<String> stringArgumentCaptor;
+    private ArgumentCaptor<UsageProto.CDPSaltPasswordRotationEvent> eventArgumentCaptor;
 
     @Captor
-    private ArgumentCaptor<UsageProto.CDPSaltPasswordRotationEvent> eventArgumentCaptor;
+    private ArgumentCaptor<StackDto> stackDtoArgumentCaptor;
 
     @InjectMocks
     private RotateSaltPasswordService underTest;
@@ -125,6 +127,13 @@ class RotateSaltPasswordServiceTest {
         securityConfig = new SecurityConfig();
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         lenient().when(stack.getSecurityConfig()).thenReturn(securityConfig);
+        lenient().when(saltPasswordStatusService.getSaltPasswordStatus(stack)).thenReturn(SaltPasswordStatus.OK);
+        Supplier<String> passwordGenerator = () -> NEW_PASSWORD;
+        ReflectionTestUtils.setField(underTest, "passwordGenerator", passwordGenerator);
+
+        Node node = mock(Node.class);
+        lenient().when(node.getHostname()).thenReturn(FQDN);
+        lenient().when(stack.getAllPrimaryGatewayInstanceNodes()).thenReturn(Set.of(node));
     }
 
     @Test
@@ -132,10 +141,24 @@ class RotateSaltPasswordServiceTest {
         underTest.rotateSaltPassword(stack);
 
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
-        verify(hostOrchestrator).changePassword(eq(gatewayConfigs), stringArgumentCaptor.capture(),
-                eq(securityConfig.getSaltSecurityConfig().getSaltPassword()));
-        String newPassword = stringArgumentCaptor.getValue();
-        verify(securityConfigService).changeSaltPassword(securityConfig, newPassword);
+        verify(hostOrchestrator).changePassword(gatewayConfigs, NEW_PASSWORD, OLD_PASSWORD);
+        verify(securityConfigService).changeSaltPassword(securityConfig, NEW_PASSWORD);
+        verify(saltPasswordStatusService).getSaltPasswordStatus(stackDtoArgumentCaptor.capture());
+        verifyCapturedStackSaltPassword();
+    }
+
+    private void verifyCapturedStackSaltPassword() {
+        assertThat(stackDtoArgumentCaptor.getValue())
+                .returns(NEW_PASSWORD, stackDto -> stackDto.getSecurityConfig().getSaltSecurityConfig().getSaltPassword());
+    }
+
+    @Test
+    void rotateSaltPasswordStatusCheckFails() {
+        when(saltPasswordStatusService.getSaltPasswordStatus(stack)).thenReturn(SaltPasswordStatus.INVALID);
+
+        assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
+                .isInstanceOf(CloudbreakOrchestratorFailedException.class)
+                .hasMessage("Salt password status check failed with status INVALID, please try the operation again");
     }
 
     @Test
@@ -202,43 +225,30 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void rotateSaltPasswordFallbackSuccess() throws Exception {
-        Node node = mock(Node.class);
-        when(node.getHostname()).thenReturn("fqdn");
-        Set<Node> nodes = Set.of(node);
-        when(stack.getAllPrimaryGatewayInstanceNodes()).thenReturn(nodes);
-
         underTest.rotateSaltPasswordFallback(stack);
 
-        String newPassword = stack.getSecurityConfig().getSaltSecurityConfig().getSaltPassword();
-        assertThat(newPassword).isNotEqualTo(OLD_PASSWORD);
-        verify(hostOrchestrator).runCommandOnHosts(gatewayConfigs, Set.of("fqdn"), "userdel saltuser");
+        verify(hostOrchestrator).runCommandOnHosts(gatewayConfigs, Set.of(FQDN), "userdel saltuser");
         verify(clusterBootstrapper).reBootstrapGateways(stack);
-        verify(securityConfigService).changeSaltPassword(securityConfig, newPassword);
+        verify(securityConfigService).changeSaltPassword(securityConfig, NEW_PASSWORD);
+        verify(saltPasswordStatusService).getSaltPasswordStatus(stackDtoArgumentCaptor.capture());
+        verifyCapturedStackSaltPassword();
     }
 
     @Test
     void rotateSaltPasswordFallbackUserDeleteFails() throws Exception {
-        Node node = mock(Node.class);
-        when(node.getHostname()).thenReturn("fqdn");
-        Set<Node> nodes = Set.of(node);
-        when(stack.getAllPrimaryGatewayInstanceNodes()).thenReturn(nodes);
-        when(hostOrchestrator.runCommandOnHosts(gatewayConfigs, Set.of("fqdn"), "userdel saltuser")).thenThrow(CloudbreakOrchestratorFailedException.class);
+        when(hostOrchestrator.runCommandOnHosts(gatewayConfigs, Set.of(FQDN), "userdel saltuser")).thenThrow(CloudbreakOrchestratorFailedException.class);
 
         underTest.rotateSaltPasswordFallback(stack);
 
         String newPassword = stack.getSecurityConfig().getSaltSecurityConfig().getSaltPassword();
         assertThat(newPassword).isNotEqualTo(OLD_PASSWORD);
-        verify(hostOrchestrator).runCommandOnHosts(gatewayConfigs, Set.of("fqdn"), "userdel saltuser");
+        verify(hostOrchestrator).runCommandOnHosts(gatewayConfigs, Set.of(FQDN), "userdel saltuser");
         verify(clusterBootstrapper).reBootstrapGateways(stack);
         verify(securityConfigService).changeSaltPassword(securityConfig, newPassword);
     }
 
     @Test
     void rotateSaltPasswordFallbackFailure() throws Exception {
-        Node node = mock(Node.class);
-        when(node.getHostname()).thenReturn("fqdn");
-        Set<Node> nodes = Set.of(node);
-        when(stack.getAllPrimaryGatewayInstanceNodes()).thenReturn(nodes);
         doThrow(CloudbreakException.class).when(clusterBootstrapper).reBootstrapGateways(stack);
 
         assertThatThrownBy(() -> underTest.rotateSaltPasswordFallback(stack))
@@ -250,6 +260,19 @@ class RotateSaltPasswordServiceTest {
                         "please remove the user manually with the command 'userdel saltuser' on node(s) [1.1.1.1, 1.1.1.2] and retry the operation.");
 
         verify(securityConfigService, never()).changeSaltPassword(eq(securityConfig), any());
+    }
+
+    @Test
+    void rotateSaltPasswordFallbackStatusCheckFails() {
+        when(saltPasswordStatusService.getSaltPasswordStatus(stack)).thenReturn(SaltPasswordStatus.INVALID);
+
+        assertThatThrownBy(() -> underTest.rotateSaltPasswordFallback(stack))
+                .isInstanceOf(CloudbreakOrchestratorFailedException.class)
+                .hasMessage("Failed to re-bootstrap gateway nodes after saltuser password delete. " +
+                        "Please check the salt-bootstrap service status on node(s) [1.1.1.1, 1.1.1.2]. " +
+                        "If the saltuser password was changed manually, " +
+                        "please remove the user manually with the command 'userdel saltuser' on node(s) [1.1.1.1, 1.1.1.2] and retry the operation.")
+                .hasCause(new CloudbreakOrchestratorFailedException("Salt password status check failed with status INVALID, please try the operation again"));
     }
 
     @Test
