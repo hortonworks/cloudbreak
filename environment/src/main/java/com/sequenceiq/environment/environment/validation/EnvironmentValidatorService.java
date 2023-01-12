@@ -304,43 +304,22 @@ public class EnvironmentValidatorService {
 
     public ValidationResult validateEncryptionKeyUrl(String encryptionKeyUrl, String accountId) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (!entitlementService.isAzureDiskSSEWithCMKEnabled(accountId)) {
-            resultBuilder.error(String.format("You have specified encryption-key-url to enable Server Side Encryption for Azure Managed disks with CMK"
-                    + " but that feature is currently not enabled for this account."
-                    + " Please get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for this account to use SSE with CMK."));
-        } else {
-            ValidationResult validationResult = encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
-            resultBuilder.merge(validationResult);
-        }
+        ValidationResult validationResult = encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
+        resultBuilder.merge(validationResult);
         return resultBuilder.build();
     }
 
     public ValidationResult validateEncryptionKeyArn(String encryptionKeyArn, String accountId) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (!entitlementService.isAWSDiskEncryptionWithCMKEnabled(accountId)) {
-            resultBuilder.error(String.format("You specified encryptionKeyArn to use Server Side Encryption for " +
-                    "AWS Managed disks with CMK, "
-                    + "but that feature is currently disabled. Get 'CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK' " +
-                    "enabled for your account to use SSE with CMK."));
-        } else {
-            ValidationResult validationResult = encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn);
-            resultBuilder.merge(validationResult);
-        }
+        ValidationResult validationResult = encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn);
+        resultBuilder.merge(validationResult);
         return resultBuilder.build();
     }
 
     public ValidationResult validateEncryptionKey(String encryptionKey, String accountId) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (StringUtils.isNotEmpty(encryptionKey)) {
-            if (!entitlementService.isGcpDiskEncryptionWithCMEKEnabled(accountId)) {
-                resultBuilder.error(String.format("You have specified encryption-key to enable encryption for GCP resources with CMEK "
-                        + "but that feature is currently not enabled for this account."
-                        + " Please get 'CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK' enabled for this account."));
-            } else {
-                ValidationResult validationResult = encryptionKeyValidator.validateEncryptionKey(encryptionKey);
-                resultBuilder.merge(validationResult);
-            }
-        }
+        ValidationResult validationResult = encryptionKeyValidator.validateEncryptionKey(encryptionKey);
+        resultBuilder.merge(validationResult);
         return resultBuilder.build();
     }
 }

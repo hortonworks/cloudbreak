@@ -106,7 +106,6 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
     }
 
     private void validate(CustomConfigurations customConfigurations) {
-        validator.validateIfAccountIsEntitled(ThreadBasedUserCrnProvider.getAccountId());
         validator.validateServiceNames(customConfigurations);
     }
 

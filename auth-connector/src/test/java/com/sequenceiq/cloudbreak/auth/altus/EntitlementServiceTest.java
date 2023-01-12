@@ -166,17 +166,8 @@ class EntitlementServiceTest {
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", (EntitlementCheckFunction) EntitlementService::gcpEndpointGatewayEnabled, false},
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", (EntitlementCheckFunction) EntitlementService::gcpEndpointGatewayEnabled, true},
 
-                {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, false},
-                {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, true},
-
                 {"CDP_CB_AZURE_ENCRYPTION_AT_HOST", (EntitlementCheckFunction) EntitlementService::isAzureEncryptionAtHostEnabled, false},
                 {"CDP_CB_AZURE_ENCRYPTION_AT_HOST", (EntitlementCheckFunction) EntitlementService::isAzureEncryptionAtHostEnabled, true},
-
-                {"CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAWSDiskEncryptionWithCMKEnabled, false},
-                {"CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAWSDiskEncryptionWithCMKEnabled, true},
-
-                {"CDP_DATAHUB_CUSTOM_CONFIGS", (EntitlementCheckFunction) EntitlementService::datahubCustomConfigsEnabled, false},
-                {"CDP_DATAHUB_CUSTOM_CONFIGS", (EntitlementCheckFunction) EntitlementService::datahubCustomConfigsEnabled, true},
 
                 {"CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION",
                         (EntitlementCheckFunction) EntitlementService::usersyncCredentialsUpdateOptimizationEnabled, false},
@@ -200,9 +191,6 @@ class EntitlementServiceTest {
 
                 {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, false},
                 {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, true},
-
-                {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, false},
-                {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, true},
 
                 {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, false},
                 {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, true},

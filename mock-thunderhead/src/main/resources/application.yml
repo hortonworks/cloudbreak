@@ -80,18 +80,11 @@ auth:
       group-size.enforce-limit.enable: true
       split-freeipa-user-retrieval.enable: true
     azure:
-      disk:
-        SSEWithCMK.enable: true
       encryptionAtHost.enable: false
       certificate.auth.enable: true
     aws:
       native.variant.migration.enable: false
-      disk:
-        EncryptionWithCMK.enable: true
-    datahub.customconfigs.enable: true
     gcp:
-      disk:
-        EncryptionWithCMEK.enable: true
     cm.ha.enable: false
     conclusion.checker.send.user.event.enable: true
     ha.repair.enable: true
