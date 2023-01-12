@@ -40,13 +40,10 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
-import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.CredentialService;
-import com.sequenceiq.freeipa.service.SecurityConfigService;
-import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.backup.BackupClusterType;
@@ -63,9 +60,6 @@ import com.sequenceiq.freeipa.util.CrnService;
 public class FreeIpaCreationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationService.class);
-
-    @Inject
-    private TlsSecurityService tlsSecurityService;
 
     @Inject
     private StackService stackService;
@@ -108,9 +102,6 @@ public class FreeIpaCreationService {
 
     @Inject
     private CloudBackupFolderResolverService cloudBackupFolderResolverService;
-
-    @Inject
-    private SecurityConfigService securityConfigService;
 
     @Inject
     private AccountTelemetryService accountTelemetryService;
@@ -165,15 +156,11 @@ public class FreeIpaCreationService {
 
         String template = templateService.waitGetTemplate(getPlatformTemplateRequest);
         stack.setTemplate(template);
-        SecurityConfig securityConfig = measure(() -> tlsSecurityService.generateSecurityKeys(accountId), LOGGER,
-                "Generating security keys took {} ms for {}", stack.getName());
         multiAzValidator.validateMultiAzForStack(stack.getPlatformvariant(), stack.getInstanceGroups());
         measure(() -> freeIpaRecommendationService.validateCustomInstanceType(stack, credential), LOGGER,
                 "Validating custom instance type took {} ms for {}", stack.getName());
         try {
             Triple<Stack, ImageEntity, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
-                SecurityConfig savedSecurityConfig = securityConfigService.save(securityConfig);
-                stack.setSecurityConfig(savedSecurityConfig);
                 Stack savedStack = stackService.save(stack);
                 freeIpaRecipeService.saveRecipes(request.getRecipes(), savedStack.getId());
                 freeIpaRecipeService.sendCreationUsageReport(stack.getResourceCrn(), CollectionUtils.emptyIfNull(request.getRecipes()).size());
