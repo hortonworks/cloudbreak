@@ -15,17 +15,14 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_UAE_CENTRAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
@@ -41,7 +38,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK_HOSTS_REMOVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_CUSTOM_CONFIGS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
@@ -533,17 +529,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private Optional<SshPublicKey> sshPublicKey;
 
-    @Value("${auth.mock.azure.disk.SSEWithCMK.enable}")
-    private boolean enableAzureDiskSSEWithCMK;
-
     @Value("${auth.mock.azure.encryptionAtHost.enable}")
     private boolean enableAzureEncryptionAtHost;
-
-    @Value("${auth.mock.aws.disk.EncryptionWithCMK.enable}")
-    private boolean enableAWSDiskEncryptionWithCMK;
-
-    @Value("${auth.mock.datahub.customconfigs.enable}")
-    private boolean datahubCustomConfigsEnabled;
 
     @Value("${auth.mock.user.sync.credentials.update.optimization.enable}")
     private boolean userSyncCredentialsUpdateOptimizationEnabled;
@@ -553,9 +540,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.cm.ha.enable}")
     private boolean cmHAEnabled;
-
-    @Value("${auth.mock.gcp.disk.EncryptionWithCMEK.enable}")
-    private boolean enableGcpDiskEncryptionWithCMEK;
 
     @Value("${auth.mock.freeipa.batch.call.enable}")
     private boolean enableFmsFreeipaBatchCall;
@@ -976,17 +960,8 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (ephemeralDisksForTempDataEnabled) {
             builder.addEntitlements(createEntitlement(EPHEMERAL_DISKS_FOR_TEMP_DATA));
         }
-        if (enableAzureDiskSSEWithCMK) {
-            builder.addEntitlements(createEntitlement(CDP_CB_AZURE_DISK_SSE_WITH_CMK));
-        }
         if (enableAzureEncryptionAtHost) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_ENCRYPTION_AT_HOST));
-        }
-        if (enableAWSDiskEncryptionWithCMK) {
-            builder.addEntitlements(createEntitlement(CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK));
-        }
-        if (datahubCustomConfigsEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_DATAHUB_CUSTOM_CONFIGS));
         }
         if (userSyncCredentialsUpdateOptimizationEnabled) {
             builder.addEntitlements(createEntitlement(CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION));
@@ -996,9 +971,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (cmHAEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CM_HA));
-        }
-        if (enableGcpDiskEncryptionWithCMEK) {
-            builder.addEntitlements(createEntitlement(CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK));
         }
         if (diagnosticsEnabled) {
             builder.addEntitlements(createEntitlement(CDP_VM_DIAGNOSTICS));

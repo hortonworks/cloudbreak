@@ -409,82 +409,32 @@ class EnvironmentValidatorServiceTest {
     }
 
     @Test
-    void shouldFailIfEncryptionKeyUrlSpecifiedAndEntitlementAndWrongFormat() {
+    void shouldFailIfEncryptionKeyUrlSpecifiedAndWrongFormat() {
         String encryptionKeyUrl = "Dummy-key-url";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         validationResultBuilder.error("error");
         when(encryptionKeyUrlValidator.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(true);
         ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl, ACCOUNT_ID);
         assertTrue(validationResult.hasError());
     }
 
     @Test
-    void shouldFailIfEncryptionKeyArnSpecifiedAndEntitlementDisabled() {
-        String encryptionKeyArn = "dummy-key-arn";
-        when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(any())).thenReturn(false);
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(encryptionKeyArn, ACCOUNT_ID);
-        assertTrue(validationResult.hasError());
-    }
-
-    @Test
-    void testValidateEncryptionKeyArnSpecifiedAndEntitlementEnabled() {
+    void testValidateEncryptionKeyArnSpecified() {
         String encryptionKeyArn = "dummy-key-arn";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         when(encryptionKeyArnValidator.validateEncryptionKeyArn(any())).thenReturn(validationResultBuilder.build());
-        when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(any())).thenReturn(true);
         ValidationResult validationResult = underTest.validateEncryptionKeyArn(encryptionKeyArn, ACCOUNT_ID);
         assertFalse(validationResult.hasError());
     }
 
     @Test
-    void shouldFailIfEncryptionKeyUrlSpecifiedAndNotEntitlement() {
-        String encryptionKeyUrl = "Dummy-key-url";
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(false);
-        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl, ACCOUNT_ID);
-        assertTrue(validationResult.hasError());
-    }
-
-    @Test
-    void testValidateEncryptionKeyUrlSpecifiedAndEntitlement() {
-        String encryptionKeyUrl = "https://someVault.vault.azure.net/keys/someKey/someKeyVersion";
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        when(encryptionKeyUrlValidator.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(true);
-        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl, ACCOUNT_ID);
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
-    void shouldFailIfGcpEncryptionKeySpecifiedAndEntitlementAndWrongFormat() {
+    void shouldFailIfGcpEncryptionKeySpecifiedAndWrongFormat() {
         String encryptionKey = "project/Wrong-dummy-key-format";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         validationResultBuilder.error("error");
         when(encryptionKeyValidator.validateEncryptionKey(any())).thenReturn(validationResultBuilder.build());
-        when(entitlementService.isGcpDiskEncryptionWithCMEKEnabled(any())).thenReturn(true);
         ValidationResult validationResult = underTest.validateEncryptionKey(encryptionKey, ACCOUNT_ID);
         assertTrue(validationResult.hasError());
-    }
-
-    @Test
-    void shouldFailIfGcpEncryptionKeySpecifiedAndNotEntitlement() {
-        String encryptionKey = "projects/dummy-project/locations/us-west2/keyRings/dummy-ring/cryptoKeys/dummy-key";
-        when(entitlementService.isGcpDiskEncryptionWithCMEKEnabled(any())).thenReturn(false);
-        ValidationResult validationResult = underTest.validateEncryptionKey(encryptionKey, ACCOUNT_ID);
-
-        assertTrue(validationResult.hasError());
-    }
-
-    @Test
-    void testValidateGcpEncryptionKeySpecifiedAndEntitlement() {
-        String encryptionKey = "projects/dummy-project/locations/us-west2/keyRings/dummy-ring/cryptoKeys/dummy-key";
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-
-        when(encryptionKeyValidator.validateEncryptionKey(any())).thenReturn(validationResultBuilder.build());
-        when(entitlementService.isGcpDiskEncryptionWithCMEKEnabled(any())).thenReturn(true);
-
-        ValidationResult validationResult = underTest.validateEncryptionKey(encryptionKey, ACCOUNT_ID);
-        assertFalse(validationResult.hasError());
     }
 
     @ParameterizedTest

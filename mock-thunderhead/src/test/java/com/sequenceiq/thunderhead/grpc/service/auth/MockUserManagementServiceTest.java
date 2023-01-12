@@ -246,17 +246,8 @@ public class MockUserManagementServiceTest {
                 {"gcpEndpointGatewayEnabled false", "gcpEndpointGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", false},
                 {"gcpEndpointGatewayEnabled true", "gcpEndpointGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", true},
 
-                {"enableAzureDiskSSEWithCMK false", "enableAzureDiskSSEWithCMK", false, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", false},
-                {"enableAzureDiskSSEWithCMK true", "enableAzureDiskSSEWithCMK", true, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", true},
-
                 {"enableAzureEncryptionAtHost false", "enableAzureEncryptionAtHost", false, "CDP_CB_AZURE_ENCRYPTION_AT_HOST", false},
                 {"enableAzureEncryptionAtHost true", "enableAzureEncryptionAtHost", true, "CDP_CB_AZURE_ENCRYPTION_AT_HOST", true},
-
-                {"enableAWSDiskEncryptionWithCMK false", "enableAWSDiskEncryptionWithCMK", false, "CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK", false},
-                {"enableAWSDiskEncryptionWithCMK true", "enableAWSDiskEncryptionWithCMK", true, "CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK", true},
-
-                {"datahubCustomConfigsEnabled false", "datahubCustomConfigsEnabled", false, "CDP_DATAHUB_CUSTOM_CONFIGS", false},
-                {"datahubCustomConfigsEnabled true", "datahubCustomConfigsEnabled", true, "CDP_DATAHUB_CUSTOM_CONFIGS", true},
 
                 {"userSyncCredentialsUpdateOptimizationEnabled false", "userSyncCredentialsUpdateOptimizationEnabled", false,
                         "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", false},
@@ -277,9 +268,6 @@ public class MockUserManagementServiceTest {
 
                 {"ephemeralDisksForTempDataEnabled false", "ephemeralDisksForTempDataEnabled", false, "EPHEMERAL_DISKS_FOR_TEMP_DATA", false},
                 {"ephemeralDisksForTempDataEnabled true", "ephemeralDisksForTempDataEnabled", true, "EPHEMERAL_DISKS_FOR_TEMP_DATA", true},
-
-                {"enableGcpDiskEncryptionWithCMEK false", "enableGcpDiskEncryptionWithCMEK", false, "CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", false},
-                {"enableGcpDiskEncryptionWithCMEK true", "enableGcpDiskEncryptionWithCMEK", true, "CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", true},
 
                 {"enableDatalakeSelectInstanceType false", "enableDatalakeSelectInstanceType", false, "CDP_DATALAKE_SELECT_INSTANCE_TYPE", false},
                 {"enableDatalakeSelectInstanceType true", "enableDatalakeSelectInstanceType", true, "CDP_DATALAKE_SELECT_INSTANCE_TYPE", true},
