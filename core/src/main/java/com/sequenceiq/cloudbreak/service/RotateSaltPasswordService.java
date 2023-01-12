@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -64,6 +66,11 @@ public class RotateSaltPasswordService {
     @Inject
     private ReactorFlowManager flowManager;
 
+    @Inject
+    private SaltPasswordStatusService saltPasswordStatusService;
+
+    private Supplier<String> passwordGenerator = PasswordUtil::generatePassword;
+
     public void validateRotateSaltPassword(StackDto stack) {
         if (stack.getStatus().isStopped()) {
             throw new BadRequestException("Rotating SaltStack user password is not supported for stopped clusters");
@@ -101,23 +108,33 @@ public class RotateSaltPasswordService {
         validateRotateSaltPassword(stack);
         SecurityConfig securityConfig = stack.getSecurityConfig();
         String oldPassword = securityConfig.getSaltSecurityConfig().getSaltPassword();
-        String newPassword = PasswordUtil.generatePassword();
+        String newPassword = passwordGenerator.get();
         List<GatewayConfig> allGatewayConfig = gatewayConfigService.getAllGatewayConfigs(stack);
         hostOrchestrator.changePassword(allGatewayConfig, newPassword, oldPassword);
-        securityConfigService.changeSaltPassword(securityConfig, newPassword);
+        securityConfig.getSaltSecurityConfig().setSaltPassword(newPassword);
+        validateAndSavePassword(stack, newPassword);
+    }
+
+    private void validateAndSavePassword(StackDto stack, String newPassword) throws CloudbreakOrchestratorFailedException {
+        SaltPasswordStatus saltPasswordStatus = saltPasswordStatusService.getSaltPasswordStatus(stack);
+        if (saltPasswordStatus != SaltPasswordStatus.OK) {
+            String message = String.format("Salt password status check failed with status %s, please try the operation again", saltPasswordStatus);
+            throw new CloudbreakOrchestratorFailedException(message);
+        }
+        securityConfigService.changeSaltPassword(stack.getSecurityConfig(), newPassword);
     }
 
     public void rotateSaltPasswordFallback(StackDto stack) throws CloudbreakOrchestratorFailedException {
         List<GatewayConfig> allGatewayConfig = gatewayConfigService.getAllGatewayConfigs(stack);
         tryRemoveSaltuserFromGateways(stack, allGatewayConfig);
 
-        String newPassword = PasswordUtil.generatePassword();
+        String newPassword = passwordGenerator.get();
         SecurityConfig securityConfig = stack.getSecurityConfig();
         securityConfig.getSaltSecurityConfig().setSaltPassword(newPassword);
         try {
             clusterBootstrapper.reBootstrapGateways(stack);
-            securityConfigService.changeSaltPassword(securityConfig, newPassword);
-        } catch (CloudbreakException e) {
+            validateAndSavePassword(stack, newPassword);
+        } catch (Exception e) {
             Set<String> gatewayConfigAddresses = allGatewayConfig.stream()
                     .map(GatewayConfig::getPrivateAddress)
                     .collect(Collectors.toSet());
