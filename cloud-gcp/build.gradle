@@ -34,7 +34,7 @@ dependencies {
     implementation (group: 'com.google.apis',               name: 'google-api-services-storage',                version: 'v1-rev20211018-1.32.1'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-dns',                    version: 'v2beta1-rev20200806-1.30.10'){
+    implementation (group: 'com.google.apis',               name: 'google-api-services-dns',                    version: 'v2-rev20220505-1.32.1'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
     implementation (group: 'com.google.apis',               name: 'google-api-services-cloudkms',               version: 'v1-rev20210928-1.32.1'){
