@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kudu.KuduConf
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kudu.KuduConfigs.RANGER_KUDU_PLUGIN_SERVICE_NAME;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspathQuietly;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -19,8 +20,8 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 
 @ExtendWith(MockitoExtension.class)
-class KuduServiceConfigProviderTest {
-    private final KuduServiceConfigProvider subject = new KuduServiceConfigProvider();
+class KuduMasterConfigProviderTest {
+    private final KuduMasterConfigProvider subject = new KuduMasterConfigProvider();
 
     @Test
     public void testRangerPluginServiceConfig7210() {
@@ -28,9 +29,10 @@ class KuduServiceConfigProviderTest {
         templateProcessor.setCdhVersion("7.2.10");
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(templateProcessor, "7.2.10");
 
-        List<ApiClusterTemplateConfig> serviceConfigs = subject.getServiceConfigs(templateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs("KUDU_MASTER", preparationObject);
 
-        assertEquals(0, serviceConfigs.size());
+        assertEquals(0, roleConfigs.size());
+        assertTrue(subject.isConfigurationNeeded(templateProcessor, preparationObject));
     }
 
     @Test
@@ -39,10 +41,20 @@ class KuduServiceConfigProviderTest {
         templateProcessor.setCdhVersion("7.2.11");
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(templateProcessor, "7.2.11");
 
-        List<ApiClusterTemplateConfig> serviceConfigs = subject.getServiceConfigs(templateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs("KUDU_MASTER", preparationObject);
 
-        assertEquals(1, serviceConfigs.size());
-        assertTrue(serviceConfigs.contains(config(RANGER_KUDU_PLUGIN_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME)));
+        assertEquals(1, roleConfigs.size());
+        assertTrue(roleConfigs.contains(config(RANGER_KUDU_PLUGIN_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME)));
+        assertTrue(subject.isConfigurationNeeded(templateProcessor, preparationObject));
+    }
+
+    @Test
+    public void testCongigNotNeeded() {
+        CmTemplateProcessor templateProcessor = new CmTemplateProcessor(readFileFromClasspathQuietly("input/cdp-streaming.bp"));
+        templateProcessor.setCdhVersion("7.2.11");
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(templateProcessor, "7.2.11");
+
+        assertFalse(subject.isConfigurationNeeded(templateProcessor, preparationObject));
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor processor, String version) {

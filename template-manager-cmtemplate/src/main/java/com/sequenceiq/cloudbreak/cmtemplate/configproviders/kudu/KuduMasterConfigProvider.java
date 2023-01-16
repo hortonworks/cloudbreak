@@ -11,18 +11,18 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.api.client.util.Lists;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
-public class KuduServiceConfigProvider implements CmTemplateComponentConfigProvider {
+public class KuduMasterConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
-    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
+    public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         ArrayList<ApiClusterTemplateConfig> configs = Lists.newArrayList();
 
-        String cdhVersion = templateProcessor.getStackVersion();
+        String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
+            "" : source.getBlueprintView().getProcessor().getStackVersion();
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_11)) {
             configs.add(config(KuduConfigs.RANGER_KUDU_PLUGIN_SERVICE_NAME, KuduConfigs.GENERATED_RANGER_SERVICE_NAME));
         }
