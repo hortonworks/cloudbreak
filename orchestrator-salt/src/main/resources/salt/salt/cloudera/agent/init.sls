@@ -24,7 +24,17 @@ install-cloudera-manager-agent:
 
 {% endif %}
 
-{%- if not salt['pkg.version']('python-psycopg2') and not salt['pkg.version']('python2-psycopg2') and not salt['pkg.version']('python38-psycopg2') %}
+# The package we check for is called differently for different OS + Python version 
+# combinations and we need to be careful to keep backward compatibility.
+# 1. CentOS 7 + Python 2
+# 2. RedHat 7 + Python 2 (customer specific)
+# 3. RedHat 8 + Python 3.8
+# 4. CentOS 8 + Python 3.8
+{%- if not salt['pkg.version']('python-psycopg2')
+   and not salt['pkg.version']('python2-psycopg2')
+   and not salt['pkg.version']('python38-psycopg2')
+   and not salt['pkg.version']('rh-python38-python-psycopg2')
+%}
 install-psycopg2:
   cmd.run:
     - name: pip install psycopg2==2.7.5 --ignore-installed
