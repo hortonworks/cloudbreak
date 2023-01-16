@@ -95,9 +95,12 @@ public class AwsPricingCache implements PricingCache {
     }
 
     public double getStoragePricePerGBHour(String region, String storageType, int volumeSize) {
+        if (volumeSize == 0 || storageType == null) {
+            LOGGER.info("The provided volumeSize is 0 or the storageType is null, so returning 0.0 as storage price per GBHour.");
+            return 0.0;
+        }
         Map<String, Double> pricingForRegion = storagePricingCache.getOrDefault(region, Map.of());
-        String checkedStorageType = storageType == null ? "standard" : storageType;
-        double priceInGBMonth = pricingForRegion.getOrDefault(checkedStorageType, 0.0);
+        double priceInGBMonth = pricingForRegion.getOrDefault(storageType, 0.0);
         return priceInGBMonth / HOURS_IN_30_DAYS;
     }
 
@@ -106,7 +109,8 @@ public class AwsPricingCache implements PricingCache {
         if (value == null) {
             GetProductsResult productsResult = getProducts(region, instanceType);
             String priceListString = productsResult.getPriceList().stream().findFirst()
-                    .orElseThrow(() -> new NotFoundException("Couldn't find the price list for the requested region and instance type combination!"));
+                    .orElseThrow(() ->
+                            new NotFoundException(String.format("Couldn't find the price list for the region %s and instance type %s!", region, instanceType)));
             try {
                 PriceListElement priceListElement = JsonUtil.readValue(priceListString, PriceListElement.class);
                 cache.put(new PricingCacheKey(region, instanceType), priceListElement);
