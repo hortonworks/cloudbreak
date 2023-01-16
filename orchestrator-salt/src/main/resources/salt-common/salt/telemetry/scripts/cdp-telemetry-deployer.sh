@@ -107,17 +107,17 @@ function upgrade_package() {
   local local_version=$(check_local_version "$component")
   if [[ "$local_version" == "-1" ]]; then
     cleanup_td_agent "$component"
-    yum clean all --disablerepo="*" --enablerepo=cdp-infra-tools
-    yum install -y "${component}" --disablerepo="*" --enablerepo=cdp-infra-tools
   else
     local version_cmp_result=$(version_lt $expected_version $local_version)
     if [[ "$version_cmp_result" == "0" ]]; then
       do_exit 0 "UPGRADE IS NOT REQUIRED"
-    else
-      yum clean all --disablerepo="*" --enablerepo=cdp-infra-tools
-      yum remove -y "${component}"
-      yum install -y "${component}" --disablerepo="*" --enablerepo=cdp-infra-tools
     fi
+  fi
+  yum clean all --disablerepo="*" --enablerepo=cdp-infra-tools
+  if [[ "$expected_version" != "" ]]; then
+    yum install -y "${component}-${expected_version}" --disablerepo="*" --enablerepo=cdp-infra-tools
+  else
+    yum install -y "${component}" --disablerepo="*" --enablerepo=cdp-infra-tools
   fi
 }
 
