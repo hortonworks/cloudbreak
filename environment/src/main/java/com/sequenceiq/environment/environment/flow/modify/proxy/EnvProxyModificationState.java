@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.modify.proxy;
 
 import com.sequenceiq.environment.environment.flow.EnvironmentFillInMemoryStateStoreRestartAction;
 import com.sequenceiq.environment.environment.flow.modify.proxy.action.AbstractEnvProxyModificationAction;
+import com.sequenceiq.environment.environment.flow.modify.proxy.action.ProxyConfigModificationDatalakeStateAction;
 import com.sequenceiq.environment.environment.flow.modify.proxy.action.ProxyConfigModificationFailedStateAction;
 import com.sequenceiq.environment.environment.flow.modify.proxy.action.ProxyConfigModificationFinishedStateAction;
 import com.sequenceiq.environment.environment.flow.modify.proxy.action.ProxyConfigModificationFreeipaStateAction;
@@ -14,6 +15,7 @@ public enum EnvProxyModificationState implements FlowState {
     INIT_STATE,
     PROXY_CONFIG_MODIFICATION_START_STATE(ProxyConfigModificationStartStateAction.class),
     PROXY_CONFIG_MODIFICATION_FREEIPA_STATE(ProxyConfigModificationFreeipaStateAction.class),
+    PROXY_CONFIG_MODIFICATION_DATALAKE_STATE(ProxyConfigModificationDatalakeStateAction.class),
     PROXY_CONFIG_MODIFICATION_FINISHED_STATE(ProxyConfigModificationFinishedStateAction.class),
     PROXY_CONFIG_MODIFICATION_FAILED_STATE(ProxyConfigModificationFailedStateAction.class),
     FINAL_STATE;

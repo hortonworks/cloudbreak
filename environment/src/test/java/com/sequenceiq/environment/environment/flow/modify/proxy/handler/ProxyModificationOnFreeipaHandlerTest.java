@@ -90,7 +90,7 @@ class ProxyModificationOnFreeipaHandlerTest {
         underTest.accept(wrappedEvent);
 
         EnvProxyModificationDefaultEvent defaultEvent = EnvProxyModificationDefaultEvent.builder()
-                .withSelector(EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector())
+                .withSelector(EnvProxyModificationStateSelectors.MODIFY_PROXY_DATALAKE_EVENT.selector())
                 .withEnvironmentDto(event.getEnvironmentDto())
                 .withProxyConfig(event.getProxyConfig())
                 .withPreviousProxyConfig(event.getPreviousProxyConfig())

@@ -166,10 +166,18 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
                 stackDto.getCluster().getEnvironmentCrn());
         if (proxyConfig.isPresent()) {
             LOGGER.info("proxyConfig is not null, setup proxy for cluster: {}", proxyConfig);
-            getClusterSetupService(stackDto).setupProxy(proxyConfig.orElse(null));
+            getClusterSetupService(stackDto).setupProxy(proxyConfig.get());
         } else {
             LOGGER.info("proxyConfig was not found by proxyConfigCrn");
         }
+    }
+
+    public void modifyProxyConfig(Long stackId) {
+        StackDto stackDto = stackDtoService.getById(stackId);
+        Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByCrnWithEnvironmentFallback(
+                stackDto.getCluster().getProxyConfigCrn(),
+                stackDto.getCluster().getEnvironmentCrn());
+        getClusterSetupService(stackDto).setupProxy(proxyConfig.orElse(null));
     }
 
     public void executePostClusterManagerStartRecipes(Long stackId) throws CloudbreakException {

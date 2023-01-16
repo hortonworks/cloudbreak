@@ -52,7 +52,6 @@ class ModifyProxyConfigFailedActionTest extends ActionTest {
     @Mock
     private StackService stackService;
 
-    @Mock
     private ModifyProxyConfigContext context;
 
     @Mock
@@ -60,8 +59,7 @@ class ModifyProxyConfigFailedActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        super.setUp(context);
-        lenient().when(context.getStack()).thenReturn(stack);
+        context = new ModifyProxyConfigContext(flowParameters, stack);
         lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
     }

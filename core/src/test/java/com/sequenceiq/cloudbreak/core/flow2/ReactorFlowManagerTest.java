@@ -164,6 +164,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerClusterProxyConfigReRegistration(STACK_ID);
         underTest.triggerRdsUpgrade(STACK_ID, TargetMajorVersion.VERSION_11, null, null);
         underTest.triggerRotateSaltPassword(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.FALLBACK);
+        underTest.triggerModifyProxyConfig(STACK_ID, null);
         underTest.triggerVerticalScale(STACK_ID, new StackVerticalScaleV4Request());
         underTest.triggerOsUpgradeByUpgradeSetsFlow(STACK_ID, "AWS", new ImageChangeDto(STACK_ID, null), List.of());
         underTest.triggerDetermineDatalakeDataSizes(STACK_ID, "asdf");

@@ -124,6 +124,17 @@ class StackV4ControllerTest {
     }
 
     @Test
+    public void modifyProxyConfigInternal() {
+        String stackCrn = "crn";
+        String previousProxyConfigCrn = "proxy-crn";
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+
+        underTest.modifyProxyConfigInternal(WORKSPACE_ID, stackCrn, previousProxyConfigCrn, USER_CRN);
+
+        verify(stackOperations).modifyProxyConfig(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID, previousProxyConfigCrn);
+    }
+
+    @Test
     public void testPrepareClusterUpgradeByCrnInternal() {
         String imageId = "imageId";
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");

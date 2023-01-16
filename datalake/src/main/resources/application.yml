@@ -65,6 +65,9 @@ sdx:
     rotatesaltpassword:
       sleeptime_sec: 10
       duration_min: 10
+    modifyproxy:
+      sleeptime_sec: 10
+      duration_min: 10
     saltupdate:
       sleeptime-sec: 10
       duration-min: 120

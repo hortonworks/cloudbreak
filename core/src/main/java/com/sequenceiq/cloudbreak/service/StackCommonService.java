@@ -263,6 +263,10 @@ public class StackCommonService {
         return stackOperationService.getSaltPasswordStatus(nameOrCrn, accountId);
     }
 
+    public FlowIdentifier modifyProxyConfig(NameOrCrn nameOrCrn, String accountId, String previousProxyConfigCrn) {
+        return stackOperationService.modifyProxyConfig(nameOrCrn, accountId, previousProxyConfigCrn);
+    }
+
     private FlowIdentifier putStartInWorkspace(StackDto stack) {
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isStartStopSupported(stack.getCloudPlatform())) {
