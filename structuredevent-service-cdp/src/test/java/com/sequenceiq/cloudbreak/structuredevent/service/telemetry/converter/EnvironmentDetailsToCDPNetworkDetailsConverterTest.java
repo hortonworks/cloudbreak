@@ -70,6 +70,12 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
                         "5", privateSubnet
                         )
                 )
+                .withEndpointGatewaySubnetMetas(Map.of(
+                                "1", publicSubnet1,
+                                "2", publicSubnet2,
+                                "3", privateSubnet
+                        )
+                )
                 .build();
 
         when(environmentDetails.getNetwork()).thenReturn(networkDto);
@@ -90,6 +96,10 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
                 networkDetails.getNumberPrivateSubnets());
         Assert.assertEquals(2,
                 networkDetails.getNumberPublicSubnets());
+        Assert.assertEquals(1,
+                networkDetails.getNumberPrivateLoadBalancerSubnets());
+        Assert.assertEquals(2,
+                networkDetails.getNumberPublicLoadBalancerSubnets());
         Assert.assertEquals("DISABLED",
                 networkDetails.getPublicEndpointAccessGateway());
         Assert.assertEquals("CIDR_WIDE_OPEN",

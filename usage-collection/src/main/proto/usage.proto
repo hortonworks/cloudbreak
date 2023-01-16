@@ -5,6 +5,7 @@ package usage;
 option java_package = "com.cloudera.thunderhead.service.common.usage";
 option java_outer_classname = "UsageProto";
 option go_package = "com/cloudera/cdp/protobuf";
+import "google/protobuf/timestamp.proto";
 
 // This proto defines the Altus usage event schema. Find the usage system design
 // at docs/usage_reporting.md. This proto file is meant to be the documentation
@@ -224,6 +225,44 @@ message Event {
     CDPEnvironmentProxyConfigEditEvent cdpEnvironmentProxyConfigEditEvent = 107;
     // A CDP CDW Usage Event.
     CDPCDWUsageEvent cdpCDWUsageEvent = 108;
+    // A CDP CML session start usage event.
+    CDPCMLSessionStartEvent cdpCMLsessionStartEvent = 109;
+    // A CDP CML engine stop usage event.
+    CDPCMLEngineStopEvent cdpCMLengineStopEvent = 110;
+    // A CDP CML engine delete usage event.
+    CDPCMLEngineDeleteEvent cdpCMLengineDeleteEvent = 111;
+    // A CDP CML engine heartbeat usage event.
+    CDPCMLEngineHeartBeatEvent cdpCMLengineHeartBeatEvent = 112;
+    // A CDP CML job start event.
+    CDPCMLJobStartEvent cdpCMLjobStartEvent = 113;
+    // A CDP CML job created or modified event.
+    CDPCMLJobCreatedOrModifiedEvent cdpCMLjobCreatedOrModifiedEvent = 114;
+    // A CDP CML experiment started event.
+    CDPCMLExperimentStartEvent cdpCMLexperimentStartEvent = 115;
+    // A CDP CML model deployed event.
+    CDPCMLModelDeployedEvent cdpCMLmodelDeployedEvent = 116;
+    // A CDP CML application deployed event.
+    CDPCMLApplicationDeployedEvent cdpCMLapplicationDeployedEvent = 117;
+    // A CDP CML project created event.
+    CDPCMLProjectCreatedEvent cdpCMLprojectCreatedEvent = 118;
+    // A CDP CML prototype completed event.
+    CDPCMLPrototypeCompletedEvent cdpCMLprototypeCompletedEvent = 119;
+    // A CDP CML application created or modified event.
+    CDPCMLApplicationCreatedOrModifiedEvent cdpCMLapplicationCreatedOrModifiedEvent = 120;
+    // A CDP CML experiment event.
+    CDPCMLExperimentEvent cdpCMLexperimentEvent = 121;
+    // A CDP CML experiment run event.
+    CDPCMLExperimentRunEvent cdpCMLexperimentRunEvent = 122;
+    // A CDP CML data connection action event.
+    CDPCMLDataConnectionActionEvent cdpCMLdataConnectionActionEvent = 123;
+    // A CDP CML workspace login event.
+    CDPCMLLoginEvent cdpCMLLoginEvent = 124;
+    // A CDP CML workspace logout event.
+    CDPCMLLogoutEvent cdpCMLLogoutEvent = 125;
+    // A CDP CML worker start event.
+    CDPCMLWorkerStartEvent cdpCMLworkerStartEvent = 126;
+    // A CDP CML spark executor event.
+    CDPCMLSparkExecutorEvent cdpCMLSparkExecutorEvent = 127;
   }
 }
 
@@ -857,6 +896,10 @@ message CDPCMLWorkspaceBackupStatus {
     VALIDATION_SUCCEEDED = 8;
     // The status when validation for creating backup request has failed.
     VALIDATION_FAILED = 9;
+    // The status when cancellation of a backup has started.
+    ABORTING = 10;
+    // The status when cancellation of a backup has succeeded.
+    ABORTED = 11;
   }
 }
 
@@ -952,6 +995,8 @@ message CDPCMLWorkspaceRequested {
   CDPCMLWorkspaceBackupMetadata cdpCMLWorkspaceBackupMetadata = 17;
   // Tenant type to identify the formfactor i.e. Saas or Paas
   string tenantType = 18;
+  // Flag to identify if workspace is created to serve as model registry.
+  bool isModelRegistry = 19;
 }
 
 // Generated when a CDP CML workspace's status changed.
@@ -1719,7 +1764,7 @@ message CDPNetworkDetails {
   string connectivity = 2;
   // How many public subnets are used
   int32 numberPublicSubnets = 3;
-  // How many public subnets are used
+  // How many private subnets are used
   int32 numberPrivateSubnets = 4;
   // Private endpoints are created for this particular environment
   string serviceEndpointCreation = 5;
@@ -1735,6 +1780,10 @@ message CDPNetworkDetails {
   string domain = 10;
   // If the customer is using their own DNS zones for some services
   CDPOwnDnsZones ownDnsZones= 11;
+  // How many public loadbalancer subnets are used
+  int32 numberPublicLoadBalancerSubnets = 12;
+  // How many private loadbalancer subnets are used
+  int32 numberPrivateLoadBalancerSubnets = 13;
 }
 
 message CDPCredentialDetails {
@@ -2207,6 +2256,18 @@ message CDPDFServiceStatus {
     PEM_CERTIFICATE_RENEWAL_FAILED = 29;
     // The status of a df service that indicates that the PEM certificate renewal succeeded
     PEM_CERTIFICATE_RENEWAL_SUCCEEDED = 30;
+    // The status of a df service where rollback succeeded
+    ROLLBACK_COMPLETED = 31;
+    // The status of a df service where rollback failed
+    ROLLBACK_FAILED = 32;
+    // The status of a df service where aborting upgrade is in progress
+    ABORT_UPGRADE_IN_PROGRESS = 33;
+    // The status of a df service where aborting upgrade succeeded
+    ABORT_UPGRADE_COMPLETED = 34;
+    // The status of a df service where aborting upgrade failed
+    ABORT_UPGRADE_FAILED = 35;
+    // The status that indicates that the pre-flight validation was requested before the df service enablement
+    ENABLE_VALIDATION_IN_PROGRESS = 36;
   }
 }
 
@@ -2254,6 +2315,8 @@ message CDPDFServiceRequested {
   bool loadBalancerAccessRestricted = 12;
   // CRN of the actor that created the request
   string actorCrn = 13;
+  // Is private cluster
+  bool privateCluster = 14;
 }
 
 message CDPDFServiceStatusChanged {
@@ -2445,6 +2508,8 @@ message CDPDFDeploymentRequested {
   string flowDesignerId = 18;
   // Username of the actor that is requesting the deployment. Since this is a workload event, actorCrn is not available.
   string username = 19;
+  // The crn of the DataFlow Service.
+  string dataFlowServiceCrn = 20;
 }
 
 message CDPDFDeploymentStatusChanged {
@@ -2463,6 +2528,8 @@ message CDPDFDeploymentStatusChanged {
   string deploymentName = 6;
   // The id of the flow design. Either this or flowVersionCrn should be set, but not both.
   string flowDesignerId = 7;
+  // The crn of the DataFlow Service.
+  string dataFlowServiceCrn = 8;
 }
 
 message CDPDFDeploymentPodStatus {
@@ -3941,4 +4008,317 @@ message CDPEnvironmentProxyConfigEditResult {
     // The proxy edit failed with an error while editing a datahub of the environment.
     DATAHUB_FAILURE = 5;
   }
+}
+
+// CDP CML workload event status.
+enum CDPCMLWorkloadEventStatus {
+  SCHEDULING = 0;
+  STARTING = 1;
+  RUNNING = 2;
+  STOPPING = 3;
+  STOPPED = 4;
+  UNKNOWN = 5;
+  PENDING = 6;
+  SUCCEEDED = 7;
+  FAILED = 8;
+}
+
+// CDP CML internal error codes for workloads.
+enum CDPCMLWorkloadInternalErrorCode {
+  UNKNOWN_INTERNAL = 0;
+  QUOTA_REQUESTS_CPU_NOT_SPECIFIED = 1;
+  QUOTA_REQUESTS_MEMORY_NOT_SPECIFIED = 2;
+  QUOTA_REQUESTS_MEMORY = 3;
+  QUOTA_REQUESTS_CPU = 4;
+  QUOTA_COUNT_POD = 5;
+  QUOTA_REQUESTS_GPU = 6;
+  NOT_ENOUGH_RESOURCE_REQUEST = 7;
+}
+
+// CDP CML kubernetes engine status.
+message CDPCMLK8SEngineStatus {
+  string engineId = 1;
+  CDPCMLWorkloadEventStatus status = 2;
+  string podIP = 3;
+  bool oomKilled = 4;
+  int32 k8sExitCode = 5;
+  int32 k8sSignal = 6;
+  string k8sMessage = 7;
+  string k8sReason = 8;
+  google.protobuf.Timestamp k8sStartedAt = 9;
+  google.protobuf.Timestamp k8sFinishedAt = 10;
+  bool found = 11;
+  CDPCMLWorkloadInternalErrorCode internalErrorCode = 12;
+}
+
+// CDP CML addons for runtimes.
+message CDPCMLUsageRuntimeAddon {
+  string uniqueName = 1;
+  string component = 2;
+}
+
+// CDP CML workload runtimes.
+message CDPCMLUsageRuntime {
+  string kernel = 1;
+  string editor = 2;
+  string version = 3;
+  string edition = 4;
+}
+
+// A CDP CML session start usage event.
+message CDPCMLSessionStartEvent {
+  reserved 1;
+  float cpu = 2;
+  float mem = 3;
+  uint32 gpu = 4;
+  uint32 userId = 5;
+  uint32 projectId = 6;
+  string kernel = 7;
+  string image = 9;
+  string engineId = 10;
+  bool cli = 11;
+  CDPCMLK8SEngineStatus k8SEngineStatus = 12;
+  CDPCMLUsageRuntime runtime = 13;
+  repeated CDPCMLUsageRuntimeAddon addons = 14;
+}
+
+// A CDP CML engine stop usage event.
+message CDPCMLEngineStopEvent {
+  uint32 userId = 1;
+  uint32 projectId = 2;
+  string engineId = 3;
+  enum KilledByReason {
+    UNKNOWN = 0;
+    USER = 1;
+    TIMEOUT = 2;
+    FAILED = 3;
+  }
+  KilledByReason killedBy = 4;
+  reserved 5;
+  CDPCMLK8SEngineStatus k8SEngineStatus = 6;
+}
+
+// A CDP CML engine delete usage event.
+message CDPCMLEngineDeleteEvent {
+  string engineId = 1;
+  enum DeletedByReason {
+    UNKNOWN = 0; //Default value
+    IDLE_TIMEOUT = 1; //Pod IDLE timed out
+    DB_NO_INFO = 2; //Database does not contain engine but there is a pod for it
+    K8S_HAS_TERMINATE_INFO = 3; //The pod has corresponding engine in DB and the engine container has terminated status
+    DB_HAS_STOPPING_STATUS = 4; //Pod has stopping status in postgres database
+    DB_IN_ERROR_STATE = 5; //Pod is in pending state and the engine container is in one of the error states for a long period
+    START_STOP_SCHEDULE_TIMEOUT = 6; //Engine has been in status (scheduling, starting or stopping) for more than allowed lifetime
+    NO_APP = 7; //Pod is running, but application is no longer referring it as its dashboard
+  }
+  DeletedByReason deletedByReason = 2;
+  CDPCMLK8SEngineStatus k8SEngineStatus = 3;
+}
+
+// A CDP CML engine heartbeat usage event.
+message CDPCMLEngineHeartBeatEvent {
+  string engineId = 1;
+  double engineAge = 2;
+  CDPCMLK8SEngineStatus k8SEngineStatus = 3;
+}
+
+message CDPCMLJobStartEvent {
+  string type = 1;
+  float cpu = 2;
+  float mem = 3;
+  uint32 gpu = 4;
+  uint32 userId = 5;
+  uint32 projectId = 6;
+  string kernel = 7;
+  reserved 8;
+  string image = 9;
+  string engineId = 10;
+  CDPCMLK8SEngineStatus k8SEngineStatus = 11;
+  uint32 jobId = 12;
+  CDPCMLUsageRuntime runtime = 13;
+  repeated CDPCMLUsageRuntimeAddon addons = 14;
+}
+
+message CDPCMLJobCreatedOrModifiedEvent {
+  uint32 userId = 1;
+  uint32 projectId = 2;
+  uint32 jobId = 3;
+  string schedule = 4;
+  string kernel = 5;
+  bool includeConsoleLog = 6;
+  uint32 notifySuccess = 7;
+  uint32 notifyFailure = 8;
+  uint32 notifyTimeout = 9;
+  uint32 notifyStopped = 10;
+  string file = 11;
+  string reportAttachments = 12;
+}
+
+message CDPCMLExperimentStartEvent {
+  float cpu = 1;
+  float mem = 2;
+  uint32 gpu = 3;
+  uint32 userId = 4;
+  uint32 projectId = 5;
+  string kernel = 6;
+  string file = 7;
+  uint32 runId = 8;
+  string image = 9;
+  string engineId = 10;
+  CDPCMLK8SEngineStatus k8SEngineStatus = 11;
+  CDPCMLUsageRuntime runtime = 12;
+  repeated CDPCMLUsageRuntimeAddon addons = 13;
+}
+
+message CDPCMLExperimentEvent {
+  string projectId = 1;
+  uint32 userId = 2;
+  string experimentId = 3;
+  string status = 4;
+  string action = 5;
+}
+
+message CDPCMLExperimentRunEvent {
+  string projectId = 1;
+  uint32 userId = 2;
+  string experimentId = 3;
+  string runId = 4;
+  string status = 5;
+  string action= 6;
+  uint32 tags = 7;
+  uint32 metrics = 8;
+  uint32 params = 9;
+  uint32 artifacts = 10;
+}
+
+message CDPCMLModelDeployedEvent {
+  float cpu = 1;
+  float mem = 2;
+  uint32 gpu = 3;
+  uint32 userId = 4;
+  uint32 projectId = 5;
+  string kernel = 6;
+  string file = 7;
+  uint32 replicas = 8;
+  string image = 9;
+  string functionName = 10;
+  string engineId = 11;
+  CDPCMLUsageRuntime runtime = 12;
+  repeated CDPCMLUsageRuntimeAddon addons = 13;
+}
+
+message CDPCMLApplicationDeployedEvent {
+  float cpu = 1;
+  float mem = 2;
+  uint32 gpu = 3;
+  uint32 userId = 4;
+  uint32 projectId = 5;
+  string kernel = 6;
+  string file = 7;
+  string image = 8;
+  string subdomain = 9;
+  string engineId = 10;
+  uint32 applicationId = 11;
+  CDPCMLUsageRuntime runtime = 12;
+  repeated CDPCMLUsageRuntimeAddon addons = 13;
+  enum EmbeddedApp {
+    NONE = 0;
+    CDV = 1;
+  }
+  EmbeddedApp embeddedApp = 14;
+}
+
+message CDPCMLApplicationCreatedOrModifiedEvent {
+  uint32 applicationId = 1;
+  enum BypassAuthentication {
+    NOT_CHANGED = 0;
+    FALSE = 1;
+    TRUE = 2;
+  }
+  BypassAuthentication bypassAuthentication = 2;
+}
+
+message CDPCMLProjectCreatedEvent {
+  uint32 userId = 1;
+  enum UserType {
+    USER = 0;
+    USER_ORGANIZATION = 1;
+  }
+  UserType userType = 2;
+  uint32 ownerId = 3;
+  uint32 projectId = 4;
+  enum Type {
+    BUILTIN_TEMPLATE = 0;
+    CUSTOM_TEMPLATE = 1;
+    GIT = 2;
+    LOCAL = 3;
+    BLANK = 4;
+    FORK = 5;
+  }
+  Type type = 5;
+  bool isPrototype = 6;
+  string gitUrl = 7;
+  enum VisibilityType {
+    PRIVATE = 0;
+    ORGANIZATION = 1;
+    PUBLIC = 2;
+  }
+  VisibilityType visibility = 8;
+  uint32 forkedProjectId = 9;
+}
+
+message CDPCMLPrototypeCompletedEvent {
+  uint32 projectId = 1;
+  bool succeeded = 2;
+}
+
+message CDPCMLLoginEvent {
+  uint32 userId = 1;
+  string usernameHash = 2;
+  bool isAdmin = 3;
+  bool isBusiness = 4;
+  enum AuthType {
+    LOCAL = 0;
+    LDAP = 1;
+    SAML = 2;
+  }
+  AuthType authType = 5;
+}
+
+message CDPCMLLogoutEvent {
+  uint32 userId = 1;
+}
+
+message CDPCMLWorkerStartEvent {
+  uint32 userId = 1;
+  uint32 projectId = 2;
+  string engineId = 3;
+  string masterId = 4;
+  float cpu = 5;
+  float mem = 6;
+  uint32 gpu = 7;
+}
+
+message CDPCMLSparkExecutorEvent {
+  string executorId = 1;
+  string action = 2;
+  string masterId = 3;
+  int64 cpu = 4;
+  int64 mem = 5;
+  int64 gpu = 6;
+  string applicationId = 7;
+}
+
+message CDPCMLDataConnectionActionEvent {
+  uint32 userId = 1;
+  uint32 projectId = 2;
+  uint32 dataConnectionId = 3;
+  string dataConnectionType = 4;
+  uint32 workspaceConnectionId = 5;
+  bool autoDiscovered = 6;
+  bool isProjectConnection = 7;
+  string dataConnectionAction = 8;
+  string virtualWarehouseName = 9;
+  string crn = 10;
+  string engineId = 11;
 }
