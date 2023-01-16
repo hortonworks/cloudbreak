@@ -292,7 +292,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             List<ListBlobItem> listBlobItems = StreamSupport
                     .stream(blobListing.spliterator(), false)
                     .collect(Collectors.toList());
-            Log.log(LOGGER, format(" Azure Blob Directory: %s contains %d sub-objects.",
+            Log.log(LOGGER, format(" Azure Blob: %s contains %d sub-objects or present with occurences.",
                     keyPrefix, listBlobItems.size()));
 
             for (ListBlobItem blob : blobListing) {
@@ -337,7 +337,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             List<ListBlobItem> listBlobItems = StreamSupport
                     .stream(blobListing.spliterator(), false)
                     .collect(Collectors.toList());
-            Log.log(LOGGER, format(" Azure Blob Directory: %s contains %d sub-objects.",
+            Log.log(LOGGER, format(" Azure Blob: %s contains %d sub-objects or present with occurences.",
                     selectedDirectory, listBlobItems.size()));
 
             for (ListBlobItem blob : blobListing) {

@@ -104,10 +104,10 @@ public class S3ClientActions extends S3Client {
                 } while (filteredObjectSummaries.isEmpty() && objectListing.isTruncated());
 
                 if (filteredObjectSummaries.isEmpty()) {
-                    LOGGER.error("Amazon S3 object: {} has 0 sub-objects!", selectedObject);
-                    throw new TestFailException(format("Amazon S3 object: %s has 0 sub-objects!", selectedObject));
+                    LOGGER.error("Amazon S3 object: {} has 0 sub-objects or it is not present!", selectedObject);
+                    throw new TestFailException(format("Amazon S3 object: %s has 0 sub-objects or it is not present!", selectedObject));
                 } else {
-                    Log.log(LOGGER, format(" Amazon S3 object: %s contains %d sub-objects.",
+                    Log.log(LOGGER, format(" Amazon S3 object: %s contains %d sub-objects or present with occurences.",
                             selectedObject, filteredObjectSummaries.size()));
                 }
 

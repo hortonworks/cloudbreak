@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -286,37 +286,21 @@ public class GcpClientActions extends GcpClient {
         return StringUtils.removeStart(baseLocationUri.getPath(), "/");
     }
 
-    public void listBucketSelectedObject(String baseLocation, boolean zeroContent) {
-        Storage storage = buildStorage();
+    public void listBucketSelectedObject(String baseLocation, String selectedObject, boolean zeroContent) {
         URI baseLocationUri = getBaseLocationUri(baseLocation);
         String bucketName = getBucketName(baseLocation);
         String keyPrefix = getKeyPrefix(baseLocation);
         Page<Blob> blobs;
-        List<Blob> filteredBlobs = new ArrayList<>();
+        List<Blob> filteredBlobs;
 
         Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
         Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
         Log.log(LOGGER, format(" Google GCS Key Prefix: %s", keyPrefix));
+        Log.log(LOGGER, format(" Google GCS Object: %s", selectedObject));
 
-        try {
-            /**
-             * If specified, results are returned in a directory-like mode. Blobs whose names, after a possible prefix(String),
-             * do not contain the '/' delimiter are returned as is.
-             *
-             * Blobs whose names, after a possible prefix(String), contain the '/' delimiter, will have their name truncated
-             * after the delimiter and will be returned as Blob objects where only:
-             * - BlobInfo.getBlobId(),
-             * - BlobInfo.getSize() and
-             * - BlobInfo.isDirectory() are set.
-             * For such directory blobs:
-             * - BlobId.getGeneration() returns null,
-             * - BlobInfo.getSize() returns 0
-             * - BlobInfo.isDirectory() returns true.
-             *
-             * Duplicate directory blobs are omitted.
-             */
+        try (Storage storage = buildStorage()) {
             blobs = storage
-                    .list(bucketName, BlobListOption.prefix(keyPrefix + "/"));
+                    .list(bucketName, BlobListOption.prefix(keyPrefix + '/'));
         } catch (Exception e) {
             Log.error(LOGGER, format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
             throw new TestFailException(format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
@@ -326,16 +310,17 @@ public class GcpClientActions extends GcpClient {
             Log.error(LOGGER, "Google GCS path: '{}' does not exist!", keyPrefix);
             throw new TestFailException(format(" Google GCS path: '%s' does not exist! ", keyPrefix));
         } else {
-            for (Blob blob : blobs.iterateAll()) {
-                if (StringUtils.remove(blob.getName(), "/").contains(StringUtils.remove(keyPrefix, "/"))) {
-                    filteredBlobs.add(blob);
-                }
-            }
-            if (CollectionUtils.isEmpty(filteredBlobs)) {
-                Log.error(LOGGER, "Google GCS object: %s has 0 sub-objects!", keyPrefix);
-                throw new TestFailException(format("Google GCS object: %s has 0 sub-objects!", keyPrefix));
+            Iterable<Blob> blobListing = blobs.iterateAll();
+            filteredBlobs = StreamSupport
+                    .stream(blobListing.spliterator(), false)
+                    .filter(listedBlob -> StringUtils.remove(listedBlob.getName(), "/").contains(StringUtils.remove(selectedObject, "/")))
+                    .collect(Collectors.toList());
+
+            if (filteredBlobs.isEmpty()) {
+                Log.error(LOGGER, "Google GCS object: %s has 0 sub-objects or it is not present!", selectedObject);
+                throw new TestFailException(format("Google GCS object: %s has 0 sub-objects or it is not present!", selectedObject));
             } else {
-                Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects.", keyPrefix, filteredBlobs.size()));
+                Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects or present with occurences.", selectedObject, filteredBlobs.size()));
                 for (Blob filteredBlob : filteredBlobs.stream().limit(10).collect(Collectors.toList())) {
                     if (filteredBlob.getSize().compareTo(0L) == 0 && !zeroContent) {
                         /**
@@ -345,10 +330,10 @@ public class GcpClientActions extends GcpClient {
                          * - BlobInfo.isDirectory() returns true
                          */
                         if (filteredBlob.isDirectory()) {
-                            LOGGER.warn("Google GCS path: '{}' has 0 bytes of content!", keyPrefix);
+                            LOGGER.warn("Google GCS path: '{}' has 0 bytes of content!", filteredBlob.getName());
                         } else {
-                            LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", keyPrefix);
-                            throw new TestFailException(format("Google GCS path: '%s' has 0 bytes of content!", keyPrefix));
+                            LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", filteredBlob.getName());
+                            throw new TestFailException(format("Google GCS path: '%s' has 0 bytes of content!", filteredBlob.getName()));
                         }
                     }
                 }
@@ -357,18 +342,19 @@ public class GcpClientActions extends GcpClient {
     }
 
     public void deleteNonVersionedBucket(String baseLocation) {
-        Storage storage = buildStorage();
         URI baseLocationUri = getBaseLocationUri(baseLocation);
         String bucketName = getBucketName(baseLocation);
         String keyPrefix = getKeyPrefix(baseLocation);
         Blob blob;
+        Storage builtStorage;
 
         Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
         Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
         Log.log(LOGGER, format(" Google GCS Key Prefix: %s", keyPrefix));
 
-        try {
+        try (Storage storage = buildStorage()) {
             blob = storage.get(bucketName, keyPrefix);
+            builtStorage = storage;
         } catch (Exception e) {
             Log.error(LOGGER, format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
             throw new TestFailException(format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
@@ -377,7 +363,7 @@ public class GcpClientActions extends GcpClient {
             try {
                 BlobSourceOption precondition =
                         BlobSourceOption.generationMatch(blob.getGeneration());
-                storage.delete(bucketName, keyPrefix, precondition);
+                builtStorage.delete(bucketName, keyPrefix, precondition);
             } catch (StorageException e) {
                 Log.error(LOGGER, format("Failed to delete bucket from base location '%s'", baseLocation));
                 throw new TestFailException(format("Failed to delete bucket from base location '%s'", baseLocation), e);
