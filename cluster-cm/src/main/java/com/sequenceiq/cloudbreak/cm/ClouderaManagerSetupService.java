@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -402,16 +401,17 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Override
     public void setupProxy(ProxyConfig proxyConfig) {
         LOGGER.info("Setup proxy for CM");
+        Optional<ProxyConfig> optionalProxy = Optional.ofNullable(proxyConfig);
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
         ApiConfigList proxyConfigList = new ApiConfigList();
-        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_server").value(getIfNotNull(proxyConfig, ProxyConfig::getServerHost)));
-        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_port").value(getIfNotNull(proxyConfig, pc -> String.valueOf(pc.getServerPort()))));
-        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_protocol").value(getIfNotNull(proxyConfig, pc -> pc.getProtocol().toUpperCase())));
+        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_server").value(optionalProxy.map(ProxyConfig::getServerHost).orElse("")));
+        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_port").value(optionalProxy.map(pc -> String.valueOf(pc.getServerPort())).orElse("")));
+        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_protocol").value(optionalProxy.map(pc -> pc.getProtocol().toUpperCase()).orElse("")));
 
         proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_user")
-                .value(getIfNotNull(proxyConfig, pc -> pc.getProxyAuthentication().map(ProxyAuthentication::getUserName).orElse(null))));
+                .value(optionalProxy.flatMap(ProxyConfig::getProxyAuthentication).map(ProxyAuthentication::getUserName).orElse("")));
         proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_password")
-                .value(getIfNotNull(proxyConfig, pc -> pc.getProxyAuthentication().map(ProxyAuthentication::getPassword).orElse(null))));
+                .value(optionalProxy.flatMap(ProxyConfig::getProxyAuthentication).map(ProxyAuthentication::getPassword).orElse("")));
         addNoProxyHosts(proxyConfig, proxyConfigList);
         try {
             LOGGER.info("Update settings with: " + proxyConfigList);
@@ -427,7 +427,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         ClusterView cluster = stack.getCluster();
         ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(cluster.getId());
         if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_6_0)) {
-            proxyConfigList.addItemsItem(new ApiConfig().name("parcel_no_proxy_list").value(getIfNotNull(proxyConfig, ProxyConfig::getNoProxyHosts)));
+            String noProxyHosts = Optional.ofNullable(proxyConfig).map(ProxyConfig::getNoProxyHosts).orElse("");
+            proxyConfigList.addItemsItem(new ApiConfig().name("parcel_no_proxy_list").value(noProxyHosts));
         }
     }
 

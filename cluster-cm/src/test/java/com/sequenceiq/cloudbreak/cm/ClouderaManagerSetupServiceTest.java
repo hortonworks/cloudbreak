@@ -886,12 +886,12 @@ public class ClouderaManagerSetupServiceTest {
 
         assertThat(capturedMessage).isEqualTo("Update proxy settings");
         assertThat(capturedConfigs.getItems()).containsExactlyInAnyOrder(
-                new ApiConfig().name("parcel_proxy_server").value(null),
-                new ApiConfig().name("parcel_proxy_port").value(null),
-                new ApiConfig().name("parcel_proxy_protocol").value(null),
-                new ApiConfig().name("parcel_proxy_user").value(null),
-                new ApiConfig().name("parcel_proxy_password").value(null),
-                new ApiConfig().name("parcel_no_proxy_list").value(null)
+                new ApiConfig().name("parcel_proxy_server").value(""),
+                new ApiConfig().name("parcel_proxy_port").value(""),
+                new ApiConfig().name("parcel_proxy_protocol").value(""),
+                new ApiConfig().name("parcel_proxy_user").value(""),
+                new ApiConfig().name("parcel_proxy_password").value(""),
+                new ApiConfig().name("parcel_no_proxy_list").value("")
         );
     }
 
