@@ -140,7 +140,9 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
     private Assertion<SdxInternalTestDto, SdxClient> getSdxInternalTestDtoSdxClientAssertion(boolean expected) {
         return (tc, testDto, client) -> {
             Boolean res = cloudFunctionality.isCloudFormationExistForStack(testDto.getName());
-            Assertions.assertThat(res).isEqualTo(expected);
+            Assertions.assertThat(res).withFailMessage("Stack cloud formation "
+                    + (expected ? " should exist but it is not" : " should not exist but it is"))
+                    .isEqualTo(expected);
             return testDto;
         };
     }
