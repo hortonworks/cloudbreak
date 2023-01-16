@@ -468,10 +468,4 @@ public class StackOperationService {
         MDCBuilder.buildMdcContext(stack);
         return saltPasswordStatusService.getSaltPasswordStatus(stack);
     }
-
-    public FlowIdentifier modifyProxyConfig(NameOrCrn nameOrCrn, String accountId, String previousProxyConfigCrn) {
-        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        MDCBuilder.buildMdcContext(stack);
-        return flowManager.triggerModifyProxyConfig(stack.getId(), previousProxyConfigCrn);
-    }
 }

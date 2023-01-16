@@ -49,7 +49,8 @@ class ModifyProxyConfigSaltStateApplyActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        context = new ModifyProxyConfigContext(flowParameters, stack);
+        super.setUp(context);
+        lenient().when(context.getStack()).thenReturn(stack);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
         payload = new ModifyProxyConfigTriggerEvent(STACK_ID, mock(Promise.class), OPERATION_ID);
     }

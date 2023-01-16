@@ -6,11 +6,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -28,14 +26,12 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -53,10 +49,6 @@ class ClusterBuilderServiceTest {
     private static final Long INSTANCE_GROUP_ID = 1L;
 
     private static final String BLUEPRINT_TEXT = "{\"some\":\"thing\"}";
-
-    private static final String PROXY_CRN = "proxy-crn";
-
-    private static final String ENV_CRN = "env-crn";
 
     @InjectMocks
     private ClusterBuilderService underTest;
@@ -115,29 +107,21 @@ class ClusterBuilderServiceTest {
     @Mock
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
-    @Mock
-    private ProxyConfig proxyConfig;
-
-    @Mock
-    private ProxyConfigDtoService proxyConfigDtoService;
-
     @BeforeEach
     void setUp() {
-        lenient().when(mockBlueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
-        lenient().when(mockCluster.getId()).thenReturn(CLUSTER_ID);
-        lenient().when(mockCluster.getProxyConfigCrn()).thenReturn(PROXY_CRN);
-        lenient().when(mockCluster.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        lenient().when(mockStack.getBlueprint()).thenReturn(mockBlueprint);
-        lenient().when(mockStack.getCluster()).thenReturn(mockCluster);
-        lenient().when(mockStack.getStack()).thenReturn(stackView);
-        lenient().when(mockInstanceGroup.getId()).thenReturn(INSTANCE_GROUP_ID);
+        when(mockBlueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
+        when(mockCluster.getId()).thenReturn(CLUSTER_ID);
+        when(mockStack.getBlueprint()).thenReturn(mockBlueprint);
+        when(mockStack.getCluster()).thenReturn(mockCluster);
+        when(mockStack.getStack()).thenReturn(stackView);
+        when(mockInstanceGroup.getId()).thenReturn(INSTANCE_GROUP_ID);
         lenient().when(mockHostGroup.getInstanceGroup()).thenReturn(mockInstanceGroup);
 
-        lenient().when(mockStackDtoService.getById(STACK_ID)).thenReturn(mockStack);
-        lenient().when(mockClusterApiConnectors.getConnector(mockStack)).thenReturn(mockClusterApi);
-        lenient().when(mockClusterApi.clusterSetupService()).thenReturn(mockClusterSetupService);
-        lenient().when(mockHostGroupService.getByClusterWithRecipes(CLUSTER_ID)).thenReturn(Set.of(mockHostGroup));
-        lenient().when(mockInstanceMetaDataService.findAliveInstancesInInstanceGroup(INSTANCE_GROUP_ID)).thenReturn(List.of(mockInstanceMetaData));
+        when(mockStackDtoService.getById(STACK_ID)).thenReturn(mockStack);
+        when(mockClusterApiConnectors.getConnector(mockStack)).thenReturn(mockClusterApi);
+        when(mockClusterApi.clusterSetupService()).thenReturn(mockClusterSetupService);
+        when(mockHostGroupService.getByClusterWithRecipes(CLUSTER_ID)).thenReturn(Set.of(mockHostGroup));
+        when(mockInstanceMetaDataService.findAliveInstancesInInstanceGroup(INSTANCE_GROUP_ID)).thenReturn(List.of(mockInstanceMetaData));
     }
 
     @Test
@@ -167,42 +151,6 @@ class ClusterBuilderServiceTest {
                 "cluster creation to be able to resolve them!", expectedException.getMessage());
 
         verify(mockClusterService, times(1)).updateExtendedBlueprintText(any(), anyString());
-    }
-
-    @Test
-    void prepareProxyConfigForStackWithoutProxy() {
-        when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(PROXY_CRN, ENV_CRN)).thenReturn(Optional.empty());
-
-        underTest.prepareProxyConfig(STACK_ID);
-
-        verifyNoInteractions(mockClusterSetupService);
-    }
-
-    @Test
-    void prepareProxyConfigForStackWithProxy() {
-        when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(PROXY_CRN, ENV_CRN)).thenReturn(Optional.of(proxyConfig));
-
-        underTest.prepareProxyConfig(STACK_ID);
-
-        verify(mockClusterSetupService).setupProxy(proxyConfig);
-    }
-
-    @Test
-    void modifyProxyConfigForStackWithoutProxy() {
-        when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(PROXY_CRN, ENV_CRN)).thenReturn(Optional.empty());
-
-        underTest.modifyProxyConfig(STACK_ID);
-
-        verify(mockClusterSetupService).setupProxy(null);
-    }
-
-    @Test
-    void modifyProxyConfigForStackWithProxy() {
-        when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(PROXY_CRN, ENV_CRN)).thenReturn(Optional.of(proxyConfig));
-
-        underTest.modifyProxyConfig(STACK_ID);
-
-        verify(mockClusterSetupService).setupProxy(proxyConfig);
     }
 
 }

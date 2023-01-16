@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -47,8 +46,8 @@ public abstract class ActionTest {
     @Captor
     private ArgumentCaptor<Event<?>> eventCaptor;
 
-    @BeforeEach
-    protected void setUpBase() {
+    protected void setUp(CommonContext context) {
+        lenient().when(context.getFlowParameters()).thenReturn(flowParameters);
         lenient().when(flowParameters.getFlowId()).thenReturn(FLOW_ID);
         lenient().when(flowParameters.getFlowTriggerUserCrn()).thenReturn("trigger-user-crn");
         lenient().when(flowParameters.getFlowOperationType()).thenReturn("flow-operation-type");

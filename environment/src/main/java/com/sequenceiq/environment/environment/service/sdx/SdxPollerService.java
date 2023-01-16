@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.service.sdx;
 
-import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_PROXY_CONFIG_MODIFICATION_IN_PROGRESS;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.RUNNING;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.START_IN_PROGRESS;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.STOPPED;
@@ -10,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
+import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.flow.DatalakeMultipleFlowsResultEvaluator;
@@ -39,8 +40,6 @@ public class SdxPollerService {
     private static final Set<SdxClusterStatusResponse> SKIP_STOP_OPERATION = Set.of(STOPPED, STOP_IN_PROGRESS);
 
     private static final Set<SdxClusterStatusResponse> SKIP_START_OPERATION = Set.of(RUNNING, START_IN_PROGRESS);
-
-    private static final Set<SdxClusterStatusResponse> SKIP_MODIFY_PROXY_OPERATION = Set.of(DATALAKE_PROXY_CONFIG_MODIFICATION_IN_PROGRESS);
 
     @Value("${env.stop.polling.attempt:360}")
     private Integer attempt;
@@ -66,27 +65,22 @@ public class SdxPollerService {
     }
 
     public void startAttachedDatalake(Long envId, String environmentName) {
-        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_START_OPERATION, sdxService::startByCrn);
+        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_START_OPERATION, sdxService::startByCrn, sdxPollerProvider::startStopSdxClustersPoller);
     }
 
     public void stopAttachedDatalakeClusters(Long envId, String environmentName) {
-        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_STOP_OPERATION, sdxService::stopByCrn);
-    }
-
-    public void modifyProxyConfigOnAttachedDatalakeClusters(Long envId, String environmentName, String previousProxyCrn) {
-        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_MODIFY_PROXY_OPERATION,
-                sdxCrn -> sdxService.modifyProxy(sdxCrn, previousProxyCrn));
+        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_STOP_OPERATION, sdxService::stopByCrn, sdxPollerProvider::startStopSdxClustersPoller);
     }
 
     private void executeSdxOperationAndStartPolling(Long envId, String environmentName, Set<SdxClusterStatusResponse> skipStatuses,
-            Function<String, FlowIdentifier> sdxOperation) {
+            Function<String, FlowIdentifier> sdxOperation, BiFunction<Long, List<FlowIdentifier>, AttemptMaker<Void>> attemptMakerFactory) {
         try {
             List<FlowIdentifier> flowIdentifiers = getExecuteSdxOperationsAndGetCrns(environmentName, sdxOperation, skipStatuses);
             if (CollectionUtils.isNotEmpty(flowIdentifiers)) {
                 Polling.stopAfterAttempt(attempt)
                         .stopIfException(false)
                         .waitPeriodly(sleeptime, TimeUnit.SECONDS)
-                        .run(sdxPollerProvider.flowListPoller(envId, flowIdentifiers));
+                        .run(attemptMakerFactory.apply(envId, flowIdentifiers));
             }
             if (multipleFlowsResultEvaluator.anyFailed(flowIdentifiers)) {
                 throw new EnvironmentServiceException(String.format("Sdx start/stop operation failed. FlowIds: %s", flowIdentifiers));

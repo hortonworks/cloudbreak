@@ -43,6 +43,7 @@ class ModifyProxyConfigFinishedActionTest extends ActionTest {
     @Mock
     private OperationService operationService;
 
+    @Mock
     private ModifyProxyConfigContext context;
 
     @Mock
@@ -50,7 +51,8 @@ class ModifyProxyConfigFinishedActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        context = new ModifyProxyConfigContext(flowParameters, stack);
+        super.setUp(context);
+        lenient().when(context.getStack()).thenReturn(stack);
         lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
     }

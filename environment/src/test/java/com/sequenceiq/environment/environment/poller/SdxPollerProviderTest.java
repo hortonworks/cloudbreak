@@ -42,7 +42,7 @@ class SdxPollerProviderTest {
     void testStopDatalakePoller(AttemptState attemptState, Boolean allFinished) throws Exception {
         when(multipleFlowsResultEvaluator.allFinished(anyList())).thenReturn(allFinished);
 
-        AttemptResult<Void> result = underTest.flowListPoller(ENV_ID, List.of(flowIdentifier1, flowIdentifier2)).process();
+        AttemptResult<Void> result = underTest.startStopSdxClustersPoller(ENV_ID, List.of(flowIdentifier1, flowIdentifier2)).process();
 
         assertEquals(attemptState, result.getState());
     }
@@ -52,7 +52,7 @@ class SdxPollerProviderTest {
     void testStartDatalakePoller(AttemptState attemptState, Boolean allFinished) throws Exception {
         when(multipleFlowsResultEvaluator.allFinished(anyList())).thenReturn(allFinished);
 
-        AttemptResult<Void> result = underTest.flowListPoller(ENV_ID, List.of(flowIdentifier1, flowIdentifier2)).process();
+        AttemptResult<Void> result = underTest.startStopSdxClustersPoller(ENV_ID, List.of(flowIdentifier1, flowIdentifier2)).process();
 
         assertEquals(attemptState, result.getState());
     }

@@ -498,24 +498,6 @@ public class StackOperationServiceTest {
         verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
     }
 
-    @Test
-    void testModifyProxyConfig() {
-        NameOrCrn nameOrCrn = NameOrCrn.ofCrn("crn");
-        StackDto stackDto = mock(StackDto.class);
-        long stackId = 1L;
-        when(stackDto.getId()).thenReturn(stackId);
-        when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
-        String previousProxyConfigCrn = "prev-proxy-crn";
-        FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
-        when(flowManager.triggerModifyProxyConfig(stackId, previousProxyConfigCrn)).thenReturn(flowIdentifier);
-
-        FlowIdentifier result = underTest.modifyProxyConfig(nameOrCrn, ACCOUNT_ID, previousProxyConfigCrn);
-
-        assertEquals(flowIdentifier, result);
-        verify(stackDtoService).getByNameOrCrn(nameOrCrn, ACCOUNT_ID);
-        verify(flowManager).triggerModifyProxyConfig(stackId, previousProxyConfigCrn);
-    }
-
     private InstanceMetaData createInstanceMetadataForTest(Long privateId, String instanceGroupName) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId("i" + privateId);

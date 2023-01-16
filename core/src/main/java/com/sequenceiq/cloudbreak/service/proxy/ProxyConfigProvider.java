@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 
@@ -28,8 +27,7 @@ public class ProxyConfigProvider {
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
 
-    public void decoratePillarWithProxyDataIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto) {
-        ClusterView cluster = stackDto.getCluster();
+    public void decoratePillarWithProxyDataIfNeeded(Map<String, SaltPillarProperties> servicePillar, ClusterView cluster) {
         Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByCrnWithEnvironmentFallback(cluster.getProxyConfigCrn(), cluster.getEnvironmentCrn());
         proxyConfig.ifPresent(pc -> {
             Map<String, Object> proxy = new HashMap<>();
@@ -41,7 +39,6 @@ public class ProxyConfigProvider {
                 proxy.put("password", auth.getPassword());
             });
             proxy.put("noProxyHosts", pc.getNoProxyHosts());
-            proxy.put("tunnel", stackDto.getTunnel());
             servicePillar.put(PROXY_KEY, new SaltPillarProperties(PROXY_SLS_PATH, singletonMap(PROXY_KEY, proxy)));
             LOGGER.info("Salt pillar properties extend with proxy config: {}", pc);
         });

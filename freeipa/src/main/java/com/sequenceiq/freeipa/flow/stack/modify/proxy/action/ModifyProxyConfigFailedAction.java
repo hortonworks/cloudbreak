@@ -55,6 +55,6 @@ public class ModifyProxyConfigFailedAction extends ModifyProxyConfigAction<Stack
 
     @Override
     protected Selectable createRequest(ModifyProxyConfigContext context) {
-        return new StackEvent(ModifyProxyConfigEvent.MODIFY_PROXY_FAILURE_HANDLED_EVENT.selector(), context.getStack().getId());
+        return new StackEvent(ModifyProxyConfigEvent.MODIFY_PROXY_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
     }
 }

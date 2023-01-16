@@ -57,7 +57,7 @@ class ProxyConfigModificationFailedStateActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        context = new EnvProxyModificationContext(flowParameters, null);
+        super.setUp(context);
         when(payload.getResourceCrn()).thenReturn(ENV_CRN);
         ProxyConfig proxyConfig = mock(ProxyConfig.class);
         when(proxyConfig.getResourceCrn()).thenReturn(PROXY_CRN);

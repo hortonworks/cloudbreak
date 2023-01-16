@@ -302,10 +302,6 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackCommonService.getSaltPasswordStatus(nameOrCrn, accountId);
     }
 
-    public FlowIdentifier modifyProxyConfig(NameOrCrn nameOrCrn, String accountId, String previousProxyConfigCrn) {
-        return stackCommonService.modifyProxyConfig(nameOrCrn, accountId, previousProxyConfigCrn);
-    }
-
     public FlowIdentifier putScaling(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackScaleV4Request updateRequest) {
         return stackCommonService.putScalingInWorkspace(nameOrCrn, accountId, updateRequest);
     }

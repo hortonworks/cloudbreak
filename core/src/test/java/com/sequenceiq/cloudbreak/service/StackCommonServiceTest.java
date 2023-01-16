@@ -390,16 +390,6 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testModifyProxyConfig() {
-        NameOrCrn nameOrCrn = NameOrCrn.ofName("name");
-        String previousProxyConfigCrn = "prev-proxy-crn";
-
-        underTest.modifyProxyConfig(nameOrCrn, ACCOUNT_ID, previousProxyConfigCrn);
-
-        verify(stackOperationService).modifyProxyConfig(nameOrCrn, ACCOUNT_ID, previousProxyConfigCrn);
-    }
-
-    @Test
     public void testSyncWhenInvalidStackStatusThenBadRequest() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
