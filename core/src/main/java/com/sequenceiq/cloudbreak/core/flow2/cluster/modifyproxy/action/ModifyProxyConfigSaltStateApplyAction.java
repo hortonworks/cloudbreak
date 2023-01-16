@@ -19,7 +19,9 @@ public class ModifyProxyConfigSaltStateApplyAction extends ModifyProxyConfigActi
     @Override
     protected void prepareExecution(ModifyProxyConfigRequest payload, Map<Object, Object> variables) {
         super.prepareExecution(payload, variables);
-        variables.put(PREVIOUS_PROXY_CONFIG, payload.getPreviousProxyConfigCrn());
+        if (payload.getPreviousProxyConfigCrn() != null) {
+            variables.put(PREVIOUS_PROXY_CONFIG, payload.getPreviousProxyConfigCrn());
+        }
     }
 
     @Override
