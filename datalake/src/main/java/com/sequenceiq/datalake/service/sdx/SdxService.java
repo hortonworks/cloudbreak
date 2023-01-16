@@ -1349,16 +1349,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster);
     }
 
-    public FlowIdentifier modifyProxyConfig(SdxCluster sdxCluster, String previousProxyConfigCrn) {
-        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                initiatorUserCrn -> stackV4Endpoint.modifyProxyConfigInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(),
-                        previousProxyConfigCrn, initiatorUserCrn)
-        );
-        cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
-        return sdxReactorFlowManager.triggerModifyProxyConfigTracker(sdxCluster);
-    }
-
     public void updateDatabaseEngineVersion(String crn, String databaseEngineVersion) {
         int updatedCount = sdxClusterRepository.updateDatabaseEngineVersion(crn, databaseEngineVersion);
         if (updatedCount < 1) {

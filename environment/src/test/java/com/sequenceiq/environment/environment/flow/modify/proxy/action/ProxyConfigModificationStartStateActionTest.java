@@ -44,7 +44,7 @@ class ProxyConfigModificationStartStateActionTest extends ActionTest {
 
     @BeforeEach
     void setUp() {
-        context = new EnvProxyModificationContext(flowParameters, null);
+        super.setUp(context);
         when(payload.getProxyConfig()).thenReturn(proxyConfig);
         when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any())).thenReturn(environmentDto);
     }

@@ -281,12 +281,6 @@ public interface StackV4Endpoint {
     SaltPasswordStatusResponse getSaltPasswordStatus(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
 
     @PUT
-    @Path("internal/{crn}/modify_proxy")
-    @Produces(MediaType.APPLICATION_JSON)
-    FlowIdentifier modifyProxyConfigInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
-            @QueryParam("previousProxyConfigCrn") String previousProxyConfigCrn, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
-
-    @PUT
     @Path("{name}/scaling")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SCALE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,

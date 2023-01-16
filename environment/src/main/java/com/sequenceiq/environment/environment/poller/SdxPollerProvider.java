@@ -33,7 +33,7 @@ public class SdxPollerProvider {
         this.multipleFlowsResultEvaluator = multipleFlowsResultEvaluator;
     }
 
-    public AttemptMaker<Void> flowListPoller(Long envId, List<FlowIdentifier> flowIdentifiers) {
+    public AttemptMaker<Void> startStopSdxClustersPoller(Long envId, List<FlowIdentifier> flowIdentifiers) {
         return () -> collectSdxResults(flowIdentifiers, envId);
     }
 

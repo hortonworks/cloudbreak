@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.service.proxy;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -13,25 +12,24 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig.ProxyConfigBuilder;
-import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.common.api.type.Tunnel;
 
-@ExtendWith(MockitoExtension.class)
-class ProxyConfigProviderTest {
+@RunWith(MockitoJUnitRunner.class)
+public class ProxyConfigProviderTest {
 
     private static final String NO_PROXY_HOSTS = "noproxy.com";
 
@@ -42,7 +40,7 @@ class ProxyConfigProviderTest {
     private Workspace workspace;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private StackDto stackDto;
+    private Stack stack;
 
     @InjectMocks
     private ProxyConfigProvider proxyConfigProvider;
@@ -51,25 +49,24 @@ class ProxyConfigProviderTest {
 
     private Map<String, SaltPillarProperties> servicePillar;
 
-    @BeforeEach
-    void init() {
+    @Before
+    public void init() {
         cluster = new Cluster();
         servicePillar = new HashMap<>();
         cluster.setWorkspace(workspace);
-        lenient().when(stackDto.getCluster()).thenReturn(cluster);
-        lenient().when(workspace.getTenant().getName()).thenReturn("tenantId");
-        lenient().when(stackDto.getCreator().getUserCrn()).thenReturn("aUserCrn");
-        lenient().when(stackDto.getTunnel()).thenReturn(Tunnel.CCMV2);
+        cluster.setStack(stack);
+        when(workspace.getTenant().getName()).thenReturn("tenantId");
+        when(stack.getCreator().getUserCrn()).thenReturn("aUserCrn");
     }
 
     @Test
-    void testNoProxyConfig() {
-        proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, stackDto);
+    public void testNoProxyConfig() {
+        proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
         assertTrue(servicePillar.isEmpty());
     }
 
     @Test
-    void testWithoutAuthProxy() {
+    public void testWithoutAuthProxy() {
         ProxyConfigBuilder proxyConfig = ProxyConfig.builder();
         Map<String, Object> properties = testProxyCore(proxyConfig);
 
@@ -79,11 +76,10 @@ class ProxyConfigProviderTest {
         assertFalse(properties.containsKey("user"));
         assertFalse(properties.containsKey("password"));
         assertEquals(NO_PROXY_HOSTS, properties.get("noProxyHosts"));
-        assertEquals(Tunnel.CCMV2, properties.get("tunnel"));
     }
 
     @Test
-    void testWithAuthProxy() {
+    public void testWithAuthProxy() {
         ProxyConfigBuilder proxyConfig = ProxyConfig.builder();
         proxyConfig.withProxyAuthentication(ProxyAuthentication.builder()
                 .withUserName("user")
@@ -93,7 +89,6 @@ class ProxyConfigProviderTest {
         assertEquals("user", properties.get("user"));
         assertEquals("pass", properties.get("password"));
         assertEquals(NO_PROXY_HOSTS, properties.get("noProxyHosts"));
-        assertEquals(Tunnel.CCMV2, properties.get("tunnel"));
     }
 
     private Map<String, Object> testProxyCore(ProxyConfigBuilder proxyConfigBuilder) {
@@ -104,7 +99,7 @@ class ProxyConfigProviderTest {
         cluster.setProxyConfigCrn("ANY_CRN");
         cluster.setEnvironmentCrn("ANY_CRN");
         when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(anyString(), anyString())).thenReturn(Optional.of(proxyConfigBuilder.build()));
-        proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, stackDto);
+        proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
         SaltPillarProperties pillarProperties = servicePillar.get(ProxyConfigProvider.PROXY_KEY);
         assertNotNull(pillarProperties);
         assertEquals(ProxyConfigProvider.PROXY_SLS_PATH, pillarProperties.getPath());

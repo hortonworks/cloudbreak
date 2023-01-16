@@ -56,8 +56,7 @@ public class EnvProxyModificationDefaultEvent extends BaseFlowEvent implements P
             return false;
         }
         EnvProxyModificationDefaultEvent that = (EnvProxyModificationDefaultEvent) o;
-        return isClassAndEqualsEvent(EnvProxyModificationDefaultEvent.class, that)
-                && Objects.equals(environmentDto, that.environmentDto)
+        return Objects.equals(environmentDto, that.environmentDto)
                 && Objects.equals(proxyConfig, that.proxyConfig)
                 && Objects.equals(previousProxyConfig, that.previousProxyConfig);
     }

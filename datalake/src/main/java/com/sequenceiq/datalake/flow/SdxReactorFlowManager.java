@@ -61,7 +61,6 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.datalake.flow.dr.datalakeinfo.event.SubmitDatalakeDataInfoTriggerEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
-import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTrackerEvent;
 import com.sequenceiq.datalake.flow.salt.update.SaltUpdateEvent;
@@ -322,13 +321,6 @@ public class SdxReactorFlowManager {
     public FlowIdentifier triggerSaltPasswordRotationTracker(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake salt password rotation tracker for: {}", cluster);
         String selector = RotateSaltPasswordTrackerEvent.ROTATE_SALT_PASSWORD_EVENT.event();
-        String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
-    }
-
-    public FlowIdentifier triggerModifyProxyConfigTracker(SdxCluster cluster) {
-        LOGGER.info("Trigger Datalake modify proxy config tracker for: {}", cluster);
-        String selector = ModifyProxyConfigTrackerEvent.MODIFY_PROXY_CONFIG_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
     }

@@ -64,8 +64,6 @@ public class FlowChainTriggers {
 
     public static final String DETERMINE_DATALAKE_DATA_SIZES_CHAIN_TRIGGER_EVENT = "DETERMINE_DATALAKE_DATA_SIZES_CHAIN_TRIGGER_EVENT";
 
-    public static final String MODIFY_PROXY_CONFIG_CHAIN_TRIGGER_EVENT = "MODIFY_PROXY_CONFIG_CHAIN_TRIGGER_EVENT";
-
     private FlowChainTriggers() {
     }
 }

@@ -472,7 +472,7 @@ public class ClusterHostServiceRunner {
         });
         servicePillar.put("startup", new SaltPillarProperties("/mount/startup.sls", singletonMap("mount", mountPathMap)));
 
-        proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, stackDto);
+        proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 

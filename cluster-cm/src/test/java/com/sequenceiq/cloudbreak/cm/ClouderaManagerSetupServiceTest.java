@@ -858,44 +858,6 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    void testSetupProxyWhenProxyConfigIsNull() throws ApiException {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
-                .thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
-                .thenReturn(new ApiConfigList());
-
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion("7.6.0");
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
-                .thenReturn(clouderaManagerRepo);
-
-        underTest.setupProxy(null);
-
-        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<ApiConfigList> configsCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
-
-        verify(clouderaManagerResourceApi, times(1)).updateConfig(
-                messageCaptor.capture(),
-                configsCaptor.capture()
-        );
-
-        String capturedMessage = messageCaptor.getValue();
-        ApiConfigList capturedConfigs = configsCaptor.getValue();
-
-        assertThat(capturedMessage).isEqualTo("Update proxy settings");
-        assertThat(capturedConfigs.getItems()).containsExactlyInAnyOrder(
-                new ApiConfig().name("parcel_proxy_server").value(null),
-                new ApiConfig().name("parcel_proxy_port").value(null),
-                new ApiConfig().name("parcel_proxy_protocol").value(null),
-                new ApiConfig().name("parcel_proxy_user").value(null),
-                new ApiConfig().name("parcel_proxy_password").value(null),
-                new ApiConfig().name("parcel_no_proxy_list").value(null)
-        );
-    }
-
-    @Test
     public void testSetupProxyWhenProxysetupThrowApiExceptionShouldThrowClouderaManagerOperationFailedException() throws ApiException {
         ApiException error = mock(ApiException.class);
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);

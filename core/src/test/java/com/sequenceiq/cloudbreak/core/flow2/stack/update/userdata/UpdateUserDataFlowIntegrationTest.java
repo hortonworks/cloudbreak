@@ -80,7 +80,9 @@ class UpdateUserDataFlowIntegrationTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final int ALL_CALLED_ONCE = 3;
+    private static final int ALL_CALLED_ONCE = 2;
+
+    private static final int CALLED_ONCE_TILL_GENERATE_USERDATA = 1;
 
     private static final String USER_DATA = "IS_CCM_V2_JUMPGATE_ENABLED=false";
 
@@ -180,15 +182,9 @@ class UpdateUserDataFlowIntegrationTest {
     }
 
     @Test
-    public void testUserDataUpdateWhenUpdateJumpgateFlagOnlyFails() throws Exception {
+    public void testUserDataUpdateWhenNewUserDataFails() throws Exception {
         doThrow(new BadRequestException("")).when(userDataService).updateJumpgateFlagOnly(STACK_ID);
-        testFlow(1, false);
-    }
-
-    @Test
-    public void testUserDataUpdateWhenUpdateProxyConfigFails() throws Exception {
-        doThrow(new BadRequestException("")).when(userDataService).updateProxyConfig(STACK_ID);
-        testFlow(2, false);
+        testFlow(CALLED_ONCE_TILL_GENERATE_USERDATA, false);
     }
 
     private void testFlow(int calledOnceCount, boolean success) throws Exception {
@@ -208,8 +204,7 @@ class UpdateUserDataFlowIntegrationTest {
         final int[] expected = new int[ALL_CALLED_ONCE];
         Arrays.fill(expected, 0, calledOnceCount, 1);
         verify(userDataService, times(expected[0])).updateJumpgateFlagOnly(STACK_ID);
-        verify(userDataService, times(expected[1])).updateProxyConfig(STACK_ID);
-        verify(resourcesApi, times(expected[2])).updateUserData(any(), any(), any(), any());
+        verify(resourcesApi, times(expected[1])).updateUserData(any(), any(), any(), any());
     }
 
     private void flowFinishedSuccessfully() {
@@ -223,12 +218,7 @@ class UpdateUserDataFlowIntegrationTest {
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> reactorNotifier.notify(STACK_ID, selector,
-                        UserDataUpdateRequest.builder()
-                                .withSelector(selector)
-                                .withStackId(STACK_ID)
-                                .withOldTunnel(Tunnel.CCM)
-                                .withModifyProxyConfig(true)
-                                .build()));
+                        new UserDataUpdateRequest(selector.toString(), STACK_ID, Tunnel.CCM)));
     }
 
     private void letItFlow(FlowIdentifier flowIdentifier) {

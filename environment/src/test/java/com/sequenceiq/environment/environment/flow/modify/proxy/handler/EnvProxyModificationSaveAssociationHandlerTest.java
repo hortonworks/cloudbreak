@@ -70,7 +70,7 @@ class EnvProxyModificationSaveAssociationHandlerTest {
         underTest.accept(wrappedEvent);
 
         EnvProxyModificationDefaultEvent envProxyModificationEvent = new EnvProxyModificationDefaultEvent(
-                EnvProxyModificationStateSelectors.MODIFY_PROXY_FREEIPA_EVENT.selector(), environmentDto, proxyConfig, previousProxyConfig, null);
+                EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector(), environmentDto, proxyConfig, previousProxyConfig, null);
         verify(environmentService).updateProxyConfig(ENV_ID, proxyConfig);
         verify(eventSender).sendEvent(envProxyModificationEvent, wrappedEvent.getHeaders());
     }
