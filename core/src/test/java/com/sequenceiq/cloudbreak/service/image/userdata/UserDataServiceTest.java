@@ -2,15 +2,18 @@ package com.sequenceiq.cloudbreak.service.image.userdata;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,8 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigUserDataReplacer;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -32,6 +35,8 @@ public class UserDataServiceTest {
 
     private static final long STACK_ID = 1L;
 
+    private static final String ENV_CRN = "env-crn";
+
     @InjectMocks
     private UserDataService underTest;
 
@@ -41,28 +46,52 @@ public class UserDataServiceTest {
     @Mock
     private StackService stackService;
 
-    @Test
-    void updateJumpgateFlagOnly() throws CloudbreakImageNotFoundException {
-        Image image = new Image("alma", Map.of(InstanceGroupType.GATEWAY, ""), "", "", "", "", "", null);
-        image.setUserdata(Map.of(InstanceGroupType.GATEWAY,
-                "FLAG=foo\nIS_CCM_ENABLED=true\nIS_CCM_V2_ENABLED=false\nIS_CCM_V2_JUMPGATE_ENABLED=false\nOTHER_FLAG=bar"));
-        when(imageService.getImage(STACK_ID)).thenReturn(image);
-        when(stackService.getByIdWithLists(1L)).thenReturn(stack());
+    @Mock
+    private ProxyConfigUserDataReplacer proxyConfigUserDataReplacer;
 
-        underTest.updateJumpgateFlagOnly(1L);
+    @Mock
+    private Stack stack;
 
-        ArgumentCaptor<Map> imageCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(imageService, times(1)).decorateImageWithUserDataForStack(any(), imageCaptor.capture());
-        assertThat(imageCaptor.getValue().get(InstanceGroupType.GATEWAY))
-                .isEqualTo("FLAG=foo\nIS_CCM_ENABLED=false\nIS_CCM_V2_ENABLED=true\nIS_CCM_V2_JUMPGATE_ENABLED=true\nOTHER_FLAG=bar");
+    @Mock
+    private Image image;
+
+    @Captor
+    private ArgumentCaptor<Map<InstanceGroupType, String>> imageCaptor;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        lenient().when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+        lenient().when(imageService.getImage(STACK_ID)).thenReturn(image);
+        lenient().when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
     }
 
-    private Stack stack() {
-        Stack aStack = new Stack();
-        aStack.setId(100L);
-        aStack.setCluster(new Cluster());
-        aStack.setResourceCrn(TEST_CLUSTER_CRN);
-        aStack.setClusterNameAsSubdomain(false);
-        return aStack;
+    @Test
+    void updateJumpgateFlagOnly() throws CloudbreakImageNotFoundException {
+        when(image.getUserdata()).thenReturn(Map.of(InstanceGroupType.GATEWAY,
+                "export FLAG=foo\nexport IS_CCM_ENABLED=true\nexport IS_CCM_V2_ENABLED=false\nexport IS_CCM_V2_JUMPGATE_ENABLED=false\n" +
+                        "export OTHER_FLAG=bar"));
+
+        underTest.updateJumpgateFlagOnly(STACK_ID);
+
+        verify(imageService, times(1)).decorateImageWithUserDataForStack(any(), imageCaptor.capture());
+        assertThat(imageCaptor.getValue().get(InstanceGroupType.GATEWAY))
+                .isEqualTo("export FLAG=foo\nexport IS_CCM_ENABLED=false\nexport IS_CCM_V2_ENABLED=true\nexport IS_CCM_V2_JUMPGATE_ENABLED=true\n" +
+                        "export OTHER_FLAG=bar");
+    }
+
+    @Test
+    void updateProxyConfig() throws CloudbreakImageNotFoundException {
+        String gwUserData = "gwUserData";
+        Map<InstanceGroupType, String> userData = Map.of(InstanceGroupType.GATEWAY, gwUserData);
+        when(image.getUserdata()).thenReturn(userData);
+        String replacedGwUserData = "replacedGwUserData";
+        when(proxyConfigUserDataReplacer.replaceProxyConfigInUserDataByEnvCrn(gwUserData, ENV_CRN)).thenReturn(replacedGwUserData);
+
+        underTest.updateProxyConfig(STACK_ID);
+
+        verify(proxyConfigUserDataReplacer).replaceProxyConfigInUserDataByEnvCrn(gwUserData, ENV_CRN);
+        verify(imageService).decorateImageWithUserDataForStack(any(), imageCaptor.capture());
+        assertThat(imageCaptor.getValue().get(InstanceGroupType.GATEWAY))
+                .isEqualTo(replacedGwUserData);
     }
 }

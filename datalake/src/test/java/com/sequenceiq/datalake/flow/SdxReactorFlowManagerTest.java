@@ -37,6 +37,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
+import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -188,6 +189,13 @@ class SdxReactorFlowManagerTest {
         SdxCluster sdxCluster = getValidSdxCluster();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSaltUpdate(sdxCluster));
         verify(reactor, times(1)).notify(eq(SALT_UPDATE_EVENT.event()), any(Event.class));
+    }
+
+    @Test
+    void testTriggerModifyProxyConfigTracker() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerModifyProxyConfigTracker(sdxCluster));
+        verify(reactor, times(1)).notify(eq(ModifyProxyConfigTrackerEvent.MODIFY_PROXY_CONFIG_EVENT.event()), any(Event.class));
     }
 
     private SdxCluster getValidSdxCluster() {

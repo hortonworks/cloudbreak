@@ -2,32 +2,40 @@ package com.sequenceiq.datalake.flow.salt.rotatepassword.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.salt.rotatepassword.event.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.datalake.flow.salt.rotatepassword.event.RotateSaltPasswordSuccessResponse;
 import com.sequenceiq.datalake.flow.salt.rotatepassword.event.RotateSaltPasswordWaitRequest;
-import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.flowwait.SdxWaitService;
 import com.sequenceiq.datalake.service.sdx.flowwait.exception.SdxWaitException;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
 class RotateSaltPasswordWaitHandlerTest {
+
+    private static final long SLEEP_TIME_IN_SEC = 90;
+
+    private static final long DURATION_IN_MINUTES = 30;
 
     private static final String USER_ID = "user-id";
 
@@ -39,18 +47,16 @@ class RotateSaltPasswordWaitHandlerTest {
     @Mock
     private SdxWaitService sdxWaitService;
 
-    @Mock
-    private SdxService sdxService;
-
-    @Mock
-    private SdxCluster sdxCluster;
-
     @InjectMocks
     private RotateSaltPasswordWaitHandler underTest;
 
+    @Captor
+    private ArgumentCaptor<PollingConfig> pollingConfigArgumentCaptor;
+
     @BeforeEach
     void setUp() {
-        when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
+        ReflectionTestUtils.setField(underTest, "sleepTimeInSec", SLEEP_TIME_IN_SEC);
+        ReflectionTestUtils.setField(underTest, "durationInMinutes", DURATION_IN_MINUTES);
     }
 
     @Test
@@ -62,13 +68,19 @@ class RotateSaltPasswordWaitHandlerTest {
                 .extracting(RotateSaltPasswordSuccessResponse.class::cast)
                 .returns(SDX_ID, RotateSaltPasswordSuccessResponse::getResourceId)
                 .returns(USER_ID, RotateSaltPasswordSuccessResponse::getUserId);
-        verify(sdxWaitService).waitForCloudbreakFlow(eq(sdxCluster), any(), eq("Rotating SaltStack user password"));
+        verify(sdxWaitService).waitForCloudbreakFlow(eq(SDX_ID), pollingConfigArgumentCaptor.capture(), eq("Rotating SaltStack user password"));
+        assertThat(pollingConfigArgumentCaptor.getValue())
+                .returns(SLEEP_TIME_IN_SEC, PollingConfig::getSleepTime)
+                .returns(TimeUnit.SECONDS, PollingConfig::getSleepTimeUnit)
+                .returns(DURATION_IN_MINUTES, PollingConfig::getDuration)
+                .returns(TimeUnit.MINUTES, PollingConfig::getDurationTimeUnit)
+                .returns(true, PollingConfig::getStopPollingIfExceptionOccurred);
     }
 
     @Test
     void testFailure() {
         SdxWaitException sdxWaitException = new SdxWaitException("message", new Throwable());
-        doThrow(sdxWaitException).when(sdxWaitService).waitForCloudbreakFlow(any(), any(), anyString());
+        doThrow(sdxWaitException).when(sdxWaitService).waitForCloudbreakFlow(anyLong(), any(), anyString());
 
         Selectable result = underTest.doAccept(EVENT);
 
@@ -78,6 +90,6 @@ class RotateSaltPasswordWaitHandlerTest {
                 .returns(SDX_ID, RotateSaltPasswordFailureResponse::getResourceId)
                 .returns(USER_ID, RotateSaltPasswordFailureResponse::getUserId)
                 .returns(sdxWaitException, RotateSaltPasswordFailureResponse::getException);
-        verify(sdxWaitService).waitForCloudbreakFlow(eq(sdxCluster), any(), eq("Rotating SaltStack user password"));
+        verify(sdxWaitService).waitForCloudbreakFlow(eq(SDX_ID), any(), eq("Rotating SaltStack user password"));
     }
 }
