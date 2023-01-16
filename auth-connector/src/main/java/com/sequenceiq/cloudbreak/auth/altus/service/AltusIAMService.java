@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.auth.altus.service;
 
+import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyType;
+import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+
+import java.security.Provider;
+import java.security.Security;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
@@ -21,6 +25,8 @@ import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 public class AltusIAMService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AltusIAMService.class);
+
+    private static final String SUN_PKCS_11_NSS_FIPS_PROVIDER_NAME = "SunPKCS11-NSS-FIPS";
 
     private final GrpcUmsClient umsClient;
 
@@ -51,7 +57,15 @@ public class AltusIAMService {
                 accountId,
                 roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId),
                 resourceRoles,
+                getDefaultAccessKeyType(),
                 regionAwareInternalCrnGeneratorFactory);
+    }
+
+    private AccessKeyType.Value getDefaultAccessKeyType() {
+        Provider sunNSSFipsProvider = Security.getProvider(SUN_PKCS_11_NSS_FIPS_PROVIDER_NAME);
+        AccessKeyType.Value defaultAccessKeyType = sunNSSFipsProvider != null ? AccessKeyType.Value.ED25519 : AccessKeyType.Value.RSA;
+        LOGGER.debug("Default access key type is {}", defaultAccessKeyType);
+        return defaultAccessKeyType;
     }
 
     /**
@@ -138,20 +152,20 @@ public class AltusIAMService {
         clearMachineUser(machineUserName, actorCrn, accountId, false);
     }
 
-    public List<UserManagementProto.MachineUser> getAllMachineUsersForAccount(String accountId) {
+    public List<MachineUser> getAllMachineUsersForAccount(String accountId) {
         return umsClient.listAllMachineUsers(accountId, true, true, regionAwareInternalCrnGeneratorFactory);
     }
 
-    private UserManagementProto.AccessKeyType.Value mapToAccessKeyType(CdpAccessKeyType cdpAccessKeyType) {
+    private AccessKeyType.Value mapToAccessKeyType(CdpAccessKeyType cdpAccessKeyType) {
         switch (cdpAccessKeyType) {
             case ED25519:
-                return UserManagementProto.AccessKeyType.Value.ED25519;
+                return AccessKeyType.Value.ED25519;
             case RSA:
-                return UserManagementProto.AccessKeyType.Value.RSA;
+                return AccessKeyType.Value.RSA;
             case ECDSA:
-                return UserManagementProto.AccessKeyType.Value.ECDSA;
+                return AccessKeyType.Value.ECDSA;
             default:
-                return UserManagementProto.AccessKeyType.Value.ED25519;
+                return AccessKeyType.Value.ED25519;
         }
     }
 }
