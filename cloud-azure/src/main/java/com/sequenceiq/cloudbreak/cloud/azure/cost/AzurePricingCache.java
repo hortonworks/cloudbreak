@@ -133,22 +133,23 @@ public class AzurePricingCache implements PricingCache {
     }
 
     public double getStoragePricePerGBHour(String region, String storageType, int volumeSize) {
-        Map<String, Double> pricesForRegion = storagePricingCache.get(region);
-        String specificVolumeType = getAzureStorageTypeBySize(storageType, volumeSize);
-        return pricesForRegion.get(specificVolumeType) / HOURS_IN_30_DAYS;
+        if (volumeSize == 0 || storageType == null) {
+            LOGGER.info("The provided volumeSize is 0 or the storageType is null, so returning 0.0 as storage price per GBHour.");
+            return 0.0;
+        }
+        Map<String, Double> pricesForRegion = storagePricingCache.getOrDefault(region, Map.of());
+        String specificStorageType = getSpecificAzureStorageTypeBySize(storageType, volumeSize);
+        return pricesForRegion.getOrDefault(specificStorageType, 0.0) / HOURS_IN_30_DAYS;
     }
 
-    private String getAzureStorageTypeBySize(String volumeType, int volumeSize) {
-        Map<String, Map<String, Integer>> specificVolumeTypes = azureDiskSizes.get(volumeType);
-        if (specificVolumeTypes == null) {
-            throw new NotFoundException(String.format("Specific volume type not found for volume type %s", volumeType));
-        }
+    private String getSpecificAzureStorageTypeBySize(String storageType, int volumeSize) {
+        Map<String, Map<String, Integer>> specificVolumeTypes = azureDiskSizes.getOrDefault(storageType, Map.of());
         for (Map.Entry<String, Map<String, Integer>> entry : specificVolumeTypes.entrySet()) {
             if (volumeSize > entry.getValue().get("minSize") && volumeSize <= entry.getValue().get("maxSize")) {
                 return entry.getKey();
             }
         }
-        throw new NotFoundException(String.format("Specific volume type not found for volume type %s and size %d", volumeType, volumeSize));
+        return "";
     }
 
     private PriceResponse getPriceResponse(String region, String instanceType) {
@@ -170,9 +171,10 @@ public class AzurePricingCache implements PricingCache {
         VmTypeMeta value = vmCache.getIfPresent(new PricingCacheKey(region, instanceType));
         if (value == null) {
             CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(extendedCloudCredential, region, "AZURE", CdpResourceType.DEFAULT, Map.of());
-            Set<VmType> vmTypes = cloudVmTypes.getCloudVmResponses().get(region);
+            Set<VmType> vmTypes = cloudVmTypes.getCloudVmResponses().getOrDefault(region, Set.of());
             VmTypeMeta instanceTypeMetadata = vmTypes.stream().filter(x -> x.value().equals(instanceType)).findFirst()
-                    .orElseThrow(() -> new NotFoundException("Couldn't find the VM metadata for the requested region and instance type combination!"))
+                    .orElseThrow(() ->
+                            new NotFoundException(String.format("Couldn't find the price list for the region %s and instance type %s!", region, instanceType)))
                     .getMetaData();
             vmCache.put(new PricingCacheKey(region, instanceType), instanceTypeMetadata);
             return instanceTypeMetadata;
@@ -203,8 +205,8 @@ public class AzurePricingCache implements PricingCache {
         return invocationBuilder.get(PriceResponse.class);
     }
 
-        @Override
-        public CloudPlatform getCloudPlatform() {
-            return CloudPlatform.AZURE;
-        }
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AZURE;
+    }
 }

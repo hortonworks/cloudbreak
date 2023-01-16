@@ -98,6 +98,34 @@ public class AzurePricingCacheTest {
         Assertions.assertEquals(69, cpu2);
     }
 
+    @Test
+    void getStoragePriceWithZeroVolumeSize() {
+        double price = underTest.getStoragePricePerGBHour("eastus", "StandardSSD_LRS", 0);
+
+        Assertions.assertEquals(0.0, price);
+    }
+
+    @Test
+    void getStoragePriceWithNullStorageType() {
+        double price = underTest.getStoragePricePerGBHour("eastus", null, 100);
+
+        Assertions.assertEquals(0.0, price);
+    }
+
+    @Test
+    void getStoragePriceWithUnknownStorageType() {
+        double price = underTest.getStoragePricePerGBHour("eastus", "unknown", 100);
+
+        Assertions.assertEquals(0.0, price);
+    }
+
+    @Test
+    void getStoragePrice() {
+        double price = underTest.getStoragePricePerGBHour("eastus", "StandardSSD_LRS", 1000);
+
+        Assertions.assertNotEquals(0.0, price);
+    }
+
     private PriceResponse getPriceResponse() {
         PriceDetails priceDetails = new PriceDetails();
         priceDetails.setRetailPrice(0.69);

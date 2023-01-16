@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.cost;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class AwsPricingCacheTest {
 
     @BeforeEach
     void setup() {
-        when(awsPricing.getProducts(any(GetProductsRequest.class))).thenReturn(getGetProductsResult());
+        lenient().when(awsPricing.getProducts(any(GetProductsRequest.class))).thenReturn(getGetProductsResult());
     }
 
     @Test
@@ -73,6 +73,34 @@ public class AwsPricingCacheTest {
 
         Assertions.assertEquals(0.69, price1);
         Assertions.assertEquals(0.69, price2);
+    }
+
+    @Test
+    void getStoragePriceWithZeroVolumeSize() {
+        double price = underTest.getStoragePricePerGBHour("eu-central-1", "gp2", 0);
+
+        Assertions.assertEquals(0.0, price);
+    }
+
+    @Test
+    void getStoragePriceWithNullStorageType() {
+        double price = underTest.getStoragePricePerGBHour("eu-central-1", null, 100);
+
+        Assertions.assertEquals(0.0, price);
+    }
+
+    @Test
+    void getStoragePriceWithUnknownStorageType() {
+        double price = underTest.getStoragePricePerGBHour("eu-central-1", "unknown", 100);
+
+        Assertions.assertEquals(0.0, price);
+    }
+
+    @Test
+    void getStoragePrice() {
+        double price = underTest.getStoragePricePerGBHour("eu-central-1", "gp2", 1000);
+
+        Assertions.assertNotEquals(0.0, price);
     }
 
     private GetProductsResult getGetProductsResult() {
