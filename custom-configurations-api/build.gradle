@@ -15,7 +15,7 @@ dependencies {
     implementation group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
     implementation group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
     implementation group: 'javax.el',                      name: 'javax.el-api',                   version: '3.0.0'
-    implementation group: 'org.glassfish.web',             name: 'javax.el',                       version: '2.2.4'
+    implementation group: 'org.glassfish.web',             name: 'javax.el',                       version: '2.2.6'
 
 
     testImplementation group: 'org.junit.jupiter',  name: 'junit-jupiter-api',              version: junitJupiterVersion
