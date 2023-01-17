@@ -27,7 +27,7 @@ public enum AzurePrivateDnsZoneServiceEnum implements AzurePrivateDnsZoneDescrip
 
     private final String dnsZoneForwarder;
 
-    AzurePrivateDnsZoneServiceEnum(String resourceType, String subResource, String dnsZoneName, String dnsZoneNamePattern, String dnsZoneForwarder) {
+    AzurePrivateDnsZoneServiceEnum(String resourceType, String subResource, String dnsZoneName, String dnsZoneForwarder, String dnsZoneNamePattern) {
         this.resourceType = resourceType;
         this.subResource = subResource;
         this.dnsZoneName = dnsZoneName;
