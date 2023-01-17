@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,11 +56,5 @@ public class SshSaltPasswordActions extends SshJClient {
                 .map(result -> LocalDate.parse(result.getValue().trim(), CHAGE_DATE_PATTERN))
                 .min(LocalDate::compareTo)
                 .orElseThrow(() -> new TestFailException("Failed to get password expiry date on nodes " + ipAddresses));
-    }
-
-    private Map<String, Pair<Integer, String>> executeCommands(Set<String> ipAddresses, String command) {
-        Map<String, Pair<Integer, String>> results = new HashMap<>();
-        ipAddresses.forEach(ipAddress -> results.put(ipAddress, executeCommand(ipAddress, command)));
-        return results;
     }
 }

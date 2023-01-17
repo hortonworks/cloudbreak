@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.assertion;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 
 public class CBAssertion {
 
@@ -44,5 +45,14 @@ public class CBAssertion {
 
     private static TestFailException getException(String message) {
         return new TestFailException(message);
+    }
+
+    public static <T, U extends MicroserviceClient> Assertion<T, U> multiAssert(Assertion<T, U>... assertions) {
+        return (testContext, testDto, client) -> {
+            for (Assertion<T, U> assertion : assertions) {
+                assertion.doAssertion(testContext, testDto, client);
+            }
+            return testDto;
+        };
     }
 }

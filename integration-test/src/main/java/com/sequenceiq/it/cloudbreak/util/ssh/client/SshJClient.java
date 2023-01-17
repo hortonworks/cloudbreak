@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -107,6 +110,12 @@ public class SshJClient {
             cmd.join(10L, TimeUnit.SECONDS);
             return Pair.of(cmd.getExitStatus(), os.toString());
         }
+    }
+
+    protected Map<String, Pair<Integer, String>> executeCommands(Set<String> ipAddresses, String command) {
+        Map<String, Pair<Integer, String>> results = new HashMap<>();
+        ipAddresses.forEach(ipAddress -> results.put(ipAddress, executeCommand(ipAddress, command)));
+        return results;
     }
 
     protected Pair<Integer, String> executeCommand(String instanceIP, String command) {

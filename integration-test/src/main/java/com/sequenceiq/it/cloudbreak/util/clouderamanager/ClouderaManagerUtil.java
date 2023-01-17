@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.util.clouderamanager;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -21,6 +22,14 @@ public class ClouderaManagerUtil {
 
     public SdxInternalTestDto checkClouderaManagerKnoxIDBrokerRoleConfigGroups(SdxInternalTestDto testDto, String user, String password) {
         return clouderaManagerClientActions.checkCmKnoxIDBrokerRoleConfigGroups(testDto, user, password);
+    }
+
+    public SdxInternalTestDto checkConfig(SdxInternalTestDto testDto, String user, String password, Map<String, String> expectedConfig) {
+        return clouderaManagerClientActions.checkConfig(testDto, user, password, expectedConfig);
+    }
+
+    public DistroXTestDto checkConfig(DistroXTestDto testDto, String user, String password, Map<String, String> expectedConfig) {
+        return clouderaManagerClientActions.checkConfig(testDto, user, password, expectedConfig);
     }
 
     public DistroXTestDto checkClouderaManagerYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, String user, String password) {
