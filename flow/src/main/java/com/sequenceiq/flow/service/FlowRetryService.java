@@ -14,6 +14,7 @@ import javax.ws.rs.BadRequestException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -49,12 +50,15 @@ public class FlowRetryService {
     private FlowLogRepository flowLogRepository;
 
     @Resource
+    @Lazy
     private List<String> retryableEvents;
 
     @Resource
+    @Lazy
     private Set<String> ignoredFromRetryEvents;
 
     @Resource
+    @Lazy
     private List<FlowConfiguration<?>> flowConfigs;
 
     public Optional<FlowLog> getLastRetryableFailedFlow(Long stackId) {
