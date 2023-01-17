@@ -95,7 +95,7 @@ allprojects {
         force "org.codehaus.jackson:jackson-jaxrs:1.9.13"
         force "org.codehaus.jackson:jackson-mapper-asl:1.9.13"
         force "org.codehaus.jackson:jackson-core-asl:1.9.13"
-        force "org.codehaus.jackson:jackson-xc:1.9.13"
+        force "org.codehaus.jackson:jackson-xc:1.9.13-atlassian-2"
         force "org.testng:testng:$testNgVersion"
         force "org.springframework:spring-messaging:$springFrameworkVersion"
         force "io.swagger:swagger-jersey2-jaxrs:$swaggerVersion"
