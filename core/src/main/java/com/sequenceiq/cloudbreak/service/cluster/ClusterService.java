@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ZOMBIE;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPO_ID_TAG;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
@@ -227,7 +228,7 @@ public class ClusterService {
     }
 
     public void updateInstancesToZombieByInstanceIds(Long stackId, Set<String> unreachableInstanceIds) {
-        updateInstanceStatusesByInstanceIds(stackId, unreachableInstanceIds, ORCHESTRATION_FAILED, "Detected as Zombie instance metadata");
+        updateInstanceStatusesByInstanceIds(stackId, unreachableInstanceIds, ZOMBIE, "Detected as Zombie instance metadata");
     }
 
     public void updateInstancesToOrchestrationFailedByInstanceIds(Long stackId, Set<String> unreachableInstanceIds) {

@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -76,6 +77,10 @@ class ClusterServiceTest {
     private static final String STATUS_REASON_ORIGINAL = "statusReasonOriginal";
 
     private static final String FQDN1 = "hostname1";
+
+    private static final String INSTANCE_INSTANCE_ID = "instance1";
+
+    private static final Long INSTANCE_ID = 1L;
 
     private static final String CLUSTER_NAME = "test-cluster-name";
 
@@ -227,6 +232,23 @@ class ClusterServiceTest {
         verify(repository).updateDbSslCert(CLUSTER_ID, "cert1\ncert2", true);
     }
 
+    @Test
+    void testUpdateInstancesToZombieByInstanceIds() {
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(eq(STACK_ID))).thenReturn(List.of(createInstanceMetadata()));
+        underTest.updateInstancesToZombieByInstanceIds(STACK_ID, Set.of(INSTANCE_INSTANCE_ID));
+        verify(instanceMetaDataService, times(1)).getAllAvailableInstanceMetadataViewsByStackId(eq(STACK_ID));
+        verify(instanceMetaDataService, times(1)).updateAllInstancesToStatus(eq(List.of(INSTANCE_ID)), eq(InstanceStatus.ZOMBIE), contains("Zombie"));
+    }
+
+    @Test
+    void testUpdateInstancesToOrchestrationFailedByInstanceIds() {
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(eq(STACK_ID))).thenReturn(List.of(createInstanceMetadata()));
+        underTest.updateInstancesToOrchestrationFailedByInstanceIds(STACK_ID, Set.of(INSTANCE_INSTANCE_ID));
+        verify(instanceMetaDataService, times(1)).getAllAvailableInstanceMetadataViewsByStackId(eq(STACK_ID));
+        verify(instanceMetaDataService, times(1)).updateAllInstancesToStatus(eq(List.of(INSTANCE_ID)),
+                eq(InstanceStatus.ORCHESTRATION_FAILED), contains("ORCHESTRATION_FAILED"));
+    }
+
     private StackDto setupStack(long stackId) {
         StackDto stackDto = mock(StackDto.class);
         lenient().when(stackDto.getId()).thenReturn(stackId);
@@ -243,11 +265,18 @@ class ClusterServiceTest {
     }
 
     private void setupInstanceMetadata(StackDto stack) {
+        InstanceMetaData instanceMetadata = createInstanceMetadata();
+        when(stack.getNotTerminatedInstanceMetaData()).thenReturn(List.of(instanceMetadata));
+    }
+
+    private static InstanceMetaData createInstanceMetadata() {
         InstanceMetaData instanceMetadata = new InstanceMetaData();
+        instanceMetadata.setId(INSTANCE_ID);
+        instanceMetadata.setInstanceId(INSTANCE_INSTANCE_ID);
         instanceMetadata.setDiscoveryFQDN(FQDN1);
         instanceMetadata.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
         instanceMetadata.setStatusReason(STATUS_REASON_ORIGINAL);
-        when(stack.getNotTerminatedInstanceMetaData()).thenReturn(List.of(instanceMetadata));
+        return instanceMetadata;
     }
 
     private void setupClusterApi(StackDto stack, HealthCheckResult healthCheckResult, String statusReason) {
