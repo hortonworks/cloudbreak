@@ -13,24 +13,23 @@ import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.CredentialBase;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = CredentialDescriptor.CREDENTIAL, parent = CredentialBase.class, value = "CredentialV1Response")
+@Schema(description = CredentialDescriptor.CREDENTIAL, allOf = CredentialBase.class, name = "CredentialV1Response")
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CredentialResponse extends CredentialBase {
 
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true, allowableValues = "length range[5, 100]")
+    @Schema(description = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(CredentialModelDescription.ATTRIBUTES)
+    @Schema(description = CredentialModelDescription.ATTRIBUTES)
     private SecretResponse attributes;
 
-    @ApiModelProperty(CredentialModelDescription.AZURE_PARAMETERS)
+    @Schema(description = CredentialModelDescription.AZURE_PARAMETERS)
     private AzureCredentialResponseParameters azure;
 
-    @ApiModelProperty(CRN)
+    @Schema(description = CRN)
     private String crn;
 
     /**
@@ -38,16 +37,16 @@ public class CredentialResponse extends CredentialBase {
      * and can become invalid, usage of it can be error prone
      */
     @Deprecated
-    @ApiModelProperty(ModelDescriptions.CREATOR)
+    @Schema(description = ModelDescriptions.CREATOR)
     private String creator;
 
-    @ApiModelProperty(CredentialModelDescription.ACCOUNT_IDENTIFIER)
+    @Schema(description = CredentialModelDescription.ACCOUNT_IDENTIFIER)
     private String accountId;
 
-    @ApiModelProperty(CredentialModelDescription.CREATED)
+    @Schema(description = CredentialModelDescription.CREATED)
     private Long created;
 
-    @ApiModelProperty(value = CredentialModelDescription.CREDENTIAL_TYPE, required = true)
+    @Schema(description = CredentialModelDescription.CREDENTIAL_TYPE, required = true)
     private CredentialType type;
 
     private Boolean govCloud;

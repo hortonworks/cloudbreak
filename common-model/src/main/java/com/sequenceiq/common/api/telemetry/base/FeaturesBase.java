@@ -7,24 +7,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 import com.sequenceiq.common.api.type.FeatureSetting;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class FeaturesBase implements Serializable {
 
     @JsonProperty("workloadAnalytics")
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
     private FeatureSetting workloadAnalytics;
 
     @JsonProperty("clusterLogsCollection")
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLUSTER_LOGS_COLLECTION_ENABLED)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_CLUSTER_LOGS_COLLECTION_ENABLED)
     private FeatureSetting clusterLogsCollection;
 
     @JsonProperty("monitoring")
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLUSTER_MONITORING_ENABLED)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_CLUSTER_MONITORING_ENABLED)
     private FeatureSetting monitoring;
 
     @JsonProperty("cloudStorageLogging")
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLOUD_STORAGE_LOGGING_ENABLED)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_CLOUD_STORAGE_LOGGING_ENABLED)
     private FeatureSetting cloudStorageLogging;
 
     public FeatureSetting getWorkloadAnalytics() {

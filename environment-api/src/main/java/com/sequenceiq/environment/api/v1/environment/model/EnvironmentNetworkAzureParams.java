@@ -10,41 +10,40 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentNetworkAzureV1Params")
+@Schema(name = "EnvironmentNetworkAzureV1Params")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class EnvironmentNetworkAzureParams {
 
     @Size(max = 255)
-    @ApiModelProperty(value = EnvironmentModelDescription.AZURE_NETWORK_ID, required = true)
+    @Schema(description = EnvironmentModelDescription.AZURE_NETWORK_ID, required = true)
     private String networkId;
 
     @Size(max = 255)
-    @ApiModelProperty(value = EnvironmentModelDescription.AZURE_RESOURCE_GROUP_NAME, required = true)
+    @Schema(description = EnvironmentModelDescription.AZURE_RESOURCE_GROUP_NAME, required = true)
     private String resourceGroupName;
 
     @Size(max = 255)
-    @ApiModelProperty(value = EnvironmentModelDescription.AZURE_PRIVATE_DNS_ZONE_ID)
+    @Schema(description = EnvironmentModelDescription.AZURE_PRIVATE_DNS_ZONE_ID)
     private String databasePrivateDnsZoneId;
 
     @Size(max = 255)
-    @ApiModelProperty(value = EnvironmentModelDescription.AZURE_AKS_PRIVATE_DNS_ZONE_ID)
+    @Schema(description = EnvironmentModelDescription.AZURE_AKS_PRIVATE_DNS_ZONE_ID)
     private String aksPrivateDnsZoneId;
 
     @NotNull
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_NO_PUBLIC_IP)
+    @Schema(description = EnvironmentModelDescription.AZURE_NO_PUBLIC_IP)
     private Boolean noPublicIp;
 
-    @ApiModelProperty(EnvironmentModelDescription.NO_OUTBOUND_LOAD_BALANCER)
+    @Schema(description = EnvironmentModelDescription.NO_OUTBOUND_LOAD_BALANCER)
     private Boolean noOutboundLoadBalancer;
 
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_AVAILABILITY_ZONES)
+    @Schema(description = EnvironmentModelDescription.AZURE_AVAILABILITY_ZONES)
     private Set<String> availabilityZones;
 
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_DELEGATED_FLEXIBLE_SERVER_SUBNET_IDS)
+    @Schema(description = EnvironmentModelDescription.AZURE_DELEGATED_FLEXIBLE_SERVER_SUBNET_IDS)
     private Set<String> flexibleServerSubnetIds;
 
     public String getNetworkId() {

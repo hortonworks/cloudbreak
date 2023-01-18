@@ -20,32 +20,32 @@ import com.sequenceiq.cloudbreak.validation.SubnetType;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkV4Base extends ProviderParametersBase implements JsonEntity {
 
-    @ApiModelProperty(NetworkModelDescription.SUBNET_CIDR)
+    @Schema(description = NetworkModelDescription.SUBNET_CIDR)
     @ValidSubnet(SubnetType.RFC_1918_COMPLIANT_ONLY)
     private String subnetCIDR;
 
-    @ApiModelProperty(NetworkModelDescription.AWS_PARAMETERS)
+    @Schema(description = NetworkModelDescription.AWS_PARAMETERS)
     private AwsNetworkV4Parameters aws;
 
-    @ApiModelProperty(NetworkModelDescription.GCP_PARAMETERS)
+    @Schema(description = NetworkModelDescription.GCP_PARAMETERS)
     private GcpNetworkV4Parameters gcp;
 
-    @ApiModelProperty(NetworkModelDescription.AZURE_PARAMETERS)
+    @Schema(description = NetworkModelDescription.AZURE_PARAMETERS)
     private AzureNetworkV4Parameters azure;
 
-    @ApiModelProperty(NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Schema(description = NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
     @Deprecated
     private OpenStackNetworkV4Parameters openstack;
 
-    @ApiModelProperty(MOCK_PARAMETERS)
+    @Schema(description = MOCK_PARAMETERS)
     private MockNetworkV4Parameters mock;
 
-    @ApiModelProperty(hidden = true, value = YARN_PARAMETERS)
+    @Schema(hidden = true, description = YARN_PARAMETERS)
     private YarnNetworkV4Parameters yarn;
 
     @Override

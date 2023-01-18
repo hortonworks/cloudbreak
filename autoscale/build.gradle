@@ -124,15 +124,8 @@ dependencyManagement {
             entry 'spring-boot-starter-freemarker'
         }
 
-        dependencySet(group: 'io.springfox', version: swaggerSpringFoxVersion) {
-            entry 'springfox-boot-starter'
-        }
-
         dependency group: 'xerces',              name: 'xercesImpl',            version: xerces
 
-        dependency (group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion) {
-          exclude 'org.yaml:snakeyaml'
-        }
         dependency group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
         dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '3.5.2'
         dependency group: 'org.springframework',           name: 'spring-context-support',         version: springFrameworkVersion
@@ -173,13 +166,9 @@ dependencies {
     implementation group: 'dnsjava',                       name: 'dnsjava'
     implementation group: 'org.ehcache',                   name: 'ehcache',                              version: '3.10.8'
 
-    implementation group: 'io.springfox',                  name: 'springfox-boot-starter'
+    implementation group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2',                           version: swaggerCoreVersion
 
     implementation group: 'com.dyngr',                 name: 'polling',                                  version: dyngrPollingVersion
-
-    implementation     ('io.swagger:swagger-jersey2-jaxrs') {
-      exclude group: 'org.yaml'
-    }
 
     implementation group: 'com.sequenceiq',                name: 'consul-api'
 

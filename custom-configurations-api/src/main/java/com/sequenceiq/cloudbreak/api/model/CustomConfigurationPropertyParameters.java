@@ -8,26 +8,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.doc.ApiDescription.CustomConfigurationsJsonProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomConfigurationPropertyParameters {
 
-    @ApiModelProperty(value = CustomConfigurationsJsonProperties.NAME)
+    @Schema(description = CustomConfigurationsJsonProperties.NAME)
     @NotNull
     private String name;
 
-    @ApiModelProperty(value = CustomConfigurationsJsonProperties.VALUE)
+    @Schema(description = CustomConfigurationsJsonProperties.VALUE)
     @NotNull
     private String value;
 
-    @ApiModelProperty
+    @Schema
     private String roleType;
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String serviceType;
 

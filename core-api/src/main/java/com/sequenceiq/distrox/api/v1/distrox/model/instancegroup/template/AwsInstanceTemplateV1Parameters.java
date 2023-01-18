@@ -9,23 +9,22 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AwsInstanceTemplateV1Parameters implements Serializable {
 
     @Valid
-    @ApiModelProperty(TemplateModelDescription.AWS_SPOT_PARAMETERS)
+    @Schema(description = TemplateModelDescription.AWS_SPOT_PARAMETERS)
     private AwsInstanceTemplateV1SpotParameters spot;
 
-    @ApiModelProperty(TemplateModelDescription.ENCRYPTION)
+    @Schema(description = TemplateModelDescription.ENCRYPTION)
     private AwsEncryptionV1Parameters encryption;
 
     @Valid
-    @ApiModelProperty(TemplateModelDescription.AWS_PLACEMENT_GROUP)
+    @Schema(description = TemplateModelDescription.AWS_PLACEMENT_GROUP)
     private AwsPlacementGroupV1Parameters placementGroup;
 
     public AwsInstanceTemplateV1SpotParameters getSpot() {

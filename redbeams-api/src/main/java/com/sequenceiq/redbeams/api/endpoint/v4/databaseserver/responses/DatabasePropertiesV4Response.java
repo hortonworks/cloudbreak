@@ -3,12 +3,11 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.DATABASE_PROPERTIES_RESPONSE)
+@Schema(description = ModelDescriptions.DATABASE_PROPERTIES_RESPONSE)
 public class DatabasePropertiesV4Response {
-    @ApiModelProperty(value = DatabaseServer.CONNECTION_NAME_FORMAT, required = true)
+    @Schema(description = DatabaseServer.CONNECTION_NAME_FORMAT, required = true)
     private ConnectionNameFormat connectionNameFormat = ConnectionNameFormat.USERNAME_ONLY;
 
     public ConnectionNameFormat getConnectionNameFormat() {

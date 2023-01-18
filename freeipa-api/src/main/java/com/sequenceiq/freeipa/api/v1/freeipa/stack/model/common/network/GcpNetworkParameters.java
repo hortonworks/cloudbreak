@@ -11,27 +11,26 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("GcpNetworkV1Parameters")
+@Schema(name = "GcpNetworkV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class GcpNetworkParameters extends MappableBase {
 
-    @ApiModelProperty
+    @Schema
     private String networkId;
 
-    @ApiModelProperty
+    @Schema
     private String subnetId;
 
-    @ApiModelProperty
+    @Schema
     private String sharedProjectId;
 
-    @ApiModelProperty
+    @Schema
     private Boolean noPublicIp;
 
-    @ApiModelProperty
+    @Schema
     private Boolean noFirewallRules;
 
     public String getNetworkId() {
@@ -87,7 +86,7 @@ public class GcpNetworkParameters extends MappableBase {
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.GCP;
     }

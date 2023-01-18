@@ -9,23 +9,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DiskModificationRequest implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = "volumes being updated", required = true)
+    @Schema(description = "volumes being updated", required = true)
     private List<Volume> volumesToUpdate;
 
     @Valid
-    @ApiModelProperty(value = "update request with the desired type and size", required = true)
+    @Schema(description = "update request with the desired type and size", required = true)
     private DiskUpdateRequest diskUpdateRequest;
 
     @NotNull
-    @ApiModelProperty(value = "stack ID being updated", required = true)
+    @Schema(description = "stack ID being updated", required = true)
     private Long stackId;
 
     public Long getStackId() {

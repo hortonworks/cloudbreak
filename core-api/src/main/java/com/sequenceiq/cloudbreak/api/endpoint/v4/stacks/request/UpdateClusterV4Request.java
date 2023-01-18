@@ -8,30 +8,29 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.common.model.annotations.TransformGetterType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateClusterV4Request implements JsonEntity {
 
-    @ApiModelProperty(ClusterModelDescription.HOSTGROUP_ADJUSTMENT)
+    @Schema(description = ClusterModelDescription.HOSTGROUP_ADJUSTMENT)
     private HostGroupAdjustmentV4Request hostGroupAdjustment;
 
-    @ApiModelProperty(value = ClusterModelDescription.STATUS_REQUEST, allowableValues = "SYNC,FULL_SYNC,REPAIR_FAILED_NODES,STOPPED,STARTED")
+    @Schema(description = ClusterModelDescription.STATUS_REQUEST)
     private StatusRequest status;
 
-    @ApiModelProperty(ClusterModelDescription.USERNAME_PASSWORD)
+    @Schema(description = ClusterModelDescription.USERNAME_PASSWORD)
     private UserNamePasswordV4Request userNamePassword;
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
+    @Schema(description = ClusterModelDescription.BLUEPRINT_ID)
     private String blueprintName;
 
     @TransformGetterType
-    @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
+    @Schema(description = ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
 
-    @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
+    @Schema(description = ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupV4Request> hostgroups;
 
     public HostGroupAdjustmentV4Request getHostGroupAdjustment() {

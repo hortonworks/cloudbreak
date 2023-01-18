@@ -14,23 +14,22 @@ import com.sequenceiq.environment.api.v1.environment.model.GcpDataServicesV1Para
 import com.sequenceiq.environment.api.v1.environment.model.request.DataServicesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DataServicesResponse;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(subTypes = { DataServicesRequest.class, DataServicesResponse.class })
+@Schema(subTypes = { DataServicesRequest.class, DataServicesResponse.class })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class DataServicesBase implements Serializable {
 
-    @ApiModelProperty(DataServicesModelDescription.AZURE_PARAMETERS)
+    @Schema(description = DataServicesModelDescription.AZURE_PARAMETERS)
     @Valid
     private AzureDataServicesV1Parameters azure;
 
-    @ApiModelProperty(DataServicesModelDescription.AWS_PARAMETERS)
+    @Schema(description = DataServicesModelDescription.AWS_PARAMETERS)
     @Valid
     private AwsDataServicesV1Parameters aws;
 
-    @ApiModelProperty(DataServicesModelDescription.GCP_PARAMETERS)
+    @Schema(description = DataServicesModelDescription.GCP_PARAMETERS)
     @Valid
     private GcpDataServicesV1Parameters gcp;
 

@@ -17,10 +17,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPFlowStructuredEventHandler;
 import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
 @EnableAsync
-@EnableSwagger2
 @ComponentScan(basePackages = "com.sequenceiq",
         //TODO eliminate this exclude filter for CDPFlowStructuredEventHandler.class with https://jira.cloudera.com/browse/CB-18923
         excludeFilters = { @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = CDPFlowStructuredEventHandler.class) })

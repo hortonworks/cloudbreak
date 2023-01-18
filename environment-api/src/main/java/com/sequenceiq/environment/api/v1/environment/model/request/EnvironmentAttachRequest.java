@@ -1,8 +1,8 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentAttachV1Request")
+@Schema(name = "EnvironmentAttachV1Request")
 public class EnvironmentAttachRequest extends EnvironmentBaseRequest {
     @Override
     public String toString() {

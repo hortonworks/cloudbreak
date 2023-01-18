@@ -111,7 +111,7 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private static final String SMON_PROMETHEUS_USERNAME = "prometheus_metrics_endpoint_username";
 
-    private static final String SMON_PROMETHEUS_PASSWORD =  "prometheus_metrics_endpoint_password";
+    private static final String SMON_PROMETHEUS_PASSWORD = "prometheus_metrics_endpoint_password";
 
     private static final String SMON_PROMETHEUS_ADAPTER_ENABLED = "prometheus_adapter_enabled";
 

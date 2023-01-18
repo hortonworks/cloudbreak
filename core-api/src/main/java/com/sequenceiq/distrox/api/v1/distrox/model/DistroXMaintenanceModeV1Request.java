@@ -5,14 +5,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStat
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DistroXMaintenanceModeV1Request implements JsonEntity {
 
-    @ApiModelProperty(value = ClusterModelDescription.STATUS_MAINTENANCE_MODE, allowableValues = "ENABLED,VALIDATION_REQUESTED,DISABLED")
+    @Schema(description = ClusterModelDescription.STATUS_MAINTENANCE_MODE)
     private MaintenanceModeStatus status;
 
     public MaintenanceModeStatus getStatus() {

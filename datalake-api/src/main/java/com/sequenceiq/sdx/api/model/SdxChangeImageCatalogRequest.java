@@ -8,10 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxChangeImageCatalogRequest {
@@ -20,7 +19,7 @@ public class SdxChangeImageCatalogRequest {
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "Image catalog can only contain lowercase alphanumeric characters and hyphens and has to start with an alphanumeric character")
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ImageModelDescription.IMAGE_CATALOG_NAME, required = true)
+    @Schema(description = ModelDescriptions.ImageModelDescription.IMAGE_CATALOG_NAME, required = true)
     private String imageCatalog;
 
     public String getImageCatalog() {
@@ -33,8 +32,6 @@ public class SdxChangeImageCatalogRequest {
 
     @Override
     public String toString() {
-        return "SdxChangeImageCatalogRequest{" +
-                "imageCatalog='" + imageCatalog + '\'' +
-                '}';
+        return "SdxChangeImageCatalogRequest{" + "imageCatalog='" + imageCatalog + '\'' + '}';
     }
 }

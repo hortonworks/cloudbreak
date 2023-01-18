@@ -8,10 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "AwsDiskEncryptionV1Parameters")
+@Schema(name = "AwsDiskEncryptionV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AwsDiskEncryptionParameters implements Serializable {
 
@@ -28,7 +27,7 @@ public class AwsDiskEncryptionParameters implements Serializable {
 
     @Pattern(regexp = REG_EXP_FOR_ENCRYPTION_KEY_ARN,
             message = AWS_ENCRYPTION_KEY_INVALID_MESSAGE)
-    @ApiModelProperty(EnvironmentModelDescription.AWS_DISK_ENCRYPTION_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AWS_DISK_ENCRYPTION_PARAMETERS)
     private String encryptionKeyArn;
 
     public AwsDiskEncryptionParameters() {

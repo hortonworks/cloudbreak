@@ -7,19 +7,18 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "AwsEnvironmentV1Parameters")
+@Schema(name = "AwsEnvironmentV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AwsEnvironmentParameters implements Serializable {
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.S3_GUARD)
+    @Schema(description = EnvironmentModelDescription.S3_GUARD)
     private S3GuardRequestParameters s3guard;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.AWS_DISK_ENCRYPTION_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AWS_DISK_ENCRYPTION_PARAMETERS)
     private AwsDiskEncryptionParameters awsDiskEncryptionParameters;
 
     public AwsEnvironmentParameters() {

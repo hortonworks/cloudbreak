@@ -8,42 +8,41 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescrip
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class ResourceV4Response {
 
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
 
-    @ApiModelProperty("Resource Type")
+    @Schema(description = "Resource Type")
     private ResourceType resourceType;
 
-    @ApiModelProperty("Common Status")
+    @Schema(description = "Common Status")
     private CommonStatus resourceStatus;
 
-    @ApiModelProperty("Resource Name")
+    @Schema(description = "Resource Name")
     private String resourceName;
 
-    @ApiModelProperty("Resource Reference")
+    @Schema(description = "Resource Reference")
     private String resourceReference;
 
-    @ApiModelProperty("Stack ID of the resource")
+    @Schema(description = "Stack ID of the resource")
     private Long resourceStack;
 
-    @ApiModelProperty("Instance ID of the resource")
+    @Schema(description = "Instance ID of the resource")
     private String instanceId;
 
-    @ApiModelProperty("JSON string of all attached volumes")
+    @Schema(description = "JSON string of all attached volumes")
     private String attributes;
 
-    @ApiModelProperty("Availability zone of the resource")
+    @Schema(description = "Availability zone of the resource")
     private String availabilityZone;
 
     public Long getId() {

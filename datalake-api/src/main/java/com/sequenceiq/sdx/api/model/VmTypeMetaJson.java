@@ -8,10 +8,9 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VmTypeMetaJson {
@@ -20,10 +19,10 @@ public class VmTypeMetaJson {
 
     public static final String MEMORY = "Memory";
 
-    @ApiModelProperty(ModelDescriptions.VM_TYPE_CONFIGS)
+    @Schema(description = ModelDescriptions.VM_TYPE_CONFIGS)
     private List<VolumeParameterConfigResponse> configs = new ArrayList<>();
 
-    @ApiModelProperty(ModelDescriptions.VM_TYPE_PROPERTIES)
+    @Schema(description = ModelDescriptions.VM_TYPE_PROPERTIES)
     private Map<String, Object> properties = new HashMap<>();
 
     public VmTypeMetaJson() {
@@ -62,9 +61,6 @@ public class VmTypeMetaJson {
 
     @Override
     public String toString() {
-        return "VmTypeMetaJson{" +
-                "configs=" + configs +
-                ", properties=" + properties +
-                '}';
+        return "VmTypeMetaJson{" + "configs=" + configs + ", properties=" + properties + '}';
     }
 }

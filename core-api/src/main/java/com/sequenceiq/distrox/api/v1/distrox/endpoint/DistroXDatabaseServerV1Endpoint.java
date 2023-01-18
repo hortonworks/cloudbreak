@@ -16,19 +16,21 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
 @Path("/v1/distrox")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/distrox", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/distrox")
 public interface DistroXDatabaseServerV1Endpoint {
 
     @GET
     @Path("/crn/{clusterCrn}/dbserver")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GET_DATABASE_SERVER_BY_CLUSTER_CRN, produces = MediaType.APPLICATION_JSON, nickname = "getDatabaseServerByClusterCrn")
+    @Operation(summary = GET_DATABASE_SERVER_BY_CLUSTER_CRN, operationId = "getDatabaseServerByClusterCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackDatabaseServerResponse getDatabaseServerByCrn(@PathParam("clusterCrn") @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) String clusterCrn);
 }

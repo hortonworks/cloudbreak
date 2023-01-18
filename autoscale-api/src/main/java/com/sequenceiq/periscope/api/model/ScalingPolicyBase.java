@@ -8,24 +8,24 @@ import javax.validation.constraints.Size;
 import com.sequenceiq.periscope.api.endpoint.validator.ValidScalingPolicy;
 import com.sequenceiq.periscope.doc.ApiDescription.ScalingPolicyJsonProperties;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @ValidScalingPolicy
 public class ScalingPolicyBase implements Json {
 
-    @ApiModelProperty(ScalingPolicyJsonProperties.NAME)
+    @Schema(description = ScalingPolicyJsonProperties.NAME)
     @Pattern(regexp = "(^[a-zA-Z][-a-zA-Z0-9]*$)",
             message = "The name can only contain alphanumeric characters and hyphens and has to start with an alphabetic character")
     private String name;
 
-    @ApiModelProperty(ScalingPolicyJsonProperties.ADJUSTMENTTYPE)
+    @Schema(description = ScalingPolicyJsonProperties.ADJUSTMENTTYPE)
     @NotNull
     private AdjustmentType adjustmentType;
 
-    @ApiModelProperty(ScalingPolicyJsonProperties.SCALINGADJUSTMENT)
+    @Schema(description = ScalingPolicyJsonProperties.SCALINGADJUSTMENT)
     private int scalingAdjustment;
 
-    @ApiModelProperty(ScalingPolicyJsonProperties.HOSTGROUP)
+    @Schema(description = ScalingPolicyJsonProperties.HOSTGROUP)
     @NotEmpty
     @Size(max = 250)
     @Pattern(regexp = "(^[a-zA-Z][-a-zA-Z0-9]*$)",

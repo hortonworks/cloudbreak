@@ -7,26 +7,25 @@ import com.sequenceiq.common.api.telemetry.base.TelemetryBase;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "TelemetryResponse")
+@Schema(name = "TelemetryResponse")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TelemetryResponse extends TelemetryBase {
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_LOGGING)
     private LoggingResponse logging;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_MONITORING)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_MONITORING)
     private MonitoringResponse monitoring;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
     private WorkloadAnalyticsResponse workloadAnalytics;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_FEATURES)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_FEATURES)
     private FeaturesResponse features;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_RULES)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_RULES)
     private List<AnonymizationRule> rules;
 
     public LoggingResponse getLogging() {

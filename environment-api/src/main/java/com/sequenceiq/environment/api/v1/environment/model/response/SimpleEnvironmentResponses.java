@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Sets;
 import com.sequenceiq.environment.api.GeneralCollectionV1Response;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "SimpleEnvironmentV1Responses", description = "Wrapper which contains multiple SimpleEnvironmentV1Responses")
+@Schema(name = "SimpleEnvironmentV1Responses", description = "Wrapper which contains multiple SimpleEnvironmentV1Responses")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SimpleEnvironmentResponses extends GeneralCollectionV1Response<SimpleEnvironmentResponse> {
     public SimpleEnvironmentResponses(Collection<SimpleEnvironmentResponse> responses) {

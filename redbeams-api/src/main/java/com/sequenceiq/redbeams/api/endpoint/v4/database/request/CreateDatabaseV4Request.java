@@ -12,31 +12,30 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A request for creating a database on a database server.
  */
-@ApiModel(description = ModelDescriptions.CREATE_DATABASE_REQUEST)
+@Schema(description = ModelDescriptions.CREATE_DATABASE_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateDatabaseV4Request implements Serializable {
 
     @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER)
     @NotNull
-    @ApiModelProperty(DatabaseServer.CRN)
+    @Schema(description = DatabaseServer.CRN)
     private String existingDatabaseServerCrn;
 
     @NotNull
-    @ApiModelProperty(Database.NAME)
+    @Schema(description = Database.NAME)
     private String databaseName;
 
     @NotNull
-    @ApiModelProperty(Database.TYPE)
+    @Schema(description = Database.TYPE)
     private String type;
 
     @Size(max = 1000000)
-    @ApiModelProperty(Database.DESCRIPTION)
+    @Schema(description = Database.DESCRIPTION)
     private String databaseDescription;
 
     /**

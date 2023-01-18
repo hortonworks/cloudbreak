@@ -8,16 +8,12 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.flow.api.FlowEndpoint;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/flow")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = {"flow"},
-        protocols = "http,https",
-        value = "/flow",
-        consumes = MediaType.APPLICATION_JSON,
-        produces = MediaType.APPLICATION_JSON)
+@Tag(name = "/flow")
 public interface RedBeamsFlowEndpoint extends FlowEndpoint {
 }

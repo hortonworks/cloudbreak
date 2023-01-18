@@ -7,26 +7,25 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ImageModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class StackImageV4Response implements JsonEntity {
-    @ApiModelProperty(ImageModelDescription.IMAGE_NAME)
+    @Schema(description = ImageModelDescription.IMAGE_NAME)
     private String name;
 
-    @ApiModelProperty(ImageModelDescription.IMAGE_CATALOG_URL)
+    @Schema(description = ImageModelDescription.IMAGE_CATALOG_URL)
     private String catalogUrl;
 
-    @ApiModelProperty(ImageModelDescription.IMAGE_ID)
+    @Schema(description = ImageModelDescription.IMAGE_ID)
     private String id;
 
-    @ApiModelProperty(ImageModelDescription.IMAGE_CATALOG_NAME)
+    @Schema(description = ImageModelDescription.IMAGE_CATALOG_NAME)
     private String catalogName;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.IMAGE_OS)
+    @Schema(description = ModelDescriptions.StackModelDescription.IMAGE_OS)
     private String os;
 
     public String getName() {

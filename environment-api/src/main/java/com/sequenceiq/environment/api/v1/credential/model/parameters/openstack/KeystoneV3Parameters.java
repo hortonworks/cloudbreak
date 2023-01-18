@@ -6,19 +6,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 @Deprecated
 public class KeystoneV3Parameters implements Serializable {
 
-    @ApiModelProperty
+    @Schema
     private ProjectKeystoneV3Parameters project;
 
-    @ApiModelProperty
+    @Schema
     private DomainKeystoneV3Parameters domain;
 
     public ProjectKeystoneV3Parameters getProject() {

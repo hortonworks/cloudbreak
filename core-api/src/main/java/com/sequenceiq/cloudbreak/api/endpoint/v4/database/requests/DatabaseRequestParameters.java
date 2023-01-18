@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseRequestParameters implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = Database.VERSION, required = true)
+    @Schema(description = Database.VERSION, required = true)
     private String version;
 
     public String getVersion() {

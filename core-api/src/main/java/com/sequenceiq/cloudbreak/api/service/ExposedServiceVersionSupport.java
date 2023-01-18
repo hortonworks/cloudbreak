@@ -19,7 +19,7 @@ public class ExposedServiceVersionSupport {
         if (Strings.isNullOrEmpty(minVersionString)) {
             shouldInclude = true;
         } else if (blueprintVersionOptional.isEmpty()) {
-            shouldInclude =  true;
+            shouldInclude = true;
         } else {
             Versioned blueprintVersion = () -> StringUtils.substringBefore(blueprintVersionOptional.get(), "-");
             Versioned minVersion = () -> StringUtils.substringBefore(minVersionString, "-");

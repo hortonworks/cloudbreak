@@ -10,10 +10,9 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterTemplateModelDescr
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class ClusterTemplateV4Base implements JsonEntity {
 
@@ -21,21 +20,21 @@ public abstract class ClusterTemplateV4Base implements JsonEntity {
     @Pattern(regexp = "^[^;\\/%]*$",
             message = "Name should not contain semicolon, forward slash or percentage characters")
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, required = true)
     private String name;
 
     @Size(max = 1000)
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(value = ClusterTemplateModelDescription.TEMPLATE, required = true)
+    @Schema(description = ClusterTemplateModelDescription.TEMPLATE, required = true)
     @NotNull
     private DistroXV1Request distroXTemplate;
 
-    @ApiModelProperty(required = true)
+    @Schema(required = true)
     private ClusterTemplateV4Type type = ClusterTemplateV4Type.OTHER;
 
-    @ApiModelProperty(ClusterTemplateModelDescription.CLOUD_PLATFORM)
+    @Schema(description = ClusterTemplateModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
     public String getName() {

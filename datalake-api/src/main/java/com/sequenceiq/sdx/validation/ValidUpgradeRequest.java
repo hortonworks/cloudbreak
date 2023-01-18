@@ -17,8 +17,7 @@ public @interface ValidUpgradeRequest {
             + "Either one of 'runtime', 'imageId', 'lockComponents' parameters "
             + "or both 'imageId' and 'lockComponents' parameter or none must be specified in the request";
 
-    Class<?>[] groups() default { };
+    Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default { };
-
+    Class<? extends Payload>[] payload() default {};
 }

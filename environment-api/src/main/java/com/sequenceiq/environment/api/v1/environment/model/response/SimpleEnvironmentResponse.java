@@ -12,10 +12,10 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnviro
 import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyViewResponse;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(value = "SimpleEnvironmentV1Response")
+@Schema(name = "SimpleEnvironmentV1Response")
 public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
     private CredentialViewResponse credential;

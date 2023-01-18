@@ -8,10 +8,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class YarnStackV4Parameters extends StackV4ParameterBase {
@@ -20,10 +19,10 @@ public class YarnStackV4Parameters extends StackV4ParameterBase {
 
     private static final String LIFETIME = "lifeTime";
 
-    @ApiModelProperty
+    @Schema
     private String yarnQueue;
 
-    @ApiModelProperty
+    @Schema
     private Integer lifetime;
 
     public String getYarnQueue() {
@@ -52,7 +51,7 @@ public class YarnStackV4Parameters extends StackV4ParameterBase {
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.YARN;
     }

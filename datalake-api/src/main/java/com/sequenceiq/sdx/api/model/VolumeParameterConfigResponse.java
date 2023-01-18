@@ -3,27 +3,26 @@ package com.sequenceiq.sdx.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VolumeParameterConfigResponse {
 
-    @ApiModelProperty(ModelDescriptions.VOLUME_PARAMETER_TYPE)
+    @Schema(description = ModelDescriptions.VOLUME_PARAMETER_TYPE)
     private String volumeParameterType;
 
-    @ApiModelProperty(ModelDescriptions.VOLUME_MINIMUM_SIZE)
+    @Schema(description = ModelDescriptions.VOLUME_MINIMUM_SIZE)
     private Integer minimumSize;
 
-    @ApiModelProperty(ModelDescriptions.VOLUME_MAXIMUM_SIZE)
+    @Schema(description = ModelDescriptions.VOLUME_MAXIMUM_SIZE)
     private Integer maximumSize;
 
-    @ApiModelProperty(ModelDescriptions.VOLUME_MINIMUM_NUMBER)
+    @Schema(description = ModelDescriptions.VOLUME_MINIMUM_NUMBER)
     private Integer minimumNumber;
 
-    @ApiModelProperty(ModelDescriptions.VOLUME_MAXIMUM_NUMBER)
+    @Schema(description = ModelDescriptions.VOLUME_MAXIMUM_NUMBER)
     private Integer maximumNumber;
 
     public VolumeParameterConfigResponse() {
@@ -79,12 +78,11 @@ public class VolumeParameterConfigResponse {
 
     @Override
     public String toString() {
-        return "VolumeParameterConfigResponse{" +
-                "volumeParameterType='" + volumeParameterType + '\'' +
-                ", minimumSize=" + minimumSize +
-                ", maximumSize=" + maximumSize +
-                ", minimumNumber=" + minimumNumber +
-                ", maximumNumber=" + maximumNumber +
-                '}';
+        return "VolumeParameterConfigResponse{"
+                + "volumeParameterType='" + volumeParameterType + '\''
+                + ", minimumSize=" + minimumSize
+                + ", maximumSize=" + maximumSize
+                + ", minimumNumber=" + minimumNumber
+                + ", maximumNumber=" + maximumNumber + '}';
     }
 }

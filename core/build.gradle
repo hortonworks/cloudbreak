@@ -123,10 +123,6 @@ dependencyManagement {
       entry 'spring-boot-starter-freemarker'
     }
 
-    dependencySet(group: 'io.springfox', version: swaggerSpringFoxVersion) {
-      entry 'springfox-boot-starter'
-    }
-
     dependencySet(group: 'org.bouncycastle',  version: bouncycastleVersion) {
       entry 'bcprov-jdk18on'
       entry 'bcpkix-jdk18on'
@@ -141,10 +137,6 @@ dependencyManagement {
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'net.jcip',                           name: 'jcip-annotations',            version: '1.0'
     dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '1.43.3'
-
-    dependency (group: 'io.swagger',                        name: 'swagger-jersey2-jaxrs',       version: swaggerVersion) {
-      exclude 'org.yaml:snakeyaml'
-    }
     dependency group: 'dnsjava',                            name: 'dnsjava',                     version: '3.5.2'
 
     dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: '1.3.4'
@@ -197,11 +189,7 @@ dependencies {
 
   implementation group: 'dnsjava',                            name: 'dnsjava'
 
-  implementation group: 'io.springfox',                       name: 'springfox-boot-starter'
-
-  implementation     ('io.swagger:swagger-jersey2-jaxrs') {
-    exclude group: 'org.yaml'
-  }
+  implementation group: 'io.swagger.core.v3',                 name: 'swagger-jaxrs2',                   version: swaggerCoreVersion
 
   implementation (group: 'com.nimbusds',                      name: 'nimbus-jose-jwt') {
      version {

@@ -277,7 +277,7 @@ class SdxUpgradeControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans =  {true, false})
+    @ValueSource(booleans = {true, false})
     void testUpgradeDatabaseServerByName(boolean forced) {
         SdxUpgradeDatabaseServerRequest request = new SdxUpgradeDatabaseServerRequest();
         request.setForced(forced);
@@ -308,7 +308,7 @@ class SdxUpgradeControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans =  {true, false})
+    @ValueSource(booleans = {true, false})
     void testUpgradeDatabaseServerByCrn(boolean forced) {
         SdxUpgradeDatabaseServerRequest request = new SdxUpgradeDatabaseServerRequest();
         request.setForced(forced);

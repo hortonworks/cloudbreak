@@ -7,30 +7,29 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.common.api.credential.AppAuthenticationType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("AzureCredentialV1ResponseParameters")
+@Schema(name = "AzureCredentialV1ResponseParameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AzureCredentialResponseParameters implements Serializable {
 
-    @ApiModelProperty
+    @Schema
     private String subscriptionId;
 
-    @ApiModelProperty
+    @Schema
     private String tenantId;
 
-    @ApiModelProperty
+    @Schema
     private String accessKey;
 
-    @ApiModelProperty
+    @Schema
     private AppAuthenticationType authenticationType;
 
-    @ApiModelProperty
+    @Schema
     private AzureCredentialCertificateResponse certificate;
 
-    @ApiModelProperty
+    @Schema
     private RoleBasedResponse roleBased;
 
     public RoleBasedResponse getRoleBased() {

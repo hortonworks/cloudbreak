@@ -8,18 +8,18 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.platformresource.model.RegionResponse;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(value = "CompactRegionV1Response")
+@Schema(name = "CompactRegionV1Response", subTypes = RegionResponse.class)
 public class CompactRegionResponse implements Serializable {
 
-    @ApiModelProperty(EnvironmentModelDescription.REGIONS)
+    @Schema(description = EnvironmentModelDescription.REGIONS)
     private List<String> names;
 
-    @ApiModelProperty(EnvironmentModelDescription.REGION_DISPLAYNAMES)
+    @Schema(description = EnvironmentModelDescription.REGION_DISPLAYNAMES)
     private Map<String, String> displayNames;
 
     public CompactRegionResponse() {

@@ -2,7 +2,7 @@ package com.sequenceiq.distrox.api.v1.distrox.model.upgrade;
 
 import java.util.Objects;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @ValidUpgradeRequest
 public class DistroXUpgradeV1Request {
@@ -91,26 +91,26 @@ public class DistroXUpgradeV1Request {
         return disableVariantChange;
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isEmpty() {
         return isUnspecifiedUpgradeType() &&
                 !Boolean.TRUE.equals(dryRun) &&
                 !isShowAvailableImagesSet();
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isDryRunOnly() {
         return isUnspecifiedUpgradeType() &&
                 Boolean.TRUE.equals(dryRun);
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isShowAvailableImagesOnly() {
         return isUnspecifiedUpgradeType() &&
                 isShowAvailableImagesSet();
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isShowAvailableImagesSet() {
         return Objects.nonNull(showAvailableImages) && DistroXUpgradeShowAvailableImages.DO_NOT_SHOW != showAvailableImages;
     }

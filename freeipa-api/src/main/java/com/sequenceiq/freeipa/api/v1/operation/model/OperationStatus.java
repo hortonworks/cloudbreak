@@ -7,35 +7,34 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("OperationV1Status")
+@Schema(name = "OperationV1Status")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationStatus {
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ID, required = true)
+    @Schema(description = UserModelDescriptions.USERSYNC_ID, required = true)
     private String operationId;
 
-    @ApiModelProperty(value = UserModelDescriptions.SYNC_OPERATION, required = true)
+    @Schema(description = UserModelDescriptions.SYNC_OPERATION, required = true)
     private OperationType operationType;
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_STATUS)
+    @Schema(description = UserModelDescriptions.USERSYNC_STATUS)
     private OperationState status;
 
-    @ApiModelProperty(value = UserModelDescriptions.SUCCESS_ENVIRONMENTS)
+    @Schema(description = UserModelDescriptions.SUCCESS_ENVIRONMENTS)
     private List<SuccessDetails> success;
 
-    @ApiModelProperty(value = UserModelDescriptions.FAILURE_ENVIRONMENTS)
+    @Schema(description = UserModelDescriptions.FAILURE_ENVIRONMENTS)
     private List<FailureDetails> failure;
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ERROR)
+    @Schema(description = UserModelDescriptions.USERSYNC_ERROR)
     private String error;
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_STARTTIME)
+    @Schema(description = UserModelDescriptions.USERSYNC_STARTTIME)
     private Long startTime;
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ENDTIME)
+    @Schema(description = UserModelDescriptions.USERSYNC_ENDTIME)
     private Long endTime;
 
     public OperationStatus(String operationId, OperationType operationType, OperationState status,

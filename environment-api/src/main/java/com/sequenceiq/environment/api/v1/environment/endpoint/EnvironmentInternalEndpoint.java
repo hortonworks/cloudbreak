@@ -20,20 +20,22 @@ import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v1/internal/env")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/internal/env", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/internal/env")
 public interface EnvironmentInternalEndpoint {
 
     @GET
     @Path("/crn/{crn}/policy_validation")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.POLICY_VALIDATION_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
-            nickname = "policyValidationInternalByEnvironmentCrn")
+    @Operation(summary = EnvironmentOpDescription.POLICY_VALIDATION_BY_CRN, description = ENVIRONMENT_NOTES,
+            operationId = "policyValidationInternalByEnvironmentCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PolicyValidationErrorResponses policyValidationByEnvironmentCrn(
         @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
         @QueryParam("service") List<String> services);
@@ -41,8 +43,9 @@ public interface EnvironmentInternalEndpoint {
     @GET
     @Path("/crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.INTERNAL_CONSUMPTION_LIST, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
-            nickname = "getEnvironmentV1InternalByCrn")
+    @Operation(summary = EnvironmentOpDescription.INTERNAL_CONSUMPTION_LIST, description = ENVIRONMENT_NOTES,
+            operationId = "getEnvironmentV1InternalByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SimpleEnvironmentResponse internalGetByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
         @QueryParam("withNetwork") @DefaultValue("false") boolean withNetwork);
 

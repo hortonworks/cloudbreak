@@ -7,18 +7,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxProgressListResponse implements Serializable {
 
-    @ApiModelProperty(ModelDescriptions.RECENT_FLOW_OPERATIONS)
+    @Schema(description = ModelDescriptions.RECENT_FLOW_OPERATIONS)
     private List<FlowProgressResponse> recentFlowOperations;
 
-    @ApiModelProperty(ModelDescriptions.RECENT_INTERNAL_FLOW_OPERATIONS)
+    @Schema(description = ModelDescriptions.RECENT_INTERNAL_FLOW_OPERATIONS)
     private List<FlowProgressResponse> recentInternalFlowOperations;
 
     public List<FlowProgressResponse> getRecentFlowOperations() {

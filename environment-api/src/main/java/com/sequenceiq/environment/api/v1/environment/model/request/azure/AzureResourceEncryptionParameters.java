@@ -8,10 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "AzureResourceEncryptionV1Parameters")
+@Schema(name = "AzureResourceEncryptionV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AzureResourceEncryptionParameters implements Serializable {
 
@@ -23,19 +22,19 @@ public class AzureResourceEncryptionParameters implements Serializable {
             "<keyName> may only contain alphanumeric characters and dashes. " +
             "<keyVersion> may only contain alphanumeric characters.";
 
-    @ApiModelProperty(EnvironmentModelDescription.ENCRYPTION_KEY_URL)
+    @Schema(description = EnvironmentModelDescription.ENCRYPTION_KEY_URL)
     @Pattern(regexp =
             "^https://[a-zA-Z-][0-9a-zA-Z-]*\\.vault\\.(azure\\.net|azure\\.cn|usgovcloudapi\\.net|microsoftazure\\.de)/keys/[0-9a-zA-Z-]+/[0-9A-Za-z]+",
             message = ENCRYPTION_KEY_URL_INVALID_MSG)
     private String encryptionKeyUrl;
 
-    @ApiModelProperty(EnvironmentModelDescription.ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
+    @Schema(description = EnvironmentModelDescription.ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
     private String encryptionKeyResourceGroupName;
 
-    @ApiModelProperty(EnvironmentModelDescription.DISK_ENCRYPTION_SET_ID)
+    @Schema(description = EnvironmentModelDescription.DISK_ENCRYPTION_SET_ID)
     private String diskEncryptionSetId;
 
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_HOST_ENCRYPTION_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AZURE_HOST_ENCRYPTION_PARAMETERS)
     private boolean enableHostEncryption;
 
     public String getEncryptionKeyUrl() {

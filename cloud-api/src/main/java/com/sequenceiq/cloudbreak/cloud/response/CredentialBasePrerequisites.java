@@ -5,11 +5,11 @@ import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDes
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class CredentialBasePrerequisites {
 
-    @ApiModelProperty(value = POLICIES)
+    @Schema(description = POLICIES)
     private Map<String, String> policies = new LinkedHashMap<>();
 
     public Map<String, String> getPolicies() {

@@ -11,33 +11,32 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupNetworkScale
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackScaleV4Request implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String group;
 
     @NotNull(message = "desiredCount must not be null.")
-    @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
+    @Schema(description = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer desiredCount;
 
     private Long stackId;
 
-    @ApiModelProperty(InstanceGroupAdjustmentModelDescription.FORCE)
+    @Schema(description = InstanceGroupAdjustmentModelDescription.FORCE)
     private Boolean forced;
 
-    @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.ADJUSTMENT_TYPE)
+    @Schema(description = InstanceGroupAdjustmentModelDescription.ADJUSTMENT_TYPE)
     private AdjustmentType adjustmentType = AdjustmentType.EXACT;
 
-    @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.THRESHOLD)
+    @Schema(description = InstanceGroupAdjustmentModelDescription.THRESHOLD)
     private Long threshold;
 
-    @ApiModelProperty(value = InstanceGroupNetworkScaleModelDescription.NETWORK_SCALE_REQUEST)
+    @Schema(description = InstanceGroupNetworkScaleModelDescription.NETWORK_SCALE_REQUEST)
     private NetworkScaleV4Request networkScaleV4Request;
 
     public String getGroup() {

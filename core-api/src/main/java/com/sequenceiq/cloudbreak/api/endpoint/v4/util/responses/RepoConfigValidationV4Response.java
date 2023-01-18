@@ -5,30 +5,29 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepositoryConfigValidationDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class RepoConfigValidationV4Response {
 
-    @ApiModelProperty(RepositoryConfigValidationDescription.FIELDS)
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
     private Boolean ambariBaseUrl;
 
-    @ApiModelProperty(RepositoryConfigValidationDescription.FIELDS)
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
     private Boolean ambariGpgKeyUrl;
 
-    @ApiModelProperty(RepositoryConfigValidationDescription.FIELDS)
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
     private Boolean stackBaseURL;
 
-    @ApiModelProperty(RepositoryConfigValidationDescription.FIELDS)
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
     private Boolean utilsBaseURL;
 
-    @ApiModelProperty(RepositoryConfigValidationDescription.FIELDS)
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
     private Boolean versionDefinitionFileUrl;
 
-    @ApiModelProperty(RepositoryConfigValidationDescription.FIELDS)
+    @Schema(description = RepositoryConfigValidationDescription.FIELDS)
     private Boolean mpackUrl;
 
     public Boolean getAmbariBaseUrl() {

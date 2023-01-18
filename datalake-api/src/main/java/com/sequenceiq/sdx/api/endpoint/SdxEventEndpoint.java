@@ -22,21 +22,22 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
 @Path("/sdx")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/sdx", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/sdx")
 public interface SdxEventEndpoint {
 
     @GET
     @Path("/structured_events")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LIST_FOR_RESOURCE, produces = MediaType.APPLICATION_JSON, notes = AUDIT_EVENTS_NOTES,
-            nickname = "getCDPAuditEventsForResource")
+    @Operation(summary = LIST_FOR_RESOURCE, description = AUDIT_EVENTS_NOTES, operationId = "getCDPAuditEventsForResource",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<CDPStructuredEvent> getAuditEvents(
             @QueryParam("environmentCrn") @NotNull(message = "The 'environmentCrn' query parameter must be specified.") String environmentCrn,
             @QueryParam("types") List<StructuredEventType> types,
@@ -45,8 +46,9 @@ public interface SdxEventEndpoint {
 
     @GET
     @Path("zip")
-    @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
-    @ApiOperation(value = LIST_FOR_RESOURCE_ZIP, notes = AUDIT_EVENTS_NOTES, nickname = "getDatalakeEventsZipForResource")
+    @Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON })
+    @Operation(summary = LIST_FOR_RESOURCE_ZIP, description = AUDIT_EVENTS_NOTES, operationId = "getDatalakeEventsZipForResource",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Response getDatalakeEventsZip(
             @QueryParam("environmentCrn") @NotNull(message = "The 'environmentCrn' query parameter must be specified.") String environmentCrn,
             @QueryParam("types") List<StructuredEventType> types);

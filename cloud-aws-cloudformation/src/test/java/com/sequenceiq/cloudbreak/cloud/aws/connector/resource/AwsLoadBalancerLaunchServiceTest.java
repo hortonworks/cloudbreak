@@ -563,7 +563,7 @@ class AwsLoadBalancerLaunchServiceTest {
                 summaries.add(lbSummary);
             }
             if (creatListeners) {
-                StackResourceSummary lSummary =  StackResourceSummary.builder()
+                StackResourceSummary lSummary = StackResourceSummary.builder()
                         .logicalResourceId(AwsListener.getListenerName(PORT, scheme))
                         .resourceStatus(ResourceStatus.CREATE_COMPLETE)
                         .build();

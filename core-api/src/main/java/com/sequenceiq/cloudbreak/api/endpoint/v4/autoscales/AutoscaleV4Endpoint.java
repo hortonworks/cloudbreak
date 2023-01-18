@@ -40,114 +40,131 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/autoscale")
 @RetryAndMetrics
 @Consumes(APPLICATION_JSON)
-@Api(value = "/autoscale", description = ControllerDescription.AUTOSCALE_DESCRIPTION, protocols = "http,https",
-        consumes = APPLICATION_JSON)
+@Tag(name = "/autoscale", description = ControllerDescription.AUTOSCALE_DESCRIPTION)
 public interface AutoscaleV4Endpoint {
 
     @PUT
     @Path("/stack/crn/{crn}/{userId}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putStackForAutoscale")
+    @Operation(summary = StackOpDescription.PUT_BY_ID, description = Notes.STACK_NOTES, operationId = "putStackForAutoscale",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStack(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateStackV4Request updateRequest);
 
     // Not overloading the regular scaling API since 1) that is public, and 2) stopstart may move into a separate InstancePoolManagementController at some point
     @PUT
     @Path("/stack/startNodes/crn/{crn}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.PUT_START_INSTANCES_BY_ID, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStartByCrn")
+    @Operation(summary = StackOpDescription.PUT_START_INSTANCES_BY_ID,
+            description = Notes.STACK_NOTES, operationId = "putStackForAutoscaleStartByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStackStartInstancesByCrn(@PathParam("crn") String crn, @Valid UpdateStackV4Request updateRequest);
 
     @PUT
     @Path("/stack/startNodes/name/{name}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.PUT_START_INSTANCES_BY_ID, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStartByName")
+    @Operation(summary = StackOpDescription.PUT_START_INSTANCES_BY_ID,
+            description = Notes.STACK_NOTES, operationId = "putStackForAutoscaleStartByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStackStartInstancesByName(@PathParam("name") String name, @Valid UpdateStackV4Request updateRequest);
 
     @PUT
     @Path("/stack/crn/{crn}/{userId}/cluster")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putClusterForAutoscale")
+    @Operation(summary = StackOpDescription.PUT_BY_ID, description = Notes.STACK_NOTES, operationId = "putClusterForAutoscale",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putCluster(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateClusterV4Request updateRequest);
 
     @GET
     @Path("stack/all")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_ALL, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getAllStackForAutoscale")
+    @Operation(summary = StackOpDescription.GET_ALL, description = Notes.STACK_NOTES, operationId = "getAllStackForAutoscale",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AutoscaleStackV4Responses getAllForAutoscale();
 
     @GET
     @Path("/autoscale_cluster/crn/{crn}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_AUTOSCALE_BY_CRN, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "getAutoscaleClusterByCrn")
+    @Operation(summary = StackOpDescription.GET_AUTOSCALE_BY_CRN,
+            description = Notes.STACK_NOTES, operationId = "getAutoscaleClusterByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AutoscaleStackV4Response getAutoscaleClusterByCrn(@PathParam("crn") String crn);
 
     @GET
     @Path("/autoscale_cluster/name/{name}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_AUTOSCALE_BY_NAME, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "getAutoscaleClusterByName")
+    @Operation(summary = StackOpDescription.GET_AUTOSCALE_BY_NAME,
+            description = Notes.STACK_NOTES, operationId = "getAutoscaleClusterByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AutoscaleStackV4Response getAutoscaleClusterByName(@PathParam("name") String name);
 
     @GET
     @Path("/autoscale_cluster/name/{name}/internal")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_INTERNAL_AUTOSCALE_BY_NAME, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "getInternalAutoscaleClusterByName")
+    @Operation(summary = StackOpDescription.GET_INTERNAL_AUTOSCALE_BY_NAME,
+            description = Notes.STACK_NOTES, operationId = "getInternalAutoscaleClusterByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AutoscaleStackV4Response getInternalAutoscaleClusterByName(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
 
     @GET
     @Path("/stack/crn/{crn}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_BY_CRN, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getStackForAutoscale")
+    @Operation(summary = StackOpDescription.GET_BY_CRN, description = Notes.STACK_NOTES, operationId = "getStackForAutoscale",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackV4Response get(@PathParam("crn") String crn);
 
     @GET
     @Path("/stack/crn/{crn}/dependent_host_groups")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_DEPENDENT_HOSTGROUPS_BY_CRN, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "getDependentHostGroupsForMultipleAutoscaleHostGroups")
+    @Operation(summary = StackOpDescription.GET_DEPENDENT_HOSTGROUPS_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "getDependentHostGroupsForMultipleAutoscaleHostGroups",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DependentHostGroupsV4Response getDependentHostGroupsForMultipleHostGroups(@PathParam("crn") String crn,
             @QueryParam("hostGroups") @NotEmpty Set<String> hostGroups);
 
     @GET
     @Path("/stack/crn/{crn}/status")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_BY_CRN, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getStackStatusForAutoscale")
+    @Operation(summary = StackOpDescription.GET_BY_CRN, description = Notes.STACK_NOTES, operationId = "getStackStatusForAutoscale",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackStatusV4Response getStatusByCrn(@PathParam("crn") String crn);
 
     @GET
     @Path("/stack/deleted")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_DELETED_STACKS_SINCE_TS, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getDeletedStacks")
+    @Operation(summary = StackOpDescription.GET_DELETED_STACKS_SINCE_TS, description = Notes.STACK_NOTES, operationId = "getDeletedStacks",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<StackStatusV4Response> getDeletedStacks(@QueryParam("since") Long since);
 
     @GET
     @Path("/stack/crn/{crn}/authorize/{userId}/{tenant}/{permission}")
     @Produces(APPLICATION_JSON)
+    @Operation(summary = StackOpDescription.AUTHORIZE_FOR_AUTOSCALE, description = Notes.STACK_NOTES,
+            operationId = "authorizeForAutoscale",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AuthorizeForAutoscaleV4Response authorizeForAutoscale(@PathParam("crn") String crn, @PathParam("userId") String userId, @PathParam("tenant") String tenant,
             @PathParam("permission") String permission);
 
     @GET
     @Path("/stack/crn/{crn}/certificate")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "getCertificateStackForAutoscale")
+    @Operation(summary = StackOpDescription.GET_STACK_CERT, description = Notes.STACK_NOTES,
+            operationId = "getCertificateStackForAutoscale",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CertificateV4Response getCertificate(@PathParam("crn") String crn);
 
     @DELETE
     @Path("/stack/crn/{crn}/instances")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "decommissionInstancesForClusterCrn")
+    @Operation(summary = StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE,
+            description = Notes.STACK_NOTES, operationId = "decommissionInstancesForClusterCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void decommissionInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
             @QueryParam("workspaceId") @Valid Long workspaceId,
             @QueryParam("instanceId") @NotEmpty List<String> instanceIds,
@@ -156,8 +173,9 @@ public interface AutoscaleV4Endpoint {
     @DELETE
     @Path("/stack/crn/{crn}/instances/internal")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "decommissionInternalInstancesForClusterCrn")
+    @Operation(summary = StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE,
+            description = Notes.STACK_NOTES, operationId = "decommissionInternalInstancesForClusterCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier decommissionInternalInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced);
@@ -165,8 +183,9 @@ public interface AutoscaleV4Endpoint {
     @DELETE
     @Path("/stack/stopNodes/crn/{crn}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "autoscaleStopInstancesByCrn")
+    @Operation(summary = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE,
+            description = Notes.STACK_NOTES, operationId = "autoscaleStopInstancesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier stopInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
@@ -175,8 +194,9 @@ public interface AutoscaleV4Endpoint {
     @DELETE
     @Path("/stack/stopNodes/name/{name}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "autoscaleStopInstancesByName")
+    @Operation(summary = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE,
+            description = Notes.STACK_NOTES, operationId = "autoscaleStopInstancesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier stopInstancesForClusterName(@PathParam("name") String clusterName,
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
@@ -185,21 +205,33 @@ public interface AutoscaleV4Endpoint {
     @GET
     @Path("clusterproxy")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = StackOpDescription.GET_CLUSTER_PROXY_CONFIGURATION,
+            description = Notes.STACK_NOTES, operationId = "getClusterProxyconfiguration",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ClusterProxyConfiguration getClusterProxyconfiguration();
 
     @GET
     @Path("limits_configuration")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = StackOpDescription.GET_LIMITS_CONFIGURATION,
+            description = Notes.STACK_NOTES, operationId = "getClusterProxyconfiguration",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     LimitsConfigurationResponse getLimitsConfiguration(@QueryParam("accountId") String accountId);
 
     @GET
     @Path("/stack/crn/{crn}/recommendation")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = StackOpDescription.GET_RECOMMENDATION,
+            description = Notes.STACK_NOTES, operationId = "getRecommendationByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AutoscaleRecommendationV4Response getRecommendation(@PathParam("crn") String clusterCrn);
 
     @GET
     @Path("recommendation")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = StackOpDescription.GET_RECOMMENDATION,
+            description = Notes.STACK_NOTES, operationId = "getRecommendationByBlueprint",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AutoscaleRecommendationV4Response getRecommendation(@QueryParam("workspaceId") @Valid Long workspaceId,
                                                         @QueryParam("blueprintName") @NotEmpty String blueprintName);
 }

@@ -62,7 +62,7 @@ public class ClouderaManagerRangerUtil {
 
     private String getRangerUserSyncRoleName(ApiClient client, String clusterName) throws ApiException {
         RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(client);
-        List<ApiRole> apiRoleList =  rolesResourceApi.readRoles(clusterName, RANGER_SERVICE_NAME, null, null)
+        List<ApiRole> apiRoleList = rolesResourceApi.readRoles(clusterName, RANGER_SERVICE_NAME, null, null)
                 .getItems()
                 .stream()
                 .filter(apiRole -> RANGER_USER_SYNC_ROLE_TYPE.equals(apiRole.getType()))

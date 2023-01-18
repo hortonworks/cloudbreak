@@ -10,9 +10,9 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.ROTATE_DATABASE_SERVER_SECRETS_REQUEST)
+@Schema(description = ModelDescriptions.ROTATE_DATABASE_SERVER_SECRETS_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RotateDatabaseServerSecretV4Request extends BaseSecretRotationRequest {
 

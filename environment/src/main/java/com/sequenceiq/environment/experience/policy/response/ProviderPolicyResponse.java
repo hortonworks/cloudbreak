@@ -6,15 +6,14 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProviderPolicyResponse implements Serializable {
 
-    @ApiModelProperty(value = "The credential policy encoded in base64")
+    @Schema(description = "The credential policy encoded in base64")
     private String policy;
 
     public ProviderPolicyResponse(String policy) {

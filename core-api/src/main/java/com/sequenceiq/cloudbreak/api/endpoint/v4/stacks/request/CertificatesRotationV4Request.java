@@ -8,16 +8,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CertificateRotation
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CertificatesRotationV4Request implements JsonEntity {
-    @ApiModelProperty(value = ClusterModelDescription.CERTIFICATE_ROTATION_TYPE, allowableValues = "HOST_CERTS")
+    @Schema(description = ClusterModelDescription.CERTIFICATE_ROTATION_TYPE, required = true)
     private CertificateRotationType certificateRotationType = CertificateRotationType.HOST_CERTS;
 
-    @ApiModelProperty(value = ClusterModelDescription.FLAG_SKIP_SALT_UPDATE)
+    @Schema(description = ClusterModelDescription.FLAG_SKIP_SALT_UPDATE)
     private Boolean skipSaltUpdate = Boolean.FALSE;
 
     public CertificateRotationType getCertificateRotationType() {

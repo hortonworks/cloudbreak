@@ -13,58 +13,57 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxClusterRequestBase implements TaggableRequest {
 
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENT_NAME)
     @NotNull
+    @Schema(description = ModelDescriptions.ENVIRONMENT_NAME)
     private String environment;
 
-    @ApiModelProperty(ModelDescriptions.CLUSTER_SHAPE)
     @NotNull
+    @Schema(description = ModelDescriptions.CLUSTER_SHAPE)
     private SdxClusterShape clusterShape;
 
-    @ApiModelProperty(ModelDescriptions.CLOUD_STORAGE_DETAILS)
+    @Schema(description = ModelDescriptions.CLOUD_STORAGE_DETAILS)
     private SdxCloudStorageRequest cloudStorage;
 
-    @ApiModelProperty(ModelDescriptions.EXTERNAL_DATABASE_OPTIONS)
+    @Schema(description = ModelDescriptions.EXTERNAL_DATABASE_OPTIONS)
     private SdxDatabaseRequest externalDatabase;
 
-    @ApiModelProperty(ModelDescriptions.AWS_OPTIONS)
     @Valid
+    @Schema(description = ModelDescriptions.AWS_OPTIONS)
     private SdxAwsRequest aws;
 
-    @ApiModelProperty(ModelDescriptions.AZURE_OPTIONS)
+    @Schema(description = ModelDescriptions.AZURE_OPTIONS)
     private SdxAzureRequest azure;
 
-    @ApiModelProperty(ModelDescriptions.TAGS)
+    @Schema(description = ModelDescriptions.TAGS)
     private Map<String, String> tags;
 
-    @ApiModelProperty(ModelDescriptions.RANGER_RAZ_ENABLED)
+    @Schema(description = ModelDescriptions.RANGER_RAZ_ENABLED)
     private boolean enableRangerRaz;
 
-    @ApiModelProperty(ModelDescriptions.RANGER_RMS_ENABLED)
+    @Schema(description = ModelDescriptions.RANGER_RMS_ENABLED)
     private boolean enableRangerRms;
 
-    @ApiModelProperty(ModelDescriptions.MULTI_AZ_ENABLED)
+    @Schema(description = ModelDescriptions.MULTI_AZ_ENABLED)
     private boolean enableMultiAz;
 
-    @ApiModelProperty(ModelDescriptions.CUSTOM_INSTANCE_GROUP_OPTIONS)
     @Valid
+    @Schema(description = ModelDescriptions.CUSTOM_INSTANCE_GROUP_OPTIONS)
     private List<SdxInstanceGroupRequest> customInstanceGroups;
 
-    @ApiModelProperty(ModelDescriptions.JAVA_VERSION)
+    @Schema(description = ModelDescriptions.JAVA_VERSION)
     private Integer javaVersion;
 
-    @ApiModelProperty(ModelDescriptions.RECIPES)
+    @Schema(description = ModelDescriptions.RECIPES)
     private Set<SdxRecipe> recipes;
 
-    @ApiModelProperty(ModelDescriptions.IMAGE_SETTINGS)
+    @Schema(description = ModelDescriptions.IMAGE_SETTINGS)
     private ImageSettingsV4Request image;
 
     public String getEnvironment() {

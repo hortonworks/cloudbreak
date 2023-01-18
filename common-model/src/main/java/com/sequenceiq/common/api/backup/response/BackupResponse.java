@@ -3,9 +3,9 @@ package com.sequenceiq.common.api.backup.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.backup.base.BackupBase;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "BackupResponse")
+@Schema(name = "BackupResponse")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BackupResponse extends BackupBase {
 }

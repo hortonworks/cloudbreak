@@ -2,9 +2,9 @@ package com.sequenceiq.environment.api.v1.environment.model.request.yarn;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "YarnEnvironmentV1Parameters")
+@Schema(name = "YarnEnvironmentV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class YarnEnvironmentParameters {
 

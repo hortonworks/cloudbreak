@@ -6,9 +6,9 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.environment.api.GeneralCollectionV1Response;
 import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ProxyConfigDescription.DESCRIPTION)
+@Schema(description = ProxyConfigDescription.DESCRIPTION)
 public class ProxyResponses extends GeneralCollectionV1Response<ProxyResponse> {
     public ProxyResponses(Set<ProxyResponse> responses) {
         super(responses);

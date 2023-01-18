@@ -15,35 +15,34 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class InstanceTemplateV4Base extends ProviderParametersBase implements JsonEntity {
 
     @Valid
-    @ApiModelProperty(TemplateModelDescription.AWS_PARAMETERS)
+    @Schema(description = TemplateModelDescription.AWS_PARAMETERS)
     private AwsInstanceTemplateV4Parameters aws;
 
-    @ApiModelProperty(TemplateModelDescription.AZURE_PARAMETERS)
+    @Schema(description = TemplateModelDescription.AZURE_PARAMETERS)
     private AzureInstanceTemplateV4Parameters azure;
 
-    @ApiModelProperty(TemplateModelDescription.GCP_PARAMETERS)
+    @Schema(description = TemplateModelDescription.GCP_PARAMETERS)
     private GcpInstanceTemplateV4Parameters gcp;
 
-    @ApiModelProperty(TemplateModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Schema(description = TemplateModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
     @Deprecated
     private OpenStackInstanceTemplateV4Parameters openstack;
 
-    @ApiModelProperty(TemplateModelDescription.YARN_PARAMETERS)
+    @Schema(description = TemplateModelDescription.YARN_PARAMETERS)
     private YarnInstanceTemplateV4Parameters yarn;
 
-    @ApiModelProperty(TemplateModelDescription.YARN_PARAMETERS)
+    @Schema(description = TemplateModelDescription.YARN_PARAMETERS)
     private MockInstanceTemplateV4Parameters mock;
 
-    @ApiModelProperty(TemplateModelDescription.INSTANCE_TYPE)
+    @Schema(description = TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
 
     public String getInstanceType() {

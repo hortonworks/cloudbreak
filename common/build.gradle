@@ -72,7 +72,8 @@ dependencies {
   api group: 'javax.persistence',                           name: 'javax.persistence-api',          version: '2.2'
   implementation group: 'org.postgresql',                   name: 'postgresql',                     version: postgreSQLVersion
   api group: 'org.jasypt',                                  name: 'jasypt-hibernate4',              version: jasyptVersion
-  api group: 'io.swagger',                                  name: 'swagger-annotations',            version: swaggerVersion
+  api group: 'io.swagger.core.v3',                          name: 'swagger-core',                   version: swaggerCoreVersion
+  implementation group: 'io.swagger.core.v3',               name: 'swagger-jaxrs2',                 version: swaggerCoreVersion
   implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'org.springframework.boot',                    name: 'spring-boot-starter-actuator',   version: springBootVersion
   api group: 'com.zaxxer',                                  name: 'HikariCP',                       version: hikariCPVersion

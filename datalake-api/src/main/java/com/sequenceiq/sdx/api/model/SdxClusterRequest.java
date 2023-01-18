@@ -3,21 +3,20 @@ package com.sequenceiq.sdx.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxClusterRequest extends SdxClusterRequestBase {
 
-    @ApiModelProperty(ModelDescriptions.RUNTIME_VERSION)
+    @Schema(description = ModelDescriptions.RUNTIME_VERSION)
     private String runtime;
 
     /**
      * @deprecated use imageSettingsV4Request's os field instead
      */
-    @ApiModelProperty(ModelDescriptions.OS)
+    @Schema(description = ModelDescriptions.OS)
     @Deprecated
     private String os;
 

@@ -8,14 +8,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage
 import com.sequenceiq.common.api.cloudstorage.old.validation.ValidGcsCloudStorageParameters;
 import com.sequenceiq.common.model.FileSystemType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidGcsCloudStorageParameters
 public class GcsCloudStorageParametersV4Response implements CloudStorageParametersV4Response {
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String serviceAccountEmail;
 
@@ -27,7 +26,7 @@ public class GcsCloudStorageParametersV4Response implements CloudStorageParamete
         this.serviceAccountEmail = serviceAccountEmail;
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @Override
     public FileSystemType getType() {
         return FileSystemType.GCS;

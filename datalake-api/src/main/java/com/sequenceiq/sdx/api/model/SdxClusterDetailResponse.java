@@ -12,15 +12,14 @@ import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxClusterDetailResponse extends SdxClusterResponse implements TaggedResponse {
 
-    @ApiModelProperty(ModelDescriptions.STACK_RESPONSE)
+    @Schema(description = ModelDescriptions.STACK_RESPONSE)
     private StackV4Response stackV4Response;
 
     public static SdxClusterDetailResponse create(SdxClusterResponse sdxClusterResponse, StackV4Response stackV4Response) {
@@ -63,18 +62,12 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
 
     @Override
     public String getTagValue(String key) {
-        return Optional.ofNullable(stackV4Response)
-                .map(stack -> stack.getTags())
-                .map(tags -> tags.getTagValue(key))
-                .orElse(null);
+        return Optional.ofNullable(stackV4Response).map(stack -> stack.getTags()).map(tags -> tags.getTagValue(key)).orElse(null);
     }
 
     @Override
     public String toString() {
-        return "SdxClusterDetailResponse{ " +
-                super.toString() +
-                " stackV4Response=" + stackV4Response +
-                '}';
+        return "SdxClusterDetailResponse{ " + super.toString() + " stackV4Response=" + stackV4Response + '}';
     }
 
     public static final class Builder {

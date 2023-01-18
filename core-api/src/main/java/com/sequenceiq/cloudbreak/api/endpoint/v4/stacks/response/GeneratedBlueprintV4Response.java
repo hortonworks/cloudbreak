@@ -7,13 +7,12 @@ import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class GeneratedBlueprintV4Response implements JsonEntity {
 
-    @ApiModelProperty(BlueprintModelDescription.BLUEPRINT)
+    @Schema(description = BlueprintModelDescription.BLUEPRINT)
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String blueprintText;

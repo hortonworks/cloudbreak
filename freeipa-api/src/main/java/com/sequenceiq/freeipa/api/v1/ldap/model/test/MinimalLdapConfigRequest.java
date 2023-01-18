@@ -6,31 +6,30 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("MinimalLdapConfigV1Request")
+@Schema(name = "MinimalLdapConfigV1Request")
 public class MinimalLdapConfigRequest {
 
     @NotNull
-    @ApiModelProperty(value = LdapConfigModelDescription.SERVER_HOST, required = true)
+    @Schema(description = LdapConfigModelDescription.SERVER_HOST, required = true)
     private String host;
 
     @NotNull
     @Max(65535)
     @Min(1)
-    @ApiModelProperty(value = LdapConfigModelDescription.SERVER_PORT, required = true)
+    @Schema(description = LdapConfigModelDescription.SERVER_PORT, required = true)
     private Integer port;
 
-    @ApiModelProperty(LdapConfigModelDescription.PROTOCOL)
+    @Schema(description = LdapConfigModelDescription.PROTOCOL)
     private String protocol = "ldap";
 
     @NotNull
-    @ApiModelProperty(value = LdapConfigModelDescription.BIND_DN, required = true)
+    @Schema(description = LdapConfigModelDescription.BIND_DN, required = true)
     private String bindDn;
 
     @NotNull
-    @ApiModelProperty(value = LdapConfigModelDescription.BIND_PASSWORD, required = true)
+    @Schema(description = LdapConfigModelDescription.BIND_PASSWORD, required = true)
     private String bindPassword;
 
     public String getHost() {

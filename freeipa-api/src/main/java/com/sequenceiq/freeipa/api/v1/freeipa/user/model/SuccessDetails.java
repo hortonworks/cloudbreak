@@ -7,9 +7,9 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("SuccessDetailsV1")
+@Schema(name = "SuccessDetailsV1")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SuccessDetails {
     private String environment;

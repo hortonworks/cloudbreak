@@ -12,43 +12,42 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIp
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpFreeIpaParameters;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "AttachedFreeIpaRequest")
+@Schema(name = "AttachedFreeIpaRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AttachedFreeIpaRequest implements Serializable {
 
     @NotNull
-    @ApiModelProperty(value = EnvironmentModelDescription.CREATE_FREEIPA, required = true)
+    @Schema(description = EnvironmentModelDescription.CREATE_FREEIPA, required = true)
     private Boolean create;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
     private Integer instanceCountByGroup;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.FREEIPA_INSTANCE_TYPE)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_INSTANCE_TYPE)
     private String instanceType;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.MULTIAZ_FREEIPA)
+    @Schema(description = EnvironmentModelDescription.MULTIAZ_FREEIPA)
     private boolean enableMultiAz;
 
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_RECIPE_LIST)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_RECIPE_LIST)
     private Set<String> recipes;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_AWS_PARAMETERS)
     private AwsFreeIpaParameters aws;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AZURE_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_AZURE_PARAMETERS)
     private AzureFreeIpaParameters azure;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_GCP_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_GCP_PARAMETERS)
     private GcpFreeIpaParameters gcp;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_IMAGE)
     private FreeIpaImageRequest image;
 
     public Boolean getCreate() {

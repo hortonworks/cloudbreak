@@ -7,21 +7,20 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AzureInstanceTemplateV1Parameters implements Serializable {
 
-    @ApiModelProperty(TemplateModelDescription.AZURE_PRIVATE_ID)
+    @Schema(description = TemplateModelDescription.AZURE_PRIVATE_ID)
     private String privateId;
 
-    @ApiModelProperty(notes = "by default false")
+    @Schema(description = "by default false")
     private Boolean encrypted = Boolean.FALSE;
 
-    @ApiModelProperty(notes = "by default true")
+    @Schema(description = "by default true")
     private Boolean managedDisk = Boolean.TRUE;
 
     public Boolean getEncrypted() {

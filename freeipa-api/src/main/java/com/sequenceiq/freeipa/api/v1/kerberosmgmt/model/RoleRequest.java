@@ -7,18 +7,17 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("RoleV1Request")
+@Schema(name = "RoleV1Request")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoleRequest {
 
     @NotNull
-    @ApiModelProperty(value = KeytabModelDescription.ROLE_NAME)
+    @Schema(description = KeytabModelDescription.ROLE_NAME)
     private String roleName;
 
-    @ApiModelProperty(value = KeytabModelDescription.PRIVILEGES)
+    @Schema(description = KeytabModelDescription.PRIVILEGES)
     private Set<String> privileges = Set.of();
 
     public String getRoleName() {

@@ -42,17 +42,16 @@ sonarqube {
 }
 
 dependencies {
-  implementation           group: 'com.squareup.okhttp3',       name: 'okhttp',                     version: okhttpVersion
+  implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                     version: okhttpVersion
+  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2',             version: swaggerCoreVersion
 
-  implementation            group: 'org.yaml',                  name: 'snakeyaml'
+  implementation     group: 'org.yaml',                  name: 'snakeyaml'
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   implementation            group: 'net.bytebuddy',             name: 'byte-buddy', version: byteBuddyVersion
 
   implementation     group: 'com.google.guava',          name: 'guava'
   implementation     group: 'com.google.code.gson',      name: 'gson'
   implementation     group: 'dnsjava',                   name: 'dnsjava'
-  implementation     group: 'io.springfox',              name: 'springfox-boot-starter'
-  implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs'
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
   implementation     group: 'org.postgresql',            name: 'postgresql'
@@ -90,8 +89,6 @@ dependencies {
     implementation     group: 'com.google.guava',          name: 'guava',                          version: guavaVersion
     implementation     group: 'com.google.code.gson',      name: 'gson',                           version: gsonVersion
     implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '3.5.2'
-    implementation     group: 'io.springfox',              name: 'springfox-boot-starter',         version: swaggerSpringFoxVersion
-    implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
     implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: jerseyCoreVersion
     implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: mybatisMigrationVersion
     implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion

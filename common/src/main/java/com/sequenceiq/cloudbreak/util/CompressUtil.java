@@ -89,7 +89,7 @@ public class CompressUtil {
      */
     public boolean compareCompressedContent(byte[] c1, byte[] c2, List<String> prefixList) throws IOException {
         Map<String, String> zipMap1 = getZipEntries(c1, prefixList);
-        Map<String, String> zipMap2 =  getZipEntries(c2, prefixList);
+        Map<String, String> zipMap2 = getZipEntries(c2, prefixList);
         return zipMap1.equals(zipMap2);
     }
 

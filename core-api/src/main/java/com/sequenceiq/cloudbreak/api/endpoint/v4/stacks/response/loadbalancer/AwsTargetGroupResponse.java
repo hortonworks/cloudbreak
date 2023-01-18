@@ -6,15 +6,15 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AwsTargetGroupResponse implements Serializable {
 
-    @ApiModelProperty(StackModelDescription.AWS_LISTENER_ARN)
+    @Schema(description = StackModelDescription.AWS_LISTENER_ARN)
     @NotNull
     private String listenerArn;
 
-    @ApiModelProperty(StackModelDescription.AWS_TARGETGROUP_ARN)
+    @Schema(description = StackModelDescription.AWS_TARGETGROUP_ARN)
     @NotNull
     private String targetGroupArn;
 

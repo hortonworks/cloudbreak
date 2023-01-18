@@ -7,20 +7,19 @@ import javax.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRecipe implements Serializable {
 
-    @ApiModelProperty(ModelDescriptions.RECIPE_NAME)
     @NotBlank
+    @Schema(description = ModelDescriptions.RECIPE_NAME)
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.HOST_GROUP_NAME)
     @NotBlank
+    @Schema(description = ModelDescriptions.HOST_GROUP_NAME)
     private String hostGroup;
 
     public String getName() {
@@ -41,9 +40,6 @@ public class SdxRecipe implements Serializable {
 
     @Override
     public String toString() {
-        return "SdxRecipe{" +
-                "name='" + name + '\'' +
-                ", hostGroup='" + hostGroup + '\'' +
-                '}';
+        return "SdxRecipe{" + "name='" + name + '\'' + ", hostGroup='" + hostGroup + '\'' + '}';
     }
 }

@@ -11,21 +11,23 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.Notes;
 import com.sequenceiq.redbeams.doc.OperationDescriptions;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v4/support")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/support", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/support")
 public interface SupportV4Endpoint {
     @POST
     @Path("certificate")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.DatabaseServerOpDescription.CERT_SWAP, notes = Notes.DatabaseServerNotes.CERT_SWAP,
-            consumes = MediaType.APPLICATION_JSON, nickname = "changeMockCertificate")
+    @Operation(summary = OperationDescriptions.DatabaseServerOpDescription.CERT_SWAP, description = Notes.DatabaseServerNotes.CERT_SWAP,
+            operationId = "changeMockCertificate",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CertificateSwapV4Response swapCertificate(
-            @Valid @ApiParam(ModelDescriptions.SUPPORT_CERTIFICATE_REQUEST) CertificateSwapV4Request request
+            @Valid @Parameter(description = ModelDescriptions.SUPPORT_CERTIFICATE_REQUEST) CertificateSwapV4Request request
     );
 }

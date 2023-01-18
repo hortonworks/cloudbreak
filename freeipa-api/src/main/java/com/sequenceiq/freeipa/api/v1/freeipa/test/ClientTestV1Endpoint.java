@@ -15,37 +15,41 @@ import com.sequenceiq.freeipa.api.v1.freeipa.test.model.CheckUsersInGroupV1Reque
 import com.sequenceiq.freeipa.api.v1.freeipa.test.model.CheckUsersV1Request;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.model.ClientTestBaseV1Response;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/freeipa/test")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/freeipa/test", description = "Client test endpoint", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/freeipa/test", description = "Client test endpoint")
 public interface ClientTestV1Endpoint {
 
     @GET
     @Path("{id}/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Retrieves user information", produces = MediaType.APPLICATION_JSON, nickname = "userShowV1")
+    @Operation(summary = "Retrieves user information", operationId = "userShowV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     String userShow(@PathParam("id") Long id, @PathParam("name") String name);
 
     @POST
     @Path("check_users")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checks if users exists in FreeIPA of the environment", produces = MediaType.APPLICATION_JSON, nickname = "checkUsers")
+    @Operation(summary = "Checks if users exists in FreeIPA of the environment", operationId = "checkUsers",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ClientTestBaseV1Response checkUsers(@Valid CheckUsersV1Request checkUsersRequest);
 
     @POST
     @Path("check_groups")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checks if groups exists in FreeIPA of the environment", produces = MediaType.APPLICATION_JSON, nickname = "checkGroups")
+    @Operation(summary = "Checks if groups exists in FreeIPA of the environment", operationId = "checkGroups",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ClientTestBaseV1Response checkGroups(@Valid CheckGroupsV1Request checkGroupsRequest);
 
     @POST
     @Path("check_users_in_group")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checks if users exists in specific group of FreeIPA of the environment",
-            produces = MediaType.APPLICATION_JSON, nickname = "checkUsersInGroup")
+    @Operation(summary = "Checks if users exists in specific group of FreeIPA of the environment", operationId = "checkUsersInGroup",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ClientTestBaseV1Response checkUsersInGroup(@Valid CheckUsersInGroupV1Request checkUsersInGroupRequest);
 }

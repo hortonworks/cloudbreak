@@ -7,23 +7,22 @@ import com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription;
 import com.sequenceiq.freeipa.api.v1.ldap.model.LdapConfigBase;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("DescribeLdapConfigV1Response")
+@Schema(name = "DescribeLdapConfigV1Response")
 @JsonInclude(Include.NON_NULL)
 public class DescribeLdapConfigResponse extends LdapConfigBase {
 
-    @ApiModelProperty(ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN)
     private String crn;
 
-    @ApiModelProperty(LdapConfigModelDescription.BIND_DN)
+    @Schema(description = LdapConfigModelDescription.BIND_DN)
     private SecretResponse bindDn;
 
-    @ApiModelProperty(LdapConfigModelDescription.BIND_PASSWORD)
+    @Schema(description = LdapConfigModelDescription.BIND_PASSWORD)
     private SecretResponse bindPassword;
 
-    @ApiModelProperty(LdapConfigModelDescription.USER_GROUP)
+    @Schema(description = LdapConfigModelDescription.USER_GROUP)
     private String userGroup;
 
     public String getCrn() {

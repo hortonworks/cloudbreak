@@ -103,7 +103,7 @@ public class ImageServiceTest {
     public void testDetermineImageNameFound() {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
-        String imageName =  ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName(DEFAULT_PLATFORM, REGION, image));
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName(DEFAULT_PLATFORM, REGION, image));
         assertEquals("ami-09fea90f257c85513", imageName);
     }
 

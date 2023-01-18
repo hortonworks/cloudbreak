@@ -63,7 +63,7 @@ public class StopStartUpscaleGetRecoveryCandidatesHandler implements CloudPlatfo
         StopStartUpscaleGetRecoveryCandidatesRequest request = event.getData();
         LOGGER.info("StopStartUpscaleGetRecoveryCandidatesHandler: {}", event.getData().getResourceId());
         if (!request.isFailureRecoveryEnabled()) {
-            StopStartUpscaleGetRecoveryCandidatesResult result =  new StopStartUpscaleGetRecoveryCandidatesResult(request.getResourceId(), request,
+            StopStartUpscaleGetRecoveryCandidatesResult result = new StopStartUpscaleGetRecoveryCandidatesResult(request.getResourceId(), request,
                     Collections.emptyList(), request.getAdjustment(), request.getHostGroupName());
             notify(result, event);
             return;

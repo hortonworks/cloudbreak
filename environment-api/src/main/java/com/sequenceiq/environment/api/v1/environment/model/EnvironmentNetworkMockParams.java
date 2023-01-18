@@ -5,15 +5,14 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentNetworkMockV1Params")
+@Schema(name = "EnvironmentNetworkMockV1Params")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentNetworkMockParams {
 
     @Size(max = 255)
-    @ApiModelProperty(value = EnvironmentModelDescription.AWS_VPC_ID, required = true)
+    @Schema(description = EnvironmentModelDescription.AWS_VPC_ID, required = true)
     private String vpcId;
 
     private String internetGatewayId;

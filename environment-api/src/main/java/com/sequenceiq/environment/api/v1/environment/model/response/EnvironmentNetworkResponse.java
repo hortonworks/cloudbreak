@@ -20,47 +20,46 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYar
 import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentNetworkV1Response")
+@Schema(name = "EnvironmentNetworkV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private String crn;
 
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.SUBNET_METAS)
+    @Schema(description = EnvironmentModelDescription.SUBNET_METAS)
     private Map<String, CloudSubnet> subnetMetas;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.CB_SUBNETS)
+    @Schema(description = EnvironmentModelDescription.CB_SUBNETS)
     private Map<String, CloudSubnet> cbSubnets;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.DWX_SUBNETS)
+    @Schema(description = EnvironmentModelDescription.DWX_SUBNETS)
     private Map<String, CloudSubnet> dwxSubnets;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.MLX_SUBNETS)
+    @Schema(description = EnvironmentModelDescription.MLX_SUBNETS)
     private Map<String, CloudSubnet> mlxSubnets;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.CB_SUBNETS)
+    @Schema(description = EnvironmentModelDescription.CB_SUBNETS)
     private Map<String, CloudSubnet> liftieSubnets;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.EXISTING_NETWORK)
+    @Schema(description = EnvironmentModelDescription.EXISTING_NETWORK)
     private boolean existingNetwork;
 
-    @ApiModelProperty(EnvironmentModelDescription.PREFERED_SUBNET_ID)
+    @Schema(description = EnvironmentModelDescription.PREFERED_SUBNET_ID)
     private String preferedSubnetId;
 
-    @ApiModelProperty(EnvironmentModelDescription.PREFERED_SUBNET_IDS)
+    @Schema(description = EnvironmentModelDescription.PREFERED_SUBNET_IDS)
     private Set<String> preferedSubnetIds;
 
-    @ApiModelProperty(EnvironmentModelDescription.NETWORKCIDRS)
+    @Schema(description = EnvironmentModelDescription.NETWORKCIDRS)
     private Set<String> networkCidrs = new HashSet<>();
 
-    @ApiModelProperty(value = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_METAS)
+    @Schema(description = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_METAS)
     private Map<String, CloudSubnet> gatewayEndpointSubnetMetas = Map.of();
 
     public String getCrn() {

@@ -12,11 +12,8 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
 @Configuration
 @EnableAutoConfiguration(exclude = WebMvcMetricsAutoConfiguration.class)
-@EnableSwagger2
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @SpringBootApplication(scanBasePackages = "com.sequenceiq", exclude = { WebMvcMetricsAutoConfiguration.class, ErrorMvcAutoConfiguration.class })
 public class PeriscopeApplication {

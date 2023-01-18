@@ -15,33 +15,34 @@ import com.sequenceiq.environment.api.doc.marketplace.MarketplaceDescription;
 import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTermsRequest;
 import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTermsResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/imageterms")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/imageterms", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/imageterms")
 public interface AzureMarketplaceTermsEndpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = MarketplaceDescription.GET, produces = MediaType.APPLICATION_JSON, notes = MarketplaceDescription.GET_NOTES,
-            nickname = "getTermsSettingV1")
+    @Operation(summary = MarketplaceDescription.GET, description = MarketplaceDescription.GET_NOTES, operationId = "getTermsSettingV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AzureMarketplaceTermsResponse get();
 
     @GET
     @Path("{accountId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = MarketplaceDescription.GET, produces = MediaType.APPLICATION_JSON, notes = MarketplaceDescription.GET_NOTES,
-            nickname = "getTermsSettingInAccountV1")
+    @Operation(summary = MarketplaceDescription.GET, description = MarketplaceDescription.GET_NOTES, operationId = "getTermsSettingInAccountV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AzureMarketplaceTermsResponse getInAccount(@AccountId @PathParam("accountId") String accountId);
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = MarketplaceDescription.PUT, produces = MediaType.APPLICATION_JSON, notes = MarketplaceDescription.PUT_NOTES,
-            nickname = "putTermsSettingV1")
+    @Operation(summary = MarketplaceDescription.PUT, description = MarketplaceDescription.PUT_NOTES, operationId = "putTermsSettingV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AzureMarketplaceTermsResponse put(@Valid AzureMarketplaceTermsRequest request);
 }

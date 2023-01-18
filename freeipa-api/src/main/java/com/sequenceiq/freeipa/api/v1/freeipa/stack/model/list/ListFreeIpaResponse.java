@@ -9,20 +9,19 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStat
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("ListFreeIpaV1Response")
+@Schema(name = "ListFreeIpaV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ListFreeIpaResponse {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
+    @Schema(description = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
     private String name;
 
     @NotNull

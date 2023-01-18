@@ -13,10 +13,9 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.GcpDatabaseServerModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class GcpDatabaseServerV4Parameters extends MappableBase {
@@ -26,11 +25,11 @@ public class GcpDatabaseServerV4Parameters extends MappableBase {
     private static final String ENGINE_VERSION = "engineVersion";
 
     @Min(value = 7, message = "backupRetentionDays must be 7 or higher")
-    @ApiModelProperty(GcpDatabaseServerModelDescriptions.BACKUP_RETENTION_DAYS)
+    @Schema(description = GcpDatabaseServerModelDescriptions.BACKUP_RETENTION_DAYS)
     private Integer backupRetentionDays;
 
     @Pattern(regexp = "\\d+(?:\\.\\d)?")
-    @ApiModelProperty(GcpDatabaseServerModelDescriptions.DB_VERSION)
+    @Schema(description = GcpDatabaseServerModelDescriptions.DB_VERSION)
     private String engineVersion;
 
     public Integer getBackupRetentionDays() {
@@ -59,7 +58,7 @@ public class GcpDatabaseServerV4Parameters extends MappableBase {
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.GCP;
     }

@@ -23,27 +23,29 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.EventOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v4/events")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/events", description = ControllerDescription.EVENT_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/events", description = ControllerDescription.EVENT_DESCRIPTION)
 public interface EventV4Endpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EventOpDescription.GET_BY_TIMESTAMP, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
-            nickname = "getEventsInWorkspace")
+    @Operation(summary = EventOpDescription.GET_BY_TIMESTAMP, description = Notes.EVENT_NOTES,
+            operationId = "getEventsInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CloudbreakEventV4Responses list(@QueryParam("since") Long since, @AccountId @QueryParam("accountId") String accountId);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EventOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
-            nickname = "getEventsByStackNameInWorkspace")
+    @Operation(summary = EventOpDescription.GET_BY_NAME, description = Notes.EVENT_NOTES,
+            operationId = "getEventsByStackNameInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(
             @PathParam("name") String name,
             @QueryParam("page") @DefaultValue("0") Integer page,
@@ -53,8 +55,9 @@ public interface EventV4Endpoint {
     @GET
     @Path("{name}/list")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EventOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
-            nickname = "getCloudbreakEventsListByStack")
+    @Operation(summary = EventOpDescription.GET_BY_NAME, description = Notes.EVENT_NOTES,
+            operationId = "getCloudbreakEventsListByStack",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<CloudbreakEventV4Response> getPagedCloudbreakEventListByStack(
             @PathParam("name") String name,
             @QueryParam("page") @DefaultValue("0") Integer page,
@@ -64,8 +67,9 @@ public interface EventV4Endpoint {
     @GET
     @Path("crn/{crn}/list")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EventOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
-            nickname = "getCloudbreakEventsListByCrn")
+    @Operation(summary = EventOpDescription.GET_BY_CRN, description = Notes.EVENT_NOTES,
+            operationId = "getCloudbreakEventsListByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<CloudbreakEventV4Response> getPagedCloudbreakEventListByCrn(
             @PathParam("crn") String crn,
             @QueryParam("page") @DefaultValue("0") Integer page,
@@ -75,21 +79,24 @@ public interface EventV4Endpoint {
     @GET
     @Path("{name}/structured")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EventOpDescription.GET_EVENTS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
-            nickname = "getStructuredEventsInWorkspace")
+    @Operation(summary = EventOpDescription.GET_EVENTS_BY_NAME, description = Notes.EVENT_NOTES,
+            operationId = "getStructuredEventsInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StructuredEventContainer structured(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
 
     @GET
     @Path("crn/{crn}/structured")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EventOpDescription.GET_EVENTS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
-            nickname = "getStructuredEventsInWorkspaceByCrn")
+    @Operation(summary = EventOpDescription.GET_EVENTS_BY_CRN, description = Notes.EVENT_NOTES,
+            operationId = "getStructuredEventsInWorkspaceByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StructuredEventContainer structuredByCrn(@PathParam("crn") String crn, @QueryParam("onlyAlive") @DefaultValue("true") boolean onlyAlive);
 
     @GET
     @Path("{name}/zip")
     @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
-    @ApiOperation(value = EventOpDescription.GET_EVENTS_ZIP_BY_NAME, notes = Notes.EVENT_NOTES,
-            nickname = "getStructuredEventsZipInWorkspace")
+    @Operation(summary = EventOpDescription.GET_EVENTS_ZIP_BY_NAME, description = Notes.EVENT_NOTES,
+            operationId = "getStructuredEventsZipInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Response download(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
 }

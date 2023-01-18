@@ -13,19 +13,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRuleV4Re
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityGroupModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class SecurityGroupV4Response implements JsonEntity {
 
-    @ApiModelProperty(SecurityGroupModelDescription.SECURITY_GROUP_IDS)
+    @Schema(description = SecurityGroupModelDescription.SECURITY_GROUP_IDS)
     private Set<String> securityGroupIds;
 
     @Valid
-    @ApiModelProperty(SecurityGroupModelDescription.SECURITY_RULES)
+    @Schema(description = SecurityGroupModelDescription.SECURITY_RULES)
     private List<SecurityRuleV4Response> securityRules = new LinkedList<>();
 
     public List<SecurityRuleV4Response> getSecurityRules() {

@@ -22,8 +22,9 @@ import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.DatabaseOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @deprecated obsolete API, should not be used, redbeams is the new service for database operations.
@@ -34,51 +35,56 @@ import io.swagger.annotations.ApiOperation;
 @RetryAndMetrics
 @Path("/v4/{workspaceId}/databases")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/{workspaceId}/databases", description = ControllerDescription.DATABASES_V4_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/{workspaceId}/databases", description = ControllerDescription.DATABASES_V4_DESCRIPTION)
 public interface DatabaseV4Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
-            nickname = "listDatabasesByWorkspace")
+    @Operation(summary = DatabaseOpDescription.LIST, description = Notes.DATABASE_NOTES,
+            operationId = "listDatabasesByWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("environment") String environment,
             @QueryParam("attachGlobal") @DefaultValue("false") Boolean attachGlobal);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
-            nickname = "createDatabaseInWorkspace")
+    @Operation(summary = DatabaseOpDescription.CREATE, description = Notes.DATABASE_NOTES,
+            operationId = "createDatabaseInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseV4Response create(@PathParam("workspaceId") Long workspaceId, @Valid DatabaseV4Request request);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
-            nickname = "getDatabaseInWorkspace")
+    @Operation(summary = DatabaseOpDescription.GET_BY_NAME, description = Notes.DATABASE_NOTES,
+            operationId = "getDatabaseInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
-            nickname = "deleteDatabaseInWorkspace")
+    @Operation(summary = DatabaseOpDescription.DELETE_BY_NAME, description = Notes.DATABASE_NOTES,
+            operationId = "deleteDatabaseInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
-            nickname = "deleteDatabasesInWorkspace")
+    @Operation(summary = DatabaseOpDescription.DELETE_MULTIPLE_BY_NAME, description = Notes.DATABASE_NOTES,
+            operationId = "deleteDatabasesInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names);
 
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.GET_REQUEST, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
-            nickname = "getDatabaseRequestFromNameInWorkspace")
+    @Operation(summary = DatabaseOpDescription.GET_REQUEST, description = Notes.DATABASE_NOTES,
+            operationId = "getDatabaseRequestFromNameInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseV4Request getRequest(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
 }

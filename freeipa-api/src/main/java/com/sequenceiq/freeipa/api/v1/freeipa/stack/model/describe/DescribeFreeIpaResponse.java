@@ -23,49 +23,48 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAu
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.usersync.UserSyncStatusResponse;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("DescribeFreeIpaV1Response")
+@Schema(name = "DescribeFreeIpaV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DescribeFreeIpaResponse {
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
+    @Schema(description = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
     private String name;
 
     @NotNull
     private String crn;
 
     @NotNull
-    @ApiModelProperty(FreeIpaModelDescriptions.PLACEMENT_SETTINGS)
+    @Schema(description = FreeIpaModelDescriptions.PLACEMENT_SETTINGS)
     private PlacementResponse placement;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.TUNNEL)
+    @Schema(description = FreeIpaModelDescriptions.TUNNEL)
     private Tunnel tunnel;
 
     @NotNull
     @Valid
-    @ApiModelProperty(value = FreeIpaModelDescriptions.INSTANCE_GROUPS, required = true)
+    @Schema(description = FreeIpaModelDescriptions.INSTANCE_GROUPS, required = true)
     private List<InstanceGroupResponse> instanceGroups;
 
     @NotNull
-    @ApiModelProperty(value = FreeIpaModelDescriptions.AUTHENTICATION, required = true)
+    @Schema(description = FreeIpaModelDescriptions.AUTHENTICATION, required = true)
     private StackAuthenticationResponse authentication;
 
     @Valid
-    @ApiModelProperty(FreeIpaModelDescriptions.NETWORK)
+    @Schema(description = FreeIpaModelDescriptions.NETWORK)
     private NetworkResponse network;
 
-    @ApiModelProperty(FreeIpaModelDescriptions.IMAGE_SETTINGS)
+    @Schema(description = FreeIpaModelDescriptions.IMAGE_SETTINGS)
     private ImageSettingsResponse image;
 
     @NotNull
-    @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, required = true)
+    @Schema(description = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, required = true)
     private FreeIpaServerResponse freeIpa;
 
     private Set<String> recipes;
@@ -78,25 +77,25 @@ public class DescribeFreeIpaResponse {
 
     private String statusReason;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_APPLICATION_VERSION)
+    @Schema(description = FreeIpaModelDescriptions.FREEIPA_APPLICATION_VERSION)
     private String appVersion;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.CLOUD_PLATFORM)
+    @Schema(description = FreeIpaModelDescriptions.CLOUD_PLATFORM)
     private String cloudPlatform;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.VARIANT)
+    @Schema(description = FreeIpaModelDescriptions.VARIANT)
     private String variant;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.TELEMETRY)
+    @Schema(description = FreeIpaModelDescriptions.TELEMETRY)
     private TelemetryResponse telemetry;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.CLOUD_STORAGE)
+    @Schema(description = FreeIpaModelDescriptions.CLOUD_STORAGE)
     private CloudStorageResponse cloudStorage;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.USERSYNC_STATUS_DETAILS)
+    @Schema(description = FreeIpaModelDescriptions.USERSYNC_STATUS_DETAILS)
     private UserSyncStatusResponse userSyncStatus;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.MULTIAZ)
+    @Schema(description = FreeIpaModelDescriptions.MULTIAZ)
     private boolean enableMultiAz;
 
     public String getEnvironmentCrn() {

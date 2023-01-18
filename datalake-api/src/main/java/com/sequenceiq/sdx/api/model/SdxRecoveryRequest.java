@@ -5,15 +5,14 @@ import java.util.StringJoiner;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRecoveryRequest {
 
-    @ApiModelProperty(ModelDescriptions.RECOVERY_TYPE)
+    @Schema(description = ModelDescriptions.RECOVERY_TYPE)
     private SdxRecoveryType type;
 
     public SdxRecoveryType getType() {
@@ -26,8 +25,6 @@ public class SdxRecoveryRequest {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", SdxRecoveryRequest.class.getSimpleName() + "[", "]")
-                .add("type=" + type)
-                .toString();
+        return new StringJoiner(", ", SdxRecoveryRequest.class.getSimpleName() + "[", "]").add("type=" + type).toString();
     }
 }

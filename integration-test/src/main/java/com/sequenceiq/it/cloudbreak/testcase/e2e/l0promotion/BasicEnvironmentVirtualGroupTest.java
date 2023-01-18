@@ -77,7 +77,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
     public void testAddUsersToEnvironment(TestContext testContext) {
         AtomicReference<Map<UmsVirtualGroupRight, String>> environmentVirtualGroups = new AtomicReference<>();
         String workloadUsernameEnvAdminA = testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_ADMIN_A).getWorkloadUserName();
-        String workloadUsernameEnvCreatorB =  testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_B).getWorkloadUserName();
+        String workloadUsernameEnvCreatorB = testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_B).getWorkloadUserName();
 
         useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
 
@@ -144,8 +144,8 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
     public void testAddGroupsToEnvironment(TestContext testContext) {
         AtomicReference<Map<UmsVirtualGroupRight, String>> environmentVirtualGroups = new AtomicReference<>();
         CloudbreakUser userEnvAdminA = testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_ADMIN_A);
-        CloudbreakUser userEnvCreatorB =  testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_B);
-        CloudbreakUser userEnvCreatorA =  testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_A);
+        CloudbreakUser userEnvCreatorB = testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_B);
+        CloudbreakUser userEnvCreatorA = testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_A);
 
         useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
 

@@ -11,19 +11,18 @@ import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.CredentialBase;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = CredentialDescriptor.CREDENTIAL_NOTES, parent = CredentialBase.class, value = "CredentialV1Request")
+@Schema(description = CredentialDescriptor.CREDENTIAL_NOTES, allOf = CredentialBase.class, name = "CredentialV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class EditCredentialRequest extends CredentialBase {
 
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, required = true)
     private String name;
 
     @Valid
-    @ApiModelProperty(CredentialModelDescription.AZURE_PARAMETERS)
+    @Schema(description = CredentialModelDescription.AZURE_PARAMETERS)
     private AzureCredentialRequestParameters azure;
 
     public String getName() {

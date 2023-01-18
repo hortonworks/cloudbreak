@@ -10,22 +10,22 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class HostGroupV4Base implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(HostGroupModelDescription.RECIPE_IDS)
+    @Schema(description = HostGroupModelDescription.RECIPE_IDS)
     private Set<String> recipeNames = new HashSet<>();
 
-    @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
+    @Schema(description = HostGroupModelDescription.RECOVERY_MODE)
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
-    @ApiModelProperty(HostGroupModelDescription.INSTANCE_GROUP)
+    @Schema(description = HostGroupModelDescription.INSTANCE_GROUP)
     private String instanceGroupName;
 
     public String getName() {

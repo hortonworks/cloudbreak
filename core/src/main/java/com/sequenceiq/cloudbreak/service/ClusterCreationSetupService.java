@@ -101,7 +101,7 @@ public class ClusterCreationSetupService {
         clusterStub.setStack(stack);
         clusterStub.setWorkspace(stack.getWorkspace());
 
-        Cluster cluster =  measure(() ->
+        Cluster cluster = measure(() ->
                 clusterDecorator.decorate(clusterStub, request, blueprint, user, stack.getWorkspace(), stack),
                 LOGGER, "Cluster decorator {} ms for stack {}", stackName);
 

@@ -24,7 +24,7 @@ public class RecipeToRecipeV4ResponseConverter {
         json.setDescription(recipe.getDescription());
         json.setType(recipeTypeToRecipeV4TypeConverter.convert(recipe.getRecipeType()));
         json.setContent(recipe.getContent());
-        WorkspaceResourceV4Response workspace =  workspaceToWorkspaceResourceV4ResponseConverter
+        WorkspaceResourceV4Response workspace = workspaceToWorkspaceResourceV4ResponseConverter
                 .convert(recipe.getWorkspace());
         json.setWorkspace(workspace);
         json.setCreator(recipe.getCreator());

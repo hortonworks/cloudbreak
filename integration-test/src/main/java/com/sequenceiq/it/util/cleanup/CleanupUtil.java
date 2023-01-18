@@ -151,7 +151,7 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public Map<String, String> getEnvironments(EnvironmentClient environmentClient) {
-        Map<String, String> parentEnvironments =  environmentClient.environmentV1Endpoint().list().getResponses().stream()
+        Map<String, String> parentEnvironments = environmentClient.environmentV1Endpoint().list().getResponses().stream()
                 .filter(response -> response.getParentEnvironmentName() == null)
                 .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
         parentEnvironments.forEach((crn, name) -> LOG.info("Found deletable environment CRN: {} and NAME: {}", crn, name));

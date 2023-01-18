@@ -57,7 +57,7 @@ public class CmTemplateBlueprintTest extends BlueprintTestBase {
     }
 
     private BlueprintTestDto checkBlueprintLastUpdatedNotNull(BlueprintTestDto entity) {
-        Optional<BlueprintV4ViewResponse> bpResponse =  entity.getViewResponses().stream().findFirst();
+        Optional<BlueprintV4ViewResponse> bpResponse = entity.getViewResponses().stream().findFirst();
         CBAssertion.assertTrue(bpResponse.isPresent() && bpResponse.get().getLastUpdated() > 0);
         return entity;
     }

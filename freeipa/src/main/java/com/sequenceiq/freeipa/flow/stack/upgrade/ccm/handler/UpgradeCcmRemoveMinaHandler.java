@@ -49,7 +49,7 @@ public class UpgradeCcmRemoveMinaHandler extends AbstractUpgradeCcmEventHandler 
                 upgradeCcmService.removeMina(request.getResourceId());
             } catch (Exception e) {
                 LOGGER.debug("Removing Mina for CCM upgrade has been failed, but new CCMv2 is operational.");
-                UpgradeCcmEvent resultEvent =  UPGRADE_CCM_CLEANING_FAILED_EVENT.createBasedOn(request);
+                UpgradeCcmEvent resultEvent = UPGRADE_CCM_CLEANING_FAILED_EVENT.createBasedOn(request);
                 resultEvent.setMinaRemoved(Boolean.FALSE);
                 return resultEvent;
             }

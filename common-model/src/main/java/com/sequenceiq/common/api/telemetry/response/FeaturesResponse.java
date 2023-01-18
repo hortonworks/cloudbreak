@@ -6,19 +6,18 @@ import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 import com.sequenceiq.common.api.type.FeatureSetting;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "FeaturesResponse")
+@Schema(name = "FeaturesResponse")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FeaturesResponse extends FeaturesBase {
 
     @JsonProperty("metering")
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_METERING)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_METERING)
     private FeatureSetting metering;
 
     @JsonProperty("useSharedAltusCredential")
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_USE_SHARED_ALTUS_CREDENTIAL_ENABLED)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_USE_SHARED_ALTUS_CREDENTIAL_ENABLED)
     private FeatureSetting useSharedAltusCredential;
 
     public FeatureSetting getMetering() {

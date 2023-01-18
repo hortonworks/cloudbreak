@@ -3,18 +3,17 @@ package com.sequenceiq.sdx.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxDatabaseBackupStatusResponse {
 
-    @ApiModelProperty(ModelDescriptions.OPERATION_STATUS)
+    @Schema(description = ModelDescriptions.OPERATION_STATUS)
     private DatalakeDatabaseDrStatus status;
 
-    @ApiModelProperty(ModelDescriptions.OPERATION_STATUS_REASON)
+    @Schema(description = ModelDescriptions.OPERATION_STATUS_REASON)
     private String statusReason;
 
     public SdxDatabaseBackupStatusResponse(DatalakeDatabaseDrStatus status) {

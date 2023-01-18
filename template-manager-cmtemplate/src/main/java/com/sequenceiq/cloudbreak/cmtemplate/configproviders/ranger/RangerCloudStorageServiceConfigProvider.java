@@ -30,7 +30,7 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
 
     private static final String RANGER_HDFS_AUDIT_URL = "ranger_plugin_hdfs_audit_url";
 
-    private static final String HIVE_METASTORE_DIR =  "hive.metastore.warehouse.dir";
+    private static final String HIVE_METASTORE_DIR = "hive.metastore.warehouse.dir";
 
     private static final String HIVE_REPLICA_DIR = "hive.repl.replica.functions.root.dir";
 

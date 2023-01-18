@@ -12,16 +12,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageV1Base;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class CloudStorageV4Request extends CloudStorageV1Base {
 
     @Valid
-    @ApiModelProperty(ClusterModelDescription.LOCATIONS)
+    @Schema(description = ClusterModelDescription.LOCATIONS)
     private Set<StorageLocationV4Request> locations = new HashSet<>();
 
     public Set<StorageLocationV4Request> getLocations() {

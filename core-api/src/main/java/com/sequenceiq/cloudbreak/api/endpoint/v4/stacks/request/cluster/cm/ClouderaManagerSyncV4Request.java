@@ -8,15 +8,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ClouderaManagerSyncV4Request implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.CmSyncRequest.IMAGE_IDS)
+    @Schema(description = ModelDescriptions.CmSyncRequest.IMAGE_IDS)
     private Set<String> candidateImageUuids = new HashSet<>();
 
     public Set<String> getCandidateImageUuids() {

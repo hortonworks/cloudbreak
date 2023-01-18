@@ -16,49 +16,48 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescrip
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceMetaDataModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HardwareInfoV4Response implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, required = true)
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = HostGroupModelDescription.HOST_GROUP_NAME, required = true)
+    @Schema(description = HostGroupModelDescription.HOST_GROUP_NAME, required = true)
     private String groupName;
 
-    @ApiModelProperty(HostMetadataModelDescription.STATE)
+    @Schema(description = HostMetadataModelDescription.STATE)
     private String state;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.PRIVATE_IP)
+    @Schema(description = InstanceMetaDataModelDescription.PRIVATE_IP)
     private String privateIp;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.PUBLIC_IP)
+    @Schema(description = InstanceMetaDataModelDescription.PUBLIC_IP)
     private String publicIp;
 
-    @ApiModelProperty
+    @Schema
     private Integer sshPort;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.INSTANCE_ID)
+    @Schema(description = InstanceMetaDataModelDescription.INSTANCE_ID)
     private String instanceId;
 
-    @ApiModelProperty(ModelDescriptions.AMBARI_SERVER)
+    @Schema(description = ModelDescriptions.AMBARI_SERVER)
     private Boolean ambariServer;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.DISCOVERY_FQDN)
+    @Schema(description = InstanceMetaDataModelDescription.DISCOVERY_FQDN)
     private String discoveryFQDN;
 
-    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
 
-    @ApiModelProperty(InstanceGroupModelDescription.STATUS)
+    @Schema(description = InstanceGroupModelDescription.STATUS)
     private InstanceStatus instanceStatus;
 
-    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_TYPE)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_TYPE)
     private InstanceMetadataType instanceMetadataType;
 
     private String imageName;
@@ -79,7 +78,7 @@ public class HardwareInfoV4Response implements JsonEntity {
 
     private String subnetId;
 
-    @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
+    @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV4Response template;
 
     public String getName() {

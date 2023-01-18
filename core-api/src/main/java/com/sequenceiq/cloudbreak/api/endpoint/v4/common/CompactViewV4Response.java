@@ -7,24 +7,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CompactViewV4Response implements JsonEntity {
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private Long id;
 
     @Size(max = 100, min = 5, message = "The length of the resource's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The resource's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, required = true)
     private String name;
 
     @Size(max = 1000)
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN)
     private String crn;
 
     public Long getId() {

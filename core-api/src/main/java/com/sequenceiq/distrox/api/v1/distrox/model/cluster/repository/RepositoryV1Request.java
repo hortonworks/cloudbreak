@@ -8,22 +8,21 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterManagerRepositoryDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class RepositoryV1Request implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ClusterManagerRepositoryDescription.VERSION, required = true)
+    @Schema(description = ClusterManagerRepositoryDescription.VERSION, required = true)
     private String version;
 
-    @ApiModelProperty(ClusterManagerRepositoryDescription.BASE_URL)
+    @Schema(description = ClusterManagerRepositoryDescription.BASE_URL)
     private String baseUrl;
 
-    @ApiModelProperty(ClusterManagerRepositoryDescription.REPO_GPG_KEY)
+    @Schema(description = ClusterManagerRepositoryDescription.REPO_GPG_KEY)
     private String gpgKeyUrl;
 
     public String getVersion() {

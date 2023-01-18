@@ -10,30 +10,29 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ImageRecommendationV4Request {
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)
+    @Schema(description = ModelDescriptions.CLOUD_PLATFORM)
     private String platform;
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.BlueprintModelDescription.BLUEPRINT_NAME)
+    @Schema(description = ModelDescriptions.BlueprintModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
 
     @NotNull
-    @ApiModelProperty(ENVIRONMENT_CRN)
+    @Schema(description = ENVIRONMENT_CRN)
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(REGION)
+    @Schema(description = REGION)
     private String region;
 
-    @ApiModelProperty(IMAGE_SETTINGS)
+    @Schema(description = IMAGE_SETTINGS)
     private ImageSettingsV4Request image;
 
     public String getPlatform() {

@@ -9,21 +9,20 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("UserSyncStatusV1Response")
+@Schema(name = "UserSyncStatusV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserSyncStatusResponse {
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ID)
+    @Schema(description = UserModelDescriptions.USERSYNC_ID)
     private String lastStartedUserSyncId;
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ID)
+    @Schema(description = UserModelDescriptions.USERSYNC_ID)
     private String lastSuccessfulUserSyncId;
 
     @NotNull
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ID)
+    @Schema(description = UserModelDescriptions.USERSYNC_ID)
     private Map<String, String> eventGenerationIds;
 
     public String getLastStartedUserSyncId() {

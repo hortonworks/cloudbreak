@@ -6,17 +6,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.service.secret.doc.SecretResponseModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonInclude(Include.NON_NULL)
 public class SecretResponse implements Serializable {
 
-    @ApiModelProperty(SecretResponseModelDescription.ENGINE_PATH)
+    @Schema(description = SecretResponseModelDescription.ENGINE_PATH)
     private String enginePath;
 
-    @ApiModelProperty(SecretResponseModelDescription.SECRET_PATH)
+    @Schema(description = SecretResponseModelDescription.SECRET_PATH)
     private String secretPath;
 
     public SecretResponse() {

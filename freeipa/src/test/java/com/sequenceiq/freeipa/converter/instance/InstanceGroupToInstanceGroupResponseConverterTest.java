@@ -34,7 +34,7 @@ public class InstanceGroupToInstanceGroupResponseConverterTest {
 
     @Test
     void testConvertAvailabilityZonesIsNull() {
-        InstanceGroupResponse instanceGroupResponse =  underTest.convert(getInstanceGroup(), true);
+        InstanceGroupResponse instanceGroupResponse = underTest.convert(getInstanceGroup(), true);
         assertEquals(Set.of(), instanceGroupResponse.getAvailabilityZones());
     }
 
@@ -43,7 +43,7 @@ public class InstanceGroupToInstanceGroupResponseConverterTest {
         InstanceGroup instanceGroup = getInstanceGroup();
         instanceGroup.setInstanceGroupNetwork(new InstanceGroupNetwork());
         instanceGroup.setAvailabilityZones(Set.of());
-        InstanceGroupResponse instanceGroupResponse =  underTest.convert(instanceGroup, true);
+        InstanceGroupResponse instanceGroupResponse = underTest.convert(instanceGroup, true);
         assertEquals(Set.of(), instanceGroupResponse.getAvailabilityZones());
     }
 
@@ -52,7 +52,7 @@ public class InstanceGroupToInstanceGroupResponseConverterTest {
         InstanceGroup instanceGroup = getInstanceGroup();
         instanceGroup.setInstanceGroupNetwork(new InstanceGroupNetwork());
         instanceGroup.setAvailabilityZones(Set.of("1", "2", "3"));
-        InstanceGroupResponse instanceGroupResponse =  underTest.convert(instanceGroup, true);
+        InstanceGroupResponse instanceGroupResponse = underTest.convert(instanceGroup, true);
         assertEquals(Set.of("1", "2", "3"), instanceGroupResponse.getAvailabilityZones());
     }
 

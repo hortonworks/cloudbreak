@@ -83,10 +83,7 @@ dependencies {
     implementation     group: "org.yaml",                  name: "snakeyaml",                                version: snakeYamlVersion
     implementation     group: "com.google.code.gson",      name: "gson",                                     version: gsonVersion
     implementation     group: "dnsjava",                   name: "dnsjava",                                  version: dnsjavaVersion
-    implementation     group: "io.springfox",              name: "springfox-boot-starter",                   version: swaggerSpringFoxVersion
-    implementation    (group: "io.swagger",                name: "swagger-jersey2-jaxrs",                    version: swaggerVersion) {
-        exclude group: "org.yaml", module: "snakeyaml"
-    }
+    implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2',                           version: swaggerCoreVersion
     implementation     group: "org.glassfish.jersey.core", name: "jersey-server",                            version: jerseyCoreVersion
     implementation     group: "org.mybatis",               name: "mybatis-migrations",                       version: mybatisMigrationVersion
     implementation     group: "org.postgresql",            name: "postgresql",                               version: postgreSQLVersion

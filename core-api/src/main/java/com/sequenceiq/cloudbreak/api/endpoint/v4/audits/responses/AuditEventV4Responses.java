@@ -7,10 +7,10 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralCollectionV4Response;
 import com.sequenceiq.common.model.annotations.Immutable;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Immutable
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AuditEventV4Responses extends GeneralCollectionV4Response<AuditEventV4Response> {
 

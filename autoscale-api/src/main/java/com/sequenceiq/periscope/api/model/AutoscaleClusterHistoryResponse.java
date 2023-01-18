@@ -3,25 +3,24 @@ package com.sequenceiq.periscope.api.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.periscope.doc.ApiDescription.HistoryJsonProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class AutoscaleClusterHistoryResponse implements Json {
 
-    @ApiModelProperty(HistoryJsonProperties.CBSTACKCRN)
+    @Schema(description = HistoryJsonProperties.CBSTACKCRN)
     private String stackCrn;
 
-    @ApiModelProperty(HistoryJsonProperties.SCALINGSTATUS)
+    @Schema(description = HistoryJsonProperties.SCALINGSTATUS)
     private ScalingStatus scalingStatus;
 
-    @ApiModelProperty(HistoryJsonProperties.STATUSREASON)
+    @Schema(description = HistoryJsonProperties.STATUSREASON)
     private String statusReason;
 
-    @ApiModelProperty(HistoryJsonProperties.TIMESTAMP)
+    @Schema(description = HistoryJsonProperties.TIMESTAMP)
     private long timestamp;
 
-    @ApiModelProperty(HistoryJsonProperties.SCALINGACTIVITY)
+    @Schema(description = HistoryJsonProperties.SCALINGACTIVITY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private AutoscaleClusterHistoryActivity autoscaleClusterHistoryActivity;
 

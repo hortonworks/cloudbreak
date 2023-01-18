@@ -7,16 +7,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequire
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterTemplateModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class DefaultClusterTemplateV4Request extends ClusterTemplateV4Request {
 
-    @ApiModelProperty(value = ClusterTemplateModelDescription.DATALAKE_REQUIRED,
-            allowableValues = "NONE,OPTIONAL,REQUIRED")
+    @Schema(description = ClusterTemplateModelDescription.DATALAKE_REQUIRED)
     private DatalakeRequired datalakeRequired = DatalakeRequired.OPTIONAL;
 
     private FeatureState featureState;

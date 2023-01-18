@@ -23,47 +23,53 @@ import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigOperationDescrip
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/kerberos")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/kerberos", description = KERBEROS_CONFIG_V4_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/kerberos", description = KERBEROS_CONFIG_V4_DESCRIPTION)
 public interface KerberosConfigV1Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DESCRIBE_FOR_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
-            nickname = "getKerberosConfigForEnvironment")
+    @Operation(summary = DESCRIBE_FOR_ENVIRONMENT, description = KERBEROS_CONFIG_NOTES,
+            operationId = "getKerberosConfigForEnvironment",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeKerberosConfigResponse describe(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @GET
     @Path("cluster")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = KerberosConfigOperationDescription.GET_BY_ENV_FOR_CLUSTER, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
-            nickname = "getKerberosConfigForClusterV1")
+    @Operation(summary = KerberosConfigOperationDescription.GET_BY_ENV_FOR_CLUSTER, description = KERBEROS_CONFIG_NOTES,
+            operationId = "getKerberosConfigForClusterV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeKerberosConfigResponse getForCluster(@QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("clusterName") @NotEmpty String clusterName);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CREATE_FOR_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
-            nickname = "createKerberosConfigForEnvironment")
+    @Operation(summary = CREATE_FOR_ENVIRONMENT, description = KERBEROS_CONFIG_NOTES,
+            operationId = "createKerberosConfigForEnvironment",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeKerberosConfigResponse create(@Valid CreateKerberosConfigRequest request);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DELETE_BY_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
-            nickname = "deleteKerberosConfigForEnvironment")
+    @Operation(summary = DELETE_BY_ENVIRONMENT, description = KERBEROS_CONFIG_NOTES,
+            operationId = "deleteKerberosConfigForEnvironment",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void delete(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @GET
     @Path("request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GET_REQUEST, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
-            nickname = "getCreateKerberosRequestForEnvironment")
+    @Operation(summary = GET_REQUEST, description = KERBEROS_CONFIG_NOTES,
+            operationId = "getCreateKerberosRequestForEnvironment",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CreateKerberosConfigRequest getRequest(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 }

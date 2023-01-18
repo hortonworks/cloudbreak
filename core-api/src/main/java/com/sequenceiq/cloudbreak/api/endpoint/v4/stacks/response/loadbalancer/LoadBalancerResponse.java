@@ -10,35 +10,35 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(Include.NON_NULL)
 public class LoadBalancerResponse implements Serializable {
 
-    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_FQDN)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_FQDN)
     private String fqdn;
 
-    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_CLOUD_DNS)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_CLOUD_DNS)
     private String cloudDns;
 
-    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_IP)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_IP)
     private String ip;
 
-    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_TARGETS)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_TARGETS)
     @NotNull
     private List<TargetGroupResponse> targets;
 
-    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_TYPE)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_TYPE)
     @NotNull
     private LoadBalancerType type;
 
-    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_AWS)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_AWS)
     private AwsLoadBalancerResponse awsResourceId;
 
-    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_AZURE)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_AZURE)
     private AzureLoadBalancerResponse azureResourceId;
 
-    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_GCP)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_GCP)
     private GcpLoadBalancerResponse gcpResourceId;
 
     public String getFqdn() {

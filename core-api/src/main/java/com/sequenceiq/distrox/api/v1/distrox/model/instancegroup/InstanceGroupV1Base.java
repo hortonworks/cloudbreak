@@ -15,44 +15,43 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 import com.sequenceiq.distrox.api.v1.distrox.model.CloudPlatformProvider;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider {
 
     @Min(value = 0, message = "The node count has to be greater or equals than 0")
     @Max(value = 100000, message = "The node count has to be less than 100000")
     @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
-    @ApiModelProperty(value = InstanceGroupModelDescription.NODE_COUNT, required = true)
+    @Schema(description = InstanceGroupModelDescription.NODE_COUNT, required = true)
     private int nodeCount;
 
     @NotNull
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_TYPE, allowableValues = "CORE,GATEWAY")
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_TYPE)
     private InstanceGroupType type = InstanceGroupType.CORE;
 
-    @ApiModelProperty(InstanceGroupModelDescription.AZURE_PARAMETERS)
+    @Schema(description = InstanceGroupModelDescription.AZURE_PARAMETERS)
     private AzureInstanceGroupV1Parameters azure;
 
     @Valid
-    @ApiModelProperty(InstanceGroupModelDescription.AWS_PARAMETERS)
+    @Schema(description = InstanceGroupModelDescription.AWS_PARAMETERS)
     private AwsInstanceGroupV1Parameters aws;
 
-    @ApiModelProperty
+    @Schema
     private GcpInstanceGroupV1Parameters gcp;
 
-    @ApiModelProperty
+    @Schema
     private YarnInstanceGroupV1Parameters yarn;
 
-    @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
+    @Schema(description = HostGroupModelDescription.RECOVERY_MODE)
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_MINIMUM_NODECOUNT)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_MINIMUM_NODECOUNT)
     private Integer minimumNodeCount = 0;
 
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_SCALABILITY_TYPE,
-            allowableValues = "ALLOWED,FORBIDDEN,ONLY_UPSCALE,ONLY_DOWNSCALE")
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_SCALABILITY_TYPE)
     private ScalabilityOption scalabilityOption = ScalabilityOption.ALLOWED;
 
     public int getNodeCount() {

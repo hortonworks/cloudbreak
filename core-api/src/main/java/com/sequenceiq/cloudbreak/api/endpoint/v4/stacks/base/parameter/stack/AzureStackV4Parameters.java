@@ -10,22 +10,21 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AzureStackV4Parameters extends StackV4ParameterBase {
 
-    @ApiModelProperty
+    @Schema
     private String resourceGroupName;
 
     @Deprecated
-    @ApiModelProperty
+    @Schema
     private boolean encryptStorage;
 
-    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_SKU)
+    @Schema(description = StackModelDescription.LOAD_BALANCER_SKU)
     private LoadBalancerSku loadBalancerSku = LoadBalancerSku.getDefault();
 
     public String getResourceGroupName() {
@@ -63,7 +62,7 @@ public class AzureStackV4Parameters extends StackV4ParameterBase {
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }

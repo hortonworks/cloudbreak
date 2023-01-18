@@ -2,8 +2,8 @@ package com.sequenceiq.common.api.telemetry.response;
 
 import com.sequenceiq.common.api.telemetry.base.WorkloadAnalyticsBase;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "WorkloadAnalyticsResponse")
+@Schema(name = "WorkloadAnalyticsResponse")
 public class WorkloadAnalyticsResponse extends WorkloadAnalyticsBase {
 }

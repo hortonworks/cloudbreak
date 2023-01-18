@@ -7,24 +7,23 @@ import org.hibernate.validator.constraints.Range;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DiskUpdateRequest implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = "Volume Type of disks", required = true)
+    @Schema(description = "Volume Type of disks", required = true)
     @OneOfEnum(enumClass = SupportedVolumeType.class)
     private String volumeType;
 
     @Range(min = 1, message = "Value must be greater than 0")
-    @ApiModelProperty(value = "Size of disks in GB")
+    @Schema(description = "Size of disks in GB")
     private int size;
 
     @NotNull
-    @ApiModelProperty(value = "Group being updated", required = true)
+    @Schema(description = "Group being updated", required = true)
     private String group;
 
     public String getVolumeType() {

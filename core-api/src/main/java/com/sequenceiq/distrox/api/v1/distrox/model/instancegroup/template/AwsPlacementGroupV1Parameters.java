@@ -10,16 +10,15 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 import com.sequenceiq.common.api.placement.AwsPlacementGroupStrategy;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AwsPlacementGroupV1Parameters implements Serializable {
 
     @Valid
-    @ApiModelProperty(value = TemplateModelDescription.AWS_PLACEMENT_GROUP_STRATEGY, allowableValues = "NONE, PARTITION, SPREAD, CLUSTER")
+    @Schema(description = TemplateModelDescription.AWS_PLACEMENT_GROUP_STRATEGY)
     private AwsPlacementGroupStrategy strategy;
 
     public AwsPlacementGroupStrategy getStrategy() {

@@ -4,14 +4,14 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class BaseSecretRotationRequest {
 
-    @ApiModelProperty("Execution type if needed")
+    @Schema(description = "Execution type if needed")
     private RotationFlowExecutionType executionType;
 
-    @ApiModelProperty("Additional parameters for rotation")
+    @Schema(description = "Additional parameters for rotation")
     private Map<String, String> additionalProperties;
 
     public RotationFlowExecutionType getExecutionType() {

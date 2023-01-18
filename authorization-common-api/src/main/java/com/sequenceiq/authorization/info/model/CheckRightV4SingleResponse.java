@@ -1,8 +1,8 @@
 package com.sequenceiq.authorization.info.model;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class CheckRightV4SingleResponse {
 
     private RightV4 right;

@@ -49,7 +49,7 @@ public class ImageCatalogV4ControllerTest {
         List<String> expected = List.of("7.2.1", "7.2.2");
         when(imageCatalogService.getRuntimeVersionsFromDefault()).thenReturn(expected);
 
-        RuntimeVersionsV4Response actual =  victim.getRuntimeVersionsFromDefault(WORKSPACE_ID);
+        RuntimeVersionsV4Response actual = victim.getRuntimeVersionsFromDefault(WORKSPACE_ID);
 
         assertEquals(expected, actual.getRuntimeVersions());
     }

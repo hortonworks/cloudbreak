@@ -13,34 +13,34 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.validation.ValidCloudStorage;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @ValidCloudStorage
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class CloudStorageV1Base implements Serializable {
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private AdlsCloudStorageV1Parameters adls;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private WasbCloudStorageV1Parameters wasb;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private GcsCloudStorageV1Parameters gcs;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private S3CloudStorageV1Parameters s3;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private EfsCloudStorageV1Parameters efs;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
     public AdlsCloudStorageV1Parameters getAdls() {

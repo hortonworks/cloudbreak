@@ -8,9 +8,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-@EnableSwagger2
 @EnableJpaRepositories(basePackages = { "com.sequenceiq" })
 @SpringBootApplication(scanBasePackages = "com.sequenceiq", exclude = { WebMvcMetricsAutoConfiguration.class, ErrorMvcAutoConfiguration.class })
 public class FreeIpaApplication {

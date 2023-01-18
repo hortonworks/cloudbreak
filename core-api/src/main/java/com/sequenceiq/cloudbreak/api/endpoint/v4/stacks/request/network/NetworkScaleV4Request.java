@@ -9,17 +9,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkScaleV4Request implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.InstanceGroupNetworkScaleModelDescription.PREFERRED_SUBNET_IDS)
+    @Schema(description = ModelDescriptions.InstanceGroupNetworkScaleModelDescription.PREFERRED_SUBNET_IDS)
     private List<String> preferredSubnetIds = new ArrayList<>();
 
-    @ApiModelProperty(value = ModelDescriptions.InstanceGroupNetworkScaleModelDescription.PREFERRED_AZS)
+    @Schema(description = ModelDescriptions.InstanceGroupNetworkScaleModelDescription.PREFERRED_AZS)
     private Set<String> preferredAvailabilityZones = new HashSet<>();
 
     public List<String> getPreferredSubnetIds() {

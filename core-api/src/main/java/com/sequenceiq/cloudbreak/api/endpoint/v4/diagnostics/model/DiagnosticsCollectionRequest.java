@@ -8,19 +8,18 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.doc.DiagnosticsModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("DiagnosticsCollectionRequest")
+@Schema(name = "DiagnosticsCollectionRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiagnosticsCollectionRequest extends BaseDiagnosticsCollectionRequest {
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.CRN)
+    @Schema(description = ModelDescriptions.StackModelDescription.CRN)
     private String stackCrn;
 
-    @ApiModelProperty(DiagnosticsModelDescription.UUID)
+    @Schema(description = DiagnosticsModelDescription.UUID)
     private String uuid;
 
     public String getStackCrn() {

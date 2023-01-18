@@ -9,22 +9,21 @@ import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentCloudStorageValidationRequest")
+@Schema(name = "EnvironmentCloudStorageValidationRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentCloudStorageValidationRequest implements Serializable {
 
-    @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_CRN)
+    @Schema(description = EnvironmentModelDescription.CREDENTIAL_CRN)
     @NotNull
     private String credentialCrn;
 
-    @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
+    @Schema(description = EnvironmentModelDescription.TELEMETRY)
     @NotNull
     private TelemetryRequest telemetry;
 
-    @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
+    @Schema(description = EnvironmentModelDescription.TELEMETRY)
     private BackupRequest backup;
 
     public String getCredentialCrn() {

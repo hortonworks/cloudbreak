@@ -13,20 +13,21 @@ import com.sequenceiq.cloudbreak.common.cost.RealTimeCostResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/sdx/cost")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/sdx/cost", protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/sdx/cost")
 public interface SdxCostEndpoint {
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "cost of SDX clusters", produces = MediaType.APPLICATION_JSON, nickname = "listSdxCost")
+    @Operation(summary = "cost of SDX clusters", operationId = "listSdxCost",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RealTimeCostResponse list(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) List<String> sdxCrns);
 }

@@ -4,9 +4,9 @@ import java.util.Collection;
 
 import com.google.common.collect.Sets;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class CheckResourceRightsV4Response extends GeneralCollectionV4Response<CheckResourceRightV4SingleResponse> {
 
     public CheckResourceRightsV4Response(Collection<CheckResourceRightV4SingleResponse> responses) {

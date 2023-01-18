@@ -13,19 +13,21 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRealTimeCostRequest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v1/env/cost")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/env/cost", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/env/cost")
 public interface EnvironmentCostV1Endpoint {
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "listEnvironmentCostV1")
+    @Operation(summary = EnvironmentOpDescription.LIST, description = ENVIRONMENT_NOTES, operationId = "listEnvironmentCostV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     EnvironmentRealTimeCostResponse list(EnvironmentRealTimeCostRequest request);
 
 }

@@ -27,27 +27,29 @@ import com.sequenceiq.sdx.api.model.SdxChildResourceMarkingRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretRotationRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretTypeResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
 @Path("/sdx")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/sdx", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/sdx")
 public interface SdxRotationEndpoint {
 
     @PUT
     @Path("rotate_secret")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Rotate SDX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXSecrets")
+    @Operation(summary = "Rotate SDX secrets", operationId = "rotateSDXSecrets",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSecrets(@Valid @NotNull SdxSecretRotationRequest request);
 
     @GET
     @Path("multi_secret/check_children")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Check ongoing child SDX multi secret rotations by parent", produces = MediaType.APPLICATION_JSON,
-            nickname = "checkSDXMultiSecretsByParent")
+    @Operation(summary = "Check ongoing child SDX multi secret rotations by parent", operationId = "checkSDXMultiSecretsByParent",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     boolean checkOngoingMultiSecretChildrenRotationsByParent(@ValidCrn(resource = ENVIRONMENT) @QueryParam("parentCrn") String parentCrn,
             @ValidMultiSecretType @QueryParam("secret") String multiSecret,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
@@ -55,16 +57,16 @@ public interface SdxRotationEndpoint {
     @PUT
     @Path("multi_secret/mark_children")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Mark child resources for SDX multi secret rotations by parent", produces = MediaType.APPLICATION_JSON,
-            nickname = "markResourcesSDXMultiSecretsByParent")
+    @Operation(summary = "Mark child resources for SDX multi secret rotations by parent", operationId = "markResourcesSDXMultiSecretsByParent",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void markMultiClusterChildrenResourcesByParent(@Valid SdxChildResourceMarkingRequest request,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
     @Path("list_secret_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "List rotatable secret types for SDX", produces = MediaType.APPLICATION_JSON,
-            nickname = "listRotatableSdxSecretType")
+    @Operation(summary = "List rotatable secret types for SDX", operationId = "listRotatableSdxSecretType",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<SdxSecretTypeResponse> listRotatableSdxSecretType(
             @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @QueryParam("datalakeCrn") @NotEmpty String datalakeCrn);
 }

@@ -1,8 +1,8 @@
 package com.sequenceiq.common.api.util.versionchecker;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class VersionCheckResult {
     private boolean versionCheckOk;
 

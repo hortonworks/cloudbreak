@@ -4,9 +4,9 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentStatusV1")
+@Schema(name = "EnvironmentStatusV1")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public enum EnvironmentStatus {
 

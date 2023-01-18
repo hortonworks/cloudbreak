@@ -8,13 +8,13 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class StructuredParameterQueriesV4Response implements JsonEntity {
 
-    @ApiModelProperty(value = StackModelDescription.ENTRIES, required = true)
+    @Schema(description = StackModelDescription.ENTRIES, required = true)
     private List<StructuredParameterQueryV4Response> entries;
 
     public List<StructuredParameterQueryV4Response> getEntries() {

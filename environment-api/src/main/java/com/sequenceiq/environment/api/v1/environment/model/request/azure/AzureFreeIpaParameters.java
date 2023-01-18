@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "AttachedFreeIpaRequestAzureParameters")
+@Schema(name = "AttachedFreeIpaRequestAzureParameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AzureFreeIpaParameters implements Serializable {
 

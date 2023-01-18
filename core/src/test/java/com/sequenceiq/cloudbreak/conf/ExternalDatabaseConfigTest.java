@@ -55,7 +55,7 @@ class ExternalDatabaseConfigTest {
 
     @Test
     void testDatabaseConfigsAzure() throws IOException {
-        Map<DatabaseStackConfigKey, DatabaseStackConfig> actualResult =  underTest.databaseConfigs();
+        Map<DatabaseStackConfigKey, DatabaseStackConfig> actualResult = underTest.databaseConfigs();
         assertEquals(2, actualResult.size());
         DatabaseStackConfig singleDatabaseStackConfig = actualResult.get(new DatabaseStackConfigKey(CloudPlatform.AZURE, AzureDatabaseType.SINGLE_SERVER));
         assertEquals("MO_Gen5_4", singleDatabaseStackConfig.getInstanceType());

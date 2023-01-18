@@ -7,21 +7,20 @@ import javax.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxDatabaseResponse {
-    @ApiModelProperty(ModelDescriptions.DATABASE_AVAILABILITY_TYPE)
+    @Schema(description = ModelDescriptions.DATABASE_AVAILABILITY_TYPE)
     private SdxDatabaseAvailabilityType availabilityType;
 
-    @ApiModelProperty(ModelDescriptions.DATABASE_ENGINE_VERSION)
+    @Schema(description = ModelDescriptions.DATABASE_ENGINE_VERSION)
     @Pattern(regexp = POSTGRES_VERSION_REGEX, message = "Not a valid database major version")
     private String databaseEngineVersion;
 
-    @ApiModelProperty(ModelDescriptions.DATABASE_SERVER_CRN)
+    @Schema(description = ModelDescriptions.DATABASE_SERVER_CRN)
     private String databaseServerCrn;
 
     public SdxDatabaseAvailabilityType getAvailabilityType() {

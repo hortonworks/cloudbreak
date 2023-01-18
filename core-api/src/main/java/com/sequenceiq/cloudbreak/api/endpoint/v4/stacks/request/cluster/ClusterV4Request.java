@@ -19,22 +19,21 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class ClusterV4Request implements JsonEntity {
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private String name;
 
     @Size(max = 15, min = 5, message = "The length of the username has to be in the range of 5 to 15 characters")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The username may only contain lowercase alphanumeric characters and hyphens, has to start with a letter and end with an " +
                     "alphanumeric character")
-    @ApiModelProperty(value = StackModelDescription.USERNAME)
+    @Schema(description = StackModelDescription.USERNAME)
     private String userName;
 
     @Pattern.List({
@@ -42,51 +41,51 @@ public class ClusterV4Request implements JsonEntity {
             @Pattern(regexp = "^.*[0-9].*$", message = "The password should contain at least one number.")
     })
     @Size(max = 100, min = 8, message = "The length of the password has to be in the range of 8 to 100 characters")
-    @ApiModelProperty(value = StackModelDescription.PASSWORD)
+    @Schema(description = StackModelDescription.PASSWORD)
     private String password;
 
-    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
+    @Schema(description = ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<String> databases = new HashSet<>();
 
-    @ApiModelProperty(ClusterModelDescription.REDBEAMS_DB_SERVER_CRN)
+    @Schema(description = ClusterModelDescription.REDBEAMS_DB_SERVER_CRN)
     private String databaseServerCrn;
 
-    @ApiModelProperty(ClusterModelDescription.PROXY_CRN)
+    @Schema(description = ClusterModelDescription.PROXY_CRN)
     private String proxyConfigCrn;
 
     @Valid
-    @ApiModelProperty(StackModelDescription.CLOUD_STORAGE)
+    @Schema(description = StackModelDescription.CLOUD_STORAGE)
     private CloudStorageRequest cloudStorage;
 
     @Valid
-    @ApiModelProperty(ClusterModelDescription.CM_REQUEST)
+    @Schema(description = ClusterModelDescription.CM_REQUEST)
     private ClouderaManagerV4Request cm;
 
     private GatewayV4Request gateway;
 
-    @ApiModelProperty(ClusterModelDescription.CUSTOM_CONTAINERS)
+    @Schema(description = ClusterModelDescription.CUSTOM_CONTAINERS)
     private CustomContainerV4Request customContainer;
 
-    @ApiModelProperty(ClusterModelDescription.CUSTOM_QUEUE)
+    @Schema(description = ClusterModelDescription.CUSTOM_QUEUE)
     private String customQueue;
 
-    @ApiModelProperty(ClusterModelDescription.EXECUTOR_TYPE)
+    @Schema(description = ClusterModelDescription.EXECUTOR_TYPE)
     @Deprecated
     private ExecutorType executorType = ExecutorType.DEFAULT;
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
+    @Schema(description = ClusterModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
 
-    @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
+    @Schema(description = ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
 
-    @ApiModelProperty(StackModelDescription.CUSTOM_CONFIGURATIONS_NAME)
+    @Schema(description = StackModelDescription.CUSTOM_CONFIGURATIONS_NAME)
     private String customConfigurationsName;
 
-    @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RAZ)
+    @Schema(description = ClusterModelDescription.ENABLE_RANGER_RAZ)
     private boolean rangerRazEnabled;
 
-    @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RMS)
+    @Schema(description = ClusterModelDescription.ENABLE_RANGER_RMS)
     private boolean rangerRmsEnabled;
 
     public String getUserName() {

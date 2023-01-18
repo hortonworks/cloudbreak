@@ -7,19 +7,18 @@ import javax.validation.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("CheckUsersInGroupV1Request")
+@Schema(name = "CheckUsersInGroupV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CheckUsersInGroupV1Request extends ClientTestBaseRequest {
 
     @NotEmpty
-    @ApiModelProperty(value = ModelDescriptions.USERS, required = true)
+    @Schema(description = ModelDescriptions.USERS, required = true)
     private Set<String> users;
 
     @NotEmpty
-    @ApiModelProperty(value = ModelDescriptions.GROUP, required = true)
+    @Schema(description = ModelDescriptions.GROUP, required = true)
     private String group;
 
     public String getGroup() {

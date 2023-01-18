@@ -34,82 +34,81 @@ import com.sequenceiq.cloudbreak.validation.ValidEnvironmentCrn;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     @ValidEnvironmentCrn
-    @ApiModelProperty(value = StackModelDescription.ENVIRONMENT_CRN, required = true)
+    @Schema(description = StackModelDescription.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
-    @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN_SETTINGS)
+    @Schema(description = StackModelDescription.CUSTOM_DOMAIN_SETTINGS)
     private CustomDomainSettingsV4Request customDomain;
 
-    @ApiModelProperty(StackModelDescription.TAGS)
+    @Schema(description = StackModelDescription.TAGS)
     private TagsV4Request tags;
 
-    @ApiModelProperty(StackModelDescription.TELEMETRY)
+    @Schema(description = StackModelDescription.TELEMETRY)
     private TelemetryRequest telemetry;
 
     @Valid
-    @ApiModelProperty(PLACEMENT_SETTINGS)
+    @Schema(description = PLACEMENT_SETTINGS)
     private PlacementSettingsV4Request placement;
 
     @NotNull
     @Valid
-    @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
+    @Schema(description = StackModelDescription.INSTANCE_GROUPS, required = true)
     private List<InstanceGroupV4Request> instanceGroups = new ArrayList<>();
 
     @NotNull(message = "You should define authentication for stack!")
     @Valid
-    @ApiModelProperty(StackModelDescription.AUTHENTICATION)
+    @Schema(description = StackModelDescription.AUTHENTICATION)
     private StackAuthenticationV4Request authentication;
 
     @Valid
-    @ApiModelProperty(StackModelDescription.NETWORK)
+    @Schema(description = StackModelDescription.NETWORK)
     private NetworkV4Request network;
 
-    @ApiModelProperty(StackModelDescription.IMAGE_SETTINGS)
+    @Schema(description = StackModelDescription.IMAGE_SETTINGS)
     private ImageSettingsV4Request image;
 
     @Valid
-    @ApiModelProperty(StackModelDescription.CLUSTER_REQUEST)
+    @Schema(description = StackModelDescription.CLUSTER_REQUEST)
     private ClusterV4Request cluster;
 
-    @ApiModelProperty(value = StackModelDescription.GATEWAY_PORT, allowableValues = "1025-65535")
+    @Schema(description = StackModelDescription.GATEWAY_PORT)
     @Min(value = 1025, message = "Port should be between 1025 and 65535")
     @Max(value = 65535, message = "Port should be between 1025 and 65535")
     private Integer gatewayPort;
 
     private StackType type = StackType.WORKLOAD;
 
-    @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE_REQUEST)
+    @Schema(description = ClusterModelDescription.SHARED_SERVICE_REQUEST)
     private SharedServiceV4Request sharedService;
 
-    @ApiModelProperty(StackModelDescription.INPUTS)
+    @Schema(description = StackModelDescription.INPUTS)
     private Map<String, Object> inputs = new HashMap<>();
 
     @Valid
-    @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
+    @Schema(description = StackModelDescription.EXTERNAL_DATABASE)
     private DatabaseRequest externalDatabase;
 
-    @ApiModelProperty(StackModelDescription.ENABLE_LOAD_BALANCER)
+    @Schema(description = StackModelDescription.ENABLE_LOAD_BALANCER)
     private boolean enableLoadBalancer;
 
     @DatalakeCrn
-    @ApiModelProperty(value = StackModelDescription.RESOURCE_CRN)
+    @Schema(description = StackModelDescription.RESOURCE_CRN)
     private String resourceCrn;
 
     private String variant;
 
-    @ApiModelProperty(value = StackModelDescription.JAVA_VERSION)
+    @Schema(description = StackModelDescription.JAVA_VERSION)
     private Integer javaVersion;
 
-    @ApiModelProperty(value = StackModelDescription.MULTIPLE_AVAILABILITY_ZONES)
+    @Schema(description = StackModelDescription.MULTIPLE_AVAILABILITY_ZONES)
     private boolean enableMultiAz;
 
     public String getEnvironmentCrn() {

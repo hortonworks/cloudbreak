@@ -24,60 +24,68 @@ import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigRespo
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v1/ldaps")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/ldaps", description = LDAP_CONFIG_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/ldaps", description = LDAP_CONFIG_DESCRIPTION)
 public interface LdapConfigV1Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.GET_BY_ENV, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
-            nickname = "getLdapConfigV1")
+    @Operation(summary = LdapConfigOpDescription.GET_BY_ENV, description = LDAP_CONFIG_NOTES,
+            operationId = "getLdapConfigV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeLdapConfigResponse describe(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @GET
     @Path("cluster")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.GET_BY_ENV_FOR_CLUSTER, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
-            nickname = "getLdapConfigForClusterV1")
+    @Operation(summary = LdapConfigOpDescription.GET_BY_ENV_FOR_CLUSTER, description = LDAP_CONFIG_NOTES,
+            operationId = "getLdapConfigForClusterV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeLdapConfigResponse getForCluster(@QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("clusterName") @NotEmpty String clusterName);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES, nickname = "createLdapConfigV1")
+    @Operation(summary = LdapConfigOpDescription.CREATE, description = LDAP_CONFIG_NOTES, operationId = "createLdapConfigV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeLdapConfigResponse create(@Valid @NotNull CreateLdapConfigRequest request);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.DELETE_BY_ENV, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
-            nickname = "deleteLdapConfigV1")
+    @Operation(summary = LdapConfigOpDescription.DELETE_BY_ENV, description = LDAP_CONFIG_NOTES,
+            operationId = "deleteLdapConfigV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void delete(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @POST
     @Path("test")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.POST_CONNECTION_TEST, produces = MediaType.APPLICATION_JSON, nickname = "testLdapConfigV1")
+    @Operation(summary = LdapConfigOpDescription.POST_CONNECTION_TEST, operationId = "testLdapConfigV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     TestLdapConfigResponse test(@Valid TestLdapConfigRequest ldapValidationRequest);
 
     @GET
     @Path("request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.GET_REQUEST, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
-            nickname = "getLdapRequestByNameV1")
+    @Operation(summary = LdapConfigOpDescription.GET_REQUEST, description = LDAP_CONFIG_NOTES,
+            operationId = "getLdapRequestByNameV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CreateLdapConfigRequest getRequest(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @GET
     @Path("usersync")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.GET_BY_ENV_FOR_USERSYNC, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
-            nickname = "getLdapConfigForUserSyncV1")
+    @Operation(summary = LdapConfigOpDescription.GET_BY_ENV_FOR_USERSYNC, description = LDAP_CONFIG_NOTES,
+            operationId = "getLdapConfigForUserSyncV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeLdapConfigResponse getForUserSync(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 }

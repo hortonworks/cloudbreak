@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class UserProfileV4Response {
 
     private String username;

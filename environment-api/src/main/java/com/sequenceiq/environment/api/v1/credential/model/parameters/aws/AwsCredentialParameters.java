@@ -9,24 +9,23 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("AwsCredentialV1Parameters")
+@Schema(name = "AwsCredentialV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AwsCredentialParameters implements Serializable {
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private KeyBasedParameters keyBased;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private RoleBasedParameters roleBased;
 
     @NotNull
-    @ApiModelProperty(required = true)
+    @Schema(required = true)
     private Boolean govCloud = false;
 
     public KeyBasedParameters getKeyBased() {

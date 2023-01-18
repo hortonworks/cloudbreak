@@ -4,29 +4,29 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.api.type.CertExpirationState;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class StackStatusV4Response {
 
-    @ApiModelProperty
+    @Schema
     private Long id;
 
-    @ApiModelProperty
+    @Schema
     private Status status;
 
-    @ApiModelProperty
+    @Schema
     private String statusReason;
 
-    @ApiModelProperty
+    @Schema
     private Status clusterStatus;
 
-    @ApiModelProperty
+    @Schema
     private String clusterStatusReason;
 
-    @ApiModelProperty
+    @Schema
     private String crn;
 
-    @ApiModelProperty(ClusterModelDescription.CERT_EXPIRATION)
+    @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
     public Long getId() {

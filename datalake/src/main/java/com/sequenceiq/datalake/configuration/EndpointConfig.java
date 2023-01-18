@@ -1,7 +1,7 @@
 package com.sequenceiq.datalake.configuration;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -15,7 +15,8 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
-import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.datalake.controller.SdxEventController;
 import com.sequenceiq.datalake.controller.diagnostics.DiagnosticsController;
@@ -39,15 +40,13 @@ import com.sequenceiq.datalake.controller.util.UtilController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.sdx.api.SdxApi;
 
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.config.SwaggerConfigLocator;
-import io.swagger.jaxrs.config.SwaggerContextService;
+import io.swagger.v3.oas.models.OpenAPI;
 
 @ApplicationPath(SdxApi.API_ROOT_CONTEXT)
 @Configuration
 public class EndpointConfig extends ResourceConfig {
 
-    private static final List<Class<?>> CONTROLLERS = Arrays.asList(
+    private static final List<Class<?>> CONTROLLERS = List.of(
             SdxController.class,
             SdxRotationController.class,
             SdxUpgradeController.class,
@@ -65,11 +64,11 @@ public class EndpointConfig extends ResourceConfig {
             SdxBackupController.class,
             SdxRestoreController.class,
             SdxRecipeController.class,
-            CDPStructuredEventV1Controller.class,
             SdxRecoveryController.class,
             SdxEventController.class,
             SdxCostController.class,
-            SdxCO2Controller.class
+            SdxCO2Controller.class,
+            OpenApiController.class
     );
 
     @Value("${info.app.version:unspecified}")
@@ -78,30 +77,31 @@ public class EndpointConfig extends ResourceConfig {
     @Value("${datalake.structuredevent.rest.enabled:false}")
     private Boolean auditEnabled;
 
+    @Value("${server.servlet.context-path:}")
+    private String contextPath;
+
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
+
+    @Inject
+    private OpenApiProvider openApiProvider;
 
     @PostConstruct
     private void init() {
         register(CDPRestAuditFilter.class);
         registerEndpoints();
         registerExceptionMappers();
+        registerSwagger();
     }
 
-    @PostConstruct
     private void registerSwagger() {
-        BeanConfig swaggerConfig = new BeanConfig();
-        swaggerConfig.setTitle("Datalake API");
-        swaggerConfig.setDescription("");
-        swaggerConfig.setVersion(applicationVersion);
-        swaggerConfig.setSchemes(new String[]{"http", "https"});
-        swaggerConfig.setBasePath(SdxApi.API_ROOT_CONTEXT);
-        swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.sdx.api,com.sequenceiq.flow.api,com.sequenceiq.authorization");
-        swaggerConfig.setScan(true);
-        swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
-        swaggerConfig.setPrettyPrint(true);
-        SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, swaggerConfig);
+        OpenAPI openAPI = openApiProvider.getOpenAPI(
+                "Data Lake API",
+                "API for working with Data Lakes",
+                applicationVersion,
+                "https://localhost" + contextPath + SdxApi.API_ROOT_CONTEXT
+        );
+        openApiProvider.createConfig(openAPI, CONTROLLERS.stream().map(Class::getName).collect(Collectors.toSet()));
     }
 
     private void registerExceptionMappers() {
@@ -114,9 +114,5 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         CONTROLLERS.forEach(this::register);
-
-        register(io.swagger.jaxrs.listing.ApiListingResource.class);
-        register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
     }
 }

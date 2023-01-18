@@ -6,9 +6,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.api.client.util.Lists;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "ClusterCO2V4Request")
+@Schema(name = "ClusterCO2V4Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClusterCO2V4Request implements Serializable {
 

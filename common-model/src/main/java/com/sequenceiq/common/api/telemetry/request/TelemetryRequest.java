@@ -4,23 +4,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.telemetry.base.TelemetryBase;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "TelemetryRequest")
+@Schema(name = "TelemetryRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TelemetryRequest extends TelemetryBase {
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_LOGGING)
     private LoggingRequest logging;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_MONITORING)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_MONITORING)
     private MonitoringRequest monitoring;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
     private WorkloadAnalyticsRequest workloadAnalytics;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_FEATURES)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_FEATURES)
     private FeaturesRequest features;
 
     public LoggingRequest getLogging() {

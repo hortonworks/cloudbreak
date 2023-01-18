@@ -7,21 +7,20 @@ import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.UPGRADE_DATABASE_SERVER_RESPONSE)
+@Schema(description = ModelDescriptions.UPGRADE_DATABASE_SERVER_RESPONSE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpgradeDatabaseServerV4Response {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.UpgradeModelDescriptions.CURRENT_VERSION)
+    @Schema(description = ModelDescriptions.UpgradeModelDescriptions.CURRENT_VERSION)
     private MajorVersion currentVersion;
 
-    @ApiModelProperty(value = ModelDescriptions.UpgradeModelDescriptions.UPGRADE_REASON)
+    @Schema(description = ModelDescriptions.UpgradeModelDescriptions.UPGRADE_REASON)
     private String reason;
 
-    @ApiModelProperty(value = ModelDescriptions.FLOW_IDENTIFIER)
+    @Schema(description = ModelDescriptions.FLOW_IDENTIFIER)
     private FlowIdentifier flowIdentifier;
 
     public MajorVersion getCurrentVersion() {

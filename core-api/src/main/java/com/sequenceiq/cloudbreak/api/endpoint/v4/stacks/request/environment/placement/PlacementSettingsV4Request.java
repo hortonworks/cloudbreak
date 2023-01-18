@@ -8,19 +8,18 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class PlacementSettingsV4Request implements JsonEntity {
 
-    @ApiModelProperty(StackModelDescription.AVAILABILITY_ZONE)
+    @Schema(description = StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
 
     @NotNull
-    @ApiModelProperty(StackModelDescription.REGION)
+    @Schema(description = StackModelDescription.REGION)
     private String region;
 
     public String getAvailabilityZone() {

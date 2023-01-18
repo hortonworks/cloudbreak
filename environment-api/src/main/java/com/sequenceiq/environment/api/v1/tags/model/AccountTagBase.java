@@ -10,20 +10,19 @@ import com.sequenceiq.environment.api.doc.tag.TagDescription;
 import com.sequenceiq.environment.api.v1.tags.model.request.AccountTagRequest;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(subTypes = {AccountTagRequest.class, AccountTagResponse.class})
+@Schema(subTypes = {AccountTagRequest.class, AccountTagResponse.class})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AccountTagBase implements Serializable {
 
     @NotNull
-    @ApiModelProperty(value = TagDescription.KEY, required = true)
+    @Schema(description = TagDescription.KEY, required = true)
     @Size(max = 127, min = 3, message = "The length of the key has to be in range of 3 to 127")
     private String key;
 
     @NotNull
-    @ApiModelProperty(value = TagDescription.VALUE, required = true)
+    @Schema(description = TagDescription.VALUE, required = true)
     @Size(max = 255, min = 3, message = "The length of the value has to be in range of 3 to 255")
     private String value;
 

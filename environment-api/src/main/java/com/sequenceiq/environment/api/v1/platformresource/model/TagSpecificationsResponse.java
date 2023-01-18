@@ -7,15 +7,14 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @NotNull
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TagSpecificationsResponse {
 
-    @ApiModelProperty(PlatformResourceModelDescription.TAG_SPECIFICATIONS)
+    @Schema(description = PlatformResourceModelDescription.TAG_SPECIFICATIONS)
     private Map<String, Map<String, Object>> specifications;
 
     public Map<String, Map<String, Object>> getSpecifications() {

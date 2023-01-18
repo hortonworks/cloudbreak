@@ -13,22 +13,21 @@ import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public abstract class BlueprintV4Base implements JsonEntity {
 
     @Size(max = 1000)
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(BlueprintModelDescription.BLUEPRINT)
+    @Schema(description = BlueprintModelDescription.BLUEPRINT)
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String blueprint;
 
-    @ApiModelProperty(BlueprintModelDescription.TAGS)
+    @Schema(description = BlueprintModelDescription.TAGS)
     private Map<String, Object> tags = new HashMap<>();
 
     public Map<String, Object> getTags() {

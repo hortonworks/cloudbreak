@@ -6,20 +6,19 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.FreeIpaServerSettingsModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("FreeIpaServerV1Response")
+@Schema(name = "FreeIpaServerV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FreeIpaServerResponse extends FreeIpaServerBase {
 
-    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.SERVER_IP)
+    @Schema(description = FreeIpaServerSettingsModelDescriptions.SERVER_IP)
     private Set<String> serverIp = new HashSet<>();
 
-    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.FREEIPA_HOST)
+    @Schema(description = FreeIpaServerSettingsModelDescriptions.FREEIPA_HOST)
     private String freeIpaHost;
 
-    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.FREEIPA_PORT)
+    @Schema(description = FreeIpaServerSettingsModelDescriptions.FREEIPA_PORT)
     private Integer freeIpaPort;
 
     public Set<String> getServerIp() {

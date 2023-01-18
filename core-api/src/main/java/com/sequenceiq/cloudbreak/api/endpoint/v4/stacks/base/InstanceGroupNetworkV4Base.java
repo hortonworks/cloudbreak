@@ -11,28 +11,28 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InstanceGroupNetworkV4Base extends ProviderParametersBase implements JsonEntity {
 
-    @ApiModelProperty(NetworkModelDescription.AWS_PARAMETERS)
+    @Schema(description = NetworkModelDescription.AWS_PARAMETERS)
     private InstanceGroupAwsNetworkV4Parameters aws;
 
-    @ApiModelProperty(NetworkModelDescription.GCP_PARAMETERS)
+    @Schema(description = NetworkModelDescription.GCP_PARAMETERS)
     private InstanceGroupGcpNetworkV4Parameters gcp;
 
-    @ApiModelProperty(NetworkModelDescription.AZURE_PARAMETERS)
+    @Schema(description = NetworkModelDescription.AZURE_PARAMETERS)
     private InstanceGroupAzureNetworkV4Parameters azure;
 
-    @ApiModelProperty(NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Schema(description = NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
     @Deprecated
     private InstanceGroupOpenstackNetworkV4Parameters openstack;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private InstanceGroupMockNetworkV4Parameters mock;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private InstanceGroupYarnNetworkV4Parameters yarn;
 
     @Override

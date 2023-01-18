@@ -8,23 +8,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FreeIpaImageRequest implements Serializable {
 
-    @ApiModelProperty(value = EnvironmentModelDescription.FREEIPA_IMAGE_CATALOG)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_IMAGE_CATALOG)
     @Size(max = 255)
     private String catalog;
 
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE_ID)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_IMAGE_ID)
     @Size(max = 255)
     private String id;
 
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE_OS_TYPE)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_IMAGE_OS_TYPE)
     @Size(max = 255)
     private String os;
 

@@ -3,11 +3,11 @@ package com.sequenceiq.mock.experience.response.common;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(value = "DeleteCommonExperienceClusterResponse")
+@Schema(name = "DeleteCommonExperienceClusterResponse")
 public class DeleteCommonExperienceWorkspaceResponse {
 
     private String name;

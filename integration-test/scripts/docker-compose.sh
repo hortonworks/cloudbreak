@@ -116,12 +116,12 @@ else
 fi
 
 mkdir -p ./apidefinitions
-curl -k http://${PUBLIC_IP}:8080/cb/api/swagger.json -o ./apidefinitions/cloudbreak.json
-curl -k http://${PUBLIC_IP}:8088/environmentservice/api/swagger.json -o ./apidefinitions/environment.json
-curl -k http://${PUBLIC_IP}:8090/freeipa/api/swagger.json -o ./apidefinitions/freeipa.json
-curl -k http://${PUBLIC_IP}:8087/redbeams/api/swagger.json -o ./apidefinitions/redbeams.json
-curl -k http://${PUBLIC_IP}:8086/dl/api/swagger.json -o ./apidefinitions/datalake.json
-curl -k http://${PUBLIC_IP}:8085/as/api/swagger.json -o ./apidefinitions/autoscale.json
+curl -k http://${PUBLIC_IP}:8080/cb/api/openapi.json -o ./apidefinitions/cloudbreak.json
+curl -k http://${PUBLIC_IP}:8088/environmentservice/api/openapi.json -o ./apidefinitions/environment.json
+curl -k http://${PUBLIC_IP}:8090/freeipa/api/openapi.json -o ./apidefinitions/freeipa.json
+curl -k http://${PUBLIC_IP}:8087/redbeams/api/openapi.json -o ./apidefinitions/redbeams.json
+curl -k http://${PUBLIC_IP}:8086/dl/api/openapi.json -o ./apidefinitions/datalake.json
+curl -k http://${PUBLIC_IP}:8085/as/api/openapi.json -o ./apidefinitions/autoscale.json
 
 docker rm -f cbreak_periscope_1
 

@@ -28,7 +28,7 @@ public class CompressUtilTest {
         byte[] updatedZipOutput = underTest.updateCompressedOutputFolders(List.of("test-salt/case2"), List.of("/salt/component1"), originalZipOutput);
         Map<String, String> mergedContentMap = underTest.getZipEntries(updatedZipOutput);
         boolean fullContentMatch = underTest.compareCompressedContent(originalZipOutput, updatedZipOutput);
-        boolean component1ContentMatch =  underTest.compareCompressedContent(originalZipOutput, updatedZipOutput, List.of("/salt/component1"));
+        boolean component1ContentMatch = underTest.compareCompressedContent(originalZipOutput, updatedZipOutput, List.of("/salt/component1"));
         boolean component2ContentMatch = underTest.compareCompressedContent(originalZipOutput, updatedZipOutput, List.of("/salt/component2"));
         // THEN
         assertEquals("myinit1", mergedContentMap.get("/pillar/component1/init.sls"));

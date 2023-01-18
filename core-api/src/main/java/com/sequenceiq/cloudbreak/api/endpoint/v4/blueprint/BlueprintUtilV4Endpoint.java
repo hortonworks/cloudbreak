@@ -24,44 +24,48 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ConnectorOpDescriptio
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/v4/{workspaceId}/blueprints_util")
-@Api(value = "/v4/{workspaceId}/blueprints_util", description = ControllerDescription.BLUEPRINT_V4_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/{workspaceId}/blueprints_util", description = ControllerDescription.BLUEPRINT_V4_DESCRIPTION)
 public interface BlueprintUtilV4Endpoint {
 
     @GET
     @Path("service_dependencies")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getServiceAndDependencies")
+    @Operation(summary = ConnectorOpDescription.GET_RECOMMENDATION, description = Notes.CONNECTOR_NOTES,
+            operationId = "getServiceAndDependencies",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ServiceDependencyMatrixV4Response getServiceAndDependencies(@PathParam("workspaceId") Long workspaceId,
         @QueryParam("services") Set<String> services, @QueryParam("platform") String platform);
 
     @GET
     @Path("services")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getServiceList")
+    @Operation(summary = ConnectorOpDescription.GET_RECOMMENDATION, description = Notes.CONNECTOR_NOTES,
+            operationId = "getServiceList",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SupportedVersionsV4Response getServiceList(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("generate")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getGeneratedTemplate")
+    @Operation(summary = ConnectorOpDescription.GET_RECOMMENDATION, description = Notes.CONNECTOR_NOTES,
+            operationId = "getGeneratedTemplate",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     GeneratedCmTemplateV4Response getGeneratedTemplate(@PathParam("workspaceId") Long workspaceId,
         @QueryParam("services") Set<String> services, @QueryParam("platform") String platform);
 
     @GET
     @Path("recommendation")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "createRecommendationForWorkspace")
+    @Operation(summary = ConnectorOpDescription.GET_RECOMMENDATION, description = Notes.CONNECTOR_NOTES,
+            operationId = "createRecommendationForWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId,
             @QueryParam("definitionName") String definitionName,
             @QueryParam("blueprintName") String blueprintName,
@@ -74,8 +78,9 @@ public interface BlueprintUtilV4Endpoint {
     @GET
     @Path("recommendation_by_cred_crn")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION_BY_CRED_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "createRecommendationForWorkspaceByCredCrn")
+    @Operation(summary = ConnectorOpDescription.GET_RECOMMENDATION_BY_CRED_CRN, description = Notes.CONNECTOR_NOTES,
+            operationId = "createRecommendationForWorkspaceByCredCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RecommendationV4Response createRecommendationByCredCrn(@PathParam("workspaceId") Long workspaceId,
             @QueryParam("definitionName") String definitionName,
             @QueryParam("blueprintName") String blueprintName,
@@ -88,8 +93,9 @@ public interface BlueprintUtilV4Endpoint {
     @GET
     @Path("recommendation_by_env_crn")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION_BY_ENV_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "createRecommendationForWorkspaceByEnvCrn")
+    @Operation(summary = ConnectorOpDescription.GET_RECOMMENDATION_BY_ENV_CRN, description = Notes.CONNECTOR_NOTES,
+            operationId = "createRecommendationForWorkspaceByEnvCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RecommendationV4Response createRecommendationByEnvCrn(@PathParam("workspaceId") Long workspaceId,
             @QueryParam("definitionName") String definitionName,
             @QueryParam("blueprintName") String blueprintName,
@@ -102,8 +108,9 @@ public interface BlueprintUtilV4Endpoint {
     @GET
     @Path("scalerecommendation")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "createScaleRecommendationForWorkspace")
+    @Operation(summary = ConnectorOpDescription.GET_RECOMMENDATION, description = Notes.CONNECTOR_NOTES,
+            operationId = "createScaleRecommendationForWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ScaleRecommendationV4Response createRecommendation(
             @PathParam("workspaceId") @Valid Long workspaceId,
             @QueryParam("blueprintName") @NotEmpty String blueprintName);
@@ -111,8 +118,9 @@ public interface BlueprintUtilV4Endpoint {
     @GET
     @Path("scalerecommendation_by_datahub_crn")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION_BY_DATAHUB_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "createScaleRecommendationForWorkspaceByDatahubCrn")
+    @Operation(summary = ConnectorOpDescription.GET_RECOMMENDATION_BY_DATAHUB_CRN, description = Notes.CONNECTOR_NOTES,
+            operationId = "createScaleRecommendationForWorkspaceByDatahubCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ScaleRecommendationV4Response createRecommendationByDatahubCrn(
             @PathParam("workspaceId") @Valid Long workspaceId,
             @QueryParam("datahubCrn") @NotEmpty String datahubCrn);
@@ -120,8 +128,9 @@ public interface BlueprintUtilV4Endpoint {
     @GET
     @Path("service_versions")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_SERVICE_VERSIONS_BY_BLUEPRINT_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getServiceVersionsByBlueprintName")
+    @Operation(summary = ConnectorOpDescription.GET_SERVICE_VERSIONS_BY_BLUEPRINT_NAME, description = Notes.CONNECTOR_NOTES,
+            operationId = "getServiceVersionsByBlueprintName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintServicesV4Response getServicesByBlueprint(@PathParam("workspaceId") Long workspaceId,
         @QueryParam("blueprintName") String blueprintName);
 

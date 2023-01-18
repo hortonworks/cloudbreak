@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -43,6 +44,8 @@ import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UtilV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.WorkspaceAwareUtilV4Controller;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredEventFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -57,9 +60,7 @@ import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1RotationController;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.config.SwaggerConfigLocator;
-import io.swagger.jaxrs.config.SwaggerContextService;
+import io.swagger.v3.oas.models.OpenAPI;
 
 @ApplicationPath(CoreApi.API_ROOT_CONTEXT)
 @Configuration
@@ -103,7 +104,8 @@ public class EndpointConfig extends ResourceConfig {
             ClusterCostV4Controller.class,
             DistroXCostV1Controller.class,
             ClusterCO2V4Controller.class,
-            DistroXCO2V1Controller.class
+            DistroXCO2V1Controller.class,
+            OpenApiController.class
     );
 
     @Value("${info.app.version:unspecified}")
@@ -112,29 +114,31 @@ public class EndpointConfig extends ResourceConfig {
     @Value("${cb.structuredevent.rest.enabled}")
     private Boolean auditEnabled;
 
+    @Value("${server.servlet.context-path:}")
+    private String contextPath;
+
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
 
+    @Inject
+    private OpenApiProvider openApiProvider;
+
     @PostConstruct
-    private void init() {
+    private void init() throws IOException {
         registerFilters();
         registerEndpoints();
         registerExceptionMappers();
+        registerSwagger();
     }
 
-    @PostConstruct
     private void registerSwagger() throws IOException {
-        BeanConfig swaggerConfig = new BeanConfig();
-        swaggerConfig.setTitle("Cloudbreak API");
-        swaggerConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/cloudbreak-introduction"));
-        swaggerConfig.setVersion(cbVersion);
-        swaggerConfig.setSchemes(new String[]{"http", "https"});
-        swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
-        swaggerConfig.setLicenseUrl("https://github.infra.cloudera.com/cloudbreak/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api,com.sequenceiq.distrox.api,com.sequenceiq.flow.api,com.sequenceiq.authorization");
-        swaggerConfig.setScan(true);
-        swaggerConfig.setPrettyPrint(true);
-        SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, swaggerConfig);
+        OpenAPI openAPI = openApiProvider.getOpenAPI(
+                "Cloudbreak API",
+                FileReaderUtils.readFileFromClasspath("swagger/cloudbreak-introduction"),
+                cbVersion,
+                "https://localhost" + contextPath + CoreApi.API_ROOT_CONTEXT
+        );
+        openApiProvider.createConfig(openAPI, CONTROLLERS.stream().map(Class::getName).collect(Collectors.toSet()));
     }
 
     private void registerExceptionMappers() {
@@ -146,10 +150,6 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         CONTROLLERS.forEach(this::register);
-
-        register(io.swagger.jaxrs.listing.ApiListingResource.class);
-        register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
     }
 
     private void registerFilters() {

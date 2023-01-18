@@ -90,7 +90,7 @@ public class EnvironmentCreationDto {
         securityAccess = builder.securityAccess;
         adminGroupName = builder.adminGroupName;
         parameters = builder.parameters;
-        experimentalFeatures =  Objects.requireNonNullElseGet(builder.experimentalFeatures, ExperimentalFeatures::new);
+        experimentalFeatures = Objects.requireNonNullElseGet(builder.experimentalFeatures, ExperimentalFeatures::new);
         tags = Objects.requireNonNullElseGet(builder.tags, HashMap::new);
         crn = builder.crn;
         parentEnvironmentName = builder.parentEnvironmentName;

@@ -1,8 +1,11 @@
 package com.sequenceiq.periscope.config;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
@@ -10,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.controller.DistroXAutoScaleClusterV1Controller;
 import com.sequenceiq.periscope.controller.DistroXAutoScaleScalingActivityV1Controller;
@@ -35,16 +40,28 @@ import com.sequenceiq.periscope.controller.mapper.UnsupportedOperationFailedExce
 import com.sequenceiq.periscope.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.periscope.utils.FileReaderUtils;
 
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.config.SwaggerConfigLocator;
-import io.swagger.jaxrs.config.SwaggerContextService;
+import io.swagger.v3.oas.models.OpenAPI;
 
 @ApplicationPath(AutoscaleApi.API_ROOT_CONTEXT)
 @Component
 public class EndpointConfig extends ResourceConfig {
 
+    private static final List<Class<?>> CONTROLLERS = List.of(
+            DistroXAutoScaleClusterV1Controller.class,
+            DistroXAutoScaleScalingActivityV1Controller.class,
+            DistroXAutoScaleYarnRecommendationV1Controller.class,
+            HistoryController.class,
+            AuthorizationInfoController.class,
+            OpenApiController.class);
+
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;
+
+    @Value("${server.servlet.context-path:}")
+    private String contextPath;
+
+    @Inject
+    private OpenApiProvider openApiProvider;
 
     @PostConstruct
     public void init() throws IOException {
@@ -54,18 +71,13 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerSwagger() throws IOException {
-        BeanConfig beanConfig = new BeanConfig();
-        beanConfig.setTitle("Auto-scaling API");
-        beanConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/auto-scaling-introduction"));
-        beanConfig.setVersion(applicationVersion);
-        beanConfig.setSchemes(new String[]{"http", "https"});
-        beanConfig.setBasePath(AutoscaleApi.API_ROOT_CONTEXT);
-        beanConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        beanConfig.setResourcePackage("com.sequenceiq.periscope.api,com.sequenceiq.authorization");
-        beanConfig.setScan(true);
-        beanConfig.setContact("https://hortonworks.com/contact-sales/");
-        beanConfig.setPrettyPrint(true);
-        SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, beanConfig);
+        OpenAPI openAPI = openApiProvider.getOpenAPI(
+                "Auto-scaling API",
+                FileReaderUtils.readFileFromClasspath("swagger/auto-scaling-introduction"),
+                applicationVersion,
+                "https://localhost" + contextPath + AutoscaleApi.API_ROOT_CONTEXT
+        );
+        openApiProvider.createConfig(openAPI, CONTROLLERS.stream().map(Class::getName).collect(Collectors.toSet()));
     }
 
     private void registerExceptionMappers() {
@@ -91,14 +103,6 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
-        register(DistroXAutoScaleClusterV1Controller.class);
-        register(DistroXAutoScaleScalingActivityV1Controller.class);
-        register(DistroXAutoScaleYarnRecommendationV1Controller.class);
-        register(HistoryController.class);
-        register(AuthorizationInfoController.class);
-
-        register(io.swagger.jaxrs.listing.ApiListingResource.class);
-        register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
+        CONTROLLERS.forEach(this::register);
     }
 }

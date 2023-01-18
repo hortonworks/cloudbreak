@@ -4,14 +4,14 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class PlacementBase {
-    @ApiModelProperty(FreeIpaModelDescriptions.AVAILABILITY_ZONE)
+    @Schema(description = FreeIpaModelDescriptions.AVAILABILITY_ZONE)
     private String availabilityZone;
 
     @NotNull
-    @ApiModelProperty(FreeIpaModelDescriptions.REGION)
+    @Schema(description = FreeIpaModelDescriptions.REGION)
     private String region;
 
     public String getAvailabilityZone() {

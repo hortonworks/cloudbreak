@@ -5,17 +5,16 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("EnvironmentUserSyncV1State")
+@Schema(name = "EnvironmentUserSyncV1State")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentUserSyncState {
     @NotNull
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_STATE, required = true)
+    @Schema(description = UserModelDescriptions.USERSYNC_STATE, required = true)
     private UserSyncState state;
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ID)
+    @Schema(description = UserModelDescriptions.USERSYNC_ID)
     private String lastUserSyncOperationId;
 
     public UserSyncState getState() {

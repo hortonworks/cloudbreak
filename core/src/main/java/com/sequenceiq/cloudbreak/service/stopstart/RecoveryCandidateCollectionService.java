@@ -69,7 +69,7 @@ public class RecoveryCandidateCollectionService {
     private List<InstanceMetadataView> collectRecoveryCandidates(List<InstanceMetadataView> startedInstances, DetailedHostStatuses detailedHostStatuses,
             Optional<String> runtimeVersion) {
         boolean servicesHealthCheckAllowed = CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion);
-        Predicate<InstanceMetadataView> instanceHealthCheck =  im -> {
+        Predicate<InstanceMetadataView> instanceHealthCheck = im -> {
             HostName hostName = hostName(im.getDiscoveryFQDN());
             boolean hostUnhealthy = detailedHostStatuses.isHostUnHealthy(hostName);
             boolean hostDecommissioned = detailedHostStatuses.isHostDecommissioned(hostName);

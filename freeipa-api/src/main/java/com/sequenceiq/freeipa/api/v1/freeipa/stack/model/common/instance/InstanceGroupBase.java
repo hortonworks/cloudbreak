@@ -7,20 +7,20 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.InstanceGroupModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class InstanceGroupBase {
     @Min(value = 0, message = "The node count has to be greater or equals than 0")
     @Max(value = 100000, message = "The node count has to be less than 100000")
     @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
-    @ApiModelProperty(value = InstanceGroupModelDescription.NODE_COUNT, required = true)
+    @Schema(description = InstanceGroupModelDescription.NODE_COUNT, required = true)
     private int nodeCount;
 
     @NotNull
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_TYPE, allowableValues = "MASTER,SLAVE")
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_TYPE, allowableValues = "MASTER,SLAVE")
     private InstanceGroupType type = InstanceGroupType.MASTER;
 
     public int getNodeCount() {

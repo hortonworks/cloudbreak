@@ -5,17 +5,16 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "AzureResourceGroupV1Parameters")
+@Schema(name = "AzureResourceGroupV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AzureResourceGroup implements Serializable {
 
-    @ApiModelProperty(EnvironmentModelDescription.EXISTING_RESOURCE_GROUP_NAME)
+    @Schema(description = EnvironmentModelDescription.EXISTING_RESOURCE_GROUP_NAME)
     private String name;
 
-    @ApiModelProperty(EnvironmentModelDescription.RESOURCE_GROUP_USAGE)
+    @Schema(description = EnvironmentModelDescription.RESOURCE_GROUP_USAGE)
     private ResourceGroupUsage resourceGroupUsage;
 
     public String getName() {

@@ -6,9 +6,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "VmLogsResponse")
+@Schema(name = "VmLogsResponse")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VmLogsResponse implements Serializable {
 

@@ -4,17 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.model.AzureDatabaseType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxDatabaseAzureRequest {
-    @ApiModelProperty(ModelDescriptions.AZURE_DATABASE_TYPE)
+    @Schema(description = ModelDescriptions.AZURE_DATABASE_TYPE)
     private AzureDatabaseType azureDatabaseType = AzureDatabaseType.SINGLE_SERVER;
 
-    @ApiModelProperty(ModelDescriptions.AZURE_DATABASE_TYPE)
+    @Schema(description = ModelDescriptions.AZURE_DATABASE_TYPE)
     private String flexibleServerDelegatedSubnetId;
 
     public AzureDatabaseType getAzureDatabaseType() {

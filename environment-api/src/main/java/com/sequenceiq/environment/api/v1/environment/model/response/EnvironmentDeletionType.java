@@ -2,9 +2,9 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentDeletionTypeV1")
+@Schema(name = "EnvironmentDeletionTypeV1")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public enum EnvironmentDeletionType {
 

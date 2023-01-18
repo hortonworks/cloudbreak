@@ -22,75 +22,85 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/freeipa/user")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/freeipa/user", description = "Synchronize users to FreeIPA", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/freeipa/user", description = "Synchronize users to FreeIPA")
 public interface UserV1Endpoint {
     @POST
     @Path("sync")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOperationDescriptions.SYNC_SINGLE, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
-            nickname = "synchronizeUserV1")
+    @Operation(summary = UserOperationDescriptions.SYNC_SINGLE, description = UserNotes.USER_NOTES,
+            operationId = "synchronizeUserV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SyncOperationStatus synchronizeUser(SynchronizeUserRequest request);
 
     @POST
     @Path("syncAll")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOperationDescriptions.SYNC_ALL, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
-            nickname = "synchronizeAllUsersV1")
+    @Operation(summary = UserOperationDescriptions.SYNC_ALL, description = UserNotes.USER_NOTES,
+            operationId = "synchronizeAllUsersV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request);
 
     @POST
     @Path("password")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOperationDescriptions.SET_PASSWORD, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
-            nickname = "setPasswordV1")
+    @Operation(summary = UserOperationDescriptions.SET_PASSWORD, description = UserNotes.USER_NOTES,
+            operationId = "setPasswordV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SyncOperationStatus setPassword(SetPasswordRequest request);
 
     @GET
     @Path("status")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOperationDescriptions.SYNC_OPERATION_STATUS, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
-            nickname = "getSyncOperationStatusV1")
+    @Operation(summary = UserOperationDescriptions.SYNC_OPERATION_STATUS, description = UserNotes.USER_NOTES,
+            operationId = "getSyncOperationStatusV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SyncOperationStatus getSyncOperationStatus(@QueryParam("operationId") @NotNull String operationId);
 
     @GET
     @Path("internal/status")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOperationDescriptions.INTERNAL_SYNC_OPERATION_STATUS, notes = UserNotes.USER_NOTES,
-            produces = MediaType.APPLICATION_JSON, nickname = "internalGetSyncOperationStatusV1")
+    @Operation(summary = UserOperationDescriptions.INTERNAL_SYNC_OPERATION_STATUS, description = UserNotes.USER_NOTES,
+            operationId = "internalGetSyncOperationStatusV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SyncOperationStatus getSyncOperationStatusInternal(
             @QueryParam("accountId") @AccountId String accountId, @QueryParam("operationId") @NotNull String operationId);
 
     @GET
     @Path("lastStatus")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOperationDescriptions.LAST_SYNC_OPERATION_STATUS, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
-            nickname = "getLastSyncOperationStatusV1")
+    @Operation(summary = UserOperationDescriptions.LAST_SYNC_OPERATION_STATUS, description = UserNotes.USER_NOTES,
+            operationId = "getLastSyncOperationStatusV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SyncOperationStatus getLastSyncOperationStatus(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @GET
     @Path("syncState")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOperationDescriptions.ENVIRONMENT_USERSYNC_STATE, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
-            nickname = "getEnvironmentUserSyncStateV1")
+    @Operation(summary = UserOperationDescriptions.ENVIRONMENT_USERSYNC_STATE, description = UserNotes.USER_NOTES,
+            operationId = "getEnvironmentUserSyncStateV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     EnvironmentUserSyncState getUserSyncState(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @POST
     @Path("presync")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOperationDescriptions.PRE_SYNC, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
-            nickname = "preSynchronizeV1")
+    @Operation(summary = UserOperationDescriptions.PRE_SYNC, description = UserNotes.USER_NOTES,
+            operationId = "preSynchronizeV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SyncOperationStatus preSynchronize(@QueryParam("environmentCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotEmpty String environmentCrn);
 
     @POST
     @Path("postsync")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOperationDescriptions.POST_SYNC, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
-            nickname = "postSynchronizeV1")
+    @Operation(summary = UserOperationDescriptions.POST_SYNC, description = UserNotes.USER_NOTES,
+            operationId = "postSynchronizeV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SyncOperationStatus postSynchronize(@QueryParam("environmentCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotEmpty String environmentCrn);
 }

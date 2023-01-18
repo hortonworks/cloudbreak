@@ -117,7 +117,7 @@ class ValidateRdsUpgradeActionsTest {
         when(stack.getId()).thenReturn(STACK_ID);
         ClusterView cluster = mock(ClusterView.class);
         lenient().when(validateRdsUpgradeService.shouldRunDataBackupRestore(stack, cluster)).thenReturn(shouldRunDataBackupRestore);
-        ValidateRdsUpgradeContext context =  new ValidateRdsUpgradeContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster);
+        ValidateRdsUpgradeContext context = new ValidateRdsUpgradeContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster);
 
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         Map<Object, Object> variables = new HashMap<>();

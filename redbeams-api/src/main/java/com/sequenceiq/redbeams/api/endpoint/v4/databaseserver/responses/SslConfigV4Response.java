@@ -7,28 +7,27 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.SSL_CONFIG_RESPONSE)
+@Schema(description = ModelDescriptions.SSL_CONFIG_RESPONSE)
 public class SslConfigV4Response implements Serializable {
 
-    @ApiModelProperty(DatabaseServer.SSL_CERTIFICATES)
+    @Schema(description = DatabaseServer.SSL_CERTIFICATES)
     private Set<String> sslCertificates;
 
-    @ApiModelProperty(DatabaseServer.SSL_CERTIFICATE_TYPE)
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_TYPE)
     private SslCertificateType sslCertificateType = SslCertificateType.NONE;
 
-    @ApiModelProperty(DatabaseServer.SSL_MODE)
+    @Schema(description = DatabaseServer.SSL_MODE)
     private SslMode sslMode = SslMode.DISABLED;
 
-    @ApiModelProperty(DatabaseServer.SSL_CERTIFICATE_ACTIVE_VERSION)
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_ACTIVE_VERSION)
     private int sslCertificateActiveVersion;
 
-    @ApiModelProperty(DatabaseServer.SSL_CERTIFICATE_HIGHEST_AVAILABLE_VERSION)
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_HIGHEST_AVAILABLE_VERSION)
     private int sslCertificateHighestAvailableVersion;
 
-    @ApiModelProperty(DatabaseServer.SSL_CERTIFICATE_ACTIVE_CLOUD_PROVIDER_IDENTIFIER)
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_ACTIVE_CLOUD_PROVIDER_IDENTIFIER)
     private String sslCertificateActiveCloudProviderIdentifier;
 
     public Set<String> getSslCertificates() {

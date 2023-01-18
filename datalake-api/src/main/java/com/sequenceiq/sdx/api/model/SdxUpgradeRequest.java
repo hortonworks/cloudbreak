@@ -6,55 +6,54 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.sdx.validation.ValidUpgradeRequest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ValidUpgradeRequest
 public class SdxUpgradeRequest {
 
-    @ApiModelProperty(ModelDescriptions.IMAGE_ID)
+    @Schema(description = ModelDescriptions.IMAGE_ID)
     private String imageId;
 
-    @ApiModelProperty(ModelDescriptions.RUNTIME_VERSION)
+    @Schema(description = ModelDescriptions.RUNTIME_VERSION)
     private String runtime;
 
-    @ApiModelProperty(ModelDescriptions.LOCK_COMPONENTS)
+    @Schema(description = ModelDescriptions.LOCK_COMPONENTS)
     private Boolean lockComponents;
 
-    @ApiModelProperty(ModelDescriptions.DRY_RUN)
+    @Schema(description = ModelDescriptions.DRY_RUN)
     private Boolean dryRun;
 
-    @ApiModelProperty(ModelDescriptions.SKIP_BACKUP)
+    @Schema(description = ModelDescriptions.SKIP_BACKUP)
     private Boolean skipBackup;
 
-    @ApiModelProperty(ModelDescriptions.SKIP_DATAHUB_VALIDATION)
+    @Schema(description = ModelDescriptions.SKIP_DATAHUB_VALIDATION)
     private Boolean skipDataHubValidation;
 
-    @ApiModelProperty(ModelDescriptions.ROLLING_UPGRADE_ENABLED)
+    @Schema(description = ModelDescriptions.ROLLING_UPGRADE_ENABLED)
     private Boolean rollingUpgradeEnabled;
 
-    @ApiModelProperty(ModelDescriptions.SKIP_VALIDATION)
+    @Schema(description = ModelDescriptions.SKIP_VALIDATION)
     private boolean skipValidation;
 
-    @ApiModelProperty(ModelDescriptions.SKIP_ATLAS)
+    @Schema(description = ModelDescriptions.SKIP_ATLAS)
     private boolean skipAtlasMetadata;
 
-    @ApiModelProperty(ModelDescriptions.SKIP_RANGER_AUDIT)
+    @Schema(description = ModelDescriptions.SKIP_RANGER_AUDIT)
     private boolean skipRangerAudits;
 
-    @ApiModelProperty(ModelDescriptions.SKIP_RANGER_METADATA)
+    @Schema(description = ModelDescriptions.SKIP_RANGER_METADATA)
     private boolean skipRangerMetadata;
 
-    @ApiModelProperty(ModelDescriptions.SHOW_AVAILABLE_IMAGES)
+    @Schema(description = ModelDescriptions.SHOW_AVAILABLE_IMAGES)
     private SdxUpgradeShowAvailableImages showAvailableImages;
 
-    @ApiModelProperty(ModelDescriptions.REPLACE_VMS)
+    @Schema(description = ModelDescriptions.REPLACE_VMS)
     private SdxUpgradeReplaceVms replaceVms;
 
-    @ApiModelProperty(ModelDescriptions.KEEP_VARIANT)
+    @Schema(description = ModelDescriptions.KEEP_VARIANT)
     private boolean keepVariant;
 
     public String getImageId() {
@@ -141,34 +140,28 @@ public class SdxUpgradeRequest {
         this.keepVariant = keepVariant;
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isEmpty() {
-        return isUnspecifiedUpgradeType() &&
-                !Boolean.TRUE.equals(dryRun) &&
-                !isShowAvailableImagesSet();
+        return isUnspecifiedUpgradeType() && !Boolean.TRUE.equals(dryRun) && !isShowAvailableImagesSet();
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isDryRunOnly() {
-        return isUnspecifiedUpgradeType() &&
-                Boolean.TRUE.equals(dryRun);
+        return isUnspecifiedUpgradeType() && Boolean.TRUE.equals(dryRun);
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isShowAvailableImagesOnly() {
-        return isUnspecifiedUpgradeType() &&
-                isShowAvailableImagesSet();
+        return isUnspecifiedUpgradeType() && isShowAvailableImagesSet();
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isShowAvailableImagesSet() {
         return Objects.nonNull(showAvailableImages) && SdxUpgradeShowAvailableImages.DO_NOT_SHOW != showAvailableImages;
     }
 
     private boolean isUnspecifiedUpgradeType() {
-        return Objects.isNull(imageId) &&
-                Objects.isNull(runtime) &&
-                !Boolean.TRUE.equals(lockComponents);
+        return Objects.isNull(imageId) && Objects.isNull(runtime) && !Boolean.TRUE.equals(lockComponents);
     }
 
     public boolean isSkipValidation() {
@@ -205,14 +198,13 @@ public class SdxUpgradeRequest {
 
     @Override
     public String toString() {
-        return "SdxUpgradeRequest{" +
-                "imageId='" + imageId + '\'' +
-                ", runtime='" + runtime + '\'' +
-                ", lockComponents=" + lockComponents +
-                ", dryRun=" + dryRun +
-                ", skipBackup=" + skipBackup +
-                ", replaceVms=" + replaceVms +
-                ", skipDataHubValidation=" + skipDataHubValidation +
-                '}';
+        return "SdxUpgradeRequest{"
+                + "imageId='" + imageId + '\''
+                + ", runtime='" + runtime + '\''
+                + ", lockComponents=" + lockComponents
+                + ", dryRun=" + dryRun
+                + ", skipBackup=" + skipBackup
+                + ", replaceVms=" + replaceVms
+                + ", skipDataHubValidation=" + skipDataHubValidation + '}';
     }
 }

@@ -135,9 +135,9 @@ class ScalingActivityServiceTest {
     }
 
     private Cluster getCluster() {
-        Cluster cluster =  new Cluster();
+        Cluster cluster = new Cluster();
         cluster.setStackName(CLOUDBREAK_STACK_NAME);
-        ClusterPertain clusterPertain =  new ClusterPertain();
+        ClusterPertain clusterPertain = new ClusterPertain();
         clusterPertain.setUserCrn(TEST_USER_CRN);
 
         cluster.setClusterPertain(clusterPertain);

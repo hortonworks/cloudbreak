@@ -8,21 +8,20 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "LocationV1Request")
+@Schema(name = "LocationV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LocationRequest implements Serializable {
 
     @Size(max = 100)
-    @ApiModelProperty(EnvironmentModelDescription.LOCATION)
+    @Schema(description = EnvironmentModelDescription.LOCATION)
     private @NotNull String name;
 
-    @ApiModelProperty(EnvironmentModelDescription.LATITUDE)
+    @Schema(description = EnvironmentModelDescription.LATITUDE)
     private Double latitude;
 
-    @ApiModelProperty(EnvironmentModelDescription.LONGITUDE)
+    @Schema(description = EnvironmentModelDescription.LONGITUDE)
     private Double longitude;
 
     public Double getLatitude() {

@@ -26,49 +26,56 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
 @Path("/sdx")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/sdx", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/sdx")
 public interface SdxRecipeEndpoint {
 
     @PUT
     @Path("crn/{crn}/refresh_recipes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = REFRESH_RECIPES_BY_CRN, nickname = "refreshRecipesByCrn")
+    @Operation(summary = REFRESH_RECIPES_BY_CRN, operationId = "refreshRecipesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpdateRecipesV4Response refreshRecipesByCrn(@PathParam("crn") String crn, @Valid UpdateRecipesV4Request request);
 
     @PUT
     @Path("name/{name}/refresh_recipes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = REFRESH_RECIPES_BY_NAME, nickname = "refreshRecipesByName")
+    @Operation(summary = REFRESH_RECIPES_BY_NAME, operationId = "refreshRecipesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpdateRecipesV4Response refreshRecipesByName(@PathParam("name") String name, @Valid UpdateRecipesV4Request request);
 
     @POST
     @Path("crn/{crn}/attach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ATTACH_RECIPE_BY_CRN, nickname = "attachRecipesByCrn")
+    @Operation(summary = ATTACH_RECIPE_BY_CRN, operationId = "attachRecipesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AttachRecipeV4Response attachRecipeByCrn(@PathParam("crn") String crn, @Valid AttachRecipeV4Request request);
 
     @POST
     @Path("{name}/attach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ATTACH_RECIPE_BY_NAME, nickname = "attachRecipesByName")
+    @Operation(summary = ATTACH_RECIPE_BY_NAME, operationId = "attachRecipesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AttachRecipeV4Response attachRecipeByName(@PathParam("name") String name, @Valid AttachRecipeV4Request request);
 
     @POST
     @Path("crn/{crn}/detach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DETACH_RECIPE_BY_CRN, nickname = "detachRecipesByCrn")
+    @Operation(summary = DETACH_RECIPE_BY_CRN, operationId = "detachRecipesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetachRecipeV4Response detachRecipeByCrn(@PathParam("crn") String crn, @Valid DetachRecipeV4Request request);
 
     @POST
     @Path("{name}/detach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DETACH_RECIPE_BY_NAME, nickname = "detachRecipesByName")
+    @Operation(summary = DETACH_RECIPE_BY_NAME, operationId = "detachRecipesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetachRecipeV4Response detachRecipeByName(@PathParam("name") String name, @Valid DetachRecipeV4Request request);
 }

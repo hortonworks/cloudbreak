@@ -4,13 +4,12 @@ import java.util.List;
 
 import com.sequenceiq.periscope.doc.ApiDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class DistroXAutoScaleYarnRecommendationResponse implements Json {
 
-    @ApiModelProperty(ApiDescription.ClusterJsonsProperties.YARN_RECOMMENDATION)
+    @Schema(description = ApiDescription.ClusterJsonsProperties.YARN_RECOMMENDATION)
     private List<String> decommissionNodeIds;
 
     public List<String> getDecommissionNodeIds() {

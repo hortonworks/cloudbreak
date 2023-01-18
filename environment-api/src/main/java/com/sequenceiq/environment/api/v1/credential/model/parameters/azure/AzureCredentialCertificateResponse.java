@@ -7,24 +7,23 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.common.api.credential.AppCertificateStatus;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("AzureCertificateResponse")
+@Schema(name = "AzureCertificateResponse")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AzureCredentialCertificateResponse implements Serializable {
 
-    @ApiModelProperty
+    @Schema
     private AppCertificateStatus status;
 
-    @ApiModelProperty
+    @Schema
     private Long expiration;
 
-    @ApiModelProperty
+    @Schema
     private String base64;
 
-    @ApiModelProperty
+    @Schema
     private String sha512;
 
     public AppCertificateStatus getStatus() {

@@ -23,39 +23,43 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/internal/distrox")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/internal/distrox", protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/internal/distrox")
 public interface DistroXInternalV1Endpoint {
 
     @GET
     @Path("crn/{crn}")
-    @ApiOperation(value = GET_BY_CRN_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "getDistroXInternalV1ByCrn")
+    @Operation(summary = GET_BY_CRN_INTERNAL, description = Notes.STACK_NOTES,
+            operationId = "getDistroXInternalV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackViewV4Response getByCrn(@PathParam("crn") String crn);
 
     @GET
     @Path("crn/{crn}/instances")
-    @ApiOperation(value = GET_BY_CRN_INSTANCES_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "getDistroXInstancesInternalV1ByCrn")
+    @Operation(summary = GET_BY_CRN_INSTANCES_INTERNAL, description = Notes.STACK_NOTES,
+            operationId = "getDistroXInstancesInternalV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackInstancesV4Responses getInstancesByCrn(@ValidCrn(resource = {CrnResourceDescriptor.DATAHUB}) @PathParam("crn") String crn);
 
     @POST
     @Path("crn/status")
-    @ApiOperation(value = GET_BY_CRNS_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "getDistroXStatusInternalV1ByCrns")
+    @Operation(summary = GET_BY_CRNS_INTERNAL, description = Notes.STACK_NOTES,
+            operationId = "getDistroXStatusInternalV1ByCrns",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackStatusV4Responses getStatusByCrns(StatusCrnsV4Request request);
 
     @POST
     @Path("crn/{crn}/renew_certificate")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RENEW_CERTIFICATE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.RENEW_CERTIFICATE_NOTES,
-            nickname = "renewInternalDistroXCertificate")
+    @Operation(summary = RENEW_CERTIFICATE_INTERNAL, description = Notes.RENEW_CERTIFICATE_NOTES,
+            operationId = "renewInternalDistroXCertificate",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier renewCertificate(@PathParam("crn") String crn);
 }

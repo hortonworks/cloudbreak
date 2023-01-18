@@ -522,7 +522,7 @@ class AzureDatabaseResourceServiceTest {
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
 
-        List<CloudResourceStatus> actual =  underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
+        List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
         assertEquals(2, actual.size());
         verify(azureUtils).getStackName(cloudContext);
@@ -543,7 +543,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
 
-        Exception exception =  assertThrows(CloudConnectorException.class,
+        Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
 
         assertEquals("Resource group with name resource group name does not exist!", exception.getMessage());
@@ -569,7 +569,7 @@ class AzureDatabaseResourceServiceTest {
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
 
-        List<CloudResourceStatus> actual =  underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
+        List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
         assertEquals(2, actual.size());
         verify(azureUtils).getStackName(cloudContext);
@@ -594,7 +594,7 @@ class AzureDatabaseResourceServiceTest {
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
 
-        List<CloudResourceStatus> actual =  underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
+        List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
         assertEquals(2, actual.size());
         verify(azureUtils).getStackName(cloudContext);
@@ -626,7 +626,7 @@ class AzureDatabaseResourceServiceTest {
                 .thenReturn(new CloudConnectorException(exceptionMessage, managementException));
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(mock(CloudResource.class)));
 
-        Exception exception =  assertThrows(CloudConnectorException.class,
+        Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
 
         assertEquals(exceptionMessage, exception.getMessage());
@@ -660,7 +660,7 @@ class AzureDatabaseResourceServiceTest {
         doThrow(azureException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(mock(CloudResource.class)));
 
-        Exception exception =  assertThrows(CloudConnectorException.class,
+        Exception exception = assertThrows(CloudConnectorException.class,
                 () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
 
         assertEquals("Error in provisioning database stack aStack: Error", exception.getMessage());

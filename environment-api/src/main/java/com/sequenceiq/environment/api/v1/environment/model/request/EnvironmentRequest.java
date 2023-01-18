@@ -24,10 +24,9 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentV1Request")
+@Schema(name = "EnvironmentV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentRequest extends EnvironmentBaseRequest implements CredentialAwareEnvRequest, TaggableRequest {
 
@@ -35,15 +34,15 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @Size(max = 28, min = 5, message = LENGHT_INVALID_MSG)
     @ValidEnvironmentName
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, required = true)
     @NotNull
     private String name;
 
     @Size(max = 1000)
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_NAME_REQUEST)
+    @Schema(description = EnvironmentModelDescription.CREDENTIAL_NAME_REQUEST)
     private String credentialName;
 
     /**
@@ -51,80 +50,80 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
      * @deprecated As of Environment service 2.27, because this is duplication
      *             {@link #location} instead.
      */
-    @ApiModelProperty(EnvironmentModelDescription.REGIONS)
+    @Schema(description = EnvironmentModelDescription.REGIONS)
     @Deprecated(forRemoval = true)
     private Set<String> regions = new HashSet<>();
 
-    @ApiModelProperty(value = EnvironmentModelDescription.LOCATION, required = true)
+    @Schema(description = EnvironmentModelDescription.LOCATION, required = true)
     @NotNull
     private LocationRequest location;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.NETWORK)
+    @Schema(description = EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkRequest network;
 
-    @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
+    @Schema(description = EnvironmentModelDescription.TELEMETRY)
     private TelemetryRequest telemetry;
 
-    @ApiModelProperty(EnvironmentModelDescription.BACKUP)
+    @Schema(description = EnvironmentModelDescription.BACKUP)
     private @Valid BackupRequest backup;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
+    @Schema(description = EnvironmentModelDescription.AUTHENTICATION)
     private EnvironmentAuthenticationRequest authentication;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.FREE_IPA)
+    @Schema(description = EnvironmentModelDescription.FREE_IPA)
     private AttachedFreeIpaRequest freeIpa;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
+    @Schema(description = EnvironmentModelDescription.SECURITY_ACCESS)
     private SecurityAccessRequest securityAccess;
 
-    @ApiModelProperty(EnvironmentModelDescription.TUNNEL)
+    @Schema(description = EnvironmentModelDescription.TUNNEL)
     private Tunnel tunnel;
 
-    @ApiModelProperty(EnvironmentModelDescription.OVERRIDE_TUNNEL)
+    @Schema(description = EnvironmentModelDescription.OVERRIDE_TUNNEL)
     private Boolean overrideTunnel;
 
-    @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
+    @Schema(description = EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.IDBMMS;
 
-    @ApiModelProperty(EnvironmentModelDescription.CLOUD_STORAGE_VALIDATION)
+    @Schema(description = EnvironmentModelDescription.CLOUD_STORAGE_VALIDATION)
     private CloudStorageValidation cloudStorageValidation = CloudStorageValidation.ENABLED;
 
-    @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
+    @Schema(description = EnvironmentModelDescription.ADMIN_GROUP_NAME)
     private String adminGroupName;
 
-    @ApiModelProperty(EnvironmentModelDescription.PROXYCONFIG_NAME)
+    @Schema(description = EnvironmentModelDescription.PROXYCONFIG_NAME)
     private String proxyConfigName;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AZURE_PARAMETERS)
     private AzureEnvironmentParameters azure;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.TAGS)
+    @Schema(description = EnvironmentModelDescription.TAGS)
     private Map<String, String> tags = new HashMap<>();
 
-    @ApiModelProperty(value = EnvironmentModelDescription.PARENT_ENVIRONMENT_NAME)
+    @Schema(description = EnvironmentModelDescription.PARENT_ENVIRONMENT_NAME)
     private String parentEnvironmentName;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.GCP_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.GCP_PARAMETERS)
     private GcpEnvironmentParameters gcp;
 
-    @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_SERVICE_VERSION)
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_SERVICE_VERSION)
     private String environmentServiceVersion;
 
     private CcmV2TlsType ccmV2TlsType;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.DATA_SERVICES)
+    @Schema(description = EnvironmentModelDescription.DATA_SERVICES)
     private DataServicesRequest dataServices;
 
     public AttachedFreeIpaRequest getFreeIpa() {

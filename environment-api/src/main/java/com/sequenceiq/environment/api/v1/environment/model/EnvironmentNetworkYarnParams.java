@@ -3,16 +3,15 @@ package com.sequenceiq.environment.api.v1.environment.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentNetworkYarnV1Params")
+@Schema(name = "EnvironmentNetworkYarnV1Params")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentNetworkYarnParams {
-    @ApiModelProperty(value = EnvironmentModelDescription.YARN_QUEUE, required = true)
+    @Schema(description = EnvironmentModelDescription.YARN_QUEUE, required = true)
     private String queue;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.YARN_LIFETIME)
+    @Schema(description = EnvironmentModelDescription.YARN_LIFETIME)
     private Integer lifetime;
 
     public String getQueue() {

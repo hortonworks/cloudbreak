@@ -8,13 +8,13 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class ParametersQueryV4Response implements JsonEntity {
 
-    @ApiModelProperty(value = StackModelDescription.CUSTOM, required = true)
+    @Schema(description = StackModelDescription.CUSTOM, required = true)
     private Map<String, String> custom;
 
     public Map<String, String> getCustom() {

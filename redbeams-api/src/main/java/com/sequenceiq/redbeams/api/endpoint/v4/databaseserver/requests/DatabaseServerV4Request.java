@@ -7,22 +7,21 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServe
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.DATABASE_SERVER_REQUEST)
+@Schema(description = ModelDescriptions.DATABASE_SERVER_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseServerV4Request extends DatabaseServerV4Base {
 
     @NotNull
-    @ApiModelProperty(value = DatabaseServer.USERNAME, required = true)
+    @Schema(description = DatabaseServer.USERNAME, required = true)
     private String connectionUserName;
 
     @NotNull
-    @ApiModelProperty(value = DatabaseServer.PASSWORD, required = true)
+    @Schema(description = DatabaseServer.PASSWORD, required = true)
     private String connectionPassword;
 
-    // @ApiModelProperty(Database.ORACLE)
+    // @Schema(description = Database.ORACLE)
     // private OracleParameters oracle;
 
     public String getConnectionUserName() {

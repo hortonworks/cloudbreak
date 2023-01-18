@@ -6,17 +6,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentLoadBalancerUpdateRequest")
+@Schema(name = "EnvironmentLoadBalancerUpdateRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentLoadBalancerUpdateRequest {
 
-    @ApiModelProperty(EnvironmentModelDescription.PUBLIC_ENDPOINT_ACCESS_GATEWAY)
+    @Schema(description = EnvironmentModelDescription.PUBLIC_ENDPOINT_ACCESS_GATEWAY)
     private PublicEndpointAccessGateway publicEndpointAccessGateway = PublicEndpointAccessGateway.DISABLED;
 
-    @ApiModelProperty(EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
+    @Schema(description = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
     private Set<String> subnetIds = Set.of();
 
     public PublicEndpointAccessGateway getPublicEndpointAccessGateway() {

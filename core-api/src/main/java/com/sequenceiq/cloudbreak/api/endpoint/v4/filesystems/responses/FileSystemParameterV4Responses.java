@@ -8,11 +8,11 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralCollectionV4Response;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-@ApiModel
+@Schema
 public class FileSystemParameterV4Responses extends GeneralCollectionV4Response<FileSystemParameterV4Response> {
 
     public FileSystemParameterV4Responses(List<FileSystemParameterV4Response> responses) {

@@ -19,22 +19,23 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/distrox")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/distrox", protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/distrox")
 public interface DistroXV1EventEndpoint {
 
     @GET
     @Path("/structured_events")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GET_DATAHUB_AUDIT_EVENTS, produces = MediaType.APPLICATION_JSON, notes = Notes.DATAHUB_AUDIT_EVENTS,
-            nickname = "getAuditEvents")
+    @Operation(summary = GET_DATAHUB_AUDIT_EVENTS, description = Notes.DATAHUB_AUDIT_EVENTS,
+            operationId = "getAuditEvents",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<CDPStructuredEvent> getAuditEvents(
             @QueryParam("resourceCrn") @NotNull @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) String resourceCrn,
             @QueryParam("page") @DefaultValue("0") Integer page,

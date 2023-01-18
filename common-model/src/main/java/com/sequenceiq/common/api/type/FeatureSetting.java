@@ -6,15 +6,14 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FeatureSetting implements Serializable {
 
     @NotNull
-    @ApiModelProperty(value = "enabled", required = true)
+    @Schema(description = "enabled", required = true)
     private Boolean enabled;
 
     public Boolean getEnabled() {

@@ -5,19 +5,18 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxInstanceGroupRequest {
 
-    @ApiModelProperty(ModelDescriptions.INSTANCE_GROUP_NAME)
     @NotNull
+    @Schema(description = ModelDescriptions.INSTANCE_GROUP_NAME)
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.INSTANCE_TYPE)
+    @Schema(description = ModelDescriptions.INSTANCE_TYPE)
     private String instanceType;
 
     public String getName() {

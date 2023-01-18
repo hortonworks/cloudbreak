@@ -11,28 +11,27 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("OpenStackNetworkV1Parameters")
+@Schema(name = "OpenStackNetworkV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 @Deprecated
 public class OpenStackNetworkParameters extends MappableBase {
 
-    @ApiModelProperty
+    @Schema
     private String networkId;
 
-    @ApiModelProperty
+    @Schema
     private String routerId;
 
-    @ApiModelProperty
+    @Schema
     private String subnetId;
 
-    @ApiModelProperty
+    @Schema
     private String publicNetId;
 
-    @ApiModelProperty
+    @Schema
     private String networkingOption;
 
     public String getNetworkId() {
@@ -88,7 +87,7 @@ public class OpenStackNetworkParameters extends MappableBase {
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         throw new IllegalStateException("OPENSTACK is deprecated");
     }

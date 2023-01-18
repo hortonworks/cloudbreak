@@ -12,21 +12,22 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/operation")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/operation", description = "Get progression details of (flow) operations on SDX cluster",
-        protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/operation", description = "Get progression details of (flow) operations on SDX cluster")
 public interface OperationEndpoint {
 
     @GET
     @Path("/resource/crn/{resourceCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get provision flow operation progress details for resource by resource crn", produces = "application/json",
-            notes = "Flow operations progress", nickname = "getOperationProgressByResourceCrn")
+    @Operation(summary = "Get provision flow operation progress details for resource by resource crn", description = "Flow operations progress",
+            operationId = "getOperationProgressByResourceCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     OperationView getOperationProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn,
             @DefaultValue("false") @QueryParam("detailed") boolean detailed);
 }

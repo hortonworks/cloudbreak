@@ -124,7 +124,7 @@ public abstract class AbstractCommandTableResource {
     void addPathSegmentsFromDefaultUrl(HttpUrl defaultHttpUrl, HttpUrl.Builder httpUrlBuilder) {
         List<String> defaultPathSegments = defaultHttpUrl.pathSegments();
         int apiIndex = defaultPathSegments.indexOf("api");
-        int versionNumberIndex =  apiIndex == INVALID_INDEX ? INVALID_INDEX : apiIndex + 1;
+        int versionNumberIndex = apiIndex == INVALID_INDEX ? INVALID_INDEX : apiIndex + 1;
         for (int i = 0; i < defaultPathSegments.size(); i++) {
             String pathSegment = defaultPathSegments.get(i);
             if (i != apiIndex && i != versionNumberIndex) {

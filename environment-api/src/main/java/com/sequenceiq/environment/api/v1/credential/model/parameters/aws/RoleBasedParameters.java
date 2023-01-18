@@ -11,10 +11,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("RoleBasedV1Parameters")
+@Schema(name = "RoleBasedV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class RoleBasedParameters implements Serializable {
@@ -22,7 +21,7 @@ public class RoleBasedParameters implements Serializable {
     static final String ROLE_ARN_LENGTH_VALIDATION_ERROR_MSG = "RoleArn length should be between 20 and 2048 characters";
 
     @NotNull
-    @ApiModelProperty(value = AWS_ROLE_ARN, required = true, example = "arn:aws:iam::981628461338:role/example-role")
+    @Schema(description = AWS_ROLE_ARN, required = true, example = "arn:aws:iam::981628461338:role/example-role")
     @Size(max = 2048, min = 20, message = ROLE_ARN_LENGTH_VALIDATION_ERROR_MSG)
     private String roleArn;
 

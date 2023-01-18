@@ -13,10 +13,9 @@ import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.CredentialBase;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = CredentialDescriptor.CREDENTIAL_NOTES, parent = CredentialBase.class, value = "CredentialV1Request")
+@Schema(description = CredentialDescriptor.CREDENTIAL_NOTES, allOf = CredentialBase.class, name = "CredentialV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class CredentialRequest extends CredentialBase {
@@ -24,11 +23,11 @@ public class CredentialRequest extends CredentialBase {
     @Size(max = 100, min = 5, message = "The length of the credential's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name of the credential can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true, allowableValues = "length range[5, 100]")
+    @Schema(description = ModelDescriptions.NAME, required = true)
     private String name;
 
     @Valid
-    @ApiModelProperty(CredentialModelDescription.AZURE_PARAMETERS)
+    @Schema(description = CredentialModelDescription.AZURE_PARAMETERS)
     private AzureCredentialRequestParameters azure;
 
     public AzureCredentialRequestParameters getAzure() {

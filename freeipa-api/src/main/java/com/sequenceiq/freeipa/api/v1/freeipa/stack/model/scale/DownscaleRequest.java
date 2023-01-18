@@ -8,20 +8,19 @@ import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("FreeIpaDownscaleV1Request")
+@Schema(name = "FreeIpaDownscaleV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @MutuallyExclusiveNotNull(fieldGroups = {"targetAvailabilityType", "instanceIds"}, message = "Either targetAvailabilityType or instanceIds should be " +
         "provided but not both.")
 public class DownscaleRequest extends ScaleRequestBase {
 
-    @ApiModelProperty(value = ModelDescriptions.AVAILABILITY_TYPE)
+    @Schema(description = ModelDescriptions.AVAILABILITY_TYPE)
     private AvailabilityType targetAvailabilityType;
 
-    @ApiModelProperty(ModelDescriptions.INSTANCE_ID)
+    @Schema(description = ModelDescriptions.INSTANCE_ID)
     private Set<String> instanceIds;
 
     public AvailabilityType getTargetAvailabilityType() {

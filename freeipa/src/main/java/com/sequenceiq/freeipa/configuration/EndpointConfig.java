@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.configuration;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -12,8 +13,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.authorization.controller.AuthorizationUtilController;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPEventV1Endpoint;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
 import com.sequenceiq.flow.controller.FlowPublicController;
@@ -38,9 +43,7 @@ import com.sequenceiq.freeipa.kerberos.v1.KerberosConfigV1Controller;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Controller;
 import com.sequenceiq.freeipa.ldap.v1.LdapConfigV1Controller;
 
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.config.SwaggerConfigLocator;
-import io.swagger.jaxrs.config.SwaggerContextService;
+import io.swagger.v3.oas.models.OpenAPI;
 
 @ApplicationPath(FreeIpaApi.API_ROOT_CONTEXT)
 @Configuration
@@ -67,7 +70,10 @@ public class EndpointConfig extends ResourceConfig {
             RecipeV1Controller.class,
             FreeIpaCostV1Controller.class,
             FreeIpaCO2V1Controller.class,
-            FreeIpaRotationV1Controller.class);
+            FreeIpaRotationV1Controller.class,
+            CDPEventV1Endpoint.class,
+            AuthorizationUtilController.class,
+            OpenApiController.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;
@@ -81,28 +87,25 @@ public class EndpointConfig extends ResourceConfig {
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
 
+    @Inject
+    private OpenApiProvider openApiProvider;
+
     @PostConstruct
     private void init() {
         registerFilters();
         registerEndpoints();
         registerExceptionMappers();
+        registerSwagger();
     }
 
-    @PostConstruct
     private void registerSwagger() {
-        BeanConfig swaggerConfig = new BeanConfig();
-        swaggerConfig.setTitle("FreeIPA API");
-        swaggerConfig.setDescription("API for working with FreeIPA clusters");
-        swaggerConfig.setVersion(applicationVersion);
-        swaggerConfig.setSchemes(new String[]{"http", "https"});
-        swaggerConfig.setBasePath(contextPath + FreeIpaApi.API_ROOT_CONTEXT);
-        swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.freeipa.api,com.sequenceiq.flow.api,com.sequenceiq.authorization," +
-                "com.sequenceiq.cloudbreak.structuredevent.rest.endpoint");
-        swaggerConfig.setScan(true);
-        swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
-        swaggerConfig.setPrettyPrint(true);
-        SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, swaggerConfig);
+        OpenAPI openAPI = openApiProvider.getOpenAPI(
+                "FreeIPA API",
+                "API for working with FreeIPA clusters",
+                applicationVersion,
+                "https://localhost" + contextPath + FreeIpaApi.API_ROOT_CONTEXT
+                );
+        openApiProvider.createConfig(openAPI, CONTROLLERS.stream().map(Class::getName).collect(Collectors.toSet()));
     }
 
     private void registerExceptionMappers() {
@@ -115,10 +118,6 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         CONTROLLERS.forEach(this::register);
-
-        register(io.swagger.jaxrs.listing.ApiListingResource.class);
-        register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
     }
 
     private void registerFilters() {

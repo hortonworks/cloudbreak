@@ -5,24 +5,23 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRepairRequest {
 
-    @ApiModelProperty(ModelDescriptions.HOST_GROUP_NAME)
+    @Schema(description = ModelDescriptions.HOST_GROUP_NAME)
     private String hostGroupName;
 
-    @ApiModelProperty(ModelDescriptions.HOST_GROUP_NAMES)
+    @Schema(description = ModelDescriptions.HOST_GROUP_NAMES)
     private List<String> hostGroupNames;
 
-    @ApiModelProperty(ModelDescriptions.NODE_IDS)
+    @Schema(description = ModelDescriptions.NODE_IDS)
     private List<String> nodesIds;
 
-    @ApiModelProperty(ModelDescriptions.DELETE_VOLUMES)
+    @Schema(description = ModelDescriptions.DELETE_VOLUMES)
     private boolean deleteVolumes;
 
     public String getHostGroupName() {
@@ -59,11 +58,10 @@ public class SdxRepairRequest {
 
     @Override
     public String toString() {
-        return "SdxRepairRequest{" +
-                "hostGroupName='" + hostGroupName + '\'' +
-                ", hostGroupNames=" + hostGroupNames +
-                ", nodesIds=" + nodesIds +
-                ", deleteVolumes=" + deleteVolumes +
-                '}';
+        return "SdxRepairRequest{"
+                + "hostGroupName='" + hostGroupName + '\''
+                + ", hostGroupNames=" + hostGroupNames
+                + ", nodesIds=" + nodesIds
+                + ", deleteVolumes=" + deleteVolumes + '}';
     }
 }

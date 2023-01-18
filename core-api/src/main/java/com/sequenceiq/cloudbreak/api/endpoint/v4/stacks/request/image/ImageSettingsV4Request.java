@@ -6,21 +6,20 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class ImageSettingsV4Request implements JsonEntity {
 
-    @ApiModelProperty(StackModelDescription.IMAGE_CATALOG)
+    @Schema(description = StackModelDescription.IMAGE_CATALOG)
     private String catalog;
 
-    @ApiModelProperty(StackModelDescription.IMAGE_ID)
+    @Schema(description = StackModelDescription.IMAGE_ID)
     private String id;
 
-    @ApiModelProperty(StackModelDescription.IMAGE_OS)
+    @Schema(description = StackModelDescription.IMAGE_OS)
     private String os;
 
     public String getCatalog() {

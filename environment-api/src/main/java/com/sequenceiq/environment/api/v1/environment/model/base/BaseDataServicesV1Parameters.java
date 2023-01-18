@@ -6,9 +6,9 @@ import com.sequenceiq.environment.api.v1.environment.model.AwsDataServicesV1Para
 import com.sequenceiq.environment.api.v1.environment.model.AzureDataServicesV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.GcpDataServicesV1Parameters;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(subTypes = { AwsDataServicesV1Parameters.class, AzureDataServicesV1Parameters.class, GcpDataServicesV1Parameters.class })
+@Schema(subTypes = { AwsDataServicesV1Parameters.class, AzureDataServicesV1Parameters.class, GcpDataServicesV1Parameters.class })
 public class BaseDataServicesV1Parameters implements Serializable {
 
     @Override

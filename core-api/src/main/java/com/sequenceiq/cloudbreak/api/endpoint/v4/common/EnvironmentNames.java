@@ -4,14 +4,13 @@ import java.util.Set;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class EnvironmentNames {
 
     @NotEmpty
-    @ApiModelProperty(required = true)
+    @Schema(required = true)
     private Set<String> environmentNames;
 
     public Set<String> getEnvironmentNames() {

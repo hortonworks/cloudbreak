@@ -15,20 +15,22 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v1/operation")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/operation", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/operation")
 public interface OperationEndpoint {
 
     @GET
     @Path("/resource/crn/{resourceCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.GET_OPERATION, produces = "application/json", notes = ENVIRONMENT_NOTES,
-            nickname = "getOperationProgressByResourceCrn")
+    @Operation(summary = EnvironmentOpDescription.GET_OPERATION, description = ENVIRONMENT_NOTES,
+            operationId = "getOperationProgressByResourceCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     OperationView getOperationProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn,
             @DefaultValue("false") @QueryParam("detailed") boolean detailed);
 }

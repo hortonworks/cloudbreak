@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.api.model;
 
 public enum SdxClusterStatusResponse {
+
     REQUESTED,
     WAIT_FOR_ENVIRONMENT,
     ENVIRONMENT_CREATED,

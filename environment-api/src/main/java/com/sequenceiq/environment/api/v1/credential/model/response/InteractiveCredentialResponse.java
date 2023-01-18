@@ -7,16 +7,15 @@ import static com.sequenceiq.environment.api.doc.environment.EnvironmentModelDes
 
 import java.io.Serializable;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "InteractiveV1Credential", description = "Contains values from an Azure interactive login attempt")
+@Schema(name = "InteractiveV1Credential", description = "Contains values from an Azure interactive login attempt")
 public class InteractiveCredentialResponse implements Serializable {
 
-    @ApiModelProperty(value = INTERACTIVE_LOGIN_CREDENTIAL_USER_CODE, example = "B8ZT2QD4K")
+    @Schema(description = INTERACTIVE_LOGIN_CREDENTIAL_USER_CODE, example = "B8ZT2QD4K")
     private String userCode;
 
-    @ApiModelProperty(value = INTERACTIVE_LOGIN_CREDENTIAL_VERIFICATION_URL, example = "https://microsoft.com/devicelogin")
+    @Schema(description = INTERACTIVE_LOGIN_CREDENTIAL_VERIFICATION_URL, example = "https://microsoft.com/devicelogin")
     private String verificationUrl;
 
     public InteractiveCredentialResponse() {

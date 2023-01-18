@@ -12,33 +12,32 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("RebuildV2Request")
+@Schema(name = "RebuildV2Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RebuildV2Request {
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotEmpty
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @ValidCrn(resource = CrnResourceDescriptor.FREEIPA)
     @NotEmpty
-    @ApiModelProperty(value = ModelDescriptions.CRN, required = true)
+    @Schema(description = ModelDescriptions.CRN, required = true)
     private String resourceCrn;
 
     @NotEmpty
-    @ApiModelProperty(value = INSTANCE_TO_REPAIR_FQDN, required = true)
+    @Schema(description = INSTANCE_TO_REPAIR_FQDN, required = true)
     private String instanceToRestoreFqdn;
 
     @NotEmpty
-    @ApiModelProperty(value = FULL_BACKUP_STORAGE_PATH, required = true)
+    @Schema(description = FULL_BACKUP_STORAGE_PATH, required = true)
     private String fullBackupStorageLocation;
 
     @NotEmpty
-    @ApiModelProperty(value = DATA_BACKUP_STORAGE_PATH, required = true)
+    @Schema(description = DATA_BACKUP_STORAGE_PATH, required = true)
     private String dataBackupStorageLocation;
 
     public String getEnvironmentCrn() {

@@ -10,15 +10,14 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.environment.api.doc.dataservices.DataServicesModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.base.BaseDataServicesV1Parameters;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AzureDataServicesV1Parameters extends BaseDataServicesV1Parameters {
 
-    @ApiModelProperty(DataServicesModelDescription.SHARED_MANAGED_IDENTITY)
+    @Schema(description = DataServicesModelDescription.SHARED_MANAGED_IDENTITY)
     @NotNull
     private String sharedManagedIdentity;
 

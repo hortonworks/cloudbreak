@@ -39,10 +39,9 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class StackV4Response extends StackV4Base implements TaggedResponse {
@@ -61,96 +60,96 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     private boolean govCloud;
 
-    @ApiModelProperty(StackModelDescription.STACK_STATUS)
+    @Schema(description = StackModelDescription.STACK_STATUS)
     private Status status;
 
-    @ApiModelProperty(StackModelDescription.CLUSTER)
+    @Schema(description = StackModelDescription.CLUSTER)
     private ClusterV4Response cluster;
 
-    @ApiModelProperty(StackModelDescription.STATUS_REASON)
+    @Schema(description = StackModelDescription.STATUS_REASON)
     private String statusReason;
 
-    @ApiModelProperty(StackModelDescription.NETWORK)
+    @Schema(description = StackModelDescription.NETWORK)
     private NetworkV4Response network;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private List<InstanceGroupV4Response> instanceGroups = new ArrayList<>();
 
-    @ApiModelProperty(StackModelDescription.CREATED)
+    @Schema(description = StackModelDescription.CREATED)
     private Long created;
 
-    @ApiModelProperty(StackModelDescription.TERMINATED)
+    @Schema(description = StackModelDescription.TERMINATED)
     private Long terminated;
 
-    @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
+    @Schema(description = StackModelDescription.GATEWAY_PORT)
     private Integer gatewayPort;
 
-    @ApiModelProperty(StackModelDescription.IMAGE)
+    @Schema(description = StackModelDescription.IMAGE)
     private StackImageV4Response image;
 
-    @ApiModelProperty(StackModelDescription.CLOUDBREAK_DETAILS)
+    @Schema(description = StackModelDescription.CLOUDBREAK_DETAILS)
     private CloudbreakDetailsV4Response cloudbreakDetails;
 
-    @ApiModelProperty(StackModelDescription.AUTHENTICATION)
+    @Schema(description = StackModelDescription.AUTHENTICATION)
     private StackAuthenticationV4Response authentication;
 
-    @ApiModelProperty(StackModelDescription.NODE_COUNT)
+    @Schema(description = StackModelDescription.NODE_COUNT)
     private Integer nodeCount;
 
-    @ApiModelProperty(StackModelDescription.HARDWARE_INFO_RESPONSE)
+    @Schema(description = StackModelDescription.HARDWARE_INFO_RESPONSE)
     private Set<HardwareInfoGroupV4Response> hardwareInfoGroups = new HashSet<>();
 
-    @ApiModelProperty(StackModelDescription.EVENTS)
+    @Schema(description = StackModelDescription.EVENTS)
     private List<CloudbreakEventV4Response> cloudbreakEvents = new ArrayList<>();
 
-    @ApiModelProperty(StackModelDescription.TAGS)
+    @Schema(description = StackModelDescription.TAGS)
     private TagsV4Response tags;
 
-    @ApiModelProperty(StackModelDescription.TELEMETRY)
+    @Schema(description = StackModelDescription.TELEMETRY)
     private TelemetryResponse telemetry;
 
-    @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
+    @Schema(description = ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
 
-    @ApiModelProperty
+    @Schema
     private CustomDomainSettingsV4Response customDomains;
 
     @NotNull
-    @ApiModelProperty(value = PLACEMENT_SETTINGS, required = true)
+    @Schema(description = PLACEMENT_SETTINGS, required = true)
     @Valid
     private PlacementSettingsV4Response placement;
 
-    @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE_REQUEST)
+    @Schema(description = ClusterModelDescription.SHARED_SERVICE_REQUEST)
     private SharedServiceV4Response sharedService;
 
-    @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
+    @Schema(description = StackModelDescription.CLOUD_PLATFORM)
     private CloudPlatform cloudPlatform;
 
-    @ApiModelProperty(StackModelDescription.VARIANT)
+    @Schema(description = StackModelDescription.VARIANT)
     private String variant;
 
-    @ApiModelProperty(StackModelDescription.TUNNEL)
+    @Schema(description = StackModelDescription.TUNNEL)
     private Tunnel tunnel = Tunnel.DIRECT;
 
-    @ApiModelProperty(StackModelDescription.FLOW_ID)
+    @Schema(description = StackModelDescription.FLOW_ID)
     private FlowIdentifier flowIdentifier;
 
-    @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
+    @Schema(description = StackModelDescription.EXTERNAL_DATABASE)
     private DatabaseResponse externalDatabase;
 
-    @ApiModelProperty(StackModelDescription.LOAD_BALANCER)
+    @Schema(description = StackModelDescription.LOAD_BALANCER)
     private List<LoadBalancerResponse> loadBalancers;
 
-    @ApiModelProperty(StackModelDescription.ENABLE_LOAD_BALANCER)
+    @Schema(description = StackModelDescription.ENABLE_LOAD_BALANCER)
     private boolean enableLoadBalancer;
 
-    @ApiModelProperty(StackModelDescription.JAVA_VERSION)
+    @Schema(description = StackModelDescription.JAVA_VERSION)
     private Integer javaVersion;
 
     private boolean enableMultiAz;
 
-    @ApiModelProperty("List of resources attached to the stack")
+    @Schema(description = "List of resources attached to the stack")
     private List<ResourceV4Response> resources;
 
     public Long getId() {

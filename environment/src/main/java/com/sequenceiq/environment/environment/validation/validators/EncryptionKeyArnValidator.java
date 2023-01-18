@@ -99,7 +99,7 @@ public class EncryptionKeyArnValidator {
                 Platform.platform(environmentDto.getCloudPlatform()), null);
 
         try {
-            CloudEncryptionKeys encryptionKeys =  retryService.testWith2SecDelayMax15Times(() -> cloudPlatformConnectors.get(cloudPlatformVariant).
+            CloudEncryptionKeys encryptionKeys = retryService.testWith2SecDelayMax15Times(() -> cloudPlatformConnectors.get(cloudPlatformVariant).
                     platformResources().encryptionKeys(extendedCloudCredential, region, Collections.emptyMap()));
             List<String> keyArns = encryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).collect(Collectors.toList());
             if (keyArns.stream().noneMatch(s -> s.equals(encryptionKeyArn))) {

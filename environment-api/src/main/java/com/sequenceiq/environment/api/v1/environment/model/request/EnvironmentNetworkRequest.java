@@ -7,9 +7,9 @@ import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
 import com.sequenceiq.environment.api.v1.environment.validator.ValidOutboundInternetTrafficNetworkRequest;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentNetworkV1Request")
+@Schema(name = "EnvironmentNetworkV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 // The yarn field was added because of Ycloud and Qaas runs where they are sending the yarn queue.

@@ -52,3 +52,4 @@ public class UpgradeRequestValidator implements ConstraintValidator<ValidUpgrade
                 || !StringUtils.isEmpty(request.getImageId()) && StringUtils.isEmpty(request.getRuntime()));
     }
 }
+

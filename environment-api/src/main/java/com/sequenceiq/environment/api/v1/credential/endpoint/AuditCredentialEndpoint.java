@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.api.v1.credential.endpoint;
 
-
 import static com.sequenceiq.environment.api.doc.credential.CredentialDescriptor.CREDENTIAL_DESCRIPTION;
 
 import javax.validation.Valid;
@@ -25,55 +24,62 @@ import com.sequenceiq.environment.api.v1.credential.model.request.EditCredential
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/credentials/audit")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/credentials/audit", description = CREDENTIAL_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/credentials/audit", description = CREDENTIAL_DESCRIPTION)
 public interface AuditCredentialEndpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
-            nickname = "listAuditCredentialsV1", httpMethod = "GET")
+    @Operation(summary = CredentialOpDescription.LIST, description = CredentialDescriptor.CREDENTIAL_NOTES,
+            operationId = "listAuditCredentialsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CredentialResponses list();
 
     @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON,
-            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getAuditCredentialByResourceCrnV1", httpMethod = "GET")
+    @Operation(summary = CredentialOpDescription.GET_BY_CRN,
+            description = CredentialDescriptor.CREDENTIAL_NOTES, operationId = "getAuditCredentialByResourceCrnV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CredentialResponse getByResourceCrn(@PathParam("crn") String credentialCrn);
 
     @GET
     @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON,
-            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getAuditCredentialByResourceNameV1", httpMethod = "GET")
+    @Operation(summary = CredentialOpDescription.GET_BY_NAME,
+            description = CredentialDescriptor.CREDENTIAL_NOTES, operationId = "getAuditCredentialByResourceNameV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CredentialResponse getByResourceName(@PathParam("name") String credentialName, @AccountId @QueryParam("accountId") String accountId);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
-            nickname = "createAuditCredentialV1", httpMethod = "POST")
+    @Operation(summary = CredentialOpDescription.CREATE, description = CredentialDescriptor.CREDENTIAL_NOTES,
+            operationId = "createAuditCredentialV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CredentialResponse post(@Valid CredentialRequest request);
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.PUT, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
-            nickname = "putAuditCredentialV1", httpMethod = "PUT")
+    @Operation(summary = CredentialOpDescription.PUT, description = CredentialDescriptor.CREDENTIAL_NOTES,
+            operationId = "putAuditCredentialV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CredentialResponse put(@Valid EditCredentialRequest credentialRequest);
 
     @GET
     @Path("prerequisites/{cloudPlatform}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.GET_PREREQUISTIES_BY_CLOUD_PROVIDER, produces = MediaType.APPLICATION_JSON,
-            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getAuditPrerequisitesForCloudPlatform", httpMethod = "GET")
+    @Operation(summary = CredentialOpDescription.GET_PREREQUISTIES_BY_CLOUD_PROVIDER,
+            description = CredentialDescriptor.CREDENTIAL_NOTES, operationId = "getAuditPrerequisitesForCloudPlatform",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(@PathParam("cloudPlatform") String platform,
         @QueryParam("govCloud") boolean govCloud,
         @QueryParam("deploymentAddress") String deploymentAddress);
@@ -81,14 +87,16 @@ public interface AuditCredentialEndpoint {
     @DELETE
     @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON,
-            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "deleteAuditCredentialByNameV1", httpMethod = "DELETE")
+    @Operation(summary = CredentialOpDescription.DELETE_BY_NAME,
+            description = CredentialDescriptor.CREDENTIAL_NOTES, operationId = "deleteAuditCredentialByNameV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CredentialResponse deleteByName(@PathParam("name") String name);
 
     @DELETE
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
-            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "deleteAuditCredentialByResourceCrnV1", httpMethod = "DELETE")
+    @Operation(summary = CredentialOpDescription.DELETE_BY_CRN,
+            description = CredentialDescriptor.CREDENTIAL_NOTES, operationId = "deleteAuditCredentialByResourceCrnV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CredentialResponse deleteByResourceCrn(@PathParam("crn") String crn);
 }

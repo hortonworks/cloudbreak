@@ -6,11 +6,11 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class GcpLoadBalancerResponse implements Serializable {
 
-    @ApiModelProperty(StackModelDescription.GCP_LOAD_BALANCER_NAME)
+    @Schema(description = StackModelDescription.GCP_LOAD_BALANCER_NAME)
     @NotNull
     private String name;
 

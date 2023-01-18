@@ -2,9 +2,9 @@ package com.sequenceiq.common.api.telemetry.response;
 
 import com.sequenceiq.common.api.telemetry.base.MonitoringBase;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "MonitoringResponse")
+@Schema(name = "MonitoringResponse")
 public class MonitoringResponse extends MonitoringBase {
 
     @Override

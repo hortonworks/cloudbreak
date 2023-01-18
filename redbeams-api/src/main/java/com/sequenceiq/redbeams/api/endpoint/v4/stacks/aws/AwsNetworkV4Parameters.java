@@ -12,15 +12,14 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.AwsNetworkModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AwsNetworkV4Parameters extends MappableBase {
 
-    @ApiModelProperty(AwsNetworkModelDescriptions.SUBNET_ID)
+    @Schema(description = AwsNetworkModelDescriptions.SUBNET_ID)
     private String subnetId;
 
     public String getSubnetId() {
@@ -40,7 +39,7 @@ public class AwsNetworkV4Parameters extends MappableBase {
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AWS;
     }

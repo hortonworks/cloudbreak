@@ -13,7 +13,7 @@ jar {
 dependencies {
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  implementation group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
+  implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2',                 version: swaggerCoreVersion
   implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
 
   implementation group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.10'

@@ -49,7 +49,7 @@ class FreeIpaChecksTest {
 
     @Test
     void checkGroupNotUnmanagedThrows() {
-        String errMessage =  "group unmanaged";
+        String errMessage = "group unmanaged";
         for (String group : FreeIpaChecks.IPA_UNMANAGED_GROUPS) {
             Exception e = assertThrows(FreeIpaClientException.class, () ->
                 FreeIpaChecks.checkGroupNotUnmanaged(group, () -> errMessage)

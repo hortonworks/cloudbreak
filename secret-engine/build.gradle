@@ -20,7 +20,7 @@ dependencies {
   implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'
   implementation group: 'javax.inject', name: 'javax.inject', version: '1'
   implementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
-  implementation group: 'io.swagger', name: 'swagger-annotations', version: swaggerVersion
+  implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: swaggerCoreVersion
   implementation group: 'com.google.code.gson', name: 'gson', version: gsonVersion
   implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
   implementation group: 'net.jcip', name: 'jcip-annotations', version: '1.0'

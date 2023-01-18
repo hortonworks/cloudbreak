@@ -16,36 +16,39 @@ import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.AuditOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v4/{workspaceId}/audits")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/{workspaceId}/audits", description = ControllerDescription.AUDIT_V4_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/{workspaceId}/audits", description = ControllerDescription.AUDIT_V4_DESCRIPTION)
 public interface AuditEventV4Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.AUDIT_EVENTS_NOTES,
-            nickname = "getAuditEventsInWorkspace")
+    @Operation(summary = AuditOpDescription.LIST_IN_WORKSPACE, description = Notes.AUDIT_EVENTS_NOTES,
+            operationId = "getAuditEventsInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AuditEventV4Responses getAuditEvents(@PathParam("workspaceId") Long workspaceId, @QueryParam("resourceType") String resourceType,
             @QueryParam("resourceId") Long resourceId, @QueryParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("zip")
     @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
-    @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE_ZIP, notes = Notes.AUDIT_EVENTS_NOTES,
-            nickname = "getAuditEventsZipInWorkspace")
+    @Operation(summary = AuditOpDescription.LIST_IN_WORKSPACE_ZIP, description = Notes.AUDIT_EVENTS_NOTES,
+            operationId = "getAuditEventsZipInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Response getAuditEventsZip(@PathParam("workspaceId") Long workspaceId, @QueryParam("resourceType") String resourceType,
             @QueryParam("resourceId") Long resourceId, @QueryParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("{auditId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = AuditOpDescription.GET_BY_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.AUDIT_EVENTS_NOTES,
-            nickname = "getAuditEventByWorkspace")
+    @Operation(summary = AuditOpDescription.GET_BY_WORKSPACE, description = Notes.AUDIT_EVENTS_NOTES,
+            operationId = "getAuditEventByWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AuditEventV4Response getAuditEventById(@PathParam("workspaceId") Long workspaceId, @PathParam("auditId") Long auditId);
 }

@@ -13,19 +13,21 @@ import com.sequenceiq.cloudbreak.common.co2.RealTimeCO2Response;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/sdx/carbon_dioxide")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/sdx/carbon_dioxide", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/sdx/carbon_dioxide")
 public interface SdxCO2Endpoint {
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "CO2 cost of SDX clusters", produces = MediaType.APPLICATION_JSON, nickname = "listSdxCO2")
+    @Operation(summary = "CO2 cost of SDX clusters", operationId = "listSdxCO2",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RealTimeCO2Response list(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) List<String> sdxCrns);
 }

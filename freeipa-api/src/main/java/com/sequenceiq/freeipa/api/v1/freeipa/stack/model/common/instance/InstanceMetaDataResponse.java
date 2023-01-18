@@ -8,48 +8,47 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.InstanceMetaDataModelDescription;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsResponse;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("InstanceMetaDataV1Response")
+@Schema(name = "InstanceMetaDataV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class InstanceMetaDataResponse {
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.PRIVATE_IP)
+    @Schema(description = InstanceMetaDataModelDescription.PRIVATE_IP)
     private String privateIp;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.PUBLIC_IP)
+    @Schema(description = InstanceMetaDataModelDescription.PUBLIC_IP)
     private String publicIp;
 
-    @ApiModelProperty
+    @Schema
     private Integer sshPort;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.INSTANCE_ID)
+    @Schema(description = InstanceMetaDataModelDescription.INSTANCE_ID)
     private String instanceId;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.DISCOVERY_FQDN)
+    @Schema(description = InstanceMetaDataModelDescription.DISCOVERY_FQDN)
     private String discoveryFQDN;
 
-    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
 
-    @ApiModelProperty(InstanceGroupModelDescription.STATUS)
+    @Schema(description = InstanceGroupModelDescription.STATUS)
     private InstanceStatus instanceStatus;
 
-    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_TYPE)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_TYPE)
     private InstanceMetadataType instanceType;
 
-    @ApiModelProperty(HostMetadataModelDescription.STATE)
+    @Schema(description = HostMetadataModelDescription.STATE)
     private String state;
 
-    @ApiModelProperty
+    @Schema
     private InstanceLifeCycle lifeCycle;
 
-    @ApiModelProperty(InstanceGroupModelDescription.SUBNET_ID)
+    @Schema(description = InstanceGroupModelDescription.SUBNET_ID)
     private String subnetId;
 
-    @ApiModelProperty(InstanceGroupModelDescription.AVAILABILITY_ZONE)
+    @Schema(description = InstanceGroupModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
 
     private ImageSettingsResponse image;

@@ -16,20 +16,21 @@ import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.FileSystemOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/v4/{workspaceId}/file_systems")
-@Api(value = "/v4/{workspaceId}/file_systems", description = ControllerDescription.FILESYSTEMS_V4_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/{workspaceId}/file_systems", description = ControllerDescription.FILESYSTEMS_V4_DESCRIPTION)
 public interface FileSystemV4Endpoint {
 
     @GET
     @Path("parameters")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FileSystemOpDescription.FILE_SYSTEM_PARAMETERS, produces = MediaType.APPLICATION_JSON, nickname = "getFileSystemParameters")
+    @Operation(summary = FileSystemOpDescription.FILE_SYSTEM_PARAMETERS, operationId = "getFileSystemParameters",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FileSystemParameterV4Responses getFileSystemParameters(
             @PathParam("workspaceId") Long workspaceId,
             @NotNull @QueryParam("blueprintName") String blueprintName,
@@ -43,8 +44,9 @@ public interface FileSystemV4Endpoint {
     @GET
     @Path("parameters_internal")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FileSystemOpDescription.FILE_SYSTEM_PARAMETERS_INTERNAL, produces = MediaType.APPLICATION_JSON,
-            nickname = "getFileSystemParametersInternal")
+    @Operation(summary = FileSystemOpDescription.FILE_SYSTEM_PARAMETERS_INTERNAL,
+            operationId = "getFileSystemParametersInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FileSystemParameterV4Responses getFileSystemParametersInternal(
             @PathParam("workspaceId") Long workspaceId,
             @NotNull @QueryParam("blueprintName") String blueprintName,

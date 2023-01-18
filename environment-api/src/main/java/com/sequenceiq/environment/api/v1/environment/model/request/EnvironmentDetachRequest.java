@@ -2,9 +2,9 @@ package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentDetachV1Request")
+@Schema(name = "EnvironmentDetachV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentDetachRequest extends EnvironmentBaseRequest {
     @Override

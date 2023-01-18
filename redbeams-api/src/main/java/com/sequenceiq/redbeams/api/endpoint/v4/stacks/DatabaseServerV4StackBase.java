@@ -12,43 +12,43 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.gcp.GcpDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescriptions;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class DatabaseServerV4StackBase extends ProviderParametersBase {
 
-    @ApiModelProperty(DatabaseServerModelDescriptions.INSTANCE_TYPE)
+    @Schema(description = DatabaseServerModelDescriptions.INSTANCE_TYPE)
     private String instanceType;
 
     @ValidDatabaseVendor
-    @ApiModelProperty(DatabaseServerModelDescriptions.DATABASE_VENDOR)
+    @Schema(description = DatabaseServerModelDescriptions.DATABASE_VENDOR)
     private String databaseVendor;
 
-    @ApiModelProperty(DatabaseServerModelDescriptions.CONNECTION_DRIVER)
+    @Schema(description = DatabaseServerModelDescriptions.CONNECTION_DRIVER)
     private String connectionDriver;
 
-    @ApiModelProperty(DatabaseServerModelDescriptions.STORAGE_SIZE)
+    @Schema(description = DatabaseServerModelDescriptions.STORAGE_SIZE)
     private Long storageSize;
 
-    @ApiModelProperty(DatabaseServerModelDescriptions.ROOT_USER_NAME)
+    @Schema(description = DatabaseServerModelDescriptions.ROOT_USER_NAME)
     private String rootUserName;
 
-    @ApiModelProperty(DatabaseServerModelDescriptions.ROOT_USER_PASSWORD)
+    @Schema(description = DatabaseServerModelDescriptions.ROOT_USER_PASSWORD)
     private String rootUserPassword;
 
     @Min(value = 1, message = "Port must be between 1 and 65535")
     @Max(value = 65535, message = "Port must be between 1 and 65535")
-    @ApiModelProperty(DatabaseServerModelDescriptions.PORT)
+    @Schema(description = DatabaseServerModelDescriptions.PORT)
     private Integer port;
 
-    @ApiModelProperty(DatabaseServerModelDescriptions.AWS_PARAMETERS)
+    @Schema(description = DatabaseServerModelDescriptions.AWS_PARAMETERS)
     private AwsDatabaseServerV4Parameters aws;
 
     @Valid
-    @ApiModelProperty(DatabaseServerModelDescriptions.AZURE_PARAMETERS)
+    @Schema(description = DatabaseServerModelDescriptions.AZURE_PARAMETERS)
     private AzureDatabaseServerV4Parameters azure;
 
     @Valid
-    @ApiModelProperty(DatabaseServerModelDescriptions.GCP_PARAMETERS)
+    @Schema(description = DatabaseServerModelDescriptions.GCP_PARAMETERS)
     private GcpDatabaseServerV4Parameters gcp;
 
     public String getInstanceType() {

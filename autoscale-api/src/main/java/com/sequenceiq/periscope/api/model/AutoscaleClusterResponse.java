@@ -4,25 +4,24 @@ import java.util.List;
 
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class AutoscaleClusterResponse extends ClusterBaseJson {
 
-    @ApiModelProperty(ClusterJsonsProperties.STATE)
+    @Schema(description = ClusterJsonsProperties.STATE)
     private String state;
 
-    @ApiModelProperty(ClusterJsonsProperties.AUTOSCALING_ENABLED)
+    @Schema(description = ClusterJsonsProperties.AUTOSCALING_ENABLED)
     private boolean autoscalingEnabled;
 
-    @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
+    @Schema(description = ClusterJsonsProperties.TIME_ALERTS)
     private List<TimeAlertResponse> timeAlerts;
 
-    @ApiModelProperty(ClusterJsonsProperties.LOAD_ALERTS)
+    @Schema(description = ClusterJsonsProperties.LOAD_ALERTS)
     private List<LoadAlertResponse> loadAlerts;
 
-    @ApiModelProperty(ClusterJsonsProperties.SCALING_CONFIGURATION)
+    @Schema(description = ClusterJsonsProperties.SCALING_CONFIGURATION)
     private ScalingConfigurationRequest scalingConfiguration;
 
     public AutoscaleClusterResponse() {

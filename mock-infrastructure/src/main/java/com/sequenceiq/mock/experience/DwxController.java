@@ -36,7 +36,7 @@ public class DwxController {
     @Inject
     private ExperienceStoreService experienceStoreService;
 
-    @GetMapping(value = "/{crn}", produces = MediaType.APPLICATION_JSON)
+    @GetMapping(value = "/{crn}")
     public CpInternalEnvironmentResponse listCluster(@PathVariable("crn") String env) throws Exception {
         experienceStoreService.createIfNotExist(env);
         if (createDummyCluster) {
@@ -54,7 +54,7 @@ public class DwxController {
         return response;
     }
 
-    @DeleteMapping(value = "/{crn}", produces = MediaType.APPLICATION_JSON)
+    @DeleteMapping(value = "/{crn}")
     public DeleteCommonExperienceWorkspaceResponse deleteCluster(@PathVariable("crn") String env) throws Exception {
         experienceStoreService.deleteById(env);
         DeleteCommonExperienceWorkspaceResponse deleteCommonExperienceWorkspaceResponse = new DeleteCommonExperienceWorkspaceResponse();
@@ -65,18 +65,18 @@ public class DwxController {
     }
 
     //create new
-    @PostMapping(value = "/mocksupport/{crn}", produces = MediaType.APPLICATION_JSON)
+    @PostMapping(value = "/mocksupport/{crn}")
     public CpInternalEnvironmentResponse addExperience(@PathVariable("crn") String env) throws Exception {
         experienceStoreService.addExperienceTo(env);
         return experienceStoreService.get(env);
     }
 
-    @PutMapping(value = "/mocksupport/experience/{id}", produces = MediaType.APPLICATION_JSON)
+    @PutMapping(value = "/mocksupport/experience/{id}")
     public CpInternalCluster changeExperience(@PathVariable("id") String id, @RequestBody CpInternalCluster cluster) throws Exception {
         return experienceStoreService.put(id, cluster);
     }
 
-    @PostMapping(value = "/mocksupport/experience/{id}", produces = MediaType.APPLICATION_JSON, consumes = MediaType.TEXT_PLAIN)
+    @PostMapping(value = "/mocksupport/experience/{id}", consumes = MediaType.TEXT_PLAIN)
     public CpInternalCluster addExperience(@PathVariable("id") String id, @RequestBody String status) throws Exception {
         return experienceStoreService.changeStatusById(id, status);
     }

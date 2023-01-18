@@ -6,16 +6,15 @@ import javax.validation.constraints.NotNull;
 import com.sequenceiq.periscope.doc.ApiDescription.BaseAlertJsonProperties;
 import com.sequenceiq.periscope.doc.ApiDescription.LoadAlertJsonProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class LoadAlertRequest extends AbstractAlertJson {
 
-    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION)
+    @Schema(description = LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION)
     private @Valid @NotNull LoadAlertConfigurationRequest loadAlertConfiguration;
 
-    @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
+    @Schema(description = BaseAlertJsonProperties.SCALINGPOLICYID)
     private @Valid @NotNull ScalingPolicyRequest scalingPolicy;
 
     public ScalingPolicyRequest getScalingPolicy() {

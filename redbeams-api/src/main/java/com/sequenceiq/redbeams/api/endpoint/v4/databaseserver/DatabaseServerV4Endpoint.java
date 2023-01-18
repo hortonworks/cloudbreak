@@ -45,199 +45,228 @@ import com.sequenceiq.redbeams.doc.OperationDescriptions;
 import com.sequenceiq.redbeams.doc.OperationDescriptions.DatabaseServerOpDescription;
 import com.sequenceiq.redbeams.doc.ParamDescriptions.DatabaseServerParamDescriptions;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
 @RetryAndMetrics
 @Path("/v4/databaseservers")
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = {"database servers"},
-        protocols = "http,https",
-        authorizations = {@Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY)},
-        produces = MediaType.APPLICATION_JSON)
+@Tag(name = "database servers")
+@SecurityScheme(type = SecuritySchemeType.APIKEY, name = RedbeamsApi.CRN_HEADER_API_KEY, in = SecuritySchemeIn.HEADER, paramName = "x-cdp-actor-crn")
 public interface DatabaseServerV4Endpoint {
 
     @GET
     @Path("")
-    @ApiOperation(value = DatabaseServerOpDescription.LIST, notes = DatabaseServerNotes.LIST,
-            nickname = "listDatabaseServers")
-    DatabaseServerV4Responses list(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
+    @Operation(summary = DatabaseServerOpDescription.LIST, description = DatabaseServerNotes.LIST,
+            operationId = "listDatabaseServers",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DatabaseServerV4Responses list(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+            @NotNull @Parameter(description = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
             @QueryParam("environmentCrn") String environmentCrn
     );
 
     @GET
     @Path("{crn}")
-    @ApiOperation(value = DatabaseServerOpDescription.GET_BY_CRN, notes = DatabaseServerNotes.GET_BY_CRN,
-            nickname = "getDatabaseServerByCrn")
+    @Operation(summary = DatabaseServerOpDescription.GET_BY_CRN, description = DatabaseServerNotes.GET_BY_CRN,
+            operationId = "getDatabaseServerByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerV4Response getByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn
     );
 
     @GET
     @Path("name/{name}")
-    @ApiOperation(value = DatabaseServerOpDescription.GET_BY_NAME, notes = DatabaseServerNotes.GET_BY_NAME,
-            nickname = "getDatabaseServerByName")
-    DatabaseServerV4Response getByName(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
+    @Operation(summary = DatabaseServerOpDescription.GET_BY_NAME, description = DatabaseServerNotes.GET_BY_NAME,
+            operationId = "getDatabaseServerByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DatabaseServerV4Response getByName(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+            @NotNull @Parameter(description = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
             @QueryParam("environmentCrn") String environmentCrn,
-            @ApiParam(DatabaseServerParamDescriptions.NAME) @PathParam("name") String name
+            @Parameter(description = DatabaseServerParamDescriptions.NAME) @PathParam("name") String name
     );
 
     @GET
     @Path("clusterCrn/{clusterCrn}")
-    @ApiOperation(value = DatabaseServerOpDescription.GET_BY_CLUSTER_CRN,
-            notes = DatabaseServerNotes.GET_BY_CLUSTER_CRN,
-            nickname = "getDatabaseServerByClusterCrn")
-    DatabaseServerV4Response getByClusterCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
+    @Operation(summary = DatabaseServerOpDescription.GET_BY_CLUSTER_CRN,
+            description = DatabaseServerNotes.GET_BY_CLUSTER_CRN,
+            operationId = "getDatabaseServerByClusterCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DatabaseServerV4Response getByClusterCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+            @NotNull @Parameter(description = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
             @QueryParam("environmentCrn") String environmentCrn,
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT, effect = DENY)
-            @NotNull @ApiParam(value = DatabaseServerParamDescriptions.CLUSTER_CRN, required = true) @PathParam("clusterCrn") String clusterCrn
+            @NotNull @Parameter(description = DatabaseServerParamDescriptions.CLUSTER_CRN, required = true) @PathParam("clusterCrn") String clusterCrn
     );
 
     @POST
     @Path("managed")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.CREATE, notes = DatabaseServerNotes.CREATE,
-            consumes = MediaType.APPLICATION_JSON, nickname = "createDatabaseServer")
+    @Operation(summary = DatabaseServerOpDescription.CREATE, description = DatabaseServerNotes.CREATE,
+            operationId = "createDatabaseServer",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerStatusV4Response create(
-            @Valid @ApiParam(DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request
+            @Valid @Parameter(description = DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request
     );
 
     @POST
     @Path("updateclustercrn")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.UPDATE_CLUSTER_CRN,  notes = DatabaseServerNotes.UPDATE_CLUSTER_CRN,
-            consumes = MediaType.APPLICATION_JSON, nickname = "updateClusterCrn")
+    @Operation(summary = DatabaseServerOpDescription.UPDATE_CLUSTER_CRN,  description = DatabaseServerNotes.UPDATE_CLUSTER_CRN,
+            operationId = "updateClusterCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void updateClusterCrn(@QueryParam("environmentCrn") String environmentCrn, @QueryParam("currentClusterCrn") String currentClusterCrn,
             @QueryParam("newClusterCrn") String newClusterCrn, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
     @Path("internal/managed")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.CREATE_INTERNAL, notes = DatabaseServerNotes.CREATE,
-            consumes = MediaType.APPLICATION_JSON, nickname = "createDatabaseServerInternal")
+    @Operation(summary = DatabaseServerOpDescription.CREATE_INTERNAL, description = DatabaseServerNotes.CREATE,
+            operationId = "createDatabaseServerInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerStatusV4Response createInternal(
-            @Valid @ApiParam(DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request,
+            @Valid @Parameter(description = DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn
     );
 
     @PUT
     @Path("{crn}/release")
-    @ApiOperation(value = DatabaseServerOpDescription.RELEASE, notes = DatabaseServerNotes.RELEASE,
-            nickname = "releaseManagedDatabaseServer")
+    @Operation(summary = DatabaseServerOpDescription.RELEASE, description = DatabaseServerNotes.RELEASE,
+            operationId = "releaseManagedDatabaseServer",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerV4Response release(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn
     );
 
     @POST
     @Path("register")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.REGISTER, notes = DatabaseServerNotes.REGISTER,
-            consumes = MediaType.APPLICATION_JSON, nickname = "registerDatabaseServer")
+    @Operation(summary = DatabaseServerOpDescription.REGISTER, description = DatabaseServerNotes.REGISTER,
+            operationId = "registerDatabaseServer",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerV4Response register(
-            @Valid @ApiParam(DatabaseServerParamDescriptions.DATABASE_SERVER_REQUEST) DatabaseServerV4Request request
+            @Valid @Parameter(description = DatabaseServerParamDescriptions.DATABASE_SERVER_REQUEST) DatabaseServerV4Request request
     );
 
     @DELETE
     @Path("{crn}")
-    @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_CRN, notes = DatabaseServerNotes.DELETE_BY_CRN,
-            nickname = "deleteDatabaseServerByCrn")
+    @Operation(summary = DatabaseServerOpDescription.DELETE_BY_CRN, description = DatabaseServerNotes.DELETE_BY_CRN,
+            operationId = "deleteDatabaseServerByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerV4Response deleteByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn,
             @QueryParam("force") @DefaultValue("false") boolean force
     );
 
     @DELETE
     @Path("/name/{name}")
-    @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_NAME, notes = DatabaseServerNotes.DELETE_BY_NAME,
-            nickname = "deleteDatabaseServerByName")
-    DatabaseServerV4Response deleteByName(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
+    @Operation(summary = DatabaseServerOpDescription.DELETE_BY_NAME, description = DatabaseServerNotes.DELETE_BY_NAME,
+            operationId = "deleteDatabaseServerByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DatabaseServerV4Response deleteByName(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+    @NotNull @Parameter(description = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
             @QueryParam("environmentCrn") String environmentCrn,
-            @ApiParam(DatabaseServerParamDescriptions.NAME) @PathParam("name") String name,
+            @Parameter(description = DatabaseServerParamDescriptions.NAME) @PathParam("name") String name,
             @QueryParam("force") @DefaultValue("false") boolean force
     );
 
     @DELETE
     @Path("")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.DELETE_MULTIPLE_BY_CRN, notes = DatabaseServerNotes.DELETE_MULTIPLE_BY_CRN,
-            consumes = MediaType.APPLICATION_JSON, nickname = "deleteMultipleDatabaseServersByCrn")
+    @Operation(summary = DatabaseServerOpDescription.DELETE_MULTIPLE_BY_CRN, description = DatabaseServerNotes.DELETE_MULTIPLE_BY_CRN,
+            operationId = "deleteMultipleDatabaseServersByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerV4Responses deleteMultiple(
-            @ApiParam(DatabaseServerParamDescriptions.CRNS) @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) Set<String> crns,
+            @Parameter(description = DatabaseServerParamDescriptions.CRNS) @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) Set<String> crns,
             @QueryParam("force") @DefaultValue("false") boolean force
     );
 
     @POST
     @Path("test")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.TEST_CONNECTION, notes = DatabaseServerNotes.TEST_CONNECTION,
-            consumes = MediaType.APPLICATION_JSON, nickname = "testDatabaseServerConnection")
+    @Operation(summary = DatabaseServerOpDescription.TEST_CONNECTION, description = DatabaseServerNotes.TEST_CONNECTION,
+            operationId = "testDatabaseServerConnection",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerTestV4Response test(
-            @Valid @ApiParam(DatabaseServerParamDescriptions.DATABASE_SERVER_TEST_REQUEST) DatabaseServerTestV4Request request
+            @Valid @Parameter(description = DatabaseServerParamDescriptions.DATABASE_SERVER_TEST_REQUEST) DatabaseServerTestV4Request request
     );
 
     @POST
     @Path("createDatabase")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.CREATE_DATABASE, notes = DatabaseServerNotes.CREATE_DATABASE,
-            consumes = MediaType.APPLICATION_JSON, nickname = "createDatabaseOnServer")
+    @Operation(summary = DatabaseServerOpDescription.CREATE_DATABASE, description = DatabaseServerNotes.CREATE_DATABASE,
+            operationId = "createDatabaseOnServer",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CreateDatabaseV4Response createDatabase(
-            @Valid @ApiParam(DatabaseServerParamDescriptions.CREATE_DATABASE_REQUEST) CreateDatabaseV4Request request
+            @Valid @Parameter(description = DatabaseServerParamDescriptions.CREATE_DATABASE_REQUEST) CreateDatabaseV4Request request
     );
 
     @PUT
     @Path("{crn}/start")
-    @ApiOperation(value = DatabaseServerOpDescription.START, notes = DatabaseServerNotes.START,
-            nickname = "startDatabaseServer")
+    @Operation(summary = DatabaseServerOpDescription.START, description = DatabaseServerNotes.START,
+            operationId = "startDatabaseServer",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void start(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn
     );
 
     @PUT
     @Path("{crn}/stop")
-    @ApiOperation(value = DatabaseServerOpDescription.STOP, notes = DatabaseServerNotes.STOP,
-            nickname = "stopDatabaseServer")
+    @Operation(summary = DatabaseServerOpDescription.STOP, description = DatabaseServerNotes.STOP,
+            operationId = "stopDatabaseServer",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void stop(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn
     );
 
     @PUT
     @Path("{crn}/upgrade")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.UPGRADE, notes = DatabaseServerNotes.UPGRADE,
-            consumes = MediaType.APPLICATION_JSON, nickname = "upgradeDatabaseServer")
+    @Operation(summary = DatabaseServerOpDescription.UPGRADE, description = DatabaseServerNotes.UPGRADE,
+            operationId = "upgradeDatabaseServer",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpgradeDatabaseServerV4Response upgrade(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
-            @Valid @NotNull @ApiParam(DatabaseServerParamDescriptions.UPGRADE_DATABASE_SERVER_REQUEST) UpgradeDatabaseServerV4Request request);
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn,
+            @Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.UPGRADE_DATABASE_SERVER_REQUEST) UpgradeDatabaseServerV4Request request);
 
     @GET
     @Path("internal/used_subnets")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.DatabaseOpDescription.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN, produces = MediaType.APPLICATION_JSON,
-            notes = Notes.DatabaseNotes.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN, nickname = "getUsedSubnetsByEnvironment")
+    @Operation(summary = OperationDescriptions.DatabaseOpDescription.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN,
+            description = Notes.DatabaseNotes.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN, operationId = "getUsedSubnetsByEnvironment",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
 
     @PUT
     @Path("{crn}/validate_upgrade")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.VALIDATE_UPGRADE, notes = DatabaseServerNotes.VALIDATE_UPGRADE,
-            consumes = MediaType.APPLICATION_JSON, nickname = "validateUpgradeDatabaseServer")
+    @Operation(summary = DatabaseServerOpDescription.VALIDATE_UPGRADE, description = DatabaseServerNotes.VALIDATE_UPGRADE,
+            operationId = "validateUpgradeDatabaseServer",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpgradeDatabaseServerV4Response validateUpgrade(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
-            @Valid @NotNull @ApiParam(DatabaseServerParamDescriptions.VALIDATE_UPGRADE_DATABASE_SERVER_REQUEST) UpgradeDatabaseServerV4Request request);
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn,
+            @Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.VALIDATE_UPGRADE_DATABASE_SERVER_REQUEST)
+            UpgradeDatabaseServerV4Request request);
 
     @PUT
     @Path("internal/rotate_secret")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.ROTATE, notes = DatabaseServerNotes.ROTATE,
-            consumes = MediaType.APPLICATION_JSON, nickname = "rotateSecrets", hidden = true)
-    FlowIdentifier rotateSecret(@Valid @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ROTATE_DATABASE_SERVER_SECRETS_REQUEST, hidden = true)
+    @Operation(summary = DatabaseServerOpDescription.ROTATE, description = DatabaseServerNotes.ROTATE,
+            operationId = "rotateSecrets",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true), hidden = true)
+    FlowIdentifier rotateSecret(@Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.ROTATE_DATABASE_SERVER_SECRETS_REQUEST, hidden = true)
             RotateDatabaseServerSecretV4Request request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

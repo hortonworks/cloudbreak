@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidJdbcConnectionUrl;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class DatabaseV4Base implements Serializable {
@@ -21,16 +21,16 @@ public abstract class DatabaseV4Base implements Serializable {
     @Size(max = 100, min = 5, message = "The length of the database's name must be between 5 to 100, inclusive")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The database's name may only contain lowercase characters, digits, and hyphens, and must start with an alphanumeric character")
-    @ApiModelProperty(value = Database.NAME, required = true)
+    @Schema(description = Database.NAME, required = true)
     private String name;
 
     @Size(max = 1000000)
-    @ApiModelProperty(Database.DESCRIPTION)
+    @Schema(description = Database.DESCRIPTION)
     private String description;
 
     @NotNull
     @ValidJdbcConnectionUrl
-    @ApiModelProperty(value = Database.CONNECTION_URL, required = true)
+    @Schema(description = Database.CONNECTION_URL, required = true)
     private String connectionURL;
 
     @NotNull
@@ -38,15 +38,15 @@ public abstract class DatabaseV4Base implements Serializable {
     @Pattern(regexp = "(^[a-zA-Z_][-a-zA-Z0-9_]*[a-zA-Z0-9_]$)",
             message = "The database's type may only contain alphanumeric characters, underscores, and hyphens, and must "
                 + "start with an alphanumeric character or underscore")
-    @ApiModelProperty(value = Database.TYPE, required = true)
+    @Schema(description = Database.TYPE, required = true)
     private String type;
 
-    @ApiModelProperty(value = Database.CONNECTION_DRIVER)
+    @Schema(description = Database.CONNECTION_DRIVER)
     private String connectionDriver;
 
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotNull
-    @ApiModelProperty(Database.ENVIRONMENT_CRN)
+    @Schema(description = Database.ENVIRONMENT_CRN)
     private String environmentCrn;
 
     public String getConnectionURL() {

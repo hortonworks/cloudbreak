@@ -19,61 +19,60 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentEditV1Request")
+@Schema(name = "EnvironmentEditV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentEditRequest implements Serializable {
 
     @Size(max = 1000)
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(EnvironmentModelDescription.NETWORK)
+    @Schema(description = EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkRequest network;
 
-    @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
+    @Schema(description = EnvironmentModelDescription.AUTHENTICATION)
     private @Valid EnvironmentAuthenticationRequest authentication;
 
-    @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
+    @Schema(description = EnvironmentModelDescription.TELEMETRY)
     private TelemetryRequest telemetry;
 
-    @ApiModelProperty(EnvironmentModelDescription.BACKUP)
+    @Schema(description = EnvironmentModelDescription.BACKUP)
     private @Valid BackupRequest backup;
 
-    @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
+    @Schema(description = EnvironmentModelDescription.SECURITY_ACCESS)
     private @Valid SecurityAccessRequest securityAccess;
 
-    @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
+    @Schema(description = EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource;
 
-    @ApiModelProperty(EnvironmentModelDescription.CLOUD_STORAGE_VALIDATION)
+    @Schema(description = EnvironmentModelDescription.CLOUD_STORAGE_VALIDATION)
     private CloudStorageValidation cloudStorageValidation;
 
-    @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
+    @Schema(description = EnvironmentModelDescription.ADMIN_GROUP_NAME)
     private String adminGroupName;
 
     private ProxyRequest proxy;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AZURE_PARAMETERS)
     private AzureEnvironmentParameters azure;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.GCP_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.GCP_PARAMETERS)
     private GcpEnvironmentParameters gcp;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.TAGS)
+    @Schema(description = EnvironmentModelDescription.TAGS)
     private Map<String, String> tags = new HashMap<>();
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.DATA_SERVICES)
+    @Schema(description = EnvironmentModelDescription.DATA_SERVICES)
     private DataServicesRequest dataServices;
 
     public String getDescription() {

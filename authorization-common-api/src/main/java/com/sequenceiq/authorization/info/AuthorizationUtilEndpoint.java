@@ -15,34 +15,38 @@ import com.sequenceiq.authorization.info.model.CheckRightV4Response;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.util.UtilControllerDescription;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v4/utils")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/utils", description = UtilControllerDescription.UTIL_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/utils", description = UtilControllerDescription.UTIL_DESCRIPTION)
 public interface AuthorizationUtilEndpoint {
 
     @POST
     @Path("check_right")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checking rights from UI in account", produces = MediaType.APPLICATION_JSON, notes = "Check right from UI",
-            nickname = "checkRightInAccount")
+    @Operation(summary = "Checking rights from UI in account", description = "Check right from UI",
+            operationId = "checkRightInAccount",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CheckRightV4Response checkRightInAccount(CheckRightV4Request checkRightV4Request);
 
     @POST
     @Path("check_right_by_crn")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checking rights from UI by resource CRN", produces = MediaType.APPLICATION_JSON, notes = "Check right from UI",
-            nickname = "checkRightByCrn")
+    @Operation(summary = "Checking rights from UI by resource CRN", description = "Check right from UI",
+            operationId = "checkRightByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CheckResourceRightsV4Response checkRightByCrn(CheckResourceRightsV4Request checkRightByCrnV4Request);
 
     @POST
     @Path("check_right_on_resources")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checking right from Uluwatu by resource CRNs", produces = MediaType.APPLICATION_JSON, notes = "Check right from Uluwatu",
-            nickname = "checkRightOnResources")
+    @Operation(summary = "Checking right from Uluwatu by resource CRNs", description = "Check right from Uluwatu",
+            operationId = "checkRightOnResources",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CheckRightOnResourcesV4Response checkRightOnResources(CheckRightOnResourcesV4Request checkRightOnResourcesV4Request);
 
 }

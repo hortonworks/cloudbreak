@@ -154,7 +154,7 @@ public class GcpAttachedDiskResourceBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes1, InstanceStatus.CREATE_REQUESTED, params1,
                 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
-        CloudInstance cloudInstance =  new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1");
+        CloudInstance cloudInstance = new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1");
         group = new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork(), emptyMap());

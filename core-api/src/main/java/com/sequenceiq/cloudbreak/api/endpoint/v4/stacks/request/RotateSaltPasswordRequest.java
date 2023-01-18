@@ -7,14 +7,13 @@ import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RotateSaltPasswordRequest implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.ROTATE_SALT_PASSWORD_REASON)
+    @Schema(description = ModelDescriptions.ClusterModelDescription.ROTATE_SALT_PASSWORD_REASON)
     private RotateSaltPasswordReason reason;
 
     public RotateSaltPasswordRequest() {

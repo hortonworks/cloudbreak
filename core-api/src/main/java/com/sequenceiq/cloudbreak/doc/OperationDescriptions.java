@@ -98,7 +98,10 @@ public class OperationDescriptions {
         public static final String RE_REGISTER_CLUSTER_PROXY_CONFIG = "Re-registers the cluster proxy config for the cluster if needed.";
         public static final String GET_USED_SUBNETS_BY_ENVIRONMENT_CRN = "List the used subnets by the given Environment resource CRN";
         public static final String GET_DELETED_STACKS_SINCE_TS = "retrieve deleted stacks after given timestamp";
-
+        public static final String GET_CLUSTER_PROXY_CONFIGURATION = "Get Cluster Proxy configuration";
+        public static final String GET_LIMITS_CONFIGURATION = "Get limits configuration";
+        public static final String GET_RECOMMENDATION = "Get recommendation";
+        public static final String AUTHORIZE_FOR_AUTOSCALE = "Authorize for Autoscale";
     }
 
     public static class ClusterOpDescription {

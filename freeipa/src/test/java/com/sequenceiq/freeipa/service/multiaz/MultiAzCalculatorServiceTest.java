@@ -335,10 +335,10 @@ class MultiAzCalculatorServiceTest {
         deletedInstance.setInstanceStatus(InstanceStatus.TERMINATED);
         Set<InstanceMetaData> instances = new HashSet<>();
         instances.add(deletedInstance);
-        InstanceMetaData instanceMetaData0 =  createInstanceMetadata(null, "instance-0");
+        InstanceMetaData instanceMetaData0 = createInstanceMetadata(null, "instance-0");
         instanceMetaData0.setAvailabilityZone("1");
         instances.add(instanceMetaData0);
-        InstanceMetaData instanceMetaData1 =  createInstanceMetadata(null, "instance-0");
+        InstanceMetaData instanceMetaData1 = createInstanceMetadata(null, "instance-0");
         instanceMetaData1.setAvailabilityZone("2");
         instances.add(instanceMetaData1);
         instances.add(createInstanceMetadata(null, "instance-2"));

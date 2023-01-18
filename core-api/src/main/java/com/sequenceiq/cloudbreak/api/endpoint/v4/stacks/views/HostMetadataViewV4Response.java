@@ -8,21 +8,21 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.NAME;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HostMetadataViewV4Response implements JsonEntity {
 
-    @ApiModelProperty(value = NAME, required = true)
+    @Schema(description = NAME, required = true)
     private String name;
 
-    @ApiModelProperty(ID)
+    @Schema(description = ID)
     private Long id;
 
-    @ApiModelProperty(STATE)
+    @Schema(description = STATE)
     private String state;
 
-    @ApiModelProperty(STATUS_REASON)
+    @Schema(description = STATUS_REASON)
     private String statusReason;
 
     public String getName() {

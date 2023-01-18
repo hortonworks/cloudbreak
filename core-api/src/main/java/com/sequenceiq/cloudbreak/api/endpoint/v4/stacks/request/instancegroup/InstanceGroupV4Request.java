@@ -17,30 +17,29 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class InstanceGroupV4Request extends InstanceGroupV4Base {
 
     @Valid
     @NotNull
-    @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
+    @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV4Request template;
 
     @Valid
-    @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
+    @Schema(description = InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupV4Request securityGroup;
 
-    @ApiModelProperty(HostGroupModelDescription.RECIPE_NAMES)
+    @Schema(description = HostGroupModelDescription.RECIPE_NAMES)
     private Set<String> recipeNames = new HashSet<>();
 
-    @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
+    @Schema(description = HostGroupModelDescription.RECOVERY_MODE)
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
-    @ApiModelProperty(InstanceGroupModelDescription.NETWORK)
+    @Schema(description = InstanceGroupModelDescription.NETWORK)
     private InstanceGroupNetworkV4Request network;
 
     public InstanceTemplateV4Request getTemplate() {

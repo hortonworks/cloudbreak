@@ -16,34 +16,33 @@ import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class GatewayV4Request implements JsonEntity {
 
     @JsonIgnore
-    @ApiModelProperty(GatewayModelDescription.KNOX_PATH)
+    @Schema(description = GatewayModelDescription.KNOX_PATH)
     private String path;
 
-    @ApiModelProperty(GatewayModelDescription.GATEWAY_TOPOLOGIES)
+    @Schema(description = GatewayModelDescription.GATEWAY_TOPOLOGIES)
     private List<GatewayTopologyV4Request> topologies;
 
     @JsonIgnore
-    @ApiModelProperty(GatewayModelDescription.KNOX_SSO_PROVIDER)
+    @Schema(description = GatewayModelDescription.KNOX_SSO_PROVIDER)
     private String ssoProvider;
 
-    @ApiModelProperty(GatewayModelDescription.KNOX_SSO_CERT)
+    @Schema(description = GatewayModelDescription.KNOX_SSO_CERT)
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String tokenCert;
 
-    @ApiModelProperty(value = GatewayModelDescription.KNOX_GATEWAY_TYPE, allowableValues = "CENTRAL,INDIVIDUAL")
+    @Schema(description = GatewayModelDescription.KNOX_GATEWAY_TYPE)
     private GatewayType gatewayType;
 
-    @ApiModelProperty(value = GatewayModelDescription.KNOX_SSO_TYPE, allowableValues = "SSO_PROVIDER,SSO_PROVIDER_FROM_UMS,NONE,PAM")
+    @Schema(description = GatewayModelDescription.KNOX_SSO_TYPE)
     private SSOType ssoType;
 
     public String getPath() {

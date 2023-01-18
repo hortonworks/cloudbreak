@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.common.mappable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class ProviderParametersBase {
 
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private CloudPlatform cloudPlatform;
 
     public CloudPlatform getCloudPlatform() {

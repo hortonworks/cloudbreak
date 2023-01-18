@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.configuration;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -12,7 +13,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
@@ -23,6 +27,8 @@ import com.sequenceiq.redbeams.controller.v4.databaseserver.DatabaseServerV4Cont
 import com.sequenceiq.redbeams.controller.v4.operation.OperationV4Controller;
 import com.sequenceiq.redbeams.controller.v4.progress.ProgressV4Controller;
 import com.sequenceiq.redbeams.controller.v4.support.SupportController;
+
+import io.swagger.v3.oas.models.OpenAPI;
 
 @ApplicationPath(RedbeamsApi.API_ROOT_CONTEXT)
 @Configuration
@@ -36,20 +42,42 @@ public class EndpointConfig extends ResourceConfig {
             FlowController.class,
             FlowPublicController.class,
             AuthorizationInfoController.class,
-            SupportController.class
+            SupportController.class,
+            AuthorizationUtilEndpoint.class,
+            OpenApiController.class
     );
 
     @Value("${redbeams.structuredevent.rest.enabled:false}")
     private Boolean auditEnabled;
 
+    @Value("${info.app.version:unspecified}")
+    private String applicationVersion;
+
+    @Value("${server.servlet.context-path:}")
+    private String contextPath;
+
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
+
+    @Inject
+    private OpenApiProvider openApiProvider;
 
     @PostConstruct
     private void init() {
         registerFilters();
         registerEndpoints();
         registerExceptionMappers();
+        registerSwagger();
+    }
+
+    private void registerSwagger() {
+        OpenAPI openAPI = openApiProvider.getOpenAPI(
+                "Redbeams API",
+                "API for working with databases and database servers",
+                applicationVersion,
+                "https://localhost" + contextPath + RedbeamsApi.API_ROOT_CONTEXT
+        );
+        openApiProvider.createConfig(openAPI, CONTROLLERS.stream().map(Class::getName).collect(Collectors.toSet()));
     }
 
     private void registerExceptionMappers() {
@@ -62,10 +90,6 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         CONTROLLERS.forEach(this::register);
-
-        register(io.swagger.jaxrs.listing.ApiListingResource.class);
-        register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
     }
 
     private void registerFilters() {

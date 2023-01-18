@@ -7,15 +7,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.SecurityGroupModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class SecurityGroupV4StackRequest {
 
-    @ApiModelProperty(SecurityGroupModelDescriptions.SECURITY_GROUP_IDS)
+    @Schema(description = SecurityGroupModelDescriptions.SECURITY_GROUP_IDS)
     private Set<String> securityGroupIds;
 
     public Set<String> getSecurityGroupIds() {

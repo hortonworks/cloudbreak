@@ -19,27 +19,30 @@ import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeOptions
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/freeipa")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/freeipa", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/freeipa")
 public interface FreeIpaUpgradeV1Endpoint {
 
     @POST
     @Path("/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.UPGRADE_FREEIPA, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "upgradeFreeIpaV1")
+    @Operation(summary = FreeIpaOperationDescriptions.UPGRADE_FREEIPA, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "upgradeFreeIpaV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FreeIpaUpgradeResponse upgradeFreeIpa(@Valid FreeIpaUpgradeRequest request);
 
     @GET
     @Path("/upgrade/options")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.UPGRADE_OPTIONS, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "getFreeIpaUpgradeOptionsV1")
+    @Operation(summary = FreeIpaOperationDescriptions.UPGRADE_OPTIONS, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "getFreeIpaUpgradeOptionsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FreeIpaUpgradeOptions getFreeIpaUpgradeOptions(
             @QueryParam("environmentCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotEmpty String environmentCrn,
             @QueryParam("catalog") String catalog,

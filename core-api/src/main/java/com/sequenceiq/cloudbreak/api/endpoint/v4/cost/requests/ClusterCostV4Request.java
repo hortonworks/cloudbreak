@@ -6,9 +6,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.api.client.util.Lists;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "ClusterCostV4Request")
+@Schema(name = "ClusterCostV4Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClusterCostV4Request implements Serializable {
 

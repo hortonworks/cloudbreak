@@ -6,17 +6,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 import com.sequenceiq.common.api.type.EncryptionType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EncryptionParametersV1Base implements Serializable {
 
-    @ApiModelProperty(value = TemplateModelDescription.ENCRYPTION_TYPE, allowableValues = "DEFAULT,NONE,CUSTOM")
+    @Schema(description = TemplateModelDescription.ENCRYPTION_TYPE)
     private EncryptionType type;
 
-    @ApiModelProperty(TemplateModelDescription.ENCRYPTION_KEY)
+    @Schema(description = TemplateModelDescription.ENCRYPTION_KEY)
     private String key;
 
     public EncryptionType getType() {

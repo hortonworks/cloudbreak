@@ -97,7 +97,7 @@ class EncryptionKeyArnValidatorTest {
 
     @Test
     void testWithInvalidEncryptionKeyWithAwsListKeysCall() {
-        String invalidKey =  "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+        String invalidKey = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
         EnvironmentDto environmentDto = createEnvironmentDto(invalidKey);
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
         when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
@@ -120,7 +120,7 @@ class EncryptionKeyArnValidatorTest {
 
     @Test
     void testWithValidEncryptionKeyWithAwsListKeysCall() {
-        String validKey =  "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+        String validKey = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
         EnvironmentDto environmentDto = createEnvironmentDto(validKey);
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
         when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
@@ -135,7 +135,7 @@ class EncryptionKeyArnValidatorTest {
 
     @Test
     public void testWithValidEncryptionKeyAndAwsListKeysCallFailed() {
-        String validKey =  "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+        String validKey = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
         EnvironmentDto environmentDto = createEnvironmentDto(validKey);
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
         AwsServiceException amazonServiceException = AwsServiceException.builder()

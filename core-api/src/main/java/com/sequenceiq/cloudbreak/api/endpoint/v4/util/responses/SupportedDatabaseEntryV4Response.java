@@ -7,23 +7,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SupportedDatabaseModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SupportedDatabaseEntryV4Response implements JsonEntity {
 
-    @ApiModelProperty(SupportedDatabaseModelDescription.DATABASENAME)
+    @Schema(description = SupportedDatabaseModelDescription.DATABASENAME)
     private String databaseName;
 
-    @ApiModelProperty(SupportedDatabaseModelDescription.DISPLAYNAME)
+    @Schema(description = SupportedDatabaseModelDescription.DISPLAYNAME)
     private String displayName;
 
-    @ApiModelProperty(SupportedDatabaseModelDescription.JDBCPREFIX)
+    @Schema(description = SupportedDatabaseModelDescription.JDBCPREFIX)
     private String jdbcPrefix;
 
-    @ApiModelProperty(SupportedDatabaseModelDescription.VERSIONS)
+    @Schema(description = SupportedDatabaseModelDescription.VERSIONS)
     private  Set<String> versions;
 
     public SupportedDatabaseEntryV4Response() {

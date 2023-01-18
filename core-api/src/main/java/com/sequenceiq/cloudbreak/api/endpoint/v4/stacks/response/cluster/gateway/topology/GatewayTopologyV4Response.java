@@ -8,18 +8,17 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.GatewayModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class GatewayTopologyV4Response implements JsonEntity {
 
-    @ApiModelProperty(GatewayModelDescription.KNOX_TOPOLOGY_NAME)
+    @Schema(description = GatewayModelDescription.KNOX_TOPOLOGY_NAME)
     private String topologyName;
 
-    @ApiModelProperty(GatewayModelDescription.EXPOSED_KNOX_SERVICES)
+    @Schema(description = GatewayModelDescription.EXPOSED_KNOX_SERVICES)
     private List<String> exposedServices;
 
     public String getTopologyName() {

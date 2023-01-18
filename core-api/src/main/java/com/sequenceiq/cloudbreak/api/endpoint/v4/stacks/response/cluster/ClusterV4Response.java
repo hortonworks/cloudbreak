@@ -29,108 +29,108 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClusterV4Response implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(ModelDescriptions.NAME)
+    @Schema(description = ModelDescriptions.NAME)
     private String name;
 
-    @ApiModelProperty(ClusterModelDescription.STATUS)
+    @Schema(description = ClusterModelDescription.STATUS)
     private Status status;
 
-    @ApiModelProperty(ClusterModelDescription.HOURS)
+    @Schema(description = ClusterModelDescription.HOURS)
     private int hoursUp;
 
-    @ApiModelProperty(ClusterModelDescription.MINUTES)
+    @Schema(description = ClusterModelDescription.MINUTES)
     private int minutesUp;
 
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(ClusterModelDescription.STATUS_REASON)
+    @Schema(description = ClusterModelDescription.STATUS_REASON)
     private String statusReason;
 
-    @ApiModelProperty(ClusterModelDescription.DATABASES)
+    @Schema(description = ClusterModelDescription.DATABASES)
     private List<DatabaseV4Response> databases;
 
-    @ApiModelProperty(ClusterModelDescription.PROXY_CRN)
+    @Schema(description = ClusterModelDescription.PROXY_CRN)
     private String proxyConfigCrn;
 
     private String proxyConfigName;
 
-    @ApiModelProperty(ClusterModelDescription.FILESYSTEM)
+    @Schema(description = ClusterModelDescription.FILESYSTEM)
     private CloudStorageResponse cloudStorage;
 
     private ClouderaManagerV4Response cm;
 
     private GatewayV4Response gateway;
 
-    @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
+    @Schema(description = ClusterModelDescription.CLUSTER_ATTRIBUTES)
     private Map<String, Object> attributes = new HashMap<>();
 
-    @ApiModelProperty(ClusterModelDescription.CUSTOM_CONTAINERS)
+    @Schema(description = ClusterModelDescription.CUSTOM_CONTAINERS)
     private CustomContainerV4Response customContainers;
 
-    @ApiModelProperty(ClusterModelDescription.CUSTOM_QUEUE)
+    @Schema(description = ClusterModelDescription.CUSTOM_QUEUE)
     private String customQueue;
 
-    @ApiModelProperty(ClusterModelDescription.CREATION_FINISHED)
+    @Schema(description = ClusterModelDescription.CREATION_FINISHED)
     private Long creationFinished;
 
-    @ApiModelProperty(ClusterModelDescription.UPTIME)
+    @Schema(description = ClusterModelDescription.UPTIME)
     private Long uptime;
 
-    @ApiModelProperty(ClusterModelDescription.CLUSTER_EXPOSED_SERVICES)
+    @Schema(description = ClusterModelDescription.CLUSTER_EXPOSED_SERVICES)
     private Map<String, Collection<ClusterExposedServiceV4Response>> exposedServices;
 
-    @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
+    @Schema(description = ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
 
-    @ApiModelProperty(StackModelDescription.CM_MANAGEMENT_USERNAME)
+    @Schema(description = StackModelDescription.CM_MANAGEMENT_USERNAME)
     private SecretResponse cmMgmtUser;
 
-    @ApiModelProperty(StackModelDescription.CM_MANAGEMENT_PASSWORD)
+    @Schema(description = StackModelDescription.CM_MANAGEMENT_PASSWORD)
     private SecretResponse cmMgmtPassword;
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
+    @Schema(description = ClusterModelDescription.BLUEPRINT)
     private BlueprintV4Response blueprint;
 
-    @ApiModelProperty(BlueprintModelDescription.BLUEPRINT)
+    @Schema(description = BlueprintModelDescription.BLUEPRINT)
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String extendedBlueprintText;
 
-    @ApiModelProperty(StackModelDescription.CUSTOM_CONFIGURATIONS_NAME)
+    @Schema(description = StackModelDescription.CUSTOM_CONFIGURATIONS_NAME)
     private String customConfigurationsName;
 
-    @ApiModelProperty(StackModelDescription.CUSTOM_CONFIGURATIONS_CRN)
+    @Schema(description = StackModelDescription.CUSTOM_CONFIGURATIONS_CRN)
     private String customConfigurationsCrn;
 
-    @ApiModelProperty(StackModelDescription.SERVER_IP)
+    @Schema(description = StackModelDescription.SERVER_IP)
     private String serverIp;
 
-    @ApiModelProperty(StackModelDescription.SERVER_FQDN)
+    @Schema(description = StackModelDescription.SERVER_FQDN)
     private String serverFqdn;
 
-    @ApiModelProperty(StackModelDescription.SERVER_URL)
+    @Schema(description = StackModelDescription.SERVER_URL)
     private String serverUrl;
 
-    @ApiModelProperty(ClusterModelDescription.REDBEAMS_DB_SERVER_CRN)
+    @Schema(description = ClusterModelDescription.REDBEAMS_DB_SERVER_CRN)
     private String databaseServerCrn;
 
-    @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RAZ)
+    @Schema(description = ClusterModelDescription.ENABLE_RANGER_RAZ)
     private boolean rangerRazEnabled;
 
-    @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RMS)
+    @Schema(description = ClusterModelDescription.ENABLE_RANGER_RMS)
     private boolean rangerRmsEnabled;
 
-    @ApiModelProperty(ClusterModelDescription.CERT_EXPIRATION)
+    @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
     public Long getId() {

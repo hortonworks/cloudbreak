@@ -11,28 +11,27 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupResponse;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("InstanceGroupV1Response")
+@Schema(name = "InstanceGroupV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstanceGroupResponse extends InstanceGroupBase {
     @NotNull
-    @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
+    @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateResponse instanceTemplate;
 
     @Valid
-    @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
+    @Schema(description = InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupResponse securityGroup;
 
     @NotNull
-    @ApiModelProperty(InstanceGroupModelDescription.NETWORK)
+    @Schema(description = InstanceGroupModelDescription.NETWORK)
     private InstanceGroupNetworkResponse network;
 
     private Set<InstanceMetaDataResponse> metaData = new HashSet<>();
 
-    @ApiModelProperty(InstanceGroupModelDescription.AVAILABILITY_ZONES)
+    @Schema(description = InstanceGroupModelDescription.AVAILABILITY_ZONES)
     private Set<String> availabilityZones;
 
     public InstanceTemplateResponse getInstanceTemplate() {

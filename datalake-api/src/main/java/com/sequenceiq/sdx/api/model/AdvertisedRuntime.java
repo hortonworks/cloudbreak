@@ -5,18 +5,17 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AdvertisedRuntime {
 
-    @ApiModelProperty(ModelDescriptions.RUNTIME_VERSION)
+    @Schema(description = ModelDescriptions.RUNTIME_VERSION)
     private String runtimeVersion;
 
-    @ApiModelProperty(ModelDescriptions.DEFAULT_RUNTIME_VERSION)
+    @Schema(description = ModelDescriptions.DEFAULT_RUNTIME_VERSION)
     private boolean defaultRuntimeVersion;
 
     public String getRuntimeVersion() {
@@ -44,8 +43,7 @@ public class AdvertisedRuntime {
             return false;
         }
         AdvertisedRuntime that = (AdvertisedRuntime) o;
-        return defaultRuntimeVersion == that.defaultRuntimeVersion &&
-                Objects.equals(runtimeVersion, that.runtimeVersion);
+        return defaultRuntimeVersion == that.defaultRuntimeVersion && Objects.equals(runtimeVersion, that.runtimeVersion);
     }
 
     @Override
@@ -55,9 +53,6 @@ public class AdvertisedRuntime {
 
     @Override
     public String toString() {
-        return "AdvertisedRuntime{" +
-                "runtimeVersion='" + runtimeVersion + '\'' +
-                ", defaultRuntimeVersion=" + defaultRuntimeVersion +
-                '}';
+        return "AdvertisedRuntime{" + "runtimeVersion='" + runtimeVersion + '\'' + ", defaultRuntimeVersion=" + defaultRuntimeVersion + '}';
     }
 }

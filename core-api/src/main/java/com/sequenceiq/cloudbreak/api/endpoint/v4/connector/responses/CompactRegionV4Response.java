@@ -10,15 +10,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CompactRegionV4Response implements JsonEntity {
 
-    @ApiModelProperty(ConnectorModelDescription.REGIONS)
+    @Schema(description = ConnectorModelDescription.REGIONS)
     private Set<String> regions;
 
-    @ApiModelProperty(ConnectorModelDescription.REGION_DISPLAYNAMES)
+    @Schema(description = ConnectorModelDescription.REGION_DISPLAYNAMES)
     private Map<String, String> displayNames;
 
     public CompactRegionV4Response() {

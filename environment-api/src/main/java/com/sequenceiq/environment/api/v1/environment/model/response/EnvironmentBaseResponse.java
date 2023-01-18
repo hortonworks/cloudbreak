@@ -20,25 +20,24 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvironmentParameters;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
+@Schema(subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
 public abstract class EnvironmentBaseResponse implements TaggedResponse {
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private String crn;
 
-    @ApiModelProperty(ModelDescriptions.NAME)
+    @Schema(description = ModelDescriptions.NAME)
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.ORIGINAL_NAME)
+    @Schema(description = ModelDescriptions.ORIGINAL_NAME)
     private String originalName;
 
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
+    @Schema(description = EnvironmentModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
     /**
@@ -46,34 +45,34 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
      * and can become invalid, usage of it can be error prone
      */
     @Deprecated
-    @ApiModelProperty(ModelDescriptions.CREATOR)
+    @Schema(description = ModelDescriptions.CREATOR)
     private String creator;
 
-    @ApiModelProperty(EnvironmentModelDescription.CREATE_FREEIPA)
+    @Schema(description = EnvironmentModelDescription.CREATE_FREEIPA)
     private Boolean createFreeIpa = Boolean.TRUE;
 
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA)
+    @Schema(description = EnvironmentModelDescription.FREEIPA)
     private FreeIpaResponse freeIpa;
 
-    @ApiModelProperty(EnvironmentModelDescription.REGIONS)
+    @Schema(description = EnvironmentModelDescription.REGIONS)
     private CompactRegionResponse regions;
 
-    @ApiModelProperty(EnvironmentModelDescription.LOCATION)
+    @Schema(description = EnvironmentModelDescription.LOCATION)
     private LocationResponse location;
 
-    @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
+    @Schema(description = EnvironmentModelDescription.TELEMETRY)
     private TelemetryResponse telemetry;
 
-    @ApiModelProperty(EnvironmentModelDescription.BACKUP)
+    @Schema(description = EnvironmentModelDescription.BACKUP)
     private @Valid BackupResponse backup;
 
-    @ApiModelProperty(EnvironmentModelDescription.NETWORK)
+    @Schema(description = EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkResponse network;
 
-    @ApiModelProperty(EnvironmentModelDescription.STATUS)
+    @Schema(description = EnvironmentModelDescription.STATUS)
     private EnvironmentStatus environmentStatus;
 
-    @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
+    @Schema(description = EnvironmentModelDescription.AUTHENTICATION)
     private EnvironmentAuthenticationResponse authentication;
 
     private String statusReason;
@@ -82,57 +81,57 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
 
     private String accountId;
 
-    @ApiModelProperty(EnvironmentModelDescription.TUNNEL)
+    @Schema(description = EnvironmentModelDescription.TUNNEL)
     private Tunnel tunnel;
 
-    @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
+    @Schema(description = EnvironmentModelDescription.SECURITY_ACCESS)
     private SecurityAccessResponse securityAccess;
 
-    @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
+    @Schema(description = EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource;
 
-    @ApiModelProperty(EnvironmentModelDescription.CLOUD_STORAGE_VALIDATION)
+    @Schema(description = EnvironmentModelDescription.CLOUD_STORAGE_VALIDATION)
     private CloudStorageValidation cloudStorageValidation;
 
-    @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
+    @Schema(description = EnvironmentModelDescription.ADMIN_GROUP_NAME)
     private String adminGroupName;
 
-    @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AZURE_PARAMETERS)
     private AzureEnvironmentParameters azure;
 
-    @ApiModelProperty(EnvironmentModelDescription.TAGS)
+    @Schema(description = EnvironmentModelDescription.TAGS)
     private TagResponse tags;
 
-    @ApiModelProperty(EnvironmentModelDescription.PARENT_ENVIRONMENT_CRN)
+    @Schema(description = EnvironmentModelDescription.PARENT_ENVIRONMENT_CRN)
     private String parentEnvironmentCrn;
 
-    @ApiModelProperty(EnvironmentModelDescription.PARENT_ENVIRONMENT_NAME)
+    @Schema(description = EnvironmentModelDescription.PARENT_ENVIRONMENT_NAME)
     private String parentEnvironmentName;
 
-    @ApiModelProperty(EnvironmentModelDescription.PARENT_ENVIRONMENT_CLOUD_PLATFORM)
+    @Schema(description = EnvironmentModelDescription.PARENT_ENVIRONMENT_CLOUD_PLATFORM)
     private String parentEnvironmentCloudPlatform;
 
-    @ApiModelProperty(EnvironmentModelDescription.GCP_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.GCP_PARAMETERS)
     private GcpEnvironmentParameters gcp;
 
-    @ApiModelProperty(EnvironmentModelDescription.YARN_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.YARN_PARAMETERS)
     private YarnEnvironmentParameters yarn;
 
-    @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_SERVICE_VERSION)
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_SERVICE_VERSION)
     private String environmentServiceVersion;
 
     private CcmV2TlsType ccmV2TlsType;
 
-    @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_DELETION_TYPE)
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_DELETION_TYPE)
     private EnvironmentDeletionType deletionType;
 
-    @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_DOMAIN_NAME)
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_DOMAIN_NAME)
     private String environmentDomain;
 
-    @ApiModelProperty(EnvironmentModelDescription.DATA_SERVICES)
+    @Schema(description = EnvironmentModelDescription.DATA_SERVICES)
     private DataServicesResponse dataServices;
 
     @JsonIgnore

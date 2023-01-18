@@ -233,7 +233,7 @@ public class SdxDeleteActions {
                 }
                 LOGGER.error(statusReason, exception);
                 try {
-                    SdxCluster sdxCluster =  sdxService.getById(payload.getResourceId());
+                    SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                     metricService.incrementMetricCounter(MetricType.SDX_DELETION_FAILED, sdxCluster);
 
                     if (sdxCluster.isDetached()) {

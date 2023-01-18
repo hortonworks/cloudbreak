@@ -6,16 +6,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxGenerateImageCatalogResponse {
 
-    @ApiModelProperty(ModelDescriptions.IMAGE_CATALOG)
     @NotNull
+    @Schema(description = ModelDescriptions.IMAGE_CATALOG)
     private CloudbreakImageCatalogV3 imageCatalog;
 
     public SdxGenerateImageCatalogResponse(CloudbreakImageCatalogV3 imageCatalog) {
@@ -28,8 +27,6 @@ public class SdxGenerateImageCatalogResponse {
 
     @Override
     public String toString() {
-        return "SdxGenerateImageCatalogResponse{" +
-                "imageCatalog=" + imageCatalog +
-                '}';
+        return "SdxGenerateImageCatalogResponse{" + "imageCatalog=" + imageCatalog + '}';
     }
 }

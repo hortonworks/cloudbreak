@@ -8,35 +8,34 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.DATABASE_RESPONSE)
+@Schema(description = ModelDescriptions.DATABASE_RESPONSE)
 @JsonInclude(Include.NON_NULL)
 public class DatabaseV4Response extends DatabaseV4Base {
 
-    @ApiModelProperty(Database.CRN)
+    @Schema(description = Database.CRN)
     private String crn;
 
-    @ApiModelProperty(Database.CREATION_DATE)
+    @Schema(description = Database.CREATION_DATE)
     private Long creationDate;
 
-    @ApiModelProperty(value = Database.DB_ENGINE, required = true)
+    @Schema(description = Database.DB_ENGINE, required = true)
     private String databaseEngine;
 
-    @ApiModelProperty(value = Database.CONNECTION_DRIVER, required = true)
+    @Schema(description = Database.CONNECTION_DRIVER, required = true)
     private String connectionDriver;
 
-    @ApiModelProperty(value = Database.DB_ENGINE_DISPLAYNAME, required = true)
+    @Schema(description = Database.DB_ENGINE_DISPLAYNAME, required = true)
     private String databaseEngineDisplayName;
 
-    @ApiModelProperty(Database.USERNAME)
+    @Schema(description = Database.USERNAME)
     private SecretResponse connectionUserName;
 
-    @ApiModelProperty(Database.PASSWORD)
+    @Schema(description = Database.PASSWORD)
     private SecretResponse connectionPassword;
 
-    @ApiModelProperty(Database.RESOURCE_STATUS)
+    @Schema(description = Database.RESOURCE_STATUS)
     private ResourceStatus resourceStatus;
 
     public Long getCreationDate() {

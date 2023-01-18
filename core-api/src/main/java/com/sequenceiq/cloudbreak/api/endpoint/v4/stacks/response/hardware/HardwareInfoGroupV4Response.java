@@ -10,19 +10,18 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HardwareModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HardwareInfoGroupV4Response implements JsonEntity {
 
-    @ApiModelProperty(HostGroupModelDescription.RECOVERY_MODE)
+    @Schema(description = HostGroupModelDescription.RECOVERY_MODE)
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
     private String name;
 
-    @ApiModelProperty(HardwareModelDescription.METADATA)
+    @Schema(description = HardwareModelDescription.METADATA)
     private Set<HardwareInfoV4Response> hardwareInfos = new HashSet<>();
 
     public RecoveryMode getRecoveryMode() {

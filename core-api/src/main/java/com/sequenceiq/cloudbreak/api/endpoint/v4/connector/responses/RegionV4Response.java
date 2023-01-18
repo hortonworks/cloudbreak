@@ -10,17 +10,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RegionV4Response extends CompactRegionV4Response {
-    @ApiModelProperty(ConnectorModelDescription.AVAILABILITY_ZONES)
+    @Schema(description = ConnectorModelDescription.AVAILABILITY_ZONES)
     private  Map<String, Collection<String>> availabilityZones;
 
-    @ApiModelProperty(ConnectorModelDescription.DEFAULT_REGIOS)
+    @Schema(description = ConnectorModelDescription.DEFAULT_REGIOS)
     private String defaultRegion;
 
-    @ApiModelProperty(ConnectorModelDescription.REGION_LOCATIONS)
+    @Schema(description = ConnectorModelDescription.REGION_LOCATIONS)
     private Set<String> locations;
 
     public RegionV4Response() {

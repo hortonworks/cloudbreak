@@ -13,22 +13,21 @@ import com.sequenceiq.cloudbreak.rotation.request.BaseSecretRotationRequest;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxSecretRotationRequest extends BaseSecretRotationRequest {
 
     @TenantAwareParam
     @ValidCrn(resource = CrnResourceDescriptor.DATALAKE)
-    @ApiModelProperty(ModelDescriptions.DATA_LAKE_CRN)
+    @Schema(description = ModelDescriptions.DATA_LAKE_CRN)
     private String crn;
 
     @ValidSecretTypes(allowedTypes = { DatalakeSecretType.class })
     @NotEmpty
-    @ApiModelProperty("Secrets to be rotated")
+    @Schema(description = "Secrets to be rotated")
     private List<String> secrets;
 
     public String getCrn() {

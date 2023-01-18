@@ -8,10 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "GcpResourceEncryptionV1Parameters")
+@Schema(name = "GcpResourceEncryptionV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GcpResourceEncryptionParameters implements Serializable {
 
@@ -21,7 +20,7 @@ public class GcpResourceEncryptionParameters implements Serializable {
             "Key location should be same as resource location " +
             "<keyName> may only contain alphanumeric characters and dashes.";
 
-    @ApiModelProperty(EnvironmentModelDescription.ENCRYPTION_KEY)
+    @Schema(description = EnvironmentModelDescription.ENCRYPTION_KEY)
     @Pattern(regexp = "projects\\/[a-zA-Z0-9_-]{1,63}\\/" +
             "locations\\/[a-zA-Z0-9_-]{1,63}\\/keyRings\\/[a-zA-Z0-9_-]{1,63}\\/cryptoKeys\\/[a-zA-Z0-9_-]{1,63}",
             message = ENCRYPTION_KEY_INVALID_MSG)

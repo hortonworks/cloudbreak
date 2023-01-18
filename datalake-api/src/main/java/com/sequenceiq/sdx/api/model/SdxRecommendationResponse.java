@@ -8,18 +8,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRecommendationResponse {
 
-    @ApiModelProperty(ModelDescriptions.TEMPLATE_DETAILS)
+    @Schema(description = ModelDescriptions.TEMPLATE_DETAILS)
     private StackV4Request template;
 
-    @ApiModelProperty(ModelDescriptions.AVAILABLE_VM_TYPES)
+    @Schema(description = ModelDescriptions.AVAILABLE_VM_TYPES)
     private Map<String, List<VmTypeResponse>> availableVmTypesByInstanceGroup = new HashMap<>();
 
     public SdxRecommendationResponse() {
@@ -48,9 +47,6 @@ public class SdxRecommendationResponse {
 
     @Override
     public String toString() {
-        return "SdxRecommendationResponse{" +
-                "template=" + template +
-                ", availableVmTypesByInstanceGroup=" + availableVmTypesByInstanceGroup +
-                '}';
+        return "SdxRecommendationResponse{" + "template=" + template + ", availableVmTypesByInstanceGroup=" + availableVmTypesByInstanceGroup + '}';
     }
 }

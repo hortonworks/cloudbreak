@@ -7,19 +7,18 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "AzureEnvironmentV1Parameters")
+@Schema(name = "AzureEnvironmentV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AzureEnvironmentParameters implements Serializable {
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.RESOURCE_GROUP_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.RESOURCE_GROUP_PARAMETERS)
     private AzureResourceGroup resourceGroup;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.RESOURCE_ENCRYPTION_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.RESOURCE_ENCRYPTION_PARAMETERS)
     private AzureResourceEncryptionParameters resourceEncryptionParameters;
 
     public AzureResourceGroup getResourceGroup() {

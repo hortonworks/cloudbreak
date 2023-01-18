@@ -9,25 +9,24 @@ import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDes
 import java.io.Serializable;
 import java.util.Objects;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class CredentialPrerequisitesResponse implements Serializable {
 
-    @ApiModelProperty(value = CLOUD_PLATFORM, required = true)
+    @Schema(description = CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 
-    @ApiModelProperty(ACCOUNT_IDENTIFIER)
+    @Schema(description = ACCOUNT_IDENTIFIER)
     private String accountId;
 
-    @ApiModelProperty(AWS_CREDENTIAL_PREREQUISITES)
+    @Schema(description = AWS_CREDENTIAL_PREREQUISITES)
     private AwsCredentialPrerequisites aws;
 
-    @ApiModelProperty(AZURE_CREDENTIAL_PREREQUISITES)
+    @Schema(description = AZURE_CREDENTIAL_PREREQUISITES)
     private AzureCredentialPrerequisites azure;
 
-    @ApiModelProperty(GCP_CREDENTIAL_PREREQUISITES)
+    @Schema(description = GCP_CREDENTIAL_PREREQUISITES)
     private GcpCredentialPrerequisites gcp;
 
     public CredentialPrerequisitesResponse(String cloudPlatform, String accountId, AwsCredentialPrerequisites aws) {

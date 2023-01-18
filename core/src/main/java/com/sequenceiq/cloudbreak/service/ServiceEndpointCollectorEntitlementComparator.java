@@ -14,9 +14,9 @@ public class ServiceEndpointCollectorEntitlementComparator {
         if (Strings.isNullOrEmpty(entitlement)) {
             shouldInclude = true;
         } else if (entitlements == null || entitlements.isEmpty()) {
-            shouldInclude =  true;
+            shouldInclude = true;
         } else if (entitlements.contains(entitlement)) {
-            shouldInclude =  true;
+            shouldInclude = true;
         }
         return shouldInclude;
     }

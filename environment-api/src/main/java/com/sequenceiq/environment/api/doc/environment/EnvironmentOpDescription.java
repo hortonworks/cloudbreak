@@ -43,6 +43,7 @@ public class EnvironmentOpDescription {
     public static final String UPGRADE_CCM = "Initiates the CCM tunnel type upgrade to the latest available version";
     public static final String VERTICAL_SCALING = "Initiates the vertical scaling on FreeIPA";
     public static final String LIST_SUPPORTED_OS = "LIst supported operating systems by environment.";
+    public static final String VALIDATE_CLOUD_STORAGE = "Validates cloud storage";
 
     private EnvironmentOpDescription() {
     }

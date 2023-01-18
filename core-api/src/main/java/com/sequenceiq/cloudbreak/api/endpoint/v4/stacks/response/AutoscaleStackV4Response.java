@@ -11,77 +11,76 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.common.api.type.Tunnel;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AutoscaleStackV4Response {
 
-    @ApiModelProperty(StackModelDescription.TENANANT)
+    @Schema(description = StackModelDescription.TENANANT)
     private String tenant;
 
-    @ApiModelProperty(StackModelDescription.WORKSPACE_ID)
+    @Schema(description = StackModelDescription.WORKSPACE_ID)
     private Long workspaceId;
 
-    @ApiModelProperty(StackModelDescription.USER_ID)
+    @Schema(description = StackModelDescription.USER_ID)
     private String userId;
 
-    @ApiModelProperty(StackModelDescription.USER_CRN)
+    @Schema(description = StackModelDescription.USER_CRN)
     private String userCrn;
 
-    @ApiModelProperty(StackModelDescription.STACK_ID)
+    @Schema(description = StackModelDescription.STACK_ID)
     private Long stackId;
 
     @ValidStackNameFormat
     @ValidStackNameLength
     @NotNull
-    @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
+    @Schema(description = StackModelDescription.STACK_NAME, required = true)
     private String name;
 
-    @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
+    @Schema(description = StackModelDescription.GATEWAY_PORT)
     private Integer gatewayPort;
 
-    @ApiModelProperty(StackModelDescription.SERVER_IP)
+    @Schema(description = StackModelDescription.SERVER_IP)
     private String clusterManagerIp;
 
-    @ApiModelProperty(StackModelDescription.USERNAME)
+    @Schema(description = StackModelDescription.USERNAME)
     private String userNamePath;
 
-    @ApiModelProperty(StackModelDescription.PASSWORD)
+    @Schema(description = StackModelDescription.PASSWORD)
     private String passwordPath;
 
-    @ApiModelProperty(StackModelDescription.STACK_STATUS)
+    @Schema(description = StackModelDescription.STACK_STATUS)
     private Status status;
 
-    @ApiModelProperty(ClusterModelDescription.STATUS)
+    @Schema(description = ClusterModelDescription.STATUS)
     private Status clusterStatus;
 
-    @ApiModelProperty(StackModelDescription.CREATED)
+    @Schema(description = StackModelDescription.CREATED)
     private Long created;
 
-    @ApiModelProperty(ClusterModelDescription.VARIANT)
+    @Schema(description = ClusterModelDescription.VARIANT)
     private String clusterManagerVariant;
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
+    @Schema(description = ClusterModelDescription.BLUEPRINT)
     private String bluePrintText;
 
-    @ApiModelProperty(StackModelDescription.CRN)
+    @Schema(description = StackModelDescription.CRN)
     private String stackCrn;
 
-    @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
+    @Schema(description = StackModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
-    @ApiModelProperty(StackModelDescription.TYPE)
+    @Schema(description = StackModelDescription.TYPE)
     private StackType stackType;
 
-    @ApiModelProperty(StackModelDescription.ENVIRONMENT_CRN)
+    @Schema(description = StackModelDescription.ENVIRONMENT_CRN)
     private String environmentCrn;
 
-    @ApiModelProperty(StackModelDescription.TUNNEL)
+    @Schema(description = StackModelDescription.TUNNEL)
     private Tunnel tunnel;
 
-    @ApiModelProperty(StackModelDescription.SALT_CB_VERSION)
+    @Schema(description = StackModelDescription.SALT_CB_VERSION)
     private String saltCbVersion;
 
     public String getStackCrn() {

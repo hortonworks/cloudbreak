@@ -8,21 +8,20 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DatalakeVerticalScaleRequest implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.HOST_GROUP_NAME)
+    @Schema(description = ModelDescriptions.HOST_GROUP_NAME)
     private String group;
 
     @Valid
     @NotNull
-    @ApiModelProperty(ModelDescriptions.CUSTOM_INSTANCE_GROUP_OPTIONS)
+    @Schema(description = ModelDescriptions.CUSTOM_INSTANCE_GROUP_OPTIONS)
     private InstanceTemplateV4Request template;
 
     public String getGroup() {

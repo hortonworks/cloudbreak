@@ -112,262 +112,289 @@ import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/distrox")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/distrox", protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/distrox")
 public interface DistroXV1Endpoint {
 
     @GET
     @Path("")
-    @ApiOperation(value = LIST, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "listDistroXV1")
+    @Operation(summary = LIST, description = Notes.STACK_NOTES,
+            operationId = "listDistroXV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackViewV4Responses list(
             @QueryParam("environmentName") String environmentName,
             @QueryParam("environmentCrn") String environmentCrn);
 
     @POST
     @Path("")
-    @ApiOperation(value = CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "postDistroXV1")
+    @Operation(summary = CREATE, description = Notes.STACK_NOTES,
+            operationId = "postDistroXV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackV4Response post(@Valid DistroXV1Request request);
 
     @POST
     @Path("internal")
-    @ApiOperation(value = CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "postDistroXInternalV1")
+    @Operation(summary = CREATE, description = Notes.STACK_NOTES,
+            operationId = "postDistroXInternalV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackV4Response postInternal(@QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
             @QueryParam("accountId") String accountId, @Valid DistroXV1Request request);
 
     @GET
     @Path("name/{name}")
-    @ApiOperation(value = GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "getDistroXV1ByName")
+    @Operation(summary = GET_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "getDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackV4Response getByName(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
 
     @GET
     @Path("crn/{crn}")
-    @ApiOperation(value = GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "getDistroXV1ByCrn")
+    @Operation(summary = GET_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "getDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackV4Response getByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn, @QueryParam("entries") Set<String> entries);
 
     @DELETE
     @Path("name/{name}")
-    @ApiOperation(value = DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "deleteDistroXV1ByName")
+    @Operation(summary = DELETE_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "deleteDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteByName(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @DELETE
     @Path("crn/{crn}")
-    @ApiOperation(value = DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "deleteDistroXV1ByCrn")
+    @Operation(summary = DELETE_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "deleteDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @DELETE
     @Path("")
-    @ApiOperation(value = DELETE_MULTIPLE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "deleteMultipleDistroXClustersByNamesV1")
+    @Operation(summary = DELETE_MULTIPLE, description = Notes.STACK_NOTES,
+            operationId = "deleteMultipleDistroXClustersByNamesV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteMultiple(DistroXMultiDeleteV1Request multiDeleteRequest, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @POST
     @Path("name/{name}/sync")
-    @ApiOperation(value = SYNC_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "syncDistroXV1ByName")
+    @Operation(summary = SYNC_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "syncDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void syncByName(@PathParam("name") String name);
 
     @POST
     @Path("crn/{crn}/sync")
-    @ApiOperation(value = SYNC_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "syncDistroXV1ByCrn")
+    @Operation(summary = SYNC_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "syncDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void syncByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @POST
     @Path("name/{name}/retry")
-    @ApiOperation(value = RETRY_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
-            nickname = "retryDistroXV1ByName")
+    @Operation(summary = RETRY_BY_NAME, description = Notes.RETRY_STACK_NOTES,
+            operationId = "retryDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void retryByName(@PathParam("name") String name);
 
     @GET
     @Path("name/{name}/retry")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.StackOpDescription.LIST_RETRYABLE_FLOWS, produces = MediaType.APPLICATION_JSON,
-            notes = Notes.LIST_RETRYABLE_NOTES, nickname = "listRetryableFlowsDistroXV1")
+    @Operation(summary = OperationDescriptions.StackOpDescription.LIST_RETRYABLE_FLOWS,
+            description = Notes.LIST_RETRYABLE_NOTES, operationId = "listRetryableFlowsDistroXV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<RetryableFlowResponse> listRetryableFlows(@PathParam("name") String name);
 
     @POST
     @Path("crn/{crn}/retry")
-    @ApiOperation(value = RETRY_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
-            nickname = "retryDistroXV1ByCrn")
+    @Operation(summary = RETRY_BY_CRN, description = Notes.RETRY_STACK_NOTES,
+            operationId = "retryDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void retryByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/stop")
-    @ApiOperation(value = STOP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "stopDistroXV1ByName")
+    @Operation(summary = STOP_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "stopDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStopByName(@PathParam("name") String name);
 
     @PUT
     @Path("crn/{crn}/stop")
-    @ApiOperation(value = STOP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "stopDistroXV1ByCrn")
+    @Operation(summary = STOP_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "stopDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStopByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/stop")
-    @ApiOperation(value = STOP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "stopDistroXV1ByNames")
+    @Operation(summary = STOP_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "stopDistroXV1ByNames",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void putStopByNames(@QueryParam("names") List<String> names);
 
     @PUT
     @Path("crn/stop")
-    @ApiOperation(value = STOP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "stopDistroXV1ByCrns")
+    @Operation(summary = STOP_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "stopDistroXV1ByCrns",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void putStopByCrns(@QueryParam("crns") List<String> crns);
 
     @PUT
     @Path("name/{name}/start")
-    @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "startDistroXV1ByName")
+    @Operation(summary = START_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "startDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStartByName(@PathParam("name") String name);
 
     @PUT
     @Path("crn/{crn}/start")
-    @ApiOperation(value = START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "startDistroXV1ByCrn")
+    @Operation(summary = START_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "startDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putStartByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/start")
-    @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "startDistroXV1ByNames")
+    @Operation(summary = START_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "startDistroXV1ByNames",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void putStartByNames(@QueryParam("names") List<String> names);
 
     @PUT
     @Path("crn/start")
-    @ApiOperation(value = START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "startDistroXV1ByCrns")
+    @Operation(summary = START_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "startDistroXV1ByCrns",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void putStartByCrns(@QueryParam("crns") List<String> crns);
 
     @PUT
     @Path("crn/restartCluster")
-    @ApiOperation(value = RESTART_CLUSTER_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "restartDistroXClusterByCrns")
+    @Operation(summary = RESTART_CLUSTER_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "restartDistroXClusterByCrns",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void restartClusterServicesByCrns(@QueryParam("crns") List<String> crns,
             @QueryParam("refreshRemoteDataContext") @DefaultValue("false") Boolean refreshRemoteDataContext);
 
     @POST
     @Path("crn/{crn}/rotate_salt_password")
-    @ApiOperation(value = ROTATE_SALT_PASSWORD_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "rotateSaltPasswordDistroXV1ByCrn")
+    @Operation(summary = ROTATE_SALT_PASSWORD_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "rotateSaltPasswordDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSaltPasswordByCrn(@PathParam("crn") String crn);
 
     @PUT
     @Path("crn/{crn}/salt_update")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UPDATE_SALT, nickname = "updateSaltDistroxV1ByCrn")
+    @Operation(summary = UPDATE_SALT, operationId = "updateSaltDistroxV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updateSaltByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/scaling")
-    @ApiOperation(value = SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "putScalingDistroXV1ByName")
+    @Operation(summary = SCALE_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "putScalingDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier putScalingByName(@PathParam("name") String name, @Valid DistroXScaleV1Request updateRequest);
 
     @PUT
     @Path("crn/{crn}/scaling")
-    @ApiOperation(value = SCALE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "putScalingDistroXV1ByCrn")
+    @Operation(summary = SCALE_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "putScalingDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void putScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn, @Valid DistroXScaleV1Request updateRequest);
 
     @PUT
     @Path("name/{name}/vertical_scaling")
-    @ApiOperation(value = VERTICAL_SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "verticalScalingByName")
+    @Operation(summary = VERTICAL_SCALE_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "verticalScalingByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier verticalScalingByName(
             @PathParam("name") String name,
             @Valid DistroXVerticalScaleV1Request updateRequest);
 
     @PUT
     @Path("crn/{crn}/vertical_scaling")
-    @ApiOperation(value = VERTICAL_SCALE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "verticalScalingByCrn")
+    @Operation(summary = VERTICAL_SCALE_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "verticalScalingByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier verticalScalingByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid DistroXVerticalScaleV1Request updateRequest);
 
     @POST
     @Path("name/{name}/manual_repair")
-    @ApiOperation(value = REPAIR_CLUSTER_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
-            nickname = "repairDistroXV1ByName")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = FlowIdentifier.class),
-            @ApiResponse(code = 0, message = "unsuccessful operation", response = Void.class)
-    })
+    @Operation(summary = REPAIR_CLUSTER_BY_NAME, description = Notes.CLUSTER_REPAIR_NOTES,
+            operationId = "repairDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier repairClusterByName(@PathParam("name") String name, @Valid DistroXRepairV1Request clusterRepairRequest);
 
     @POST
     @Path("crn/{crn}/manual_repair")
-    @ApiOperation(value = REPAIR_CLUSTER_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
-            nickname = "repairDistroXV1ByCrn")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = FlowIdentifier.class),
-            @ApiResponse(code = 0, message = "unsuccessful operation", response = Void.class)
-    })
+    @Operation(summary = REPAIR_CLUSTER_BY_CRN, description = Notes.CLUSTER_REPAIR_NOTES,
+            operationId = "repairDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier repairClusterByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid DistroXRepairV1Request clusterRepairRequest);
 
     @GET
     @Path("name/{name}/cli_create")
-    @ApiOperation(value = GET_STACK_REQUEST_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "getDistroXRequestV1ByName")
+    @Operation(summary = GET_STACK_REQUEST_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "getDistroXRequestV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Object getRequestfromName(@PathParam("name") String name);
 
     @GET
     @Path("crn/{crn}/cli_create")
-    @ApiOperation(value = GET_STACK_REQUEST_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "getDistroXRequestV1ByCrn")
+    @Operation(summary = GET_STACK_REQUEST_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "getDistroXRequestV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Object getRequestfromCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @GET
     @Path("name/{name}/status")
-    @ApiOperation(value = GET_STATUS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "statusDistroXV1ByName")
+    @Operation(summary = GET_STATUS_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "statusDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackStatusV4Response getStatusByName(@PathParam("name") String name);
 
     @GET
     @Path("crn/{crn}/status")
-    @ApiOperation(value = GET_STATUS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "statusDistroXV1ByCrn")
+    @Operation(summary = GET_STATUS_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "statusDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackStatusV4Response getStatusByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @DELETE
     @Path("name/{name}/instance")
-    @ApiOperation(value = DELETE_INSTANCE_BY_ID_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "deleteInstanceDistroXV1ByName")
+    @Operation(summary = DELETE_INSTANCE_BY_ID_BY_NAME, description = Notes.STACK_NOTES,
+            operationId = "deleteInstanceDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteInstanceByName(@PathParam("name") String name,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("instanceId") String instanceId);
 
     @DELETE
     @Path("crn/{crn}/instance")
-    @ApiOperation(value = DELETE_INSTANCE_BY_ID_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "deleteInstanceDistroXV1ByCrn")
+    @Operation(summary = DELETE_INSTANCE_BY_ID_BY_CRN, description = Notes.STACK_NOTES,
+            operationId = "deleteInstanceDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteInstanceByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("instanceId") String instanceId);
 
     @DELETE
     @Path("name/{name}/instances")
-    @ApiOperation(value = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "deleteInstancesDistroXV1ByName")
+    @Operation(summary = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, description = Notes.STACK_NOTES,
+            operationId = "deleteInstancesDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteInstancesByName(@PathParam("name") String name,
             @QueryParam("id") List<String> instances,
             MultipleInstanceDeleteRequest request,
@@ -375,8 +402,9 @@ public interface DistroXV1Endpoint {
 
     @DELETE
     @Path("crn/{crn}/instances")
-    @ApiOperation(value = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "deleteInstancesDistroXV1ByCrn")
+    @Operation(summary = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, description = Notes.STACK_NOTES,
+            operationId = "deleteInstancesDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteInstancesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @QueryParam("id") List<String> instances,
             MultipleInstanceDeleteRequest request,
@@ -384,226 +412,259 @@ public interface DistroXV1Endpoint {
 
     @PUT
     @Path("name/{name}/maintenance")
-    @ApiOperation(value = SET_MAINTENANCE_MODE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.MAINTENANCE_NOTES,
-            nickname = "setDistroXMaintenanceModeByName")
+    @Operation(summary = SET_MAINTENANCE_MODE_BY_NAME, description = Notes.MAINTENANCE_NOTES,
+            operationId = "setDistroXMaintenanceModeByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void setClusterMaintenanceModeByName(@PathParam("name") String name,
             @NotNull DistroXMaintenanceModeV1Request maintenanceMode);
 
     @PUT
     @Path("crn/{crn}/maintenance")
-    @ApiOperation(value = SET_MAINTENANCE_MODE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.MAINTENANCE_NOTES,
-            nickname = "setDistroXMaintenanceModeByCrn")
+    @Operation(summary = SET_MAINTENANCE_MODE_BY_CRN, description = Notes.MAINTENANCE_NOTES,
+            operationId = "setDistroXMaintenanceModeByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void setClusterMaintenanceModeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @NotNull DistroXMaintenanceModeV1Request maintenanceMode);
 
     @DELETE
     @Path("name/{name}/cluster")
-    @ApiOperation(value = DELETE_WITH_KERBEROS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
-            nickname = "deleteWithKerberosDistroXV1ByName")
+    @Operation(summary = DELETE_WITH_KERBEROS_BY_NAME, description = Notes.CLUSTER_NOTES,
+            operationId = "deleteWithKerberosDistroXV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteWithKerberosByName(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
     @Path("crn/{crn}/cluster")
-    @ApiOperation(value = DELETE_WITH_KERBEROS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
-            nickname = "deleteWithKerberosDistroXV1ByCrn")
+    @Operation(summary = DELETE_WITH_KERBEROS_BY_CRN, description = Notes.CLUSTER_NOTES,
+            operationId = "deleteWithKerberosDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteWithKerberosByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @POST
     @Path("cli_create")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CLI_COMMAND, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
-            nickname = "getCreateClusterForCli")
+    @Operation(summary = CLI_COMMAND, description = Notes.CLUSTER_NOTES,
+            operationId = "getCreateClusterForCli",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Object getCreateAwsClusterForCli(@NotNull @Valid DistroXV1Request request);
 
     @POST
     @Path("blueprint")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = POST_STACK_FOR_BLUEPRINT, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "postDistroXForBlueprintV1")
+    @Operation(summary = POST_STACK_FOR_BLUEPRINT, description = Notes.STACK_NOTES,
+            operationId = "postDistroXForBlueprintV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     GeneratedBlueprintV4Response postStackForBlueprint(@Valid DistroXV1Request stackRequest);
 
     @POST
     @Path("diagnostics")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
-            nickname = "collectDistroxCmDiagnosticsV4")
+    @Operation(summary = DiagnosticsOperationDescriptions.COLLECT_DIAGNOSTICS,
+            operationId = "collectDistroxCmDiagnosticsV4",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier collectDiagnostics(@Valid DiagnosticsCollectionV1Request request);
 
     @GET
     @Path("diagnostics/logs")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS, produces = MediaType.APPLICATION_JSON,
-            nickname = "getDistroxCmVmLogsV4")
+    @Operation(summary = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS,
+            operationId = "getDistroxCmVmLogsV4",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     VmLogsResponse getVmLogs();
 
     @GET
     @Path("diagnostics/{crn}/collections")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.LIST_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
-            nickname = "listDistroxDiagnosticsCollectionsV1")
+    @Operation(summary = DiagnosticsOperationDescriptions.LIST_COLLECTIONS,
+            operationId = "listDistroxDiagnosticsCollectionsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ListDiagnosticsCollectionResponse listCollections(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @POST
     @Path("diagnostics/{crn}/collections/cancel")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.CANCEL_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
-            nickname = "cancelDistroxDiagnosticsCollectionsV1")
+    @Operation(summary = DiagnosticsOperationDescriptions.CANCEL_COLLECTIONS,
+            operationId = "cancelDistroxDiagnosticsCollectionsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void cancelCollections(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @POST
     @Path("diagnostics/cm")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
-            nickname = "collectDistroxCmBasedDiagnosticsV1")
+    @Operation(summary = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS,
+            operationId = "collectDistroxCmBasedDiagnosticsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier collectCmDiagnostics(@Valid CmDiagnosticsCollectionV1Request request);
 
     @GET
     @Path("diagnostics/cm/{stackCrn}/roles")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_CM_ROLES, produces = MediaType.APPLICATION_JSON,
-            nickname = "getDistroxCmRoles")
+    @Operation(summary = DiagnosticsOperationDescriptions.GET_CM_ROLES,
+            operationId = "getDistroxCmRoles",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<String> getCmRoles(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("stackCrn") String stackCrn);
 
     @GET
     @Path("progress/resource/crn/{resourceCrn}/last")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GET_LAST_FLOW_PROGRESS, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
-            nickname = "getDistroXLastFlowLogProgressByResourceCrn")
+    @Operation(summary = GET_LAST_FLOW_PROGRESS, description = Notes.FLOW_OPERATION_PROGRESS_NOTES,
+            operationId = "getDistroXLastFlowLogProgressByResourceCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowProgressResponse getLastFlowLogProgressByResourceCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("progress/resource/crn/{resourceCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LIST_FLOW_PROGRESS, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
-            nickname = "getDistroXFlowLogsProgressByResourceCrn")
+    @Operation(summary = LIST_FLOW_PROGRESS, description = Notes.FLOW_OPERATION_PROGRESS_NOTES,
+            operationId = "getDistroXFlowLogsProgressByResourceCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(
             @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("operation/resource/crn/{resourceCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GET_OPERATION, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
-            nickname = "getDistroXOperationProgressByResourceCrn")
+    @Operation(summary = GET_OPERATION, description = Notes.FLOW_OPERATION_PROGRESS_NOTES,
+            operationId = "getDistroXOperationProgressByResourceCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     OperationView getOperationProgressByResourceCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("resourceCrn") String resourceCrn,
             @DefaultValue("false") @QueryParam("detailed") boolean detailed);
 
     @POST
     @Path("crn/{crn}/renew_certificate")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RENEW_CERTIFICATE, produces = MediaType.APPLICATION_JSON, notes = Notes.RENEW_CERTIFICATE_NOTES,
-            nickname = "renewDistroXCertificate")
+    @Operation(summary = RENEW_CERTIFICATE, description = Notes.RENEW_CERTIFICATE_NOTES,
+            operationId = "renewDistroXCertificate",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier renewCertificate(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/rotate_autotls_certificates")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateAutoTlsCertificatesByName")
+    @Operation(summary = ROTATE_CERTIFICATES, operationId = "rotateAutoTlsCertificatesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CertificatesRotationV4Response rotateAutoTlsCertificatesByName(@PathParam("name") String name,
             @Valid CertificatesRotationV4Request rotateCertificateRequest);
 
     @PUT
     @Path("crn/{crn}/rotate_autotls_certificates")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateAutoTlsCertificatesByCrn")
+    @Operation(summary = ROTATE_CERTIFICATES, operationId = "rotateAutoTlsCertificatesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid CertificatesRotationV4Request rotateCertificateRequest);
 
     @PUT
     @Path("name/{name}/refresh_recipes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = REFRESH_RECIPES_BY_NAME, nickname = "refreshRecipesByName")
+    @Operation(summary = REFRESH_RECIPES_BY_NAME, operationId = "refreshRecipesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpdateRecipesV4Response refreshRecipesByName(@PathParam("name") String name, @Valid UpdateRecipesV4Request request);
 
     @PUT
     @Path("crn/{crn}/refresh_recipes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = REFRESH_RECIPES_BY_CRN, nickname = "refreshRecipesByCrn")
+    @Operation(summary = REFRESH_RECIPES_BY_CRN, operationId = "refreshRecipesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpdateRecipesV4Response refreshRecipesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid UpdateRecipesV4Request request);
 
     @POST
     @Path("crn/{crn}/attach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ATTACH_RECIPE_BY_CRN, nickname = "attachRecipesByCrn")
+    @Operation(summary = ATTACH_RECIPE_BY_CRN, operationId = "attachRecipesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AttachRecipeV4Response attachRecipeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid AttachRecipeV4Request request);
 
     @POST
     @Path("name/{name}/attach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ATTACH_RECIPE_BY_NAME, nickname = "attachRecipesByName")
+    @Operation(summary = ATTACH_RECIPE_BY_NAME, operationId = "attachRecipesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AttachRecipeV4Response attachRecipeByName(@PathParam("name") String name, @Valid AttachRecipeV4Request request);
 
     @POST
     @Path("crn/{crn}/detach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DETACH_RECIPE_BY_CRN, nickname = "detachRecipesByCrn")
+    @Operation(summary = DETACH_RECIPE_BY_CRN, operationId = "detachRecipesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetachRecipeV4Response detachRecipeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid DetachRecipeV4Request request);
 
     @POST
     @Path("name/{name}/detach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DETACH_RECIPE_BY_NAME, nickname = "detachRecipesByName")
+    @Operation(summary = DETACH_RECIPE_BY_NAME, operationId = "detachRecipesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetachRecipeV4Response detachRecipeByName(@PathParam("name") String name, @Valid DetachRecipeV4Request request);
 
     @POST
     @Path("{name}/sync_component_versions_from_cm")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "syncs from distrox cluster CM the CM and parcel versions", produces = MediaType.APPLICATION_JSON, nickname = "syncDistroxCm")
+    @Operation(summary = "syncs from distrox cluster CM the CM and parcel versions", operationId = "syncDistroxCm",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DistroXSyncCmV1Response syncComponentVersionsFromCmByName(@PathParam("name") String name);
 
     @POST
     @Path("crn/{crn}/sync_component_versions_from_cm")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "syncs from distrox cluster CM the CM and parcel versions", produces = MediaType.APPLICATION_JSON, nickname = "syncDistroxCmByCrn")
+    @Operation(summary = "syncs from distrox cluster CM the CM and parcel versions", operationId = "syncDistroxCmByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/change_image_catalog")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CHANGE_IMAGE_CATALOG, nickname = "changeImageCatalog")
+    @Operation(summary = CHANGE_IMAGE_CATALOG, operationId = "changeImageCatalog",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void changeImageCatalog(@PathParam("name") String name, @Valid @NotNull ChangeImageCatalogV4Request changeImageCatalogRequest);
 
     @GET
     @Path("name/{name}/generate_image_catalog")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GENERATE_IMAGE_CATALOG, nickname = "generateImageCatalog")
+    @Operation(summary = GENERATE_IMAGE_CATALOG, operationId = "generateImageCatalog",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DistroXGenerateImageCatalogV1Response generateImageCatalog(@PathParam("name") String name);
 
     @GET
     @Path("{name}/get_cluster_recoverable")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "validates if the distrox cluster is recoverable or not", nickname = "getClusterRecoverableByName")
+    @Operation(summary = "validates if the distrox cluster is recoverable or not", operationId = "getClusterRecoverableByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RecoveryValidationV4Response getClusterRecoverableByName(@PathParam("name") String name);
 
     @GET
     @Path("/crn/{crn}/get_cluster_recoverable")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "validates if the distrox cluster is recoverable or not", nickname = "getClusterRecoverableByCrn")
+    @Operation(summary = "validates if the distrox cluster is recoverable or not", operationId = "getClusterRecoverableByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RecoveryValidationV4Response getClusterRecoverableByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("crn/{crn}/modify_proxy")
-    @ApiOperation(value = MODIFY_PROXY_CONFIG_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.MODIFY_PROXY_CONFIG_NOTES,
-            nickname = "modifyProxyConfigDistroXInternalV1ByCrn")
+    @Operation(summary = MODIFY_PROXY_CONFIG_INTERNAL, description = Notes.MODIFY_PROXY_CONFIG_NOTES,
+            operationId = "modifyProxyConfigDistroXInternalV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier modifyProxyInternal(@ValidCrn(resource = {CrnResourceDescriptor.DATAHUB}) @PathParam("crn") String crn,
             @ValidCrn(resource = {CrnResourceDescriptor.PROXY}) @QueryParam("previousProxyConfigCrn") String previousProxyConfigCrn,
             String initiatorUserCrn);
 
     @PUT
     @Path("name/{name}/delete_volumes")
-    @ApiOperation(value = DELETE_VOLUMES_BY_STACK_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "deleteVolumesByStackName")
+    @Operation(summary = DELETE_VOLUMES_BY_STACK_NAME, description = Notes.STACK_NOTES,
+            operationId = "deleteVolumesByStackName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteVolumesByStackName(
             @PathParam("name") String name,
             @Valid StackDeleteVolumesRequest deleteRequest);
 
     @PUT
     @Path("crn/{crn}/delete_volumes")
-    @ApiOperation(value = DELETE_VOLUMES_BY_STACK_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "deleteVolumesByStackCrn")
+    @Operation(summary = DELETE_VOLUMES_BY_STACK_CRN, description = Notes.STACK_NOTES,
+            operationId = "deleteVolumesByStackCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteVolumesByStackCrn(
             @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid StackDeleteVolumesRequest deleteRequest);
@@ -611,15 +672,15 @@ public interface DistroXV1Endpoint {
     @PUT
     @Path("/name/{name}/disk_update")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Updates disk type and resizes DH", produces = MediaType.APPLICATION_JSON,
-            nickname = "diskUpdateByName")
+    @Operation(summary = "Updates disk type and resizes DH", operationId = "diskUpdateByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier diskUpdateByName(@PathParam("name") String name, @Valid DiskUpdateRequest updateRequest);
 
     @PUT
     @Path("/crn/{crn}/disk_update")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Updates disk type and resizes DH", produces = MediaType.APPLICATION_JSON,
-            nickname = "diskUpdateByCrn")
+    @Operation(summary = "Updates disk type and resizes DH", operationId = "diskUpdateByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier diskUpdateByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
 }

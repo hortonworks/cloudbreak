@@ -6,11 +6,11 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AwsLoadBalancerResponse implements Serializable {
 
-    @ApiModelProperty(StackModelDescription.AWS_LB_ARN)
+    @Schema(description = StackModelDescription.AWS_LB_ARN)
     @NotNull
     private String arn;
 

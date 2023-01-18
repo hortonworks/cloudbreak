@@ -8,22 +8,21 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AzureDistroXV1Parameters implements Serializable {
 
-    @ApiModelProperty
+    @Schema
     private String resourceGroupName;
 
     @Deprecated
-    @ApiModelProperty
+    @Schema
     private boolean encryptStorage;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.LOAD_BALANCER_SKU)
+    @Schema(description = ModelDescriptions.StackModelDescription.LOAD_BALANCER_SKU)
     private LoadBalancerSku loadBalancerSku = LoadBalancerSku.getDefault();
 
     public String getResourceGroupName() {

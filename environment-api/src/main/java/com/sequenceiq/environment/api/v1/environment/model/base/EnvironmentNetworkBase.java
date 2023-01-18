@@ -25,15 +25,14 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNe
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.validator.cidr.NetworkCidr;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(subTypes = {EnvironmentNetworkRequest.class, EnvironmentNetworkResponse.class})
+@Schema(subTypes = {EnvironmentNetworkRequest.class, EnvironmentNetworkResponse.class})
 public abstract class EnvironmentNetworkBase implements Serializable {
 
-    @ApiModelProperty(value = EnvironmentModelDescription.SUBNET_IDS)
+    @Schema(description = EnvironmentModelDescription.SUBNET_IDS)
     private Set<String> subnetIds;
 
     @Size(max = 255)
@@ -41,37 +40,37 @@ public abstract class EnvironmentNetworkBase implements Serializable {
     @ValidSubnet(SubnetType.RFC_1918_COMPLIANT_ONLY_OR_EMPTY)
     private String networkCidr;
 
-    @ApiModelProperty(EnvironmentModelDescription.PRIVATE_SUBNET_CREATION)
+    @Schema(description = EnvironmentModelDescription.PRIVATE_SUBNET_CREATION)
     private PrivateSubnetCreation privateSubnetCreation = PrivateSubnetCreation.DISABLED;
 
-    @ApiModelProperty(EnvironmentModelDescription.SERVICE_ENDPOINT_CREATION)
+    @Schema(description = EnvironmentModelDescription.SERVICE_ENDPOINT_CREATION)
     private ServiceEndpointCreation serviceEndpointCreation = ServiceEndpointCreation.DISABLED;
 
-    @ApiModelProperty(EnvironmentModelDescription.PUBLIC_ENDPOINT_ACCESS_GATEWAY)
+    @Schema(description = EnvironmentModelDescription.PUBLIC_ENDPOINT_ACCESS_GATEWAY)
     private PublicEndpointAccessGateway publicEndpointAccessGateway = PublicEndpointAccessGateway.DISABLED;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
+    @Schema(description = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
     private Set<String> endpointGatewaySubnetIds = Set.of();
 
-    @ApiModelProperty(EnvironmentModelDescription.OUTBOUND_INTERNET_TRAFFIC)
+    @Schema(description = EnvironmentModelDescription.OUTBOUND_INTERNET_TRAFFIC)
     private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;
 
-    @ApiModelProperty(EnvironmentModelDescription.AWS_SPECIFIC_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AWS_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkAwsParams aws;
 
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_SPECIFIC_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.AZURE_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkAzureParams azure;
 
-    @ApiModelProperty(EnvironmentModelDescription.YARN_SPECIFIC_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.YARN_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkYarnParams yarn;
 
-    @ApiModelProperty(EnvironmentModelDescription.MOCK_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.MOCK_PARAMETERS)
     private EnvironmentNetworkMockParams mock;
 
-    @ApiModelProperty(EnvironmentModelDescription.GCP_SPECIFIC_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.GCP_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkGcpParams gcp;
 
-    @ApiModelProperty(EnvironmentModelDescription.LOADBALANCER_CREATION)
+    @Schema(description = EnvironmentModelDescription.LOADBALANCER_CREATION)
     private LoadBalancerCreation loadBalancerCreation = LoadBalancerCreation.ENABLED;
 
     public Set<String> getSubnetIds() {

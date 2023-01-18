@@ -19,29 +19,25 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeipaSecretTypeResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/freeipa")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/freeipa",
-        protocols = "http,https",
-        authorizations = {@Authorization(value = FreeIpaApi.CRN_HEADER_API_KEY)},
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/freeipa")
 public interface FreeIpaRotationV1Endpoint {
 
     @PUT
     @Path("rotate_secret")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ROTATE_SECRETS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "rotateSecretsByCrn")
+    @Operation(summary = ROTATE_SECRETS_BY_CRN, description = FreeIpaNotes.FREEIPA_NOTES, operationId = "rotateSecretsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSecretsByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @Valid @NotNull FreeIpaSecretRotationRequest request);
@@ -49,8 +45,8 @@ public interface FreeIpaRotationV1Endpoint {
     @GET
     @Path("list_secret_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "List rotatable secret types for Free IPA", produces = MediaType.APPLICATION_JSON,
-            nickname = "listRotatableFreeipaSecretType")
+    @Operation(summary = "List rotatable secret types for Free IPA", operationId = "listRotatableFreeipaSecretType",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<FreeipaSecretTypeResponse> listRotatableFreeipaSecretType(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 }

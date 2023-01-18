@@ -7,21 +7,20 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidUpdateStackRequest;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidUpdateStackRequest
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateStackV4Request implements JsonEntity {
 
-    @ApiModelProperty(value = StackModelDescription.STATUS_REQUEST, allowableValues = "SYNC,FULL_SYNC,REPAIR_FAILED_NODES,STOPPED,STARTED")
+    @Schema(description = StackModelDescription.STATUS_REQUEST)
     private StatusRequest status;
 
-    @ApiModelProperty(InstanceGroupAdjustmentModelDescription.WITH_CLUSTER_EVENT)
+    @Schema(description = InstanceGroupAdjustmentModelDescription.WITH_CLUSTER_EVENT)
     private Boolean withClusterEvent = Boolean.FALSE;
 
-    @ApiModelProperty(StackModelDescription.INSTANCE_GROUP_ADJUSTMENT)
+    @Schema(description = StackModelDescription.INSTANCE_GROUP_ADJUSTMENT)
     private InstanceGroupAdjustmentV4Request instanceGroupAdjustment;
 
     public StatusRequest getStatus() {

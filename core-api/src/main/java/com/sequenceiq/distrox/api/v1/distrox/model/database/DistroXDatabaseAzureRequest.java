@@ -8,17 +8,16 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.common.model.AzureDatabaseType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class DistroXDatabaseAzureRequest implements Serializable {
-    @ApiModelProperty(Database.AZURE_DATABASE_TYPE)
+    @Schema(description = Database.AZURE_DATABASE_TYPE)
     private AzureDatabaseType azureDatabaseType;
 
-    @ApiModelProperty(Database.FLEXIBLE_SERVER_DELEGATED_SUBNET)
+    @Schema(description = Database.FLEXIBLE_SERVER_DELEGATED_SUBNET)
     private String flexibleServerDelegatedSubnetId;
 
     public AzureDatabaseType getAzureDatabaseType() {

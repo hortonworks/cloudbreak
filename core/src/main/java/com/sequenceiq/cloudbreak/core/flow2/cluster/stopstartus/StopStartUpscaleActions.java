@@ -142,7 +142,7 @@ public class StopStartUpscaleActions {
                 List<CloudInstance> stoppedCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(stoppedInstancesInHg, stack.getStack());
                 List<CloudInstance> allCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(instanceMetaDataForHg, stack.getStack());
 
-                StopStartUpscaleStartInstancesRequest request =  new StopStartUpscaleStartInstancesRequest(context.getCloudContext(),
+                StopStartUpscaleStartInstancesRequest request = new StopStartUpscaleStartInstancesRequest(context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack(), context.getHostGroupName(), stoppedCloudInstancesForHg,
                         allCloudInstancesForHg, payload.getStartedInstancesWithServicesNotRunning(), context.getAdjustment());
                 sendEvent(context, request);

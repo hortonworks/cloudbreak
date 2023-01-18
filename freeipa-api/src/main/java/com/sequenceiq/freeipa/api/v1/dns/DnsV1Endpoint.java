@@ -33,40 +33,45 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v1/dns")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/dns", description = "Amange DNS in FreeIPA", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/dns", description = "Amange DNS in FreeIPA")
 public interface DnsV1Endpoint {
     @POST
     @Path("zone/cidr")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNETS, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "addDnsZoneForSubnetsV1")
+    @Operation(summary = DnsOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNETS, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "addDnsZoneForSubnetsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(@Valid AddDnsZoneForSubnetsRequest request);
 
     @POST
     @Path("zone/id")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNET_IDS, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "addDnsZoneForSubnetIdsV1")
+    @Operation(summary = DnsOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNET_IDS, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "addDnsZoneForSubnetIdsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@Valid AddDnsZoneForSubnetIdsRequest request);
 
     @GET
     @Path("zone")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.LIST_DNS_ZONES, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "listDnsZonesV1")
+    @Operation(summary = DnsOperationDescriptions.LIST_DNS_ZONES, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "listDnsZonesV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Set<String> listDnsZones(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @DELETE
     @Path("zone/cidr")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "deleteDnsZoneBySubnetV1")
+    @Operation(summary = DnsOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "deleteDnsZoneBySubnetV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteDnsZoneBySubnet(@QueryParam("environment") @NotEmpty String environmentCrn,
             @QueryParam("subnet") @NotEmpty
             @Pattern(regexp = "(^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([0-9]|[1-2][0-9]|3[0-2]))$)",
@@ -75,37 +80,42 @@ public interface DnsV1Endpoint {
     @DELETE
     @Path("zone/id")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET_ID, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "deleteDnsZoneBySubnetIdV1")
+    @Operation(summary = DnsOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET_ID, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "deleteDnsZoneBySubnetIdV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteDnsZoneBySubnetId(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("networkId") @NotEmpty String networkId,
             @QueryParam("subnetId") @NotEmpty String subnetId);
 
     @DELETE
     @Path("record")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_RECORD_BY_FQDN, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "deleteDnsRecordByFqdnV1")
+    @Operation(summary = DnsOperationDescriptions.DELETE_DNS_RECORD_BY_FQDN, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "deleteDnsRecordByFqdnV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteDnsRecordsByFqdn(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("fqdn") @NotEmpty List<String> fqdns);
 
     @POST
     @Path("record/a")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_A_RECORD, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "addDnsARecordV1")
+    @Operation(summary = DnsOperationDescriptions.ADD_DNS_A_RECORD, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "addDnsARecordV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void addDnsARecord(@Valid @NotNull AddDnsARecordRequest request);
 
     @POST
     @Path("record/a/internal")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_A_RECORD, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "addDnsARecordV1Internal")
+    @Operation(summary = DnsOperationDescriptions.ADD_DNS_A_RECORD, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "addDnsARecordV1Internal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void addDnsARecordInternal(@AccountId @QueryParam("accountId") @NotEmpty String accountId, @Valid @NotNull AddDnsARecordRequest request);
 
     @DELETE
     @Path("record/a")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_A_RECORD, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "deleteDnsARecordV1")
+    @Operation(summary = DnsOperationDescriptions.DELETE_DNS_A_RECORD, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "deleteDnsARecordV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteDnsARecord(@QueryParam("environment") @NotEmpty String environmentCrn,
             @QueryParam("dnsZone") @Pattern(regexp = DNS_ZONE_PATTERN, message = DNS_ZONE_MSG) String dnsZone,
             @QueryParam("hostname") @NotEmpty @Pattern(regexp = DNS_HOSTNAME_PATTERN, message = DNS_HOSTNAME_MSG) String hostname);
@@ -113,22 +123,25 @@ public interface DnsV1Endpoint {
     @POST
     @Path("record/cname")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_CNAME_RECORD, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "addDnsCnameRecordV1")
+    @Operation(summary = DnsOperationDescriptions.ADD_DNS_CNAME_RECORD, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "addDnsCnameRecordV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void addDnsCnameRecord(@Valid @NotNull AddDnsCnameRecordRequest request);
 
     @POST
     @Path("record/cname/internal")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_CNAME_RECORD, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "addDnsCnameRecordV1Internal")
+    @Operation(summary = DnsOperationDescriptions.ADD_DNS_CNAME_RECORD, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "addDnsCnameRecordV1Internal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void addDnsCnameRecordInternal(@AccountId @QueryParam("accountId") @NotEmpty String accountId, @Valid @NotNull AddDnsCnameRecordRequest request);
 
     @DELETE
     @Path("record/cname")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_CNAME_RECORD, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "deleteDnsCnameRecordV1")
+    @Operation(summary = DnsOperationDescriptions.DELETE_DNS_CNAME_RECORD, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "deleteDnsCnameRecordV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void deleteDnsCnameRecord(@QueryParam("environment") @NotEmpty String environmentCrn,
             @QueryParam("dnsZone") @Pattern(regexp = DNS_ZONE_PATTERN, message = DNS_ZONE_MSG) String dnsZone,
             @QueryParam("cname") @NotEmpty @Pattern(regexp = DNS_CNAME_PATTERN, message = DNS_CNAME_MSG) String cname);

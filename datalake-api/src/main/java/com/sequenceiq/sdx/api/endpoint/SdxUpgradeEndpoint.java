@@ -22,45 +22,50 @@ import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
 @Path("/sdx")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/sdx", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/sdx")
 public interface SdxUpgradeEndpoint {
 
     @POST
     @Path("{name}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "upgrades the data lake cluster", nickname = "upgradeDatalakeCluster")
+    @Operation(summary = "upgrades the data lake cluster", operationId = "upgradeDatalakeCluster",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeResponse upgradeClusterByName(@PathParam("name") String name, @Valid SdxUpgradeRequest upgradeSdxClusterRequest);
 
     @POST
     @Path("/crn/{crn}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "upgrades the data lake cluster", nickname = "upgradeDatalakeClusterByCrn")
-    SdxUpgradeResponse upgradeClusterByCrn(@PathParam("crn") String crn,
-            @Valid SdxUpgradeRequest upgradeSdxClusterRequest);
+    @Operation(summary = "upgrades the data lake cluster", operationId = "upgradeDatalakeClusterByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxUpgradeResponse upgradeClusterByCrn(@PathParam("crn") String crn, @Valid SdxUpgradeRequest upgradeSdxClusterRequest);
 
     @POST
     @Path("{name}/prepare_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "prepares the data lake cluster for upgrade", nickname = "prepareDatalakeClusterUpgrade")
+    @Operation(summary = "prepares the data lake cluster for upgrade", operationId = "prepareDatalakeClusterUpgrade",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeResponse prepareClusterUpgradeByName(@PathParam("name") String name, @Valid SdxUpgradeRequest distroxUpgradeRequest);
 
     @POST
     @Path("/crn/{crn}/prepare_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "prepares the data lake cluster for upgrade", nickname = "prepareDatalakeClusterUpgradeByCrn")
+    @Operation(summary = "prepares the data lake cluster for upgrade", operationId = "prepareDatalakeClusterUpgradeByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeResponse prepareClusterUpgradeByCrn(@PathParam("crn") String crn, @Valid SdxUpgradeRequest distroxUpgradeRequest);
 
     @PUT
     @Path("/internal/upgrade_ccm")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Upgrade Cluster Connectivity Manager", nickname = "upgradeCcm")
+    @Operation(summary = "Upgrade Cluster Connectivity Manager", operationId = "upgradeCcm",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxCcmUpgradeResponse upgradeCcm(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
@@ -68,15 +73,16 @@ public interface SdxUpgradeEndpoint {
     @PUT
     @Path("{name}/upgrade_rds")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Upgrades the database server of the data lake", nickname = "upgradeDatalakeDatabaseByName")
-    SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByName(@PathParam("name") String clusterName, @Valid SdxUpgradeDatabaseServerRequest
-            sdxUpgradeDatabaseServerRequest);
+    @Operation(summary = "Upgrades the database server of the data lake", operationId = "upgradeDatalakeDatabaseByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByName(@PathParam("name") String clusterName,
+            @Valid SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest);
 
     @PUT
     @Path("/crn/{crn}/upgrade_rds")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Upgrades the database server of the data lake", nickname = "upgradeDatalakeDatabaseByCrn")
+    @Operation(summary = "Upgrades the database server of the data lake", operationId = "upgradeDatalakeDatabaseByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String clusterCrn,
             @Valid SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest);
-
 }

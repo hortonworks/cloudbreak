@@ -14,59 +14,58 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescrip
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceMetaDataModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonInclude(Include.NON_NULL)
 public class InstanceMetaDataV4Response implements JsonEntity {
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.PRIVATE_IP)
+    @Schema(description = InstanceMetaDataModelDescription.PRIVATE_IP)
     private String privateIp;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.PUBLIC_IP)
+    @Schema(description = InstanceMetaDataModelDescription.PUBLIC_IP)
     private String publicIp;
 
-    @ApiModelProperty
+    @Schema
     private Integer sshPort;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.INSTANCE_ID)
+    @Schema(description = InstanceMetaDataModelDescription.INSTANCE_ID)
     private String instanceId;
 
-    @ApiModelProperty(ModelDescriptions.AMBARI_SERVER)
+    @Schema(description = ModelDescriptions.AMBARI_SERVER)
     private Boolean ambariServer;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.DISCOVERY_FQDN)
+    @Schema(description = InstanceMetaDataModelDescription.DISCOVERY_FQDN)
     private String discoveryFQDN;
 
-    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.SUBNET_ID)
+    @Schema(description = InstanceMetaDataModelDescription.SUBNET_ID)
     private String subnetId;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.AVAILABILITY_ZONE)
+    @Schema(description = InstanceMetaDataModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
 
-    @ApiModelProperty(InstanceMetaDataModelDescription.RACK_ID)
+    @Schema(description = InstanceMetaDataModelDescription.RACK_ID)
     private String rackId;
 
-    @ApiModelProperty(InstanceGroupModelDescription.STATUS)
+    @Schema(description = InstanceGroupModelDescription.STATUS)
     private InstanceStatus instanceStatus;
 
-    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_TYPE)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_TYPE)
     private InstanceMetadataType instanceType;
 
-    @ApiModelProperty(HostMetadataModelDescription.STATE)
+    @Schema(description = HostMetadataModelDescription.STATE)
     private String state;
 
-    @ApiModelProperty(HostMetadataModelDescription.STATUS_REASON)
+    @Schema(description = HostMetadataModelDescription.STATUS_REASON)
     private String statusReason;
 
-    @ApiModelProperty
+    @Schema
     private List<MountedVolumeV4Response> mountedVolumes = Lists.newArrayList();
 
-    @ApiModelProperty
+    @Schema
     private InstanceLifeCycle lifeCycle;
 
     public String getInstanceGroup() {

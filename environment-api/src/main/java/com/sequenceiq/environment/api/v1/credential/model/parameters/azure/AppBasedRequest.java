@@ -7,25 +7,24 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.common.api.credential.AppAuthenticationType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("AppBasedV1Request")
+@Schema(name = "AppBasedV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AppBasedRequest implements Serializable {
 
-    @ApiModelProperty
+    @Schema
     private String accessKey;
 
     // We should default to SECRET, since in the past we supported only SECRET based app credentials
-    @ApiModelProperty
+    @Schema
     private AppAuthenticationType authenticationType = AppAuthenticationType.SECRET;
 
-    @ApiModelProperty
+    @Schema
     private Boolean generateCertificate;
 
-    @ApiModelProperty
+    @Schema
     private String secretKey;
 
     public String getAccessKey() {

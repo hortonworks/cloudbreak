@@ -1,8 +1,8 @@
 package com.sequenceiq.common.api.type;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "DataHubStartAction")
+@Schema(name = "DataHubStartAction")
 public enum DataHubStartAction {
     START_ALL,
     DO_NOT_START

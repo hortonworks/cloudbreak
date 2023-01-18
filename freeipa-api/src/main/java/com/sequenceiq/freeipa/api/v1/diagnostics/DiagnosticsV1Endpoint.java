@@ -17,40 +17,45 @@ import com.sequenceiq.freeipa.api.v1.diagnostics.docs.DiagnosticsOperationDescri
 import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v1/diagnostics")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/diagnostics", description = "Diagnostics in FreeIPA", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/diagnostics", description = "Diagnostics in FreeIPA")
 public interface DiagnosticsV1Endpoint {
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_FREEIPA_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
-            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "collectFreeIpaDiagnosticsV1")
+    @Operation(summary = DiagnosticsOperationDescriptions.COLLECT_FREEIPA_DIAGNOSTICS,
+            description = FreeIpaNotes.FREEIPA_NOTES, operationId = "collectFreeIpaDiagnosticsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier collectDiagnostics(@Valid DiagnosticsCollectionRequest request);
 
     @GET
     @Path("logs")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS, produces = MediaType.APPLICATION_JSON,
-            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "getFreeIpaVmLogsV1")
+    @Operation(summary = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS,
+            description = FreeIpaNotes.FREEIPA_NOTES, operationId = "getFreeIpaVmLogsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     VmLogsResponse getVmLogs();
 
     @GET
     @Path("{environmentCrn}/collections")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.LIST_DIAGNOSTICS_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
-            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "listDiagnosticsCollectionsV1")
+    @Operation(summary = DiagnosticsOperationDescriptions.LIST_DIAGNOSTICS_COLLECTIONS,
+            description = FreeIpaNotes.FREEIPA_NOTES, operationId = "listDiagnosticsCollectionsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ListDiagnosticsCollectionResponse listDiagnosticsCollections(@PathParam("environmentCrn") String environmentCrn);
 
     @POST
     @Path("{environmentCrn}/collections/cancel")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.CANCEL_DIAGNOSTICS_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
-            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "cancelDiagnosticsCollectionsV1")
+    @Operation(summary = DiagnosticsOperationDescriptions.CANCEL_DIAGNOSTICS_COLLECTIONS,
+            description = FreeIpaNotes.FREEIPA_NOTES, operationId = "cancelDiagnosticsCollectionsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void cancelCollections(@PathParam("environmentCrn") String environmentCrn);
 }

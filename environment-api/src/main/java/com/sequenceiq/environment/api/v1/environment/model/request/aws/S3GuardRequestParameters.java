@@ -7,16 +7,15 @@ import javax.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "S3GuardV1Parameters")
+@Schema(name = "S3GuardV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class S3GuardRequestParameters implements Serializable {
 
     @Pattern(regexp = "^[a-zA-Z0-9\\.\\-_]{3,255}$",
             message = "Table name must be between 3 and 255 characters long and can contain only alpnahumeric charachters, dot, dash and hyphen.")
-    @ApiModelProperty(EnvironmentModelDescription.S3_GUARD_DYNAMO_TABLE_NAME)
+    @Schema(description = EnvironmentModelDescription.S3_GUARD_DYNAMO_TABLE_NAME)
     private String dynamoDbTableName;
 
     public S3GuardRequestParameters() {

@@ -97,8 +97,6 @@ import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.CloudbreakAuthorizationService;
 import com.zaxxer.hikari.HikariDataSource;
 
-import springfox.documentation.swagger.web.SwaggerResourcesProvider;
-
 @Ignore
 @SpringBootTest(classes = MetricTest.TestConfig.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
@@ -475,9 +473,6 @@ public class MetricTest {
 
         @MockBean
         private SubscriptionRepository subscriptionRepository;
-
-        @MockBean
-        private SwaggerResourcesProvider swaggerResourcesProvider;
 
         @MockBean
         private TransactionalScheduler scheduler;

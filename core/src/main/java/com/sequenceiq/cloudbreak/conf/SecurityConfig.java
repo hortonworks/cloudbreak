@@ -133,8 +133,7 @@ public class SecurityConfig {
                     .authenticated()
                     .antMatchers(AUTHORIZATION_API)
                     .authenticated()
-                    .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
-                    .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()
+                    .antMatchers(API_ROOT_CONTEXT + "/openapi.json").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/**").denyAll();
 
             http.csrf().disable();

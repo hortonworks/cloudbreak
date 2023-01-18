@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.validator.cidr.ValidCidrList;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @MutuallyExclusiveNotNull(fieldGroups = {"securityGroupIdForKnox,defaultSecurityGroupId", "cidr"},
         message = "Please set either only the CIDR field or both security group id fields")
@@ -18,16 +18,16 @@ import io.swagger.annotations.ApiModelProperty;
 public abstract class SecurityAccessBase implements Serializable {
 
     @Size(min = 1, max = 4000, message = "The length of the security group ID can be minimum 1 and maximum 4000 characters.")
-    @ApiModelProperty(EnvironmentModelDescription.KNOX_SECURITY_GROUP)
+    @Schema(description = EnvironmentModelDescription.KNOX_SECURITY_GROUP)
     private String securityGroupIdForKnox;
 
     @Size(min = 1, max = 4000, message = "The length of the security group ID can be minimum 1 and maximum 4000 characters.")
-    @ApiModelProperty(EnvironmentModelDescription.DEFAULT_SECURITY_GROUP)
+    @Schema(description = EnvironmentModelDescription.DEFAULT_SECURITY_GROUP)
     private String defaultSecurityGroupId;
 
     @ValidCidrList
     @Size(min = 5, max = 4000, message = "The list of CIDRs must consist of characters between 5 and 4000")
-    @ApiModelProperty(EnvironmentModelDescription.SECURITY_CIDR)
+    @Schema(description = EnvironmentModelDescription.SECURITY_CIDR)
     private String cidr;
 
     public String getSecurityGroupIdForKnox() {

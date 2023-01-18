@@ -15,10 +15,9 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.Instan
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.validation.ValidRootVolumeSize;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 @ValidRootVolumeSize
@@ -26,13 +25,13 @@ public class InstanceGroupV1Request extends InstanceGroupV1Base {
 
     @Valid
     @NotNull
-    @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
+    @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV1Request template;
 
-    @ApiModelProperty(HostGroupModelDescription.RECIPE_NAMES)
+    @Schema(description = HostGroupModelDescription.RECIPE_NAMES)
     private Set<String> recipeNames = new HashSet<>();
 
-    @ApiModelProperty(HostGroupModelDescription.NETWORK)
+    @Schema(description = HostGroupModelDescription.NETWORK)
     private InstanceGroupNetworkV1Request network;
 
     public InstanceTemplateV1Request getTemplate() {

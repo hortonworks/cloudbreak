@@ -8,29 +8,29 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("SdxDatabaseBackupRequest")
+@Schema(name = "SdxDatabaseBackupRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxDatabaseBackupRequest {
+
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.BACKUP_ID, required = true)
+    @Schema(description = ModelDescriptions.BACKUP_ID, required = true)
     private String backupId;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.BACKUP_LOCATION, required = true)
+    @Schema(description = ModelDescriptions.BACKUP_LOCATION, required = true)
     private String backupLocation;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.CLOSE_CONNECTIONS, required = true)
+    @Schema(description = ModelDescriptions.CLOSE_CONNECTIONS, required = true)
     private boolean closeConnections;
 
-    @ApiModelProperty(value = ModelDescriptions.SKIP_DATABASE_NAMES, required = false)
+    @Schema(description = ModelDescriptions.SKIP_DATABASE_NAMES, required = false)
     private List<String> skipDatabaseNames;
 
-    @ApiModelProperty(value = ModelDescriptions.DATABASE_BACKUP_RESTORE_MAX_DURATION, required = false)
+    @Schema(description = ModelDescriptions.DATABASE_BACKUP_RESTORE_MAX_DURATION, required = false)
     private int databaseMaxDurationInMin;
 
     public String getBackupId() {

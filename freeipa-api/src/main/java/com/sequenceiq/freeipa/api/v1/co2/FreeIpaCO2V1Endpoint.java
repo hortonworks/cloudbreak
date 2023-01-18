@@ -11,27 +11,23 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.common.co2.RealTimeCO2Response;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
-import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/freeipa/carbon_dioxide")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/freeipa/carbon_dioxide",
-        protocols = "http,https",
-        authorizations = {@Authorization(value = FreeIpaApi.CRN_HEADER_API_KEY)},
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/freeipa/carbon_dioxide")
 public interface FreeIpaCO2V1Endpoint {
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.CO2, produces = MediaType.APPLICATION_JSON,
-            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "listFreeIpaCO2V1")
+    @Operation(summary = FreeIpaOperationDescriptions.CO2, description = FreeIpaNotes.FREEIPA_NOTES, operationId = "listFreeIpaCO2V1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RealTimeCO2Response list(List<String> environmentCrns, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

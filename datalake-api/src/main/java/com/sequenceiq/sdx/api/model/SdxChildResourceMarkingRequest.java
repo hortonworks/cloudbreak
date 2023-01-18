@@ -9,22 +9,21 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxChildResourceMarkingRequest {
 
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENT_CRN)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN)
     @NotNull
     private String parentCrn;
 
     @ValidMultiSecretType
     @NotEmpty
-    @ApiModelProperty("Secret to be rotated")
+    @Schema(description = "Secret to be rotated")
     private String secret;
 
     public String getParentCrn() {

@@ -9,10 +9,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("InstanceTemplateV1Request")
+@Schema(name = "InstanceTemplateV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstanceTemplateRequest extends InstanceTemplateBase {
@@ -22,7 +21,7 @@ public class InstanceTemplateRequest extends InstanceTemplateBase {
     private VolumeRequest rootVolume;
 
     @Valid
-    @ApiModelProperty(FreeIpaModelDescriptions.AWS_PARAMETERS)
+    @Schema(description = FreeIpaModelDescriptions.AWS_PARAMETERS)
     private AwsInstanceTemplateParameters aws;
 
     public Set<VolumeRequest> getAttachedVolumes() {

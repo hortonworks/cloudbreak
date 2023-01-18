@@ -3,18 +3,18 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.model.annotations.Immutable;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Immutable
 public class CertificateV4Response {
 
-    @ApiModelProperty(StackModelDescription.CERTIFICATE)
+    @Schema(description = StackModelDescription.CERTIFICATE)
     private String serverCert;
 
-    @ApiModelProperty(StackModelDescription.CLIENT_KEY)
+    @Schema(description = StackModelDescription.CLIENT_KEY)
     private String clientKeyPath;
 
-    @ApiModelProperty(StackModelDescription.CLIENT_CERT)
+    @Schema(description = StackModelDescription.CLIENT_CERT)
     private String clientCertPath;
 
     public CertificateV4Response() {

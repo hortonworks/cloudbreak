@@ -5,18 +5,17 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExperiencePolicyResponse implements Serializable {
 
-    @ApiModelProperty(value = "AWS credential prerequisite policy")
+    @Schema(description = "AWS credential prerequisite policy")
     private ProviderPolicyResponse aws;
 
-    @ApiModelProperty(value = "AZURE credential prerequisite policy")
+    @Schema(description = "AZURE credential prerequisite policy")
     private ProviderPolicyResponse azure;
 
     public ProviderPolicyResponse getAws() {

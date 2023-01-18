@@ -6,25 +6,24 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("SynchronizeAllUsersV1Request")
+@Schema(name = "SynchronizeAllUsersV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SynchronizeAllUsersRequest extends SynchronizeOperationRequestBase {
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_MACHINEUSER_CRNS)
+    @Schema(description = UserModelDescriptions.USERSYNC_MACHINEUSER_CRNS)
     private Set<String> machineUsers = new HashSet<>();
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_USER_CRNS)
+    @Schema(description = UserModelDescriptions.USERSYNC_USER_CRNS)
     private Set<String> users = new HashSet<>();
 
-    @ApiModelProperty(value = UserModelDescriptions.DELETED_WORKLOAD_USERS)
-    private Set<String> deletedWorkloadUsers =  new HashSet<>();
+    @Schema(description = UserModelDescriptions.DELETED_WORKLOAD_USERS)
+    private Set<String> deletedWorkloadUsers = new HashSet<>();
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ACCOUNT_ID)
+    @Schema(description = UserModelDescriptions.USERSYNC_ACCOUNT_ID)
     private String accountId;
 
-    @ApiModelProperty(value = UserModelDescriptions.WORKLOAD_CREDENTIALS_UPDATE_TYPE)
+    @Schema(description = UserModelDescriptions.WORKLOAD_CREDENTIALS_UPDATE_TYPE)
     private WorkloadCredentialsUpdateType workloadCredentialsUpdateType = WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED;
 
     public SynchronizeAllUsersRequest() {

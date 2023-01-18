@@ -4,16 +4,16 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescri
 
 import java.io.Serializable;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class VolumeBase implements Serializable {
-    @ApiModelProperty(TemplateModelDescription.VOLUME_COUNT)
+    @Schema(description = TemplateModelDescription.VOLUME_COUNT)
     private Integer count;
 
-    @ApiModelProperty(TemplateModelDescription.VOLUME_TYPE)
+    @Schema(description = TemplateModelDescription.VOLUME_TYPE)
     private String type;
 
-    @ApiModelProperty(value = TemplateModelDescription.VOLUME_SIZE, required = true)
+    @Schema(description = TemplateModelDescription.VOLUME_SIZE, required = true)
     private Integer size;
 
     public Integer getSize() {

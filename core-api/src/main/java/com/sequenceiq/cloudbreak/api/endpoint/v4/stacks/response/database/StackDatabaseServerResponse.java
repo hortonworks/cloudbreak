@@ -7,57 +7,56 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.DatabaseServerModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class StackDatabaseServerResponse {
 
-    @ApiModelProperty(DatabaseServerModelDescription.CRN)
+    @Schema(description = DatabaseServerModelDescription.CRN)
     private String crn;
 
-    @ApiModelProperty(DatabaseServerModelDescription.NAME)
+    @Schema(description = DatabaseServerModelDescription.NAME)
     private String name;
 
-    @ApiModelProperty(DatabaseServerModelDescription.DESCRIPTION)
+    @Schema(description = DatabaseServerModelDescription.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(DatabaseServerModelDescription.ENVIRONMENT_CRN)
+    @Schema(description = DatabaseServerModelDescription.ENVIRONMENT_CRN)
     private String environmentCrn;
 
-    @ApiModelProperty(DatabaseServerModelDescription.HOST)
+    @Schema(description = DatabaseServerModelDescription.HOST)
     private String host;
 
-    @ApiModelProperty(DatabaseServerModelDescription.PORT)
+    @Schema(description = DatabaseServerModelDescription.PORT)
     private Integer port;
 
-    @ApiModelProperty(DatabaseServerModelDescription.DATABASE_VENDOR)
+    @Schema(description = DatabaseServerModelDescription.DATABASE_VENDOR)
     private String databaseVendor;
 
-    @ApiModelProperty(DatabaseServerModelDescription.DATABASE_VENDOR_DISPLAY_NAME)
+    @Schema(description = DatabaseServerModelDescription.DATABASE_VENDOR_DISPLAY_NAME)
     private String databaseVendorDisplayName;
 
-    @ApiModelProperty(DatabaseServerModelDescription.CREATION_DATE)
+    @Schema(description = DatabaseServerModelDescription.CREATION_DATE)
     private Long creationDate;
 
-    @ApiModelProperty(DatabaseServerModelDescription.RESOURCE_STATUS)
+    @Schema(description = DatabaseServerModelDescription.RESOURCE_STATUS)
     private DatabaseServerResourceStatus resourceStatus;
 
-    @ApiModelProperty(DatabaseServerModelDescription.STATUS)
+    @Schema(description = DatabaseServerModelDescription.STATUS)
     private DatabaseServerStatus status;
 
-    @ApiModelProperty(DatabaseServerModelDescription.STATUS_REASON)
+    @Schema(description = DatabaseServerModelDescription.STATUS_REASON)
     private String statusReason;
 
-    @ApiModelProperty(DatabaseServerModelDescription.CLUSTER_CRN)
+    @Schema(description = DatabaseServerModelDescription.CLUSTER_CRN)
     private String clusterCrn;
 
-    @ApiModelProperty(DatabaseServerModelDescription.SSL_CONFIG)
+    @Schema(description = DatabaseServerModelDescription.SSL_CONFIG)
     private DatabaseServerSslConfig sslConfig;
 
-    @ApiModelProperty(DatabaseServerModelDescription.MAJOR_VERSION)
+    @Schema(description = DatabaseServerModelDescription.MAJOR_VERSION)
     private MajorVersion majorVersion;
 
     public StackDatabaseServerResponse() {

@@ -7,32 +7,32 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.NetworkModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class NetworkBase extends ProviderParametersBase {
-    @ApiModelProperty(NetworkModelDescription.OUTBOUND_INTERNET_TRAFFIC)
+    @Schema(description = NetworkModelDescription.OUTBOUND_INTERNET_TRAFFIC)
     private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;
 
-    @ApiModelProperty(NetworkModelDescription.NETWORK_CIDRS)
+    @Schema(description = NetworkModelDescription.NETWORK_CIDRS)
     private List<String> networkCidrs;
 
-    @ApiModelProperty(NetworkModelDescription.AWS_PARAMETERS)
+    @Schema(description = NetworkModelDescription.AWS_PARAMETERS)
     private AwsNetworkParameters aws;
 
-    @ApiModelProperty(NetworkModelDescription.AZURE_PARAMETERS)
+    @Schema(description = NetworkModelDescription.AZURE_PARAMETERS)
     private AzureNetworkParameters azure;
 
-    @ApiModelProperty(NetworkModelDescription.GCP_PARAMETERS)
+    @Schema(description = NetworkModelDescription.GCP_PARAMETERS)
     private GcpNetworkParameters gcp;
 
-    @ApiModelProperty(NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Schema(description = NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
     @Deprecated
     private OpenStackNetworkParameters openstack;
 
-    @ApiModelProperty(hidden = false)
+    @Schema
     private MockNetworkParameters mock;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private YarnNetworkParameters yarn;
 
     public OutboundInternetTraffic getOutboundInternetTraffic() {

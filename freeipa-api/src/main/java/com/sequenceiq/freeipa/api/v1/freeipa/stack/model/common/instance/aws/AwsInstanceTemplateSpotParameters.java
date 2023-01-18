@@ -9,19 +9,18 @@ import javax.validation.constraints.Min;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "AwsInstanceTemplateSpotParameters")
+@Schema(name = "AwsInstanceTemplateSpotParameters")
 public class AwsInstanceTemplateSpotParameters implements Serializable {
 
-    @ApiModelProperty(FreeIpaModelDescriptions.AWS_SPOT_PERCENTAGE)
+    @Schema(description = FreeIpaModelDescriptions.AWS_SPOT_PERCENTAGE)
     @Min(value = 0, message = "Spot percentage must be between 0 and 100 percent")
     @Max(value = 100, message = "Spot percentage must be between 0 and 100 percent")
     @Digits(fraction = 0, integer = 3, message = "Spot percentage has to be a number")
     private int percentage;
 
-    @ApiModelProperty(FreeIpaModelDescriptions.AWS_SPOT_MAX_PRICE)
+    @Schema(description = FreeIpaModelDescriptions.AWS_SPOT_MAX_PRICE)
     @DecimalMin(value = "0.001", message = "Spot max price must be between 0.001 and 255 with maximum 4 fraction digits")
     @Max(value = 255, message = "Spot max price must be between 0.001 and 255 with maximum 4 fraction digits")
     @Digits(fraction = 4, integer = 3, message = "Spot max price must be between 0.001 and 255 with maximum 4 fraction digits")

@@ -26,13 +26,9 @@ dependencies {
   implementation project(':authorization-common-api')
   implementation project(':structuredevent-api-cdp')
 
-  implementation ('io.swagger:swagger-jersey2-jaxrs') {
-    exclude group: 'org.yaml'
-  }
-
   constraints {
     implementation group: 'org.glassfish.jersey.ext', name: 'jersey-proxy-client',   version: jerseyCoreVersion
-    implementation group: 'io.swagger',               name: 'swagger-jersey2-jaxrs', version: swaggerVersion
+    implementation group: 'io.swagger.core.v3',       name: 'swagger-jaxrs2',        version: swaggerCoreVersion
   }
 
   testImplementation group: 'org.hamcrest',           name: 'hamcrest',              version: hamcrestVersion

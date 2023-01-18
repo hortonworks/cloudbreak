@@ -44,7 +44,7 @@ public class OperationServiceTest {
 
     private static final String TEST_DATALAKE_CRN = "crn:cdp:datalake:us-west-1:autoscale:cluster:ffff";
 
-    private static final List<Class<?>> EXPECTED_TYPE_LIST =  List.of(
+    private static final List<Class<?>> EXPECTED_TYPE_LIST = List.of(
             CloudConfigValidationFlowConfig .class,
             KerberosConfigValidationFlowConfig .class,
             ExternalDatabaseCreationFlowConfig .class,

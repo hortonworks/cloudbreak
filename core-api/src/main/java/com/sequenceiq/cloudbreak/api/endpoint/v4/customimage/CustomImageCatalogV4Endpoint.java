@@ -38,72 +38,80 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImag
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Consumes(APPLICATION_JSON)
 @Path("/v4/custom_image_catalogs")
-@Api(value = "/v4/customimagecatalogs", description = CUSTOM_IMAGE_CATALOG_V4_DESCRIPTION, protocols = "http,https",
-        consumes = APPLICATION_JSON)
+@Tag(name = "/v4/customimagecatalogs", description = CUSTOM_IMAGE_CATALOG_V4_DESCRIPTION)
 public interface CustomImageCatalogV4Endpoint {
 
     @GET
     @Path("")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = LIST, produces = APPLICATION_JSON, notes = CUSTOM_IMAGE_CATALOG_NOTES,
-            nickname = "listCustomImageCatalogs")
+    @Operation(summary = LIST, description = CUSTOM_IMAGE_CATALOG_NOTES,
+            operationId = "listCustomImageCatalogs",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4ListResponse list(@QueryParam("accountId") @AccountId String accountId);
 
     @GET
     @Path("name/{name}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = GET_BY_NAME, produces = APPLICATION_JSON, notes = CUSTOM_IMAGE_CATALOG_NOTES,
-            nickname = "getCustomImageCatalogByName")
+    @Operation(summary = GET_BY_NAME, description = CUSTOM_IMAGE_CATALOG_NOTES,
+            operationId = "getCustomImageCatalogByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4GetResponse get(@PathParam("name") String name, @QueryParam("accountId") @AccountId String accountId);
 
     @POST
     @Path("")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = CREATE, produces = APPLICATION_JSON, notes = CUSTOM_IMAGE_CATALOG_NOTES,
-            nickname = "createCustomImageCatalog")
+    @Operation(summary = CREATE, description = CUSTOM_IMAGE_CATALOG_NOTES,
+            operationId = "createCustomImageCatalog",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4CreateResponse create(@Valid CustomImageCatalogV4CreateRequest request, @QueryParam("accountId") @AccountId String accountId);
 
     @DELETE
     @Path("name/{name}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = DELETE_BY_NAME, produces = APPLICATION_JSON, notes = CUSTOM_IMAGE_CATALOG_NOTES,
-            nickname = "deleteCustomImageCatalogByName")
+    @Operation(summary = DELETE_BY_NAME, description = CUSTOM_IMAGE_CATALOG_NOTES,
+            operationId = "deleteCustomImageCatalogByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4DeleteResponse delete(@PathParam("name") String name, @QueryParam("accountId") @AccountId String accountId);
 
     @GET
     @Path("{name}/image/{imageId}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = GET_BY_NAME_IN_CATALOG, produces = APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES, nickname = "getCustomImage")
+    @Operation(summary = GET_BY_NAME_IN_CATALOG, description = IMAGE_CATALOG_NOTES, operationId = "getCustomImage",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4GetImageResponse getCustomImage(@PathParam("name") String name, @PathParam("imageId") String imageId,
             @QueryParam("accountId") @AccountId String accountId);
 
     @POST
     @Path("{name}/image")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = CREATE_IN_CATALOG, produces = APPLICATION_JSON, notes = CUSTOM_IMAGE_CATALOG_NOTES,
-            nickname = "createCustomImage")
+    @Operation(summary = CREATE_IN_CATALOG, description = CUSTOM_IMAGE_CATALOG_NOTES,
+            operationId = "createCustomImage",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4CreateImageResponse createCustomImage(@PathParam("name") String name,
             @Valid CustomImageCatalogV4CreateImageRequest request, @QueryParam("accountId") @AccountId String accountId);
 
     @PUT
     @Path("{name}/image/{imageId}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = UPDATE_IN_CATALOG, produces = APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "updateCustomImage")
+    @Operation(summary = UPDATE_IN_CATALOG, description = IMAGE_CATALOG_NOTES,
+            operationId = "updateCustomImage",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4UpdateImageResponse updateCustomImage(@PathParam("name") String name, @PathParam("imageId") String imageId,
             @Valid CustomImageCatalogV4UpdateImageRequest request, @QueryParam("accountId") @AccountId String accountId);
 
     @DELETE
     @Path("{name}/image/{imageId}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = DELETE_FROM_CATALOG, produces = APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "deleteCustomImage")
+    @Operation(summary = DELETE_FROM_CATALOG, description = IMAGE_CATALOG_NOTES,
+            operationId = "deleteCustomImage",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CustomImageCatalogV4DeleteImageResponse deleteCustomImage(@PathParam("name") String name, @PathParam("imageId") String imageId,
             @QueryParam("accountId") @AccountId String accountId);
 

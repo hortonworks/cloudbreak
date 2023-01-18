@@ -6,25 +6,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("OpenstackV1Parameters")
+@Schema(name = "OpenstackV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 @Deprecated
 public class OpenstackParameters implements Serializable {
 
-    @ApiModelProperty(required = true)
+    @Schema(required = true)
     private String endpoint;
 
-    @ApiModelProperty(required = true, allowableValues = "public, admin, internal")
+    @Schema(required = true, allowableValues = "public, admin, internal")
     private String facing;
 
-    @ApiModelProperty(required = true)
+    @Schema(required = true)
     private String password;
 
-    @ApiModelProperty(required = true)
+    @Schema(required = true)
     private String userName;
 
     private KeystoneV2Parameters keystoneV2;

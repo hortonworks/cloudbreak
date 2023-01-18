@@ -8,26 +8,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("AzureCredentialV1RequestParameters")
+@Schema(name = "AzureCredentialV1RequestParameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AzureCredentialRequestParameters implements Serializable {
 
-    @ApiModelProperty(example = "a8d4457d-310v-41p6-sc53-14g8d733e514")
+    @Schema(example = "a8d4457d-310v-41p6-sc53-14g8d733e514")
     private String subscriptionId;
 
-    @ApiModelProperty(example = "b10u3481-2451-10ba-7sfd-9o2d1v60185d")
+    @Schema(example = "b10u3481-2451-10ba-7sfd-9o2d1v60185d")
     private String tenantId;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private AppBasedRequest appBased;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private RoleBasedRequest roleBased;
 
     public RoleBasedRequest getRoleBased() {

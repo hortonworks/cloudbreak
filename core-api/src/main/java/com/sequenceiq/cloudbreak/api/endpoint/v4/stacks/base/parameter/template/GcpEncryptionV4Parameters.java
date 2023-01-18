@@ -5,14 +5,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.EncryptionParametersV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GcpEncryptionV4Parameters extends EncryptionParametersV4Base {
 
-    @ApiModelProperty(value = TemplateModelDescription.ENCRYPTION_METHOD, allowableValues = "RAW,RSA,KMS")
+    @Schema(description = TemplateModelDescription.ENCRYPTION_METHOD)
     private KeyEncryptionMethod keyEncryptionMethod;
 
     public KeyEncryptionMethod getKeyEncryptionMethod() {

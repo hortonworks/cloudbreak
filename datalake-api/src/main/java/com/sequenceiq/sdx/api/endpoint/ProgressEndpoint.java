@@ -11,27 +11,29 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.sdx.api.model.SdxProgressListResponse;
 import com.sequenceiq.sdx.api.model.SdxProgressResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/progress")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/progress", description = "Get progression details of (flow) operations on SDX cluster",
-        protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/progress", description = "Get progression details of (flow) operations on SDX cluster")
 public interface ProgressEndpoint {
 
     @GET
     @Path("/resource/crn/{resourceCrn}/last")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get last flow operation progress details for resource by resource crn", produces = "application/json",
-            notes = "Flow operations progress", nickname = "getSdxLastFlowLogProgressByResourceCrn")
+    @Operation(summary = "Get last flow operation progress details for resource by resource crn", description = "Flow operations progress",
+            operationId = "getSdxLastFlowLogProgressByResourceCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxProgressResponse getLastFlowLogProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("/resource/crn/{resourceCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "List recent flow operations progress details for resource by resource crn", produces = "application/json",
-            notes = "Flow operations progress", nickname = "getSdxFlowLogsProgressByResourceCrn")
+    @Operation(summary = "List recent flow operations progress details for resource by resource crn", description = "Flow operations progress",
+            operationId = "getSdxFlowLogsProgressByResourceCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxProgressListResponse getFlowLogsProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
 }

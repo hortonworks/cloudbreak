@@ -20,7 +20,7 @@ dependencies {
   api group: 'javax.validation',                         name: 'validation-api',                 version: javaxValidationVersion
   api group: 'org.apache.commons',                       name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
-  implementation group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
+  implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2',                       version: swaggerCoreVersion
 
   testImplementation group: 'org.assertj',               name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion

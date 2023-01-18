@@ -12,21 +12,22 @@ import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.InfoOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v4/info")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/info", description = ControllerDescription.INFO_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/info", description = ControllerDescription.INFO_DESCRIPTION)
 public interface CloudbreakInfoV4Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = InfoOpDescription.INFO, produces = MediaType.APPLICATION_JSON, notes = Notes.INFO_CONFIG_NOTES,
-            nickname = "info")
+    @Operation(summary = InfoOpDescription.INFO, description = Notes.INFO_CONFIG_NOTES,
+            operationId = "info",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CloudbreakInfoResponse info();
 
 }

@@ -28,92 +28,103 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescriptio
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v4/{workspaceId}/blueprints")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/{workspaceId}/blueprints", description = ControllerDescription.BLUEPRINT_V4_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/{workspaceId}/blueprints", description = ControllerDescription.BLUEPRINT_V4_DESCRIPTION)
 public interface BlueprintV4Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.LIST_BY_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
-            nickname = "listBlueprintsByWorkspace")
+    @Operation(summary = BlueprintOpDescription.LIST_BY_WORKSPACE, description = BLUEPRINT_NOTES,
+            operationId = "listBlueprintsByWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintV4ViewResponses list(@PathParam("workspaceId") Long workspaceId, @DefaultValue("false") @QueryParam("withSdx") Boolean withSdx);
 
     @GET
     @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
-            nickname = "getBlueprintInWorkspace")
+    @Operation(summary = BlueprintOpDescription.GET_BY_NAME_IN_WORKSPACE, description = BLUEPRINT_NOTES,
+            operationId = "getBlueprintInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintV4Response getByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") @NotNull String name);
 
     @GET
     @Path("name/{name}/internal")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.GET_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
-            nickname = "getBlueprintInWorkspaceInternal")
+    @Operation(summary = BlueprintOpDescription.GET_BY_NAME_IN_WORKSPACE_INTERNAL, description = BLUEPRINT_NOTES,
+            operationId = "getBlueprintInWorkspaceInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @AccountId @QueryParam("accountId") String accountId,
             @PathParam("name") @NotNull String name);
 
     @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.GET_BY_CRN_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
-            nickname = "getBlueprintByCrn")
+    @Operation(summary = BlueprintOpDescription.GET_BY_CRN_IN_WORKSPACE, description = BLUEPRINT_NOTES,
+            operationId = "getBlueprintByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintV4Response getByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") @NotNull String crn);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.CREATE_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
-            nickname = "createBlueprintInWorkspace")
+    @Operation(summary = BlueprintOpDescription.CREATE_IN_WORKSPACE, description = BLUEPRINT_NOTES,
+            operationId = "createBlueprintInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid BlueprintV4Request request);
 
     @POST
     @Path("internal")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.CREATE_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
-            nickname = "createBlueprintInWorkspaceInternal")
+    @Operation(summary = BlueprintOpDescription.CREATE_IN_WORKSPACE_INTERNAL, description = BLUEPRINT_NOTES,
+            operationId = "createBlueprintInWorkspaceInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintV4Response postInternal(@AccountId @QueryParam("accountId") String accountId,  @PathParam("workspaceId") Long workspaceId,
             @Valid BlueprintV4Request request);
 
     @DELETE
     @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
-            nickname = "deleteBlueprintInWorkspace")
+    @Operation(summary = BlueprintOpDescription.DELETE_BY_NAME_IN_WORKSPACE, description = BLUEPRINT_NOTES,
+            operationId = "deleteBlueprintInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintV4Response deleteByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") @NotNull String name);
 
     @DELETE
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.DELETE_BY_CRN_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
-            nickname = "deleteBlueprintByCrn")
+    @Operation(summary = BlueprintOpDescription.DELETE_BY_CRN_IN_WORKSPACE, description = BLUEPRINT_NOTES,
+            operationId = "deleteBlueprintByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintV4Response deleteByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") @NotNull String crn);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON,
-            notes = BLUEPRINT_NOTES, nickname = "deleteBlueprintsInWorkspace")
+    @Operation(summary = BlueprintOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE,
+            description = BLUEPRINT_NOTES, operationId = "deleteBlueprintsInWorkspace",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names);
 
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = BlueprintOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
-            nickname = "getBlueprintRequestFromName")
+    @Operation(summary = BlueprintOpDescription.GET_BY_NAME, description = BLUEPRINT_NOTES,
+            operationId = "getBlueprintRequestFromName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     BlueprintV4Request getRequest(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("{name}/parameters")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.CUSTOM_PARAMETERS, produces = MediaType.APPLICATION_JSON,
-            nickname = "getBlueprintCustomParameters")
+    @Operation(summary = UtilityOpDescription.CUSTOM_PARAMETERS,
+            operationId = "getBlueprintCustomParameters",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ParametersQueryV4Response getParameters(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 }

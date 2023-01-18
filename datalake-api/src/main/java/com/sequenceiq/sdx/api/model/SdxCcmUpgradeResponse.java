@@ -6,24 +6,23 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxCcmUpgradeResponse {
 
-    @ApiModelProperty(ModelDescriptions.FLOW_IDENTIFIER)
+    @Schema(description = ModelDescriptions.FLOW_IDENTIFIER)
     private FlowIdentifier flowIdentifier;
 
-    @ApiModelProperty(ModelDescriptions.CCM_UPGRADE_RESPONSE_TYPE)
+    @Schema(description = ModelDescriptions.CCM_UPGRADE_RESPONSE_TYPE)
     private CcmUpgradeResponseType responseType;
 
-    @ApiModelProperty(ModelDescriptions.CCM_UPGRADE_ERROR_REASON)
+    @Schema(description = ModelDescriptions.CCM_UPGRADE_ERROR_REASON)
     private String reason;
 
-    @ApiModelProperty(ModelDescriptions.DATA_LAKE_CRN)
+    @Schema(description = ModelDescriptions.DATA_LAKE_CRN)
     private String resourceCrn;
 
     public SdxCcmUpgradeResponse() {
@@ -77,7 +76,9 @@ public class SdxCcmUpgradeResponse {
             return false;
         }
         SdxCcmUpgradeResponse that = (SdxCcmUpgradeResponse) o;
-        return Objects.equals(flowIdentifier, that.flowIdentifier) && responseType == that.responseType && Objects.equals(reason, that.reason)
+        return Objects.equals(flowIdentifier, that.flowIdentifier)
+                && responseType == that.responseType
+                && Objects.equals(reason, that.reason)
                 && Objects.equals(resourceCrn, that.resourceCrn);
     }
 
@@ -88,11 +89,10 @@ public class SdxCcmUpgradeResponse {
 
     @Override
     public String toString() {
-        return "SdxCcmUpgradeResponse{" +
-                "flowIdentifier=" + flowIdentifier +
-                ", responseType=" + responseType +
-                ", reason='" + reason +
-                ", resourceCrn='" + resourceCrn + '\'' +
-                '}';
+        return "SdxCcmUpgradeResponse{"
+                + "flowIdentifier=" + flowIdentifier
+                + ", responseType=" + responseType
+                + ", reason='" + reason
+                + ", resourceCrn='" + resourceCrn + '\'' + '}';
     }
 }

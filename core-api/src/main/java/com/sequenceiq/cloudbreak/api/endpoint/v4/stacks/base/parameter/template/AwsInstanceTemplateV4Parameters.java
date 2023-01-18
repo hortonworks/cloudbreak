@@ -20,23 +20,22 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 import com.sequenceiq.common.api.placement.AwsPlacementGroupStrategy;
 import com.sequenceiq.common.api.type.EncryptionType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4ParameterBase {
 
     @Valid
-    @ApiModelProperty(TemplateModelDescription.AWS_SPOT_PARAMETERS)
+    @Schema(description = TemplateModelDescription.AWS_SPOT_PARAMETERS)
     private AwsInstanceTemplateV4SpotParameters spot;
 
-    @ApiModelProperty(TemplateModelDescription.ENCRYPTION)
+    @Schema(description = TemplateModelDescription.ENCRYPTION)
     private AwsEncryptionV4Parameters encryption;
 
     @Valid
-    @ApiModelProperty(TemplateModelDescription.AWS_PLACEMENT_GROUP)
+    @Schema(description = TemplateModelDescription.AWS_PLACEMENT_GROUP)
     private AwsPlacementGroupV4Parameters placementGroup;
 
     public AwsInstanceTemplateV4SpotParameters getSpot() {
@@ -84,7 +83,7 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AWS;
     }

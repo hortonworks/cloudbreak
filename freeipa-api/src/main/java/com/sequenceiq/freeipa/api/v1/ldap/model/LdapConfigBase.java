@@ -16,75 +16,75 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class LdapConfigBase {
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @Size(max = 100, min = 1, message = "The length of the ldap config's name has to be in range of 1 to 100")
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, required = true)
     private String name;
 
     @Size(max = 1000, message = "The length of the ldap config's description has to be in range of 0 to 1000")
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
     @NotNull
-    @ApiModelProperty(value = LdapConfigModelDescription.SERVER_HOST, required = true)
+    @Schema(description = LdapConfigModelDescription.SERVER_HOST, required = true)
     private String host;
 
     @NotNull
     @Max(65535)
     @Min(1)
-    @ApiModelProperty(value = LdapConfigModelDescription.SERVER_PORT, required = true)
+    @Schema(description = LdapConfigModelDescription.SERVER_PORT, required = true)
     private Integer port;
 
-    @ApiModelProperty(LdapConfigModelDescription.PROTOCOL)
+    @Schema(description = LdapConfigModelDescription.PROTOCOL)
     private String protocol = "ldap";
 
     @NotNull
-    @ApiModelProperty(value = LdapConfigModelDescription.USER_SEARCH_BASE, required = true)
+    @Schema(description = LdapConfigModelDescription.USER_SEARCH_BASE, required = true)
     private String userSearchBase;
 
     @NotNull
-    @ApiModelProperty(value = LdapConfigModelDescription.USER_DN_PATTERN, required = true)
+    @Schema(description = LdapConfigModelDescription.USER_DN_PATTERN, required = true)
     private String userDnPattern;
 
-    @ApiModelProperty(LdapConfigModelDescription.GROUP_SEARCH_BASE)
+    @Schema(description = LdapConfigModelDescription.GROUP_SEARCH_BASE)
     private String groupSearchBase;
 
-    @ApiModelProperty(LdapConfigModelDescription.USER_NAME_ATTRIBUTE)
+    @Schema(description = LdapConfigModelDescription.USER_NAME_ATTRIBUTE)
     private String userNameAttribute;
 
-    @ApiModelProperty(LdapConfigModelDescription.DOMAIN)
+    @Schema(description = LdapConfigModelDescription.DOMAIN)
     private String domain;
 
-    @ApiModelProperty(value = LdapConfigModelDescription.DIRECTORY_TYPE, allowableValues = "LDAP,ACTIVE_DIRECTORY")
+    @Schema(description = LdapConfigModelDescription.DIRECTORY_TYPE, allowableValues = "LDAP,ACTIVE_DIRECTORY")
     private DirectoryType directoryType = DirectoryType.ACTIVE_DIRECTORY;
 
-    @ApiModelProperty(LdapConfigModelDescription.USER_OBJECT_CLASS)
+    @Schema(description = LdapConfigModelDescription.USER_OBJECT_CLASS)
     private String userObjectClass;
 
-    @ApiModelProperty(LdapConfigModelDescription.GROUP_OBJECT_CLASS)
+    @Schema(description = LdapConfigModelDescription.GROUP_OBJECT_CLASS)
     private String groupObjectClass;
 
-    @ApiModelProperty(LdapConfigModelDescription.GROUP_ID_ATTRIBUTE)
+    @Schema(description = LdapConfigModelDescription.GROUP_ID_ATTRIBUTE)
     private String groupNameAttribute;
 
-    @ApiModelProperty(LdapConfigModelDescription.GROUP_MEMBER_ATTRIBUTE)
+    @Schema(description = LdapConfigModelDescription.GROUP_MEMBER_ATTRIBUTE)
     private String groupMemberAttribute;
 
-    @ApiModelProperty(LdapConfigModelDescription.ADMIN_GROUP)
+    @Schema(description = LdapConfigModelDescription.ADMIN_GROUP)
     private String adminGroup;
 
-    @ApiModelProperty(LdapConfigModelDescription.CERTIFICATE)
+    @Schema(description = LdapConfigModelDescription.CERTIFICATE)
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String certificate;
 
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotEmpty
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     public String getName() {

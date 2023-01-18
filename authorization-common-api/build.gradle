@@ -26,7 +26,7 @@ dependencies {
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
-  implementation group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
+  implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2',                 version: swaggerCoreVersion
   implementation group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
 
   testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion

@@ -19,54 +19,61 @@ import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/v4/diagnostics")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/diagnostics", description = "Diagnostics in Stacks", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/diagnostics", description = "Diagnostics in Stacks")
 public interface DiagnosticsV4Endpoint {
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
-            nickname = "collectStackCmDiagnostics")
+    @Operation(summary = DiagnosticsOperationDescriptions.COLLECT_DIAGNOSTICS,
+            operationId = "collectStackCmDiagnostics",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier collectDiagnostics(@Valid DiagnosticsCollectionRequest request);
 
     @GET
     @Path("logs")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS, produces = MediaType.APPLICATION_JSON,
-            nickname = "getStackCmVmLogs")
+    @Operation(summary = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS,
+            operationId = "getStackCmVmLogs",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     VmLogsResponse getVmLogs();
 
     @GET
     @Path("{crn}/collections")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.LIST_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
-            nickname = "listStackDiagnosticsCollections")
+    @Operation(summary = DiagnosticsOperationDescriptions.LIST_COLLECTIONS,
+            operationId = "listStackDiagnosticsCollections",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ListDiagnosticsCollectionResponse listCollections(@PathParam("crn") String crn);
 
     @POST
     @Path("{crn}/collections/cancel")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.CANCEL_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
-            nickname = "cancelStackDiagnosticsCollections")
+    @Operation(summary = DiagnosticsOperationDescriptions.CANCEL_COLLECTIONS,
+            operationId = "cancelStackDiagnosticsCollections",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void cancelCollections(@PathParam("crn") String crn);
 
     @POST
     @Path("cm")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
-            nickname = "collectCmDiagnostics")
+    @Operation(summary = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS,
+            operationId = "collectCmDiagnostics",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier collectCmDiagnostics(@Valid CmDiagnosticsCollectionRequest request);
 
     @GET
     @Path("cm/{stackCrn}/roles")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_CM_ROLES, produces = MediaType.APPLICATION_JSON,
-            nickname = "getCmRoles")
+    @Operation(summary = DiagnosticsOperationDescriptions.GET_CM_ROLES,
+            operationId = "getCmRoles",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<String> getCmRoles(@PathParam("stackCrn") String stackCrn);
 }

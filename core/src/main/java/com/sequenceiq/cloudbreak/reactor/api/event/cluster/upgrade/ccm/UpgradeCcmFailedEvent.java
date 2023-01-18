@@ -31,7 +31,7 @@ public class UpgradeCcmFailedEvent extends StackFailureEvent implements UpgradeC
         this.oldTunnel = oldTunnel;
         this.failureOrigin = failureOrigin;
         this.clusterId = clusterId;
-        this.revertTime =  revertTime;
+        this.revertTime = revertTime;
     }
 
     public UpgradeCcmFailedEvent(

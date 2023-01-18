@@ -7,23 +7,22 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("InstanceGroupV1Request")
+@Schema(name = "InstanceGroupV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstanceGroupRequest extends InstanceGroupBase {
 
     @Valid
-    @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
+    @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateRequest instanceTemplate;
 
     @Valid
-    @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
+    @Schema(description = InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupRequest securityGroup;
 
-    @ApiModelProperty(InstanceGroupModelDescription.NETWORK)
+    @Schema(description = InstanceGroupModelDescription.NETWORK)
     private InstanceGroupNetworkRequest network;
 
     public InstanceTemplateRequest getInstanceTemplate() {

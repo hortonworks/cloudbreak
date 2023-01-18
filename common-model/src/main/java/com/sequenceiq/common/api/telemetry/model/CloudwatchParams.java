@@ -9,20 +9,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CloudwatchParams implements Serializable {
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String instanceProfile;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLOUDWATCH_PARAMS_REGION)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_CLOUDWATCH_PARAMS_REGION)
     private String region;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLOUDWATCH_PARAMS)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_CLOUDWATCH_PARAMS)
     private CloudwatchStreamKey streamKey = CloudwatchStreamKey.HOSTNAME;
 
     public String getInstanceProfile() {

@@ -7,15 +7,14 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "GcpEnvironmentV1Parameters")
+@Schema(name = "GcpEnvironmentV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GcpEnvironmentParameters implements Serializable {
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.GCP_RESOURCE_ENCRYPTION_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.GCP_RESOURCE_ENCRYPTION_PARAMETERS)
     private GcpResourceEncryptionParameters gcpResourceEncryptionParameters;
 
     public GcpEnvironmentParameters() {

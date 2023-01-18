@@ -6,14 +6,13 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MultipleInstanceDeleteRequest {
 
-    @ApiModelProperty(value = ModelDescriptions.InstanceGroupModelDescription.MULTI_INSTANCE)
+    @Schema(description = ModelDescriptions.InstanceGroupModelDescription.MULTI_INSTANCE)
     private List<String> instances = new ArrayList<>();
 
     public List<String> getInstances() {

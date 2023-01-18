@@ -16,7 +16,7 @@ public class ClouderaManagerProxiedClientFactory {
 
     private static final String API_VERSION_31 = "v31";
 
-    private static final int CM_READ_TIMEOUT_MS =  60 * 1000;
+    private static final int CM_READ_TIMEOUT_MS = 60 * 1000;
 
     private static final int CM_CONNECT_TIMEOUT_MS = 60 * 1000;
 

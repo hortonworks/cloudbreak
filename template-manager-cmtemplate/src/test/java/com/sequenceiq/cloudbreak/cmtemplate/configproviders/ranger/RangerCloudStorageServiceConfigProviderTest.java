@@ -292,7 +292,7 @@ public class RangerCloudStorageServiceConfigProviderTest {
         AdlsGen2FileSystemConfigurationsView fileSystemConfigurationsView =
                 new AdlsGen2FileSystemConfigurationsView(new AdlsGen2FileSystem(), locations, false);
 
-        GeneralClusterConfigs generalClusterConfigs =  new GeneralClusterConfigs();
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("fqdn"));
 
         return Builder.builder()
@@ -325,7 +325,7 @@ public class RangerCloudStorageServiceConfigProviderTest {
         GcsFileSystemConfigurationsView fileSystemConfigurationsView =
                 new GcsFileSystemConfigurationsView(new GcsFileSystem(), locations, false);
 
-        GeneralClusterConfigs generalClusterConfigs =  new GeneralClusterConfigs();
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("fqdn"));
 
         return Builder.builder()
@@ -366,7 +366,7 @@ public class RangerCloudStorageServiceConfigProviderTest {
         S3FileSystemConfigurationsView fileSystemConfigurationsView =
                 new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
 
-        GeneralClusterConfigs generalClusterConfigs =  new GeneralClusterConfigs();
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("fqdn"));
 
         return Builder.builder()

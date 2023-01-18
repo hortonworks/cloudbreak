@@ -30,21 +30,22 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesR
 import com.sequenceiq.environment.api.v1.platformresource.model.RegionResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.TagSpecificationsResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/platform_resources")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/platform_resources", description = PlatformResourceModelDescription.CONNECTOR_V1_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/platform_resources", description = PlatformResourceModelDescription.CONNECTOR_V1_DESCRIPTION)
 public interface CredentialPlatformResourceEndpoint {
 
     @GET
     @Path("machine_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_VMTYPES_BY_CREDENTIAL, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getVmTypesByCredential")
+    @Operation(summary = OpDescription.GET_VMTYPES_BY_CREDENTIAL, description = CONNECTOR_NOTES,
+            operationId = "getVmTypesByCredential",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformVmtypesResponse getVmTypesByCredential(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -56,8 +57,9 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_REGIONS_BY_CREDENTIAL, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getRegionsByCredential")
+    @Operation(summary = OpDescription.GET_REGIONS_BY_CREDENTIAL, description = CONNECTOR_NOTES,
+            operationId = "getRegionsByCredential",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RegionResponse getRegionsByCredential(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -69,15 +71,17 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("disk_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_DISK_TYPES, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getDisktypes")
+    @Operation(summary = OpDescription.GET_DISK_TYPES, description = CONNECTOR_NOTES,
+            operationId = "getDisktypes",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformDisksResponse getDisktypes();
 
     @GET
     @Path("networks")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_NETWORKS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getPlatformNetworks")
+    @Operation(summary = OpDescription.GET_NETWORKS, description = CONNECTOR_NOTES,
+            operationId = "getPlatformNetworks",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformNetworksResponse getCloudNetworks(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -91,8 +95,9 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("ip_pools")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_IPPOOLS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getIpPoolsCredentialId")
+    @Operation(summary = OpDescription.GET_IPPOOLS, description = CONNECTOR_NOTES,
+            operationId = "getIpPoolsCredentialId",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformIpPoolsResponse getIpPoolsCredentialId(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -103,8 +108,9 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("gateways")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_GATEWAYS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getGatewaysCredentialId")
+    @Operation(summary = OpDescription.GET_GATEWAYS, description = CONNECTOR_NOTES,
+            operationId = "getGatewaysCredentialId",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformGatewaysResponse getGatewaysCredentialId(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -115,8 +121,9 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("encryption_keys")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_ENCRYPTIONKEYS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getEncryptionKeys")
+    @Operation(summary = OpDescription.GET_ENCRYPTIONKEYS, description = CONNECTOR_NOTES,
+            operationId = "getEncryptionKeys",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformEncryptionKeysResponse getEncryptionKeys(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -127,8 +134,9 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("security_groups")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_SECURITYGROUPS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getPlatformSecurityGroups")
+    @Operation(summary = OpDescription.GET_SECURITYGROUPS, description = CONNECTOR_NOTES,
+            operationId = "getPlatformSecurityGroups",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformSecurityGroupsResponse getSecurityGroups(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -140,8 +148,9 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("ssh_keys")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_SSHKEYS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getPlatformSShKeys")
+    @Operation(summary = OpDescription.GET_SSHKEYS, description = CONNECTOR_NOTES,
+            operationId = "getPlatformSShKeys",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformSshKeysResponse getCloudSshKeys(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -152,8 +161,9 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("access_configs")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_ACCESSCONFIGS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getAccessConfigs")
+    @Operation(summary = OpDescription.GET_ACCESSCONFIGS, description = CONNECTOR_NOTES,
+            operationId = "getAccessConfigs",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformAccessConfigsResponse getAccessConfigs(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -165,15 +175,17 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("tag_specifications")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_TAG_SPECIFICATIONS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getTagSpecifications")
+    @Operation(summary = OpDescription.GET_TAG_SPECIFICATIONS, description = CONNECTOR_NOTES,
+            operationId = "getTagSpecifications",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     TagSpecificationsResponse getTagSpecifications();
 
     @GET
     @Path("nosql_tables")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_NOSQL_TABLES, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getNoSqlTables")
+    @Operation(summary = OpDescription.GET_NOSQL_TABLES, description = CONNECTOR_NOTES,
+            operationId = "getNoSqlTables",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformNoSqlTablesResponse getNoSqlTables(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -184,8 +196,9 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("resource_groups")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_RESOURCE_GROUPS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getResourceGroups")
+    @Operation(summary = OpDescription.GET_RESOURCE_GROUPS, description = CONNECTOR_NOTES,
+            operationId = "getResourceGroups",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformResourceGroupsResponse getResourceGroups(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
@@ -196,8 +209,9 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("private_dns_zones")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_PRIVATE_DNS_ZONES, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getPrivateDnsZones")
+    @Operation(summary = OpDescription.GET_PRIVATE_DNS_ZONES, description = CONNECTOR_NOTES,
+            operationId = "getPrivateDnsZones",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     PlatformPrivateDnsZonesResponse getPrivateDnsZones(
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,

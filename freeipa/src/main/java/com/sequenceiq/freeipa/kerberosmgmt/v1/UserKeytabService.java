@@ -44,7 +44,7 @@ public class UserKeytabService {
     private FreeIpaClientFactory freeIpaClientFactory;
 
     private String getKerberosRealm(String accountId, String environmentCrn) {
-        KerberosConfig krbConfig =  kerberosConfigRepository
+        KerberosConfig krbConfig = kerberosConfigRepository
                 .findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(accountId, environmentCrn)
                 .orElseThrow(notFound("KerberosConfig for environment", environmentCrn));
         return krbConfig.getRealm();

@@ -5,20 +5,19 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("EnvironmentAuthenticationV1Response")
+@Schema(name = "EnvironmentAuthenticationV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentAuthenticationResponse implements Serializable {
 
-    @ApiModelProperty(EnvironmentModelDescription.PUBLIC_KEY)
+    @Schema(description = EnvironmentModelDescription.PUBLIC_KEY)
     private String publicKey;
 
-    @ApiModelProperty(EnvironmentModelDescription.PUBLIC_KEY_ID)
+    @Schema(description = EnvironmentModelDescription.PUBLIC_KEY_ID)
     private String publicKeyId;
 
-    @ApiModelProperty(EnvironmentModelDescription.LOGIN_USER_NAME)
+    @Schema(description = EnvironmentModelDescription.LOGIN_USER_NAME)
     private String loginUserName;
 
     public String getPublicKey() {

@@ -10,10 +10,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.cloudstorage.doc.CloudStorageModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class CloudStorageBase implements Serializable {
@@ -24,7 +23,7 @@ public abstract class CloudStorageBase implements Serializable {
 
     private List<@Valid StorageIdentityBase> identities = new ArrayList<>();
 
-    @ApiModelProperty(CloudStorageModelDescription.ACCOUNT_MAPPING)
+    @Schema(description = CloudStorageModelDescription.ACCOUNT_MAPPING)
     private AccountMappingBase accountMapping;
 
     public AwsStorageParameters getAws() {

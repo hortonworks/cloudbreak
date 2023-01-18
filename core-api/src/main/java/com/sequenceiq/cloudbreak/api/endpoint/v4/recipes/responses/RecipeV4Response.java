@@ -7,14 +7,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceRe
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = RecipeModelDescription.DESCRIPTION)
+@Schema(description = RecipeModelDescription.DESCRIPTION)
 @JsonInclude(Include.NON_NULL)
 public class RecipeV4Response extends RecipeV4Base {
 
-    @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
+    @Schema(description = ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
 
     /**
@@ -22,10 +21,10 @@ public class RecipeV4Response extends RecipeV4Base {
      * and can become invalid, usage of it can be error prone
      */
     @Deprecated
-    @ApiModelProperty(ModelDescriptions.CREATOR)
+    @Schema(description = ModelDescriptions.CREATOR)
     private String creator;
 
-    @ApiModelProperty(ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN)
     private String crn;
 
     private Long created;

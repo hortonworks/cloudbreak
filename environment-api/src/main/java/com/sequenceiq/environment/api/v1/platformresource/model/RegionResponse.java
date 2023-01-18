@@ -10,20 +10,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(name = "CompactRegionV1Response")
 public class RegionResponse extends CompactRegionResponse {
-    @ApiModelProperty(PlatformResourceModelDescription.AVAILABILITY_ZONES)
+    @Schema(description = PlatformResourceModelDescription.AVAILABILITY_ZONES)
     private  Map<String, List<String>> availabilityZones;
 
-    @ApiModelProperty(PlatformResourceModelDescription.DEFAULT_REGIOS)
+    @Schema(description = PlatformResourceModelDescription.DEFAULT_REGIOS)
     private String defaultRegion;
 
-    @ApiModelProperty(PlatformResourceModelDescription.REGION_LOCATIONS)
+    @Schema(description = PlatformResourceModelDescription.REGION_LOCATIONS)
     private List<String> locations;
 
-    @ApiModelProperty(PlatformResourceModelDescription.K8S_SUPPORTED_LOCATIONS)
+    @Schema(description = PlatformResourceModelDescription.K8S_SUPPORTED_LOCATIONS)
     private List<String> k8sSupportedlocations;
 
     public RegionResponse() {

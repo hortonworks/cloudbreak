@@ -15,28 +15,30 @@ import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v4/cost")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/cost", protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/cost")
 public interface ClusterCostV4Endpoint {
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.CostOpDescription.LIST, produces = MediaType.APPLICATION_JSON,
-            notes = Notes.CLUSTER_COST_NOTES, nickname = "listClusterCostV4")
+    @Operation(summary = OperationDescriptions.CostOpDescription.LIST,
+            description = Notes.CLUSTER_COST_NOTES, operationId = "listClusterCostV4",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RealTimeCostResponse list(List<String> clusterCrns, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("environment")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.CostOpDescription.LIST_BY_ENV, produces = MediaType.APPLICATION_JSON,
-            notes = Notes.CLUSTER_COST_NOTES, nickname = "listClusterCostByEnvV4")
+    @Operation(summary = OperationDescriptions.CostOpDescription.LIST_BY_ENV,
+            description = Notes.CLUSTER_COST_NOTES, operationId = "listClusterCostByEnvV4",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RealTimeCostResponse listByEnv(ClusterCostV4Request clusterCostV4Request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

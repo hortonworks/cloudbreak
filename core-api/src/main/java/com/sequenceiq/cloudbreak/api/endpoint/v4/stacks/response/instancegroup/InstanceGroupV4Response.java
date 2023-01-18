@@ -16,32 +16,31 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.t
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class InstanceGroupV4Response extends InstanceGroupV4Base {
 
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(InstanceGroupModelDescription.METADATA)
+    @Schema(description = InstanceGroupModelDescription.METADATA)
     private Set<InstanceMetaDataV4Response> metadata = new HashSet<>();
 
-    @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
+    @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV4Response template;
 
-    @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
+    @Schema(description = InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupV4Response securityGroup;
 
     private List<RecipeV4Response> recipes;
 
-    @ApiModelProperty(InstanceGroupModelDescription.AVAILABILITY_ZONES)
+    @Schema(description = InstanceGroupModelDescription.AVAILABILITY_ZONES)
     private Set<String> availabilityZones = new HashSet<>();
 
-    @ApiModelProperty(InstanceGroupModelDescription.NETWORK)
+    @Schema(description = InstanceGroupModelDescription.NETWORK)
     private InstanceGroupNetworkV4Response network;
 
     public Long getId() {

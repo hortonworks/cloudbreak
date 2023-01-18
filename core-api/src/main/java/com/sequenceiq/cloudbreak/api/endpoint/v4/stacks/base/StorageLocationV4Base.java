@@ -8,20 +8,20 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class StorageLocationV4Base implements JsonEntity {
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String propertyFile;
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String propertyName;
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String value;
 

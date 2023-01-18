@@ -5,7 +5,7 @@ import javax.validation.constraints.Pattern;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.FreeIpaServerSettingsModelDescriptions;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class FreeIpaServerBase {
 
@@ -15,15 +15,15 @@ public abstract class FreeIpaServerBase {
 
     @NotNull
     @Pattern(regexp = DOMAIN_MATCHER, message = "Invalid FreeIpa domain format")
-    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.DOMAIN)
+    @Schema(description = FreeIpaServerSettingsModelDescriptions.DOMAIN)
     private String domain;
 
     @NotNull
     @Pattern(regexp = HOSTNAME_MATCHER, message = "Invalid FreeIpa hostname format")
-    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.HOSTNAME)
+    @Schema(description = FreeIpaServerSettingsModelDescriptions.HOSTNAME)
     private String hostname;
 
-    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.ADMIN_GROUP_NAME)
+    @Schema(description = FreeIpaServerSettingsModelDescriptions.ADMIN_GROUP_NAME)
     private String adminGroupName;
 
     public String getDomain() {

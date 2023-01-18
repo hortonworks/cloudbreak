@@ -11,28 +11,25 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCostResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
-import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/freeipa/cost")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/freeipa/cost",
-        protocols = "http,https",
-        authorizations = {@Authorization(value = FreeIpaApi.CRN_HEADER_API_KEY)},
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/freeipa/cost")
 public interface FreeIpaCostV1Endpoint {
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.COST, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "listFreeIpaCostV1")
+    @Operation(summary = FreeIpaOperationDescriptions.COST, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "listFreeIpaCostV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RealTimeCostResponse list(List<String> environmentCrns, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
 }

@@ -8,28 +8,27 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class AutoscaleClusterRequest extends ClusterBaseJson {
 
-    @ApiModelProperty(ClusterJsonsProperties.WORKSPACE_ID)
+    @Schema(description = ClusterJsonsProperties.WORKSPACE_ID)
     @NotNull
     @Min(1L)
     private Long workspaceId;
 
-    @ApiModelProperty(ClusterJsonsProperties.PASSWORD)
+    @Schema(description = ClusterJsonsProperties.PASSWORD)
     private String pass;
 
-    @ApiModelProperty(ClusterJsonsProperties.ENABLE_AUTOSCALING)
+    @Schema(description = ClusterJsonsProperties.ENABLE_AUTOSCALING)
     private boolean enableAutoscaling;
 
     @Valid
-    @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
+    @Schema(description = ClusterJsonsProperties.TIME_ALERTS)
     private List<TimeAlertRequest> timeAlerts;
 
-    @ApiModelProperty(ClusterJsonsProperties.SCALING_CONFIGURATION)
+    @Schema(description = ClusterJsonsProperties.SCALING_CONFIGURATION)
     @Valid
     private ScalingConfigurationRequest scalingConfiguration;
 

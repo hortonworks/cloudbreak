@@ -27,80 +27,79 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.Placement
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("CreateFreeIpaV1Request")
+@Schema(name = "CreateFreeIpaV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CreateFreeIpaRequest implements TaggableRequest {
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
+    @Schema(description = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
     private String name;
 
     @NotNull
-    @ApiModelProperty(FreeIpaModelDescriptions.PLACEMENT_SETTINGS)
+    @Schema(description = FreeIpaModelDescriptions.PLACEMENT_SETTINGS)
     private PlacementRequest placement;
 
     @Valid
-    @ApiModelProperty(value = FreeIpaModelDescriptions.INSTANCE_GROUPS, required = true)
+    @Schema(description = FreeIpaModelDescriptions.INSTANCE_GROUPS, required = true)
     private List<InstanceGroupRequest> instanceGroups;
 
     @NotNull
     @Valid
-    @ApiModelProperty(value = FreeIpaModelDescriptions.AUTHENTICATION, required = true)
+    @Schema(description = FreeIpaModelDescriptions.AUTHENTICATION, required = true)
     private StackAuthenticationRequest authentication;
 
     @Valid
-    @ApiModelProperty(FreeIpaModelDescriptions.NETWORK)
+    @Schema(description = FreeIpaModelDescriptions.NETWORK)
     private NetworkRequest network;
 
     @Valid
-    @ApiModelProperty(FreeIpaModelDescriptions.IMAGE_SETTINGS)
+    @Schema(description = FreeIpaModelDescriptions.IMAGE_SETTINGS)
     private ImageSettingsRequest image;
 
-    @ApiModelProperty(FreeIpaModelDescriptions.RECIPES)
+    @Schema(description = FreeIpaModelDescriptions.RECIPES)
     private Set<String> recipes;
 
     @NotNull
     @Valid
-    @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, required = true)
+    @Schema(description = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, required = true)
     private FreeIpaServerRequest freeIpa;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.GATEWAY_PORT, allowableValues = "1025-65535")
+    @Schema(description = FreeIpaModelDescriptions.GATEWAY_PORT, minimum = "1025", maximum = "65535")
     @Min(value = 1025, message = "Port should be between 1025 and 65535")
     @Max(value = 65535, message = "Port should be between 1025 and 65535")
     private Integer gatewayPort;
 
-    @ApiModelProperty(FreeIpaModelDescriptions.TELEMETRY)
+    @Schema(description = FreeIpaModelDescriptions.TELEMETRY)
     private TelemetryRequest telemetry;
 
-    @ApiModelProperty(FreeIpaModelDescriptions.BACKUP)
+    @Schema(description = FreeIpaModelDescriptions.BACKUP)
     @Valid
     private BackupRequest backup;
 
-    @ApiModelProperty(FreeIpaModelDescriptions.TAGS)
+    @Schema(description = FreeIpaModelDescriptions.TAGS)
     private Map<String, String> tags = new HashMap<>();
 
     /**
      * @deprecated use {@link #tunnel} instead
      */
-    @ApiModelProperty(value = FreeIpaModelDescriptions.USE_CCM)
+    @Schema(description = FreeIpaModelDescriptions.USE_CCM)
     @Deprecated
     private Boolean useCcm;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.TUNNEL)
+    @Schema(description = FreeIpaModelDescriptions.TUNNEL)
     private Tunnel tunnel;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.VARIANT)
+    @Schema(description = FreeIpaModelDescriptions.VARIANT)
     private String variant;
 
-    @ApiModelProperty(value = FreeIpaModelDescriptions.MULTIAZ)
+    @Schema(description = FreeIpaModelDescriptions.MULTIAZ)
     private Boolean enableMultiAz;
 
     public String getEnvironmentCrn() {

@@ -7,16 +7,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "EnvironmentNetworkAwsV1Params")
+@Schema(name = "EnvironmentNetworkAwsV1Params")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class EnvironmentNetworkAwsParams {
 
     @Size(max = 255)
-    @ApiModelProperty(value = EnvironmentModelDescription.AWS_VPC_ID, required = true)
+    @Schema(description = EnvironmentModelDescription.AWS_VPC_ID, required = true)
     private String vpcId;
 
     public String getVpcId() {

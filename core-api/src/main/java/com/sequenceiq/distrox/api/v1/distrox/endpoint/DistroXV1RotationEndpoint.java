@@ -26,27 +26,28 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretTypeResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RetryAndMetrics
 @Path("/v1/distrox")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/distrox", protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/distrox")
 public interface DistroXV1RotationEndpoint {
 
     @PUT
     @Path("rotate_secret")
-    @ApiOperation(value = "Rotate DistroX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateDistroXSecrets")
+    @Operation(summary = "Rotate DistroX secrets", operationId = "rotateDistroXSecrets",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSecrets(@Valid @NotNull DistroXSecretRotationRequest request);
 
     @GET
     @Path("multi_secret/check_children")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Check ongoing child DistroX multi secret rotations by parent", produces = MediaType.APPLICATION_JSON,
-            nickname = "checkDistroXMultiSecretsByParent")
+    @Operation(summary = "Check ongoing child DistroX multi secret rotations by parent", operationId = "checkDistroXMultiSecretsByParent",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     boolean checkOngoingChildrenMultiSecretRotationsByParent(@ValidCrn(resource = { ENVIRONMENT, DATALAKE }) @QueryParam("parentCrn") String parentCrn,
             @ValidMultiSecretType @QueryParam("secret") String multiSecret,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
@@ -54,16 +55,16 @@ public interface DistroXV1RotationEndpoint {
     @PUT
     @Path("multi_secret/mark_children")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Mark child resources for DistroX multi secret rotations by parent", produces = MediaType.APPLICATION_JSON,
-            nickname = "markResourcesDistroXMultiSecretsByParent")
+    @Operation(summary = "Mark child resources for DistroX multi secret rotations by parent", operationId = "markResourcesDistroXMultiSecretsByParent",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void markMultiClusterChildrenResourcesByParent(@Valid DistroXChildResourceMarkingRequest request,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
     @Path("list_secret_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "List rotatable secret types for distroX", produces = MediaType.APPLICATION_JSON,
-            nickname = "listRotatableDistroXSecretType")
+    @Operation(summary = "List rotatable secret types for distroX", operationId = "listRotatableDistroXSecretType",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<DistroXSecretTypeResponse> listRotatableDistroXSecretType(
             @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @QueryParam("datahubCrn") @NotEmpty String datahubCrn);
 }

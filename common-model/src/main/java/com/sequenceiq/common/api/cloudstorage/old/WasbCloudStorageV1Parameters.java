@@ -8,22 +8,21 @@ import com.sequenceiq.common.api.cloudstorage.old.validation.ValidWasbCloudStora
 import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
 import com.sequenceiq.common.model.FileSystemType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidWasbCloudStorageParameters
 public class WasbCloudStorageV1Parameters implements FileSystemAwareCloudStorage {
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String accountKey;
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String accountName;
 
-    @ApiModelProperty
+    @Schema
     private boolean secure;
 
     public String getAccountKey() {
@@ -50,7 +49,7 @@ public class WasbCloudStorageV1Parameters implements FileSystemAwareCloudStorage
         this.secure = secure;
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @Override
     public FileSystemType getType() {
         return FileSystemType.WASB;

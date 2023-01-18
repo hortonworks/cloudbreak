@@ -5,35 +5,34 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxClusterResizeRequest {
 
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENT_NAME)
     @NotNull
+    @Schema(description = ModelDescriptions.ENVIRONMENT_NAME)
     private String environment;
 
-    @ApiModelProperty(ModelDescriptions.CLUSTER_SHAPE)
     @NotNull
+    @Schema(description = ModelDescriptions.CLUSTER_SHAPE)
     private SdxClusterShape clusterShape;
 
-    @ApiModelProperty(ModelDescriptions.SKIP_VALIDATION)
+    @Schema(description = ModelDescriptions.SKIP_VALIDATION)
     private boolean skipValidation;
 
-    @ApiModelProperty(ModelDescriptions.SKIP_ATLAS)
+    @Schema(description = ModelDescriptions.SKIP_ATLAS)
     private boolean skipAtlasMetadata;
 
-    @ApiModelProperty(ModelDescriptions.SKIP_RANGER_AUDIT)
+    @Schema(description = ModelDescriptions.SKIP_RANGER_AUDIT)
     private boolean skipRangerAudits;
 
-    @ApiModelProperty(ModelDescriptions.SKIP_RANGER_METADATA)
+    @Schema(description = ModelDescriptions.SKIP_RANGER_METADATA)
     private boolean skipRangerMetadata;
 
-    @ApiModelProperty(ModelDescriptions.MULTI_AZ_ENABLED)
+    @Schema(description = ModelDescriptions.MULTI_AZ_ENABLED)
     private boolean enableMultiAz;
 
     public String getEnvironment() {

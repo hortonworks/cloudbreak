@@ -5,14 +5,13 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "UpdateAzureEncryptionParametersV1Request")
+@Schema(name = "UpdateAzureEncryptionParametersV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateAzureResourceEncryptionParametersRequest implements Serializable {
 
-    @ApiModelProperty(EnvironmentModelDescription.RESOURCE_ENCRYPTION_PARAMETERS)
+    @Schema(description = EnvironmentModelDescription.RESOURCE_ENCRYPTION_PARAMETERS)
     private AzureResourceEncryptionParameters azureResourceEncryptionParameters;
 
     public AzureResourceEncryptionParameters getAzureResourceEncryptionParameters() {

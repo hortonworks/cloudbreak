@@ -14,38 +14,37 @@ import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigModelDescription
 import com.sequenceiq.freeipa.api.v1.kerberos.validation.ValidKerberosRequest;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("CreateKerberosConfigV1Request")
+@Schema(name = "CreateKerberosConfigV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 @ValidKerberosRequest
 public class CreateKerberosConfigRequest {
     @Valid
-    @ApiModelProperty
+    @Schema
     private ActiveDirectoryKerberosDescriptor activeDirectory;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private FreeIpaKerberosDescriptor freeIpa;
 
     @Valid
-    @ApiModelProperty
+    @Schema
     private MITKerberosDescriptor mit;
 
-    @ApiModelProperty(value = KerberosConfigModelDescription.KERBEROS_CONFIG_NAME, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_CONFIG_NAME, required = true)
     @NotNull
     @NotEmpty
     private String name;
 
     @Size(max = 1000)
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     public ActiveDirectoryKerberosDescriptor getActiveDirectory() {

@@ -4,25 +4,24 @@ import java.util.Date;
 
 import com.sequenceiq.periscope.doc.ApiDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class DistroXAutoscaleScalingActivityResponse implements Json {
 
-    @ApiModelProperty(ApiDescription.ClusterJsonsProperties.OPERATION_ID)
+    @Schema(description = ApiDescription.ClusterJsonsProperties.OPERATION_ID)
     private String operationId;
 
-    @ApiModelProperty(ApiDescription.ClusterJsonsProperties.START_TIME)
+    @Schema(description = ApiDescription.ClusterJsonsProperties.START_TIME)
     private Date startTime;
 
-    @ApiModelProperty(ApiDescription.ClusterJsonsProperties.END_TIME)
+    @Schema(description = ApiDescription.ClusterJsonsProperties.END_TIME)
     private Date endTime;
 
-    @ApiModelProperty(ApiDescription.ClusterJsonsProperties.ACTIVITY_STATUS)
+    @Schema(description = ApiDescription.ClusterJsonsProperties.ACTIVITY_STATUS)
     private ApiActivityStatus apiActivityStatus;
 
-    @ApiModelProperty(ApiDescription.ClusterJsonsProperties.ACTIVITY_REASON)
+    @Schema(description = ApiDescription.ClusterJsonsProperties.ACTIVITY_REASON)
     private String scalingActivityReason;
 
     public DistroXAutoscaleScalingActivityResponse() {

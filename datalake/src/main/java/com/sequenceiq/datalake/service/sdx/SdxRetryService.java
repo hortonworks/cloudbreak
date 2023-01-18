@@ -39,7 +39,7 @@ public class SdxRetryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRetryService.class);
 
-    private static final Set<Class<? extends FlowConfiguration<?>>> FULLY_RESTARTABLE_FLOWS =  Sets.newHashSet(
+    private static final Set<Class<? extends FlowConfiguration<?>>> FULLY_RESTARTABLE_FLOWS = Sets.newHashSet(
             DatalakeRestoreFlowConfig.class,
             DatalakeBackupFlowConfig.class);
 

@@ -12,53 +12,52 @@ import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.DATABASE_SERVER_RESPONSE)
+@Schema(description = ModelDescriptions.DATABASE_SERVER_RESPONSE)
 @JsonInclude(Include.NON_NULL)
 public class DatabaseServerV4Response extends DatabaseServerV4Base {
 
-    @ApiModelProperty(DatabaseServer.ID)
+    @Schema(description = DatabaseServer.ID)
     private Long id;
 
-    @ApiModelProperty(DatabaseServer.CRN)
+    @Schema(description = DatabaseServer.CRN)
     private String crn;
 
-    @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR_DISPLAY_NAME, required = true)
+    @Schema(description = DatabaseServer.DATABASE_VENDOR_DISPLAY_NAME, required = true)
     private String databaseVendorDisplayName;
 
-    @ApiModelProperty(value = DatabaseServer.CONNECTION_DRIVER, required = true)
+    @Schema(description = DatabaseServer.CONNECTION_DRIVER, required = true)
     private String connectionDriver;
 
-    @ApiModelProperty(DatabaseServer.USERNAME)
+    @Schema(description = DatabaseServer.USERNAME)
     private SecretResponse connectionUserName;
 
-    @ApiModelProperty(DatabaseServer.PASSWORD)
+    @Schema(description = DatabaseServer.PASSWORD)
     private SecretResponse connectionPassword;
 
-    @ApiModelProperty(DatabaseServer.CREATION_DATE)
+    @Schema(description = DatabaseServer.CREATION_DATE)
     private Long creationDate;
 
-    @ApiModelProperty(DatabaseServer.RESOURCE_STATUS)
+    @Schema(description = DatabaseServer.RESOURCE_STATUS)
     private ResourceStatus resourceStatus;
 
-    @ApiModelProperty(DatabaseServer.STATUS)
+    @Schema(description = DatabaseServer.STATUS)
     private Status status;
 
-    @ApiModelProperty(DatabaseServer.STATUS_REASON)
+    @Schema(description = DatabaseServer.STATUS_REASON)
     private String statusReason;
 
-    @ApiModelProperty(DatabaseServer.SSL_CONFIG)
+    @Schema(description = DatabaseServer.SSL_CONFIG)
     private SslConfigV4Response sslConfig;
 
-    @ApiModelProperty(DatabaseServer.CLUSTER_CRN)
+    @Schema(description = DatabaseServer.CLUSTER_CRN)
     private String clusterCrn;
 
-    @ApiModelProperty(DatabaseServer.MAJOR_VERSION)
+    @Schema(description = DatabaseServer.MAJOR_VERSION)
     private MajorVersion majorVersion;
 
-    @ApiModelProperty(value = DatabaseServer.DATABASE_PROPERTIES, required = true)
+    @Schema(description = DatabaseServer.DATABASE_PROPERTIES, required = true)
     private DatabasePropertiesV4Response databasePropertiesV4Response;
 
     public Long getId() {

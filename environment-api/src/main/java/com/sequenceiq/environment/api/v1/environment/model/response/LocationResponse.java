@@ -5,23 +5,22 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "LocationV1Response")
+@Schema(name = "LocationV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LocationResponse implements Serializable {
 
-    @ApiModelProperty(EnvironmentModelDescription.LOCATION)
+    @Schema(description = EnvironmentModelDescription.LOCATION)
     private String name;
 
-    @ApiModelProperty(EnvironmentModelDescription.LOCATION_DISPLAY_NAME)
+    @Schema(description = EnvironmentModelDescription.LOCATION_DISPLAY_NAME)
     private String displayName;
 
-    @ApiModelProperty(EnvironmentModelDescription.LATITUDE)
+    @Schema(description = EnvironmentModelDescription.LATITUDE)
     private Double latitude;
 
-    @ApiModelProperty(EnvironmentModelDescription.LONGITUDE)
+    @Schema(description = EnvironmentModelDescription.LONGITUDE)
     private Double longitude;
 
     public String getName() {

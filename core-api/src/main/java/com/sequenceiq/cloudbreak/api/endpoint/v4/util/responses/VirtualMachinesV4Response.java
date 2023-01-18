@@ -7,15 +7,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VirtualMachinesV4Response implements JsonEntity {
 
-    @ApiModelProperty(ConnectorModelDescription.VIRTUAL_MACHNES)
+    @Schema(description = ConnectorModelDescription.VIRTUAL_MACHNES)
     private Set<VmTypeV4Response> virtualMachines = new HashSet<>();
 
-    @ApiModelProperty(ConnectorModelDescription.DEFAULT_VIRTUAL_MACHINES)
+    @Schema(description = ConnectorModelDescription.DEFAULT_VIRTUAL_MACHINES)
     private VmTypeV4Response defaultVirtualMachine;
 
     public Set<VmTypeV4Response> getVirtualMachines() {

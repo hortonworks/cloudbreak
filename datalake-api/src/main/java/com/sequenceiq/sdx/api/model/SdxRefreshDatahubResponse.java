@@ -10,15 +10,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRefreshDatahubResponse {
 
-    @ApiModelProperty(DATAHUB_CRNS_REFRESHED)
+    @Schema(description = DATAHUB_CRNS_REFRESHED)
     private List<StackViewV4Response> refreshedDatahubs;
 
     public SdxRefreshDatahubResponse() {
@@ -56,8 +55,6 @@ public class SdxRefreshDatahubResponse {
 
     @Override
     public String toString() {
-        return "SdxRefreshDatahubResponse{" +
-                "refreshedDatahubs=" + refreshedDatahubs +
-                '}';
+        return "SdxRefreshDatahubResponse{" + "refreshedDatahubs=" + refreshedDatahubs + '}';
     }
 }

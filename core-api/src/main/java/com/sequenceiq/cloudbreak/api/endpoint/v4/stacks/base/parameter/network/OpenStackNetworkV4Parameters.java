@@ -12,28 +12,27 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 @Deprecated
 public class OpenStackNetworkV4Parameters extends MappableBase implements JsonEntity {
 
-    @ApiModelProperty
+    @Schema
     private String networkId;
 
-    @ApiModelProperty
+    @Schema
     private String routerId;
 
-    @ApiModelProperty
+    @Schema
     private String subnetId;
 
-    @ApiModelProperty
+    @Schema
     private String publicNetId;
 
-    @ApiModelProperty
+    @Schema
     private String networkingOption;
 
     public String getNetworkId() {
@@ -89,7 +88,7 @@ public class OpenStackNetworkV4Parameters extends MappableBase implements JsonEn
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         throw new IllegalStateException("OPENSTACK is deprecated");
     }

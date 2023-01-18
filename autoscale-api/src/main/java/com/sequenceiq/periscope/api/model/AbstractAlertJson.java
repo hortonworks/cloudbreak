@@ -6,7 +6,7 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.periscope.doc.ApiDescription.BaseAlertJsonProperties;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class AbstractAlertJson implements Json {
 
@@ -14,10 +14,10 @@ public abstract class AbstractAlertJson implements Json {
             message = "The name can only contain alphanumeric characters and hyphens and has to start with an alphabetic character")
     @NotEmpty
     @Size(max = 250)
-    @ApiModelProperty(BaseAlertJsonProperties.ALERTNAME)
+    @Schema(description = BaseAlertJsonProperties.ALERTNAME)
     private String alertName;
 
-    @ApiModelProperty(BaseAlertJsonProperties.DESCRIPTION)
+    @Schema(description = BaseAlertJsonProperties.DESCRIPTION)
     @Size(max = 250)
     private String description;
 

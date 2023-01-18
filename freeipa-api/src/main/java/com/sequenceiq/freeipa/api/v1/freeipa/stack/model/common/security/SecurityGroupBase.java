@@ -4,10 +4,10 @@ import java.util.Set;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.SecurityGroupModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class SecurityGroupBase {
-    @ApiModelProperty(SecurityGroupModelDescription.SECURITY_GROUP_IDS)
+    @Schema(description = SecurityGroupModelDescription.SECURITY_GROUP_IDS)
     private Set<String> securityGroupIds;
 
     public Set<String> getSecurityGroupIds() {

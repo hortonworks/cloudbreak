@@ -9,38 +9,37 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UpgradeModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidUpgradeRequest;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ValidUpgradeRequest
 public class UpgradeV4Request {
 
-    @ApiModelProperty(UpgradeModelDescription.IMAGE_ID)
+    @Schema(description = UpgradeModelDescription.IMAGE_ID)
     private String imageId;
 
-    @ApiModelProperty(UpgradeModelDescription.RUNTIME)
+    @Schema(description = UpgradeModelDescription.RUNTIME)
     private String runtime;
 
-    @ApiModelProperty(UpgradeModelDescription.LOCK_COMPONENTS)
+    @Schema(description = UpgradeModelDescription.LOCK_COMPONENTS)
     private Boolean lockComponents;
 
-    @ApiModelProperty(UpgradeModelDescription.DRY_RUN)
+    @Schema(description = UpgradeModelDescription.DRY_RUN)
     private Boolean dryRun;
 
     private Boolean replaceVms = Boolean.TRUE;
 
-    @ApiModelProperty(UpgradeModelDescription.SKIP_DATAHUB_VALIDATION)
+    @Schema(description = UpgradeModelDescription.SKIP_DATAHUB_VALIDATION)
     private Boolean skipDataHubValidation;
 
-    @ApiModelProperty(UpgradeModelDescription.SHOW_AVAILABLE_IMAGES)
+    @Schema(description = UpgradeModelDescription.SHOW_AVAILABLE_IMAGES)
     private UpgradeShowAvailableImages showAvailableImages = UpgradeShowAvailableImages.DO_NOT_SHOW;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private InternalUpgradeSettings internalUpgradeSettings;
 
-    @ApiModelProperty(UpgradeModelDescription.KEEP_VARIANT)
+    @Schema(description = UpgradeModelDescription.KEEP_VARIANT)
     private boolean keepVariant;
 
     public String getImageId() {
@@ -125,19 +124,19 @@ public class UpgradeV4Request {
                 !isShowAvailableImagesSet();
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isDryRunOnly() {
         return isUnspecifiedUpgradeType() &&
                 Boolean.TRUE.equals(dryRun);
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isShowAvailableImagesOnly() {
         return isUnspecifiedUpgradeType() &&
                 isShowAvailableImagesSet();
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public boolean isShowAvailableImagesSet() {
         return Objects.nonNull(showAvailableImages) && UpgradeShowAvailableImages.DO_NOT_SHOW != showAvailableImages;
     }

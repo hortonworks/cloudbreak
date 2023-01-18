@@ -4,17 +4,17 @@ import java.io.Serializable;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class FreeIpaImageResponse implements Serializable {
 
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
     private String catalog;
 
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE_ID)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_IMAGE_ID)
     private String id;
 
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE_OS_TYPE)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_IMAGE_OS_TYPE)
     private String os;
 
     public String getCatalog() {

@@ -12,21 +12,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterTemplateModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private Long id;
 
     private ResourceStatus status;
 
-    @ApiModelProperty(value = ClusterTemplateModelDescription.DATALAKE_REQUIRED,
-            allowableValues = "NONE,OPTIONAL,REQUIRED")
+    @Schema(description = ClusterTemplateModelDescription.DATALAKE_REQUIRED)
     private DatalakeRequired datalakeRequired = DatalakeRequired.OPTIONAL;
 
     private String environmentCrn;
@@ -39,17 +37,17 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     private FeatureState featureState;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.NODE_COUNT)
+    @Schema(description = ModelDescriptions.ClusterTemplateViewModelDescription.NODE_COUNT)
     private Integer nodeCount;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.STACK_TYPE)
+    @Schema(description = ModelDescriptions.ClusterTemplateViewModelDescription.STACK_TYPE)
     private String stackType;
 
-    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.STACK_VERSION)
+    @Schema(description = ModelDescriptions.ClusterTemplateViewModelDescription.STACK_VERSION)
     private String stackVersion;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN)
     private String crn;
 
     public FeatureState getFeatureState() {

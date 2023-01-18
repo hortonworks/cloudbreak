@@ -8,21 +8,21 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformDisksResponse implements Serializable {
 
-    @ApiModelProperty(PlatformResourceModelDescription.DISK_TYPES)
+    @Schema(description = PlatformResourceModelDescription.DISK_TYPES)
     private Map<String, Collection<String>> diskTypes;
 
-    @ApiModelProperty(PlatformResourceModelDescription.DEFAULT_DISKS)
+    @Schema(description = PlatformResourceModelDescription.DEFAULT_DISKS)
     private Map<String, String> defaultDisks;
 
-    @ApiModelProperty(PlatformResourceModelDescription.DISK_MAPPINGS)
+    @Schema(description = PlatformResourceModelDescription.DISK_MAPPINGS)
     private Map<String, Map<String, String>> diskMappings;
 
-    @ApiModelProperty(PlatformResourceModelDescription.DISK_DISPLAYNAMES)
+    @Schema(description = PlatformResourceModelDescription.DISK_DISPLAYNAMES)
     private Map<String, Map<String, String>> displayNames;
 
     public PlatformDisksResponse() {

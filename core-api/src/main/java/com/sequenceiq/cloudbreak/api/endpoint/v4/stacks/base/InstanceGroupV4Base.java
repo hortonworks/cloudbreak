@@ -20,7 +20,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InstanceGroupV4Base extends ProviderParametersBase implements JsonEntity {
@@ -28,44 +28,43 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     @Min(value = 0, message = "The node count has to be greater or equals than 0")
     @Max(value = 400, message = "The node count has to be less than 400")
     @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
-    @ApiModelProperty(value = InstanceGroupModelDescription.NODE_COUNT, required = true)
+    @Schema(description = InstanceGroupModelDescription.NODE_COUNT, required = true)
     private int nodeCount;
 
     @NotNull
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_TYPE, allowableValues = "CORE,GATEWAY")
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_TYPE)
     private InstanceGroupType type = InstanceGroupType.CORE;
 
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_SCALABILITY_TYPE,
-            allowableValues = "ALLOWED,FORBIDDEN,ONLY_UPSCALE,ONLY_DOWNSCALE")
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_SCALABILITY_TYPE)
     private ScalabilityOption scalabilityOption = ScalabilityOption.ALLOWED;
 
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_MINIMUM_NODECOUNT)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_MINIMUM_NODECOUNT)
     private Integer minimumNodeCount = 0;
 
-    @ApiModelProperty(InstanceGroupModelDescription.AZURE_PARAMETERS)
+    @Schema(description = InstanceGroupModelDescription.AZURE_PARAMETERS)
     private AzureInstanceGroupV4Parameters azure;
 
-    @ApiModelProperty(InstanceGroupModelDescription.GCP_PARAMETERS)
+    @Schema(description = InstanceGroupModelDescription.GCP_PARAMETERS)
     private GcpInstanceGroupV4Parameters gcp;
 
     @Valid
-    @ApiModelProperty(InstanceGroupModelDescription.AWS_PARAMETERS)
+    @Schema(description = InstanceGroupModelDescription.AWS_PARAMETERS)
     private AwsInstanceGroupV4Parameters aws;
 
-    @ApiModelProperty(InstanceGroupModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Schema(description = InstanceGroupModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
     @Deprecated
     private OpenStackInstanceGroupV4Parameters openstack;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private YarnInstanceGroupV4Parameters yarn;
 
-    @ApiModelProperty(hidden = false)
+    @Schema
     private MockInstanceGroupV4Parameters mock;
 
-    @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
+    @Schema(description = HostGroupModelDescription.RECOVERY_MODE)
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
     public int getNodeCount() {

@@ -4,24 +4,23 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MountedVolumeV4Response implements JsonEntity {
 
-    @ApiModelProperty
+    @Schema
     private String volumeId;
 
-    @ApiModelProperty
+    @Schema
     private String device;
 
-    @ApiModelProperty
+    @Schema
     private String volumeType;
 
-    @ApiModelProperty
+    @Schema
     private String volumeSize;
 
     public String getVolumeId() {

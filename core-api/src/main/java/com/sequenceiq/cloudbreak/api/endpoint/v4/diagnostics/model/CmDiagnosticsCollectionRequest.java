@@ -6,15 +6,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.api.diagnostics.BaseCmDiagnosticsCollectionRequest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CmDiagnosticsCollectionRequest extends BaseCmDiagnosticsCollectionRequest {
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.CRN)
+    @Schema(description = ModelDescriptions.StackModelDescription.CRN)
     private String stackCrn;
 
     @Override

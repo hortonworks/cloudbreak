@@ -13,27 +13,26 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-@ApiModel(value = "EnvironmentNetworkGcpV1Params")
+import io.swagger.v3.oas.annotations.media.Schema;
+@Schema(name = "EnvironmentNetworkGcpV1Params")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class EnvironmentNetworkGcpParams implements Serializable {
 
     @Size(max = 255)
-    @ApiModelProperty(value = EnvironmentModelDescription.GCP_NETWORK_ID, required = true)
+    @Schema(description = EnvironmentModelDescription.GCP_NETWORK_ID, required = true)
     private String networkId;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.GCP_SHARED_PROJECT_ID, required = true)
+    @Schema(description = EnvironmentModelDescription.GCP_SHARED_PROJECT_ID, required = true)
     private String sharedProjectId;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.GCP_NO_PUBLIC_IP, required = true)
+    @Schema(description = EnvironmentModelDescription.GCP_NO_PUBLIC_IP, required = true)
     private Boolean noPublicIp;
 
-    @ApiModelProperty(value = EnvironmentModelDescription.GCP_NO_FIREWALL_RULES, required = true)
+    @Schema(description = EnvironmentModelDescription.GCP_NO_FIREWALL_RULES, required = true)
     private Boolean noFirewallRules;
 
-    @ApiModelProperty(EnvironmentModelDescription.GCP_AVAILABILITY_ZONES)
+    @Schema(description = EnvironmentModelDescription.GCP_AVAILABILITY_ZONES)
     private Set<String> availabilityZones = Set.of();
 
     public String getNetworkId() {

@@ -17,18 +17,17 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnviro
 import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(value = "DetailedEnvironmentV1Response")
+@Schema(name = "DetailedEnvironmentV1Response")
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
-    @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_RESPONSE)
+    @Schema(description = EnvironmentModelDescription.CREDENTIAL_RESPONSE)
     private CredentialResponse credential;
 
-    @ApiModelProperty(EnvironmentModelDescription.PROXYCONFIG_RESPONSE)
+    @Schema(description = EnvironmentModelDescription.PROXYCONFIG_RESPONSE)
     private ProxyResponse proxyConfig;
 
     public CredentialResponse getCredential() {

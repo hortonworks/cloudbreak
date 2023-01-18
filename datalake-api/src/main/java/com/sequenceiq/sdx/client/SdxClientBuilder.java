@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceClientBuilder;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 
 public class SdxClientBuilder extends AbstractUserCrnServiceClientBuilder<SdxServiceCrnClient> {
+
     public SdxClientBuilder(String serviceAddress) {
         super(serviceAddress);
     }

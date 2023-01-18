@@ -149,7 +149,7 @@ class UserKeytabServiceTest {
     void testGetKeytabBase64MissingKerberosConfig() {
         when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(any(), any()))
                 .thenReturn(Optional.empty());
-        Exception exception =  assertThrows(NotFoundException.class, () -> underTest.getKeytabBase64(USER_CRN, ENV_CRN));
+        Exception exception = assertThrows(NotFoundException.class, () -> underTest.getKeytabBase64(USER_CRN, ENV_CRN));
         assertEquals(String.format("KerberosConfig for environment '%s' not found.", ENV_CRN), exception.getMessage());
     }
 
@@ -165,7 +165,7 @@ class UserKeytabServiceTest {
                 .build();
         when(grpcUmsClient.getActorWorkloadCredentials(any())).thenReturn(response);
 
-        Exception exception =  assertThrows(NotFoundException.class, () -> underTest.getKeytabBase64(USER_CRN, ENV_CRN));
+        Exception exception = assertThrows(NotFoundException.class, () -> underTest.getKeytabBase64(USER_CRN, ENV_CRN));
         assertEquals("Could not retrieve workload credentials. A workload password may not have been set for this user or machine user.",
                 exception.getMessage());
     }

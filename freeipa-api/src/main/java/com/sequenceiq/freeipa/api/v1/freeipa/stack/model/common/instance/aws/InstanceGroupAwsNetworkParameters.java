@@ -4,13 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(value = "InstanceGroupAwsNetworkV1Parameters")
+@Schema(name = "InstanceGroupAwsNetworkV1Parameters")
 public class InstanceGroupAwsNetworkParameters implements Serializable {
 
-    @ApiModelProperty
+    @Schema
     private List<String> subnetIds = new ArrayList<>();
 
     public List<String> getSubnetIds() {
