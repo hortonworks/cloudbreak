@@ -3,17 +3,16 @@ package com.sequenceiq.flow.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RetryableFlowResponse implements JsonEntity {
 
-    @ApiModelProperty("Name of the failed operation, that is also retryable.")
+    @Schema(description = "Name of the failed operation, that is also retryable.")
     private String name;
 
-    @ApiModelProperty("Date when the operation went failed.")
+    @Schema(description = "Date when the operation went failed.")
     private Long failDate;
 
     private RetryableFlowResponse(String name, Long failDate) {

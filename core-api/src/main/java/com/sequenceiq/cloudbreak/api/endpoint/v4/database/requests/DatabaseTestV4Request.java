@@ -6,18 +6,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseTestV4Request implements JsonEntity {
 
-    @ApiModelProperty(Database.NAME)
+    @Schema(description = Database.NAME)
     private String existingDatabaseName;
 
     @Valid
-    @ApiModelProperty(Database.DATABASE_REQUEST)
+    @Schema(description = Database.DATABASE_REQUEST)
     private DatabaseV4Request database;
 
     public String getExistingDatabaseName() {

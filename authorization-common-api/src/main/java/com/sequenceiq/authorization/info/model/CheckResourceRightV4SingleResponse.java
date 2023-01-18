@@ -2,9 +2,9 @@ package com.sequenceiq.authorization.info.model;
 
 import java.util.List;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class CheckResourceRightV4SingleResponse {
 
     private String resourceCrn;

@@ -17,7 +17,6 @@ dependencies {
     implementation     project(":structuredevent-api-cdp")
 
     implementation     group: "org.apache.commons",            name: "commons-lang3",                  version: apacheCommonsLangVersion
-    implementation     group: "io.swagger",                    name: "swagger-jersey2-jaxrs",          version: swaggerVersion
     implementation     group: "javax.validation",              name: "validation-api",                 version: javaxValidationVersion
     implementation     group: "org.glassfish.jersey.ext",      name: "jersey-proxy-client",            version: jerseyCoreVersion
     implementation     group: "org.glassfish.jersey.media",    name: "jersey-media-json-jackson",      version: jerseyCoreVersion

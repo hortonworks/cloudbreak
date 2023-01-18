@@ -22,19 +22,19 @@ import com.sequenceiq.consumption.api.v1.consumption.model.request.CloudResource
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.response.ConsumptionExistenceResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 @Path("/v1/internal/consumption")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/internal/consumption", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/internal/consumption")
 public interface ConsumptionInternalEndpoint {
 
     @POST
     @Path("schedule/storage")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConsumptionOpDescription.SCHEDULE_STORAGE, produces = MediaType.APPLICATION_JSON, nickname = "scheduleStorageCollection")
+    @Operation(summary =  ConsumptionOpDescription.SCHEDULE_STORAGE, operationId ="scheduleStorageCollection")
     void scheduleStorageConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
             @Valid @NotNull StorageConsumptionRequest request,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
@@ -43,7 +43,7 @@ public interface ConsumptionInternalEndpoint {
     @DELETE
     @Path("unschedule/storage")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConsumptionOpDescription.UNSCHEDULE_STORAGE, produces = MediaType.APPLICATION_JSON, nickname = "unscheduleStorageCollection")
+    @Operation(summary =  ConsumptionOpDescription.UNSCHEDULE_STORAGE, operationId ="unscheduleStorageCollection")
     void unscheduleStorageConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
             @QueryParam("monitoredResourceCrn") String monitoredResourceCrn, @NotEmpty @QueryParam("storageLocation") String storageLocation,
@@ -53,7 +53,7 @@ public interface ConsumptionInternalEndpoint {
     @GET
     @Path("exists/storage")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConsumptionOpDescription.STORAGE_EXISTS, produces = MediaType.APPLICATION_JSON, nickname = "storageCollectionExists")
+    @Operation(summary =  ConsumptionOpDescription.STORAGE_EXISTS, operationId ="storageCollectionExists")
     ConsumptionExistenceResponse doesStorageConsumptionCollectionExist(@AccountId @QueryParam("accountId") String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
             @QueryParam("monitoredResourceCrn") String monitoredResourceCrn, @NotEmpty @QueryParam("storageLocation") String storageLocation,
@@ -63,8 +63,8 @@ public interface ConsumptionInternalEndpoint {
     @POST
     @Path("schedule")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConsumptionOpDescription.SCHEDULE_CLOUD_RESOURCE, produces = MediaType.APPLICATION_JSON,
-            nickname = "scheduleConsumtpionCollection")
+    @Operation(summary =  ConsumptionOpDescription.SCHEDULE_CLOUD_RESOURCE,
+            operationId = "scheduleConsumtpionCollection")
     void scheduleCloudResourceConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
             @Valid @NotNull CloudResourceConsumptionRequest request,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
@@ -73,8 +73,8 @@ public interface ConsumptionInternalEndpoint {
     @DELETE
     @Path("{monitoredResourceCrn}/unschedule")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConsumptionOpDescription.UNSCHEDULE_CLOUD_RESOURCE, produces = MediaType.APPLICATION_JSON,
-            nickname = "unscheduleConsumptionCollection")
+    @Operation(summary =  ConsumptionOpDescription.UNSCHEDULE_CLOUD_RESOURCE,
+            operationId = "unscheduleConsumptionCollection")
     void unscheduleCloudResourceConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.ENVIRONMENT})
             @PathParam("monitoredResourceCrn") String monitoredResourceCrn,
@@ -85,8 +85,8 @@ public interface ConsumptionInternalEndpoint {
     @GET
     @Path("{monitoredResourceCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConsumptionOpDescription.CLOUD_RESOURCE_EXISTS, produces = MediaType.APPLICATION_JSON,
-            nickname = "ConsumptionCollectionExists")
+    @Operation(summary =  ConsumptionOpDescription.CLOUD_RESOURCE_EXISTS,
+            operationId = "ConsumptionCollectionExists")
     ConsumptionExistenceResponse doesCloudResourceConsumptionCollectionExist(@AccountId @QueryParam("accountId") String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.ENVIRONMENT})
             @PathParam("monitoredResourceCrn") String monitoredResourceCrn,

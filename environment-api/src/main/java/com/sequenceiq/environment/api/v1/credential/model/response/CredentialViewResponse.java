@@ -8,17 +8,16 @@ import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
 import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = CredentialDescriptor.CREDENTIAL_VIEW, value = "CredentialViewV1Response")
+@Schema(description = CredentialDescriptor.CREDENTIAL_VIEW, name = "CredentialViewV1Response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CredentialViewResponse implements Serializable {
 
-    @ApiModelProperty(ModelDescriptions.NAME)
+    @Schema(description = ModelDescriptions.NAME)
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN)
     private String crn;
 
     /**
@@ -26,19 +25,19 @@ public class CredentialViewResponse implements Serializable {
      * and can become invalid, usage of it can be error prone
      */
     @Deprecated
-    @ApiModelProperty(ModelDescriptions.CREATOR)
+    @Schema(description = ModelDescriptions.CREATOR)
     private String creator;
 
-    @ApiModelProperty(value = CredentialModelDescription.CLOUD_PLATFORM, required = true)
+    @Schema(description = CredentialModelDescription.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(CredentialModelDescription.VERIFICATION_STATUS_TEXT)
+    @Schema(description = CredentialModelDescription.VERIFICATION_STATUS_TEXT)
     private String verificationStatusText;
 
-    @ApiModelProperty(CredentialModelDescription.CREDENTIAL_TYPE)
+    @Schema(description = CredentialModelDescription.CREDENTIAL_TYPE)
     private CredentialType type;
 
     private Boolean govCloud;

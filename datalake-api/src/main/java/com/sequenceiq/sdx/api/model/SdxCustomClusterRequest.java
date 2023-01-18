@@ -3,23 +3,20 @@ package com.sequenceiq.sdx.api.model;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxCustomClusterRequest extends SdxClusterRequestBase {
 
-    @ApiModelProperty(ModelDescriptions.IMAGE_SETTINGS)
+    @Schema(description = ModelDescriptions.IMAGE_SETTINGS)
     private ImageSettingsV4Request imageSettingsV4Request;
 
-    @ApiModelProperty(ModelDescriptions.RECIPES)
+    @Schema(description = ModelDescriptions.RECIPES)
     private Set<SdxRecipe> recipes;
 
     public ImageSettingsV4Request getImageSettingsV4Request() {
@@ -56,6 +53,7 @@ public class SdxCustomClusterRequest extends SdxClusterRequestBase {
         newRequest.setRecipes(recipes);
 
         return new Pair<SdxClusterRequest, ImageSettingsV4Request>() {
+
             @Override
             public SdxClusterRequest getLeft() {
                 return newRequest;

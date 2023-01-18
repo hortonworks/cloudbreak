@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
 import com.sequenceiq.common.model.annotations.Immutable;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Immutable
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CDPAuditEventV1Responses extends CDPStructuredEventGeneralCollectionV1Response<CDPAuditEventV1Response> {
 

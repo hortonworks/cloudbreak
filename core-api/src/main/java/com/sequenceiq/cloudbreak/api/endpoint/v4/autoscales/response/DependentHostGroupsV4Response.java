@@ -5,14 +5,13 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DependentHostGroupsV4Response {
 
-    @ApiModelProperty
+    @Schema
     private Map<String, Set<String>> dependentHostGroups;
 
     public Map<String, Set<String>> getDependentHostGroups() {

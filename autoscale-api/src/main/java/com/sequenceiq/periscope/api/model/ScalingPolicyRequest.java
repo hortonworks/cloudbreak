@@ -1,8 +1,8 @@
 package com.sequenceiq.periscope.api.model;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class ScalingPolicyRequest extends ScalingPolicyBase {
 
 }

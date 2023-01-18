@@ -14,31 +14,30 @@ import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Paramete
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class BackupBase implements Serializable {
 
     @NotNull
-    @ApiModelProperty(BackupModelDescription.BACKUP_STORAGE_LOCATION)
+    @Schema(description = BackupModelDescription.BACKUP_STORAGE_LOCATION)
     private String storageLocation;
 
     @Valid
-    @ApiModelProperty(BackupModelDescription.BACKUP_S3_ATTRIBUTES)
+    @Schema(description = BackupModelDescription.BACKUP_S3_ATTRIBUTES)
     private S3CloudStorageV1Parameters s3;
 
-    @ApiModelProperty(BackupModelDescription.BACKUP_ADLS_GEN_2_ATTRIBUTES)
+    @Schema(description = BackupModelDescription.BACKUP_ADLS_GEN_2_ATTRIBUTES)
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
     @Valid
-    @ApiModelProperty(BackupModelDescription.BACKUP_GCS_ATTRIBUTES)
+    @Schema(description = BackupModelDescription.BACKUP_GCS_ATTRIBUTES)
     private GcsCloudStorageV1Parameters gcs;
 
     @Valid
-    @ApiModelProperty(BackupModelDescription.BACKUP_CLOUDWATCH_ATTRIBUTES)
+    @Schema(description = BackupModelDescription.BACKUP_CLOUDWATCH_ATTRIBUTES)
     private BackupCloudwatchParams cloudwatch;
 
     public String getStorageLocation() {

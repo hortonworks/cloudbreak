@@ -6,17 +6,16 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityRulesModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityRulesV4Response {
 
-    @ApiModelProperty(SecurityRulesModelDescription.CORE)
+    @Schema(description = SecurityRulesModelDescription.CORE)
     private List<SecurityRuleV4Response> core = new ArrayList<>();
 
-    @ApiModelProperty(SecurityRulesModelDescription.GATEWAY)
+    @Schema(description = SecurityRulesModelDescription.GATEWAY)
     private List<SecurityRuleV4Response> gateway = new ArrayList<>();
 
     public List<SecurityRuleV4Response> getCore() {

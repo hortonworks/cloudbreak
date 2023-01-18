@@ -10,22 +10,21 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("RebootInstancesV1Request")
+@Schema(name = "RebootInstancesV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RebootInstancesRequest {
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotEmpty
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
-    @ApiModelProperty(ModelDescriptions.FORCE_REBOOT)
+    @Schema(description = ModelDescriptions.FORCE_REBOOT)
     private boolean forceReboot;
 
-    @ApiModelProperty(ModelDescriptions.INSTANCE_ID)
+    @Schema(description = ModelDescriptions.INSTANCE_ID)
     private List<String> instanceIds;
 
     public String getEnvironmentCrn() {

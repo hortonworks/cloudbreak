@@ -1,8 +1,10 @@
 package com.sequenceiq.consumption.configuration.api;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.ext.ExceptionMapper;
 
@@ -13,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
@@ -21,9 +24,8 @@ import com.sequenceiq.consumption.endpoint.ConsumptionInternalV1Controller;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.config.SwaggerConfigLocator;
-import io.swagger.jaxrs.config.SwaggerContextService;
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import io.swagger.v3.oas.models.OpenAPI;
 
 @Configuration
 @ApplicationPath(ConsumptionApi.API_ROOT_CONTEXT)
@@ -37,40 +39,54 @@ public class EndpointConfig extends ResourceConfig {
             CDPStructuredEventV1Controller.class,
             ConsumptionInternalV1Controller.class);
 
+    private static final Set<String> OPENAPI_RESOURCE_PACKAGES = Stream.of(
+            "com.sequenceiq.consumption.api",
+                    "com.sequenceiq.flow.api",
+                    "com.consumption.authorization",
+                    "com.sequenceiq.consumption.structuredevent.rest.endpoint")
+            .collect(Collectors.toSet());
+
+    private final String contextPath;
+
     private final String applicationVersion;
 
     private final boolean auditEnabled;
 
     private final List<ExceptionMapper<?>> exceptionMappers;
 
+    private final OpenApiProvider openApiProvider;
+
     public EndpointConfig(@Value("${info.app.version:unspecified}") String applicationVersion,
             @Value("${consumption.structuredevent.rest.enabled:true}") boolean auditEnabled,
-            List<ExceptionMapper<?>> exceptionMappers) {
-
+            @Value("${server.servlet.context-path:}") String contextPath,
+            List<ExceptionMapper<?>> exceptionMappers,
+            OpenApiProvider openApiProvider) {
         this.applicationVersion = applicationVersion;
         this.auditEnabled = auditEnabled;
+        this.contextPath = contextPath;
         this.exceptionMappers = exceptionMappers;
+        this.openApiProvider = openApiProvider;
         registerFilters();
         registerEndpoints();
         registerExceptionMappers();
         registerSwagger();
+        registerOpenApi();
     }
 
-    @PostConstruct
+    private void registerOpenApi() {
+        OpenApiResource openApiResource = new OpenApiResource();
+        register(openApiResource);
+    }
+
     private void registerSwagger() {
-        BeanConfig swaggerConfig = new BeanConfig();
-        swaggerConfig.setTitle("Consumption API");
-        swaggerConfig.setDescription("Consumption operation related API.");
-        swaggerConfig.setVersion(applicationVersion);
-        swaggerConfig.setSchemes(new String[]{"http", "https"});
-        swaggerConfig.setBasePath(ConsumptionApi.API_ROOT_CONTEXT);
-        swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.consumption.api,com.sequenceiq.flow.api,com.consumption.authorization," +
-                "com.sequenceiq.consumption.structuredevent.rest.endpoint");
-        swaggerConfig.setScan(true);
-        swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
-        swaggerConfig.setPrettyPrint(true);
-        SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, swaggerConfig);
+        OpenAPI openAPI = openApiProvider.getOpenAPI(
+                "Consumption API",
+                "Consumption operation related API.",
+                applicationVersion,
+                "https://localhost" + contextPath + ConsumptionApi.API_ROOT_CONTEXT
+        );
+        openAPI.setComponents(openApiProvider.getComponents());
+        openApiProvider.createConfig(openAPI, OPENAPI_RESOURCE_PACKAGES);
     }
 
     private void registerExceptionMappers() {
@@ -82,10 +98,6 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         CONTROLLERS.forEach(this::register);
-
-        register(io.swagger.jaxrs.listing.ApiListingResource.class);
-        register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
     }
 
     private void registerFilters() {

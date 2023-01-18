@@ -6,24 +6,23 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class CustomDomainSettingsV4Base implements JsonEntity {
 
-    @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN)
+    @Schema(description = StackModelDescription.CUSTOM_DOMAIN)
     private String domainName;
 
-    @ApiModelProperty(StackModelDescription.CUSTOM_HOSTNAME)
+    @Schema(description = StackModelDescription.CUSTOM_HOSTNAME)
     private String hostname;
 
-    @ApiModelProperty(StackModelDescription.CLUSTER_NAME_AS_SUBDOMAIN)
+    @Schema(description = StackModelDescription.CLUSTER_NAME_AS_SUBDOMAIN)
     private boolean clusterNameAsSubdomain;
 
-    @ApiModelProperty(StackModelDescription.HOSTGROUP_NAME_AS_HOSTNAME)
+    @Schema(description = StackModelDescription.HOSTGROUP_NAME_AS_HOSTNAME)
     private boolean hostgroupNameAsHostname;
 
     public String getDomainName() {

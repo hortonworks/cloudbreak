@@ -1,23 +1,24 @@
 package com.sequenceiq.environment.api.v1.credential.model.parameters.azure;
 
+import static io.swagger.v3.oas.annotations.media.Schema.*;
+
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("RoleBasedV1Request")
+@Schema(name = "RoleBasedV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class RoleBasedRequest implements Serializable {
 
-    @ApiModelProperty(required = true)
+    @Schema(required = true)
     private String roleName;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private String deploymentAddress;
 
     public String getRoleName() {

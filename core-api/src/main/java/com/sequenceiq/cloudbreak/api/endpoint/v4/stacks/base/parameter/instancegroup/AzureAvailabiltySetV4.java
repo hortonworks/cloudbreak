@@ -3,18 +3,18 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instance
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AzureAvailabiltySetV4 implements JsonEntity {
 
-    @ApiModelProperty
+    @Schema
     private String name;
 
-    @ApiModelProperty
+    @Schema
     private Integer faultDomainCount;
 
-    @ApiModelProperty
+    @Schema
     private Integer updateDomainCount;
 
     public String getName() {

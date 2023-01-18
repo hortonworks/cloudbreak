@@ -11,38 +11,37 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonInclude(Include.NON_NULL)
 public class DatabaseV4Response extends DatabaseV4Base {
 
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(ModelDescriptions.CREATED)
+    @Schema(description = ModelDescriptions.CREATED)
     private Long creationDate;
 
-    @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
+    @Schema(description = RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;
 
-    @ApiModelProperty(value = Database.DB_ENGINE, required = true)
+    @Schema(description = Database.DB_ENGINE, required = true)
     private String databaseEngine;
 
-    @ApiModelProperty(value = Database.CONNECTION_DRIVER_NAME, required = true)
+    @Schema(description = Database.CONNECTION_DRIVER_NAME, required = true)
     private String connectionDriver;
 
-    @ApiModelProperty(value = Database.DB_ENGINE_DISPLAYNAME, required = true)
+    @Schema(description = Database.DB_ENGINE_DISPLAYNAME, required = true)
     private String databaseEngineDisplayName;
 
-    @ApiModelProperty(Database.USERNAME)
+    @Schema(description = Database.USERNAME)
     private SecretResponse connectionUserName;
 
-    @ApiModelProperty(Database.PASSWORD)
+    @Schema(description = Database.PASSWORD)
     private SecretResponse connectionPassword;
 
-    @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
+    @Schema(description = ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
 
     public Long getId() {

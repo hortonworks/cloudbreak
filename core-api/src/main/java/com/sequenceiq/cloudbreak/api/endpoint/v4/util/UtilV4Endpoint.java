@@ -30,25 +30,25 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.util.UtilControllerDescription;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 @Path("/v4/utils")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/utils", description = UtilControllerDescription.UTIL_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/utils", description = UtilControllerDescription.UTIL_DESCRIPTION)
 public interface UtilV4Endpoint {
 
     @GET
     @Path("client")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CHECK_CLIENT_VERSION, produces = MediaType.APPLICATION_JSON, nickname = "checkClientVersionV4")
+    @Operation(summary =  CHECK_CLIENT_VERSION, operationId ="checkClientVersionV4")
     VersionCheckResult checkClientVersion(@QueryParam("version") String version);
 
     @GET
     @Path("stack_matrix")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.STACK_MATRIX, produces = MediaType.APPLICATION_JSON, nickname = "getStackMatrixUtilV4")
+    @Operation(summary =  UtilityOpDescription.STACK_MATRIX, operationId ="getStackMatrixUtilV4")
     StackMatrixV4Response getStackMatrix(
         @QueryParam("imageCatalogName") String imageCatalogName,
         @QueryParam("platform") String platform,
@@ -57,48 +57,48 @@ public interface UtilV4Endpoint {
     @GET
     @Path("cloud_storage_matrix")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.CLOUD_STORAGE_MATRIX, produces = MediaType.APPLICATION_JSON, nickname = "getCloudStorageMatrixV4",
-            notes = "Define stack version at least at patch level eg. 2.6.0")
+    @Operation(summary =  UtilityOpDescription.CLOUD_STORAGE_MATRIX, operationId ="getCloudStorageMatrixV4",
+            description =  "Define stack version at least at patch level eg. 2.6.0")
     CloudStorageSupportedV4Responses getCloudStorageMatrix(@QueryParam("stackVersion") String stackVersion);
 
     @POST
     @Path("validate_repository")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RepositoryConfigsValidationOpDescription.POST_REPOSITORY_CONFIGS_VALIDATION, produces = MediaType.APPLICATION_JSON,
-            notes = Notes.REPOSITORY_CONFIGS_VALIDATION_NOTES, nickname = "repositoryConfigsValidationV4")
+    @Operation(summary =  RepositoryConfigsValidationOpDescription.POST_REPOSITORY_CONFIGS_VALIDATION,
+            description =  Notes.REPOSITORY_CONFIGS_VALIDATION_NOTES, operationId ="repositoryConfigsValidationV4")
     RepoConfigValidationV4Response repositoryConfigValidationRequest(@Valid RepoConfigValidationV4Request repoConfigValidationV4Request);
 
     @GET
     @Path("default_security_rules")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = MediaType.APPLICATION_JSON,
-            notes = Notes.SECURITY_RULE_NOTES, nickname = "getDefaultSecurityRules")
+    @Operation(summary =  SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES,
+            description =  Notes.SECURITY_RULE_NOTES, operationId ="getDefaultSecurityRules")
     SecurityRulesV4Response getDefaultSecurityRules();
 
     @GET
     @Path("deployment")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = AccountPreferencesDescription.GET, produces = MediaType.APPLICATION_JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
-            nickname = "getDeploymentInfo")
+    @Operation(summary =  AccountPreferencesDescription.GET, description =  Notes.ACCOUNT_PREFERENCES_NOTES,
+            operationId = "getDeploymentInfo")
     DeploymentPreferencesV4Response deployment();
 
     @POST
     @Path("notification_test")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.NOTIFICATION_TEST, produces = MediaType.APPLICATION_JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
-            nickname = "postNotificationTest")
+    @Operation(summary =  UtilityOpDescription.NOTIFICATION_TEST, description =  Notes.ACCOUNT_PREFERENCES_NOTES,
+            operationId = "postNotificationTest")
     ResourceEventResponse postNotificationTest();
 
     @POST
     @Path("renew_certificate")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.RENEW_CERTIFICATE, produces = MediaType.APPLICATION_JSON, notes = Notes.RENEW_CERTIFICATE_NOTES,
-            nickname = "renewCertificate")
+    @Operation(summary =  UtilityOpDescription.RENEW_CERTIFICATE, description =  Notes.RENEW_CERTIFICATE_NOTES,
+            operationId = "renewCertificate")
     Response renewCertificate(RenewCertificateV4Request renewCertificateV4Request);
 
     @GET
     @Path("used_images")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.USED_IMAGES, produces = MediaType.APPLICATION_JSON, nickname = "usedImages")
+    @Operation(summary =  UtilityOpDescription.USED_IMAGES, operationId ="usedImages")
     UsedImagesListV4Response usedImages(@QueryParam("thresholdInDays") Integer thresholdInDays);
 }

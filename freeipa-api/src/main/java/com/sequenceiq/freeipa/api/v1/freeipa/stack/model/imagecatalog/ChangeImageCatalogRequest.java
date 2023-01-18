@@ -5,15 +5,14 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class ChangeImageCatalogRequest {
 
     @Size(max = 255, min = 1, message = "The length of the image catalog has to be in range of 1 to 255")
     @NotNull
-    @ApiModelProperty(value = FreeIpaModelDescriptions.ImageSettingsModelDescription.IMAGE_CATALOG, required = true)
+    @Schema(description = FreeIpaModelDescriptions.ImageSettingsModelDescription.IMAGE_CATALOG, required = true)
     private String imageCatalog;
 
     public String getImageCatalog() {

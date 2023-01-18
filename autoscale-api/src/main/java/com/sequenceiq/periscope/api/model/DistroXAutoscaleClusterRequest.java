@@ -7,21 +7,20 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class DistroXAutoscaleClusterRequest implements Json {
-    @ApiModelProperty(ClusterJsonsProperties.ENABLE_AUTOSCALING)
+    @Schema(description = ClusterJsonsProperties.ENABLE_AUTOSCALING)
     private @NotNull Boolean enableAutoscaling;
 
-    @ApiModelProperty(value = ClusterJsonsProperties.ENABLE_STOP_START_SCALING)
+    @Schema(description = ClusterJsonsProperties.ENABLE_STOP_START_SCALING)
     private Boolean useStopStartMechanism;
 
-    @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
+    @Schema(description = ClusterJsonsProperties.TIME_ALERTS)
     private List<@Valid TimeAlertRequest> timeAlertRequests;
 
-    @ApiModelProperty(ClusterJsonsProperties.LOAD_ALERTS)
+    @Schema(description = ClusterJsonsProperties.LOAD_ALERTS)
     private List<@Valid LoadAlertRequest> loadAlertRequests;
 
     public DistroXAutoscaleClusterRequest() {

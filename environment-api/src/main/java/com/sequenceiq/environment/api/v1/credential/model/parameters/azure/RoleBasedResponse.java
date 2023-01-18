@@ -6,24 +6,23 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("RoleBasedV1Response")
+@Schema(name = "RoleBasedV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class RoleBasedResponse implements Serializable {
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private String deploymentAddress;
 
-    @ApiModelProperty
+    @Schema
     private String spDisplayName;
 
-    @ApiModelProperty
+    @Schema
     private Boolean codeGrantFlow;
 
-    @ApiModelProperty
+    @Schema
     private String appObjectId;
 
     public String getDeploymentAddress() {

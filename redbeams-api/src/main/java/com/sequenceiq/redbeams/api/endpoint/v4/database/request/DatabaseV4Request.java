@@ -8,20 +8,19 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 import com.sequenceiq.redbeams.validation.ValidDatabaseVendorAndService;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.DATABASE_REQUEST)
+@Schema(description = ModelDescriptions.DATABASE_REQUEST)
 @ValidDatabaseVendorAndService
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseV4Request extends DatabaseV4Base {
 
     @NotNull
-    @ApiModelProperty(value = Database.USERNAME, required = true)
+    @Schema(description = Database.USERNAME, required = true)
     private String connectionUserName;
 
     @NotNull
-    @ApiModelProperty(value = Database.PASSWORD, required = true)
+    @Schema(description = Database.PASSWORD, required = true)
     private String connectionPassword;
 
     public String getConnectionUserName() {

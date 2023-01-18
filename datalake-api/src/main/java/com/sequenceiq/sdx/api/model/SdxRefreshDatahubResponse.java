@@ -1,24 +1,20 @@
 package com.sequenceiq.sdx.api.model;
 
 import static com.sequenceiq.sdx.api.model.ModelDescriptions.DATAHUB_CRNS_REFRESHED;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRefreshDatahubResponse {
 
-    @ApiModelProperty(DATAHUB_CRNS_REFRESHED)
+    @Schema(description = DATAHUB_CRNS_REFRESHED)
     private List<StackViewV4Response> refreshedDatahubs;
 
     public SdxRefreshDatahubResponse() {
@@ -56,8 +52,6 @@ public class SdxRefreshDatahubResponse {
 
     @Override
     public String toString() {
-        return "SdxRefreshDatahubResponse{" +
-                "refreshedDatahubs=" + refreshedDatahubs +
-                '}';
+        return "SdxRefreshDatahubResponse{" + "refreshedDatahubs=" + refreshedDatahubs + '}';
     }
 }

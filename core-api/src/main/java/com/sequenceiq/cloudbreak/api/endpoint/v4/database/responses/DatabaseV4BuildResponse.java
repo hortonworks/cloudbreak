@@ -6,13 +6,12 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class DatabaseV4BuildResponse implements JsonEntity {
 
-    @ApiModelProperty(value = ClusterModelDescription.RESULT_DBS, required = true)
+    @Schema(description = ClusterModelDescription.RESULT_DBS, required = true)
     private Map<String, String> results = new HashMap<>();
 
     public Map<String, String> getResults() {

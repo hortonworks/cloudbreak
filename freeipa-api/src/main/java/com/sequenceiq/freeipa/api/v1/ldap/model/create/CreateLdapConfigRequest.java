@@ -6,18 +6,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription;
 import com.sequenceiq.freeipa.api.v1.ldap.model.LdapConfigBase;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("CreateLdapConfigV1Request")
+@Schema(name = "CreateLdapConfigV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateLdapConfigRequest extends LdapConfigBase {
     @NotNull
-    @ApiModelProperty(value = LdapConfigModelDescription.BIND_DN, required = true)
+    @Schema(description = LdapConfigModelDescription.BIND_DN, required = true)
     private String bindDn;
 
     @NotNull
-    @ApiModelProperty(value = LdapConfigModelDescription.BIND_PASSWORD, required = true)
+    @Schema(description = LdapConfigModelDescription.BIND_PASSWORD, required = true)
     private String bindPassword;
 
     public String getBindDn() {

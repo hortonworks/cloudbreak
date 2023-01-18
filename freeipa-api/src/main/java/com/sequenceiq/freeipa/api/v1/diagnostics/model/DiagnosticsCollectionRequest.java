@@ -9,17 +9,16 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("DiagnosticsCollectionV1Request")
+@Schema(name = "DiagnosticsCollectionV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiagnosticsCollectionRequest extends BaseDiagnosticsCollectionRequest {
 
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotNull
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENT_CRN)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN)
     private String environmentCrn;
 
     public String getEnvironmentCrn() {

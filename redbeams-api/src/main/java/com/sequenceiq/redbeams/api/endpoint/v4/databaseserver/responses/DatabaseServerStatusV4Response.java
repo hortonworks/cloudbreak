@@ -8,29 +8,28 @@ import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.DATABASE_SERVER_STATUS_RESPONSE)
+@Schema(description = ModelDescriptions.DATABASE_SERVER_STATUS_RESPONSE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DatabaseServerStatusV4Response {
     @NotNull
-    @ApiModelProperty(value = DatabaseServer.ENVIRONMENT_CRN, required = true)
+    @Schema(description = DatabaseServer.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = DatabaseServer.NAME, required = true)
+    @Schema(description = DatabaseServer.NAME, required = true)
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = DatabaseServer.CRN, required = true)
+    @Schema(description = DatabaseServer.CRN, required = true)
     private String resourceCrn;
 
-    @ApiModelProperty(value = DatabaseServer.STATUS, required = true)
+    @Schema(description = DatabaseServer.STATUS, required = true)
     private Status status;
 
-    @ApiModelProperty(value = DatabaseServer.STATUS_REASON, required = true)
+    @Schema(description = DatabaseServer.STATUS_REASON, required = true)
     private String statusReason;
 
     public String getEnvironmentCrn() {

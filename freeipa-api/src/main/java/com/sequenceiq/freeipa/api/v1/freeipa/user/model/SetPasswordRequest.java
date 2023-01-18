@@ -5,13 +5,12 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("SetPasswordV1Request")
+@Schema(name = "SetPasswordV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SetPasswordRequest extends SynchronizeOperationRequestBase {
-    @ApiModelProperty(value = UserModelDescriptions.USER_PASSWORD)
+    @Schema(description = UserModelDescriptions.USER_PASSWORD)
     private String password;
 
     public SetPasswordRequest() {

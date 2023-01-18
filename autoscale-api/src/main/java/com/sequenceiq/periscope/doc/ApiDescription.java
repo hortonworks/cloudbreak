@@ -38,14 +38,14 @@ public class ApiDescription {
     }
 
     public static class AlertNotes {
-        public static final String TIME_BASED_NOTES = "Auto-scaling supports two Alert types: load and time based. "
+        public static final String TIME_BASED_NOTES =  "Auto-scaling supports two Alert types: load and time based. "
                 + "Time based alerts are based on cron expressions and allow alerts to be triggered based on time.";
-        public static final String METRIC_BASED_NOTES = "Auto-scaling supports two Alert types: metric and time based. "
+        public static final String METRIC_BASED_NOTES =  "Auto-scaling supports two Alert types: metric and time based. "
                 + "Metric based alerts are using the default (or custom) Ambari metrics. These metrics have a default Threshold value configured in Ambari - "
                 + "nevertheless these thresholds can be configured, changed or altered in Ambari. In order to change the default threshold for a metric "
                 + "please go to Ambari UI and select the Alerts tab and the metric. The values can be changed in the Threshold section. ";
-        public static final String PROMETHEUS_BASED_NOTES = "Prometheus based alerts are using Prometheus under the hood. ";
-        public static final String LOAD_BASED_NOTES = "Load based alerts are based on the load observed in the cluster ";
+        public static final String PROMETHEUS_BASED_NOTES =  "Prometheus based alerts are using Prometheus under the hood. ";
+        public static final String LOAD_BASED_NOTES =  "Load based alerts are based on the load observed in the cluster ";
     }
 
     public static class ConfigurationOpDescription {
@@ -54,7 +54,7 @@ public class ApiDescription {
     }
 
     public static class ConfigurationNotes {
-        public static final String NOTES = "An SLA scaling policy can contain multiple alerts. When an alert is triggered a scaling adjustment is applied,"
+        public static final String NOTES =  "An SLA scaling policy can contain multiple alerts. When an alert is triggered a scaling adjustment is applied,"
                 + " however to keep the cluster size within boundaries a cluster size min. and cluster size max. is attached to the cluster - "
                 + "thus a scaling policy can never over or undersize a cluster. Also in order to avoid stressing the cluster we have introduced a "
                 + "cooldown time period (minutes) - though an alert is raised and there is an associated scaling policy, the system will not apply "
@@ -78,7 +78,7 @@ public class ApiDescription {
     }
 
     public static class PolicyNotes {
-        public static final String NOTES = "Scaling is the ability to increase or decrease the capacity of the Hadoop cluster or application "
+        public static final String NOTES =  "Scaling is the ability to increase or decrease the capacity of the Hadoop cluster or application "
                 + "based on an alert. When scaling policies are used, the capacity is automatically increased or decreased according to the "
                 + "conditions defined. Cloudbreak will do the heavy lifting and based on the alerts and the scaling policy linked to them it "
                 + "executes the associated policy. We scaling granularity is at the hostgroup level - thus you have the option to scale services "
@@ -104,11 +104,11 @@ public class ApiDescription {
     }
 
     public static class ClusterNotes {
-        public static final String NOTES = "Ambari cluster.";
+        public static final String NOTES =  "Ambari cluster.";
     }
 
     public static class DistroXClusterNotes {
-        public static final String NOTES = "DataHub cluster.";
+        public static final String NOTES =  "DataHub cluster.";
     }
 
     public static class ClusterJsonsProperties {

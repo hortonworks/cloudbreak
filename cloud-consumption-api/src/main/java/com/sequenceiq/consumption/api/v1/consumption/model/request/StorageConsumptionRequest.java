@@ -5,15 +5,14 @@ import javax.validation.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.consumption.api.doc.ConsumptionModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StorageConsumptionRequest extends ConsumptionBaseRequest {
 
     @NotEmpty
-    @ApiModelProperty(value = ConsumptionModelDescription.STORAGE_LOCATION, required = true)
+    @Schema(description = ConsumptionModelDescription.STORAGE_LOCATION, required = true)
     private String storageLocation;
 
     public String getStorageLocation() {

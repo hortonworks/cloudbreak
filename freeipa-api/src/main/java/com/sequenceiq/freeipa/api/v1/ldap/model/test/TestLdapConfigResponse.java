@@ -4,13 +4,12 @@ import static com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription.
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("TestLdapConfigV1Response")
+@Schema(name = "TestLdapConfigV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TestLdapConfigResponse {
-    @ApiModelProperty(value = LDAP_CONNECTION_RESULT, required = true)
+    @Schema(description = LDAP_CONNECTION_RESULT, required = true)
     private String result;
 
     public TestLdapConfigResponse() {

@@ -7,22 +7,21 @@ import javax.validation.Valid;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepairClusterRequest;
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @MutuallyExclusiveNotNull(fieldGroups = {"hostGroups", "nodes"}, message = "Either hostGroups or nodes should be provided but not both.")
 public class DistroXRepairV1Request {
 
-    @ApiModelProperty(value = RepairClusterRequest.HOSTGROUPS, required = true)
+    @Schema(description = RepairClusterRequest.HOSTGROUPS, required = true)
     private List<String> hostGroups;
 
-    @ApiModelProperty(RepairClusterRequest.NODES)
+    @Schema(description = RepairClusterRequest.NODES)
     @Valid
     private DistroXRepairNodesV1Request nodes;
 
     @Deprecated
-    @ApiModelProperty(RepairClusterRequest.REMOVE_ONLY)
+    @Schema(description = RepairClusterRequest.REMOVE_ONLY)
     private boolean removeOnly;
 
     public List<String> getHostGroups() {

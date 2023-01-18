@@ -9,20 +9,19 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("RebuildV1Request")
+@Schema(name = "RebuildV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RebuildRequest {
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotEmpty
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.REBUILD_SOURCE_CRN, required = true)
+    @Schema(description = ModelDescriptions.REBUILD_SOURCE_CRN, required = true)
     private String sourceCrn;
 
     public String getEnvironmentCrn() {

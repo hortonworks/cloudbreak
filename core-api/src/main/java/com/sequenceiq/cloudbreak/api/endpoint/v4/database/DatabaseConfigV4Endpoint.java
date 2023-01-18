@@ -13,18 +13,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DbConnectionParamsV4Response;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 @Validated
 @Path("/v4/dbconfig")
 @RetryAndMetrics
-@Api(value = "/v4/dbconfig", protocols = "http,https")
+@Tag(name = "/v4/dbconfig")
 public interface DatabaseConfigV4Endpoint {
 
     @GET
     @Path("connectionparams")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "get database config", produces = "application/json", nickname = "getDbConfig")
+    @Operation(summary =  "get database config", operationId ="getDbConfig")
     DbConnectionParamsV4Response getDbConfig(@QueryParam("stackCrn") @NotNull String stackCrn, @QueryParam("databaseType") @NotNull DatabaseType databaseType);
 }

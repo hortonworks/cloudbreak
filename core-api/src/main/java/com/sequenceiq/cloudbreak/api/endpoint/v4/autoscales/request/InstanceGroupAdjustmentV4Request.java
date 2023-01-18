@@ -10,30 +10,29 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescrip
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InstanceGroupAdjustmentV4Request implements JsonEntity {
 
     public static final long HUNDRED_PERCENT = 100L;
 
     @NotNull
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String instanceGroup;
 
     @NotNull
-    @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
+    @Schema(description = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer scalingAdjustment;
 
-    @ApiModelProperty(value = ModelDescriptions.InstanceGroupNetworkScaleModelDescription.NETWORK_SCALE_REQUEST)
+    @Schema(description = ModelDescriptions.InstanceGroupNetworkScaleModelDescription.NETWORK_SCALE_REQUEST)
     private NetworkScaleV4Request networkScaleRequest;
 
-    @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.ADJUSTMENT_TYPE)
+    @Schema(description = InstanceGroupAdjustmentModelDescription.ADJUSTMENT_TYPE)
     private AdjustmentType adjustmentType = AdjustmentType.EXACT;
 
-    @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.THRESHOLD)
+    @Schema(description = InstanceGroupAdjustmentModelDescription.THRESHOLD)
     private Long threshold;
 
     public String getInstanceGroup() {

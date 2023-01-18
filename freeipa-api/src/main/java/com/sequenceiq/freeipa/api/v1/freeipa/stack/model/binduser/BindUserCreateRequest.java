@@ -8,20 +8,19 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("BindUserCreateV1Request")
+@Schema(name = "BindUserCreateV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BindUserCreateRequest {
     @NotEmpty
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotEmpty
-    @ApiModelProperty(value = "Bind user suffix, eg cluster name", required = true)
+    @Schema(description = "Bind user suffix, eg cluster name", required = true)
     private String bindUserNameSuffix;
 
     public String getEnvironmentCrn() {

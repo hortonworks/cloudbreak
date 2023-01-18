@@ -5,34 +5,33 @@ import java.util.List;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class DistroXAutoscaleClusterResponse implements Json {
 
-    @ApiModelProperty(ClusterJsonsProperties.STACK_NAME)
+    @Schema(description = ClusterJsonsProperties.STACK_NAME)
     private String stackName;
 
-    @ApiModelProperty(ClusterJsonsProperties.STACK_CRN)
+    @Schema(description = ClusterJsonsProperties.STACK_CRN)
     private String stackCrn;
 
-    @ApiModelProperty(ClusterJsonsProperties.STATE)
+    @Schema(description = ClusterJsonsProperties.STATE)
     private ClusterState state;
 
-    @ApiModelProperty(ClusterJsonsProperties.STACK_TYPE)
+    @Schema(description = ClusterJsonsProperties.STACK_TYPE)
     private StackType stackType;
 
-    @ApiModelProperty(ClusterJsonsProperties.AUTOSCALING_ENABLED)
+    @Schema(description = ClusterJsonsProperties.AUTOSCALING_ENABLED)
     private Boolean autoscalingEnabled;
 
-    @ApiModelProperty(ClusterJsonsProperties.STOP_START_SCALING_ENABLED)
+    @Schema(description = ClusterJsonsProperties.STOP_START_SCALING_ENABLED)
     private Boolean stopStartScalingEnabled;
 
-    @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
+    @Schema(description = ClusterJsonsProperties.TIME_ALERTS)
     private List<TimeAlertResponse> timeAlerts;
 
-    @ApiModelProperty(ClusterJsonsProperties.LOAD_ALERTS)
+    @Schema(description = ClusterJsonsProperties.LOAD_ALERTS)
     private List<LoadAlertResponse> loadAlerts;
 
     public DistroXAutoscaleClusterResponse() {

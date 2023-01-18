@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class DeploymentPreferencesV4Response {
 
     private Set<SupportedExternalDatabaseServiceEntryV4Response> supportedExternalDatabases = new HashSet<>();

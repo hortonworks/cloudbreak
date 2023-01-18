@@ -7,20 +7,19 @@ import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
 import com.sequenceiq.environment.api.v1.proxy.model.ProxyBase;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ProxyConfigDescription.DESCRIPTION)
+@Schema(description = ProxyConfigDescription.DESCRIPTION)
 @JsonInclude(Include.NON_NULL)
 public class ProxyResponse extends ProxyBase {
 
-    @ApiModelProperty(ProxyConfigDescription.PROXY_CONFIG_ID)
+    @Schema(description = ProxyConfigDescription.PROXY_CONFIG_ID)
     private String crn;
 
-    @ApiModelProperty(ProxyConfigDescription.USERNAME)
+    @Schema(description = ProxyConfigDescription.USERNAME)
     private SecretResponse userName;
 
-    @ApiModelProperty(ProxyConfigDescription.PASSWORD)
+    @Schema(description = ProxyConfigDescription.PASSWORD)
     private SecretResponse password;
 
     /**
@@ -28,7 +27,7 @@ public class ProxyResponse extends ProxyBase {
      * and can become invalid, usage of it can be error prone
      */
     @Deprecated
-    @ApiModelProperty(ModelDescriptions.CREATOR)
+    @Schema(description = ModelDescriptions.CREATOR)
     private String creator;
 
     public String getCrn() {

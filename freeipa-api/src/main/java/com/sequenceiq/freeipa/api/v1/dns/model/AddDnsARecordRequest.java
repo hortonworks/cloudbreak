@@ -14,34 +14,33 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.freeipa.api.v1.dns.doc.DnsModelDescription;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("AddDnsARecordV1Request")
+@Schema(name = "AddDnsARecordV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddDnsARecordRequest {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotEmpty
-    @ApiModelProperty(value = DnsModelDescription.HOSTNAME, required = true)
+    @Schema(description = DnsModelDescription.HOSTNAME, required = true)
     @Pattern(regexp = DNS_HOSTNAME_PATTERN, message = DNS_HOSTNAME_MSG)
     private String hostname;
 
     @NotEmpty
-    @ApiModelProperty(value = DnsModelDescription.IP, required = true)
+    @Schema(description = DnsModelDescription.IP, required = true)
     @Pattern(regexp = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
             message = "Must be a valid IPv4 format like 1.2.3.4")
     private String ip;
 
-    @ApiModelProperty(DnsModelDescription.DNS_ZONE)
+    @Schema(description = DnsModelDescription.DNS_ZONE)
     @Pattern(regexp = DNS_ZONE_PATTERN, message = DNS_ZONE_MSG)
     private String dnsZone;
 
-    @ApiModelProperty(DnsModelDescription.CREATE_REVERSE)
+    @Schema(description = DnsModelDescription.CREATE_REVERSE)
     private boolean createReverse;
 
     public String getEnvironmentCrn() {

@@ -909,3 +909,9 @@ cdp:
   structuredevent:
     rest:
       contentlogging: false
+
+logging:
+  level:
+    org:
+      springframework:
+        web: TRACE

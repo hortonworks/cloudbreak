@@ -8,21 +8,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformDisksV4Response implements JsonEntity {
 
-    @ApiModelProperty(ConnectorModelDescription.DISK_TYPES)
+    @Schema(description = ConnectorModelDescription.DISK_TYPES)
     private Map<String, Collection<String>> diskTypes;
 
-    @ApiModelProperty(ConnectorModelDescription.DEFAULT_DISKS)
+    @Schema(description = ConnectorModelDescription.DEFAULT_DISKS)
     private Map<String, String> defaultDisks;
 
-    @ApiModelProperty(ConnectorModelDescription.DISK_MAPPINGS)
+    @Schema(description = ConnectorModelDescription.DISK_MAPPINGS)
     private Map<String, Map<String, String>> diskMappings;
 
-    @ApiModelProperty(ConnectorModelDescription.DISK_DISPLAYNAMES)
+    @Schema(description = ConnectorModelDescription.DISK_DISPLAYNAMES)
     private Map<String, Map<String, String>> displayNames;
 
     public PlatformDisksV4Response() {

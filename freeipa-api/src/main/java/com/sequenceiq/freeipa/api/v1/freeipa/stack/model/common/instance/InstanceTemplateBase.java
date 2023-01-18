@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.TemplateModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class InstanceTemplateBase implements Serializable {
-    @ApiModelProperty(TemplateModelDescription.INSTANCE_TYPE)
+    @Schema(description = TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
 
     public String getInstanceType() {

@@ -6,13 +6,13 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class ClientTestBaseRequest {
 
     @NotEmpty
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     public String getEnvironmentCrn() {

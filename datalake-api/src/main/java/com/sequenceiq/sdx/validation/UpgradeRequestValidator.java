@@ -1,12 +1,9 @@
 package com.sequenceiq.sdx.validation;
 
 import java.util.Objects;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
 import org.apache.commons.lang3.StringUtils;
-
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 
 public class UpgradeRequestValidator implements ConstraintValidator<ValidUpgradeRequest, SdxUpgradeRequest> {
@@ -32,9 +29,8 @@ public class UpgradeRequestValidator implements ConstraintValidator<ValidUpgrade
     }
 
     private boolean mutuallyExclusiveDryRunOrShowImages(SdxUpgradeRequest request, ConstraintValidatorContext context) {
-        if (request.isDryRun()  && request.isShowAvailableImagesSet()) {
-            String msg = "Invalid upgrade request: 'dry-run' cannot be used in parallel with  'show-available-images' or "
-                    + "'show-latest-available-image-per-runtime' in the request";
+        if (request.isDryRun() && request.isShowAvailableImagesSet()) {
+            String msg = "Invalid upgrade request: 'dry-run' cannot be used in parallel with  'show-available-images' or " + "'show-latest-available-image-per-runtime' in the request";
             context.buildConstraintViolationWithTemplate(msg).addConstraintViolation().disableDefaultConstraintViolation();
             return false;
         }
@@ -46,8 +42,6 @@ public class UpgradeRequestValidator implements ConstraintValidator<ValidUpgrade
     }
 
     private boolean isRuntimeUpgrade(SdxUpgradeRequest request) {
-        return !Boolean.TRUE.equals(request.getLockComponents())
-                && ((!StringUtils.isEmpty(request.getRuntime()) && StringUtils.isEmpty(request.getImageId()))
-                || (!StringUtils.isEmpty(request.getImageId()) && StringUtils.isEmpty(request.getRuntime())));
+        return !Boolean.TRUE.equals(request.getLockComponents()) && ((!StringUtils.isEmpty(request.getRuntime()) && StringUtils.isEmpty(request.getImageId())) || (!StringUtils.isEmpty(request.getImageId()) && StringUtils.isEmpty(request.getRuntime())));
     }
 }

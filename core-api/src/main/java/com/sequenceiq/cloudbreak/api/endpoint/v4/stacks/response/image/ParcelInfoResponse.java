@@ -6,18 +6,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ParcelInfoResponse implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.ImageModelDescription.PARCEL_NAME)
+    @Schema(description = ModelDescriptions.ImageModelDescription.PARCEL_NAME)
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.ImageModelDescription.PARCEL_VERSION)
+    @Schema(description = ModelDescriptions.ImageModelDescription.PARCEL_VERSION)
     private String version;
 
-    @ApiModelProperty(ModelDescriptions.ImageModelDescription.PARCEL_BUILD_NUMBER)
+    @Schema(description = ModelDescriptions.ImageModelDescription.PARCEL_BUILD_NUMBER)
     private String buildNumber;
 
     public ParcelInfoResponse() {

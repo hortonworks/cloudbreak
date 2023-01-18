@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.salt.controller;
 
 import javax.inject.Inject;
-import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,7 @@ public class SaltApiController {
     @Inject
     private SaltApiRunComponent saltApiRunComponent;
 
-    @PostMapping(value = "run", produces = MediaType.APPLICATION_JSON)
+    @PostMapping(value = "run")
     public Object saltRun(@PathVariable("mock_uuid") String mockUuid, @RequestBody String body) throws Exception {
         Object saltApiResponse = saltApiRunComponent.createSaltApiResponse(mockUuid, body);
         LOGGER.trace("{} body with result: {}", body, saltApiResponse);

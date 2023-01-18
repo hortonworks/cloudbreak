@@ -13,26 +13,26 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.api.type.CertExpirationState;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(Include.NON_NULL)
 public class ClusterViewV4Response extends CompactViewV4Response {
-    @ApiModelProperty(ClusterModelDescription.STATUS)
+    @Schema(description = ClusterModelDescription.STATUS)
     private Status status;
 
-    @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
+    @Schema(description = ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupViewV4Response> hostGroups = new HashSet<>();
 
-    @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE)
+    @Schema(description = ClusterModelDescription.SHARED_SERVICE)
     private SharedServiceV4Response sharedServiceResponse;
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
+    @Schema(description = ClusterModelDescription.BLUEPRINT)
     private BlueprintV4ViewResponse blueprint;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.SERVER_IP)
+    @Schema(description = ModelDescriptions.StackModelDescription.SERVER_IP)
     private String serverIp;
 
-    @ApiModelProperty(ClusterModelDescription.CERT_EXPIRATION)
+    @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
     public Status getStatus() {

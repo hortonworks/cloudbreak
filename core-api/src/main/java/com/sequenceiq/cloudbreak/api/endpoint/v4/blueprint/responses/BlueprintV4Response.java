@@ -11,14 +11,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonInclude(Include.NON_NULL)
 public class BlueprintV4Response extends BlueprintV4Base {
 
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, required = true)
     @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon "
             + "and percentage character.")
     @NotNull
@@ -26,13 +25,13 @@ public class BlueprintV4Response extends BlueprintV4Base {
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN)
     private String crn;
 
-    @ApiModelProperty(BlueprintModelDescription.HOST_GROUP_COUNT)
+    @Schema(description = BlueprintModelDescription.HOST_GROUP_COUNT)
     private Integer hostGroupCount;
 
-    @ApiModelProperty(BlueprintModelDescription.STATUS)
+    @Schema(description = BlueprintModelDescription.STATUS)
     private ResourceStatus status;
 
     private Long created;

@@ -2,17 +2,17 @@ package com.sequenceiq.distrox.api.v1.distrox.model.instancegroup;
 
 import java.io.Serializable;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AzureAvailabiltySetV1Parameters implements Serializable {
 
-    @ApiModelProperty
+    @Schema
     private String name;
 
-    @ApiModelProperty
+    @Schema
     private Integer faultDomainCount;
 
-    @ApiModelProperty
+    @Schema
     private Integer updateDomainCount;
 
     public String getName() {

@@ -9,19 +9,18 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.validation.ValidEnvironmentSettings;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidEnvironmentSettings
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class EnvironmentSettingsV4Request implements JsonEntity {
 
-    @ApiModelProperty(ENVIRONMENT_CRN)
+    @Schema(description = ENVIRONMENT_CRN)
     private String name;
 
-    @ApiModelProperty(CREDENTIAL_NAME)
+    @Schema(description = CREDENTIAL_NAME)
     private String credentialName;
 
     public String getName() {

@@ -7,18 +7,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TagsV1Request implements JsonEntity {
 
-    @ApiModelProperty(StackModelDescription.APPLICATION_TAGS)
+    @Schema(description = StackModelDescription.APPLICATION_TAGS)
     private Map<String, String> application = new HashMap<>();
 
-    @ApiModelProperty(StackModelDescription.USERDEFINED_TAGS)
+    @Schema(description = StackModelDescription.USERDEFINED_TAGS)
     private Map<String, String> userDefined = new HashMap<>();
 
-    @ApiModelProperty(StackModelDescription.DEFAULT_TAGS)
+    @Schema(description = StackModelDescription.DEFAULT_TAGS)
     private Map<String, String> defaults = new HashMap<>();
 
     public Map<String, String> getApplication() {

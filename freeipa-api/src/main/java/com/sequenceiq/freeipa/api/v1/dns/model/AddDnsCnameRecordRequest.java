@@ -15,29 +15,28 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.freeipa.api.v1.dns.doc.DnsModelDescription;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("AddDnsCnameRecordV1Request")
+@Schema(name = "AddDnsCnameRecordV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddDnsCnameRecordRequest {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotEmpty
-    @ApiModelProperty(value = DnsModelDescription.CNAME, required = true)
+    @Schema(description = DnsModelDescription.CNAME, required = true)
     @Pattern(regexp = DNS_CNAME_PATTERN, message = DNS_CNAME_MSG)
     private String cname;
 
-    @ApiModelProperty(DnsModelDescription.DNS_ZONE)
+    @Schema(description = DnsModelDescription.DNS_ZONE)
     @Pattern(regexp = DNS_ZONE_PATTERN, message = DNS_ZONE_MSG)
     private String dnsZone;
 
     @NotEmpty
-    @ApiModelProperty(value = DnsModelDescription.CNAME_TARGET_FQDN, required = true)
+    @Schema(description = DnsModelDescription.CNAME_TARGET_FQDN, required = true)
     @Pattern(regexp = CNAME_TARGET_REGEXP,
             message = "Target FQDN must be valid. Might start with '*.' and can contain alphanumeric characters, dash and dot.")
     private String targetFqdn;

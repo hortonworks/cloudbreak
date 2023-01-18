@@ -14,28 +14,27 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.validation.customimage.UniqueRegion;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NotNull
 public class CustomImageCatalogV4UpdateImageRequest {
 
-    @ApiModelProperty(value = IMAGE_TYPE)
+    @Schema(description = IMAGE_TYPE)
     private String imageType;
 
     @Size(max = 255, message = "The length of the sourceImageId must be less than 255")
     @Pattern(regexp = "(^[a-z0-9][-a-z0-9]*[a-z0-9]$)",
             message = "The sourceImageId can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @ApiModelProperty(value = SOURCE_IMAGE_ID)
+    @Schema(description = SOURCE_IMAGE_ID)
     private String sourceImageId;
 
     @Size(max = 255, message = "The length of the baseParcelUrl must be less than 255")
-    @ApiModelProperty(value = BASE_PARCEL_URL)
+    @Schema(description = BASE_PARCEL_URL)
     private String baseParcelUrl;
 
-    @ApiModelProperty(value = VM_IMAGES)
+    @Schema(description = VM_IMAGES)
     @UniqueRegion
     private Set<CustomImageCatalogV4VmImageRequest> vmImages;
 

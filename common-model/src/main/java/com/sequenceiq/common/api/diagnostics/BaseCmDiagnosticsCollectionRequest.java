@@ -13,41 +13,41 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.telemetry.doc.DiagnosticsModelDescription;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class BaseCmDiagnosticsCollectionRequest implements Serializable {
 
     @NotNull
-    @ApiModelProperty(DiagnosticsModelDescription.DESTINATION)
+    @Schema(description = DiagnosticsModelDescription.DESTINATION)
     private DiagnosticsDestination destination;
 
-    @ApiModelProperty(DiagnosticsModelDescription.ROLES)
+    @Schema(description = DiagnosticsModelDescription.ROLES)
     private List<String> roles = new ArrayList<>();
 
-    @ApiModelProperty(DiagnosticsModelDescription.BUNDLE_SIZE_BYTES)
+    @Schema(description = DiagnosticsModelDescription.BUNDLE_SIZE_BYTES)
     private BigDecimal bundleSizeBytes;
 
-    @ApiModelProperty(DiagnosticsModelDescription.START_TIME)
+    @Schema(description = DiagnosticsModelDescription.START_TIME)
     private Date startTime;
 
-    @ApiModelProperty(DiagnosticsModelDescription.END_TIME)
+    @Schema(description = DiagnosticsModelDescription.END_TIME)
     private Date endTime;
 
-    @ApiModelProperty(DiagnosticsModelDescription.TICKET)
+    @Schema(description = DiagnosticsModelDescription.TICKET)
     private String ticket;
 
-    @ApiModelProperty(DiagnosticsModelDescription.COMMENTS)
+    @Schema(description = DiagnosticsModelDescription.COMMENTS)
     private String comments;
 
-    @ApiModelProperty(DiagnosticsModelDescription.ENABLE_MONITOR_METRICS_COLLECTION)
+    @Schema(description = DiagnosticsModelDescription.ENABLE_MONITOR_METRICS_COLLECTION)
     private Boolean enableMonitorMetricsCollection;
 
-    @ApiModelProperty(DiagnosticsModelDescription.UPDATE_PACKAGE)
+    @Schema(description = DiagnosticsModelDescription.UPDATE_PACKAGE)
     private Boolean updatePackage = Boolean.FALSE;
 
-    @ApiModelProperty(DiagnosticsModelDescription.SKIP_VALIDATION)
+    @Schema(description = DiagnosticsModelDescription.SKIP_VALIDATION)
     private Boolean skipValidation = Boolean.FALSE;
 
     public abstract String getStackCrn();

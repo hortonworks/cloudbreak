@@ -4,9 +4,9 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("FreeIpaServerV1Request")
+@Schema(name = "FreeIpaServerV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FreeIpaServerRequest extends FreeIpaServerBase {
     @NotNull

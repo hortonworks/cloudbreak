@@ -6,23 +6,22 @@ import com.sequenceiq.common.api.cloudstorage.old.validation.ValidAdlsGen2CloudS
 import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
 import com.sequenceiq.common.model.FileSystemType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidAdlsGen2CloudStorageParameters
 public class AdlsGen2CloudStorageV1Parameters implements FileSystemAwareCloudStorage {
 
-    @ApiModelProperty
+    @Schema
     private String accountKey;
 
-    @ApiModelProperty
+    @Schema
     private String accountName;
 
-    @ApiModelProperty
+    @Schema
     private String managedIdentity;
 
-    @ApiModelProperty
+    @Schema
     private boolean secure;
 
     public String getAccountKey() {
@@ -57,7 +56,7 @@ public class AdlsGen2CloudStorageV1Parameters implements FileSystemAwareCloudSto
         this.managedIdentity = managedIdentity;
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @Override
     public FileSystemType getType() {
         return FileSystemType.ADLS_GEN_2;

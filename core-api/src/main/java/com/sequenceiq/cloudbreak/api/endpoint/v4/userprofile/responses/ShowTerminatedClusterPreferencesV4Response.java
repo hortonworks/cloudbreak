@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class ShowTerminatedClusterPreferencesV4Response {
 
     private String source;

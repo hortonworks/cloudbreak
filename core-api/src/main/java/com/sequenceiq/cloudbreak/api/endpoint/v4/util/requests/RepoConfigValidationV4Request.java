@@ -6,30 +6,29 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterManagerRepositoryDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackRepositoryDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class RepoConfigValidationV4Request {
 
-    @ApiModelProperty(ClusterManagerRepositoryDescription.BASE_URL)
+    @Schema(description = ClusterManagerRepositoryDescription.BASE_URL)
     private String ambariBaseUrl;
 
-    @ApiModelProperty(ClusterManagerRepositoryDescription.REPO_GPG_KEY)
+    @Schema(description = ClusterManagerRepositoryDescription.REPO_GPG_KEY)
     private String ambariGpgKeyUrl;
 
-    @ApiModelProperty(StackRepositoryDescription.STACK_BASE_URL)
+    @Schema(description = StackRepositoryDescription.STACK_BASE_URL)
     private String stackBaseURL;
 
-    @ApiModelProperty(StackRepositoryDescription.UTILS_BASE_URL)
+    @Schema(description = StackRepositoryDescription.UTILS_BASE_URL)
     private String utilsBaseURL;
 
-    @ApiModelProperty(StackRepositoryDescription.VDF_URL)
+    @Schema(description = StackRepositoryDescription.VDF_URL)
     private String versionDefinitionFileUrl;
 
-    @ApiModelProperty(StackRepositoryDescription.MPACK_URL)
+    @Schema(description = StackRepositoryDescription.MPACK_URL)
     private String mpackUrl;
 
     public String getAmbariBaseUrl() {

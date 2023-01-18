@@ -7,28 +7,27 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupAdjustmentModelD
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HostGroupAdjustmentV4Request implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = HostGroupModelDescription.HOST_GROUP_NAME, required = true)
+    @Schema(description = HostGroupModelDescription.HOST_GROUP_NAME, required = true)
     private String hostGroup;
 
     @NotNull
-    @ApiModelProperty(value = HostGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
+    @Schema(description = HostGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer scalingAdjustment;
 
-    @ApiModelProperty(HostGroupAdjustmentModelDescription.WITH_STACK_UPDATE)
+    @Schema(description = HostGroupAdjustmentModelDescription.WITH_STACK_UPDATE)
     private Boolean withStackUpdate = Boolean.FALSE;
 
-    @ApiModelProperty(HostGroupAdjustmentModelDescription.VALIDATE_NODE_COUNT)
+    @Schema(description = HostGroupAdjustmentModelDescription.VALIDATE_NODE_COUNT)
     private Boolean validateNodeCount = Boolean.TRUE;
 
-    @ApiModelProperty(HostGroupAdjustmentModelDescription.FORCED)
+    @Schema(description = HostGroupAdjustmentModelDescription.FORCED)
     private Boolean forced;
 
     public String getHostGroup() {

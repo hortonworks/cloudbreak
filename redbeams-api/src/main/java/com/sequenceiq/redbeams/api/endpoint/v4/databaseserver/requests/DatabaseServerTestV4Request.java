@@ -11,20 +11,19 @@ import com.sequenceiq.cloudbreak.validation.ValidIfExactlyOneNonNull;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerTest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.DATABASE_SERVER_TEST_REQUEST)
+@Schema(description = ModelDescriptions.DATABASE_SERVER_TEST_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ValidIfExactlyOneNonNull(fields = { "existingDatabaseServerCrn", "databaseServer" })
 public class DatabaseServerTestV4Request implements Serializable {
 
     @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER)
-    @ApiModelProperty(DatabaseServerTest.EXISTING_CRN)
+    @Schema(description = DatabaseServerTest.EXISTING_CRN)
     private String existingDatabaseServerCrn;
 
     @Valid
-    @ApiModelProperty(DatabaseServerTest.NEW_REQUEST)
+    @Schema(description = DatabaseServerTest.NEW_REQUEST)
     private DatabaseServerV4Request databaseServer;
 
     public String getExistingDatabaseServerCrn() {

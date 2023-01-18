@@ -7,18 +7,18 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.DatabaseServerModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(Include.NON_NULL)
 public class DatabaseServerSslConfig {
 
-    @ApiModelProperty(DatabaseServerModelDescription.SSL_CERTIFICATES)
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATES)
     private Set<String> sslCertificates;
 
-    @ApiModelProperty(DatabaseServerModelDescription.SSL_CERTIFICATE_TYPE)
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_TYPE)
     private DatabaseServerSslCertificateType sslCertificateType;
 
-    @ApiModelProperty(DatabaseServerModelDescription.SSL_MODE)
+    @Schema(description = DatabaseServerModelDescription.SSL_MODE)
     private DatabaseServerSslMode sslMode;
 
     public DatabaseServerSslConfig() {

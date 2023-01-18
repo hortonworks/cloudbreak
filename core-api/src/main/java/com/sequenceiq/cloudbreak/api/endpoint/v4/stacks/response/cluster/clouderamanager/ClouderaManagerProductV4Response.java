@@ -10,29 +10,28 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ClouderaManagerProductV4Response implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.NAME)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.NAME)
     private String name;
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.DISPLAY_NAME)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.DISPLAY_NAME)
     private String displayName;
 
-    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.VERSION)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.VERSION)
     private String version;
 
-    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.PARCEL)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.PARCEL)
     private String parcel;
 
-    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.CSD)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.CSD)
     private List<String> csd;
 
     public String getName() {

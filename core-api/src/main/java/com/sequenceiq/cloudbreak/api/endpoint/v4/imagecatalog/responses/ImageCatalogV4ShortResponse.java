@@ -6,17 +6,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.base.ImageCatalogV
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ImageCatalogDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonInclude(Include.NON_NULL)
 public class ImageCatalogV4ShortResponse extends ImageCatalogV4Base {
 
-    @ApiModelProperty(value = ImageCatalogDescription.DEFAULT, required = true)
+    @Schema(description = ImageCatalogDescription.DEFAULT, required = true)
     private boolean usedAsDefault;
 
-    @ApiModelProperty(ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN)
     private String crn;
 
     public String getCrn() {

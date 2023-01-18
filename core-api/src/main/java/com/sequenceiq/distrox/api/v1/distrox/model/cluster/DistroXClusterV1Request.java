@@ -19,10 +19,9 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.ClouderaManagerV1Request;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class DistroXClusterV1Request implements Serializable {
@@ -31,7 +30,7 @@ public class DistroXClusterV1Request implements Serializable {
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The username may only contain lowercase alphanumeric characters and hyphens, has to start with a letter and end with an " +
                     "alphanumeric character")
-    @ApiModelProperty(value = StackModelDescription.USERNAME, required = true)
+    @Schema(description = StackModelDescription.USERNAME, required = true)
     private String userName;
 
     @Pattern.List({
@@ -39,34 +38,34 @@ public class DistroXClusterV1Request implements Serializable {
             @Pattern(regexp = "^.*[0-9].*$", message = "The password should contain at least one number.")
     })
     @Size(max = 100, min = 8, message = "The length of the password has to be in the range of 8 to 100 characters")
-    @ApiModelProperty(value = StackModelDescription.PASSWORD, required = true)
+    @Schema(description = StackModelDescription.PASSWORD, required = true)
     private String password;
 
-    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
+    @Schema(description = ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<String> databases = new HashSet<>();
 
-    @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
+    @Schema(description = ClusterModelDescription.PROXY_NAME)
     private String proxy;
 
     @Valid
-    @ApiModelProperty(StackModelDescription.CLOUD_STORAGE)
+    @Schema(description = StackModelDescription.CLOUD_STORAGE)
     private CloudStorageRequest cloudStorage;
 
     @Valid
-    @ApiModelProperty(ClusterModelDescription.CM_REQUEST)
+    @Schema(description = ClusterModelDescription.CM_REQUEST)
     private ClouderaManagerV1Request cm;
 
     private List<String> exposedServices;
 
     @NotNull
     @NotEmpty
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
+    @Schema(description = ClusterModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
 
-    @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
+    @Schema(description = ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.FALSE;
 
-    @ApiModelProperty(StackModelDescription.CUSTOM_CONFIGURATIONS_NAME)
+    @Schema(description = StackModelDescription.CUSTOM_CONFIGURATIONS_NAME)
     private String customConfigurationsName;
 
     public String getUserName() {

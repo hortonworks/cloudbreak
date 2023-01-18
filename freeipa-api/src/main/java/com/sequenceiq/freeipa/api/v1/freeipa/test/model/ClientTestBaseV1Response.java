@@ -3,14 +3,13 @@ package com.sequenceiq.freeipa.api.v1.freeipa.test.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("ClientTestBaseV1Response")
+@Schema(name = "ClientTestBaseV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClientTestBaseV1Response {
 
-    @ApiModelProperty(ModelDescriptions.RESULT)
+    @Schema(description = ModelDescriptions.RESULT)
     private Boolean result;
 
     public ClientTestBaseV1Response() {

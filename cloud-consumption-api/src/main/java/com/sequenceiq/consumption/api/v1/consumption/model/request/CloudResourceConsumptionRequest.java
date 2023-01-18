@@ -7,19 +7,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.consumption.api.doc.ConsumptionModelDescription;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudResourceConsumptionRequest extends ConsumptionBaseRequest {
 
     @NotEmpty
-    @ApiModelProperty(value = ConsumptionModelDescription.CLOUD_RESOURCE_ID, required = true)
+    @Schema(description = ConsumptionModelDescription.CLOUD_RESOURCE_ID, required = true)
     private String cloudResourceId;
 
     @NotNull
-    @ApiModelProperty(value = ConsumptionModelDescription.CONSUMPTION_TYPE, allowableValues = "UNKNOWN,STORAGE,EBS,ELASTIC_FILESYSTEM", required = true)
+    @Schema(description = ConsumptionModelDescription.CONSUMPTION_TYPE, allowableValues = "UNKNOWN,STORAGE,EBS,ELASTIC_FILESYSTEM", required = true)
     private ConsumptionType consumptionType;
 
     public ConsumptionType getConsumptionType() {

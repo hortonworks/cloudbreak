@@ -13,10 +13,9 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.AzureDatabaseServerModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AzureDatabaseServerV4Parameters extends MappableBase {
@@ -36,28 +35,28 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
     private static final String STORAGE_AUTO_GROW = "storageAutoGrow";
 
     @Min(value = 7, message = "backupRetentionDays must be 7 or higher")
-    @ApiModelProperty(AzureDatabaseServerModelDescriptions.BACKUP_RETENTION_DAYS)
+    @Schema(description = AzureDatabaseServerModelDescriptions.BACKUP_RETENTION_DAYS)
     private Integer backupRetentionDays;
 
     @Pattern(regexp = "\\d+(?:\\.\\d)?")
-    @ApiModelProperty(AzureDatabaseServerModelDescriptions.DB_VERSION)
+    @Schema(description = AzureDatabaseServerModelDescriptions.DB_VERSION)
     private String dbVersion;
 
-    @ApiModelProperty(AzureDatabaseServerModelDescriptions.GEO_REDUNDANT_BACKUPS)
+    @Schema(description = AzureDatabaseServerModelDescriptions.GEO_REDUNDANT_BACKUPS)
     private Boolean geoRedundantBackup;
 
     @Min(value = 2, message = "skuCapacity must be 2 or higher")
-    @ApiModelProperty(AzureDatabaseServerModelDescriptions.SKU_CAPACITY)
+    @Schema(description = AzureDatabaseServerModelDescriptions.SKU_CAPACITY)
     private Integer skuCapacity;
 
-    @ApiModelProperty(AzureDatabaseServerModelDescriptions.SKU_FAMILY)
+    @Schema(description = AzureDatabaseServerModelDescriptions.SKU_FAMILY)
     private String skuFamily;
 
     @Pattern(regexp = "Basic|GeneralPurpose|MemoryOptimized")
-    @ApiModelProperty(AzureDatabaseServerModelDescriptions.SKU_TIER)
+    @Schema(description = AzureDatabaseServerModelDescriptions.SKU_TIER)
     private String skuTier;
 
-    @ApiModelProperty(AzureDatabaseServerModelDescriptions.STORAGE_AUTO_GROW)
+    @Schema(description = AzureDatabaseServerModelDescriptions.STORAGE_AUTO_GROW)
     private Boolean storageAutoGrow;
 
     public Integer getBackupRetentionDays() {
@@ -131,7 +130,7 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }

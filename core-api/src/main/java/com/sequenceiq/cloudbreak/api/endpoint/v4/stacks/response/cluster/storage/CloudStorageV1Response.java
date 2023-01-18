@@ -15,27 +15,26 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageV1Base;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class CloudStorageV1Response extends CloudStorageV1Base {
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private Long id;
 
     @Valid
-    @ApiModelProperty(ClusterModelDescription.LOCATIONS)
+    @Schema(description = ClusterModelDescription.LOCATIONS)
     private Set<StorageLocationV4Response> locations = new HashSet<>();
 
     @NotNull
-    @ApiModelProperty(value = FileSystem.NAME, required = true)
+    @Schema(description = FileSystem.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = FileSystem.TYPE, required = true)
+    @Schema(description = FileSystem.TYPE, required = true)
     private String type;
 
     public Long getId() {

@@ -12,10 +12,9 @@ import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigModelDescription
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("DescribeKerberosConfigV1Response")
+@Schema(name = "DescribeKerberosConfigV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class DescribeKerberosConfigResponse {
@@ -24,13 +23,13 @@ public class DescribeKerberosConfigResponse {
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
-    @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_URL)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_URL)
     private String url;
 
-    @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_ADMIN_URL)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_ADMIN_URL)
     private String adminUrl;
 
     private String realm;
@@ -44,31 +43,31 @@ public class DescribeKerberosConfigResponse {
     @NotNull(message = "Kerberos type can not be null")
     private KerberosType type;
 
-    @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_KDC_VERIFY_KDC_TRUST)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_KDC_VERIFY_KDC_TRUST)
     private Boolean verifyKdcTrust = true;
 
-    @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_DOMAIN)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_DOMAIN)
     private String domain;
 
     @Pattern(regexp = "(^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}"
             + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$)")
-    @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_NAMESERVERS)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_NAMESERVERS)
     private String nameServers;
 
     @Size(max = 1000)
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_PASSWORD)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_PASSWORD)
     private SecretResponse password;
 
-    @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_PRINCIPAL)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_PRINCIPAL)
     private SecretResponse principal;
 
-    @ApiModelProperty(KerberosConfigModelDescription.DESCRIPTOR)
+    @Schema(description = KerberosConfigModelDescription.DESCRIPTOR)
     private SecretResponse descriptor;
 
-    @ApiModelProperty(KerberosConfigModelDescription.KRB_5_CONF)
+    @Schema(description = KerberosConfigModelDescription.KRB_5_CONF)
     private SecretResponse krb5Conf;
 
     public String getEnvironmentCrn() {

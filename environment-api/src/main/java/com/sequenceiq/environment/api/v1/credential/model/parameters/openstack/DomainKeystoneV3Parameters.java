@@ -1,22 +1,23 @@
 package com.sequenceiq.environment.api.v1.credential.model.parameters.openstack;
 
+import static io.swagger.v3.oas.annotations.media.Schema.*;
+
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(parent = KeystoneV3Base.class)
+@Schema(allOf = KeystoneV3Base.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 @Deprecated
 public class DomainKeystoneV3Parameters extends KeystoneV3Base {
 
     @NotNull
-    @ApiModelProperty(required = true)
+    @Schema(required = true)
     private String domainName;
 
     public String getDomainName() {

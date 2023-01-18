@@ -23,26 +23,26 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEventCon
 import com.sequenceiq.cloudbreak.structuredevent.rest.model.CDPEventV1Response;
 import com.sequenceiq.cloudbreak.structuredevent.rest.model.CDPEventV1Responses;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 @Path("/v1/events")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/events", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/events")
 public interface CDPEventV1Endpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GET_BY_TIMESTAMP, produces = MediaType.APPLICATION_JSON, notes = EVENT_NOTES,
-            nickname = "getEventsInAccount")
+    @Operation(summary =  GET_BY_TIMESTAMP, description =  EVENT_NOTES,
+            operationId = "getEventsInAccount")
     CDPEventV1Responses list(@QueryParam("since") Long since);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = EVENT_NOTES,
-            nickname = "getEventsByResourceNameInAccount")
+    @Operation(summary =  GET_BY_NAME, description =  EVENT_NOTES,
+            operationId = "getEventsByResourceNameInAccount")
     Page<CDPEventV1Response> getCloudbreakEventsByResource(
             @PathParam("name") String name,
             @QueryParam("page") @DefaultValue("0") Integer page,
@@ -51,13 +51,13 @@ public interface CDPEventV1Endpoint {
     @GET
     @Path("{name}/structured")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GET_EVENTS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = EVENT_NOTES,
-            nickname = "getStructuredEventsInAccount")
+    @Operation(summary =  GET_EVENTS_BY_NAME, description =  EVENT_NOTES,
+            operationId = "getStructuredEventsInAccount")
     CDPStructuredEventContainer structured(@PathParam("name") String name);
 
     @GET
     @Path("{name}/zip")
     @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
-    @ApiOperation(value = GET_EVENTS_ZIP_BY_NAME, notes = EVENT_NOTES, nickname = "getStructuredEventsZipInAccount")
+    @Operation(summary =  GET_EVENTS_ZIP_BY_NAME, description =  EVENT_NOTES, operationId ="getStructuredEventsZipInAccount")
     Response download(@PathParam("name") String name);
 }

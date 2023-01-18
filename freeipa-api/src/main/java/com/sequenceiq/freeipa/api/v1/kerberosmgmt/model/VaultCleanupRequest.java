@@ -5,18 +5,17 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("VaultCleanupV1Request")
+@Schema(name = "VaultCleanupV1Request")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VaultCleanupRequest {
 
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     @NotNull
     private String environmentCrn;
 
-    @ApiModelProperty(value = ModelDescriptions.CLUSTER_CRN)
+    @Schema(description = ModelDescriptions.CLUSTER_CRN)
     private String clusterCrn;
 
     public String getEnvironmentCrn() {

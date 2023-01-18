@@ -2,8 +2,7 @@ package com.sequenceiq.sdx.api.model;
 
 public enum SdxUpgradeReplaceVms {
 
-    ENABLED(true),
-    DISABLED(false);
+    ENABLED(true), DISABLED(false);
 
     private final boolean booleanValue;
 

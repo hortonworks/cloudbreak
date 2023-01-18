@@ -8,28 +8,27 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelDescription;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("HostKeytabV1Request")
+@Schema(name = "HostKeytabV1Request")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class HostKeytabRequest {
 
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     @NotNull
     private String environmentCrn;
 
     @NotNull
     private String serverHostName;
 
-    @ApiModelProperty(value = ModelDescriptions.CLUSTER_CRN)
+    @Schema(description = ModelDescriptions.CLUSTER_CRN)
     private String clusterCrn;
 
-    @ApiModelProperty(value = KeytabModelDescription.DO_NOT_RECREATE_KEYTAB)
+    @Schema(description = KeytabModelDescription.DO_NOT_RECREATE_KEYTAB)
     private Boolean doNotRecreateKeytab = Boolean.FALSE;
 
-    @ApiModelProperty(value = KeytabModelDescription.ROLE)
+    @Schema(description = KeytabModelDescription.ROLE)
     private RoleRequest roleRequest;
 
     public String getEnvironmentCrn() {

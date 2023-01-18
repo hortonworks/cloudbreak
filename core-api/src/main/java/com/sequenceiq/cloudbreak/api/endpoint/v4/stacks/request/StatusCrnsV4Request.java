@@ -5,13 +5,12 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class StatusCrnsV4Request {
 
-    @ApiModelProperty(ModelDescriptions.CRNS)
+    @Schema(description = ModelDescriptions.CRNS)
     private List<String> crns = new ArrayList<>();
 
     public List<String> getCrns() {

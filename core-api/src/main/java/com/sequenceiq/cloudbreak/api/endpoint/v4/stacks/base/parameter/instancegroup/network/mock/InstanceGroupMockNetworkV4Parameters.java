@@ -13,15 +13,14 @@ import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class InstanceGroupMockNetworkV4Parameters extends MappableBase implements JsonEntity {
 
-    @ApiModelProperty
+    @Schema
     private List<String> subnetIds = new ArrayList<>();
 
     public List<String> getSubnetIds() {
@@ -41,7 +40,7 @@ public class InstanceGroupMockNetworkV4Parameters extends MappableBase implement
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.MOCK;
     }

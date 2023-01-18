@@ -9,10 +9,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class MockNetworkV1Parameters implements Serializable {
@@ -20,18 +19,18 @@ public class MockNetworkV1Parameters implements Serializable {
     /**
      * @deprecated should not be used anymore
      */
-    @ApiModelProperty
+    @Schema
     @Deprecated
     private String subnetId;
 
     /**
      * @deprecated should not be used anymore
      */
-    @ApiModelProperty
+    @Schema
     @Deprecated
     private String internetGatewayId;
 
-    @ApiModelProperty
+    @Schema
     private String vpcId;
 
     public String getInternetGatewayId() {

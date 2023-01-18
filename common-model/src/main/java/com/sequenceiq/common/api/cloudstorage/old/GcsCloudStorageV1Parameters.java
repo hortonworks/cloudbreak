@@ -8,14 +8,13 @@ import com.sequenceiq.common.api.cloudstorage.old.validation.ValidGcsCloudStorag
 import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
 import com.sequenceiq.common.model.FileSystemType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidGcsCloudStorageParameters
 public class GcsCloudStorageV1Parameters implements FileSystemAwareCloudStorage {
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String serviceAccountEmail;
 
@@ -27,7 +26,7 @@ public class GcsCloudStorageV1Parameters implements FileSystemAwareCloudStorage 
         this.serviceAccountEmail = serviceAccountEmail;
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @Override
     public FileSystemType getType() {
         return FileSystemType.GCS;

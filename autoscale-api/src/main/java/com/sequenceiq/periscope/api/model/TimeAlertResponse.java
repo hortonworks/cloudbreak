@@ -3,22 +3,21 @@ package com.sequenceiq.periscope.api.model;
 import com.sequenceiq.periscope.doc.ApiDescription.BaseAlertJsonProperties;
 import com.sequenceiq.periscope.doc.ApiDescription.TimeAlertJsonProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class TimeAlertResponse extends AbstractAlertJson {
 
-    @ApiModelProperty(BaseAlertJsonProperties.CRN)
+    @Schema(description = BaseAlertJsonProperties.CRN)
     private String crn;
 
-    @ApiModelProperty(TimeAlertJsonProperties.TIMEZONE)
+    @Schema(description = TimeAlertJsonProperties.TIMEZONE)
     private String timeZone;
 
-    @ApiModelProperty(TimeAlertJsonProperties.CRON)
+    @Schema(description = TimeAlertJsonProperties.CRON)
     private String cron;
 
-    @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
+    @Schema(description = BaseAlertJsonProperties.SCALINGPOLICYID)
     private ScalingPolicyResponse scalingPolicy;
 
     public String getTimeZone() {

@@ -6,9 +6,9 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class ExposedServiceV4Response {
 
     private String serviceName;

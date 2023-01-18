@@ -10,15 +10,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.SecurityGroupModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("SecurityGroupV1Request")
+@Schema(name = "SecurityGroupV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class SecurityGroupRequest extends SecurityGroupBase {
     @Valid
-    @ApiModelProperty(SecurityGroupModelDescription.SECURITY_RULES)
+    @Schema(description = SecurityGroupModelDescription.SECURITY_RULES)
     private List<SecurityRuleRequest> securityRules = new LinkedList<>();
 
     public List<SecurityRuleRequest> getSecurityRules() {

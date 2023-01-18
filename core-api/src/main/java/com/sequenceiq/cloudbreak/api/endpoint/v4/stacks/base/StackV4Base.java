@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class StackV4Base extends ProviderParametersBase implements JsonEntity {
@@ -23,29 +23,29 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     @ValidStackNameFormat
     @ValidStackNameLength
     @NotNull
-    @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
+    @Schema(description = StackModelDescription.STACK_NAME, required = true)
     private String name;
 
-    @ApiModelProperty(StackModelDescription.AWS_PARAMETERS)
+    @Schema(description = StackModelDescription.AWS_PARAMETERS)
     private AwsStackV4Parameters aws;
 
-    @ApiModelProperty(StackModelDescription.GCP_PARAMETERS)
+    @Schema(description = StackModelDescription.GCP_PARAMETERS)
     private GcpStackV4Parameters gcp;
 
-    @ApiModelProperty(StackModelDescription.AZURE_PARAMETERS)
+    @Schema(description = StackModelDescription.AZURE_PARAMETERS)
     private AzureStackV4Parameters azure;
 
-    @ApiModelProperty(StackModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Schema(description = StackModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
     @Deprecated
     private OpenStackStackV4Parameters openstack;
 
-    @ApiModelProperty(StackModelDescription.YARN_PARAMETERS)
+    @Schema(description = StackModelDescription.YARN_PARAMETERS)
     private YarnStackV4Parameters yarn;
 
-    @ApiModelProperty(hidden = false)
+    @Schema
     private MockStackV4Parameters mock;
 
-    @ApiModelProperty
+    @Schema
     private Long timeToLive;
 
     public String getName() {

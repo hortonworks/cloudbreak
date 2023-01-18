@@ -2,18 +2,17 @@ package com.sequenceiq.sdx.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxStopValidationResponse {
-    @ApiModelProperty(ModelDescriptions.STOPPABLE)
+
+    @Schema(description = ModelDescriptions.STOPPABLE)
     private boolean stoppable;
 
-    @ApiModelProperty(ModelDescriptions.UNSTOPPABLE_REASON)
+    @Schema(description = ModelDescriptions.UNSTOPPABLE_REASON)
     private String unstoppableReason;
 
     public SdxStopValidationResponse() {
@@ -42,8 +41,6 @@ public class SdxStopValidationResponse {
 
     @Override
     public String toString() {
-        return "SdxStopValidationResponse{" +
-                (stoppable ? ("stoppable=true, unstoppableReason='" + unstoppableReason + '\'') : "stoppable=false") +
-                '}';
+        return "SdxStopValidationResponse{" + (stoppable ? ("stoppable=true, unstoppableReason='" + unstoppableReason + '\'') : "stoppable=false") + '}';
     }
 }

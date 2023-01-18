@@ -9,21 +9,20 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("ImageChangeV1Request")
+@Schema(name = "ImageChangeV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ImageChangeRequest {
 
     @NotEmpty
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(required = true)
+    @Schema(required = true)
     private ImageSettingsRequest imageSettings;
 
     public String getEnvironmentCrn() {

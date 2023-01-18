@@ -2,13 +2,12 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.responses;
 
 import java.util.List;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class RoleTypeV4Response {
 
-    @ApiModelProperty
+    @Schema
     private List<String> roleTypes;
 
     public RoleTypeV4Response() {

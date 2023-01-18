@@ -7,22 +7,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.periscope.api.endpoint.validator.ValidScalingConfiguration;
 import com.sequenceiq.periscope.doc.ApiDescription.ScalingConfigurationJsonProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @ValidScalingConfiguration
-@ApiModel
+@Schema
 public class ScalingConfigurationRequest implements Json {
 
-    @ApiModelProperty(ScalingConfigurationJsonProperties.MINSIZE)
+    @Schema(description = ScalingConfigurationJsonProperties.MINSIZE)
     @NotNull
     private int minSize;
 
-    @ApiModelProperty(ScalingConfigurationJsonProperties.MAXSIZE)
+    @Schema(description = ScalingConfigurationJsonProperties.MAXSIZE)
     @NotNull
     private int maxSize;
 
-    @ApiModelProperty(ScalingConfigurationJsonProperties.COOLDOWN)
+    @Schema(description = ScalingConfigurationJsonProperties.COOLDOWN)
     @JsonProperty("cooldown")
     @NotNull
     @Min(1)

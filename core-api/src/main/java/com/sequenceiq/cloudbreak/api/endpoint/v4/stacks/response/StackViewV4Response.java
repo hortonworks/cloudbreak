@@ -11,40 +11,40 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackViewV4Response implements JsonEntity {
 
-    @ApiModelProperty(StackModelDescription.CRN)
+    @Schema(description = StackModelDescription.CRN)
     private String crn;
 
-    @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
+    @Schema(description = StackModelDescription.STACK_NAME, required = true)
     private String name;
 
-    @ApiModelProperty(StackModelDescription.HDP_VERSION)
+    @Schema(description = StackModelDescription.HDP_VERSION)
     private String hdpVersion;
 
-    @ApiModelProperty(StackModelDescription.CLUSTER)
+    @Schema(description = StackModelDescription.CLUSTER)
     private ClusterViewV4Response cluster;
 
-    @ApiModelProperty(StackModelDescription.STACK_STATUS)
+    @Schema(description = StackModelDescription.STACK_STATUS)
     private Status status;
 
-    @ApiModelProperty(StackModelDescription.NODE_COUNT)
+    @Schema(description = StackModelDescription.NODE_COUNT)
     private Integer nodeCount;
 
-    @ApiModelProperty(StackModelDescription.CREATED)
+    @Schema(description = StackModelDescription.CREATED)
     private Long created;
 
-    @ApiModelProperty(StackModelDescription.TERMINATED)
+    @Schema(description = StackModelDescription.TERMINATED)
     private Long terminated;
 
-    @ApiModelProperty(StackModelDescription.USER)
+    @Schema(description = StackModelDescription.USER)
     private UserViewV4Response user;
 
-    @ApiModelProperty(StackModelDescription.ENVIRONMENT_CRN)
+    @Schema(description = StackModelDescription.ENVIRONMENT_CRN)
     private String environmentCrn;
 
     private String environmentName;
@@ -53,21 +53,21 @@ public class StackViewV4Response implements JsonEntity {
 
     private boolean govCloud;
 
-    @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
+    @Schema(description = StackModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
-    @ApiModelProperty(StackModelDescription.VARIANT)
+    @Schema(description = StackModelDescription.VARIANT)
     private String variant;
 
-    @ApiModelProperty(StackModelDescription.TUNNEL)
+    @Schema(description = StackModelDescription.TUNNEL)
     private Tunnel tunnel = Tunnel.DIRECT;
 
-    @ApiModelProperty(StackModelDescription.STACK_VERSION)
+    @Schema(description = StackModelDescription.STACK_VERSION)
     private String stackVersion;
 
     private boolean upgradeable;
 
-    @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
+    @Schema(description = StackModelDescription.EXTERNAL_DATABASE)
     private DatabaseResponse externalDatabase;
 
     public String getCrn() {

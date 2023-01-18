@@ -14,20 +14,19 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
 @Path("/sdx")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/sdx", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/sdx")
 public interface DatabaseServerEndpoint {
 
     @GET
     @Path("/crn/{clusterCrn}/dbserver")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "get database server for SDX cluster by cluster crn", produces = MediaType.APPLICATION_JSON,
-            nickname = "getDatabaseServerByClusterCrn")
+    @Operation(summary = "get database server for SDX cluster by cluster crn", operationId ="getDatabaseServerByClusterCrn")
     StackDatabaseServerResponse getDatabaseServerByCrn(@PathParam("clusterCrn") @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) String clusterCrn);
 }

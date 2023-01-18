@@ -6,18 +6,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("GcpV1Parameters")
+@Schema(name = "GcpV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class GcpCredentialParameters implements Serializable {
 
-    @ApiModelProperty
+    @Schema
     private P12Parameters p12;
 
-    @ApiModelProperty
+    @Schema
     private JsonParameters json;
 
     public P12Parameters getP12() {

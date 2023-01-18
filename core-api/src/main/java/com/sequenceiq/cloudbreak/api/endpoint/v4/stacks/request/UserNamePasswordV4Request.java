@@ -7,26 +7,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UserNamePasswordModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserNamePasswordV4Request implements JsonEntity {
 
     @NotNull
     @Size(min = 1, message = "The length of the name has to be greater than 1")
-    @ApiModelProperty(value = UserNamePasswordModelDescription.NEW_USER_NAME, required = true)
+    @Schema(description = UserNamePasswordModelDescription.NEW_USER_NAME, required = true)
     private String userName;
 
     @NotNull
     @Size(min = 1, message = "The length of the old password has to be greater than 1")
-    @ApiModelProperty(value = UserNamePasswordModelDescription.OLD_PASSWORD, required = true)
+    @Schema(description = UserNamePasswordModelDescription.OLD_PASSWORD, required = true)
     private String oldPassword;
 
     @NotNull
     @Size(min = 1, message = "The length of the password has to be greater than 1")
-    @ApiModelProperty(value = UserNamePasswordModelDescription.NEW_PASSWORD, required = true)
+    @Schema(description = UserNamePasswordModelDescription.NEW_PASSWORD, required = true)
     private String password;
 
     public String getUserName() {

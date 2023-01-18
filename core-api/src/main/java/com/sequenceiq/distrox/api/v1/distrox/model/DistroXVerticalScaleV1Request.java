@@ -8,20 +8,19 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescrip
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DistroXVerticalScaleV1Request implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String group;
 
     @Valid
     @NotNull
-    @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
+    @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV1Request template;
 
     public String getGroup() {

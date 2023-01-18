@@ -10,27 +10,26 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProductBase;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ClouderaManagerProductV4Request implements JsonEntity, ClouderaManagerProductBase {
 
     @NotEmpty
-    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.NAME)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.NAME)
     private String name;
 
     @NotEmpty
-    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.VERSION)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.VERSION)
     private String version;
 
     @NotEmpty
-    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.PARCEL)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.PARCEL)
     private String parcel;
 
-    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.CSD)
+    @Schema(description = ModelDescriptions.ClouderaManagerProductDescription.CSD)
     private List<String> csd;
 
     public String getName() {

@@ -6,9 +6,9 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.GeneralCollectionV4Response;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.DATABASE_SERVER_RESPONSES)
+@Schema(description = ModelDescriptions.DATABASE_SERVER_RESPONSES)
 public class DatabaseServerV4Responses extends GeneralCollectionV4Response<DatabaseServerV4Response> {
     public DatabaseServerV4Responses(Set<DatabaseServerV4Response> responses) {
         super(responses);

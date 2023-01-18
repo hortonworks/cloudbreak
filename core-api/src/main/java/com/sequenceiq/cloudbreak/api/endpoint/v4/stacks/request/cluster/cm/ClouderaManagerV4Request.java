@@ -12,22 +12,21 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repos
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class ClouderaManagerV4Request implements JsonEntity {
     @Valid
-    @ApiModelProperty(ClusterModelDescription.CM_REPO_DETAILS)
+    @Schema(description = ClusterModelDescription.CM_REPO_DETAILS)
     private ClouderaManagerRepositoryV4Request repository;
 
     @Valid
-    @ApiModelProperty(ClusterModelDescription.CM_PRODUCT_DETAILS)
+    @Schema(description = ClusterModelDescription.CM_PRODUCT_DETAILS)
     private List<ClouderaManagerProductV4Request> products;
 
-    @ApiModelProperty(value = ClusterModelDescription.CM_ENABLE_AUTOTLS, required = true)
+    @Schema(description = ClusterModelDescription.CM_ENABLE_AUTOTLS, required = true)
     private Boolean enableAutoTls = Boolean.TRUE;
 
     public ClouderaManagerRepositoryV4Request getRepository() {

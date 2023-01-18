@@ -28,21 +28,20 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeysR
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.RegionResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RetryAndMetrics
 @Path("/v1/env/platform_resources")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/env/platform_resources", description = PlatformResourceModelDescription.CONNECTOR_V1_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/env/platform_resources", description = PlatformResourceModelDescription.CONNECTOR_V1_DESCRIPTION)
 public interface EnvironmentPlatformResourceEndpoint {
 
     @GET
     @Path("machine_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_VMTYPES_BY_CREDENTIAL, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getVmTypesByCredentialByEnv")
+    @Operation(summary =  OpEnvDescription.GET_VMTYPES_BY_CREDENTIAL, description =  CONNECTOR_NOTES,
+            operationId = "getVmTypesByCredentialByEnv")
     PlatformVmtypesResponse getVmTypesByCredential(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
@@ -53,8 +52,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("machine_types_for_vertical_scaling")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_VERTICAL_SCALE_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getVmTypesForVerticalScaling")
+    @Operation(summary =  OpEnvDescription.GET_VERTICAL_SCALE_RECOMMENDATION, description =  CONNECTOR_NOTES,
+            operationId = "getVmTypesForVerticalScaling")
     PlatformVmtypesResponse getVmTypesForVerticalScaling(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("instanceType") String instanceType,
@@ -63,8 +62,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_REGIONS_BY_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getRegionsByEnv")
+    @Operation(summary =  OpEnvDescription.GET_REGIONS_BY_ENVIRONMENT, description =  CONNECTOR_NOTES,
+            operationId = "getRegionsByEnv")
     RegionResponse getRegionsByCredential(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
@@ -75,8 +74,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("networks")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_NETWORKS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getPlatformNetworksByEnv")
+    @Operation(summary =  OpEnvDescription.GET_NETWORKS, description =  CONNECTOR_NOTES,
+            operationId = "getPlatformNetworksByEnv")
     PlatformNetworksResponse getCloudNetworks(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
@@ -87,8 +86,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("ip_pools")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_IPPOOLS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getIpPoolsByEnv")
+    @Operation(summary =  OpEnvDescription.GET_IPPOOLS, description =  CONNECTOR_NOTES,
+            operationId = "getIpPoolsByEnv")
     PlatformIpPoolsResponse getIpPoolsCredentialId(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
@@ -98,8 +97,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("gateways")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_GATEWAYS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getGatewaysByEnv")
+    @Operation(summary =  OpEnvDescription.GET_GATEWAYS, description =  CONNECTOR_NOTES,
+            operationId = "getGatewaysByEnv")
     PlatformGatewaysResponse getGatewaysCredentialId(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
@@ -109,8 +108,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("encryption_keys")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_ENCRYPTIONKEYS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getEncryptionKeysByEnv")
+    @Operation(summary =  OpEnvDescription.GET_ENCRYPTIONKEYS, description =  CONNECTOR_NOTES,
+            operationId = "getEncryptionKeysByEnv")
     PlatformEncryptionKeysResponse getEncryptionKeys(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
@@ -120,8 +119,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("security_groups")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_SECURITYGROUPS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getPlatformSecurityGroupsByEnv")
+    @Operation(summary =  OpEnvDescription.GET_SECURITYGROUPS, description =  CONNECTOR_NOTES,
+            operationId = "getPlatformSecurityGroupsByEnv")
     PlatformSecurityGroupsResponse getSecurityGroups(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
@@ -132,8 +131,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("ssh_keys")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_SSHKEYS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getPlatformSShKeysByEnv")
+    @Operation(summary =  OpEnvDescription.GET_SSHKEYS, description =  CONNECTOR_NOTES,
+            operationId = "getPlatformSShKeysByEnv")
     PlatformSshKeysResponse getCloudSshKeys(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
@@ -143,8 +142,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("access_configs")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_ACCESSCONFIGS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getAccessConfigsByEnv")
+    @Operation(summary =  OpEnvDescription.GET_ACCESSCONFIGS, description =  CONNECTOR_NOTES,
+            operationId = "getAccessConfigsByEnv")
     PlatformAccessConfigsResponse getAccessConfigs(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
@@ -155,8 +154,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("nosql_tables")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_NOSQL_TABLES, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getNoSqlTablesByEnv")
+    @Operation(summary =  OpEnvDescription.GET_NOSQL_TABLES, description =  CONNECTOR_NOTES,
+            operationId = "getNoSqlTablesByEnv")
     PlatformNoSqlTablesResponse getNoSqlTables(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") @NotEmpty String region,
@@ -166,8 +165,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("resource_groups")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_RESOURCE_GROUPS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getResourceGroupsByEnv")
+    @Operation(summary =  OpEnvDescription.GET_RESOURCE_GROUPS, description =  CONNECTOR_NOTES,
+            operationId = "getResourceGroupsByEnv")
     PlatformResourceGroupsResponse getResourceGroups(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
@@ -177,8 +176,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("private_dns_zones")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_PRIVATE_DNS_ZONES, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
-            nickname = "getPrivateDnsZonesByEnv")
+    @Operation(summary =  OpEnvDescription.GET_PRIVATE_DNS_ZONES, description =  CONNECTOR_NOTES,
+            operationId = "getPrivateDnsZonesByEnv")
     PlatformPrivateDnsZonesResponse getPrivateDnsZones(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("platformVariant") String platformVariant);

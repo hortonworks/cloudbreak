@@ -7,15 +7,15 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VirtualMachinesResponse implements Serializable {
 
-    @ApiModelProperty(PlatformResourceModelDescription.VIRTUAL_MACHNES)
+    @Schema(description = PlatformResourceModelDescription.VIRTUAL_MACHNES)
     private Set<VmTypeResponse> virtualMachines = new HashSet<>();
 
-    @ApiModelProperty(PlatformResourceModelDescription.DEFAULT_VIRTUAL_MACHINES)
+    @Schema(description = PlatformResourceModelDescription.DEFAULT_VIRTUAL_MACHINES)
     private VmTypeResponse defaultVirtualMachine;
 
     public Set<VmTypeResponse> getVirtualMachines() {

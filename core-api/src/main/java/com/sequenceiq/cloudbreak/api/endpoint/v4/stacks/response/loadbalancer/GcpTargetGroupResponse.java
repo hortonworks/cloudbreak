@@ -6,15 +6,15 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class GcpTargetGroupResponse implements Serializable {
 
-    @ApiModelProperty(StackModelDescription.GCP_LB_INSTANCE_GROUP)
+    @Schema(description = StackModelDescription.GCP_LB_INSTANCE_GROUP)
     @NotNull
     private String gcpInstanceGroupName;
 
-    @ApiModelProperty(StackModelDescription.GCP_LB_BACKEND_SERVICE)
+    @Schema(description = StackModelDescription.GCP_LB_BACKEND_SERVICE)
     @NotNull
     private String gcpBackendServiceName;
 

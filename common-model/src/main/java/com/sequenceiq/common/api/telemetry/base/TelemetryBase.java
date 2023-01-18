@@ -6,11 +6,11 @@ import java.util.Map;
 
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class TelemetryBase implements Serializable {
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_FLUENT_ATTRIBUTES)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_FLUENT_ATTRIBUTES)
     private Map<String, Object> fluentAttributes = new HashMap<>();
 
     public Map<String, Object> getFluentAttributes() {

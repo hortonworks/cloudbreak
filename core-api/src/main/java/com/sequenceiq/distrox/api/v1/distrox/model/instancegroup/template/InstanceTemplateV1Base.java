@@ -10,28 +10,27 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 import com.sequenceiq.distrox.api.v1.distrox.model.CloudPlatformProvider;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class InstanceTemplateV1Base implements Serializable, CloudPlatformProvider {
 
     @Valid
-    @ApiModelProperty(TemplateModelDescription.AWS_PARAMETERS)
+    @Schema(description = TemplateModelDescription.AWS_PARAMETERS)
     private AwsInstanceTemplateV1Parameters aws;
 
-    @ApiModelProperty(TemplateModelDescription.AZURE_PARAMETERS)
+    @Schema(description = TemplateModelDescription.AZURE_PARAMETERS)
     private AzureInstanceTemplateV1Parameters azure;
 
-    @ApiModelProperty(TemplateModelDescription.GCP_PARAMETERS)
+    @Schema(description = TemplateModelDescription.GCP_PARAMETERS)
     private GcpInstanceTemplateV1Parameters gcp;
 
-    @ApiModelProperty(TemplateModelDescription.YARN_PARAMETERS)
+    @Schema(description = TemplateModelDescription.YARN_PARAMETERS)
     private YarnInstanceTemplateV1Parameters yarn;
 
-    @ApiModelProperty(TemplateModelDescription.INSTANCE_TYPE)
+    @Schema(description = TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
 
     public String getInstanceType() {

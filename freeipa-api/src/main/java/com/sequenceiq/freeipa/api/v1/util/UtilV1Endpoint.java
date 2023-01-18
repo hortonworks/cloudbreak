@@ -15,24 +15,24 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.util.doc.UtilDescriptions;
 import com.sequenceiq.freeipa.api.v1.util.model.UsedImagesListV1Response;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RetryAndMetrics
 @Path("/v1/utils")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/utils", description = UtilDescriptions.NOTES, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/utils", description = UtilDescriptions.NOTES)
 public interface UtilV1Endpoint {
 
     @GET
     @Path("used_images")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilDescriptions.USED_IMAGES, produces = MediaType.APPLICATION_JSON, nickname = "usedImagesV1")
+    @Operation(summary =  UtilDescriptions.USED_IMAGES, operationId ="usedImagesV1")
     UsedImagesListV1Response usedImages(@QueryParam("thresholdInDays") Integer thresholdInDays);
 
     @GET
     @Path("used_recipes/{accountId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilDescriptions.USED_IMAGES, produces = MediaType.APPLICATION_JSON, nickname = "usedRecipesV1")
+    @Operation(summary =  UtilDescriptions.USED_IMAGES, operationId ="usedRecipesV1")
     List<String> usedRecipes(@AccountId @PathParam("accountId") String accountId);
 }

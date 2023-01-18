@@ -12,26 +12,26 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.InstanceGroupMoc
 import com.sequenceiq.distrox.api.v1.distrox.model.network.openstack.InstanceGroupOpenstackNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.yarn.InstanceGroupYarnNetworkV1Parameters;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class InstanceGroupNetworkV1Base extends ProviderParametersBase implements Serializable {
 
-    @ApiModelProperty(NetworkModelDescription.AWS_PARAMETERS)
+    @Schema(description = NetworkModelDescription.AWS_PARAMETERS)
     private InstanceGroupAwsNetworkV1Parameters aws;
 
-    @ApiModelProperty(NetworkModelDescription.AZURE_PARAMETERS)
+    @Schema(description = NetworkModelDescription.AZURE_PARAMETERS)
     private InstanceGroupAzureNetworkV1Parameters azure;
 
-    @ApiModelProperty(NetworkModelDescription.MOCK_PARAMETERS)
+    @Schema(description = NetworkModelDescription.MOCK_PARAMETERS)
     private InstanceGroupMockNetworkV1Parameters mock;
 
-    @ApiModelProperty(NetworkModelDescription.GCP_PARAMETERS)
+    @Schema(description = NetworkModelDescription.GCP_PARAMETERS)
     private InstanceGroupGcpNetworkV1Parameters gcp;
 
-    @ApiModelProperty(NetworkModelDescription.YARN_PARAMETERS)
+    @Schema(description = NetworkModelDescription.YARN_PARAMETERS)
     private InstanceGroupYarnNetworkV1Parameters yarn;
 
-    @ApiModelProperty(NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Schema(description = NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
     @Deprecated
     private InstanceGroupOpenstackNetworkV1Parameters openstack;
 

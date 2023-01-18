@@ -5,26 +5,25 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EventModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudbreakEventBaseV4 implements JsonEntity {
 
-    @ApiModelProperty(EventModelDescription.TYPE)
+    @Schema(description = EventModelDescription.TYPE)
     private String eventType;
 
-    @ApiModelProperty(EventModelDescription.TIMESTAMP)
+    @Schema(description = EventModelDescription.TIMESTAMP)
     private long eventTimestamp;
 
-    @ApiModelProperty(EventModelDescription.MESSAGE)
+    @Schema(description = EventModelDescription.MESSAGE)
     private String eventMessage;
 
-    @ApiModelProperty(ModelDescriptions.USER_ID)
+    @Schema(description = ModelDescriptions.USER_ID)
     private String userId;
 
-    @ApiModelProperty(EventModelDescription.NOTIFICATION_TYPE)
+    @Schema(description = EventModelDescription.NOTIFICATION_TYPE)
     private String notificationType;
 
     public String getEventType() {

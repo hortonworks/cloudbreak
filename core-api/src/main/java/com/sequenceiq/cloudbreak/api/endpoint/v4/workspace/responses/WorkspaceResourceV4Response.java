@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkspaceResourceV4Response implements JsonEntity {
 
-    @ApiModelProperty(RecipeModelDescription.WORKSPACE_ID)
+    @Schema(description = RecipeModelDescription.WORKSPACE_ID)
     private Long id;
 
-    @ApiModelProperty(RecipeModelDescription.WORKSPACE_NAME)
+    @Schema(description = RecipeModelDescription.WORKSPACE_NAME)
     private String name;
 
     public Long getId() {

@@ -2,22 +2,20 @@ package com.sequenceiq.sdx.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRestoreStatusResponse {
 
-    @ApiModelProperty(ModelDescriptions.OPERATION_ID)
+    @Schema(description = ModelDescriptions.OPERATION_ID)
     private String operationId;
 
-    @ApiModelProperty(ModelDescriptions.OPERATION_STATUS)
+    @Schema(description = ModelDescriptions.OPERATION_STATUS)
     private String status;
 
-    @ApiModelProperty(ModelDescriptions.OPERATION_STATUS_REASON)
+    @Schema(description = ModelDescriptions.OPERATION_STATUS_REASON)
     private String reason;
 
     public SdxRestoreStatusResponse() {
@@ -47,10 +45,6 @@ public class SdxRestoreStatusResponse {
 
     @Override
     public String toString() {
-        return "SdxDatabaseRestoreResponse{" +
-                "OperationId=" + operationId +
-                "Status=" + status +
-                "Reason=" + reason +
-                '}';
+        return "SdxDatabaseRestoreResponse{" + "OperationId=" + operationId + "Status=" + status + "Reason=" + reason + '}';
     }
 }

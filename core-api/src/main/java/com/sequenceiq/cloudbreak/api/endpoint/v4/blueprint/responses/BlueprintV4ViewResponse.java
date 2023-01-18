@@ -12,27 +12,26 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class BlueprintV4ViewResponse extends CompactViewV4Response {
-    @ApiModelProperty(BlueprintModelDescription.STACK_TYPE)
+    @Schema(description = BlueprintModelDescription.STACK_TYPE)
     private String stackType;
 
-    @ApiModelProperty(BlueprintModelDescription.STACK_VERSION)
+    @Schema(description = BlueprintModelDescription.STACK_VERSION)
     private String stackVersion;
 
-    @ApiModelProperty(BlueprintModelDescription.HOST_GROUP_COUNT)
+    @Schema(description = BlueprintModelDescription.HOST_GROUP_COUNT)
     private Integer hostGroupCount;
 
-    @ApiModelProperty(BlueprintModelDescription.STATUS)
+    @Schema(description = BlueprintModelDescription.STATUS)
     private ResourceStatus status;
 
-    @ApiModelProperty(BlueprintModelDescription.TAGS)
+    @Schema(description = BlueprintModelDescription.TAGS)
     private Map<String, Object> tags = new HashMap<>();
 
-    @ApiModelProperty(BlueprintModelDescription.UPGRADEABLE)
+    @Schema(description = BlueprintModelDescription.UPGRADEABLE)
     private BlueprintBasedUpgradeOption upgradeable;
 
     private Long created;

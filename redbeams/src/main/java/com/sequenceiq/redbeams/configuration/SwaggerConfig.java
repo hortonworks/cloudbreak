@@ -1,20 +1,28 @@
 package com.sequenceiq.redbeams.configuration;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
 
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.config.SwaggerConfigLocator;
-import io.swagger.jaxrs.config.SwaggerContextService;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import io.swagger.v3.oas.models.OpenAPI;
 
-@EnableSwagger2
 @Configuration
 public class SwaggerConfig {
+
+    private static final Set<String> OPENAPI_RESOURCE_PACKAGES = Stream.of(
+            "com.sequenceiq.redbeams.api",
+                    "com.sequenceiq.flow.api",
+                    "com.sequenceiq.authorization")
+            .collect(Collectors.toSet());
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;
@@ -22,20 +30,18 @@ public class SwaggerConfig {
     @Value("${server.servlet.context-path:}")
     private String contextPath;
 
-    @PostConstruct
-    private void registerSwagger() {
-        BeanConfig swaggerConfig = new BeanConfig();
-        swaggerConfig.setTitle("Redbeams API");
-        swaggerConfig.setDescription("API for working with databases and database servers");
-        swaggerConfig.setVersion(applicationVersion);
-        swaggerConfig.setSchemes(new String[]{"http", "https"});
-        swaggerConfig.setBasePath(contextPath + RedbeamsApi.API_ROOT_CONTEXT);
-        swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.redbeams.api,com.sequenceiq.flow.api,com.sequenceiq.authorization");
-        swaggerConfig.setScan(true);
-        swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
-        swaggerConfig.setPrettyPrint(true);
-        SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, swaggerConfig);
-    }
+    @Inject
+    private OpenApiProvider openApiProvider;
 
+    @PostConstruct
+    public void registerSwagger() {
+        OpenAPI openAPI = openApiProvider.getOpenAPI(
+                "Redbeams API",
+                "API for working with databases and database servers",
+                applicationVersion,
+                "https://localhost" + contextPath + RedbeamsApi.API_ROOT_CONTEXT
+        );
+        openAPI.setComponents(openApiProvider.getComponents());
+        openApiProvider.createConfig(openAPI, OPENAPI_RESOURCE_PACKAGES);
+    }
 }

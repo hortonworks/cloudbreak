@@ -4,14 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ResourceEventResponse {
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.EVENTS)
+    @Schema(description = ModelDescriptions.StackModelDescription.EVENTS)
     private ResourceEvent event;
 
     public ResourceEvent getEvent() {

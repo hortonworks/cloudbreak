@@ -3,16 +3,15 @@ package com.sequenceiq.periscope.api.model;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterAutoscaleState;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterStopStartScalingState;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("AutoscaleState")
+@Schema(name = "AutoscaleState")
 public class AutoscaleClusterState {
 
-    @ApiModelProperty(ClusterAutoscaleState.ENABLE_AUTOSCALING)
+    @Schema(description = ClusterAutoscaleState.ENABLE_AUTOSCALING)
     private Boolean enableAutoscaling;
 
-    @ApiModelProperty(ClusterStopStartScalingState.ENABLE_STOP_START_SCALING)
+    @Schema(description = ClusterStopStartScalingState.ENABLE_STOP_START_SCALING)
     private Boolean useStopStartMechanism;
 
     public Boolean isEnableAutoscaling() {

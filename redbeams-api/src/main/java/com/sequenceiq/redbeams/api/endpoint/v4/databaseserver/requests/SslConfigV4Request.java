@@ -5,14 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.SSL_CONFIG_REQUEST)
+@Schema(description = ModelDescriptions.SSL_CONFIG_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SslConfigV4Request {
 
-    @ApiModelProperty(DatabaseServer.SSL_MODE)
+    @Schema(description = DatabaseServer.SSL_MODE)
     private SslMode sslMode;
 
     public SslMode getSslMode() {

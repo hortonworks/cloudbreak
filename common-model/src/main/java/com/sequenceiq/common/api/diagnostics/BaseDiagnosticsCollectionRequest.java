@@ -13,62 +13,62 @@ import com.sequenceiq.common.api.telemetry.doc.DiagnosticsModelDescription;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseDiagnosticsCollectionRequest {
 
-    @ApiModelProperty(DiagnosticsModelDescription.ISSUE)
+    @Schema(description = DiagnosticsModelDescription.ISSUE)
     private String issue;
 
-    @ApiModelProperty(DiagnosticsModelDescription.DESCRIPTION)
+    @Schema(description = DiagnosticsModelDescription.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(DiagnosticsModelDescription.LABELS)
+    @Schema(description = DiagnosticsModelDescription.LABELS)
     private List<String> labels;
 
-    @ApiModelProperty(DiagnosticsModelDescription.START_TIME)
+    @Schema(description = DiagnosticsModelDescription.START_TIME)
     private Date startTime;
 
-    @ApiModelProperty(DiagnosticsModelDescription.END_TIME)
+    @Schema(description = DiagnosticsModelDescription.END_TIME)
     private Date endTime;
 
     @NotNull
-    @ApiModelProperty(DiagnosticsModelDescription.DESTINATION)
+    @Schema(description = DiagnosticsModelDescription.DESTINATION)
     private DiagnosticsDestination destination;
 
-    @ApiModelProperty(DiagnosticsModelDescription.HOST_GROUPS)
+    @Schema(description = DiagnosticsModelDescription.HOST_GROUPS)
     private Set<String> hostGroups = new HashSet<>();
 
-    @ApiModelProperty(DiagnosticsModelDescription.HOSTS)
+    @Schema(description = DiagnosticsModelDescription.HOSTS)
     private Set<String> hosts = new HashSet<>();
 
-    @ApiModelProperty(DiagnosticsModelDescription.EXCLUDE_HOSTS)
+    @Schema(description = DiagnosticsModelDescription.EXCLUDE_HOSTS)
     private Set<String> excludeHosts = new HashSet<>();
 
-    @ApiModelProperty(DiagnosticsModelDescription.ADDITIONAL_LOGS)
+    @Schema(description = DiagnosticsModelDescription.ADDITIONAL_LOGS)
     private List<VmLog> additionalLogs = List.of();
 
-    @ApiModelProperty(DiagnosticsModelDescription.INCLUDE_SALT_LOGS)
+    @Schema(description = DiagnosticsModelDescription.INCLUDE_SALT_LOGS)
     private Boolean includeSaltLogs = Boolean.FALSE;
 
-    @ApiModelProperty(DiagnosticsModelDescription.INCLUDE_SAR_OUTPUT)
+    @Schema(description = DiagnosticsModelDescription.INCLUDE_SAR_OUTPUT)
     private Boolean includeSarOutput = Boolean.FALSE;
 
-    @ApiModelProperty(DiagnosticsModelDescription.INCLUDE_NGINX_REPORT)
+    @Schema(description = DiagnosticsModelDescription.INCLUDE_NGINX_REPORT)
     private Boolean includeNginxReport = Boolean.FALSE;
 
-    @ApiModelProperty(DiagnosticsModelDescription.UPDATE_PACKAGE)
+    @Schema(description = DiagnosticsModelDescription.UPDATE_PACKAGE)
     private Boolean updatePackage = Boolean.FALSE;
 
-    @ApiModelProperty(DiagnosticsModelDescription.SKIP_VALIDATION)
+    @Schema(description = DiagnosticsModelDescription.SKIP_VALIDATION)
     private Boolean skipValidation = Boolean.FALSE;
 
-    @ApiModelProperty(DiagnosticsModelDescription.SKIP_WORKSPACE_CLEANUP)
+    @Schema(description = DiagnosticsModelDescription.SKIP_WORKSPACE_CLEANUP)
     private Boolean skipWorkspaceCleanupOnStartup = Boolean.FALSE;
 
-    @ApiModelProperty(DiagnosticsModelDescription.SKIP_UNRESPONSIVE_HOSTS)
+    @Schema(description = DiagnosticsModelDescription.SKIP_UNRESPONSIVE_HOSTS)
     private Boolean skipUnresponsiveHosts = Boolean.FALSE;
 
     public List<String> getLabels() {

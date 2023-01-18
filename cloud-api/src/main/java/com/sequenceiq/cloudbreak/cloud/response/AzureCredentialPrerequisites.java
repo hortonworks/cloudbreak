@@ -7,16 +7,15 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class AzureCredentialPrerequisites extends CredentialBasePrerequisites implements Serializable {
 
-    @ApiModelProperty(value = AZURE_APP_CREATION_COMMAND, required = true)
+    @Schema(description = AZURE_APP_CREATION_COMMAND, required = true)
     private String appCreationCommand;
 
-    @ApiModelProperty(value = AZURE_ROLE_DEF_JSON, required = true)
+    @Schema(description = AZURE_ROLE_DEF_JSON, required = true)
     private String roleDefitionJson;
 
     public AzureCredentialPrerequisites() {

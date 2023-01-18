@@ -4,9 +4,9 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class CDPEventV1Responses extends CDPStructuredEventGeneralCollectionV1Response<CDPEventV1Response> {
 
     public CDPEventV1Responses(List<CDPEventV1Response> responses) {

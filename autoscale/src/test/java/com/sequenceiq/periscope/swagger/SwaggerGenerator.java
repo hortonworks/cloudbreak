@@ -3,24 +3,23 @@ package com.sequenceiq.periscope.swagger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.sequenceiq.periscope.api.AutoscaleApi;
+import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.periscope.config.EndpointConfig;
 
-import io.swagger.jaxrs.Reader;
-import io.swagger.jaxrs.config.SwaggerConfigLocator;
-import io.swagger.jaxrs.config.SwaggerContextService;
-import io.swagger.models.Swagger;
-import io.swagger.util.Json;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
+import io.swagger.v3.oas.models.OpenAPI;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = EndpointConfig.class)
@@ -30,15 +29,22 @@ public class SwaggerGenerator {
     @Autowired
     private EndpointConfig endpointConfig;
 
+    @SpyBean
+    private OpenApiProvider openApiProvider;
+
     @Test
     public void generateSwaggerJson() throws Exception {
-        Set<Class<?>> classes = new HashSet<>(endpointConfig.getClasses());
-        classes.add(AutoscaleApi.class);
-        Swagger swagger = new Reader(SwaggerConfigLocator.getInstance().getConfig(SwaggerContextService.CONFIG_ID_DEFAULT).configure(new Swagger()))
-                .read(classes);
+        Set<String> classes = endpointConfig.getClasses().stream()
+                .map(Class::getName)
+                .collect(Collectors.toSet());
+
+        OpenAPI openAPI = new JaxrsOpenApiContextBuilder<>()
+                .resourceClasses(classes)
+                .buildContext(true)
+                .read();
         Path path = Paths.get("./build/swagger/autoscale.json");
         Files.createDirectories(path.getParent());
-        Files.writeString(path, Json.pretty(swagger));
+        Files.writeString(path, Json.pretty(openAPI));
     }
 
 }

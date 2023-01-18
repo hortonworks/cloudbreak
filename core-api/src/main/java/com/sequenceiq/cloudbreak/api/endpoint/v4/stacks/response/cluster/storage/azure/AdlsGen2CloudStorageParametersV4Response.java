@@ -8,18 +8,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage
 import com.sequenceiq.common.api.cloudstorage.old.validation.ValidAdlsGen2CloudStorageParameters;
 import com.sequenceiq.common.model.FileSystemType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidAdlsGen2CloudStorageParameters
 public class AdlsGen2CloudStorageParametersV4Response implements CloudStorageParametersV4Response {
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String accountKey;
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String accountName;
 
@@ -39,7 +38,7 @@ public class AdlsGen2CloudStorageParametersV4Response implements CloudStoragePar
         this.accountName = accountName;
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @Override
     public FileSystemType getType() {
         return FileSystemType.ADLS_GEN_2;

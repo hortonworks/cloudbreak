@@ -7,35 +7,34 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("SyncOperationV1Status")
+@Schema(name = "SyncOperationV1Status")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SyncOperationStatus {
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ID, required = true)
+    @Schema(description = UserModelDescriptions.USERSYNC_ID, required = true)
     private final String operationId;
 
-    @ApiModelProperty(value = UserModelDescriptions.SYNC_OPERATION, required = true)
+    @Schema(description = UserModelDescriptions.SYNC_OPERATION, required = true)
     private final SyncOperationType syncOperationType;
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_STATUS)
+    @Schema(description = UserModelDescriptions.USERSYNC_STATUS)
     private SynchronizationStatus status;
 
-    @ApiModelProperty(value = UserModelDescriptions.SUCCESS_ENVIRONMENTS)
+    @Schema(description = UserModelDescriptions.SUCCESS_ENVIRONMENTS)
     private List<SuccessDetails> success;
 
-    @ApiModelProperty(value = UserModelDescriptions.FAILURE_ENVIRONMENTS)
+    @Schema(description = UserModelDescriptions.FAILURE_ENVIRONMENTS)
     private List<FailureDetails> failure;
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ERROR)
+    @Schema(description = UserModelDescriptions.USERSYNC_ERROR)
     private String error;
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_STARTTIME)
+    @Schema(description = UserModelDescriptions.USERSYNC_STARTTIME)
     private final long startTime;
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ENDTIME)
+    @Schema(description = UserModelDescriptions.USERSYNC_ENDTIME)
     private Long endTime;
 
     @JsonCreator

@@ -2,13 +2,12 @@ package com.sequenceiq.periscope.api.model;
 
 import com.sequenceiq.periscope.doc.ApiDescription.StateJsonProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class StateJson implements Json {
 
-    @ApiModelProperty(StateJsonProperties.STATE)
+    @Schema(description = StateJsonProperties.STATE)
     private ClusterState state;
 
     public ClusterState getState() {

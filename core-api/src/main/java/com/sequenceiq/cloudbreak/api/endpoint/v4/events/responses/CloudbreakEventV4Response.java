@@ -11,56 +11,55 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonInclude(Include.NON_NULL)
 public class CloudbreakEventV4Response extends CloudbreakEventBaseV4 {
 
-    @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)
+    @Schema(description = ModelDescriptions.CLOUD_PLATFORM)
     private String cloud;
 
-    @ApiModelProperty(StackModelDescription.REGION)
+    @Schema(description = StackModelDescription.REGION)
     private String region;
 
-    @ApiModelProperty(StackModelDescription.AVAILABILITY_ZONE)
+    @Schema(description = StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
 
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
+    @Schema(description = ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
 
-    @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_NAME)
+    @Schema(description = BlueprintModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
 
-    @ApiModelProperty(ClusterModelDescription.CLUSTER_ID)
+    @Schema(description = ClusterModelDescription.CLUSTER_ID)
     private Long clusterId;
 
-    @ApiModelProperty(ClusterModelDescription.CLUSTER_NAME)
+    @Schema(description = ClusterModelDescription.CLUSTER_NAME)
     private String clusterName;
 
-    @ApiModelProperty(StackModelDescription.CRN)
+    @Schema(description = StackModelDescription.CRN)
     private String stackCrn;
 
-    @ApiModelProperty(StackModelDescription.STACK_NAME)
+    @Schema(description = StackModelDescription.STACK_NAME)
     private String stackName;
 
-    @ApiModelProperty(StackModelDescription.STACK_STATUS)
+    @Schema(description = StackModelDescription.STACK_STATUS)
     private Status stackStatus;
 
-    @ApiModelProperty(InstanceGroupModelDescription.NODE_COUNT)
+    @Schema(description = InstanceGroupModelDescription.NODE_COUNT)
     private Integer nodeCount;
 
-    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
 
-    @ApiModelProperty(StackModelDescription.CLUSTER_STATUS)
+    @Schema(description = StackModelDescription.CLUSTER_STATUS)
     private Status clusterStatus;
 
-    @ApiModelProperty(ModelDescriptions.WORKSPACE_ID)
+    @Schema(description = ModelDescriptions.WORKSPACE_ID)
     private Long workspaceId;
 
-    @ApiModelProperty(ModelDescriptions.TENANT_NAME)
+    @Schema(description = ModelDescriptions.TENANT_NAME)
     private String tenantName;
 
     private LdapDetails ldapDetails;

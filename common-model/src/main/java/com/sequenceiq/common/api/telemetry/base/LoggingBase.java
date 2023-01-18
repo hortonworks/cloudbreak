@@ -12,28 +12,27 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class LoggingBase implements Serializable {
 
     @NotNull
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_STORAGE_LOCATION)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_LOGGING_STORAGE_LOCATION)
     private String storageLocation;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_S3_ATTRIBUTES)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_LOGGING_S3_ATTRIBUTES)
     private S3CloudStorageV1Parameters s3;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_ADLS_GEN_2_ATTRIBUTES)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_LOGGING_ADLS_GEN_2_ATTRIBUTES)
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_GCS_ATTRIBUTES)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_LOGGING_GCS_ATTRIBUTES)
     private GcsCloudStorageV1Parameters gcs;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_CLOUDWATCH_ATTRIBUTES)
+    @Schema(description = TelemetryModelDescription.TELEMETRY_LOGGING_CLOUDWATCH_ATTRIBUTES)
     private CloudwatchParams cloudwatch;
 
     public String getStorageLocation() {

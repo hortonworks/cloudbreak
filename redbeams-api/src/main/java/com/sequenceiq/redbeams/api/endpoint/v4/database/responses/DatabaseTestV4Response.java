@@ -7,14 +7,13 @@ import javax.validation.constraints.NotNull;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseTest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.DATABASE_TEST_RESPONSE)
+@Schema(description = ModelDescriptions.DATABASE_TEST_RESPONSE)
 @NotNull
 public class DatabaseTestV4Response implements Serializable {
 
-    @ApiModelProperty(value = DatabaseTest.RESULT, required = true)
+    @Schema(description = DatabaseTest.RESULT, required = true)
     private String result;
 
     public DatabaseTestV4Response() {

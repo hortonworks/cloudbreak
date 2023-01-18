@@ -14,21 +14,20 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 import com.sequenceiq.common.api.type.EncryptionType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4ParameterBase {
 
-    @ApiModelProperty(TemplateModelDescription.ENCRYPTION)
+    @Schema(description = TemplateModelDescription.ENCRYPTION)
     private GcpEncryptionV4Parameters encryption;
 
-    @ApiModelProperty
+    @Schema
     private Boolean preemptible;
 
-    @ApiModelProperty(notes = "by default false")
+    @Schema(description = "by default false")
     private Boolean encrypted = Boolean.FALSE;
 
     public Boolean getEncrypted() {
@@ -69,7 +68,7 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.GCP;
     }

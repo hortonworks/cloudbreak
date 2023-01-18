@@ -10,18 +10,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Reques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.HostGroupV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HostGroupV4Request extends HostGroupV4Base {
 
-    @ApiModelProperty(HostGroupModelDescription.RECIPES)
+    @Schema(description = HostGroupModelDescription.RECIPES)
     private Set<RecipeV4Request> recipes = new HashSet<>();
 
     @NotNull
-    @ApiModelProperty(value = HostGroupModelDescription.HOST_COUNT, required = true)
+    @Schema(description = HostGroupModelDescription.HOST_COUNT, required = true)
     private Integer hostCount;
 
     public Set<RecipeV4Request> getRecipes() {

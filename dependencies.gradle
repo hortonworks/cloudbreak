@@ -19,8 +19,7 @@ ext {
   javaxActivationVersion = '1.1.1'
   javaxValidationVersion = '2.0.1.Final'
   jerseyCoreVersion = '2.37'
-  swaggerVersion = '1.6.2'
-  swaggerSpringFoxVersion = '3.0.0'
+  swaggerCoreVersion = '2.2.7'
 
   // Network
   dnsjavaVersion = '2.1.7'

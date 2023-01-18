@@ -8,18 +8,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage
 import com.sequenceiq.common.api.cloudstorage.old.validation.ValidS3CloudStorageParameters;
 import com.sequenceiq.common.model.FileSystemType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidS3CloudStorageParameters
 public class S3CloudStorageParametersV4Response implements CloudStorageParametersV4Response {
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String instanceProfile;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @Override
     public FileSystemType getType() {
         return FileSystemType.S3;

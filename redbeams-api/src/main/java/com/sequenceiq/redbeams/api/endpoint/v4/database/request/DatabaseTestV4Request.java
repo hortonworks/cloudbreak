@@ -10,20 +10,19 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Identifie
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseTest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.DATABASE_TEST_REQUEST)
+@Schema(description = ModelDescriptions.DATABASE_TEST_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ValidIfExactlyOneNonNull(fields = { "existingDatabase", "database" })
 public class DatabaseTestV4Request implements Serializable {
 
     @Valid
-    @ApiModelProperty(DatabaseTest.EXISTING_REQUEST)
+    @Schema(description = DatabaseTest.EXISTING_REQUEST)
     private DatabaseV4Identifiers existingDatabase;
 
     @Valid
-    @ApiModelProperty(DatabaseTest.NEW_REQUEST)
+    @Schema(description = DatabaseTest.NEW_REQUEST)
     private DatabaseV4Request database;
 
     public DatabaseV4Identifiers getExistingDatabase() {

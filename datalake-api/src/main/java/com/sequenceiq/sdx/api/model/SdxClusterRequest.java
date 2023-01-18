@@ -1,22 +1,19 @@
 package com.sequenceiq.sdx.api.model;
 
 import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxClusterRequest extends SdxClusterRequestBase {
 
-    @ApiModelProperty(ModelDescriptions.RUNTIME_VERSION)
+    @Schema(description = ModelDescriptions.RUNTIME_VERSION)
     private String runtime;
 
-    @ApiModelProperty(ModelDescriptions.RECIPES)
+    @Schema(description = ModelDescriptions.RECIPES)
     private Set<SdxRecipe> recipes;
 
     public String getRuntime() {
@@ -37,9 +34,6 @@ public class SdxClusterRequest extends SdxClusterRequestBase {
 
     @Override
     public String toString() {
-        return "SdxClusterRequest{" +
-                "runtime='" + runtime + '\'' +
-                ", recipes=" + recipes +
-                "} " + super.toString();
+        return "SdxClusterRequest{" + "runtime='" + runtime + '\'' + ", recipes=" + recipes + "} " + super.toString();
     }
 }

@@ -22,80 +22,80 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.ServiceTypeV4Response
 import com.sequenceiq.cloudbreak.doc.ApiDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RetryAndMetrics
 @Path("/v4/custom_configurations")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/custom_configurations", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/custom_configurations")
 public interface CustomConfigurationsV4Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.GET_ALL, produces = MediaType.APPLICATION_JSON, nickname = "list",
-            notes = CUSTOM_CONFIGURATIONS_NOTES)
+    @Operation(summary =  ApiDescription.CustomConfigurationsOpDescription.GET_ALL, operationId ="list",
+            description =  CUSTOM_CONFIGURATIONS_NOTES)
     CustomConfigurationsV4Responses list();
 
     @GET
     @Path("/crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON, nickname = "getByCrn",
-            notes = CUSTOM_CONFIGURATIONS_NOTES)
+    @Operation(summary =  ApiDescription.CustomConfigurationsOpDescription.GET_BY_CRN, operationId ="getByCrn",
+            description =  CUSTOM_CONFIGURATIONS_NOTES)
     CustomConfigurationsV4Response getByCrn(@PathParam("crn") @NotNull String crn);
 
     @GET
     @Path("/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, nickname = "getByName",
-            notes = CUSTOM_CONFIGURATIONS_NOTES)
+    @Operation(summary =  ApiDescription.CustomConfigurationsOpDescription.GET_BY_NAME, operationId ="getByName",
+            description =  CUSTOM_CONFIGURATIONS_NOTES)
     CustomConfigurationsV4Response getByName(@PathParam("name") @NotNull String name);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, nickname = "post",
-            notes = CUSTOM_CONFIGURATIONS_NOTES)
+    @Operation(summary =  ApiDescription.CustomConfigurationsOpDescription.CREATE, operationId ="post",
+            description =  CUSTOM_CONFIGURATIONS_NOTES)
     CustomConfigurationsV4Response post(@Valid CustomConfigurationsV4Request request);
 
     @POST
     @Path("/name/{name}/clone")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.CLONE_BY_NAME, produces = MediaType.APPLICATION_JSON, nickname = "cloneByName",
-            notes = CUSTOM_CONFIGURATIONS_NOTES)
+    @Operation(summary =  ApiDescription.CustomConfigurationsOpDescription.CLONE_BY_NAME, operationId ="cloneByName",
+            description =  CUSTOM_CONFIGURATIONS_NOTES)
     CustomConfigurationsV4Response cloneByName(@PathParam("name") @NotNull String name, @Valid CloneCustomConfigurationsV4Request cloneCustomConfigsRequest);
 
     @POST
     @Path("/crn/{crn}/clone")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.CLONE_BY_CRN, produces = MediaType.APPLICATION_JSON, nickname = "cloneByCrn",
-            notes = CUSTOM_CONFIGURATIONS_NOTES)
+    @Operation(summary =  ApiDescription.CustomConfigurationsOpDescription.CLONE_BY_CRN, operationId ="cloneByCrn",
+            description =  CUSTOM_CONFIGURATIONS_NOTES)
     CustomConfigurationsV4Response cloneByCrn(@PathParam("crn") @NotNull String crn, @Valid CloneCustomConfigurationsV4Request cloneCustomConfigsRequest);
 
     @DELETE
     @Path("/crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON, nickname = "deleteByCrn",
-            notes = CUSTOM_CONFIGURATIONS_NOTES)
+    @Operation(summary =  ApiDescription.CustomConfigurationsOpDescription.DELETE_BY_CRN, operationId ="deleteByCrn",
+            description =  CUSTOM_CONFIGURATIONS_NOTES)
     CustomConfigurationsV4Response deleteByCrn(@PathParam("crn") @NotNull String crn);
 
     @DELETE
     @Path("/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, nickname = "deleteByName",
-            notes = CUSTOM_CONFIGURATIONS_NOTES)
+    @Operation(summary =  ApiDescription.CustomConfigurationsOpDescription.DELETE_BY_NAME, operationId ="deleteByName",
+            description =  CUSTOM_CONFIGURATIONS_NOTES)
     CustomConfigurationsV4Response deleteByName(@PathParam("name") @NotNull String name);
 
     @GET
     @Path("/service_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.GET_SERVICE_TYPES, produces = MediaType.APPLICATION_JSON,
-            nickname = "getServiceTypes")
+    @Operation(summary =  ApiDescription.CustomConfigurationsOpDescription.GET_SERVICE_TYPES,
+            operationId = "getServiceTypes")
     ServiceTypeV4Response getServiceTypes();
 
     @GET
     @Path("/role_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.GET_ROLE_TYPES, produces = MediaType.APPLICATION_JSON, nickname = "getRoleTypes")
+    @Operation(summary =  ApiDescription.CustomConfigurationsOpDescription.GET_ROLE_TYPES, operationId ="getRoleTypes")
     RoleTypeV4Response getRoleTypes();
 }

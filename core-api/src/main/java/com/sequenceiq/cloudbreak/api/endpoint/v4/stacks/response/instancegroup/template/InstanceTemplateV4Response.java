@@ -11,15 +11,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.t
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class InstanceTemplateV4Response extends InstanceTemplateV4Base {
 
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private Long id;
 
     private RootVolumeV4Response rootVolume;

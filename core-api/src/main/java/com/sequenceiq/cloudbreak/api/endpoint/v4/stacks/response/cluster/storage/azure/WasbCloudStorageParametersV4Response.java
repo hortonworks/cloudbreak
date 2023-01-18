@@ -8,18 +8,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage
 import com.sequenceiq.common.api.cloudstorage.old.validation.ValidWasbCloudStorageParameters;
 import com.sequenceiq.common.model.FileSystemType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidWasbCloudStorageParameters
 public class WasbCloudStorageParametersV4Response implements CloudStorageParametersV4Response {
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String accountKey;
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String accountName;
 
@@ -49,7 +48,7 @@ public class WasbCloudStorageParametersV4Response implements CloudStorageParamet
         this.secure = secure;
     }
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @Override
     public FileSystemType getType() {
         return FileSystemType.WASB;

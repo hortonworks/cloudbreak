@@ -10,27 +10,26 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.AwsDatabaseServerModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AwsDatabaseServerV4Parameters extends MappableBase {
 
     public static final String MULTI_AZ = "multiAZ";
 
-    @ApiModelProperty(AwsDatabaseServerModelDescriptions.BACKUP_RETENTION_PERIOD)
+    @Schema(description = AwsDatabaseServerModelDescriptions.BACKUP_RETENTION_PERIOD)
     private Integer backupRetentionPeriod;
 
-    @ApiModelProperty(AwsDatabaseServerModelDescriptions.ENGINE_VERSION)
+    @Schema(description = AwsDatabaseServerModelDescriptions.ENGINE_VERSION)
     private String engineVersion;
 
     // This is a String because of https://github.com/swagger-api/swagger-codegen/issues/7391
-    @ApiModelProperty(AwsDatabaseServerModelDescriptions.MULTI_AZ)
+    @Schema(description = AwsDatabaseServerModelDescriptions.MULTI_AZ)
     private String multiAZ;
 
-    @ApiModelProperty(AwsDatabaseServerModelDescriptions.STORAGE_TYPE)
+    @Schema(description = AwsDatabaseServerModelDescriptions.STORAGE_TYPE)
     private String storageType;
 
     public Integer getBackupRetentionPeriod() {
@@ -77,7 +76,7 @@ public class AwsDatabaseServerV4Parameters extends MappableBase {
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AWS;
     }

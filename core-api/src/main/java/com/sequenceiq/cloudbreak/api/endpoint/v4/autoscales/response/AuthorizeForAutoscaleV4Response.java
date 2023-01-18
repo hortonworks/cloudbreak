@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AuthorizeForAutoscaleV4Response {
 
-    @ApiModelProperty
+    @Schema
     private boolean success;
 
     public boolean isSuccess() {

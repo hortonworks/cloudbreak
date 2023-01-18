@@ -3,19 +3,17 @@ package com.sequenceiq.sdx.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRestoreResponse {
 
-    @ApiModelProperty(ModelDescriptions.OPERATION_ID)
+    @Schema(description = ModelDescriptions.OPERATION_ID)
     private String operationId;
 
-    @ApiModelProperty(ModelDescriptions.FLOW_IDENTIFIER)
+    @Schema(description = ModelDescriptions.FLOW_IDENTIFIER)
     private FlowIdentifier flowIdentifier;
 
     public SdxRestoreResponse() {
@@ -40,9 +38,6 @@ public class SdxRestoreResponse {
 
     @Override
     public String toString() {
-        return "SdxDatabaseRestoreResponse{" +
-                "FlowIdentifier= " + flowIdentifier.toString() +
-                "OperationId=" + operationId +
-                '}';
+        return "SdxDatabaseRestoreResponse{" + "FlowIdentifier= " + flowIdentifier.toString() + "OperationId=" + operationId + '}';
     }
 }

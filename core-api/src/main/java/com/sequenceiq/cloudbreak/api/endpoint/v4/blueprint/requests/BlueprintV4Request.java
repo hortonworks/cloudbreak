@@ -14,22 +14,21 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidDeprecated;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class BlueprintV4Request extends BlueprintV4Base {
 
-    @ApiModelProperty(value = ModelDescriptions.NAME)
+    @Schema(description = ModelDescriptions.NAME)
     @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon "
             + "and percentage character.")
     @Pattern(regexp = "^[^;\\/%]*$")
     private String name;
 
     @ValidDeprecated(message = "Submitting Cluster Template by URL is not allowed anymore. Please use text based submission.")
-    @ApiModelProperty(BlueprintModelDescription.URL)
+    @Schema(description = BlueprintModelDescription.URL)
     private String url;
 
     private Set<String> services = new HashSet<>();

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Sets;
 import com.sequenceiq.environment.api.GeneralCollectionV1Response;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("PolicyValidationErrorResponses")
+@Schema(name = "PolicyValidationErrorResponses")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PolicyValidationErrorResponses extends GeneralCollectionV1Response<PolicyValidationErrorResponse> {
 

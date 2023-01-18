@@ -9,10 +9,9 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NotNull
 public class CustomImageCatalogV4CreateRequest {
@@ -21,11 +20,11 @@ public class CustomImageCatalogV4CreateRequest {
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
-    @ApiModelProperty(value = NAME, required = true)
+    @Schema(description = NAME, required = true)
     private String name;
 
     @Size(max = 255, message = "The length of the description must be less than 255")
-    @ApiModelProperty(DESCRIPTION)
+    @Schema(description = DESCRIPTION)
     private String description;
 
     public String getName() {

@@ -16,48 +16,47 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnPa
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(subTypes = {CredentialRequest.class, CredentialResponse.class})
+@Schema(subTypes = {CredentialRequest.class, CredentialResponse.class})
 public abstract class CredentialBase implements Serializable {
 
     @NotNull
-    @ApiModelProperty(value = CredentialModelDescription.CLOUD_PLATFORM, required = true)
+    @Schema(description = CredentialModelDescription.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 
     @Valid
-    @ApiModelProperty(CredentialModelDescription.AWS_PARAMETERS)
+    @Schema(description = CredentialModelDescription.AWS_PARAMETERS)
     private AwsCredentialParameters aws;
 
     @Valid
-    @ApiModelProperty(CredentialModelDescription.GCP_PARAMETERS)
+    @Schema(description = CredentialModelDescription.GCP_PARAMETERS)
     private GcpCredentialParameters gcp;
 
     @Valid
-    @ApiModelProperty(CredentialModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Schema(description = CredentialModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
     @Deprecated
     private OpenstackParameters openstack;
 
     @Valid
-    @ApiModelProperty(CredentialModelDescription.YARN_PARAMETERS)
+    @Schema(description = CredentialModelDescription.YARN_PARAMETERS)
     private YarnParameters yarn;
 
     @Valid
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private MockParameters mock;
 
     @Size(max = 1000)
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(CredentialModelDescription.VERIFICATION_STATUS_TEXT)
+    @Schema(description = CredentialModelDescription.VERIFICATION_STATUS_TEXT)
     private String verificationStatusText;
 
-    @ApiModelProperty(CredentialModelDescription.VERIFY_PERMISSIONS)
+    @Schema(description = CredentialModelDescription.VERIFY_PERMISSIONS)
     private boolean verifyPermissions;
 
-    @ApiModelProperty(CredentialModelDescription.SKIP_ORG_POLICY_DECISIONS)
+    @Schema(description = CredentialModelDescription.SKIP_ORG_POLICY_DECISIONS)
     private boolean skipOrgPolicyDecisions;
 
     public MockParameters getMock() {

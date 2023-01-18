@@ -22,10 +22,9 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
@@ -51,7 +50,7 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     private Map<String, Object> inputs = new HashMap<>();
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     private Integer gatewayPort;
 
     private boolean enableLoadBalancer;

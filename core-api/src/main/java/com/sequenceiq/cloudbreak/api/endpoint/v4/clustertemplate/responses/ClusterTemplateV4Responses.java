@@ -5,9 +5,9 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralCollectionV4Response;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class ClusterTemplateV4Responses extends GeneralCollectionV4Response<ClusterTemplateV4Response> {
 
     public ClusterTemplateV4Responses(Set<ClusterTemplateV4Response> responses) {

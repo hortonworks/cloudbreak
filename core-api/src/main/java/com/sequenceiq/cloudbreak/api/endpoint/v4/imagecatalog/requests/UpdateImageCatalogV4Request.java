@@ -6,15 +6,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.base.ImageCatalogV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateImageCatalogV4Request extends ImageCatalogV4Base {
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN)
     private String crn;
 
     public String getCrn() {

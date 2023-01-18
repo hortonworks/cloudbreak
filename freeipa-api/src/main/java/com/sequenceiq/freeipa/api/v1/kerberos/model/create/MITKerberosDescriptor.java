@@ -6,28 +6,27 @@ import javax.validation.constraints.NotNull;
 import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigModelDescription;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("MITKerberosV1Descriptor")
+@Schema(name = "MITKerberosV1Descriptor")
 public class MITKerberosDescriptor extends KerberosDescriptorBase {
 
-    @ApiModelProperty(value = KerberosConfigModelDescription.KERBEROS_URL, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_URL, required = true)
     @NotNull
     @NotEmpty
     private String url;
 
-    @ApiModelProperty(value = KerberosConfigModelDescription.KERBEROS_ADMIN_URL, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_ADMIN_URL, required = true)
     @NotNull
     @NotEmpty
     private String adminUrl;
 
-    @ApiModelProperty(value = KerberosConfigModelDescription.KERBEROS_REALM, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_REALM, required = true)
     @NotNull
     @NotEmpty
     private String realm;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @Override
     public KerberosType getType() {
         return KerberosType.MIT;

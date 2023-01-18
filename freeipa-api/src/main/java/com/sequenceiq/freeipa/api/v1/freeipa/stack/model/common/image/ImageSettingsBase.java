@@ -4,17 +4,17 @@ import java.util.Objects;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.ImageSettingsModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class ImageSettingsBase {
 
-    @ApiModelProperty(ImageSettingsModelDescription.IMAGE_CATALOG)
+    @Schema(description = ImageSettingsModelDescription.IMAGE_CATALOG)
     private String catalog;
 
-    @ApiModelProperty(ImageSettingsModelDescription.IMAGE_ID)
+    @Schema(description = ImageSettingsModelDescription.IMAGE_ID)
     private String id;
 
-    @ApiModelProperty(ImageSettingsModelDescription.OS_TYPE)
+    @Schema(description = ImageSettingsModelDescription.OS_TYPE)
     private String os;
 
     public String getCatalog() {

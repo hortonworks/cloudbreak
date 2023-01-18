@@ -4,14 +4,13 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.periscope.doc.ApiDescription.TimeAlertJsonProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class TimeAlertValidationRequest implements Json {
 
     @NotNull
-    @ApiModelProperty(TimeAlertJsonProperties.CRON)
+    @Schema(description = TimeAlertJsonProperties.CRON)
     private String cronExpression;
 
     public String getCronExpression() {

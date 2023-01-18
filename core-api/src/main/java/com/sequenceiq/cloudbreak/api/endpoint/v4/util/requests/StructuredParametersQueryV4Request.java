@@ -8,31 +8,31 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UtilDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class StructuredParametersQueryV4Request {
 
     @NotNull
-    @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
+    @Schema(description = StackModelDescription.STACK_NAME, required = true)
     private String clusterName;
 
-    @ApiModelProperty(UtilDescription.ACCOUNT_NAME)
+    @Schema(description = UtilDescription.ACCOUNT_NAME)
     private String accountName;
 
     @NotNull
-    @ApiModelProperty(value = UtilDescription.STORAGE_NAME, required = true)
+    @Schema(description = UtilDescription.STORAGE_NAME, required = true)
     private String storageName;
 
     @NotNull
-    @ApiModelProperty(value = UtilDescription.FILESYTEM_TYPE, required = true)
+    @Schema(description = UtilDescription.FILESYTEM_TYPE, required = true)
     private String fileSystemType;
 
-    @ApiModelProperty(value = UtilDescription.ATTACHED_CLUSTER, required = true)
+    @Schema(description = UtilDescription.ATTACHED_CLUSTER, required = true)
     private boolean attachedCluster;
 
-    @ApiModelProperty(value = UtilDescription.SECURE)
+    @Schema(description = UtilDescription.SECURE)
     private boolean secure;
 
     public String getAccountName() {

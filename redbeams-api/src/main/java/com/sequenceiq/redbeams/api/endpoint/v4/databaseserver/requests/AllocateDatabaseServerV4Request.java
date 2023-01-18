@@ -24,10 +24,9 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DBStack;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST)
+@Schema(description = ModelDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
@@ -36,41 +35,41 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
     @Size(max = RDS_NAME_MAX_LENGTH, min = 5, message = "The length of the name must be between 5 to " + RDS_NAME_MAX_LENGTH + " inclusive")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and must start with an alphanumeric character")
-    @ApiModelProperty(value = DBStack.STACK_NAME)
+    @Schema(description = DBStack.STACK_NAME)
     private String name;
 
     @NotNull
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @ApiModelProperty(value = DatabaseServer.ENVIRONMENT_CRN, required = true)
+    @Schema(description = DatabaseServer.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
     @ValidCrn(resource = { CrnResourceDescriptor.ENVIRONMENT }, effect = DENY)
-    @ApiModelProperty(value = DatabaseServer.CLUSTER_CRN, required = true)
+    @Schema(description = DatabaseServer.CLUSTER_CRN, required = true)
     private String clusterCrn;
 
     @Valid
-    @ApiModelProperty(DBStack.NETWORK)
+    @Schema(description = DBStack.NETWORK)
     private NetworkV4StackRequest network;
 
     @NotNull
     @Valid
-    @ApiModelProperty(value = DBStack.DATABASE_SERVER, required = true)
+    @Schema(description = DBStack.DATABASE_SERVER, required = true)
     private DatabaseServerV4StackRequest databaseServer;
 
-    @ApiModelProperty(DBStack.AWS_PARAMETERS)
+    @Schema(description = DBStack.AWS_PARAMETERS)
     private AwsDBStackV4Parameters aws;
 
-    @ApiModelProperty(DBStack.AZURE_PARAMETERS)
+    @Schema(description = DBStack.AZURE_PARAMETERS)
     private AzureDBStackV4Parameters azure;
 
-    @ApiModelProperty(DBStack.AZURE_PARAMETERS)
+    @Schema(description = DBStack.AZURE_PARAMETERS)
     private GcpDBStackV4Parameters gcp;
 
-    @ApiModelProperty(DatabaseServer.SSL_CONFIG)
+    @Schema(description = DatabaseServer.SSL_CONFIG)
     private SslConfigV4Request sslConfig;
 
-    @ApiModelProperty(DatabaseServer.TAGS)
+    @Schema(description = DatabaseServer.TAGS)
     private Map<String, String> tags = new HashMap<>();
 
     public String getName() {

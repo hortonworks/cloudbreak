@@ -8,25 +8,24 @@ import javax.validation.constraints.Size;
 import com.sequenceiq.periscope.doc.ApiDescription.BaseAlertJsonProperties;
 import com.sequenceiq.periscope.doc.ApiDescription.TimeAlertJsonProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class TimeAlertRequest extends AbstractAlertJson {
 
-    @ApiModelProperty(TimeAlertJsonProperties.TIMEZONE)
+    @Schema(description = TimeAlertJsonProperties.TIMEZONE)
     @Size(max = 50)
     @NotBlank
     private String timeZone;
 
-    @ApiModelProperty(TimeAlertJsonProperties.CRON)
+    @Schema(description = TimeAlertJsonProperties.CRON)
     @NotBlank
     @Size(max = 100)
     private String cron;
 
     @Valid
     @NotNull
-    @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
+    @Schema(description = BaseAlertJsonProperties.SCALINGPOLICYID)
     private ScalingPolicyRequest scalingPolicy;
 
     public String getTimeZone() {

@@ -4,17 +4,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("HostKeytabV1Response")
+@Schema(name = "HostKeytabV1Response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class HostKeytabResponse {
 
-    @ApiModelProperty (KeytabModelDescription.PRINCIPAL)
+    @Schema(description = KeytabModelDescription.PRINCIPAL)
     private SecretResponse hostPrincipal;
 
-    @ApiModelProperty (KeytabModelDescription.KEYTAB)
+    @Schema(description = KeytabModelDescription.KEYTAB)
     private SecretResponse keytab;
 
     public SecretResponse getHostPrincipal() {

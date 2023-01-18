@@ -7,15 +7,14 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.consumption.api.doc.ConsumptionModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConsumptionExistenceResponse implements Serializable {
 
     @NotNull
-    @ApiModelProperty(value = ConsumptionModelDescription.EXISTS, required = true)
+    @Schema(description = ConsumptionModelDescription.EXISTS, required = true)
     private boolean exists;
 
     public boolean isExists() {

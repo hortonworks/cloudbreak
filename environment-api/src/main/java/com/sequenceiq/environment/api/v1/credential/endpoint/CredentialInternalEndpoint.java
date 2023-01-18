@@ -14,20 +14,20 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RetryAndMetrics
 @Path("/v1/internal/credentials")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/internal/credentials", description = CREDENTIAL_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v1/internal/credentials", description = CREDENTIAL_DESCRIPTION)
 public interface CredentialInternalEndpoint {
 
     @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "get internal Credential (includes the deleted credentials as well)", produces = MediaType.APPLICATION_JSON,
-            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getCredentialInternalByResourceCrnV1", httpMethod = "GET")
+    @Operation(summary =  "get internal Credential (includes the deleted credentials as well)",
+            description =  CredentialDescriptor.CREDENTIAL_NOTES, operationId ="getCredentialInternalByResourceCrnV1")
     CredentialResponse getByResourceCrn(@PathParam("crn") String credentialCrn);
 
 }

@@ -9,20 +9,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackVerticalScaleV4Request implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String group;
 
     @Valid
     @NotNull
-    @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
+    @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV4Request template;
 
     private Long stackId;

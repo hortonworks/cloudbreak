@@ -5,10 +5,10 @@ import java.util.Set;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class SynchronizeOperationRequestBase {
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ENVIRONMENT_CRNS)
+    @Schema(description = UserModelDescriptions.USERSYNC_ENVIRONMENT_CRNS)
     private Set<String> environments = new HashSet<>();
 
     public SynchronizeOperationRequestBase() {

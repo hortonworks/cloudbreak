@@ -23,69 +23,68 @@ import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterTemplateOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/v4/{workspaceId}/cluster_templates")
-@Api(value = "/v4/{workspaceId}/cluster_templates", description = ControllerDescription.CLUSTER_TEMPLATE_V4_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/{workspaceId}/cluster_templates", description = ControllerDescription.CLUSTER_TEMPLATE_V4_DESCRIPTION)
 public interface ClusterTemplateV4Endpoint {
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterTemplateOpDescription.CREATE_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = CLUSTER_TEMPLATE_NOTES,
-            nickname = "createClusterTemplateInWorkspace")
+    @Operation(summary =  ClusterTemplateOpDescription.CREATE_IN_WORKSPACE, description =  CLUSTER_TEMPLATE_NOTES,
+            operationId = "createClusterTemplateInWorkspace")
     ClusterTemplateV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid ClusterTemplateV4Request request);
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterTemplateOpDescription.LIST_BY_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = CLUSTER_TEMPLATE_NOTES,
-            nickname = "listClusterTemplatesByWorkspace")
+    @Operation(summary =  ClusterTemplateOpDescription.LIST_BY_WORKSPACE, description =  CLUSTER_TEMPLATE_NOTES,
+            operationId = "listClusterTemplatesByWorkspace")
     ClusterTemplateViewV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("env/{environmentCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterTemplateOpDescription.LIST_BY_ENV, produces = MediaType.APPLICATION_JSON,
-            notes = CLUSTER_TEMPLATE_NOTES, nickname = "listClusterTemplatesByEnv")
+    @Operation(summary =  ClusterTemplateOpDescription.LIST_BY_ENV,
+            description =  CLUSTER_TEMPLATE_NOTES, operationId ="listClusterTemplatesByEnv")
     ClusterTemplateViewV4Responses listByEnv(@PathParam("workspaceId") Long workspaceId, @PathParam("environmentCrn") String environmentCrn);
 
     @GET
     @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterTemplateOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = CLUSTER_TEMPLATE_NOTES,
-            nickname = "getClusterTemplateByNameInWorkspace")
+    @Operation(summary =  ClusterTemplateOpDescription.GET_BY_NAME_IN_WORKSPACE, description =  CLUSTER_TEMPLATE_NOTES,
+            operationId = "getClusterTemplateByNameInWorkspace")
     ClusterTemplateV4Response getByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @DELETE
     @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterTemplateOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = CLUSTER_TEMPLATE_NOTES,
-            nickname = "deleteClusterTemplateByNameInWorkspace")
+    @Operation(summary =  ClusterTemplateOpDescription.DELETE_BY_NAME_IN_WORKSPACE, description =  CLUSTER_TEMPLATE_NOTES,
+            operationId = "deleteClusterTemplateByNameInWorkspace")
     ClusterTemplateV4Response deleteByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterTemplateOpDescription.GET_BY_CRN_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = CLUSTER_TEMPLATE_NOTES,
-            nickname = "getClusterTemplateByCrnInWorkspace")
+    @Operation(summary =  ClusterTemplateOpDescription.GET_BY_CRN_IN_WORKSPACE, description =  CLUSTER_TEMPLATE_NOTES,
+            operationId = "getClusterTemplateByCrnInWorkspace")
     ClusterTemplateV4Response getByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
 
     @DELETE
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterTemplateOpDescription.DELETE_BY_CRN_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = CLUSTER_TEMPLATE_NOTES,
-            nickname = "deleteClusterTemplateByCrnInWorkspace")
+    @Operation(summary =  ClusterTemplateOpDescription.DELETE_BY_CRN_IN_WORKSPACE, description =  CLUSTER_TEMPLATE_NOTES,
+            operationId = "deleteClusterTemplateByCrnInWorkspace")
     ClusterTemplateV4Response deleteByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ClusterTemplateOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON,
-            notes = CLUSTER_TEMPLATE_NOTES, nickname = "deleteClusterTemplatesInWorkspace")
+    @Operation(summary =  ClusterTemplateOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE,
+            description =  CLUSTER_TEMPLATE_NOTES, operationId ="deleteClusterTemplatesInWorkspace")
     ClusterTemplateV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names,
             @QueryParam("environmentName") String environmentName, @QueryParam("environmentCrn") String environmentCrn);
 

@@ -7,11 +7,11 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AzureTargetGroupResponse implements Serializable {
 
-    @ApiModelProperty(StackModelDescription.AZURE_LB_AVAILABILITY_SET)
+    @Schema(description = StackModelDescription.AZURE_LB_AVAILABILITY_SET)
     @NotNull
     private List<String> availabilitySet;
 

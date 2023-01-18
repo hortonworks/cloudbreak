@@ -1,33 +1,29 @@
 package com.sequenceiq.sdx.api.model;
 
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxUpgradeResponse {
 
-    @ApiModelProperty(ModelDescriptions.CURRENT_IMAGE)
+    @Schema(description = ModelDescriptions.CURRENT_IMAGE)
     private ImageInfoV4Response current;
 
-    @ApiModelProperty(ModelDescriptions.UPGRADE_CANDIDATE_IMAGES)
+    @Schema(description = ModelDescriptions.UPGRADE_CANDIDATE_IMAGES)
     private List<ImageInfoV4Response> upgradeCandidates;
 
-    @ApiModelProperty(ModelDescriptions.UPGRADE_ERROR_REASON)
+    @Schema(description = ModelDescriptions.UPGRADE_ERROR_REASON)
     private String reason;
 
-    @ApiModelProperty(ModelDescriptions.FLOW_IDENTIFIER)
+    @Schema(description = ModelDescriptions.FLOW_IDENTIFIER)
     private FlowIdentifier flowIdentifier;
 
     public SdxUpgradeResponse() {
@@ -93,10 +89,6 @@ public class SdxUpgradeResponse {
 
     @Override
     public String toString() {
-        return "UpgradeOptionsV4Response{" +
-                "current=" + current +
-                ", upgradeCandidates=" + upgradeCandidates +
-                ", reason='" + reason + '\'' +
-                '}';
+        return "UpgradeOptionsV4Response{" + "current=" + current + ", upgradeCandidates=" + upgradeCandidates + ", reason='" + reason + '\'' + '}';
     }
 }

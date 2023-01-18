@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = RecipeModelDescription.DESCRIPTION)
+@Schema(description = RecipeModelDescription.DESCRIPTION)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class RecipeV4Request extends RecipeV4Base {

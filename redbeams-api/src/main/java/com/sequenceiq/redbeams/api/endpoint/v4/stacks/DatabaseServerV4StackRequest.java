@@ -5,15 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class DatabaseServerV4StackRequest extends DatabaseServerV4StackBase {
 
-    @ApiModelProperty(DatabaseServerModelDescriptions.SECURITY_GROUP)
+    @Schema(description = DatabaseServerModelDescriptions.SECURITY_GROUP)
     private SecurityGroupV4StackRequest securityGroup;
 
     public SecurityGroupV4StackRequest getSecurityGroup() {

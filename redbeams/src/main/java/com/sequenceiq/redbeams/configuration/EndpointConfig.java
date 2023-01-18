@@ -24,6 +24,8 @@ import com.sequenceiq.redbeams.controller.v4.operation.OperationV4Controller;
 import com.sequenceiq.redbeams.controller.v4.progress.ProgressV4Controller;
 import com.sequenceiq.redbeams.controller.v4.support.SupportController;
 
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+
 @ApplicationPath(RedbeamsApi.API_ROOT_CONTEXT)
 @Configuration
 public class EndpointConfig extends ResourceConfig {
@@ -50,6 +52,12 @@ public class EndpointConfig extends ResourceConfig {
         registerFilters();
         registerEndpoints();
         registerExceptionMappers();
+        registerOpenApi();
+    }
+
+    private void registerOpenApi() {
+        OpenApiResource openApiResource = new OpenApiResource();
+        register(openApiResource);
     }
 
     private void registerExceptionMappers() {
@@ -62,10 +70,6 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         CONTROLLERS.forEach(this::register);
-
-        register(io.swagger.jaxrs.listing.ApiListingResource.class);
-        register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
     }
 
     private void registerFilters() {

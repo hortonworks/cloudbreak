@@ -6,17 +6,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.base.SecurityAccessBase;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("SecurityAccessV1Response")
+@Schema(name = "SecurityAccessV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityAccessResponse extends SecurityAccessBase {
 
-    @ApiModelProperty(EnvironmentModelDescription.KNOX_SECURITY_GROUPS)
+    @Schema(description = EnvironmentModelDescription.KNOX_SECURITY_GROUPS)
     private Set<String> securityGroupIdsForKnox;
 
-    @ApiModelProperty(EnvironmentModelDescription.DEFAULT_SECURITY_GROUPS)
+    @Schema(description = EnvironmentModelDescription.DEFAULT_SECURITY_GROUPS)
     private Set<String> defaultSecurityGroupIds;
 
     public Set<String> getSecurityGroupIdsForKnox() {

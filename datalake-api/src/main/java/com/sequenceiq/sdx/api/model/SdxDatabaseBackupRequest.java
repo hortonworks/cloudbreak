@@ -2,32 +2,29 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.Collections;
 import java.util.List;
-
 import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel("SdxDatabaseBackupRequest")
+@Schema(name = "SdxDatabaseBackupRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxDatabaseBackupRequest {
+
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.BACKUP_ID, required = true)
+    @Schema(description = ModelDescriptions.BACKUP_ID, required = true)
     private String backupId;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.BACKUP_LOCATION, required = true)
+    @Schema(description = ModelDescriptions.BACKUP_LOCATION, required = true)
     private String backupLocation;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.CLOSE_CONNECTIONS, required = true)
+    @Schema(description = ModelDescriptions.CLOSE_CONNECTIONS, required = true)
     private boolean closeConnections;
 
-    @ApiModelProperty(value = ModelDescriptions.SKIP_DATABASE_NAMES, required = false)
+    @Schema(description = ModelDescriptions.SKIP_DATABASE_NAMES, required = false)
     private List<String> skipDatabaseNames;
 
     public String getBackupId() {
@@ -64,11 +61,6 @@ public class SdxDatabaseBackupRequest {
 
     @Override
     public String toString() {
-        return "SdxDatabaseBackupRequest{" +
-                "backupId='" + backupId + '\'' +
-                ", backupLocation='" + backupLocation + '\'' +
-                ", closeConnections=" + closeConnections +
-                ", skipDatabaseNames='" + skipDatabaseNames + '\'' +
-                '}';
+        return "SdxDatabaseBackupRequest{" + "backupId='" + backupId + '\'' + ", backupLocation='" + backupLocation + '\'' + ", closeConnections=" + closeConnections + ", skipDatabaseNames='" + skipDatabaseNames + '\'' + '}';
     }
 }

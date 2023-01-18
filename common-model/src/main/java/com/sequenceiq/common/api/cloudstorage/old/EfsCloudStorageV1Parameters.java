@@ -8,18 +8,17 @@ import com.sequenceiq.common.api.cloudstorage.old.validation.ValidS3CloudStorage
 import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
 import com.sequenceiq.common.model.FileSystemType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidS3CloudStorageParameters
 public class EfsCloudStorageV1Parameters implements FileSystemAwareCloudStorage {
 
-    @ApiModelProperty
+    @Schema
     @NotNull
     private String instanceProfile;
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     @Override
     public FileSystemType getType() {
         return FileSystemType.EFS;

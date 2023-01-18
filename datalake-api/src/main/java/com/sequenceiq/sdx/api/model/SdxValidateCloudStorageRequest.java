@@ -1,36 +1,33 @@
 package com.sequenceiq.sdx.api.model;
 
 import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxValidateCloudStorageRequest {
 
-    @ApiModelProperty(ModelDescriptions.DATA_ACCESS_ROLE)
     @NotNull
+    @Schema(description = ModelDescriptions.DATA_ACCESS_ROLE)
     private String dataAccessRole;
 
-    @ApiModelProperty(ModelDescriptions.RANGER_AUDIT_ROLE)
     @NotNull
+    @Schema(description = ModelDescriptions.RANGER_AUDIT_ROLE)
     private String rangerAuditRole;
 
-    @ApiModelProperty(ModelDescriptions.CREDENTIAL_CRN)
     @NotNull
+    @Schema(description = ModelDescriptions.CREDENTIAL_CRN)
     private String credentialCrn;
 
-    @ApiModelProperty(ModelDescriptions.CLOUD_STORAGE_DETAILS)
     @NotNull
+    @Schema(description = ModelDescriptions.CLOUD_STORAGE_DETAILS)
     private SdxCloudStorageRequest sdxCloudStorageRequest;
 
-    @ApiModelProperty(ModelDescriptions.CLUSTER_TEMPLATE_NAME)
     @NotNull
+    @Schema(description = ModelDescriptions.CLUSTER_TEMPLATE_NAME)
     private String blueprintName;
 
     public SdxValidateCloudStorageRequest() {
@@ -55,5 +52,4 @@ public class SdxValidateCloudStorageRequest {
     public String getRangerAuditRole() {
         return rangerAuditRole;
     }
-
 }

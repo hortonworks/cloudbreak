@@ -10,31 +10,28 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
 import org.springframework.validation.annotation.Validated;
-
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Validated
 @Path("/sdx")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/sdx", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/sdx")
 public interface SdxBackupEndpoint {
 
     @POST
     @Path("{name}/backupDatalake")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatalake")
+    @Operation(summary = "backup the datalake ", operationId ="backupDatalake")
     SdxBackupResponse backupDatalakeByName(@PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation,
             @QueryParam("backupName") String backupName,
@@ -46,46 +43,36 @@ public interface SdxBackupEndpoint {
     @POST
     @Path("{name}/backupDatalakeStatus")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup status of the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatalakeStatus")
-    SdxBackupStatusResponse backupDatalakeStatusByName(@PathParam("name") String name,
-            @QueryParam("backupId") String backupId,
-            @QueryParam("backupName") String backupName);
+    @Operation(summary = "backup status of the datalake ", operationId ="backupDatalakeStatus")
+    SdxBackupStatusResponse backupDatalakeStatusByName(@PathParam("name") String name, @QueryParam("backupId") String backupId, @QueryParam("backupName") String backupName);
 
     @GET
     @Path("{name}/getBackupDatalakeStatus")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup status of the datalake by datalake name ", produces = MediaType.APPLICATION_JSON,
-            nickname = "getBackupDatalakeStatus")
-    SdxBackupStatusResponse getBackupDatalakeStatus(@ApiParam(value = "required: datalake name", required = true) @PathParam("name") String name,
-            @ApiParam(value = "optional: datalake backup id", required = false) @QueryParam("backupId") String backupId,
-            @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
+    @Operation(summary = "backup status of the datalake by datalake name ", operationId ="getBackupDatalakeStatus")
+    SdxBackupStatusResponse getBackupDatalakeStatus(@Parameter(description = "required: datalake name", required = true) @PathParam("name") String name, @Parameter(description = "optional: datalake backup id", required = false) @QueryParam("backupId") String backupId, @Parameter(description = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
 
     @GET
     @Path("{name}/getDatalakeBackupId")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup Id of the datalake backup by datalake name ", produces = MediaType.APPLICATION_JSON, nickname = "getDatalakeBackupId")
-    String getDatalakeBackupId(@ApiParam(value = "required: datalake name", required = true) @PathParam("name") String name,
-            @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
+    @Operation(summary = "backup Id of the datalake backup by datalake name ", operationId ="getDatalakeBackupId")
+    String getDatalakeBackupId(@Parameter(description = "required: datalake name", required = true) @PathParam("name") String name, @Parameter(description = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
 
     @POST
     @Path("{name}/backupDatabase")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup the database backing datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatabase")
-    SdxDatabaseBackupResponse backupDatabaseByName(@PathParam("name") String name,
-            @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation);
+    @Operation(summary = "backup the database backing datalake ", operationId ="backupDatabase")
+    SdxDatabaseBackupResponse backupDatabaseByName(@PathParam("name") String name, @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation);
 
     @POST
     @Path("{name}/backupDatabaseInternal")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup the database with the option of closing or not closing connections to the database ", produces = MediaType.APPLICATION_JSON,
-        nickname = "backupDatabaseInternal")
-    SdxDatabaseBackupResponse backupDatabaseByNameInternal(@PathParam("name") String name,
-            @Valid @NotNull SdxDatabaseBackupRequest backupRequest);
+    @Operation(summary = "backup the database with the option of closing or not closing connections to the database ", operationId ="backupDatabaseInternal")
+    SdxDatabaseBackupResponse backupDatabaseByNameInternal(@PathParam("name") String name, @Valid @NotNull SdxDatabaseBackupRequest backupRequest);
 
     @GET
     @Path("{name}/backupDatabaseStatus")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get the status of datalake database backup operation", produces = MediaType.APPLICATION_JSON, nickname = "backupDatabaseStatus")
-    SdxDatabaseBackupStatusResponse getBackupDatabaseStatusByName(@PathParam("name") String name,
-            @QueryParam("operationId") String operationId);
+    @Operation(summary = "Get the status of datalake database backup operation", operationId ="backupDatabaseStatus")
+    SdxDatabaseBackupStatusResponse getBackupDatabaseStatusByName(@PathParam("name") String name, @QueryParam("operationId") String operationId);
 }

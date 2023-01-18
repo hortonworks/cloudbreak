@@ -7,27 +7,27 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.periscope.doc.ApiDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AutoscaleClusterHistoryActivity {
 
-    @ApiModelProperty(ApiDescription.HistoryJsonProperties.ALERTTYPE)
+    @Schema(description = ApiDescription.HistoryJsonProperties.ALERTTYPE)
     @JsonProperty("autoscalingType")
     private AlertType alertType;
 
-    @ApiModelProperty(ApiDescription.HistoryJsonProperties.ADJUSTMENTTYPE)
+    @Schema(description = ApiDescription.HistoryJsonProperties.ADJUSTMENTTYPE)
     private AdjustmentType adjustmentType;
 
-    @ApiModelProperty(ApiDescription.HistoryJsonProperties.ADJUSTMENT)
+    @Schema(description = ApiDescription.HistoryJsonProperties.ADJUSTMENT)
     private int adjustment;
 
-    @ApiModelProperty(ApiDescription.HistoryJsonProperties.HOSTGROUP)
+    @Schema(description = ApiDescription.HistoryJsonProperties.HOSTGROUP)
     private String hostGroup;
 
-    @ApiModelProperty(ApiDescription.HistoryJsonProperties.ORIGINALNODECOUNT)
+    @Schema(description = ApiDescription.HistoryJsonProperties.ORIGINALNODECOUNT)
     private int originalNodeCount;
 
-    @ApiModelProperty(ApiDescription.HistoryJsonProperties.PROPERTIES)
+    @Schema(description = ApiDescription.HistoryJsonProperties.PROPERTIES)
     private Map<String, String> properties = new HashMap<>();
 
     public String getAlertType() {

@@ -9,49 +9,48 @@ import javax.validation.constraints.NotNull;
 import com.sequenceiq.periscope.api.endpoint.validator.ValidLoadAlertConfiguration;
 import com.sequenceiq.periscope.doc.ApiDescription.LoadAlertJsonProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @ValidLoadAlertConfiguration
 public class LoadAlertConfigurationRequest implements Json {
-    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MIN_RESOUCE_VALUE)
+    @Schema(description = LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MIN_RESOUCE_VALUE)
     @Min(value = 0)
     @Digits(fraction = 0, integer = 3)
     @NotNull
     private @Valid Integer minResourceValue;
 
-    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_RESOUCE_VALUE)
+    @Schema(description = LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_RESOUCE_VALUE)
     @Min(value = 0)
     @Digits(fraction = 0, integer = 3)
     @NotNull
     private @Valid Integer maxResourceValue;
 
-    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_COOL_DOWN_MINS_VALUE)
+    @Schema(description = LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_COOL_DOWN_MINS_VALUE)
     @Min(value = 1)
     @Max(value = 180)
     @Digits(fraction = 0, integer = 3)
     private @Valid Integer coolDownMinutes;
 
-    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_SCALE_UP_COOL_DOWN_MINS_VALUE)
+    @Schema(description = LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_SCALE_UP_COOL_DOWN_MINS_VALUE)
     @Min(value = 1)
     @Max(value = 180)
     @Digits(fraction = 0, integer = 3)
     private @Valid Integer scaleUpCoolDownMinutes;
 
-    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_SCALE_DOWN_COOL_DOWN_MINS_VALUE)
+    @Schema(description = LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_SCALE_DOWN_COOL_DOWN_MINS_VALUE)
     @Min(value = 1)
     @Max(value = 180)
     @Digits(fraction = 0, integer = 3)
     private @Valid Integer scaleDownCoolDownMinutes;
 
-    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_SCALEUP_STEP_SIZE_VALUE)
+    @Schema(description = LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_SCALEUP_STEP_SIZE_VALUE)
     @Min(value = 2)
     @Max(value = 500)
     @Digits(fraction = 0, integer = 3)
     private @Valid Integer maxScaleUpStepSize;
 
-    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_SCALEDOWN_STEP_SIZE_VALUE)
+    @Schema(description = LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_SCALEDOWN_STEP_SIZE_VALUE)
     @Min(value = 2)
     @Max(value = 500)
     @Digits(fraction = 0, integer = 3)

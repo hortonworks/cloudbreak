@@ -8,29 +8,29 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class DistroXV1Base implements Serializable, CloudPlatformProvider {
 
     @ValidStackNameFormat
     @ValidStackNameLength
     @NotNull
-    @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
+    @Schema(description = StackModelDescription.STACK_NAME, required = true)
     private String name;
 
-    @ApiModelProperty(StackModelDescription.AWS_PARAMETERS)
+    @Schema(description = StackModelDescription.AWS_PARAMETERS)
     private AwsDistroXV1Parameters aws;
 
-    @ApiModelProperty(StackModelDescription.AZURE_PARAMETERS)
+    @Schema(description = StackModelDescription.AZURE_PARAMETERS)
     private AzureDistroXV1Parameters azure;
 
-    @ApiModelProperty
+    @Schema
     private GcpDistroXV1Parameters gcp;
 
-    @ApiModelProperty
+    @Schema
     private YarnDistroXV1Parameters yarn;
 
-    @ApiModelProperty
+    @Schema
     private Long timeToLive;
 
     public String getName() {

@@ -12,8 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.base.Strings;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public enum ApiFormatRules implements ApiFormatRule {
 
@@ -26,13 +25,13 @@ public enum ApiFormatRules implements ApiFormatRule {
             return validationError("missing @JsonIgnoreProperties(ignoreUnknown = true) annotation", this);
         }
     },
-    HAS_API_MODEL_ANNOTATION {
+    HAS_SCHEMA_ANNOTATION {
         @Override
         public Optional<String> apply(Class<?> modelClass) {
-            if (hasAnnotation(modelClass, ApiModel.class)) {
+            if (hasAnnotation(modelClass, Schema.class)) {
                 return Optional.empty();
             }
-            return validationError("missing @ApiModel annotation", this);
+            return validationError("missing @Schema annotation", this);
         }
     },
     HAS_JSON_INCLUDE_NON_NULL {
@@ -45,22 +44,22 @@ public enum ApiFormatRules implements ApiFormatRule {
             return validationError("missing @JsonInclude(Include.NON_NULL) annotation", this);
         }
     },
-    HAS_API_MODEL_PROPERTY_ON_FIELDS {
+    HAS_SCHEMA_PROPERTY_ON_FIELDS {
         @Override
         public Optional<String> apply(Class<?> modelClass) {
             List<String> fieldsWithoutAnnotation = new ArrayList<>();
             for (Field field : modelClass.getDeclaredFields()) {
 
                 if (!Modifier.isStatic(field.getModifiers())
-                        && (!field.isAnnotationPresent(ApiModelProperty.class)
-                        || Strings.isNullOrEmpty(field.getAnnotation(ApiModelProperty.class).value()))) {
+                        && (!field.isAnnotationPresent(Schema.class)
+                        || Strings.isNullOrEmpty(field.getAnnotation(Schema.class).description()))) {
                     fieldsWithoutAnnotation.add(field.getName());
                 }
             }
             if (fieldsWithoutAnnotation.isEmpty()) {
                 return Optional.empty();
             } else {
-                return validationError("missing @ApiModelProperty(<description>) annotation on properties: " + fieldsWithoutAnnotation, this);
+                return validationError("missing @Schema(description = <description>) annotation on properties: " + fieldsWithoutAnnotation, this);
             }
         }
     };

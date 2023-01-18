@@ -5,24 +5,22 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxBackupLocationValidationRequest {
 
     @ValidStackNameFormat
     @ValidStackNameLength
-    @ApiModelProperty(ModelDescriptions.DATA_LAKE_NAME)
+    @Schema(description = ModelDescriptions.DATA_LAKE_NAME)
     private String clusterName;
 
-    @ApiModelProperty(value = ModelDescriptions.BACKUP_LOCATION)
+    @Schema(description = ModelDescriptions.BACKUP_LOCATION)
     private String backupLocation;
 
-    @ApiModelProperty(value = ModelDescriptions.OPERATION_TYPE)
+    @Schema(description = ModelDescriptions.OPERATION_TYPE)
     private BackupOperationType operationType;
 
     public SdxBackupLocationValidationRequest() {
@@ -53,10 +51,6 @@ public class SdxBackupLocationValidationRequest {
 
     @Override
     public String toString() {
-        return "SdxBackupLocationValidationRequest{" +
-                "ClusterName='" + clusterName + '\'' +
-                "Operation Type ='" + operationType + '\'' +
-                "BackupLocation='" + backupLocation + '\'' +
-                '}';
+        return "SdxBackupLocationValidationRequest{" + "ClusterName='" + clusterName + '\'' + "Operation Type ='" + operationType + '\'' + "BackupLocation='" + backupLocation + '\'' + '}';
     }
 }

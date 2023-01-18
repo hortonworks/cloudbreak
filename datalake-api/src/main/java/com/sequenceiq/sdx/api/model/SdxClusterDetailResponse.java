@@ -3,7 +3,6 @@ package com.sequenceiq.sdx.api.model;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -11,41 +10,20 @@ import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxClusterDetailResponse extends SdxClusterResponse implements TaggedResponse {
 
-    @ApiModelProperty(ModelDescriptions.STACK_RESPONSE)
+    @Schema(description = ModelDescriptions.STACK_RESPONSE)
     private StackV4Response stackV4Response;
 
     public static SdxClusterDetailResponse create(SdxClusterResponse sdxClusterResponse, StackV4Response stackV4Response) {
         Builder builder = Builder.newSdxClusterDetailResponseBuilder();
         if (Objects.nonNull(sdxClusterResponse)) {
-            builder.withCrn(sdxClusterResponse.getCrn())
-                    .withName(sdxClusterResponse.getName())
-                    .withStatus(sdxClusterResponse.getStatus())
-                    .withStatusReason(sdxClusterResponse.getStatusReason())
-                    .withEnvironmentName(sdxClusterResponse.getEnvironmentName())
-                    .withEnvironmentCrn(sdxClusterResponse.getEnvironmentCrn())
-                    .withStackCrn(sdxClusterResponse.getStackCrn())
-                    .withClusterShape(sdxClusterResponse.getClusterShape())
-                    .withCloudStorageBaseLocation(sdxClusterResponse.getCloudStorageBaseLocation())
-                    .withCloudStorageFileSystemType(sdxClusterResponse.getCloudStorageFileSystemType())
-                    .withRuntime(sdxClusterResponse.getRuntime())
-                    .withRangerRazEnabled(sdxClusterResponse.getRangerRazEnabled())
-                    .withTags(sdxClusterResponse.getTags())
-                    .withCertExpirationState(sdxClusterResponse.getCertExpirationState())
-                    .withSdxClusterServiceVersion(sdxClusterResponse.getSdxClusterServiceVersion())
-                    .withDetached(sdxClusterResponse.isDetached())
-                    .withEnableMultiAz(sdxClusterResponse.isEnableMultiAz())
-                    .withDatabaseEngineVersion(sdxClusterResponse.getDatabaseEngineVersion())
-                    .withDatabaseServerCrn(sdxClusterResponse.getDatabaseServerCrn())
-                    .withCreated(sdxClusterResponse.getCreated());
+            builder.withCrn(sdxClusterResponse.getCrn()).withName(sdxClusterResponse.getName()).withStatus(sdxClusterResponse.getStatus()).withStatusReason(sdxClusterResponse.getStatusReason()).withEnvironmentName(sdxClusterResponse.getEnvironmentName()).withEnvironmentCrn(sdxClusterResponse.getEnvironmentCrn()).withStackCrn(sdxClusterResponse.getStackCrn()).withClusterShape(sdxClusterResponse.getClusterShape()).withCloudStorageBaseLocation(sdxClusterResponse.getCloudStorageBaseLocation()).withCloudStorageFileSystemType(sdxClusterResponse.getCloudStorageFileSystemType()).withRuntime(sdxClusterResponse.getRuntime()).withRangerRazEnabled(sdxClusterResponse.getRangerRazEnabled()).withTags(sdxClusterResponse.getTags()).withCertExpirationState(sdxClusterResponse.getCertExpirationState()).withSdxClusterServiceVersion(sdxClusterResponse.getSdxClusterServiceVersion()).withDetached(sdxClusterResponse.isDetached()).withEnableMultiAz(sdxClusterResponse.isEnableMultiAz()).withDatabaseEngineVersion(sdxClusterResponse.getDatabaseEngineVersion()).withDatabaseServerCrn(sdxClusterResponse.getDatabaseServerCrn()).withCreated(sdxClusterResponse.getCreated());
         }
         return builder.withStackV4Response(stackV4Response).build();
     }
@@ -60,18 +38,12 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
 
     @Override
     public String getTagValue(String key) {
-        return Optional.ofNullable(stackV4Response)
-                .map(stack -> stack.getTags())
-                .map(tags -> tags.getTagValue(key))
-                .orElse(null);
+        return Optional.ofNullable(stackV4Response).map(stack -> stack.getTags()).map(tags -> tags.getTagValue(key)).orElse(null);
     }
 
     @Override
     public String toString() {
-        return "SdxClusterDetailResponse{ " +
-                super.toString() +
-                " stackV4Response=" + stackV4Response +
-                '}';
+        return "SdxClusterDetailResponse{ " + super.toString() + " stackV4Response=" + stackV4Response + '}';
     }
 
     public static final class Builder {

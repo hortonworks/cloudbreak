@@ -2,19 +2,17 @@ package com.sequenceiq.sdx.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxDatabaseRestoreStatusResponse {
 
-    @ApiModelProperty(ModelDescriptions.OPERATION_STATUS)
+    @Schema(description = ModelDescriptions.OPERATION_STATUS)
     private DatalakeDatabaseDrStatus status;
 
-    @ApiModelProperty(ModelDescriptions.OPERATION_STATUS_REASON)
+    @Schema(description = ModelDescriptions.OPERATION_STATUS_REASON)
     private String statusReason;
 
     public SdxDatabaseRestoreStatusResponse(DatalakeDatabaseDrStatus status) {
@@ -24,7 +22,6 @@ public class SdxDatabaseRestoreStatusResponse {
     public SdxDatabaseRestoreStatusResponse(DatalakeDatabaseDrStatus status, String statusReason) {
         this.status = status;
         this.statusReason = statusReason;
-
     }
 
     public DatalakeDatabaseDrStatus getStatus() {

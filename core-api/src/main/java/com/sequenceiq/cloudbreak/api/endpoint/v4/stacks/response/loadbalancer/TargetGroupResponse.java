@@ -9,26 +9,26 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(Include.NON_NULL)
 public class TargetGroupResponse implements Serializable {
 
-    @ApiModelProperty(StackModelDescription.TARGET_GROUP_PORT)
+    @Schema(description = StackModelDescription.TARGET_GROUP_PORT)
     @NotNull
     private long port;
 
-    @ApiModelProperty(StackModelDescription.TARGET_GROUP_INSTANCES)
+    @Schema(description = StackModelDescription.TARGET_GROUP_INSTANCES)
     @NotNull
     private Set<String> targetInstances;
 
-    @ApiModelProperty(StackModelDescription.TARGET_GROUP_AWS)
+    @Schema(description = StackModelDescription.TARGET_GROUP_AWS)
     private AwsTargetGroupResponse awsResourceIds;
 
-    @ApiModelProperty(StackModelDescription.TARGET_GROUP_AZURE)
+    @Schema(description = StackModelDescription.TARGET_GROUP_AZURE)
     private AzureTargetGroupResponse azureResourceId;
 
-    @ApiModelProperty
+    @Schema
     private GcpTargetGroupResponse gcpResourceId;
 
     public long getPort() {

@@ -6,19 +6,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseV4BuildRequest implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = Database.DATABASE_REQUEST, required = true)
+    @Schema(description = Database.DATABASE_REQUEST, required = true)
     private DatabaseV4Request rdsConfigRequest;
 
     @NotNull
-    @ApiModelProperty(value = Database.DATABASE_REQUEST_CLUSTER_NAME, required = true)
+    @Schema(description = Database.DATABASE_REQUEST_CLUSTER_NAME, required = true)
     private String clusterName;
 
     public DatabaseV4Request getRdsConfigRequest() {

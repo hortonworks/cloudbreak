@@ -7,18 +7,17 @@ import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
 import com.sequenceiq.environment.api.v1.proxy.model.ProxyBase;
 import com.sequenceiq.environment.api.v1.proxy.validation.ValidProxyConfigAuthRequest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ProxyConfigDescription.DESCRIPTION)
+@Schema(description = ProxyConfigDescription.DESCRIPTION)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 @ValidProxyConfigAuthRequest
 public class ProxyRequest extends ProxyBase {
-    @ApiModelProperty(ProxyConfigDescription.USERNAME)
+    @Schema(description = ProxyConfigDescription.USERNAME)
     private String userName;
 
-    @ApiModelProperty(ProxyConfigDescription.PASSWORD)
+    @Schema(description = ProxyConfigDescription.PASSWORD)
     private String password;
 
     public String getUserName() {

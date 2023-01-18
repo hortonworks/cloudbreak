@@ -6,17 +6,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel("TestLdapConfigV1Request")
+@Schema(name = "TestLdapConfigV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TestLdapConfigRequest {
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENT_CRN)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN)
     private String environmentCrn;
 
     @Valid
-    @ApiModelProperty(LdapConfigModelDescription.VALIDATION_REQUEST)
+    @Schema(description = LdapConfigModelDescription.VALIDATION_REQUEST)
     private MinimalLdapConfigRequest ldap;
 
     public String getEnvironmentCrn() {

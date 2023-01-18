@@ -35,7 +35,7 @@ public class LiftieController {
     @Inject
     private LiftieExperienceStoreService liftieExperienceStoreService;
 
-    @GetMapping(value = "cluster", produces = MediaType.APPLICATION_JSON)
+    @GetMapping(value = "cluster")
     public ListClustersResponse listCluster(@RequestParam("env") String env, @RequestParam("tenant") String tenant) throws Exception {
         if (createDummyCluster) {
             LOGGER.debug("Creting dummy Liftie cluster if it does not exist in the local store");
@@ -44,7 +44,7 @@ public class LiftieController {
         return liftieExperienceStoreService.get(env);
     }
 
-    @DeleteMapping(value = "cluster/{id}", produces = MediaType.APPLICATION_JSON)
+    @DeleteMapping(value = "cluster/{id}")
     public DeleteClusterResponse deleteCluster(@PathVariable("id") String id) throws Exception {
         liftieExperienceStoreService.deleteById(id);
         DeleteClusterResponse deleteClusterResponse = new DeleteClusterResponse();
@@ -53,18 +53,18 @@ public class LiftieController {
         return deleteClusterResponse;
     }
 
-    @PostMapping(value = "mocksupport/{crn}", produces = MediaType.APPLICATION_JSON)
+    @PostMapping(value = "mocksupport/{crn}")
     public ListClustersResponse createNew(@PathVariable("crn") String env) throws Exception {
         liftieExperienceStoreService.create(env, ThreadBasedUserCrnProvider.getAccountId());
         return liftieExperienceStoreService.get(env);
     }
 
-    @PutMapping(value = "mocksupport/experience/{id}", produces = MediaType.APPLICATION_JSON)
+    @PutMapping(value = "mocksupport/experience/{id}")
     public LiftieClusterView putClusterId(@PathVariable("id") String id, @RequestBody LiftieClusterView clusterView) throws Exception {
         return liftieExperienceStoreService.changeById(id, clusterView);
     }
 
-    @PostMapping(value = "mocksupport/experience/{id}", produces = MediaType.APPLICATION_JSON, consumes = MediaType.TEXT_PLAIN)
+    @PostMapping(value = "mocksupport/experience/{id}", consumes = MediaType.TEXT_PLAIN)
     public LiftieClusterView putClusterId(@PathVariable("id") String id, @RequestBody String status) throws Exception {
         return liftieExperienceStoreService.setStatusById(id, status);
     }

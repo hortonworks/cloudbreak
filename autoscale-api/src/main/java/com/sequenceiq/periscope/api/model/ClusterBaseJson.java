@@ -4,24 +4,24 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class ClusterBaseJson implements Json {
 
-    @ApiModelProperty(ClusterJsonsProperties.HOST)
+    @Schema(description = ClusterJsonsProperties.HOST)
     private String host;
 
-    @ApiModelProperty(ClusterJsonsProperties.PORT)
+    @Schema(description = ClusterJsonsProperties.PORT)
     private String port;
 
-    @ApiModelProperty(ClusterJsonsProperties.USERNAME)
+    @Schema(description = ClusterJsonsProperties.USERNAME)
     private String user;
 
-    @ApiModelProperty(ClusterJsonsProperties.STACK_NAME)
+    @Schema(description = ClusterJsonsProperties.STACK_NAME)
     private String stackName;
 
     @NotNull
-    @ApiModelProperty(ClusterJsonsProperties.STACK_CRN)
+    @Schema(description = ClusterJsonsProperties.STACK_CRN)
     private String stackCrn;
 
     public ClusterBaseJson() {

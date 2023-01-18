@@ -7,16 +7,15 @@ import javax.validation.constraints.NotEmpty;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepairClusterNodeRequest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class ClusterRepairNodesV4Request {
 
-    @ApiModelProperty(RepairClusterNodeRequest.DELETE_VOLUMES)
+    @Schema(description = RepairClusterNodeRequest.DELETE_VOLUMES)
     private boolean deleteVolumes;
 
-    @ApiModelProperty(RepairClusterNodeRequest.IDS)
+    @Schema(description = RepairClusterNodeRequest.IDS)
     @NotEmpty(message = "Node ID list must not be empty")
     private List<String> ids;
 

@@ -9,27 +9,26 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceRe
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ImageCatalogDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonInclude(Include.NON_NULL)
 @NotNull
 public class ImageCatalogV4Response extends ImageCatalogV4Base {
 
-    @ApiModelProperty(value = ImageCatalogDescription.DEFAULT, required = true)
+    @Schema(description = ImageCatalogDescription.DEFAULT, required = true)
     private boolean usedAsDefault;
 
-    @ApiModelProperty(ImageCatalogDescription.IMAGE_RESPONSES)
+    @Schema(description = ImageCatalogDescription.IMAGE_RESPONSES)
     private ImagesV4Response images;
 
-    @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
+    @Schema(description = ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
 
-    @ApiModelProperty(ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN)
     private String crn;
 
-    @ApiModelProperty(ModelDescriptions.CREATED)
+    @Schema(description = ModelDescriptions.CREATED)
     private Long created;
 
     public Long getCreated() {

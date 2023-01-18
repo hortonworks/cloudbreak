@@ -6,13 +6,12 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 public class GcpCredentialPrerequisites extends CredentialBasePrerequisites implements Serializable {
 
-    @ApiModelProperty(value = GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND, required = true)
+    @Schema(description = GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND, required = true)
     private String creationCommand;
 
     public GcpCredentialPrerequisites() {

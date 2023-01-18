@@ -6,15 +6,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @NotNull
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseTestV4Response implements JsonEntity {
 
-    @ApiModelProperty(value = Database.DATABASE_CONNECTION_TEST_RESULT, required = true)
+    @Schema(description = Database.DATABASE_CONNECTION_TEST_RESULT, required = true)
     private String result;
 
     public DatabaseTestV4Response() {

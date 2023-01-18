@@ -9,24 +9,23 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UpgradeCcmDescription;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StackCcmUpgradeV4Response {
 
-    @ApiModelProperty(UpgradeCcmDescription.FLOW_ID)
+    @Schema(description = UpgradeCcmDescription.FLOW_ID)
     private FlowIdentifier flowIdentifier;
 
-    @ApiModelProperty(UpgradeCcmDescription.CCM_UPGRADE_RESPONSE_TYPE)
+    @Schema(description = UpgradeCcmDescription.CCM_UPGRADE_RESPONSE_TYPE)
     private CcmUpgradeResponseType responseType;
 
-    @ApiModelProperty(UpgradeCcmDescription.CCM_UPGRADE_ERROR_REASON)
+    @Schema(description = UpgradeCcmDescription.CCM_UPGRADE_ERROR_REASON)
     private String reason;
 
-    @ApiModelProperty(StackModelDescription.CRN)
+    @Schema(description = StackModelDescription.CRN)
     private String resourceCrn;
 
     public StackCcmUpgradeV4Response() {

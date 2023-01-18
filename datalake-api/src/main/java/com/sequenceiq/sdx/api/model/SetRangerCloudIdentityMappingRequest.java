@@ -2,29 +2,25 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.Map;
 import java.util.Objects;
-
 import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SetRangerCloudIdentityMappingRequest {
 
-    @ApiModelProperty(ModelDescriptions.AZURE_USER_MAPPING)
     @NotNull
+    @Schema(description = ModelDescriptions.AZURE_USER_MAPPING)
     private Map<String, String> azureUserMapping;
 
     /**
      * @deprecated azureGroupMapping is not supported
      */
     @Deprecated
-    @ApiModelProperty(ModelDescriptions.AZURE_GROUP_MAPPING)
+    @Schema(description = ModelDescriptions.AZURE_GROUP_MAPPING)
     private Map<String, String> azureGroupMapping;
 
     public Map<String, String> getAzureUserMapping() {
@@ -45,10 +41,7 @@ public class SetRangerCloudIdentityMappingRequest {
 
     @Override
     public String toString() {
-        return "SetRangerCloudIdentityMappingRequest{" +
-                "azureUserMapping=" + azureUserMapping +
-                ", azureGroupMapping=" + azureGroupMapping +
-                '}';
+        return "SetRangerCloudIdentityMappingRequest{" + "azureUserMapping=" + azureUserMapping + ", azureGroupMapping=" + azureGroupMapping + '}';
     }
 
     @Override
@@ -60,8 +53,7 @@ public class SetRangerCloudIdentityMappingRequest {
             return false;
         }
         SetRangerCloudIdentityMappingRequest that = (SetRangerCloudIdentityMappingRequest) o;
-        return Objects.equals(azureUserMapping, that.azureUserMapping) &&
-                Objects.equals(azureGroupMapping, that.azureGroupMapping);
+        return Objects.equals(azureUserMapping, that.azureUserMapping) && Objects.equals(azureGroupMapping, that.azureGroupMapping);
     }
 
     @Override

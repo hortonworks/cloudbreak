@@ -1,26 +1,23 @@
 package com.sequenceiq.sdx.api.model;
 
 import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RangerCloudIdentitySyncStatus {
 
-    @ApiModelProperty(ModelDescriptions.COMMAND_ID)
+    @Schema(description = ModelDescriptions.COMMAND_ID)
     private Long commandId;
 
-    @ApiModelProperty(ModelDescriptions.OPERATION_STATUS)
     @NotNull
+    @Schema(description = ModelDescriptions.OPERATION_STATUS)
     private RangerCloudIdentitySyncState state;
 
-    @ApiModelProperty(ModelDescriptions.OPERATION_STATUS_REASON)
+    @Schema(description = ModelDescriptions.OPERATION_STATUS_REASON)
     private String statusReason;
 
     public Long getCommandId() {
@@ -49,10 +46,6 @@ public class RangerCloudIdentitySyncStatus {
 
     @Override
     public String toString() {
-        return "RangerCloudIdentitySyncStatus{" +
-                ", commandId=" + commandId +
-                ", state=" + state +
-                ", statusReason='" + statusReason + '\'' +
-                '}';
+        return "RangerCloudIdentitySyncStatus{" + ", commandId=" + commandId + ", state=" + state + ", statusReason='" + statusReason + '\'' + '}';
     }
 }

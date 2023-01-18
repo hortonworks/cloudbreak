@@ -7,17 +7,17 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureNetworkV4Parameters;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.NetworkModelDescriptions;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class NetworkV4StackBase extends ProviderParametersBase {
 
-    @ApiModelProperty(NetworkModelDescriptions.AWS_PARAMETERS)
+    @Schema(description = NetworkModelDescriptions.AWS_PARAMETERS)
     private AwsNetworkV4Parameters aws;
 
-    @ApiModelProperty(NetworkModelDescriptions.AZURE_PARAMETERS)
+    @Schema(description = NetworkModelDescriptions.AZURE_PARAMETERS)
     private AzureNetworkV4Parameters azure;
 
-    @ApiModelProperty(NetworkModelDescriptions.GCP_PARAMETERS)
+    @Schema(description = NetworkModelDescriptions.GCP_PARAMETERS)
     private GcpNetworkV4Parameters gcp;
 
     @Override

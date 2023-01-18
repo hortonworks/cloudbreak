@@ -1,83 +1,80 @@
 package com.sequenceiq.sdx.api.model;
 
 import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxClusterResponse {
 
-    @ApiModelProperty(ModelDescriptions.DATA_LAKE_CRN)
+    @Schema(description = ModelDescriptions.DATA_LAKE_CRN)
     private String crn;
 
-    @ApiModelProperty(ModelDescriptions.DATA_LAKE_NAME)
+    @Schema(description = ModelDescriptions.DATA_LAKE_NAME)
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.CLUSTER_SHAPE)
+    @Schema(description = ModelDescriptions.CLUSTER_SHAPE)
     private SdxClusterShape clusterShape;
 
-    @ApiModelProperty(ModelDescriptions.DATA_LAKE_STATUS)
+    @Schema(description = ModelDescriptions.DATA_LAKE_STATUS)
     private SdxClusterStatusResponse status;
 
-    @ApiModelProperty(ModelDescriptions.DATA_LAKE_STATUS_REASON)
+    @Schema(description = ModelDescriptions.DATA_LAKE_STATUS_REASON)
     private String statusReason;
 
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENT_NAME)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_NAME)
     private String environmentName;
 
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENT_CRN)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN)
     private String environmentCrn;
 
-    @ApiModelProperty(ModelDescriptions.DATABASE_SERVER_CRN)
+    @Schema(description = ModelDescriptions.DATABASE_SERVER_CRN)
     private String databaseServerCrn;
 
-    @ApiModelProperty(ModelDescriptions.STACK_CRN)
+    @Schema(description = ModelDescriptions.STACK_CRN)
     private String stackCrn;
 
-    @ApiModelProperty(ModelDescriptions.CREATED)
+    @Schema(description = ModelDescriptions.CREATED)
     private Long created;
 
-    @ApiModelProperty(ModelDescriptions.CLOUD_STORAGE_BASE_LOCATION)
+    @Schema(description = ModelDescriptions.CLOUD_STORAGE_BASE_LOCATION)
     private String cloudStorageBaseLocation;
 
-    @ApiModelProperty(ModelDescriptions.CLOUD_STORAGE_FILE_SYSTEM_TYPE)
+    @Schema(description = ModelDescriptions.CLOUD_STORAGE_FILE_SYSTEM_TYPE)
     private FileSystemType cloudStorageFileSystemType;
 
-    @ApiModelProperty(ModelDescriptions.RUNTIME_VERSION)
+    @Schema(description = ModelDescriptions.RUNTIME_VERSION)
     private String runtime;
 
-    @ApiModelProperty(ModelDescriptions.FLOW_IDENTIFIER)
+    @Schema(description = ModelDescriptions.FLOW_IDENTIFIER)
     private FlowIdentifier flowIdentifier;
 
-    @ApiModelProperty(ModelDescriptions.RANGER_RAZ_ENABLED)
+    @Schema(description = ModelDescriptions.RANGER_RAZ_ENABLED)
     private boolean rangerRazEnabled;
 
-    @ApiModelProperty(ModelDescriptions.MULTI_AZ_ENABLED)
+    @Schema(description = ModelDescriptions.MULTI_AZ_ENABLED)
     private boolean enableMultiAz;
 
-    @ApiModelProperty(ModelDescriptions.TAGS)
+    @Schema(description = ModelDescriptions.TAGS)
     private Map<String, String> tags;
 
-    @ApiModelProperty(ClusterModelDescription.CERT_EXPIRATION)
+    @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
-    @ApiModelProperty(ModelDescriptions.DATA_LAKE_CLUSTER_SERVICE_VERSION)
+    @Schema(description = ModelDescriptions.DATA_LAKE_CLUSTER_SERVICE_VERSION)
     private String sdxClusterServiceVersion;
 
-    @ApiModelProperty(ModelDescriptions.DETACHED)
+    @Schema(description = ModelDescriptions.DETACHED)
     private boolean detached;
 
-    @ApiModelProperty(ModelDescriptions.DATABASE_ENGINE_VERSION)
+    @Schema(description = ModelDescriptions.DATABASE_ENGINE_VERSION)
     private String databaseEngineVersion;
 
     public String getCrn() {
@@ -250,28 +247,6 @@ public class SdxClusterResponse {
 
     @Override
     public String toString() {
-        return "SdxClusterResponse{" +
-                "crn='" + crn + '\'' +
-                ", name='" + name + '\'' +
-                ", clusterShape=" + clusterShape +
-                ", status=" + status +
-                ", statusReason='" + statusReason + '\'' +
-                ", environmentName='" + environmentName + '\'' +
-                ", environmentCrn='" + environmentCrn + '\'' +
-                ", databaseServerCrn='" + databaseServerCrn + '\'' +
-                ", stackCrn='" + stackCrn + '\'' +
-                ", created=" + created +
-                ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' +
-                ", cloudStorageFileSystemType=" + cloudStorageFileSystemType +
-                ", runtime='" + runtime + '\'' +
-                ", flowIdentifier=" + flowIdentifier +
-                ", rangerRazEnabled=" + rangerRazEnabled +
-                ", tags=" + tags +
-                ", certExpirationState=" + certExpirationState +
-                ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
-                ", Detached=" + detached +
-                ", enableMultiAz=" + enableMultiAz +
-                ", databaseEngineVersion=" + databaseEngineVersion +
-                '}';
+        return "SdxClusterResponse{" + "crn='" + crn + '\'' + ", name='" + name + '\'' + ", clusterShape=" + clusterShape + ", status=" + status + ", statusReason='" + statusReason + '\'' + ", environmentName='" + environmentName + '\'' + ", environmentCrn='" + environmentCrn + '\'' + ", databaseServerCrn='" + databaseServerCrn + '\'' + ", stackCrn='" + stackCrn + '\'' + ", created=" + created + ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' + ", cloudStorageFileSystemType=" + cloudStorageFileSystemType + ", runtime='" + runtime + '\'' + ", flowIdentifier=" + flowIdentifier + ", rangerRazEnabled=" + rangerRazEnabled + ", tags=" + tags + ", certExpirationState=" + certExpirationState + ", sdxClusterServiceVersion=" + sdxClusterServiceVersion + ", Detached=" + detached + ", enableMultiAz=" + enableMultiAz + ", databaseEngineVersion=" + databaseEngineVersion + '}';
     }
 }

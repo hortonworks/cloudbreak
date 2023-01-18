@@ -6,16 +6,16 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AttachedClusterInfoV4Response implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(ModelDescriptions.NAME)
+    @Schema(description = ModelDescriptions.NAME)
     private String name;
 
     public Long getId() {

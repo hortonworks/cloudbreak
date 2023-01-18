@@ -6,22 +6,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseV4Request extends DatabaseV4Base {
 
     @NotNull
-    @ApiModelProperty(value = Database.USERNAME, required = true)
+    @Schema(description = Database.USERNAME, required = true)
     private String connectionUserName;
 
     @NotNull
-    @ApiModelProperty(value = Database.PASSWORD, required = true)
+    @Schema(description = Database.PASSWORD, required = true)
     private String connectionPassword;
 
-    @ApiModelProperty(Database.ORACLE)
+    @Schema(description = Database.ORACLE)
     private OracleParameters oracle;
 
     public String getConnectionUserName() {

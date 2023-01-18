@@ -11,17 +11,17 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HostGroupViewV4Response implements JsonEntity {
-    @ApiModelProperty(ID)
+    @Schema(description = ID)
     private Long id;
 
-    @ApiModelProperty(value = NAME, required = true)
+    @Schema(description = NAME, required = true)
     private String name;
 
-    @ApiModelProperty(METADATA)
+    @Schema(description = METADATA)
     private Set<HostMetadataViewV4Response> metadata = new HashSet<>();
 
     public Long getId() {

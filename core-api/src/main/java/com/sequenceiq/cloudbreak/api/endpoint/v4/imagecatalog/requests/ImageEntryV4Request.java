@@ -11,10 +11,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ImageEntryV4Request {
@@ -23,23 +22,23 @@ public class ImageEntryV4Request {
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The ID can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ImageModelDescription.IMAGE_ID, required = true)
+    @Schema(description = ModelDescriptions.ImageModelDescription.IMAGE_ID, required = true)
     private String id;
 
     @Size(max = 48, min = 32, message = "The length of the ID must be between 32 and 48")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The ID can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ImageModelDescription.SOURCE_IMAGE_ID, required = true)
+    @Schema(description = ModelDescriptions.ImageModelDescription.SOURCE_IMAGE_ID, required = true)
     private String sourceId;
 
-    @ApiModelProperty(value = ModelDescriptions.ImageModelDescription.PARCEL_BASE_URL)
+    @Schema(description = ModelDescriptions.ImageModelDescription.PARCEL_BASE_URL)
     private String parcelBaseUrl;
 
-    @ApiModelProperty(value = ModelDescriptions.ImageModelDescription.IMAGE_TYPE)
+    @Schema(description = ModelDescriptions.ImageModelDescription.IMAGE_TYPE)
     private String imageType;
 
-    @ApiModelProperty(value = ModelDescriptions.ImageModelDescription.VMS_TO_REGIONS)
+    @Schema(description = ModelDescriptions.ImageModelDescription.VMS_TO_REGIONS)
     private Map<String, String> vmsToRegions = new HashMap<>();
 
     public String getId() {

@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.client.internal;
 
 public class SdxApiClientParams {
+
     private boolean restDebug;
 
     private boolean certificateValidation;

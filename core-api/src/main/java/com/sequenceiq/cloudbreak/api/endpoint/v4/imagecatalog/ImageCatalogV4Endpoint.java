@@ -29,94 +29,93 @@ import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ImageCatalogOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/v4/{workspaceId}/image_catalogs")
-@Api(value = "/v4/{workspaceId}/imagecatalogs", description = ControllerDescription.IMAGE_CATALOG_V4_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Tag(name = "/v4/{workspaceId}/imagecatalogs", description = ControllerDescription.IMAGE_CATALOG_V4_DESCRIPTION)
 public interface ImageCatalogV4Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.LIST_BY_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "listImageCatalogsByWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.LIST_BY_WORKSPACE, description =  IMAGE_CATALOG_NOTES,
+            operationId = "listImageCatalogsByWorkspace")
     ImageCatalogV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("custom") boolean customCatalogsOnly);
 
     @GET
     @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "getImageCatalogInWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.GET_BY_NAME_IN_WORKSPACE, description =  IMAGE_CATALOG_NOTES,
+            operationId = "getImageCatalogInWorkspace")
     ImageCatalogV4Response getByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("withImages") @DefaultValue("false") Boolean withImages);
 
     @GET
     @Path("name/{name}/internal")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "getImageCatalogInWorkspaceInternal")
+    @Operation(summary =  ImageCatalogOpDescription.GET_BY_NAME_IN_WORKSPACE_INTERNAL, description =  IMAGE_CATALOG_NOTES,
+            operationId = "getImageCatalogInWorkspaceInternal")
     ImageCatalogV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("withImages") @DefaultValue("false") Boolean withImages, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_BY_CRN_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "getImageCatalogByCrnInWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.GET_BY_CRN_IN_WORKSPACE, description =  IMAGE_CATALOG_NOTES,
+            operationId = "getImageCatalogByCrnInWorkspace")
     ImageCatalogV4Response getByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
             @QueryParam("withImages") @DefaultValue("false") Boolean withImages);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.CREATE_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "createImageCatalogInWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.CREATE_IN_WORKSPACE, description =  IMAGE_CATALOG_NOTES,
+            operationId = "createImageCatalogInWorkspace")
     ImageCatalogV4Response create(@PathParam("workspaceId") Long workspaceId, @Valid ImageCatalogV4Request request);
 
     @DELETE
     @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "deleteImageCatalogInWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.DELETE_BY_NAME_IN_WORKSPACE, description =  IMAGE_CATALOG_NOTES,
+            operationId = "deleteImageCatalogInWorkspace")
     ImageCatalogV4Response deleteByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @DELETE
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_CRN_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "deleteImageCatalogByCrnInWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.DELETE_BY_CRN_IN_WORKSPACE, description =  IMAGE_CATALOG_NOTES,
+            operationId = "deleteImageCatalogByCrnInWorkspace")
     ImageCatalogV4Response deleteByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "deleteImageCatalogsInWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, description =  IMAGE_CATALOG_NOTES,
+            operationId = "deleteImageCatalogsInWorkspace")
     ImageCatalogV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names);
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.PUT_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "updateImageCatalogInWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.PUT_BY_NAME, description =  IMAGE_CATALOG_NOTES,
+            operationId = "updateImageCatalogInWorkspace")
     ImageCatalogV4Response update(@PathParam("workspaceId") Long workspaceId, @Valid UpdateImageCatalogV4Request request);
 
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_BY_IMAGE_CATALOG_NAME, produces = MediaType.APPLICATION_JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getImageCatalogRequestFromNameInWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.GET_BY_IMAGE_CATALOG_NAME,
+            description =  IMAGE_CATALOG_NOTES, operationId ="getImageCatalogRequestFromNameInWorkspace")
     ImageCatalogV4Request getRequest(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("images")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES, produces = MediaType.APPLICATION_JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getImagesInWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.GET_IMAGES,
+            description =  IMAGE_CATALOG_NOTES, operationId ="getImagesInWorkspace")
     ImagesV4Response getImages(@PathParam("workspaceId") Long workspaceId,
             @QueryParam("stackName") String stackName,
             @QueryParam("platform") String platform,
@@ -127,8 +126,8 @@ public interface ImageCatalogV4Endpoint {
     @GET
     @Path("{name}/images")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_NAME, produces = MediaType.APPLICATION_JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getImagesByNameInWorkspace")
+    @Operation(summary =  ImageCatalogOpDescription.GET_IMAGES_BY_NAME,
+            description =  IMAGE_CATALOG_NOTES, operationId ="getImagesByNameInWorkspace")
     ImagesV4Response getImagesByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("stackName") String stackName,
             @QueryParam("platform") String platform,
@@ -139,40 +138,40 @@ public interface ImageCatalogV4Endpoint {
     @GET
     @Path("image")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_BY_ID, produces = MediaType.APPLICATION_JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getImageById")
+    @Operation(summary =  ImageCatalogOpDescription.GET_IMAGE_BY_ID,
+            description =  IMAGE_CATALOG_NOTES, operationId ="getImageById")
     ImagesV4Response getImageByImageId(@PathParam("workspaceId") Long workspaceId, @QueryParam("imageId") String imageId,
             @AccountId @QueryParam("accountId") String accountId) throws Exception;
 
     @GET
     @Path("{name}/image")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_BY_NAME_AND_ID, produces = MediaType.APPLICATION_JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getImageByNameAndId")
+    @Operation(summary =  ImageCatalogOpDescription.GET_IMAGE_BY_NAME_AND_ID,
+            description =  IMAGE_CATALOG_NOTES, operationId ="getImageByNameAndId")
     ImagesV4Response getImageByCatalogNameAndImageId(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("imageId") String imageId, @AccountId @QueryParam("accountId") String accountId) throws Exception;
 
     @GET
     @Path("{name}/singleimage")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_BY_NAME_AND_ID, produces = MediaType.APPLICATION_JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getSingleImageByNameAndId")
+    @Operation(summary =  ImageCatalogOpDescription.GET_IMAGE_BY_NAME_AND_ID,
+            description =  IMAGE_CATALOG_NOTES, operationId ="getSingleImageByNameAndId")
     ImageV4Response getSingleImageByCatalogNameAndImageId(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("imageId") String imageId) throws Exception;
 
     @GET
     @Path("image/{imageId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT_BY_ID, produces = MediaType.APPLICATION_JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getImageFromDefaultById")
+    @Operation(summary =  ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT_BY_ID,
+            description =  IMAGE_CATALOG_NOTES, operationId ="getImageFromDefaultById")
     ImageV4Response getImageFromDefaultById(@PathParam("workspaceId") Long workspaceId,
             @PathParam("imageId") String imageId) throws Exception;
 
     @GET
     @Path("image/type/{type}/provider/{provider}/runtime/{runtime}/govCloud/{govCloud}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT, produces = MediaType.APPLICATION_JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getImageFromDefaultWithRuntime")
+    @Operation(summary =  ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT,
+            description =  IMAGE_CATALOG_NOTES, operationId ="getImageFromDefaultWithRuntime")
     ImageV4Response getImageFromDefault(@PathParam("workspaceId") Long workspaceId,
             @PathParam("type") String type,
             @PathParam("provider") String provider,
@@ -182,8 +181,8 @@ public interface ImageCatalogV4Endpoint {
     @GET
     @Path("image/type/{type}/provider/{provider}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT, produces = MediaType.APPLICATION_JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getImageFromDefault")
+    @Operation(summary =  ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT,
+            description =  IMAGE_CATALOG_NOTES, operationId ="getImageFromDefault")
     ImageV4Response getImageFromDefault(@PathParam("workspaceId") Long workspaceId,
             @PathParam("type") String type,
             @PathParam("provider") String provider) throws Exception;
@@ -191,7 +190,7 @@ public interface ImageCatalogV4Endpoint {
     @GET
     @Path("default_runtime_versions")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.GET_DEFAULT_IMAGE_CATALOG_RUNTIME_VERSIONS, produces = MediaType.APPLICATION_JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getRuntimeVersionsFromDefault")
+    @Operation(summary =  ImageCatalogOpDescription.GET_DEFAULT_IMAGE_CATALOG_RUNTIME_VERSIONS,
+            description =  IMAGE_CATALOG_NOTES, operationId ="getRuntimeVersionsFromDefault")
     RuntimeVersionsV4Response getRuntimeVersionsFromDefault(@PathParam("workspaceId") Long workspaceId) throws Exception;
 }

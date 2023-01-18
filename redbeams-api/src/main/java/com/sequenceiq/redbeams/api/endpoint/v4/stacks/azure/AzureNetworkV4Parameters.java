@@ -10,17 +10,16 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.AzureNetworkModelDescription;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel
+@Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AzureNetworkV4Parameters extends MappableBase {
 
     private static final String SUBNETS = "subnets";
 
-    @ApiModelProperty(AzureNetworkModelDescription.SUBNETS)
+    @Schema(description = AzureNetworkModelDescription.SUBNETS)
     private String subnets;
 
     public String getSubnets() {
@@ -40,7 +39,7 @@ public class AzureNetworkV4Parameters extends MappableBase {
 
     @Override
     @JsonIgnore
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }

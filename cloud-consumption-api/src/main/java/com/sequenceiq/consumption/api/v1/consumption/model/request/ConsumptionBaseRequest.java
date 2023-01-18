@@ -11,29 +11,28 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.consumption.api.doc.ConsumptionModelDescription;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ResourceType;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(subTypes = StorageConsumptionRequest.class)
+@Schema(subTypes = StorageConsumptionRequest.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class ConsumptionBaseRequest implements Serializable {
 
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotNull
-    @ApiModelProperty(value = ConsumptionModelDescription.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ConsumptionModelDescription.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = ConsumptionModelDescription.MONITORED_RESOURCE_TYPE, required = true)
+    @Schema(description = ConsumptionModelDescription.MONITORED_RESOURCE_TYPE, required = true)
     private ResourceType monitoredResourceType;
 
     @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.DATAHUB})
     @NotNull
-    @ApiModelProperty(value = ConsumptionModelDescription.MONITORED_RESOURCE_CRN, required = true)
+    @Schema(description = ConsumptionModelDescription.MONITORED_RESOURCE_CRN, required = true)
     private String monitoredResourceCrn;
 
     @NotEmpty
-    @ApiModelProperty(value = ConsumptionModelDescription.MONITORED_RESOURCE_NAME, required = true)
+    @Schema(description = ConsumptionModelDescription.MONITORED_RESOURCE_NAME, required = true)
     private String monitoredResourceName;
 
     public String getEnvironmentCrn() {
