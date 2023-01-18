@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.aws.amazoncf.action;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -23,19 +24,24 @@ public class CfClientActions {
 
     private static final String CLOUDERA_ENVIRONMENT_RESOURCE_NAME = "Cloudera-Environment-Resource-Name";
 
+    private static final Set DO_NOT_LIST_CLOUDFORMATIONS_STATUSES = Set.of("DELETE_COMPLETE", "DELETE_IN_PROGRESS");
+
     @Inject
     private CfClient cfClient;
 
     public List<StackSummary> listCfStacksByName(String name) {
         AmazonCloudFormation client = cfClient.buildCfClient();
         return client.listStacks().getStackSummaries()
-                .stream().filter(stack -> stack.getStackName().startsWith(name)).collect(Collectors.toList());
+                .stream().filter(stack -> stack.getStackName().startsWith(name)
+                        && !DO_NOT_LIST_CLOUDFORMATIONS_STATUSES.contains(stack.getStackStatus())).collect(Collectors.toList());
     }
 
     public List<Stack> listCfStacksByTagsEnvironmentCrn(String crn) {
         AmazonCloudFormation client = cfClient.buildCfClient();
         return client.describeStacks().getStacks().stream().filter(
-                stack -> stack.getTags().stream().anyMatch(tag -> tag.getKey().equals(CLOUDERA_ENVIRONMENT_RESOURCE_NAME) && tag.getValue().equals(crn))
+                stack ->
+                        stack.getTags().stream().anyMatch(tag -> tag.getKey().equals(CLOUDERA_ENVIRONMENT_RESOURCE_NAME) && tag.getValue().equals(crn)
+                        && DO_NOT_LIST_CLOUDFORMATIONS_STATUSES.contains(stack.getStackStatus()))
         ).collect(Collectors.toList());
     }
 
