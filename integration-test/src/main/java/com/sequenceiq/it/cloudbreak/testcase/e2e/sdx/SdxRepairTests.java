@@ -95,7 +95,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 })
                 .awaitForDeletedInstancesOnProvider()
                 .await(SdxClusterStatusResponse.DELETED_ON_PROVIDER_SIDE,
-                        key(sdx).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.NODE_FAILURE)))
+                        key(sdx).withWaitForFlow(Boolean.FALSE)
+                                .withIgnoredStatues(Set.of(SdxClusterStatusResponse.NODE_FAILURE, SdxClusterStatusResponse.CLUSTER_UNREACHABLE)))
                 .when(sdxTestClient.repair(MASTER.getName(), IDBROKER.getName()), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS,
                         key(sdx).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.DELETED_ON_PROVIDER_SIDE)))
