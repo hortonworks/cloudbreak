@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 
 import static java.util.Collections.singletonMap;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,21 +22,21 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider.RedbeamsDbSslDetails;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class PostgresConfigService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedDatabaseConfigProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConfigService.class);
 
     private static final String POSTGRES_COMMON = "postgres-common";
 
@@ -53,16 +54,13 @@ public class PostgresConfigService {
     private RedbeamsDbServerConfigurer dbServerConfigurer;
 
     @Inject
-    private RedbeamsDbCertificateProvider dbCertificateProvider;
-
-    @Inject
     private EmbeddedDatabaseConfigProvider embeddedDatabaseConfigProvider;
 
     @Inject
-    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
+    private DatabaseSslService databaseSslService;
 
     @Inject
-    private ClusterService clusterService;
+    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
 
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto) {
         Map<String, Object> postgresConfig = initPostgresConfig(stackDto);
@@ -70,9 +68,9 @@ public class PostgresConfigService {
         if (stackDto.getCluster().getDbSslRootCertBundle() == null) {
             sslSaltConfig = getSslSaltConfigWhenRootCertNull(stackDto);
         } else {
-            sslSaltConfig = getSslSaltConfigWhenRotateRequired(stackDto);
+            sslSaltConfig = getSslSaltConfigWhenRootCertAlreadyInitialized(stackDto);
         }
-        if (sslSaltConfig != null && StringUtils.isNotEmpty(sslSaltConfig.getRootCertsBundle())) {
+        if (StringUtils.isNotBlank(sslSaltConfig.getRootCertsBundle())) {
             generateDatabaseSSLConfiguration(servicePillar, sslSaltConfig);
         }
 
@@ -82,27 +80,33 @@ public class PostgresConfigService {
         servicePillar.putAll(upgradeRdsBackupRestoreStateParamsProvider.createParamsForRdsBackupRestore(stackDto, ""));
     }
 
-    private SSLSaltConfig getSslSaltConfigWhenRotateRequired(StackDto stackDto) {
+    private SSLSaltConfig getSslSaltConfigWhenRootCertAlreadyInitialized(StackDto stackDto) {
         SSLSaltConfig sslSaltConfig = new SSLSaltConfig();
-        sslSaltConfig.setRootCertsBundle(stackDto.getCluster().getDbSslRootCertBundle());
-        sslSaltConfig.setSslEnabled(stackDto.getCluster().getDbSslEnabled());
+        ClusterView cluster = stackDto.getCluster();
+        String dbSslRootCertBundle = cluster.getDbSslRootCertBundle();
+        boolean dbSslEnabled = databaseSslService.isDbSslEnabledByClusterView(stackDto.getStack(), cluster);
+        LOGGER.info("Cluster.dbSslRootCertBundle is not null. Using SslDetails from Cluster: dbSslRootCertBundle='{}', dbSslEnabled={}", dbSslRootCertBundle,
+                dbSslEnabled);
+        sslSaltConfig.setRootCertsBundle(dbSslRootCertBundle);
+        sslSaltConfig.setSslEnabled(dbSslEnabled);
         sslSaltConfig.setRestartRequired(true);
         return sslSaltConfig;
     }
 
     private SSLSaltConfig getSslSaltConfigWhenRootCertNull(StackDto stackDto) {
         SSLSaltConfig sslSaltConfig = new SSLSaltConfig();
-        RedbeamsDbSslDetails sslDetails = dbCertificateProvider.getRelatedSslCerts(stackDto);
-        sslSaltConfig.setRootCertsBundle(clusterService.updateDbSslCert(stackDto.getCluster().getId(), sslDetails));
+        LOGGER.info("Cluster.dbSslRootCertBundle is null. Fetching SslDetails from DatabaseSslService");
+        DatabaseSslDetails sslDetails = databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stackDto);
+        LOGGER.info("Fetched SslDetails: {}", sslDetails);
+        sslSaltConfig.setRootCertsBundle(sslDetails.getSslCertBundle());
         sslSaltConfig.setSslEnabled(sslDetails.isSslEnabledForStack());
         sslSaltConfig.setRestartRequired(false);
         return sslSaltConfig;
     }
 
     private void generateDatabaseSSLConfiguration(Map<String, SaltPillarProperties> servicePillar, SSLSaltConfig sslSaltConfig) {
-        Map<String, Object> rootSslCertsMap = new HashMap<>();
-        rootSslCertsMap.putAll(sslSaltConfig.toMap());
-        rootSslCertsMap.put("ssl_certs_file_path", dbCertificateProvider.getSslCertsFilePath());
+        Map<String, Object> rootSslCertsMap = new HashMap<>(sslSaltConfig.toMap());
+        rootSslCertsMap.put("ssl_certs_file_path", databaseSslService.getSslCertsFilePath());
         servicePillar.put(POSTGRES_COMMON, new SaltPillarProperties("/postgresql/root-certs.sls",
                 singletonMap("postgres_root_certs", rootSslCertsMap)));
     }
@@ -139,8 +143,8 @@ public class PostgresConfigService {
         return postgresConfig;
     }
 
-    class SSLSaltConfig {
-        private String rootCertsBundle;
+    static class SSLSaltConfig {
+        private String rootCertsBundle = "";
 
         private boolean sslEnabled;
 
@@ -151,7 +155,7 @@ public class PostgresConfigService {
         }
 
         public void setRootCertsBundle(String rootCertsBundle) {
-            this.rootCertsBundle = rootCertsBundle;
+            this.rootCertsBundle = requireNonNull(rootCertsBundle);
         }
 
         public boolean isSslEnabled() {
@@ -162,16 +166,22 @@ public class PostgresConfigService {
             this.sslEnabled = sslEnabled;
         }
 
+        public boolean isRestartRequired() {
+            return restartRequired;
+        }
+
         public void setRestartRequired(boolean restartRequired) {
             this.restartRequired = restartRequired;
         }
 
         public Map<String, Object> toMap() {
+            // Note: The Salt logic expects "ssl_enabled" and "ssl_restart_required" both be represented as strings, not primitive booleans.
             return Map.of(
                     "ssl_certs", rootCertsBundle,
-                "ssl_restart_required", restartRequired,
-                "ssl_enabled", sslEnabled
+                    "ssl_restart_required", String.valueOf(restartRequired),
+                    "ssl_enabled", String.valueOf(sslEnabled)
             );
         }
     }
+
 }

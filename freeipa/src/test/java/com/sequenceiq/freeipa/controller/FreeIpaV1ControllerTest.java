@@ -64,6 +64,8 @@ class FreeIpaV1ControllerTest {
 
     private static final String INITIATOR_USER_CRN = "initiatorUserCrn";
 
+    private static final String ROOT_CERTIFICATE = "rootCertificate";
+
     @InjectMocks
     private FreeIpaV1Controller underTest;
 
@@ -223,8 +225,18 @@ class FreeIpaV1ControllerTest {
 
     @Test
     void getRootCertificate() throws Exception {
-        underTest.getRootCertificate(ENVIRONMENT_CRN);
-        verify(rootCertificateService, times(1)).getRootCertificate(ENVIRONMENT_CRN, ACCOUNT_ID);
+        when(rootCertificateService.getRootCertificate(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(ROOT_CERTIFICATE);
+
+        assertThat(underTest.getRootCertificate(ENVIRONMENT_CRN)).isEqualTo(ROOT_CERTIFICATE);
+    }
+
+    @Test
+    void getRootCertificateInternal() throws Exception {
+        when(rootCertificateService.getRootCertificate(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(ROOT_CERTIFICATE);
+
+        assertThat(underTest.getRootCertificateInternal(ENVIRONMENT_CRN, ACCOUNT_ID)).isEqualTo(ROOT_CERTIFICATE);
+
+        verify(crnService, never()).getCurrentAccountId();
     }
 
     @Test

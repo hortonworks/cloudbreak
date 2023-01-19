@@ -178,12 +178,44 @@ configure-max-connections:
       - service: start-postgresql
     - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_max_connections_configured
 
+{%- if postgres_data_on_attached_disk and postgresql.ssl_enabled == True %}
+
+/opt/salt/scripts/conf_pgsql_ssl.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: postgres
+    - mode: 750
+    - source: salt://postgresql/scripts/conf_pgsql_ssl.sh
+    - template: jinja
+    - context:
+        postgres_directory: {{ postgres_directory }}
+
+{{ postgres_scripts_executed_directory }}/pgsql_ssl_configured:
+  file.rename:
+    - makedirs: True
+    - source: {{ postgres_log_directory }}/pgsql_ssl_configured
+    - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
+
+configure-ssl:
+  cmd.run:
+    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/conf_pgsql_ssl.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
+    - require:
+      - file: /opt/salt/scripts/conf_pgsql_ssl.sh
+      - service: start-postgresql
+    - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_ssl_configured
+
+{%- endif %}
+
 /opt/salt/scripts/init_db.sh:
   file.managed:
     - makedirs: True
     - require:
       - cmd: configure-listen-address
       - cmd: configure-max-connections
+{%- if postgres_data_on_attached_disk and postgresql.ssl_enabled == True %}
+      - cmd: configure-ssl
+{%- endif %}
     - mode: 750
     - user: root
     - group: postgres
@@ -202,8 +234,14 @@ init-services-db:
     - unless: test -f {{ postgres_scripts_executed_directory }}/init-services-db-executed
     - require:
       - file: /opt/salt/scripts/init_db.sh
+{%- if postgres_data_on_attached_disk and postgresql.ssl_enabled == True %}
+      - file: {{ postgresql.root_certs_file }}
+{%- endif %}
       - cmd: configure-listen-address
       - cmd: configure-max-connections
+{%- if postgres_data_on_attached_disk and postgresql.ssl_enabled == True %}
+      - cmd: configure-ssl
+{%- endif %}
 
 restart-pgsql-if-reconfigured:
   service.running:
@@ -211,6 +249,9 @@ restart-pgsql-if-reconfigured:
     - watch:
       - cmd: configure-listen-address
       - cmd: configure-max-connections
+{%- if postgres_data_on_attached_disk and postgresql.ssl_enabled == True %}
+      - cmd: configure-ssl
+{%- endif %}
       - cmd: init-services-db
 
 {% endif %}

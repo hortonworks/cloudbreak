@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class RdsSslModeTest {
 
-    static Object[][] sslDataProvider() {
+    static Object[][] sslModeDataProvider() {
         return new Object[][]{
                 // testCaseName sslMode resultExpected
                 {"sslMode=null", null, false},
@@ -17,9 +17,23 @@ class RdsSslModeTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("sslDataProvider")
+    @MethodSource("sslModeDataProvider")
     void isEnabledTest(String testCaseName, RdsSslMode sslMode, boolean resultExpected) {
         assertThat(RdsSslMode.isEnabled(sslMode)).isEqualTo(resultExpected);
+    }
+
+    static Object[][] sslEnforcementDataProvider() {
+        return new Object[][]{
+                // sslEnforcementEnabled, resultExpected
+                {false, RdsSslMode.DISABLED},
+                {true, RdsSslMode.ENABLED},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("sslEnforcementDataProvider")
+    void fromBooleanTest(boolean sslEnforcementEnabled, RdsSslMode resultExpected) {
+        assertThat(RdsSslMode.fromBoolean(sslEnforcementEnabled)).isEqualTo(resultExpected);
     }
 
 }

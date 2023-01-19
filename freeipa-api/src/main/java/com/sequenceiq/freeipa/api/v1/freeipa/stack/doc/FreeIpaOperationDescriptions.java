@@ -13,6 +13,8 @@ public final class FreeIpaOperationDescriptions {
     public static final String LIST_BY_ACCOUNT = "List all FreeIPA stacks by account";
     public static final String INTERNAL_LIST_BY_ACCOUNT = "List all FreeIPA stacks by account using the internal actor";
     public static final String GET_ROOTCERTIFICATE_BY_ENVID = "Get FreeIPA root certificate by environment CRN";
+    public static final String INTERNAL_GET_ROOTCERTIFICATE_BY_ENVID_AND_ACCOUNTID =
+            "Get FreeIPA root certificate by environment CRN and account ID using the internal actor";
     public static final String DELETE_BY_ENVID = "Delete FreeIPA stack by environment CRN";
     public static final String CLEANUP = "Cleans out users, hosts and related DNS entries";
     public static final String INTERNAL_CLEANUP = "Cleans out users, hosts and related DNS entries using internal actor";

@@ -68,6 +68,18 @@ upgrade_postgresql_db:
     - require:
       - cmd: upgrade_postgresql_db
 
+{%- if postgresql.ssl_enabled == True %}
+
+{{ new_postgres_directory }}/certs:
+  file.copy:
+    - makedirs: True
+    - source: {{ original_postgres_directory}}/certs
+    - force: True
+    - require:
+      - cmd: upgrade_postgresql_db
+
+{%- endif %}
+
 remove_original_binaries:
   file.absent:
     - name: {{ original_postgres_binaries }}
