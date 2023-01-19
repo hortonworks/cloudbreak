@@ -354,5 +354,9 @@
   {
     "path": "/var/log/cdp-prometheus/cdp-prometheus.log",
     "label": "cdp-prometheus"
+  },
+  {
+    "path": "/var/log/sssd/*.log",
+    "label": "SSSD"
   }
 ]
