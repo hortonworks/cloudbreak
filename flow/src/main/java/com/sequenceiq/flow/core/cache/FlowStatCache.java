@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,7 @@ import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
-import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 
 @Component
 public class FlowStatCache {
@@ -35,14 +37,11 @@ public class FlowStatCache {
 
     private final Map<String, FlowStat> resourceCrnFlowChainStatCache = new ConcurrentHashMap<>();
 
-    private final PayloadContextProvider payloadContextProvider;
+    @Inject
+    private PayloadContextProvider payloadContextProvider;
 
-    private final FlowOperationStatisticsService flowOperationStatisticsService;
-
-    public FlowStatCache(FlowOperationStatisticsService flowOperationStatisticsService, PayloadContextProvider payloadContextProvider) {
-        this.flowOperationStatisticsService = flowOperationStatisticsService;
-        this.payloadContextProvider = payloadContextProvider;
-    }
+    @Inject
+    private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
     public void put(String flowId, String flowChainId, Long resourceId,
             String operationType, Class<? extends FlowConfiguration<?>> flowConfigType, boolean restored) {
@@ -89,7 +88,7 @@ public class FlowStatCache {
         if (flowIdStatCache.containsKey(flowId)) {
             FlowStat flowStat = flowIdStatCache.get(flowId);
             if (store && StringUtils.isBlank(flowStat.getFlowChainId())) {
-                flowOperationStatisticsService.save(flowStat);
+                flowOperationStatisticsPersister.save(flowStat);
             }
             PayloadContext payloadContext = flowStat.getPayloadContext();
             resourceCrnFlowStatCache.remove(payloadContext.getResourceCrn());
@@ -104,7 +103,7 @@ public class FlowStatCache {
         if (flowChainIdStatCache.containsKey(flowChainId)) {
             FlowStat flowStat = flowChainIdStatCache.get(flowChainId);
             if (store) {
-                flowOperationStatisticsService.save(flowStat);
+                flowOperationStatisticsPersister.save(flowStat);
             }
             PayloadContext payloadContext = flowStat.getPayloadContext();
             resourceCrnFlowChainStatCache.remove(payloadContext.getResourceCrn());

@@ -86,6 +86,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
@@ -411,6 +412,9 @@ class UpgradeCcmFlowIntegrationTest {
 
         @MockBean
         private HealthCheckService healthCheckService;
+
+        @MockBean
+        private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
         @Bean
         public io.opentracing.Tracer jaegerTracer() {

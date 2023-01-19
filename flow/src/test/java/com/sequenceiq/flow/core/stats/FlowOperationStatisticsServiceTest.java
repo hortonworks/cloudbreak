@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
 import com.sequenceiq.flow.api.model.operation.OperationType;
@@ -46,9 +45,6 @@ public class FlowOperationStatisticsServiceTest {
     private FlowOperationStatsRepository flowOperationStatsRepository;
 
     @Mock
-    private TransactionService transactionService;
-
-    @Mock
     private PayloadContextProvider payloadContextProvider;
 
     @Mock
@@ -60,7 +56,7 @@ public class FlowOperationStatisticsServiceTest {
     @BeforeEach
     public void setUp() {
         underTest = new FlowOperationStatisticsService(flowOperationStatsRepository, payloadContextProvider,
-                transactionService, flowProgressResponseConverter);
+                flowProgressResponseConverter);
     }
 
     @Test
