@@ -8,6 +8,8 @@ public class KafkaRoles {
 
     public static final String KAFKA_CONNECT = "KAFKA_CONNECT";
 
+    public static final String KAFKA_KRAFT = "KRAFT";
+
     private KafkaRoles() {
     }
 

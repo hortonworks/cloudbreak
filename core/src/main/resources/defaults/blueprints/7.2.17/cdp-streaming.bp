@@ -50,6 +50,11 @@
             "refName": "kafka-KAFKA_CONNECT-BASE",
             "roleType": "KAFKA_CONNECT",
             "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_KRAFT-BASE",
+            "roleType": "KRAFT",
+            "base": true
           }
         ]
       },
@@ -169,6 +174,14 @@
         "roleConfigGroupsRefNames": [
           "kafka-GATEWAY-BASE",
           "kafka-KAFKA_CONNECT-BASE"
+        ]
+      },
+      {
+        "refName": "kraft",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_KRAFT-BASE"
         ]
       }
     ]
