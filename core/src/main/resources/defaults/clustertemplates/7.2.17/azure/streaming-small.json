@@ -62,6 +62,25 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "recipeNames": []
+      },
+      {
+        "name": "kraft",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "Standard_LRS"
+            }
+          ],
+          "azure": {
+            "manageDisk": true
+          },
+          "instanceType": "Standard_D8_v3"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
       }
     ]
   }
