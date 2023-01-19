@@ -80,6 +80,7 @@ import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.user.UserPreferences;
 import com.sequenceiq.environment.user.UserPreferencesRepository;
 import com.sequenceiq.environment.user.UserPreferencesService;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 import com.sequenceiq.flow.repository.FlowLogRepository;
@@ -133,6 +134,9 @@ public class CredentialExperienceTest {
 
     @MockBean
     private PolicyValidationErrorResponseConverter policyValidationErrorResponseConverter;
+
+    @MockBean
+    private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;

@@ -9,9 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,15 +18,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.EvictingQueue;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.PayloadContextProvider;
-import com.sequenceiq.flow.core.cache.FlowStat;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowOperationStats;
 import com.sequenceiq.flow.repository.FlowOperationStatsRepository;
@@ -48,20 +43,15 @@ public class FlowOperationStatisticsService {
 
     private static final Integer DEFAULT_PROGRESS = -1;
 
-    private static final Integer MAX_FLOW_STAT_SIZE = 10;
-
     private final FlowOperationStatsRepository flowOperationStatsRepository;
-
-    private final TransactionService transactionService;
 
     private final PayloadContextProvider payloadContextProvider;
 
     private final FlowProgressResponseConverter flowProgressResponseConverter;
 
     public FlowOperationStatisticsService(FlowOperationStatsRepository flowOperationStatsRepository, PayloadContextProvider payloadContextProvider,
-            TransactionService transactionService, FlowProgressResponseConverter flowProgressResponseConverter) {
+            FlowProgressResponseConverter flowProgressResponseConverter) {
         this.flowOperationStatsRepository = flowOperationStatsRepository;
-        this.transactionService = transactionService;
         this.payloadContextProvider = payloadContextProvider;
         this.flowProgressResponseConverter = flowProgressResponseConverter;
     }
@@ -107,50 +97,6 @@ public class FlowOperationStatisticsService {
                 .withTypeOrderList(typeOrderList)
                 .withProgressFromHistory(progressFromHistory)
                 .build());
-    }
-
-    public synchronized void save(FlowStat flowStat) {
-        if (OperationType.UNKNOWN.equals(flowStat.getOperationType()) || flowStat.getPayloadContext() == null) {
-            return;
-        }
-        if (flowStat.isRestored()) {
-            LOGGER.debug("Flow was restored, so statistics won't be saved about that. (operation: {})", flowStat.getOperationType());
-            return;
-        }
-        try {
-            OperationType operationType = flowStat.getOperationType();
-            PayloadContext payloadContext = flowStat.getPayloadContext();
-            Optional<FlowOperationStats> flowOpStatOpt = flowOperationStatsRepository.findFirstByOperationTypeAndCloudPlatform(
-                    operationType, payloadContext.getCloudPlatform());
-            final FlowOperationStats flowOperationStats;
-            if (flowOpStatOpt.isPresent()) {
-                flowOperationStats = flowOpStatOpt.get();
-            } else {
-                flowOperationStats = new FlowOperationStats();
-                flowOperationStats.setOperationType(operationType);
-                flowOperationStats.setCloudPlatform(payloadContext.getCloudPlatform());
-            }
-            String durationHistory = flowOperationStats.getDurationHistory();
-            Queue<Double> durationHistoryQueue = EvictingQueue.create(MAX_FLOW_STAT_SIZE);
-            if (StringUtils.isNotBlank(durationHistory)) {
-                Splitter.on(",").splitToList(durationHistory)
-                        .forEach(
-                                s -> {
-                                    durationHistoryQueue.add(Double.parseDouble(s));
-                                }
-                        );
-            }
-            Double elapsedOperationTime = getRoundedTimeInSeconds(flowStat.getStartTime(), new Date().getTime());
-            durationHistoryQueue.add(elapsedOperationTime);
-            durationHistory = StringUtils.join(durationHistoryQueue.stream()
-                    .map(Object::toString).collect(Collectors.toList()), ",");
-            flowOperationStats.setDurationHistory(durationHistory);
-            transactionService.required(() -> flowOperationStatsRepository.save(flowOperationStats));
-        } catch (TransactionService.TransactionExecutionException e) {
-            LOGGER.warn("Cannot store flow operation statistics.", e);
-        } catch (Exception e) {
-            LOGGER.warn("Unexpected error happened during storing flow operation statistics", e);
-        }
     }
 
     private Integer getProgressFromHistory(Double expectedAvgTime, Long created) {

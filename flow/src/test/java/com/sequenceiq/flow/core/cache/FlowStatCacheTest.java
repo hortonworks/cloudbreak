@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.PayloadContextProvider;
-import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 
 @ExtendWith(MockitoExtension.class)
 public class FlowStatCacheTest {
@@ -50,12 +49,7 @@ public class FlowStatCacheTest {
     private PayloadContextProvider payloadContextProvider;
 
     @Mock
-    private FlowOperationStatisticsService flowOperationStatisticsService;
-
-    @BeforeEach
-    public void setUp() {
-        underTest = new FlowStatCache(flowOperationStatisticsService, payloadContextProvider);
-    }
+    private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
     @Test
     public void testPutFlow() {
