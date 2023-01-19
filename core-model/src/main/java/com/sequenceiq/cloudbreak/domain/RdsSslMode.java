@@ -7,4 +7,8 @@ public enum RdsSslMode {
     public static boolean isEnabled(RdsSslMode mode) {
         return ENABLED.equals(mode);
     }
+
+    public static RdsSslMode fromBoolean(boolean sslEnforcementEnabled) {
+        return sslEnforcementEnabled ? ENABLED : DISABLED;
+    }
 }

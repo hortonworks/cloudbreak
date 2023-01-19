@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
+import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
@@ -70,7 +71,6 @@ import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingSe
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
@@ -113,7 +113,7 @@ public class StackToTemplatePreparationObjectConverter {
     private PostgresConfigService postgresConfigService;
 
     @Inject
-    private RedbeamsDbCertificateProvider dbCertificateProvider;
+    private DatabaseSslService databaseSslService;
 
     @Inject
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
@@ -234,7 +234,7 @@ public class StackToTemplatePreparationObjectConverter {
 
             BlueprintView blueprintView = blueprintViewProvider.getBlueprintView(source.getBlueprint());
             Optional<String> version = Optional.ofNullable(blueprintView.getVersion());
-            String sslCertsFilePath = dbCertificateProvider.getSslCertsFilePath();
+            String sslCertsFilePath = databaseSslService.getSslCertsFilePath();
             Set<RdsConfigWithoutCluster> rdsConfigWithoutClusters = postgresConfigService.createRdsConfigIfNeeded(source);
             Set<RdsView> rdsViews = rdsConfigWithoutClusters.stream()
                     .map(e -> rdsViewProvider.getRdsView(e, sslCertsFilePath))

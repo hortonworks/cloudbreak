@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
+import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.validation.AllRoleTypes;
@@ -63,7 +63,7 @@ public class ClusterServicesRestartService {
     private PostgresConfigService postgresConfigService;
 
     @Inject
-    private RedbeamsDbCertificateProvider dbCertificateProvider;
+    private DatabaseSslService databaseSslService;
 
     @Inject
     private RdsViewProvider rdsViewProvider;
@@ -77,12 +77,9 @@ public class ClusterServicesRestartService {
                 clusterDataHub,
                 dlIsRebuild,
                 resizeEntitlementEnabled);
-        if (clusterDataHub &&
+        return clusterDataHub &&
                 dlIsRebuild &&
-                resizeEntitlementEnabled) {
-            return true;
-        }
-        return false;
+                resizeEntitlementEnabled;
     }
 
     public void refreshClusterOnStart(Stack stack, Stack datalakeStack, CmTemplateProcessor blueprintProcessor) throws CloudbreakException {
@@ -106,8 +103,9 @@ public class ClusterServicesRestartService {
 
     private void updateDatabaseConfiguration(Stack datalakeStack, Stack dataHubStack, String service, DatabaseType databaseType) {
         Cluster cluster = clusterService.getByIdWithLists(datalakeStack.getCluster().getId());
+        String databaseTypeString = databaseType.toString();
         Optional<RdsConfigWithoutCluster> rdsConfig = postgresConfigService.createRdsConfigIfNeeded(datalakeStack, cluster, databaseType)
-                .stream().filter(config -> config.getType().toLowerCase().equals(databaseType.toString().toLowerCase()))
+                .stream().filter(config -> config.getType().equalsIgnoreCase(databaseTypeString))
                 .findFirst();
         try {
             if (rdsConfig.isPresent()) {
@@ -122,8 +120,8 @@ public class ClusterServicesRestartService {
     }
 
     private Map<String, String> getRdsConfigMap(RdsConfigWithoutCluster rdsConfig) {
-        RdsView hiveRdsView = rdsViewProvider.getRdsView(rdsConfig, dbCertificateProvider.getSslCertsFilePath());
-        Map<String, String> configs = new HashMap<String, String>();
+        RdsView hiveRdsView = rdsViewProvider.getRdsView(rdsConfig, databaseSslService.getSslCertsFilePath());
+        Map<String, String> configs = new HashMap<>();
         configs.put(HIVE_METASTORE_DATABASE_HOST, hiveRdsView.getHost());
         configs.put(HIVE_METASTORE_DATABASE_NAME, hiveRdsView.getDatabaseName());
         configs.put(HIVE_METASTORE_DATABASE_PASSWORD, hiveRdsView.getConnectionPassword());

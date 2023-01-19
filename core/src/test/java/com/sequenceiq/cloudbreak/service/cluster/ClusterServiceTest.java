@@ -54,10 +54,10 @@ import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -150,7 +150,7 @@ class ClusterServiceTest {
             String name, HealthCheckResult healthCheckResult, InstanceStatus expectedInstanceStatus, String expectedStatusReason, int expectedCount) {
         when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.of("7.2.11"));
         StackDto stack = setupStack(STACK_ID);
-        setupClusterApi(stack, healthCheckResult, expectedStatusReason);
+        setupClusterApi(healthCheckResult, expectedStatusReason);
         setupInstanceMetadata(stack);
         ArgumentCaptor<InstanceMetadataView> captor = ArgumentCaptor.forClass(InstanceMetadataView.class);
 
@@ -207,8 +207,10 @@ class ClusterServiceTest {
 
     @Test
     void testUpdateDbSslCertWhenCertIsEmpty() {
-        RedbeamsDbCertificateProvider.RedbeamsDbSslDetails relatedCerts = new RedbeamsDbCertificateProvider.RedbeamsDbSslDetails(emptySet(), false);
-        underTest.updateDbSslCert(CLUSTER_ID, relatedCerts);
+        DatabaseSslDetails sslDetails = new DatabaseSslDetails(emptySet(), false);
+
+        underTest.updateDbSslCert(CLUSTER_ID, sslDetails);
+
         verify(repository).updateDbSslCert(CLUSTER_ID, "", false);
     }
 
@@ -217,8 +219,10 @@ class ClusterServiceTest {
         Set<String> certs = new LinkedHashSet<>();
         certs.add("cert1");
         certs.add("cert2");
-        RedbeamsDbCertificateProvider.RedbeamsDbSslDetails relatedCerts = new RedbeamsDbCertificateProvider.RedbeamsDbSslDetails(certs, false);
-        underTest.updateDbSslCert(CLUSTER_ID, relatedCerts);
+        DatabaseSslDetails sslDetails = new DatabaseSslDetails(certs, false);
+
+        underTest.updateDbSslCert(CLUSTER_ID, sslDetails);
+
         verify(repository).updateDbSslCert(CLUSTER_ID, "cert1\ncert2", false);
     }
 
@@ -227,8 +231,10 @@ class ClusterServiceTest {
         Set<String> certs = new LinkedHashSet<>();
         certs.add("cert1");
         certs.add("cert2");
-        RedbeamsDbCertificateProvider.RedbeamsDbSslDetails relatedCerts = new RedbeamsDbCertificateProvider.RedbeamsDbSslDetails(certs, true);
-        underTest.updateDbSslCert(CLUSTER_ID, relatedCerts);
+        DatabaseSslDetails sslDetails = new DatabaseSslDetails(certs, true);
+
+        underTest.updateDbSslCert(CLUSTER_ID, sslDetails);
+
         verify(repository).updateDbSslCert(CLUSTER_ID, "cert1\ncert2", true);
     }
 
@@ -279,7 +285,7 @@ class ClusterServiceTest {
         return instanceMetadata;
     }
 
-    private void setupClusterApi(StackDto stack, HealthCheckResult healthCheckResult, String statusReason) {
+    private void setupClusterApi(HealthCheckResult healthCheckResult, String statusReason) {
         ClusterApi connector = mock(ClusterApi.class);
         ClusterStatusService clusterStatusService = mock(ClusterStatusService.class);
         when(clusterStatusService.isClusterManagerRunning()).thenReturn(true);

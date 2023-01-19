@@ -6,30 +6,63 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class EmbeddedDatabaseService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedDatabaseService.class);
+
+    private static final String SSL_ENFORCEMENT_MIN_RUNTIME_VERSION = "7.2.2";
+
     @Inject
     private CloudParameterCache cloudParameterCache;
 
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Inject
+    private BlueprintService blueprintService;
+
     public boolean isEmbeddedDatabaseOnAttachedDiskEnabled(StackDtoDelegate stack, ClusterView cluster) {
-        DatabaseAvailabilityType externalDatabase = ObjectUtils.defaultIfNull(stack.getExternalDatabaseCreationType(), DatabaseAvailabilityType.NONE);
+        return isEmbeddedDatabaseOnAttachedDiskEnabledInternal(stack.getExternalDatabaseCreationType(), stack.getCloudPlatform(), cluster);
+    }
+
+    boolean isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(StackView stack, ClusterView cluster) {
+        return isEmbeddedDatabaseOnAttachedDiskEnabledInternal(stack.getExternalDatabaseCreationType(), stack.getCloudPlatform(), cluster);
+    }
+
+    private boolean isEmbeddedDatabaseOnAttachedDiskEnabledInternal(DatabaseAvailabilityType externalDatabaseCreationType, String cloudPlatform,
+            ClusterView cluster) {
+        DatabaseAvailabilityType externalDatabase = ObjectUtils.defaultIfNull(externalDatabaseCreationType, DatabaseAvailabilityType.NONE);
         String databaseCrn = cluster == null ? "" : cluster.getDatabaseServerCrn();
         return DatabaseAvailabilityType.NONE == externalDatabase
                 && StringUtils.isEmpty(databaseCrn)
-                && cloudParameterCache.isVolumeAttachmentSupported(stack.getCloudPlatform());
+                && cloudParameterCache.isVolumeAttachmentSupported(cloudPlatform);
     }
 
     public boolean isAttachedDiskForEmbeddedDatabaseCreated(StackDto stack) {
@@ -42,10 +75,51 @@ public class EmbeddedDatabaseService {
         return cluster.getEmbeddedDatabaseOnAttachedDisk() && calculateVolumeCountOnGatewayGroup(gatewayGroup.map(InstanceGroupView::getTemplate)) > 0;
     }
 
+    public boolean isSslEnforcementForEmbeddedDatabaseEnabled(StackView stackView, ClusterView clusterView) {
+        String accountId = Crn.safeFromString(stackView.getResourceCrn()).getAccountId();
+        StackType stackType = stackView.getType();
+        boolean sslEnforcementEnabled = false;
+        if (stackType == StackType.DATALAKE) {
+            sslEnforcementEnabled = entitlementService.databaseWireEncryptionEnabled(accountId);
+        } else if (stackType == StackType.WORKLOAD) {
+            sslEnforcementEnabled = entitlementService.databaseWireEncryptionDatahubEnabled(accountId);
+        }
+        String runtime = getRuntime(clusterView);
+        boolean response = sslEnforcementEnabled && isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stackView, clusterView) &&
+                isSslEnforcementSupportedForRuntime(runtime);
+        LOGGER.info("Embedded DB SSL enforcement is {} for runtime version {}", response ? "enabled" : "disabled", runtime);
+        return response;
+    }
+
+    private String getRuntime(ClusterView clusterView) {
+        String runtime = null;
+        Optional<String> blueprintTextOpt = blueprintService.getByClusterId(clusterView.getId()).map(Blueprint::getBlueprintText);
+        if (blueprintTextOpt.isPresent()) {
+            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintTextOpt.get());
+            runtime = cmTemplateProcessor.getStackVersion();
+            LOGGER.info("Blueprint text is available for stack, found runtime version '{}'", runtime);
+        } else {
+            LOGGER.warn("Blueprint text is unavailable for stack, thus runtime version cannot be determined.");
+        }
+        return runtime;
+    }
+
+    private boolean isSslEnforcementSupportedForRuntime(String runtime) {
+        if (StringUtils.isBlank(runtime)) {
+            // While this may happen for custom data lakes, it is not possible for DH clusters
+            LOGGER.info("Runtime version is NOT specified, embedded DB SSL enforcement is NOT permitted");
+            return false;
+        }
+        boolean permitted = CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(() -> runtime, () -> SSL_ENFORCEMENT_MIN_RUNTIME_VERSION);
+        LOGGER.info("Embedded DB SSL enforcement {} permitted for runtime version {}", permitted ? "is" : "is NOT", runtime);
+        return permitted;
+    }
+
     private int calculateVolumeCountOnGatewayGroup(Optional<Template> gatewayGroupTemplate) {
         Template template = gatewayGroupTemplate.orElse(null);
         return template == null ? 0 : template.getVolumeTemplates().stream()
                 .filter(volumeTemplate -> volumeTemplate.getUsageType() == VolumeUsageType.DATABASE)
                 .mapToInt(VolumeTemplate::getVolumeCount).sum();
     }
+
 }

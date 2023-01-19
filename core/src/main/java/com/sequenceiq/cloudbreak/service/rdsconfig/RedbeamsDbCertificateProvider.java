@@ -7,12 +7,12 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -29,43 +29,35 @@ public class RedbeamsDbCertificateProvider {
 
     private final DatalakeService datalakeService;
 
-    private final String certsPath;
-
-    public RedbeamsDbCertificateProvider(RedbeamsDbServerConfigurer dbServerConfigurer,
-            DatalakeService datalakeService, @Value("${cb.externaldatabase.ssl.rootcerts.path:}") String certsPath) {
+    public RedbeamsDbCertificateProvider(RedbeamsDbServerConfigurer dbServerConfigurer, DatalakeService datalakeService) {
         this.dbServerConfigurer = dbServerConfigurer;
         this.datalakeService = datalakeService;
-        this.certsPath = certsPath;
     }
 
-    public String getSslCertsFilePath() {
-        return certsPath;
-    }
-
-    public RedbeamsDbSslDetails getRelatedSslCerts(StackDto stackDto) {
+    public DatabaseSslDetails getRelatedSslCerts(StackDto stackDto) {
         Set<String> relatedSslCerts = new HashSet<>();
-        Set<String> sslCertsForStack = new HashSet<>();
-        getDatalakeDatabaseRootCerts(stackDto.getStack(), relatedSslCerts);
+        StackView stack = stackDto.getStack();
+        getDatalakeDatabaseRootCerts(stack, relatedSslCerts);
         ClusterView cluster = stackDto.getCluster();
-        if (dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
-            sslCertsForStack = getDatabaseRootCerts(cluster.getName(), cluster.getDatabaseServerCrn(), stackDto.getStack().getResourceCrn());
-            relatedSslCerts.addAll(sslCertsForStack);
-        }
+        Set<String> sslCertsForStack = getDatabaseRootCerts(cluster.getName(), cluster.getDatabaseServerCrn(), stack.getResourceCrn());
+        relatedSslCerts.addAll(sslCertsForStack);
         // Note: When stackDto is a DH, relatedSslCerts is the union of DL + DH certs,
         // and sslEnabledForStack is purely determined by the presence of DH certs.
-        return new RedbeamsDbSslDetails(relatedSslCerts, !sslCertsForStack.isEmpty());
+        return new DatabaseSslDetails(relatedSslCerts, !sslCertsForStack.isEmpty());
     }
 
     private void getDatalakeDatabaseRootCerts(StackView stack, Set<String> result) {
         if (StackType.WORKLOAD.equals(stack.getType())) {
             Optional<Stack> datalakeStack = datalakeService.getDatalakeStackByDatahubStack(stack);
-            LOGGER.debug("Gathering datalake and its database if exists for the cluster");
+            LOGGER.debug("Gathering datalake and its database if exists for the datahub cluster");
             if (datalakeStack.isPresent()) {
                 Cluster dataLakeCluster = datalakeStack.get().getCluster();
                 result.addAll(getDatabaseRootCerts(dataLakeCluster.getName(), dataLakeCluster.getDatabaseServerCrn(), datalakeStack.get().getResourceCrn()));
             } else {
-                LOGGER.info("There is no datalake resource could be found for the cluster.");
+                LOGGER.warn("No datalake resource could be found for the datahub cluster");
             }
+        } else {
+            LOGGER.debug("Stack is not a datahub cluster");
         }
     }
 
@@ -98,24 +90,5 @@ public class RedbeamsDbCertificateProvider {
             LOGGER.info("No remote database is configured for cluster(crn:'{}', name: '{}')", stackResourceCrn, clusterName);
         }
         return result;
-    }
-
-    public static class RedbeamsDbSslDetails {
-        private final Set<String> sslCerts;
-
-        private final boolean sslEnabledForStack;
-
-        public RedbeamsDbSslDetails(Set<String> sslCerts, boolean sslEnabledForStack) {
-            this.sslCerts = sslCerts;
-            this.sslEnabledForStack = sslEnabledForStack;
-        }
-
-        public Set<String> getSslCerts() {
-            return sslCerts;
-        }
-
-        public boolean isSslEnabledForStack() {
-            return sslEnabledForStack;
-        }
     }
 }
