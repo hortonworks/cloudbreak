@@ -142,3 +142,7 @@ cb:
     aws.fallback:
       enabled: true
       targetversion: "11.16"
+
+quartz:
+  initialization:
+    delay: 30

@@ -1,10 +1,12 @@
 package com.sequenceiq.environment.configuration;
 
+import static com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService.DELAYED_TASK_EXECUTOR;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
@@ -32,6 +35,9 @@ import com.sequenceiq.environment.environment.validation.securitygroup.Environme
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
+
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
 @Configuration
 @EnableRetry
@@ -69,6 +75,9 @@ public class AppConfig {
     @Value("${cb.intermediate.threadpool.capacity.size:}")
     private int intermediateQueueCapacity;
 
+    @Value("${environment.delayed.threadpool.core.size:10}")
+    private int delayedCorePoolSize;
+
     @Inject
     @Named("redbeamsServerUrl")
     private String redbeamsServerUrl;
@@ -78,6 +87,9 @@ public class AppConfig {
 
     @Value("${environment.freeipa.supportedPlatforms:}")
     private String supportedFreeIpaPlatforms;
+
+    @Inject
+    private MeterRegistry meterRegistry;
 
     @Bean
     public Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform() {
@@ -135,6 +147,15 @@ public class AppConfig {
     @Scope(SCOPE_PROTOTYPE)
     public Client restClient() {
         return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
+    }
+
+    @Bean(name = DELAYED_TASK_EXECUTOR)
+    public ScheduledExecutorService delayedTaskExecutor() {
+        ThreadPoolTaskScheduler executor = new ThreadPoolTaskScheduler();
+        executor.setPoolSize(delayedCorePoolSize);
+        executor.setThreadNamePrefix("delayedExecutor-");
+        executor.initialize();
+        return ExecutorServiceMetrics.monitor(meterRegistry, executor.getScheduledExecutor(), DELAYED_TASK_EXECUTOR, "threadpool");
     }
 
     @Bean

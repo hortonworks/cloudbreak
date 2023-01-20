@@ -1,9 +1,13 @@
 package com.sequenceiq.redbeams.configuration;
 
+import static com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService.DELAYED_TASK_EXECUTOR;
+
 import java.io.IOException;
 import java.security.Security;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +19,12 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.sequenceiq.cloudbreak.concurrent.MdcCopyingTaskDecorator;
+
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
 @Configuration
 @EnableRetry
@@ -47,6 +55,9 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${redbeams.intermediate.threadpool.capacity.size:}")
     private int intermediateQueueCapacity;
 
+    @Value("${redbeams.delayed.threadpool.core.size:10}")
+    private int delayedCorePoolSize;
+
     @Value("${redbeams.client.id}")
     private String clientId;
 
@@ -58,6 +69,9 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Value("${cert.ignorePreValidation}")
     private boolean ignorePreValidation;
+
+    @Inject
+    private MeterRegistry meterRegistry;
 
     private ResourceLoader resourceLoader;
 
@@ -86,6 +100,15 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setTaskDecorator(new MdcCopyingTaskDecorator());
         executor.initialize();
         return executor;
+    }
+
+    @Bean(name = DELAYED_TASK_EXECUTOR)
+    public ScheduledExecutorService delayedTaskExecutor() {
+        ThreadPoolTaskScheduler executor = new ThreadPoolTaskScheduler();
+        executor.setPoolSize(delayedCorePoolSize);
+        executor.setThreadNamePrefix("delayedExecutor-");
+        executor.initialize();
+        return ExecutorServiceMetrics.monitor(meterRegistry, executor.getScheduledExecutor(), DELAYED_TASK_EXECUTOR, "threadpool");
     }
 
     @Override
