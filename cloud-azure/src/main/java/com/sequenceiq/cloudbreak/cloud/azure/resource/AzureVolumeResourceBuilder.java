@@ -26,10 +26,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.compute.Disk;
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.resources.fluentcore.arm.AvailabilityZoneId;
+import com.azure.resourcemanager.compute.models.Disk;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
@@ -312,14 +311,14 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .orElseThrow(() -> new AzureResourceException("Resource group resource not found"));
         String resourceGroupName = resourceGroup.getName();
 
-        PagedList<Disk> existingDisks = client.listDisksByResourceGroup(resourceGroupName);
+        List<Disk> existingDisks = client.listDisksByResourceGroup(resourceGroupName).getAll();
         ResourceStatus volumeSetStatus = getResourceStatus(existingDisks, volumeResources);
         return volumeResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, volumeSetStatus))
                 .collect(toList());
     }
 
-    private ResourceStatus getResourceStatus(PagedList<Disk> existingDisks, List<CloudResource> volumeResources) {
+    private ResourceStatus getResourceStatus(List<Disk> existingDisks, List<CloudResource> volumeResources) {
         List<String> expectedIdList = volumeResources.stream()
                 .map(this::getVolumeSetAttributes)
                 .map(VolumeSetAttributes::getVolumes)

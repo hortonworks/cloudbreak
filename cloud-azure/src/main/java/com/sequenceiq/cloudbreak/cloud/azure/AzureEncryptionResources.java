@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.google.common.annotations.VisibleForTesting;
-import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
-import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
@@ -248,7 +248,7 @@ public class AzureEncryptionResources implements EncryptionResources {
                 .withDiskEncryptionSetPrincipalObjectId(createdSet.identity().principalId())
                 .withDiskEncryptionSetLocation(createdSet.location())
                 .withDiskEncryptionSetName(createdSet.name())
-                .withTags(createdSet.getTags())
+                .withTags(createdSet.tags())
                 .withDiskEncryptionSetResourceGroupName(desResourceGroupName)
                 .build();
     }

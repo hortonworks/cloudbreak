@@ -69,7 +69,9 @@ public class LogContextAspects {
                     .environmentCrn(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.ENVIRONMENT_CRN.toString())))
                     .buildMdc();
         } else {
-            MDCBuilder.buildMdcContextFromMap(eventMdcContext);
+            if (eventMdcContext != null) {
+                MDCBuilder.buildMdcContextFromMap(eventMdcContext);
+            }
         }
     }
 

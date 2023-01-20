@@ -36,14 +36,14 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.core.task.AsyncTaskExecutor;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.compute.Disk;
-import com.microsoft.azure.management.compute.VirtualMachine;
+import com.azure.resourcemanager.compute.models.Disk;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -252,8 +252,9 @@ public class AzureVolumeResourceBuilderTest {
         CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.CREATED)
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, "", volumes, VOLUME_SIZE, "ssd")))
                 .withName(VOLUME_NAME).build();
-        PagedList<Disk> pagedList = mock(PagedList.class);
-        when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(pagedList);
+        AzureListResult<Disk> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getAll()).thenReturn(List.of());
+        when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(azureListResult);
 
         underTest.delete(context, auth, volumeSetResource);
 
@@ -278,15 +279,15 @@ public class AzureVolumeResourceBuilderTest {
         when(disk2.id()).thenReturn("vol2");
         Disk disk3 = mock(Disk.class);
         when(disk3.id()).thenReturn("vol3");
-        PagedList<Disk> pagedList = mock(PagedList.class);
         diskList.add(disk1);
         diskList.add(disk2);
         diskList.add(disk3);
         Disk disk = mock(Disk.class);
+        AzureListResult<Disk> azureListResult = mock(AzureListResult.class);
         when(disk.isAttachedToVirtualMachine()).thenReturn(false);
         when(azureClient.getDiskById(any())).thenReturn(disk);
-        when(pagedList.stream()).thenAnswer(invocation -> diskList.stream());
-        when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(pagedList);
+        when(azureListResult.getAll()).thenReturn(diskList);
+        when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(azureListResult);
 
         underTest.delete(context, auth, volumeSetResource);
 
@@ -319,7 +320,6 @@ public class AzureVolumeResourceBuilderTest {
         Disk disk3 = mock(Disk.class);
         when(disk3.id()).thenReturn("vol3");
         when(disk3.isAttachedToVirtualMachine()).thenReturn(true);
-        PagedList<Disk> pagedList = mock(PagedList.class);
         diskList.add(disk1);
         diskList.add(disk2);
         diskList.add(disk3);
@@ -327,8 +327,9 @@ public class AzureVolumeResourceBuilderTest {
         when(disk.isAttachedToVirtualMachine()).thenReturn(true);
         when(disk.virtualMachineId()).thenReturn("instance1");
         when(azureClient.getDiskById(any())).thenReturn(disk);
-        when(pagedList.stream()).thenAnswer(invocation -> diskList.stream());
-        when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(pagedList);
+        AzureListResult<Disk> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getAll()).thenReturn(diskList);
+        when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(azureListResult);
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         when(azureClient.getVirtualMachine(eq("instance1"))).thenReturn(virtualMachine);
 

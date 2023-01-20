@@ -16,8 +16,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -28,16 +30,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.SubResource;
-import com.microsoft.azure.management.network.Network;
-import com.microsoft.azure.management.privatedns.v2018_09_01.PrivateZone;
-import com.microsoft.azure.management.privatedns.v2018_09_01.ProvisioningState;
-import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.VirtualNetworkLinkInner;
+import com.azure.core.management.SubResource;
+import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.privatedns.fluent.models.VirtualNetworkLinkInner;
+import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
+import com.azure.resourcemanager.privatedns.models.ProvisioningState;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.ValidationTestUtil;
-import com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.PrivateDnsZoneValidationTestConstants.TestPagedList;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,9 +75,12 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     @Test
     void testPrivateDnsZoneExistsWhenZoneExists() {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        PagedList<PrivateZone> privateZones = new TestPagedList<>();
+        List<PrivateDnsZone> privateZones = new ArrayList<>();
         privateZones.add(getPrivateDnsZone(null, ZONE_NAME_POSTGRES, null));
-        when(azureClient.getPrivateDnsZonesByResourceGroup(SUBSCRIPTION_ID, SINGLE_RESOURCE_GROUP_NAME)).thenReturn(privateZones);
+        AzureListResult<PrivateDnsZone> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getStream()).thenReturn(privateZones.stream());
+        when(azureClient.getPrivateDnsZonesByResourceGroup(SUBSCRIPTION_ID, SINGLE_RESOURCE_GROUP_NAME))
+                .thenReturn(azureListResult);
 
         resultBuilder = underTest.privateDnsZoneExists(azureClient, getPrivateDnsZoneResourceId(), resultBuilder);
 
@@ -87,8 +91,9 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     @Test
     void testPrivateDnsZoneExistsWhenZoneDoesNotExist() {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        PagedList<PrivateZone> privateZones = new TestPagedList<>();
-        when(azureClient.getPrivateDnsZonesByResourceGroup(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME)).thenReturn(privateZones);
+        AzureListResult<PrivateDnsZone> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getStream()).thenReturn(Stream.empty());
+        when(azureClient.getPrivateDnsZonesByResourceGroup(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME)).thenReturn(azureListResult);
 
         resultBuilder = underTest.privateDnsZoneExists(azureClient, getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
 
@@ -103,8 +108,11 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Network network = getNetwork();
         when(azureClient.getNetworkByResourceGroup(NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME)).thenReturn(network);
-        PagedList<VirtualNetworkLinkInner> virtualNetworkLinks = getNetworkLinks(List.of(NETWORK_RESOURCE_ID));
-        when(azureClient.listNetworkLinksByPrivateDnsZoneName(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES)).thenReturn(virtualNetworkLinks);
+        List<VirtualNetworkLinkInner> virtualNetworkLinks = getNetworkLinks(List.of(NETWORK_RESOURCE_ID));
+        AzureListResult<VirtualNetworkLinkInner> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getStream()).thenReturn(virtualNetworkLinks.stream());
+        when(azureClient.listNetworkLinksByPrivateDnsZoneName(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES))
+                .thenReturn(azureListResult);
 
         resultBuilder = underTest.privateDnsZoneConnectedToNetwork(azureClient, NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME,
                 getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
@@ -117,8 +125,11 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Network network = getNetwork();
         when(azureClient.getNetworkByResourceGroup(NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME)).thenReturn(network);
-        PagedList<VirtualNetworkLinkInner> virtualNetworkLinks = getNetworkLinks(List.of("anotherNetwork"));
-        when(azureClient.listNetworkLinksByPrivateDnsZoneName(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES)).thenReturn(virtualNetworkLinks);
+        List<VirtualNetworkLinkInner> virtualNetworkLinks = getNetworkLinks(List.of("anotherNetwork"));
+        AzureListResult<VirtualNetworkLinkInner> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getStream()).thenReturn(virtualNetworkLinks.stream());
+        when(azureClient.listNetworkLinksByPrivateDnsZoneName(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES))
+                .thenReturn(azureListResult);
 
         resultBuilder = underTest.privateDnsZoneConnectedToNetwork(azureClient, NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME,
                 getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
@@ -133,7 +144,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     @Test
     void testPrivateDnsZonesNotConnectedToNetworkWhenNoZonesFound() {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        PagedList<PrivateZone> privateDnsZoneList = new TestPagedList<>();
+        List<PrivateDnsZone> privateDnsZoneList = new ArrayList<>();
 
         ValidationResult result = underTest.privateDnsZonesNotConnectedToNetwork(azureClient, NETWORK_NAME, A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES,
                 resultBuilder, privateDnsZoneList);
@@ -145,7 +156,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     @Test
     void testPrivateDnsZonesNotConnectedToNetworkWhenZoneInSingleRG() {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        PagedList<PrivateZone> privateDnsZoneList = getPrivateDnsZones(SINGLE_RESOURCE_GROUP_NAME, List.of(""), null);
+        List<PrivateDnsZone> privateDnsZoneList = getPrivateDnsZones(SINGLE_RESOURCE_GROUP_NAME, List.of(""), null);
 
         ValidationResult result = underTest.privateDnsZonesNotConnectedToNetwork(azureClient, NETWORK_NAME, SINGLE_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES,
                 resultBuilder, privateDnsZoneList);
@@ -157,7 +168,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     @Test
     void testPrivateDnsZonesNotConnectedToNetworkWhenZoneNameIsNotSupported() {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        PagedList<PrivateZone> privateDnsZoneList = getPrivateDnsZones(A_RESOURCE_GROUP_NAME, List.of("unrelated.zone"), null);
+        List<PrivateDnsZone> privateDnsZoneList = getPrivateDnsZones(A_RESOURCE_GROUP_NAME, List.of("unrelated.zone"), null);
 
         ValidationResult result = underTest.privateDnsZonesNotConnectedToNetwork(azureClient, NETWORK_NAME, SINGLE_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES,
                 resultBuilder, privateDnsZoneList);
@@ -170,7 +181,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     @MethodSource(value = "getAllProvisioningStates")
     void testPrivateDnsZonesNotConnectedToNetworkWhenZoneProvisioningStateNotSucceeded(ProvisioningState provisioningState) {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        PagedList<PrivateZone> privateDnsZoneList = getPrivateDnsZones(A_RESOURCE_GROUP_NAME, List.of(ZONE_NAME_POSTGRES), provisioningState);
+        List<PrivateDnsZone> privateDnsZoneList = getPrivateDnsZones(A_RESOURCE_GROUP_NAME, List.of(ZONE_NAME_POSTGRES), provisioningState);
 
         ValidationResult result = underTest.privateDnsZonesNotConnectedToNetwork(azureClient, NETWORK_NAME, SINGLE_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES,
                 resultBuilder, privateDnsZoneList);
@@ -182,7 +193,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     @Test
     void testPrivateDnsZonesNotConnectedToNetworkWhenZoneNotConnected() {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        PagedList<PrivateZone> privateDnsZoneList = getPrivateDnsZones(A_RESOURCE_GROUP_NAME, List.of(ZONE_NAME_POSTGRES), ProvisioningState.SUCCEEDED);
+        List<PrivateDnsZone> privateDnsZoneList = getPrivateDnsZones(A_RESOURCE_GROUP_NAME, List.of(ZONE_NAME_POSTGRES), ProvisioningState.SUCCEEDED);
         when(azureClient.getNetworkLinkByPrivateDnsZone(A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES, NETWORK_NAME)).thenReturn(null);
 
         ValidationResult result = underTest.privateDnsZonesNotConnectedToNetwork(azureClient, NETWORK_NAME, SINGLE_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES,
@@ -194,7 +205,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     @Test
     void testPrivateDnsZonesNotConnectedToNetworkWhenZoneConnected() {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        PagedList<PrivateZone> privateDnsZoneList = getPrivateDnsZones(A_RESOURCE_GROUP_NAME, List.of(ZONE_NAME_POSTGRES), ProvisioningState.SUCCEEDED);
+        List<PrivateDnsZone> privateDnsZoneList = getPrivateDnsZones(A_RESOURCE_GROUP_NAME, List.of(ZONE_NAME_POSTGRES), ProvisioningState.SUCCEEDED);
         when(azureClient.getNetworkLinkByPrivateDnsZone(A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES, NETWORK_NAME)).thenReturn(new VirtualNetworkLinkInner());
 
         ValidationResult result = underTest.privateDnsZonesNotConnectedToNetwork(azureClient, NETWORK_NAME, SINGLE_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES,
@@ -212,8 +223,8 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
                 .collect(Collectors.toList());
     }
 
-    private PagedList<VirtualNetworkLinkInner> getNetworkLinks(List<String> foundNetworkIds) {
-        PagedList<VirtualNetworkLinkInner> virtualNetworkLinks = new TestPagedList<>();
+    private List<VirtualNetworkLinkInner> getNetworkLinks(List<String> foundNetworkIds) {
+        List<VirtualNetworkLinkInner> virtualNetworkLinks = new ArrayList<>();
         foundNetworkIds.stream()
                 .map(id -> new VirtualNetworkLinkInner().withVirtualNetwork(new SubResource().withId(id)))
                 .forEach(virtualNetworkLinks::add);
@@ -226,16 +237,16 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         return network;
     }
 
-    private PagedList<PrivateZone> getPrivateDnsZones(String resourceGroupName, List<String> privateZoneNames, ProvisioningState provisioningState) {
-        PagedList<PrivateZone> privateZones = new TestPagedList<>();
+    private List<PrivateDnsZone> getPrivateDnsZones(String resourceGroupName, List<String> privateZoneNames, ProvisioningState provisioningState) {
+        List<PrivateDnsZone> privateZones = new ArrayList<>();
         privateZoneNames.stream()
                 .map(pzn -> getPrivateDnsZone(resourceGroupName, pzn, provisioningState))
                 .forEach(privateZones::add);
         return privateZones;
     }
 
-    private PrivateZone getPrivateDnsZone(String resourceGroupName, String dnsZoneName, ProvisioningState provisioningState) {
-        PrivateZone privateZone = mock(PrivateZone.class);
+    private PrivateDnsZone getPrivateDnsZone(String resourceGroupName, String dnsZoneName, ProvisioningState provisioningState) {
+        PrivateDnsZone privateZone = mock(PrivateDnsZone.class);
         if (StringUtils.isNotEmpty(dnsZoneName)) {
             when(privateZone.name()).thenReturn(dnsZoneName);
         }

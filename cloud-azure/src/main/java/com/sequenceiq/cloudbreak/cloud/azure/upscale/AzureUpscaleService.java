@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,13 +9,12 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.ListUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.resources.Deployment;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.resources.models.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
@@ -80,7 +80,7 @@ public class AzureUpscaleService {
         List<CloudResource> templateResources = new ArrayList<>();
         List<CloudResource> osDiskResources = new ArrayList<>();
 
-        DateTime preDeploymentTime = DateTime.now();
+        OffsetDateTime preDeploymentTime = OffsetDateTime.now();
         filterExistingInstances(azureStackView);
         try {
             List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
@@ -117,7 +117,7 @@ public class AzureUpscaleService {
             LOGGER.error("Retry.ActionFailedException happened", e);
             azureScaleUtilService.rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw azureUtils.convertToCloudConnectorException(e.getCause(), "Stack upscale");
-        } catch (CloudException e) {
+        } catch (ManagementException e) {
             LOGGER.error("CloudException happened", e);
             azureScaleUtilService.rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             azureScaleUtilService.checkIfQuotaLimitIssued(e);

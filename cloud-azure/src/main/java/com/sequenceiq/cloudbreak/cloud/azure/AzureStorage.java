@@ -18,15 +18,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.azure.core.management.ProxyResource;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.resources.fluentcore.arm.models.HasId;
+import com.azure.resourcemanager.resources.models.Subscription;
+import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
+import com.azure.resourcemanager.storage.models.Kind;
+import com.azure.resourcemanager.storage.models.StorageAccount;
+import com.azure.resourcemanager.storage.models.StorageAccounts;
 import com.google.common.base.Strings;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.resources.Subscription;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
-import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
-import com.microsoft.azure.management.storage.Kind;
-import com.microsoft.azure.management.storage.StorageAccount;
-import com.microsoft.azure.management.storage.StorageAccounts;
-import com.microsoft.azure.management.storage.implementation.StorageAccountInner;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureStorageAccountBuilderService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.StorageAccountParameters;
@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageInfo;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageInfoService;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageService;
 import com.sequenceiq.cloudbreak.cloud.azure.storage.SkuTypeResolver;
+import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -122,7 +123,7 @@ public class AzureStorage {
     }
 
     public StorageAccount createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup,
-            String region, Boolean encrypted, Map<String, String> tags) throws CloudException {
+            String region, Boolean encrypted, Map<String, String> tags) throws ManagementException {
         Optional<StorageAccount> storageAccountOptional = findStorageAccount(client, osStorageName);
         if (storageAccountOptional.isEmpty()) {
             StorageAccountParameters storageAccountParameters = new StorageAccountParameters(
@@ -136,14 +137,6 @@ public class AzureStorage {
                     + "In order to proceed, please delete that storage account.", storageAccount.name(), storageAccount.resourceGroupName());
             LOGGER.warn(errorMessage);
             throw new CloudbreakServiceException(errorMessage);
-        }
-    }
-
-    public void deleteStorage(AzureClient client, String osStorageName, String storageGroup)
-            throws CloudException {
-        Optional<StorageAccount> storageAccountOptional = findStorageAccount(client, osStorageName);
-        if (storageAccountOptional.isPresent()) {
-            client.deleteStorageAccount(storageGroup, osStorageName);
         }
     }
 
@@ -179,7 +172,7 @@ public class AzureStorage {
         String subscriptionIdPart = StringUtils.isBlank(resourceGroup)
                 ? acv.getSubscriptionId().replaceAll("-", "").toLowerCase()
                 : armUtils.encodeString(acv.getSubscriptionId().replaceAll("-", "").toLowerCase());
-        String regionInitials = WordUtils.initials(Region.findByLabelOrName(region).label(), ' ').toLowerCase();
+        String regionInitials = WordUtils.initials(RegionUtil.findByLabelOrName(region).label(), ' ').toLowerCase();
         String resourceGroupPart = armUtils.encodeString(resourceGroup);
         String result = String.format("%s%s%s%s", prefix, regionInitials, subscriptionIdPart, resourceGroupPart);
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
@@ -226,12 +219,12 @@ public class AzureStorage {
             return storageAccount.map(HasId::id);
         }
 
-        List<String> subscriptionIds = client.listSubscriptions().stream().map(Subscription::subscriptionId).collect(Collectors.toList());
+        List<String> subscriptionIds = client.listSubscriptions().getStream().map(Subscription::subscriptionId).collect(Collectors.toList());
         LOGGER.debug("Checking other subscriptions for storage account: {}", String.join(",", subscriptionIds));
         for (String subscriptionId : subscriptionIds) {
             Optional<StorageAccountInner> storageAccountInner = client.getStorageAccountBySubscription(account, subscriptionId, Kind.STORAGE_V2);
             if (storageAccountInner.isPresent()) {
-                return storageAccountInner.map(s -> s.id());
+                return storageAccountInner.map(ProxyResource::id);
             }
         }
 

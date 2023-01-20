@@ -16,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
-import com.microsoft.azure.management.compute.implementation.ImageInner;
+import com.azure.resourcemanager.compute.fluent.models.ImageInner;
+import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +38,7 @@ public class AzureManagedImageServiceTest {
     private AzureClient azureClient;
 
     @Spy
-    private final AzureAuthExceptionHandler azureAuthExceptionHandler = new AzureAuthExceptionHandler();
+    private final AzureExceptionHandler azureExceptionHandler = new AzureExceptionHandler();
 
     @Test
     public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenSucceededOnProviderSide() {
@@ -46,7 +46,7 @@ public class AzureManagedImageServiceTest {
         VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
         when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(image);
         ImageInner imageInner = mock(ImageInner.class);
-        when(image.inner()).thenReturn(imageInner);
+        when(image.innerModel()).thenReturn(imageInner);
         when(imageInner.provisioningState()).thenReturn("Succeeded");
 
         Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
@@ -62,7 +62,7 @@ public class AzureManagedImageServiceTest {
         VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
         when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(image);
         ImageInner imageInner = mock(ImageInner.class);
-        when(image.inner()).thenReturn(imageInner);
+        when(image.innerModel()).thenReturn(imageInner);
         when(imageInner.provisioningState()).thenReturn("Unknown");
 
         Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
@@ -77,7 +77,7 @@ public class AzureManagedImageServiceTest {
         VirtualMachineCustomImage image = mock(VirtualMachineCustomImage.class);
         when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(image);
         ImageInner imageInner = mock(ImageInner.class);
-        when(image.inner()).thenReturn(imageInner);
+        when(image.innerModel()).thenReturn(imageInner);
         when(imageInner.provisioningState()).thenReturn("Failed");
 
         CloudConnectorException actual = assertThrows(CloudConnectorException.class, () -> underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient));

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,16 +17,17 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.compute.ManagedDiskParameters;
-import com.microsoft.azure.management.compute.OSDisk;
-import com.microsoft.azure.management.compute.StorageProfile;
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.resources.Deployment;
-import com.microsoft.azure.management.resources.DeploymentOperation;
-import com.microsoft.azure.management.resources.DeploymentOperations;
-import com.microsoft.azure.management.resources.TargetResource;
+import com.azure.core.http.rest.PagedIterable;
+import com.azure.resourcemanager.compute.models.ManagedDiskParameters;
+import com.azure.resourcemanager.compute.models.OSDisk;
+import com.azure.resourcemanager.compute.models.StorageProfile;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.resources.models.Deployment;
+import com.azure.resourcemanager.resources.models.DeploymentOperation;
+import com.azure.resourcemanager.resources.models.DeploymentOperations;
+import com.azure.resourcemanager.resources.models.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -74,10 +76,10 @@ public class AzureCloudResourceServiceTest {
         TargetResource t = new TargetResource();
         t.withResourceType(MICROSOFT_COMPUTE_VIRTUAL_MACHINES);
         t.withResourceName(VM_NAME);
-        PagedList<DeploymentOperation> operationList = Mockito.spy(PagedList.class);
+        PagedIterable<DeploymentOperation> operationList = Mockito.mock(PagedIterable.class);
         DeploymentOperations operations = Mockito.mock(DeploymentOperations.class);
         DeploymentOperation operation = Mockito.mock(DeploymentOperation.class);
-        operationList.add(operation);
+        when(operationList.stream()).thenReturn(Stream.of(operation));
 
         when(deployment.deploymentOperations()).thenReturn(operations);
         when(deployment.deploymentOperations().list()).thenReturn(operationList);
@@ -97,10 +99,10 @@ public class AzureCloudResourceServiceTest {
         TargetResource t = new TargetResource();
         t.withResourceType(MICROSOFT_COMPUTE_VIRTUAL_MACHINES);
         t.withResourceName(VM_NAME);
-        PagedList<DeploymentOperation> operationList = Mockito.spy(PagedList.class);
+        PagedIterable<DeploymentOperation> operationList = Mockito.mock(PagedIterable.class);
         DeploymentOperations operations = Mockito.mock(DeploymentOperations.class);
         DeploymentOperation operation = Mockito.mock(DeploymentOperation.class);
-        operationList.add(operation);
+        when(operationList.stream()).thenReturn(Stream.of(operation));
 
         when(deployment.deploymentOperations()).thenReturn(operations);
         when(deployment.deploymentOperations().list()).thenReturn(operationList);
@@ -120,10 +122,10 @@ public class AzureCloudResourceServiceTest {
         TargetResource t = new TargetResource();
         t.withResourceType("unknown");
         t.withResourceName(VM_NAME);
-        PagedList<DeploymentOperation> operationList = Mockito.spy(PagedList.class);
+        PagedIterable<DeploymentOperation> operationList = Mockito.mock(PagedIterable.class);
         DeploymentOperations operations = Mockito.mock(DeploymentOperations.class);
         DeploymentOperation operation = Mockito.mock(DeploymentOperation.class);
-        operationList.add(operation);
+        when(operationList.stream()).thenReturn(Stream.of(operation));
 
         when(deployment.deploymentOperations()).thenReturn(operations);
         when(deployment.deploymentOperations().list()).thenReturn(operationList);
@@ -172,12 +174,12 @@ public class AzureCloudResourceServiceTest {
         CloudResource vm1 = createCloudResource(INSTANCE_1, ResourceType.AZURE_INSTANCE);
         CloudResource vm2 = createCloudResource(INSTANCE_2, ResourceType.AZURE_INSTANCE);
         CloudResource vm3 = createCloudResource(INSTANCE_3, ResourceType.AZURE_INSTANCE);
-        PagedList<VirtualMachine> virtualMachines = Mockito.spy(PagedList.class);
+        AzureListResult<VirtualMachine> virtualMachines = Mockito.mock(AzureListResult.class);
         VirtualMachine vm = Mockito.mock(VirtualMachine.class);
         StorageProfile storageProfile = Mockito.mock(StorageProfile.class);
         OSDisk osDisk = Mockito.mock(OSDisk.class);
         ManagedDiskParameters managedDiskParameters = Mockito.mock(ManagedDiskParameters.class);
-        virtualMachines.add(vm);
+        when(virtualMachines.getStream()).thenAnswer(invocation -> Stream.of(vm));
 
         when(vm.name()).thenReturn(INSTANCE_1);
         when(vm.storageProfile()).thenReturn(storageProfile);

@@ -10,30 +10,23 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationException;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationResult;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowResponse;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponses;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.OperationException;
@@ -124,8 +117,8 @@ public class ServiceProviderCredentialAdapter {
     }
 
     public CDPServicePolicyVerification verifyByServices(Credential credential, String accountId,
-        List<String> services,
-        Map<String, String> experiencePrerequisites) {
+            List<String> services,
+            Map<String, String> experiencePrerequisites) {
         credential = credentialPrerequisiteService.decorateCredential(credential);
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(credential.getId())
@@ -184,68 +177,8 @@ public class ServiceProviderCredentialAdapter {
         return changed;
     }
 
-    public Map<String, String> interactiveLogin(Credential credential, String accountId) {
-        CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(credential.getId())
-                .withName(credential.getName())
-                .withCrn(credential.getResourceCrn())
-                .withPlatform(credential.getCloudPlatform())
-                .withVariant(credential.getCloudPlatform())
-                .withAccountId(accountId)
-                .build();
-        ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
-        LOGGER.debug("Requesting interactive login cloudPlatform {}.", credential.getCloudPlatform());
-        InteractiveLoginRequest request = requestProvider.getInteractiveLoginRequest(cloudContext, cloudCredential);
-        LOGGER.debug("Triggering event: {}", request);
-        eventBus.notify(request.selector(), eventFactory.createEvent(request));
-        try {
-            InteractiveLoginResult res = request.await();
-            String message = "Interactive login Failed: ";
-            LOGGER.debug("Result: {}", res);
-            if (res.getStatus() != EventStatus.OK) {
-                LOGGER.info(message, res.getErrorDetails());
-                throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
-            }
-            return res.getParameters();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while executing credential verification", e);
-            throw new OperationException(e);
-        }
-    }
-
     public Credential update(Credential credential) {
         return credential;
-    }
-
-    public Credential initCodeGrantFlow(Credential credential, String accountId) {
-        CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(credential.getId())
-                .withName(credential.getName())
-                .withCrn(credential.getResourceCrn())
-                .withPlatform(credential.getCloudPlatform())
-                .withVariant(credential.getCloudPlatform())
-                .withAccountId(accountId)
-                .build();
-        CloudCredential cloudCredential = credentialConverter.convert(credential);
-        LOGGER.debug("Requesting code grant flow cloudPlatform {}.", credential.getCloudPlatform());
-        InitCodeGrantFlowRequest request = requestProvider.getInitCodeGrantFlowRequest(cloudContext, cloudCredential);
-        LOGGER.info("Triggering event: {}", request);
-        eventBus.notify(request.selector(), eventFactory.createEvent(request));
-        try {
-            InitCodeGrantFlowResponse res = request.await();
-            LOGGER.info("Result: {}", res);
-            if (res.getStatus() != EventStatus.OK) {
-                String message = "Authorization code grant based credential creation couldn't be initialized: ";
-                LOGGER.error(message, res.getErrorDetails());
-                throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
-            }
-            Map<String, String> codeGrantFlowInitParams = res.getCodeGrantFlowInitParams();
-            addCodeGrantFlowInitAttributesToCredential(credential, codeGrantFlowInitParams);
-            return credential;
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while executing initialization of authorization code grant based credential creation:", e);
-            throw new OperationException(e);
-        }
     }
 
     private boolean mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys) {
@@ -269,14 +202,5 @@ public class ServiceProviderCredentialAdapter {
             credential.setAttributes(new Json(newAttributes).getValue());
         }
         return newAttributesAdded;
-    }
-
-    private void addCodeGrantFlowInitAttributesToCredential(Credential credential, Map<String, String> codeGrantFlowInitParams) {
-        Json attributes = new Json(credential.getAttributes());
-        Map<String, Object> newAttributes = attributes.getMap();
-        Map<String, Object> azureAttributes = (Map<String, Object>) newAttributes.get(AzureCredentialView.PROVIDER_KEY);
-        Map<String, String> codeGrantFlowAttributes = (Map<String, String>) azureAttributes.get(AzureCredentialView.CODE_GRANT_FLOW_BASED);
-        codeGrantFlowAttributes.putAll(codeGrantFlowInitParams);
-        credential.setAttributes(new Json(newAttributes).getValue());
     }
 }

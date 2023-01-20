@@ -83,14 +83,8 @@ public class AwsCredentialConnectorTest {
     }
 
     @Test
-    public void testInteractiveLoginIsProhibitedOnAws() {
-        expectedException.expect(UnsupportedOperationException.class);
-        underTest.interactiveLogin(null, null, null);
-    }
-
-    @Test
     public void testVerifyIfRoleBasedCredentialVerificationThrowsSdkBaseExceptionThenFailedStatusShouldReturn()
-        throws AwsPermissionMissingException, IOException {
+            throws AwsPermissionMissingException, IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
@@ -373,7 +367,7 @@ public class AwsCredentialConnectorTest {
 
     @Test
     public void testVerifyByServiceIfOnlyKeyBasedCredentialWithAccessKeyAndRoleBasedNOTDefinedShouldThrowException()
-        throws IOException {
+            throws IOException {
 
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, UTF_8);

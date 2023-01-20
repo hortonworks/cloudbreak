@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -37,6 +39,9 @@ class AzureTagValidatorTest {
 
     @Mock
     private ImageFilter imageFilter;
+
+    @MockBean(name = "azureClientThreadPool")
+    private ExecutorService executorServicel;
 
     @TestFactory
     Collection<DynamicTest> testFactoryOnTagValidator() {

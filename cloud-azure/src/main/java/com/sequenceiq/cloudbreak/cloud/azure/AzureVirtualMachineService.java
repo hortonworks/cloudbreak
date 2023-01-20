@@ -18,23 +18,25 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.compute.models.PowerState;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.compute.models.VirtualMachineInstanceView;
+import com.azure.resourcemanager.resources.fluentcore.arm.models.HasName;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimaps;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.compute.PowerState;
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.resources.fluentcore.arm.models.HasName;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.azure.util.ReactiveUtils;
+import com.sequenceiq.cloudbreak.cloud.azure.util.SchedulerProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
-import rx.Completable;
-import rx.schedulers.Schedulers;
+import reactor.core.publisher.Mono;
 
 @Component
 public class AzureVirtualMachineService {
@@ -44,40 +46,44 @@ public class AzureVirtualMachineService {
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
+    @Inject
+    private SchedulerProvider schedulerProvider;
+
+    @Inject
+    private AzureExceptionHandler azureExceptionHandler;
+
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 60)
     public Map<String, VirtualMachine> getVirtualMachinesByName(AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
         LOGGER.debug("Starting to retrieve vm metadata from Azure for {} for ids: {}", resourceGroup, privateInstanceIds);
-        PagedList<VirtualMachine> virtualMachines = getVirtualMachinesByPrivateInstanceIds(azureClient, resourceGroup, privateInstanceIds);
+        List<VirtualMachine> virtualMachines = getVirtualMachinesByPrivateInstanceIds(azureClient, resourceGroup, privateInstanceIds);
         errorIfEmpty(virtualMachines);
         LOGGER.debug("Virtual machines from Azure: {}", virtualMachines.stream().map(HasName::name).collect(Collectors.joining(", ")));
         validateResponse(virtualMachines, privateInstanceIds);
         return collectVirtualMachinesByName(privateInstanceIds, virtualMachines);
     }
 
-    private PagedList<VirtualMachine> getVirtualMachinesByPrivateInstanceIds(AzureClient azureClient, String resourceGroup,
-            Collection<String> privateInstanceIds) {
-        PagedList<VirtualMachine> virtualMachines = azureClient.getVirtualMachines(resourceGroup);
-        while (hasMissingVm(virtualMachines, privateInstanceIds) && virtualMachines.hasNextPage()) {
-            virtualMachines.loadNextPage();
+    private List<VirtualMachine> getVirtualMachinesByPrivateInstanceIds(
+            AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
+        List<VirtualMachine> virtualMachines = azureClient.getVirtualMachines(resourceGroup).getWhile(vms -> !hasMissingVm(vms, privateInstanceIds));
+        if (!virtualMachines.isEmpty()) {
+            return virtualMachines;
         }
-        if (hasNoVmInResourceGroup(virtualMachines)) {
-            LOGGER.info("We could not receive any VM in resource group. Let's try to fetch VMs by instance ids.");
-            for (String privateInstanceId : privateInstanceIds) {
-                VirtualMachine virtualMachineByResourceGroup = azureClient.getVirtualMachineByResourceGroup(resourceGroup, privateInstanceId);
-                if (virtualMachineByResourceGroup == null) {
-                    LOGGER.info("Could not find vm with private id: " + privateInstanceId);
-                } else {
-                    virtualMachines.add(virtualMachineByResourceGroup);
-                }
+        LOGGER.info("We could not receive any VM in resource group. Let's try to fetch VMs by instance ids.");
+        for (String privateInstanceId : privateInstanceIds) {
+            VirtualMachine virtualMachineByResourceGroup = azureClient.getVirtualMachineByResourceGroup(resourceGroup, privateInstanceId);
+            if (virtualMachineByResourceGroup == null) {
+                LOGGER.info("Could not find vm with private id: " + privateInstanceId);
+            } else {
+                virtualMachines.add(virtualMachineByResourceGroup);
             }
         }
         return virtualMachines;
     }
 
-    private Map<String, VirtualMachine> getVirtualMachinesByNameEmptyAllowed(AzureClient azureClient, String resourceGroup,
-            Collection<String> privateInstanceIds) {
+    private Map<String, VirtualMachine> getVirtualMachinesByNameEmptyAllowed(
+            AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
         LOGGER.debug("Starting to retrieve vm metadata gracefully from Azure for {} for ids: {}", resourceGroup, privateInstanceIds);
-        PagedList<VirtualMachine> virtualMachines = getVirtualMachinesByPrivateInstanceIds(azureClient, resourceGroup, privateInstanceIds);
+        List<VirtualMachine> virtualMachines = getVirtualMachinesByPrivateInstanceIds(azureClient, resourceGroup, privateInstanceIds);
         validateResponse(virtualMachines, privateInstanceIds);
         return collectVirtualMachinesByName(privateInstanceIds, virtualMachines);
     }
@@ -103,14 +109,14 @@ public class AzureVirtualMachineService {
     public void refreshInstanceViews(Map<String, VirtualMachine> virtualMachines) {
         LOGGER.info("Parallel instance views refresh to download instance view fields from azure, like PowerState of the machines: {}",
                 virtualMachines.keySet());
-        List<Completable> refreshInstanceViewCompletables = new ArrayList<>();
+        List<Mono<VirtualMachineInstanceView>> refreshInstanceViewCompletables = new ArrayList<>();
         for (VirtualMachine virtualMachine : virtualMachines.values()) {
-            refreshInstanceViewCompletables.add(Completable.fromObservable(virtualMachine.refreshInstanceViewAsync()).subscribeOn(Schedulers.io()));
+            refreshInstanceViewCompletables.add(virtualMachine.refreshInstanceViewAsync().subscribeOn(schedulerProvider.io()));
         }
-        Completable.merge(refreshInstanceViewCompletables).await();
+        ReactiveUtils.waitAll(refreshInstanceViewCompletables);
     }
 
-    private boolean hasMissingVm(PagedList<VirtualMachine> virtualMachines, Collection<String> privateInstanceIds) {
+    private boolean hasMissingVm(List<VirtualMachine> virtualMachines, Collection<String> privateInstanceIds) {
         Set<String> virtualMachineNames = virtualMachines
                 .stream()
                 .map(VirtualMachine::name)
@@ -122,24 +128,20 @@ public class AzureVirtualMachineService {
         return hasMissingVm;
     }
 
-    private boolean hasNoVmInResourceGroup(PagedList<VirtualMachine> virtualMachines) {
-        return virtualMachines.isEmpty();
-    }
-
-    private Map<String, VirtualMachine> collectVirtualMachinesByName(Collection<String> privateInstanceIds, PagedList<VirtualMachine> virtualMachines) {
+    private Map<String, VirtualMachine> collectVirtualMachinesByName(Collection<String> privateInstanceIds, List<VirtualMachine> virtualMachines) {
         return virtualMachines.stream()
                 .filter(virtualMachine -> privateInstanceIds.contains(virtualMachine.name()))
                 .collect(Collectors.toMap(HasName::name, vm -> vm));
     }
 
-    private void validateResponse(PagedList<VirtualMachine> virtualMachines, Collection<String> privateInstanceIds) {
+    private void validateResponse(List<VirtualMachine> virtualMachines, Collection<String> privateInstanceIds) {
         if (hasMissingVm(virtualMachines, privateInstanceIds)) {
             LOGGER.warn("Failed to retrieve all host from Azure. Only {} found from the {}.", virtualMachines.size(), privateInstanceIds.size());
         }
     }
 
-    private void errorIfEmpty(PagedList<VirtualMachine> virtualMachines) {
-        if (hasNoVmInResourceGroup(virtualMachines)) {
+    private void errorIfEmpty(List<VirtualMachine> virtualMachines) {
+        if (virtualMachines.isEmpty()) {
             LOGGER.warn("Azure returned 0 vms when listing by resource group. This should not be possible, retrying");
             throw new CloudConnectorException("Operation failed, azure returned an empty list while trying to list vms in resource group.");
         }
@@ -161,11 +163,11 @@ public class AzureVirtualMachineService {
             try {
                 virtualMachines.putAll(getVirtualMachinesByNameEmptyAllowed(azureClient,
                         resourceGroupInstanceIdsMap.getKey(), resourceGroupInstanceIdsMap.getValue()));
-            } catch (CloudException e) {
+            } catch (ManagementException e) {
                 LOGGER.debug("Exception occurred during the list of Virtual Machines by resource group", e);
                 for (String instance : resourceGroupInstanceIdsMap.getValue()) {
                     cloudInstances.stream().filter(cloudInstance -> instance.equals(cloudInstance.getInstanceId())).findFirst().ifPresent(cloudInstance -> {
-                        if (e.body() != null && "ResourceNotFound".equals(e.body().code())) {
+                        if (azureExceptionHandler.isNotFound(e)) {
                             statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED));
                         } else {
                             String msg = String.format("Failed to get VM's state from Azure: %s", e.toString());

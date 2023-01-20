@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.management.storage.StorageAccountSkuType;
+import com.azure.resourcemanager.storage.models.StorageAccountSkuType;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.StorageAccountParameters;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 

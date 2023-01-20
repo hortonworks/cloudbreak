@@ -25,8 +25,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.compute.models.ApiErrorException;
+import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerContext;
@@ -153,7 +154,7 @@ public class AzureImageServiceTest {
     @Test
     public void testCreateCustomImageWhenTimeoutAndImageNotPresent() throws Exception {
         imagePresent(false);
-        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new CloudException("cloud exception text", null));
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new ApiErrorException("cloud exception text", null));
         doThrow(new TimeoutException("timeout text")).when(azureManagedImageCreationPoller).startPolling(any(), any());
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> {
@@ -161,19 +162,19 @@ public class AzureImageServiceTest {
         });
 
         // This assertion was introduced during junit4 to junit5 conversion, but it is not ideal to send back a java.lang.Exception to the end user.
-        assertEquals("com.microsoft.azure.CloudException: cloud exception text", exception.getMessage());
+        assertEquals("com.azure.resourcemanager.compute.models.ApiErrorException: cloud exception text", exception.getMessage());
 
         verifyPollingStarted();
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyUpdate(cr.capture(), any()), CommonStatus.FAILED);
         verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME);
-        assertTrue(exception.getCause() instanceof CloudException);
+        assertTrue(exception.getCause() instanceof ManagementException);
     }
 
     @Test
     public void testCreateCustomImageWhenErrorAndImageNotPresent() throws Exception {
         imagePresent(false);
-        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new CloudException("cloud exception text", null));
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new ManagementException("cloud exception text", null));
         doThrow(new Exception("Custom exception during polling")).when(azureManagedImageCreationPoller).startPolling(any(), any());
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> {
@@ -193,7 +194,7 @@ public class AzureImageServiceTest {
     @Test
     public void testCreateCustomImageWhenErrorButImagePresent() {
         imagePresent(true);
-        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new CloudException("", null));
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new ManagementException("", null));
         when(virtualMachineCustomImage.name()).thenReturn(CUSTOM_IMAGE_NAME_WITH_REGION);
         when(virtualMachineCustomImage.id()).thenReturn(CUSTOM_IMAGE_ID);
 

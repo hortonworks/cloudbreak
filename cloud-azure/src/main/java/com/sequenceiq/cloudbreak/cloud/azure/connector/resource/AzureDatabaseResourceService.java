@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.resources.models.Deployment;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.google.common.collect.Lists;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.resources.Deployment;
-import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDatabaseTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDatabaseTemplateProvider;
@@ -104,7 +104,7 @@ public class AzureDatabaseResourceService {
         Deployment deployment;
         try {
             deployDatabaseServer(stackName, resourceGroupName, template, client);
-        } catch (CloudException e) {
+        } catch (ManagementException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Database stack provisioning");
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Error in provisioning database stack %s: %s", stackName, e.getMessage()), e);
@@ -198,7 +198,8 @@ public class AzureDatabaseResourceService {
     }
 
     private List<CloudResourceStatus> deleteResources(List<CloudResource> resources, CloudContext cloudContext, boolean force,
-            AzureClient client, PersistenceNotifier persistenceNotifier, String keyVaultUrl, String keyVaultResourceGroupName) {
+            AzureClient client, PersistenceNotifier persistenceNotifier, String keyVaultUrl,
+            String keyVaultResourceGroupName) {
 
         // TODO simplify after final form of template is reached
 
@@ -226,7 +227,7 @@ public class AzureDatabaseResourceService {
                             vaultName));
                 } else {
                     String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
-                                    "associated with Database.", vaultName, keyVaultResourceGroupName, dbPrincipalId);
+                            "associated with Database.", vaultName, keyVaultResourceGroupName, dbPrincipalId);
                     retryService.testWith2SecDelayMax15Times(() -> {
                         try {
                             LOGGER.info("Removing {}.", description);
@@ -300,7 +301,7 @@ public class AzureDatabaseResourceService {
             stack.getDatabaseServer().putParameter(DB_VERSION, targetMajorVersion.getMajorVersion());
             String template = azureDatabaseTemplateBuilder.build(cloudContext, stack);
             deployDatabaseServer(stackName, resourceGroupName, template, client);
-        } catch (CloudException e) {
+        } catch (ManagementException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Database stack upgrade");
         } catch (CloudConnectorException e) {
             throw e;

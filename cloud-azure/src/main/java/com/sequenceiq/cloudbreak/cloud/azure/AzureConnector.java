@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
+import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFileSystemValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureStorageValidator;
@@ -163,12 +163,12 @@ public class AzureConnector implements CloudConnector {
 
     @Override
     public String regionToDisplayName(String region) {
-        return Region.findByLabelOrName(region).label();
+        return RegionUtil.findByLabelOrName(region).label();
     }
 
     @Override
     public String displayNameToRegion(String displayName) {
-        return Region.findByLabelOrName(displayName).name();
+        return RegionUtil.findByLabelOrName(displayName).name();
     }
 
     @Override

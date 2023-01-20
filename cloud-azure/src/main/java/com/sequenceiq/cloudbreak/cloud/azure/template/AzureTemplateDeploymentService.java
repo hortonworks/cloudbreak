@@ -6,9 +6,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.CloudError;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.resources.Deployment;
+import com.azure.core.management.exception.ManagementError;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.resources.models.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
@@ -62,9 +62,9 @@ public class AzureTemplateDeploymentService {
         return retry.testWith1SecDelayMax5Times(() -> {
             try {
                 return client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
-            } catch (CloudException e) {
-                if (e.body() != null && e.body().details() != null) {
-                    String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
+            } catch (ManagementException e) {
+                if (e.getValue() != null && e.getValue().getDetails() != null) {
+                    String details = e.getValue().getDetails().stream().map(ManagementError::getMessage).collect(Collectors.joining(", "));
                     if (details.contains("Please check the power state later")) {
                         throw new Retry.ActionFailedException("VMs not started in time.", e);
                     }

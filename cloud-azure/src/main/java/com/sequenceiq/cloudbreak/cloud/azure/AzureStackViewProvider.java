@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.management.network.Subnet;
+import com.azure.resourcemanager.network.models.Subnet;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
@@ -94,7 +94,7 @@ class AzureStackViewProvider {
         String resourceGroup = network.getStringParameter(RESOURCE_GROUP_NAME);
         String networkId = network.getStringParameter(NETWORK_ID);
         Collection<String> subnetIds = azureUtils.getCustomSubnetIds(network);
-        com.microsoft.azure.management.network.Network networkByResourceGroup =
+        com.azure.resourcemanager.network.models.Network networkByResourceGroup =
                 retryService.testWith1SecDelayMax5Times(
                         () -> {
                             try {

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -180,16 +179,6 @@ public class GcpCredentialConnectorTest {
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
-    }
-
-
-    /**
-     * On GCP there is no interactive login option, so when someone calls this
-     * implementation, a UnsupportedOperationException should be thrown.
-     */
-    @Test
-    public void testInteractiveLoginIsProhibitedOnGcp() {
-        assertThrows(UnsupportedOperationException.class, () -> underTest.interactiveLogin(null, null, null));
     }
 
 

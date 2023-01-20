@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import static com.sequenceiq.common.model.CredentialType.AUDIT;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -20,7 +19,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,11 +47,8 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
-import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
-import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.domain.CredentialSettings;
-import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.v1.converter.CreateCredentialRequestToCredentialConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
@@ -64,9 +59,6 @@ import com.sequenceiq.notification.NotificationSender;
 
 @Service
 public class CredentialService extends AbstractCredentialService implements CompositeAuthResourcePropertyProvider {
-
-    private static final String DEPLOYMENT_ADDRESS_ATTRIBUTE_NOT_FOUND = "The 'deploymentAddress' parameter needs to be specified in the interactive login "
-            + "request!";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
@@ -167,11 +159,6 @@ public class CredentialService extends AbstractCredentialService implements Comp
                 .orElseThrow(notFound("Credential with environmentName:", environmentName));
     }
 
-    public Map<String, String> interactiveLogin(String accountId, Credential credential) {
-        validateDeploymentAddress(credential);
-        return credentialAdapter.interactiveLogin(credential, accountId);
-    }
-
     public Credential verify(Credential credential) {
         CredentialVerification verification = credentialAdapter.verify(credential, credential.getAccountId());
         if (verification.isChanged()) {
@@ -260,48 +247,6 @@ public class CredentialService extends AbstractCredentialService implements Comp
         return credentialPrerequisiteService.getPrerequisites(cloudPlatformInUpperCase, govCloud, deploymentAddress, type);
     }
 
-    public String initCodeGrantFlow(String accountId, @Nonnull Credential credential, String creatorUserCrn) {
-        repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms(), ENVIRONMENT)
-                .map(Credential::getName)
-                .ifPresent(name -> {
-                    throw new BadRequestException("Credential already exists with name: " + name);
-                });
-        LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
-        credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn, ENVIRONMENT);
-        validateDeploymentAddress(credential);
-        Credential created = credentialAdapter.initCodeGrantFlow(credential, accountId);
-        created.setResourceCrn(createCRN(accountId));
-        created.setAccountId(accountId);
-        created.setCreator(creatorUserCrn);
-        created = repository.save(created);
-        return getCodeGrantFlowAppLoginUrl(created);
-    }
-
-    public String initCodeGrantFlow(String accountId, String name) {
-        Credential original = repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms(), ENVIRONMENT)
-                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
-        String originalAttributes = original.getAttributes();
-        if (getAzureCodeGrantFlowAttributes(original) == null) {
-            throw new UnsupportedOperationException("This operation is only allowed on Authorization Code Grant flow based credentails.");
-        }
-        Credential updated = credentialAdapter.initCodeGrantFlow(original, accountId);
-        updated = repository.save(updated);
-        secretService.delete(originalAttributes);
-        return getCodeGrantFlowAppLoginUrl(updated);
-    }
-
-    public Credential authorizeCodeGrantFlow(String code, @Nonnull String state, String accountId, @Nonnull String platform) {
-        String cloudPlatformUpperCased = platform.toUpperCase();
-        Set<Credential> credentials = repository.findAllByAccountId(accountId, List.of(cloudPlatformUpperCased), ENVIRONMENT);
-        Credential original = getCredentialByCodeGrantFlowState(state, credentials);
-        LOGGER.info("Authorizing credential('{}') with Authorization Code Grant flow.", original.getName());
-        String attributesSecret = original.getAttributesSecret();
-        updateAuthorizationCodeOfAzureCredential(original, code);
-        Credential updated = repository.save(credentialAdapter.verify(original, accountId).getCredential());
-        secretService.delete(attributesSecret);
-        return updated;
-    }
-
     public String getCloudPlatformByCredential(String credentialName, String accountId, CredentialType type) {
         if (!Strings.isNullOrEmpty(credentialName)) {
             try {
@@ -327,55 +272,6 @@ public class CredentialService extends AbstractCredentialService implements Comp
 
     Credential save(Credential credential) {
         return repository.save(credential);
-    }
-
-    private void validateDeploymentAddress(Credential credential) {
-        if (getAzureCodeGrantFlowAttributes(credential) == null || StringUtils.isEmpty(getAzureCodeGrantFlowAttributes(credential).getDeploymentAddress())) {
-            throw new BadRequestException(DEPLOYMENT_ADDRESS_ATTRIBUTE_NOT_FOUND);
-        }
-    }
-
-    private String getCodeGrantFlowAppLoginUrl(Credential credential) {
-        CodeGrantFlowAttributes azureCodeGrantFlowAttributes = getAzureCodeGrantFlowAttributes(credential);
-        Object appLoginUrl = Optional.ofNullable(azureCodeGrantFlowAttributes.getAppLoginUrl())
-                .orElseThrow(() -> new CredentialOperationException("Unable to obtain App login url!"));
-        return String.valueOf(appLoginUrl);
-    }
-
-    private Credential getCredentialByCodeGrantFlowState(@Nonnull String state, Set<Credential> credentials) {
-        return credentials.stream()
-                .filter(cred -> {
-                    CodeGrantFlowAttributes azureCodeGrantFlowAttributes = getAzureCodeGrantFlowAttributes(cred);
-                    return azureCodeGrantFlowAttributes != null && state.equalsIgnoreCase(azureCodeGrantFlowAttributes.getCodeGrantFlowState());
-                })
-                .findFirst()
-                .orElseThrow(notFound("Code grant flow based credential for user with state:", state));
-    }
-
-    private CodeGrantFlowAttributes getAzureCodeGrantFlowAttributes(Credential credential) {
-        CodeGrantFlowAttributes codeGrantFlowAttributes = null;
-        try {
-            CredentialAttributes credentialAttributes = new Json(credential.getAttributes()).get(CredentialAttributes.class);
-            if (credentialAttributes.getAzure() != null && credentialAttributes.getAzure().getCodeGrantFlowBased() != null) {
-                codeGrantFlowAttributes = credentialAttributes.getAzure().getCodeGrantFlowBased();
-            }
-        } catch (IOException e) {
-            LOGGER.warn("Attributes of credential '{}' could not get from JSON attributes", credential.getName());
-        }
-        return codeGrantFlowAttributes;
-    }
-
-    private void updateAuthorizationCodeOfAzureCredential(Credential credential, String authorizationCode) {
-        try {
-            CredentialAttributes credentialAttributes = new Json(credential.getAttributes()).get(CredentialAttributes.class);
-            if (credentialAttributes.getAzure() != null && credentialAttributes.getAzure().getCodeGrantFlowBased() != null) {
-                CodeGrantFlowAttributes codeGrantFlowAttributes = credentialAttributes.getAzure().getCodeGrantFlowBased();
-                codeGrantFlowAttributes.setAuthorizationCode(authorizationCode);
-                credential.setAttributes(new Json(credentialAttributes).getValue());
-            }
-        } catch (IOException e) {
-            LOGGER.info("Attributes of credential '{}' could not get from JSON attributes", credential.getName());
-        }
     }
 
     private String createCRN(@Nonnull String accountId) {

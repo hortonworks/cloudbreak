@@ -10,10 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.resources.models.Deployment;
+import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.resources.Deployment;
-import com.microsoft.azure.management.storage.StorageAccount;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorageAccountTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -48,7 +48,7 @@ public class AzureStorageAccountBuilderService {
                 LOGGER.debug("Created template deployment for storage account: {}", templateDeployment.exportTemplate().template());
             }
             return client.getStorageAccountByGroup(resourceGroupName, storageAccountName);
-        } catch (CloudException e) {
+        } catch (ManagementException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Storage account creation");
         } catch (Exception e) {
             String message = String.format("Could not create storage account %s in resource group %s%s",

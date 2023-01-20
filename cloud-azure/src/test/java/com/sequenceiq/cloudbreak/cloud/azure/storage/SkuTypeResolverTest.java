@@ -8,7 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.management.storage.StorageAccountSkuType;
+import com.azure.resourcemanager.storage.models.StorageAccountSkuType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 
 @ExtendWith(MockitoExtension.class)

@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.management.compute.VirtualMachine;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureVirtualMachineService;
@@ -49,7 +49,7 @@ public class AzureVerticalScaleService {
             Map<String, VirtualMachine> virtualMachinesByName = azureVirtualMachineService.getVirtualMachinesByName(
                     client,
                     resourceGroupName,
-                    instanceList.stream().map(e -> e.getInstanceId()).collect(Collectors.toSet()));
+                    instanceList.stream().map(CloudInstance::getInstanceId).collect(Collectors.toSet()));
 
             for (CloudInstance cloudInstance : instanceList) {
                 virtualMachinesByName.values()

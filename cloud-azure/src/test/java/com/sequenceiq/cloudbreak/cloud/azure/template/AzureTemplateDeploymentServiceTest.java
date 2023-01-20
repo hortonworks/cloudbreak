@@ -7,6 +7,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
@@ -15,13 +17,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.CloudError;
-import com.microsoft.azure.CloudException;
+import com.azure.core.management.exception.ManagementError;
+import com.azure.resourcemanager.compute.models.ApiError;
+import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureTestUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
@@ -74,9 +78,13 @@ class AzureTemplateDeploymentServiceTest {
         when(retry.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         when(azureUtils.getStackName(any())).thenReturn("stack1");
         AzureClient client = mock(AzureClient.class);
-        CloudError cloudError = new CloudError().withMessage("Error happened");
-        cloudError.details().add(new CloudError().withMessage("Please check the power state later"));
-        when(client.createTemplateDeployment(eq("rg1"), eq("stack1"), eq("template"), any())).thenThrow(new CloudException("Error", null, cloudError));
+        ApiError cloudError = AzureTestUtils.apiError(null, "Error happened");
+        List<ManagementError> details = new ArrayList<>();
+        AzureTestUtils.setDetails(cloudError, details);
+        ManagementError managementError = AzureTestUtils.managementError(null, "Please check the power state later");
+        details.add(managementError);
+        when(client.createTemplateDeployment(eq("rg1"), eq("stack1"), eq("template"), any()))
+                .thenThrow(new ApiErrorException("Error", null, cloudError));
 
         Retry.ActionFailedException actionFailedException = assertThrows(Retry.ActionFailedException.class,
                 () -> underTest.getTemplateDeployment(client, stack, ac, stackView, AzureInstanceTemplateOperation.PROVISION));

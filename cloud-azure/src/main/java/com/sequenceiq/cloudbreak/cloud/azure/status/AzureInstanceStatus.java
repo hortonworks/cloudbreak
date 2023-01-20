@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.microsoft.azure.management.compute.PowerState;
+import com.azure.resourcemanager.compute.models.PowerState;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 public class AzureInstanceStatus {

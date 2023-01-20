@@ -18,8 +18,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -41,7 +39,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -53,7 +50,6 @@ import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.v1.converter.CreateCredentialRequestToCredentialConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
@@ -285,28 +281,6 @@ class CredentialServiceTest {
     }
 
     @Test
-    void testInteractiveLogin() throws JsonProcessingException {
-        Map<String, String> testResult = Map.of("any", "any");
-        when(credentialAdapter.interactiveLogin(eq(ENV_CREDENTIAL), anyString())).thenReturn(testResult);
-        assertEquals(testResult, credentialServiceUnderTest.interactiveLogin("any", ENV_CREDENTIAL));
-    }
-
-    @Test
-    void testInteractiveLoginBadRequestNoDeploymentAddress() throws JsonProcessingException {
-        ENV_CREDENTIAL.setAttributes(getTestAttributes(STATE, null, REDIRECT_URL));
-        when(credentialAdapter.interactiveLogin(eq(ENV_CREDENTIAL), anyString())).thenReturn(Map.of("any", "any"));
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.interactiveLogin("any", ENV_CREDENTIAL));
-    }
-
-    @Test
-    void testInteractiveLoginBadRequestNoCorrectAttributes() throws JsonProcessingException {
-        CredentialAttributes azureAttributes = new CredentialAttributes();
-        ENV_CREDENTIAL.setAttributes(JsonUtil.writeValueAsString(azureAttributes));
-        when(credentialAdapter.interactiveLogin(eq(ENV_CREDENTIAL), anyString())).thenReturn(Map.of("any", "any"));
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.interactiveLogin("any", ENV_CREDENTIAL));
-    }
-
-    @Test
     void testUpdateByAccountIdNotFoundAndEnvironmentCredential() {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.empty());
@@ -482,106 +456,6 @@ class CredentialServiceTest {
         credentialServiceUnderTest.getPrerequisites(PLATFORM, false, DEPLOYMENT_ADDRESS, USER_ID, AUDIT);
         verify(credentialValidator).validateCredentialCloudPlatform(PLATFORM, USER_ID, AUDIT);
         verify(credentialPrerequisiteService).getPrerequisites(PLATFORM, false, DEPLOYMENT_ADDRESS, AUDIT);
-    }
-
-    @Test
-    void testInitCodeGrantFlow() {
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(ENV_CREDENTIAL);
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
-        String result = credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, ENV_CREDENTIAL, USER_ID);
-        assertEquals(REDIRECT_URL, result);
-        verify(repository).save(eq(ENV_CREDENTIAL));
-    }
-
-    @Test
-    void testInitCodeGrantFlowNoUrl() {
-        ENV_CREDENTIAL.setAttributes(getTestAttributes(STATE, DEPLOYMENT_ADDRESS, null));
-
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(ENV_CREDENTIAL);
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
-        assertThrows(CredentialOperationException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, ENV_CREDENTIAL, USER_ID));
-    }
-
-    @Test
-    void testInitCodeGrantFlowValidationErrorNotSaved() {
-        doThrow(BadRequestException.class).when(credentialValidator).validateCredentialCloudPlatform(anyString(), anyString(), any(CredentialType.class));
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, ENV_CREDENTIAL, USER_ID));
-        verify(repository, never()).save(eq(ENV_CREDENTIAL));
-    }
-
-    @Test
-    void testInitCodeGrantFlowAdapterErrorNotSaved() {
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenThrow(BadRequestException.class);
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, ENV_CREDENTIAL, USER_ID));
-        verify(repository, never()).save(eq(ENV_CREDENTIAL));
-    }
-
-    @Test
-    void testInitCodeGrantFlowNoDeploymentAddress() {
-        ENV_CREDENTIAL.setAttributes(getTestAttributes(STATE, null, REDIRECT_URL));
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(ENV_CREDENTIAL);
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, ENV_CREDENTIAL, USER_ID));
-        verify(repository, never()).save(eq(ENV_CREDENTIAL));
-    }
-
-    @Test
-    void testInitCodeGrantFlowExisting() {
-        when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Optional.of(ENV_CREDENTIAL));
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(ENV_CREDENTIAL);
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
-        String result = credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL_NAME);
-        assertEquals(REDIRECT_URL, result);
-        verify(repository).save(eq(ENV_CREDENTIAL));
-        verify(secretService).delete(eq(getTestAttributes(STATE, DEPLOYMENT_ADDRESS, REDIRECT_URL)));
-    }
-
-    @Test
-    void testInitCodeGrantFlowExistingButNot() {
-        when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL_NAME));
-        verify(repository, never()).save(any());
-        verify(secretService, never()).delete(anyString());
-    }
-
-    @Test
-    void testInitCodeGrantFlowExistingWithoutGrantFlow() {
-        ENV_CREDENTIAL.setAttributes(getTestAttributesWithCodeGrantFlow(null));
-        when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Optional.of(ENV_CREDENTIAL));
-        when(credentialAdapter.initCodeGrantFlow(any(), anyString())).thenReturn(ENV_CREDENTIAL);
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
-        assertThrows(UnsupportedOperationException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL_NAME));
-        verify(repository, never()).save(any());
-        verify(secretService, never()).delete(anyString());
-    }
-
-    @Test
-    void testAuthorizeCodeGrantFlowNotFound() {
-        when(repository.findAllByAccountId(eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Set.of());
-        assertThrows(NotFoundException.class,
-                () -> credentialServiceUnderTest.authorizeCodeGrantFlow(DIFFERENT_CODE, STATE, ACCOUNT_ID, "platform"));
-        verify(repository, never()).save(any());
-    }
-
-    @Test
-    void testAuthorizeCodeGrantFlowFoundButStateDoesNotMatch() {
-        ENV_CREDENTIAL.setAttributes(getTestAttributes(DIFFERENT_STATE, DEPLOYMENT_ADDRESS, REDIRECT_URL));
-        when(repository.findAllByAccountId(eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Set.of(ENV_CREDENTIAL));
-        assertThrows(NotFoundException.class,
-                () -> credentialServiceUnderTest.authorizeCodeGrantFlow(DIFFERENT_CODE, STATE, ACCOUNT_ID, "platform"));
-        verify(repository, never()).save(any());
-    }
-
-    @Test
-    void testAuthorizeCodeGrantFlowFoundStateMatches() throws IOException {
-        when(repository.save(any())).thenReturn(ENV_CREDENTIAL);
-        when(repository.findAllByAccountId(eq(ACCOUNT_ID), anyCollection(), any())).thenReturn(Set.of(ENV_CREDENTIAL));
-        when(credentialAdapter.verify(any(), anyString())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
-
-        Credential result =
-                credentialServiceUnderTest.authorizeCodeGrantFlow(DIFFERENT_CODE, STATE, ACCOUNT_ID, "platform");
-        CredentialAttributes resultAttributes = new Json(result.getAttributes()).get(CredentialAttributes.class);
-        assertEquals(DIFFERENT_CODE, resultAttributes.getAzure().getCodeGrantFlowBased().getAuthorizationCode());
     }
 
     private String getTestAttributes(String state, String deploymentAddress, String url) {

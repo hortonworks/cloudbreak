@@ -1,18 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
-import static com.microsoft.azure.management.compute.DiskSkuTypes.PREMIUM_LRS;
-import static com.microsoft.azure.management.compute.DiskSkuTypes.STANDARD_LRS;
-import static com.microsoft.azure.management.compute.DiskSkuTypes.STANDARD_SSD_LRS;
-import static com.microsoft.azure.management.compute.DiskSkuTypes.ULTRA_SSD_LRS;
-import static com.microsoft.azure.management.privatedns.v2018_09_01.ProvisioningState.SUCCEEDED;
+import static com.azure.resourcemanager.compute.models.DiskSkuTypes.PREMIUM_LRS;
+import static com.azure.resourcemanager.compute.models.DiskSkuTypes.STANDARD_LRS;
+import static com.azure.resourcemanager.compute.models.DiskSkuTypes.STANDARD_SSD_LRS;
+import static com.azure.resourcemanager.compute.models.DiskSkuTypes.ULTRA_SSD_LRS;
+import static com.azure.resourcemanager.privatedns.models.ProvisioningState.SUCCEEDED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.Collections.emptyMap;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,99 +22,97 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.management.Region;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.authorization.fluent.models.RoleAssignmentInner;
+import com.azure.resourcemanager.authorization.models.RoleAssignment;
+import com.azure.resourcemanager.authorization.models.RoleAssignments;
+import com.azure.resourcemanager.compute.ComputeManager;
+import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
+import com.azure.resourcemanager.compute.fluent.models.DiskInner;
+import com.azure.resourcemanager.compute.models.AvailabilitySet;
+import com.azure.resourcemanager.compute.models.CachingTypes;
+import com.azure.resourcemanager.compute.models.Disk;
+import com.azure.resourcemanager.compute.models.DiskEncryptionSetIdentityType;
+import com.azure.resourcemanager.compute.models.DiskEncryptionSetType;
+import com.azure.resourcemanager.compute.models.DiskSkuTypes;
+import com.azure.resourcemanager.compute.models.DiskStorageAccountTypes;
+import com.azure.resourcemanager.compute.models.Encryption;
+import com.azure.resourcemanager.compute.models.EncryptionSetIdentity;
+import com.azure.resourcemanager.compute.models.KeyForDiskEncryptionSet;
+import com.azure.resourcemanager.compute.models.OperatingSystemStateTypes;
+import com.azure.resourcemanager.compute.models.SourceVault;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
+import com.azure.resourcemanager.compute.models.VirtualMachineDataDisk;
+import com.azure.resourcemanager.compute.models.VirtualMachineInstanceView;
+import com.azure.resourcemanager.compute.models.VirtualMachineSize;
+import com.azure.resourcemanager.keyvault.models.AccessPolicy;
+import com.azure.resourcemanager.keyvault.models.AccessPolicyEntry;
+import com.azure.resourcemanager.keyvault.models.KeyPermissions;
+import com.azure.resourcemanager.keyvault.models.Vault;
+import com.azure.resourcemanager.marketplaceordering.MarketplaceOrderingManager;
+import com.azure.resourcemanager.marketplaceordering.models.AgreementTerms;
+import com.azure.resourcemanager.msi.models.Identity;
+import com.azure.resourcemanager.network.fluent.models.FrontendIpConfigurationInner;
+import com.azure.resourcemanager.network.models.LoadBalancer;
+import com.azure.resourcemanager.network.models.LoadBalancerFrontend;
+import com.azure.resourcemanager.network.models.LoadBalancingRule;
+import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.network.models.NetworkInterface;
+import com.azure.resourcemanager.network.models.NetworkInterfaces;
+import com.azure.resourcemanager.network.models.NetworkSecurityGroups;
+import com.azure.resourcemanager.network.models.PublicIpAddress;
+import com.azure.resourcemanager.network.models.Subnet;
+import com.azure.resourcemanager.privatedns.PrivateDnsZoneManager;
+import com.azure.resourcemanager.privatedns.fluent.models.VirtualNetworkLinkInner;
+import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
+import com.azure.resourcemanager.privatedns.models.VirtualNetworkLinkState;
+import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
+import com.azure.resourcemanager.resources.fluentcore.model.HasInnerModel;
+import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
+import com.azure.resourcemanager.resources.models.Deployment;
+import com.azure.resourcemanager.resources.models.DeploymentMode;
+import com.azure.resourcemanager.resources.models.DeploymentOperations;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
+import com.azure.resourcemanager.resources.models.ResourceGroups;
+import com.azure.resourcemanager.resources.models.Subscription;
+import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
+import com.azure.resourcemanager.storage.models.Kind;
+import com.azure.resourcemanager.storage.models.StorageAccount;
+import com.azure.resourcemanager.storage.models.StorageAccountKey;
+import com.azure.resourcemanager.storage.models.StorageAccounts;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobClientBuilder;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobContainerClientBuilder;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobProperties;
+import com.azure.storage.blob.models.BlobStorageException;
+import com.azure.storage.blob.options.BlobBeginCopyOptions;
+import com.azure.storage.common.StorageSharedKeyCredential;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.compute.AvailabilitySet;
-import com.microsoft.azure.management.compute.CachingTypes;
-import com.microsoft.azure.management.compute.Disk;
-import com.microsoft.azure.management.compute.DiskEncryptionSetIdentityType;
-import com.microsoft.azure.management.compute.DiskEncryptionSetType;
-import com.microsoft.azure.management.compute.DiskSkuTypes;
-import com.microsoft.azure.management.compute.DiskStorageAccountTypes;
-import com.microsoft.azure.management.compute.Encryption;
-import com.microsoft.azure.management.compute.EncryptionSetIdentity;
-import com.microsoft.azure.management.compute.KeyForDiskEncryptionSet;
-import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
-import com.microsoft.azure.management.compute.SourceVault;
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
-import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
-import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
-import com.microsoft.azure.management.compute.VirtualMachineSize;
-import com.microsoft.azure.management.compute.implementation.ComputeManager;
-import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
-import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetsInner;
-import com.microsoft.azure.management.compute.implementation.DiskInner;
-import com.microsoft.azure.management.graphrbac.RoleAssignment;
-import com.microsoft.azure.management.graphrbac.RoleAssignments;
-import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
-import com.microsoft.azure.management.keyvault.AccessPolicy;
-import com.microsoft.azure.management.keyvault.AccessPolicyEntry;
-import com.microsoft.azure.management.keyvault.KeyPermissions;
-import com.microsoft.azure.management.keyvault.Vault;
-import com.microsoft.azure.management.marketplaceordering.v2015_06_01.AgreementTerms;
-import com.microsoft.azure.management.marketplaceordering.v2015_06_01.implementation.MarketplaceOrderingManager;
-import com.microsoft.azure.management.msi.Identity;
-import com.microsoft.azure.management.network.LoadBalancer;
-import com.microsoft.azure.management.network.LoadBalancerFrontend;
-import com.microsoft.azure.management.network.LoadBalancingRule;
-import com.microsoft.azure.management.network.Network;
-import com.microsoft.azure.management.network.NetworkInterface;
-import com.microsoft.azure.management.network.NetworkInterfaces;
-import com.microsoft.azure.management.network.NetworkSecurityGroup;
-import com.microsoft.azure.management.network.NetworkSecurityGroups;
-import com.microsoft.azure.management.network.PublicIPAddress;
-import com.microsoft.azure.management.network.Subnet;
-import com.microsoft.azure.management.network.implementation.FrontendIPConfigurationInner;
-import com.microsoft.azure.management.privatedns.v2018_09_01.PrivateZone;
-import com.microsoft.azure.management.privatedns.v2018_09_01.VirtualNetworkLinkState;
-import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.VirtualNetworkLinkInner;
-import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.privatednsManager;
-import com.microsoft.azure.management.resources.Deployment;
-import com.microsoft.azure.management.resources.DeploymentMode;
-import com.microsoft.azure.management.resources.DeploymentOperations;
-import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.management.resources.ResourceGroups;
-import com.microsoft.azure.management.resources.Subscription;
-import com.microsoft.azure.management.resources.fluentcore.arm.AvailabilityZoneId;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
-import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
-import com.microsoft.azure.management.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
-import com.microsoft.azure.management.storage.Kind;
-import com.microsoft.azure.management.storage.ProvisioningState;
-import com.microsoft.azure.management.storage.StorageAccount;
-import com.microsoft.azure.management.storage.StorageAccount.DefinitionStages.WithCreate;
-import com.microsoft.azure.management.storage.StorageAccountKey;
-import com.microsoft.azure.management.storage.StorageAccountSkuType;
-import com.microsoft.azure.management.storage.StorageAccounts;
-import com.microsoft.azure.management.storage.implementation.StorageAccountInner;
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
-import com.microsoft.azure.storage.blob.CloudPageBlob;
-import com.microsoft.azure.storage.blob.CopyState;
-import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
-import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
-import rx.Completable;
-import rx.Observable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public class AzureClient {
 
@@ -128,52 +122,48 @@ public class AzureClient {
 
     private static final Pattern ENCRYPTION_KEY_URL_VAULT_NAME = Pattern.compile("https://([^.]+)\\.vault.*");
 
-    private final Azure azure;
+    private final AzureResourceManager azure;
 
-    private final privatednsManager privatednsManager;
+    private final PrivateDnsZoneManager privateDnsZoneManager;
 
     private final MarketplaceOrderingManager marketplaceOrderingManager;
 
-    private final AzureClientCredentials azureClientCredentials;
+    private final AzureClientFactory azureClientFactory;
 
-    private final AzureAuthExceptionHandler azureAuthExceptionHandler;
+    private final AzureExceptionHandler azureExceptionHandler;
 
     private final ComputeManager computeManager;
 
-    public AzureClient(AzureClientCredentials azureClientCredentials, AzureAuthExceptionHandler azureAuthExceptionHandler) {
-        this.azureClientCredentials = azureClientCredentials;
-        azure = azureClientCredentials.getAzure();
-        privatednsManager = azureClientCredentials.getPrivateDnsManager();
+    public AzureClient(AzureClientFactory azureClientCredentials, AzureExceptionHandler azureExceptionHandler) {
+        this.azureClientFactory = azureClientCredentials;
+        azure = azureClientCredentials.getAzureResourceManager();
+        privateDnsZoneManager = azureClientCredentials.getPrivateDnsManager();
         marketplaceOrderingManager = azureClientCredentials.getMarketplaceOrderingManager();
         computeManager = azureClientCredentials.getComputeManager();
-        this.azureAuthExceptionHandler = azureAuthExceptionHandler;
+        this.azureExceptionHandler = azureExceptionHandler;
     }
 
-    public Azure getAzure() {
+    public AzureResourceManager getAzure() {
         return azure;
     }
 
-    public Optional<String> getRefreshToken() {
-        return azureClientCredentials.getRefreshToken();
-    }
-
     public ResourceGroup getResourceGroup(String name) {
-        return handleAuthException(() -> azure.resourceGroups().getByName(name));
+        return handleException(() -> azure.resourceGroups().getByName(name));
     }
 
     public ResourceGroups getResourceGroups() {
-        return handleAuthException(azure::resourceGroups);
+        return handleException(azure::resourceGroups);
     }
 
-    public PagedList<Network> getNetworks() {
-        return handleAuthException(() -> azure.networks().list());
+    public AzureListResult<Network> getNetworks() {
+        return handleException(() -> new AzureListResult<>(azure.networks().list()));
     }
 
     public boolean resourceGroupExists(String name) {
         try {
             return getResourceGroups().contain(name);
-        } catch (CloudException e) {
-            if (e.getMessage().contains("Status code 403")) {
+        } catch (ManagementException e) {
+            if (azureExceptionHandler.isForbidden(e)) {
                 LOGGER.info("Resource group {} does not exist or insufficient permission to access it, exception: {}", name, e);
                 return false;
             }
@@ -182,18 +172,18 @@ public class AzureClient {
     }
 
     public void deleteResourceGroup(String name) {
-        handleAuthException(() -> azure.resourceGroups().deleteByName(name));
+        handleException(() -> azure.resourceGroups().deleteByName(name));
     }
 
     public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags) {
-        return handleAuthException(() -> azure.resourceGroups().define(name)
+        return handleException(() -> azure.resourceGroups().define(name)
                 .withRegion(region)
                 .withTags(tags)
                 .create());
     }
 
     public Deployment createTemplateDeployment(String resourceGroupName, String deploymentName, String templateContent, String parameterContent) {
-        return handleAuthException(() -> {
+        return handleException(() -> {
             try {
                 return azure.deployments().define(deploymentName)
                         .withExistingResourceGroup(resourceGroupName)
@@ -208,122 +198,74 @@ public class AzureClient {
     }
 
     public boolean templateDeploymentExists(String resourceGroupName, String deploymentName) {
-        return handleAuthException(() -> azure.deployments().checkExistence(resourceGroupName, deploymentName));
+        return handleException(() -> azure.deployments().checkExistence(resourceGroupName, deploymentName));
     }
 
     public ResourceStatus getTemplateDeploymentStatus(String resourceGroupName, String deploymentName) {
-        return handleAuthException(() -> Optional.ofNullable(getTemplateDeployment(resourceGroupName, deploymentName)))
+        return handleException(() -> Optional.ofNullable(getTemplateDeployment(resourceGroupName, deploymentName)))
                 .map(Deployment::provisioningState)
                 .map(AzureStatusMapper::mapResourceStatus)
                 .orElse(ResourceStatus.DELETED);
     }
 
     public CommonStatus getTemplateDeploymentCommonStatus(String resourceGroupName, String deploymentName) {
-        return handleAuthException(() -> Optional.ofNullable(getTemplateDeployment(resourceGroupName, deploymentName)))
+        return handleException(() -> Optional.ofNullable(getTemplateDeployment(resourceGroupName, deploymentName)))
                 .map(Deployment::provisioningState)
                 .map(AzureStatusMapper::mapCommonStatus)
                 .orElse(CommonStatus.DETACHED);
     }
 
     public void deleteTemplateDeployment(String resourceGroupName, String deploymentName) {
-        handleAuthException(() -> azure.deployments().deleteByResourceGroup(resourceGroupName, deploymentName));
+        handleException(() -> azure.deployments().deleteByResourceGroup(resourceGroupName, deploymentName));
     }
 
     public Deployment getTemplateDeployment(String resourceGroupName, String deploymentName) {
-        return handleAuthException(() -> azure.deployments().getByResourceGroup(resourceGroupName, deploymentName));
+        return handleException(() -> azure.deployments().getByResourceGroup(resourceGroupName, deploymentName));
     }
 
     public DeploymentOperations getTemplateDeploymentOperations(String resourceGroupName, String deploymentName) {
-        return handleAuthException(() -> getTemplateDeployment(resourceGroupName, deploymentName).deploymentOperations());
-    }
-
-    public void cancelTemplateDeployment(String resourceGroupName, String deploymentName) {
-        handleAuthException(() -> getTemplateDeployment(resourceGroupName, deploymentName).cancel());
+        return handleException(() -> getTemplateDeployment(resourceGroupName, deploymentName).deploymentOperations());
     }
 
     public StorageAccounts getStorageAccounts() {
-        return handleAuthException(azure::storageAccounts);
+        return handleException(azure::storageAccounts);
     }
 
-    public void deleteStorageAccount(String resourceGroup, String storageName) {
-        handleAuthException(() -> azure.storageAccounts().deleteByResourceGroup(resourceGroup, storageName));
-    }
-
-    public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, StorageAccountSkuType accType,
-            Boolean encryted,
-            Map<String, String> tags) {
-        return handleAuthException(() -> {
-            WithCreate withCreate = azure.storageAccounts()
-                    .define(storageName)
-                    .withRegion(storageLocation)
-                    .withExistingResourceGroup(resourceGroup)
-                    .withTags(tags)
-                    .withSku(accType)
-                    .withOnlyHttpsTraffic()
-                    .withGeneralPurposeAccountKindV2();
-            if (encryted) {
-                withCreate.withBlobEncryption();
-            }
-
-            return withCreate.create();
-        });
-    }
-
-    public List<StorageAccountKey> getStorageAccountKeys(String resourceGroup, String storageName) {
-        return getStorageAccountByGroup(resourceGroup, storageName).getKeys();
-    }
-
-    public ProvisioningState getStorageStatus(String resourceGroup, String storageName) {
-        return getStorageAccountByGroup(resourceGroup, storageName).provisioningState();
+    public StorageAccountKey getStorageAccountKey(String resourceGroup, String storageName) {
+        List<StorageAccountKey> keys = getStorageAccountByGroup(resourceGroup, storageName).getKeys();
+        if (CollectionUtils.isEmpty(keys)) {
+            throw new CloudConnectorException("Not found access key for " + storageName + " storage account.");
+        }
+        return keys.get(0);
     }
 
     public StorageAccount getStorageAccountByGroup(String resourceGroup, String storageName) {
-        return handleAuthException(() -> azure.storageAccounts().getByResourceGroup(resourceGroup, storageName));
+        return handleException(() -> azure.storageAccounts().getByResourceGroup(resourceGroup, storageName));
     }
 
     public Optional<StorageAccount> getStorageAccount(String storageName, Kind accountKind) {
-        return handleAuthException(() -> azure.storageAccounts().list().stream()
+        return handleException(() -> azure.storageAccounts().list().stream()
                 .filter(account -> account.kind().equals(accountKind)
                         && account.name().equalsIgnoreCase(storageName))
                 .findAny());
     }
 
     public Optional<StorageAccountInner> getStorageAccountBySubscription(String storageName, String subscriptionId, Kind accountKind) {
-        return azure.storageAccounts().manager().inner().withSubscriptionId(subscriptionId).storageAccounts().list().stream()
+        return azureClientFactory.getAzureResourceManager(subscriptionId)
+                .storageAccounts()
+                .list()
+                .stream()
                 .filter(account -> account.kind().equals(accountKind) && account.name().equalsIgnoreCase(storageName))
+                .map(HasInnerModel::innerModel)
                 .findAny();
     }
 
-    public void deleteContainerInStorage(String resourceGroup, String storageName, String containerName) {
-        LOGGER.debug("delete container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
-        CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
-        try {
-            boolean existed = container.deleteIfExists();
-            LOGGER.debug("Is container existed: " + existed);
-        } catch (StorageException e) {
-            throw new CloudConnectorException("can't delete container in storage, storage service error occurred", e);
-        }
-    }
-
-    public void deleteBlobInStorageContainer(String resourceGroup, String storageName, String containerName, String blobName) {
-        LOGGER.debug("delete blob: RG={}, storageName={}, containerName={}, blobName={}", resourceGroup, storageName, containerName, blobName);
-        CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
-        try {
-            CloudBlockBlob blob = container.getBlockBlobReference(blobName);
-            boolean wasDeleted = blob.deleteIfExists();
-            LOGGER.debug("Blob was deleted: " + wasDeleted);
-        } catch (URISyntaxException e) {
-            throw new CloudConnectorException("can't delete blob in storage container, URI is not valid", e);
-        } catch (StorageException e) {
-            throw new CloudConnectorException("can't delete blob in storage container, storage service error occurred", e);
-        }
-    }
-
-    public Disk createManagedDisk(String diskName, int diskSize, AzureDiskType diskType, String region, String resourceGroupName, Map<String, String> tags,
+    public Disk createManagedDisk(
+            String diskName, int diskSize, AzureDiskType diskType, String region, String resourceGroupName, Map<String, String> tags,
             String diskEncryptionSetId) {
         LOGGER.debug("create managed disk with name={}", diskName);
         Disk.DefinitionStages.WithCreate withCreate = azure.disks().define(diskName)
-                .withRegion(Region.findByLabelOrName(region))
+                .withRegion(RegionUtil.findByLabelOrName(region))
                 .withExistingResourceGroup(resourceGroupName)
                 .withData()
                 .withSizeInGB(diskSize)
@@ -340,7 +282,7 @@ public class AzureClient {
             Encryption encryption = new Encryption();
             encryption.withDiskEncryptionSetId(diskEncryptionSetId);
             // WithCreate is actually a DiskImpl instance, but that type is not visible.
-            DiskInner inner = (DiskInner) ((IndexableRefreshableWrapperImpl) withCreate).inner();
+            DiskInner inner = (DiskInner) ((IndexableRefreshableWrapperImpl) withCreate).innerModel();
             inner.withEncryption(encryption);
         }
     }
@@ -358,7 +300,7 @@ public class AzureClient {
         }
         // This is needed because of bug https://github.com/Azure/azure-libraries-for-java/issues/632
         // It affects the VM-s launched from Azure Marketplace images
-        vm.inner().withPlan(null);
+        vm.innerModel().withPlan(null);
         vm.update()
                 .withExistingDataDisk(disk)
                 .withDataDiskDefaultCachingType(cachingTypes)
@@ -378,8 +320,8 @@ public class AzureClient {
         vm.update().withoutDataDisk(lun).apply();
     }
 
-    public PagedList<Disk> listDisksByResourceGroup(String resourceGroupName) {
-        return azure.disks().listByResourceGroup(resourceGroupName);
+    public AzureListResult<Disk> listDisksByResourceGroup(String resourceGroupName) {
+        return AzureListResult.listByResourceGroup(azure.disks(), resourceGroupName);
     }
 
     public Disk getDiskById(String id) {
@@ -387,43 +329,42 @@ public class AzureClient {
     }
 
     public Disk getDiskByName(String resourceGroupName, String diskName) {
-        return azure.disks().getByResourceGroup(resourceGroupName, diskName);
+        return handleException(() -> azure.disks().getByResourceGroup(resourceGroupName, diskName));
     }
 
-    public Observable<String> deleteManagedDisksAsync(Collection<String> ids) {
+    public Flux<String> deleteManagedDisksAsync(Collection<String> ids) {
         LOGGER.debug("delete managed disk: id={}", ids);
-        return handleAuthException(() -> azure.disks().deleteByIdsAsync(ids));
+        return handleException(() -> azure.disks().deleteByIdsAsync(ids));
     }
 
-    public Completable deleteManagedDiskAsync(String resourceGroup, String name) {
-        return handleAuthException(() -> azure.disks().deleteByResourceGroupAsync(resourceGroup, name));
+    public Mono<Void> deleteManagedDiskAsync(String resourceGroup, String name) {
+        return handleException(() -> azure.disks().deleteByResourceGroupAsync(resourceGroup, name));
     }
 
     public DiskSkuTypes convertAzureDiskTypeToDiskSkuTypes(AzureDiskType diskType) {
         return Objects.nonNull(diskType) ? DiskSkuTypes.fromStorageAccountType(DiskStorageAccountTypes.fromString(diskType.value()))
-                : DiskSkuTypes.STANDARD_LRS;
+                : STANDARD_LRS;
     }
 
     public void createContainerInStorage(String resourceGroup, String storageName, String containerName) {
-        LOGGER.debug("create container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
-        CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
-            boolean created = container.createIfNotExists();
+            LOGGER.debug("create container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
+            boolean created = getBlobContainerClient(resourceGroup, storageName, containerName).createIfNotExists();
             LOGGER.debug("Container created: " + created);
-        } catch (StorageException e) {
+        } catch (BlobStorageException e) {
             throw new CloudConnectorException("can't create container in storage, storage service error occurred", e);
         }
     }
 
     public VirtualMachineCustomImage findImage(String resourceGroup, String imageName) {
         LOGGER.debug("Searching custom image {} in resource group {}", imageName, resourceGroup);
-        return azureAuthExceptionHandler.handleAuthException(() -> azure
+        return azureExceptionHandler.handleException(() -> azure
                 .virtualMachineCustomImages()
                 .getByResourceGroup(resourceGroup, imageName));
     }
 
     public VirtualMachineCustomImage createImage(String imageName, String resourceGroup, String fromVhdUri, String region) {
-        return handleAuthException(() -> {
+        return handleException(() -> {
             LOGGER.info("check the existence of resource group '{}', creating if it doesn't exist on Azure side", resourceGroup);
             if (!azure.resourceGroups().contain(resourceGroup)) {
                 LOGGER.info("Creating resource group: {}", resourceGroup);
@@ -444,102 +385,97 @@ public class AzureClient {
         });
     }
 
-    public Observable<AgreementTerms> signImageConsent(AzureMarketplaceImage azureMarketplaceImage) {
+    public AgreementTerms signImageConsent(AzureMarketplaceImage azureMarketplaceImage) {
         return marketplaceOrderingManager.marketplaceAgreements()
-                .signAsync(azureMarketplaceImage.getPublisherId(), azureMarketplaceImage.getOfferId(), azureMarketplaceImage.getPlanId());
+                .sign(azureMarketplaceImage.getPublisherId(), azureMarketplaceImage.getOfferId(), azureMarketplaceImage.getPlanId());
     }
 
     public void copyImageBlobInStorageContainer(String resourceGroup, String storageName, String containerName, String sourceBlob, String sourceBlobName) {
-        LOGGER.debug("copy image in storage container: RG={}, storageName={}, containerName={}, sourceBlob={}",
-                resourceGroup, storageName, containerName, sourceBlob);
-        CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
-            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlobName);
-            String copyId = cloudPageBlob.startCopy(new URI(sourceBlob));
+            LOGGER.debug("copy image in storage container: RG={}, storageName={}, containerName={}, sourceBlob={}",
+                    resourceGroup, storageName, containerName, sourceBlob);
+            String copyId = getBlobClient(resourceGroup, storageName, containerName, sourceBlobName)
+                    .getPageBlobClient()
+                    .beginCopy(new BlobBeginCopyOptions(sourceBlob))
+                    .poll()
+                    .getValue()
+                    .getCopyId();
             LOGGER.debug("Image copy started, copy id: {}", copyId);
-        } catch (URISyntaxException e) {
-            throw new CloudConnectorException("can't copy image blob, URI is not valid", e);
-        } catch (StorageException e) {
+        } catch (BlobStorageException e) {
             throw new CloudConnectorException("can't copy image blob, storage service error occurred", e);
         }
     }
 
     public CopyState getCopyStatus(String resourceGroup, String storageName, String containerName, String sourceBlobName) {
-        LOGGER.debug("get image copy status: RG={}, storageName={}, containerName={}, sourceBlob={}",
-                resourceGroup, storageName, containerName, sourceBlobName);
-        CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
-            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlobName);
-            LOGGER.debug("Downloading {} container attributes.", container.getName());
-            container.downloadAttributes();
-            LOGGER.debug("Downloading {} cloudPageBlob attributes.", cloudPageBlob.getName());
-            cloudPageBlob.downloadAttributes();
-            return cloudPageBlob.getCopyState();
-        } catch (URISyntaxException e) {
-            throw new CloudConnectorException("can't get copy status, URI is not valid", e);
-        } catch (StorageException e) {
+            LOGGER.debug("get image copy status: RG={}, storageName={}, containerName={}, sourceBlob={}",
+                    resourceGroup, storageName, containerName, sourceBlobName);
+            BlobClient blobClient = getBlobClient(resourceGroup, storageName, containerName, sourceBlobName);
+            BlobProperties blobProperties = blobClient.getProperties();
+            CopyState copyState = CopyState.of(blobProperties.getCopyStatus(), blobProperties.getCopyProgress());
+            LOGGER.info("Copy state: {}", copyState);
+            return copyState;
+        } catch (BlobStorageException e) {
             throw new CloudConnectorException("can't get copy status, storage service error occurred", e);
         }
     }
 
     public String getImageBlobUri(String resourceGroup, String storageName, String containerName, String vhdName) {
-        CloudBlobContainer blobContainer = getBlobContainer(resourceGroup, storageName, containerName);
         try {
-            CloudPageBlob pageBlobReference = blobContainer.getPageBlobReference(vhdName);
-            return pageBlobReference.getUri().toString();
-        } catch (URISyntaxException e) {
-            throw new CloudConnectorException("can't get image blob uri, URI is not valid", e);
-        } catch (StorageException e) {
+            return getBlobClient(resourceGroup, storageName, containerName, vhdName).getBlobUrl();
+        } catch (BlobStorageException e) {
             throw new CloudConnectorException("can't get image blob uri, storage service error occurred", e);
         }
     }
 
-    public List<ListBlobItem> listBlobInStorage(String resourceGroup, String storageName, String containerName) {
-        CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
-        List<ListBlobItem> targetCollection = new ArrayList<>();
+    public List<BlobItem> listBlobInStorage(String resourceGroup, String storageName, String containerName) {
         try {
-            container.downloadAttributes();
-            container.listBlobs().iterator().forEachRemaining(targetCollection::add);
+            return new AzureListResult<>(getBlobContainerClient(resourceGroup, storageName, containerName).listBlobs()).getAll();
         } catch (Exception e) {
             LOGGER.warn("Failed to list blobs in storage: {}.", storageName);
             throw new CloudConnectorException(e);
         }
-        return targetCollection;
     }
 
-    public CloudBlobContainer getBlobContainer(String resourceGroup, String storageName, String containerName) {
+    public BlobContainerClient getBlobContainerClient(String resourceGroup, String storageName, String containerName) {
         LOGGER.debug("get blob container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
-        List<StorageAccountKey> keys = getStorageAccountKeys(resourceGroup, storageName);
-        String storageConnectionString = String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", storageName, keys.get(0).value());
+        StorageAccountKey key = getStorageAccountKey(resourceGroup, storageName);
         try {
-            CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
-            CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
-            CloudBlobContainer containerReference = blobClient.getContainerReference(containerName);
-            LOGGER.debug("Blob container {} reference retrieved.", containerReference.getName());
-            return containerReference;
-        } catch (URISyntaxException e) {
-            throw new CloudConnectorException("can't get blob container, URI is not valid", e);
-        } catch (InvalidKeyException e) {
-            throw new CloudConnectorException("can't get blob container, credentials in the connection string contain an invalid key", e);
-        } catch (StorageException e) {
+            return azureClientFactory.configureDefault(new BlobContainerClientBuilder())
+                    .endpoint("https://" + storageName + ".blob.core.windows.net")
+                    .containerName(containerName)
+                    .credential(new StorageSharedKeyCredential(storageName, key.value()))
+                    .buildClient();
+        } catch (BlobStorageException e) {
             throw new CloudConnectorException("can't get blob container, storage service error occurred", e);
         }
     }
 
-    public PagedList<VirtualMachine> getVirtualMachines(String resourceGroup) {
-        return handleAuthException(() -> azure.virtualMachines().listByResourceGroup(resourceGroup));
+    public BlobClient getBlobClient(String resourceGroup, String storageName, String containerName, String blobName) {
+        LOGGER.debug("get blob container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
+        StorageAccountKey key = getStorageAccountKey(resourceGroup, storageName);
+        try {
+            return azureClientFactory.configureDefault(new BlobClientBuilder())
+                    .endpoint("https://" + storageName + ".blob.core.windows.net")
+                    .containerName(containerName)
+                    .blobName(blobName)
+                    .credential(new StorageSharedKeyCredential(storageName, key.value()))
+                    .buildClient();
+        } catch (BlobStorageException e) {
+            throw new CloudConnectorException("can't get blob client, storage service error occurred", e);
+        }
+    }
+
+    public AzureListResult<VirtualMachine> getVirtualMachines(String resourceGroup) {
+        return handleException(() -> AzureListResult.listByResourceGroup(azure.virtualMachines(), resourceGroup));
     }
 
     public VirtualMachine getVirtualMachineByResourceGroup(String resourceGroup, String vmName) {
-        return handleAuthException(() -> azure.virtualMachines().getByResourceGroup(resourceGroup, vmName));
+        return handleException(() -> azure.virtualMachines().getByResourceGroup(resourceGroup, vmName));
     }
 
     public VirtualMachine getVirtualMachine(String vmId) {
-        return handleAuthException(() -> azure.virtualMachines().getById(vmId));
-    }
-
-    public Observable<VirtualMachine> getVirtualMachineAsync(String resourceGroup, String vmName) {
-        return handleAuthException(() -> azure.virtualMachines().getByResourceGroupAsync(resourceGroup, vmName));
+        return handleException(() -> azure.virtualMachines().getById(vmId));
     }
 
     public VirtualMachineInstanceView getVirtualMachineInstanceView(String resourceGroup, String vmName) {
@@ -547,7 +483,7 @@ public class AzureClient {
     }
 
     public Set<AvailabilityZoneId> getAvailabilityZone(String resourceGroup, String vmName) {
-        return handleAuthException(() -> {
+        return handleException(() -> {
             VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, vmName);
             return Objects.nonNull(vm) ? vm.availabilityZones() : Collections.emptySet();
         });
@@ -557,157 +493,114 @@ public class AzureClient {
         return getVirtualMachineInstanceView(resourceGroup, vmName).platformFaultDomain();
     }
 
-    public Integer getUpdateDomainNumber(String resourceGroup, String vmName) {
-        return getVirtualMachineInstanceView(resourceGroup, vmName).platformUpdateDomain();
-    }
-
     public AvailabilitySet getAvailabilitySet(String resourceGroup, String asName) {
-        return handleAuthException(() -> azure.availabilitySets().getByResourceGroup(resourceGroup, asName));
+        return handleException(() -> azure.availabilitySets().getByResourceGroup(resourceGroup, asName));
     }
 
-    public Completable deleteLoadBalancerAsync(String resourceGroup, String loadBalancerName) {
-        return handleAuthException(() -> azure.loadBalancers().deleteByResourceGroupAsync(resourceGroup, loadBalancerName));
+    public Mono<Void> deleteLoadBalancerAsync(String resourceGroup, String loadBalancerName) {
+        return handleException(() -> azure.loadBalancers().deleteByResourceGroupAsync(resourceGroup, loadBalancerName));
     }
 
-    public void deleteAvailabilitySet(String resourceGroup, String asName) {
-        handleAuthException(() -> azure.availabilitySets().deleteByResourceGroup(resourceGroup, asName));
+    public Mono<Void> deleteAvailabilitySetAsync(String resourceGroup, String asName) {
+        return handleException(() -> azure.availabilitySets().deleteByResourceGroupAsync(resourceGroup, asName));
     }
 
-    public Completable deleteAvailabilitySetAsync(String resourceGroup, String asName) {
-        return handleAuthException(() -> azure.availabilitySets().deleteByResourceGroupAsync(resourceGroup, asName));
+    public Mono<Void> deallocateVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
     }
 
-    public Completable deallocateVirtualMachineAsync(String resourceGroup, String vmName) {
-        return handleAuthException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
+    public Mono<Void> deleteVirtualMachine(String resourceGroup, String vmName) {
+        return handleException(() -> azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, vmName));
     }
 
-    public Completable deleteVirtualMachine(String resourceGroup, String vmName) {
-        return handleAuthException(() -> azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, vmName));
+    public Mono<Void> startVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName));
     }
 
-    public Completable startVirtualMachineAsync(String resourceGroup, String vmName) {
-        return handleAuthException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName));
+    public Mono<Void> stopVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleException(() -> azure.virtualMachines().powerOffAsync(resourceGroup, vmName));
     }
 
-    public Completable rebootVirtualMachineAsync(String resourceGroup, String vmName) {
-        return handleAuthException(() -> azure.virtualMachines().restartAsync(resourceGroup, vmName));
+    public Mono<Void> deletePublicIpAddressByNameAsync(String resourceGroup, String ipName) {
+        return handleException(() -> azure.publicIpAddresses().deleteByResourceGroupAsync(resourceGroup, ipName));
     }
 
-    public void stopVirtualMachine(String resourceGroup, String vmName) {
-        handleAuthException(() -> azure.virtualMachines().powerOff(resourceGroup, vmName));
+    public Flux<String> deleteSecurityGroupsAsnyc(Collection<String> ids) {
+        return handleException(() -> azure.networkSecurityGroups().deleteByIdsAsync(ids));
     }
 
-    public Completable stopVirtualMachineAsync(String resourceGroup, String vmName) {
-        return handleAuthException(() -> azure.virtualMachines().powerOffAsync(resourceGroup, vmName));
+    public AzureListResult<PublicIpAddress> getPublicIpAddresses(String resourceGroup) {
+        return handleException(() -> AzureListResult.listByResourceGroup(azure.publicIpAddresses(), resourceGroup));
     }
 
-    public Completable deletePublicIpAddressByNameAsync(String resourceGroup, String ipName) {
-        return handleAuthException(() -> azure.publicIPAddresses().deleteByResourceGroupAsync(resourceGroup, ipName));
+    public Mono<Void> deleteNetworkInterfaceAsync(String resourceGroup, String networkInterfaceName) {
+        return handleException(() -> azure.networkInterfaces().deleteByResourceGroupAsync(resourceGroup, networkInterfaceName));
     }
 
-    public Observable<String> deleteSecurityGroupsAsnyc(Collection<String> ids) {
-        return handleAuthException(() -> azure.networkSecurityGroups().deleteByIdsAsync(ids));
-    }
-
-    public void deletePublicIpAddressById(String ipId) {
-        handleAuthException(() -> azure.publicIPAddresses().deleteById(ipId));
-    }
-
-    public HasId getPublicIpAddress(String resourceGroup, String ipName) {
-        return handleAuthException(() -> azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName));
-    }
-
-    public PagedList<PublicIPAddress> getPublicIpAddresses(String resourceGroup) {
-        return handleAuthException(() -> azure.publicIPAddresses().listByResourceGroup(resourceGroup));
-    }
-
-    public PublicIPAddress getPublicIpAddressById(String ipId) {
-        return handleAuthException(() -> azure.publicIPAddresses().getById(ipId));
-    }
-
-    public Completable deleteNetworkInterfaceAsync(String resourceGroup, String networkInterfaceName) {
-        return handleAuthException(() -> azure.networkInterfaces().deleteByResourceGroupAsync(resourceGroup, networkInterfaceName));
-    }
-
-    public NetworkInterface getNetworkInterface(String resourceGroup, String networkInterfaceName) {
-        return handleAuthException(() -> azure.networkInterfaces().getByResourceGroup(resourceGroup, networkInterfaceName));
-    }
-
-    public PagedList<NetworkInterface> getNetworkInterfaces(String resourceGroup) {
-        return handleAuthException(() -> azure.networkInterfaces().listByResourceGroup(resourceGroup));
+    public AzureListResult<NetworkInterface> getNetworkInterfaces(String resourceGroup) {
+        return handleException(() -> AzureListResult.listByResourceGroup(azure.networkInterfaces(), resourceGroup));
     }
 
     public List<NetworkInterface> getNetworkInterfaceListByNames(String resourceGroup, Collection<String> attachedNetworkInterfaces) {
-        PagedList<NetworkInterface> networkInterfaces = getNetworkInterfaces(resourceGroup);
-        networkInterfaces.loadAll();
-        return networkInterfaces.stream()
+        return getNetworkInterfaces(resourceGroup)
+                .getStream()
                 .filter(networkInterface -> attachedNetworkInterfaces
                         .contains(networkInterface.name()))
                 .collect(Collectors.toList());
     }
 
-    public NetworkInterface getNetworkInterfaceById(String networkInterfaceId) {
-        return handleAuthException(() -> azure.networkInterfaces().getById(networkInterfaceId));
-    }
-
     public NetworkInterfaces getNetworkInterfaces() {
-        return handleAuthException(azure::networkInterfaces);
+        return handleException(azure::networkInterfaces);
     }
 
     public Subnet getSubnetProperties(String resourceGroup, String virtualNetwork, String subnet) {
-        return handleAuthException(() -> {
+        return handleException(() -> {
             Network networkByResourceGroup = getNetworkByResourceGroup(resourceGroup, virtualNetwork);
             return networkByResourceGroup == null ? null : networkByResourceGroup.subnets().get(subnet);
         });
     }
 
     public Network getNetworkByResourceGroup(String resourceGroup, String virtualNetwork) {
-        return handleAuthException(() -> azure.networks().getByResourceGroup(resourceGroup, virtualNetwork));
+        return handleException(() -> azure.networks().getByResourceGroup(resourceGroup, virtualNetwork));
     }
 
     public Map<String, Subnet> getSubnets(String resourceGroup, String virtualNetwork) {
-        return handleAuthException(() -> {
+        return handleException(() -> {
             Network network = getNetworkByResourceGroup(resourceGroup, virtualNetwork);
             return network == null ? emptyMap() : network.subnets();
         });
     }
 
-    public Observable<String> deleteNetworksAsync(Collection<String> networkIds) {
-        return handleAuthException(() -> azure.networks().deleteByIdsAsync(networkIds));
+    public Flux<String> deleteNetworksAsync(Collection<String> networkIds) {
+        return handleException(() -> azure.networks().deleteByIdsAsync(networkIds));
     }
 
     public void deleteNetworkInResourceGroup(String resourceGroup, String networkId) {
-        handleAuthException(() -> azure.networks().deleteByResourceGroup(resourceGroup, networkId));
+        handleException(() -> azure.networks().deleteByResourceGroup(resourceGroup, networkId));
     }
 
-    public Observable<String> deleteStorageAccountsAsync(Collection<String> accountIds) {
-        return handleAuthException(() -> azure.storageAccounts().deleteByIdsAsync(accountIds));
+    public Flux<String> deleteStorageAccountsAsync(Collection<String> accountIds) {
+        return handleException(() -> azure.storageAccounts().deleteByIdsAsync(accountIds));
     }
 
-    public Observable<String> deleteImagesAsync(Collection<String> imageIds) {
-        return handleAuthException(() -> azure.virtualMachineCustomImages().deleteByIdsAsync(imageIds));
+    public Flux<String> deleteImagesAsync(Collection<String> imageIds) {
+        return handleException(() -> azure.virtualMachineCustomImages().deleteByIdsAsync(imageIds));
     }
 
     public NetworkSecurityGroups getSecurityGroups() {
-        return handleAuthException(azure::networkSecurityGroups);
-    }
-
-    public NetworkSecurityGroup getSecurityGroupProperties(String resourceGroup, String securityGroup) {
-        return handleAuthException(() -> azure.networkSecurityGroups().getByResourceGroup(resourceGroup, securityGroup));
+        return handleException(azure::networkSecurityGroups);
     }
 
     public Set<VirtualMachineSize> getVmTypes(String region) throws ProviderAuthenticationFailedException {
-        return handleAuthException(() -> {
+        return handleException(() -> {
             Set<VirtualMachineSize> resultList = new HashSet<>();
             if (region == null) {
                 for (Region tmpRegion : Region.values()) {
-                    PagedList<VirtualMachineSize> virtualMachineSizes = azure.virtualMachines().sizes()
-                            .listByRegion(Region.findByLabelOrName(tmpRegion.label()));
-                    getAllElement(virtualMachineSizes, resultList);
+                    resultList.addAll(AzureListResult.listByRegion(azure.virtualMachines().sizes(), tmpRegion.label()).getAll());
                 }
+            } else {
+                resultList.addAll(AzureListResult.listByRegion(azure.virtualMachines().sizes(), region).getAll());
             }
-            PagedList<VirtualMachineSize> virtualMachineSizes = azure.virtualMachines().sizes().listByRegion(Region.findByLabelOrName(region));
-            getAllElement(virtualMachineSizes, resultList);
             return resultList;
         });
     }
@@ -723,24 +616,19 @@ public class AzureClient {
         return resultList;
     }
 
-    private Set<VirtualMachineSize> getAllElement(Collection<VirtualMachineSize> virtualMachineSizes, Set<VirtualMachineSize> resultList) {
-        resultList.addAll(virtualMachineSizes);
-        return resultList;
-    }
-
     public LoadBalancer getLoadBalancer(String resourceGroupName, String loadBalancerName) {
-        return handleAuthException(() -> azure.loadBalancers().getByResourceGroup(resourceGroupName, loadBalancerName));
+        return handleException(() -> azure.loadBalancers().getByResourceGroup(resourceGroupName, loadBalancerName));
     }
 
     /**
      * Returns the IP addresses associated with a particular Load Balancer in a particular Azure Resource Group.
-     *
+     * <p>
      * Load balancer type is used to determine whether to return private or public IP addresses, it's possible for a
      * load balancer to have both private and public IP addresses.
      *
      * @param resourceGroupName the name of the resource group containing the load balancer
-     * @param loadBalancerName the name of the load balancer
-     * @param loadBalancerType corresponds to load balancer IP address types to retrieve.
+     * @param loadBalancerName  the name of the load balancer
+     * @param loadBalancerType  corresponds to load balancer IP address types to retrieve.
      * @return IP addresses
      */
     public List<String> getLoadBalancerIps(String resourceGroupName, String loadBalancerName, LoadBalancerType loadBalancerType) {
@@ -758,12 +646,13 @@ public class AzureClient {
     }
 
     private List<String> getLoadBalancerIps(String resourceGroupName, String loadBalancerName) {
-        List<String> idsAssociatedWithLoadBalancerPublicIps = getLoadBalancer(resourceGroupName, loadBalancerName).publicIPAddressIds();
-        List<PublicIPAddress> publicIpAddressesInResourceGroup = getPublicIpAddresses(resourceGroupName);
+        List<String> idsAssociatedWithLoadBalancerPublicIps = getLoadBalancer(resourceGroupName, loadBalancerName).publicIpAddressIds();
 
-        List<String> loadBalancerIps = publicIpAddressesInResourceGroup.stream()
+        List<String> loadBalancerIps = getPublicIpAddresses(resourceGroupName)
+                .getAll()
+                .stream()
                 .filter(ipAddress -> idsAssociatedWithLoadBalancerPublicIps.contains(ipAddress.id()))
-                .map(PublicIPAddress::ipAddress)
+                .map(PublicIpAddress::ipAddress)
                 .sorted()
                 .collect(Collectors.toList());
 
@@ -776,8 +665,8 @@ public class AzureClient {
         Map<String, LoadBalancerFrontend> frontends = getLoadBalancer(resourceGroupName, loadBalancerName).frontends();
 
         List<String> loadbalancerPrivateIps = frontends.values().stream()
-                .map(LoadBalancerFrontend::inner)
-                .map(FrontendIPConfigurationInner::privateIPAddress)
+                .map(LoadBalancerFrontend::innerModel)
+                .map(FrontendIpConfigurationInner::privateIpAddress)
                 .filter(Objects::nonNull)
                 .sorted()
                 .collect(Collectors.toList());
@@ -790,132 +679,111 @@ public class AzureClient {
         return getLoadBalancer(resourceGroupName, loadBalancerName).loadBalancingRules();
     }
 
-    public PagedList<Identity> listIdentities() {
-        return handleAuthException(() -> azure.identities().list());
+    public AzureListResult<Identity> listIdentities() {
+        return handleException(() -> AzureListResult.list(azure.identities()));
     }
 
     public List<Identity> listIdentitiesByRegion(String region) {
         return listIdentities()
+                .getAll()
                 .stream()
                 .filter(identity -> identity.region().label().equalsIgnoreCase(region)
                         || identity.region().name().equalsIgnoreCase(region))
                 .collect(Collectors.toList());
     }
 
-    public List<Identity> filterIdentitiesByRoleAssignement(List<Identity> identityList, String roleAssignmentScope) {
-        PagedList<RoleAssignment> roleAssignments = listRoleAssignmentsByScope(roleAssignmentScope);
-        return identityList.stream().filter(
-                identity -> roleAssignments.stream()
-                        .anyMatch(roleAssignment -> roleAssignment.principalId() != null
-                                && roleAssignment.principalId().equalsIgnoreCase(identity.principalId())))
-                .collect(Collectors.toList());
-    }
-
     public Identity getIdentityById(String id) {
-        return handleAuthException(() -> azure.identities().getById(id));
+        return handleException(() -> azure.identities().getById(id));
     }
 
     public RoleAssignments getRoleAssignments() {
-        return handleAuthException(() -> azure.identities().manager()).graphRbacManager().roleAssignments();
+        return getRoleAssignments(azure);
     }
 
-    public PagedList<RoleAssignment> listRoleAssignmentsByScope(String scope) {
-        return handleAuthException(() -> getRoleAssignments().listByScope(scope));
+    public RoleAssignments getRoleAssignments(AzureResourceManager azure) {
+        return handleException(() -> azure.identities().manager()).authorizationManager().roleAssignments();
+    }
+
+    public AzureListResult<RoleAssignment> listRoleAssignmentsByScope(String scope) {
+        return handleException(() -> new AzureListResult<>(getRoleAssignments().listByScope(scope)));
     }
 
     public List<RoleAssignmentInner> listRoleAssignmentsByScopeInner(String scope) {
-        List<RoleAssignmentInner> roleAssignmentInners = new ArrayList<>();
-        for (RoleAssignment ra : listRoleAssignmentsByScope(scope)) {
-            roleAssignmentInners.add(ra.inner());
-        }
-        return roleAssignmentInners;
+        return listRoleAssignmentsByScope(scope)
+                .getStream()
+                .map(HasInnerModel::innerModel)
+                .collect(Collectors.toList());
     }
 
-    public PagedList<RoleAssignmentInner> listRoleAssignments() {
-        return listRoleAssignmentsBySubscription(getCurrentSubscription().subscriptionId());
+    public AzureListResult<RoleAssignmentInner> listRoleAssignments() {
+        return new AzureListResult<>(listRoleAssignmentsBySubscription(getCurrentSubscription().subscriptionId()));
     }
 
-    public PagedList<RoleAssignmentInner> listRoleAssignmentsBySubscription(String subscriptionId) {
-        return handleAuthException(() -> getRoleAssignments().manager().roleInner().withSubscriptionId(subscriptionId).roleAssignments().list());
-    }
-
-    public PagedList<RoleAssignmentInner> listRoleAssignmentsByPrincipalId(String principalId) {
-        return handleAuthException(() -> getRoleAssignments().inner().list(String.format("$filter=principalId eq %s", principalId)));
-    }
-
-    public boolean checkIdentityRoleAssignement(String identityId, String scopeId) {
-        Identity identity = getIdentityById(identityId);
-        PagedList<RoleAssignment> roleAssignments = listRoleAssignmentsByScope(scopeId);
-        return roleAssignments.stream().anyMatch(roleAssignment -> roleAssignment.principalId() != null &&
-                roleAssignment.principalId().equalsIgnoreCase(identity.principalId()));
+    public PagedIterable<RoleAssignmentInner> listRoleAssignmentsBySubscription(String subscriptionId) {
+        return handleException(() -> getRoleAssignments(azureClientFactory.getAzureResourceManager(subscriptionId))
+                .manager()
+                .roleServiceClient()
+                .getRoleAssignments()
+                .list());
     }
 
     public Subscription getCurrentSubscription() {
         return azure.getCurrentSubscription();
     }
 
-    public PagedList<Subscription> listSubscriptions() {
-        return azure.subscriptions().list();
+    public AzureListResult<Subscription> listSubscriptions() {
+        return AzureListResult.list(azure.subscriptions());
     }
 
     public void deleteGenericResourceById(String id) {
-        handleAuthException(() -> azure.genericResources().deleteById(id));
+        handleException(() -> azure.genericResources().deleteById(id));
     }
 
     public String getServicePrincipalForResourceById(String referenceId) {
-        return handleAuthException(() -> azure.genericResources().getById(referenceId).inner().identity().principalId());
+        return handleException(() -> azure.genericResources().getById(referenceId).identity().principalId());
     }
 
-    public PagedList<PrivateZone> getPrivateDnsZoneList() {
-        PagedList<PrivateZone> privateDnsZones = privatednsManager.privateZones().list();
-        privateDnsZones.loadAll();
-        return privateDnsZones;
+    public AzureListResult<PrivateDnsZone> getPrivateDnsZoneList() {
+        return AzureListResult.list(privateDnsZoneManager.privateZones());
     }
 
-    public PagedList<PrivateZone> getPrivateDnsZonesByResourceGroup(String subscriptionId, String resourceGroupName) {
-        privatednsManager dnsManager = azureClientCredentials.getPrivateDnsManagerWithAnotherSubscription(subscriptionId);
-        PagedList<PrivateZone> privateDnsZones = dnsManager.privateZones().listByResourceGroup(resourceGroupName);
-        privateDnsZones.loadAll();
-        return privateDnsZones;
+    public AzureListResult<PrivateDnsZone> getPrivateDnsZonesByResourceGroup(String subscriptionId, String resourceGroupName) {
+        return AzureListResult.listByResourceGroup(
+                azureClientFactory.getPrivateDnsManagerWithAnotherSubscription(subscriptionId).privateZones(),
+                resourceGroupName);
     }
 
-    public List<PrivateZone> getPrivateDnsZoneListFromAllSubscriptions() {
-        PagedList<Subscription> subscriptions = azure.subscriptions().list();
-        subscriptions.loadAll();
-        return subscriptions.stream().map(s -> getPrivateDnsZones(s.subscriptionId()))
-                .flatMap(Collection::stream)
+    public List<PrivateDnsZone> getPrivateDnsZoneListFromAllSubscriptions() {
+        return azure.subscriptions()
+                .list()
+                .stream()
+                .map(s -> getPrivateDnsZones(s.subscriptionId()))
+                .flatMap(AzureListResult::getStream)
                 .collect(Collectors.toList());
     }
 
-    private PagedList<PrivateZone> getPrivateDnsZones(String subscriptionId) {
-        privatednsManager dnsManager = azureClientCredentials.getPrivateDnsManagerWithAnotherSubscription(subscriptionId);
-        PagedList<PrivateZone> privateDnsZones = dnsManager.privateZones().list();
-        privateDnsZones.loadAll();
-        return privateDnsZones;
+    private AzureListResult<PrivateDnsZone> getPrivateDnsZones(String subscriptionId) {
+        return AzureListResult.list(azureClientFactory.getPrivateDnsManagerWithAnotherSubscription(subscriptionId).privateZones());
     }
 
-    public PagedList<PrivateZone> listPrivateDnsZonesByResourceGroup(String resourceGroupName) {
-        PagedList<PrivateZone> privateDnsZones = privatednsManager.privateZones().listByResourceGroup(resourceGroupName);
-        privateDnsZones.loadAll();
-        return privateDnsZones;
+    public AzureListResult<PrivateDnsZone> listPrivateDnsZonesByResourceGroup(String resourceGroupName) {
+        return AzureListResult.listByResourceGroup(privateDnsZoneManager.privateZones(), resourceGroupName);
     }
 
-    public PagedList<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String resourceGroupName, String dnsZoneName) {
-        PagedList<VirtualNetworkLinkInner> virtualNetworkLinks = privatednsManager.virtualNetworkLinks().inner().list(resourceGroupName, dnsZoneName);
-        virtualNetworkLinks.loadAll();
-        return virtualNetworkLinks;
+    public AzureListResult<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String resourceGroupName, String dnsZoneName) {
+        return new AzureListResult<>(privateDnsZoneManager.serviceClient().getVirtualNetworkLinks().list(resourceGroupName, dnsZoneName));
     }
 
-    public PagedList<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String subscriptionId, String resourceGroupName, String dnsZoneName) {
-        privatednsManager dnsManager = azureClientCredentials.getPrivateDnsManagerWithAnotherSubscription(subscriptionId);
-        PagedList<VirtualNetworkLinkInner> virtualNetworkLinks = dnsManager.virtualNetworkLinks().inner().list(resourceGroupName, dnsZoneName);
-        virtualNetworkLinks.loadAll();
-        return virtualNetworkLinks;
+    public AzureListResult<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String subscriptionId, String resourceGroupName, String dnsZoneName) {
+        return new AzureListResult<>(azureClientFactory.getPrivateDnsManagerWithAnotherSubscription(subscriptionId)
+                .serviceClient()
+                .getVirtualNetworkLinks()
+                .list(resourceGroupName, dnsZoneName));
     }
 
     public VirtualNetworkLinkInner getNetworkLinkByPrivateDnsZone(String resourceGroupName, String dnsZoneName, String virtualNetworkLinkName) {
         return virtualNetworkLinkName == null ? null
-                : privatednsManager.virtualNetworkLinks().inner().get(resourceGroupName, dnsZoneName, virtualNetworkLinkName);
+                : privateDnsZoneManager.serviceClient().getVirtualNetworkLinks().get(resourceGroupName, dnsZoneName, virtualNetworkLinkName);
     }
 
     public boolean checkIfDnsZonesDeployed(String resourceGroupName, List<AzurePrivateDnsZoneServiceEnum> services) {
@@ -923,7 +791,7 @@ public class AzureClient {
                 .map(AzurePrivateDnsZoneServiceEnum::getDnsZoneName)
                 .collect(Collectors.toList()));
 
-        PagedList<PrivateZone> dnsZones = listPrivateDnsZonesByResourceGroup(resourceGroupName);
+        List<PrivateDnsZone> dnsZones = listPrivateDnsZonesByResourceGroup(resourceGroupName).getAll();
         for (AzurePrivateDnsZoneServiceEnum service : services) {
             String dnsZoneName = service.getDnsZoneName();
             boolean dnsZoneFound = dnsZones.stream()
@@ -944,11 +812,8 @@ public class AzureClient {
                         .collect(Collectors.toList()));
         for (AzurePrivateDnsZoneServiceEnum service : services) {
             String dnsZoneName = service.getDnsZoneName();
-            PagedList<VirtualNetworkLinkInner> virtualNetworkLinks = listNetworkLinksByPrivateDnsZoneName(resourceGroupName, dnsZoneName);
-            if (virtualNetworkLinks.isEmpty()) {
-                LOGGER.info("Network link for network {} not found for DNS zone {}!", networkId, dnsZoneName);
-                return false;
-            } else if (!isNetworkLinkCreated(networkId, virtualNetworkLinks)) {
+            AzureListResult<VirtualNetworkLinkInner> virtualNetworkLinks = listNetworkLinksByPrivateDnsZoneName(resourceGroupName, dnsZoneName);
+            if (!isNetworkLinkCreated(networkId, virtualNetworkLinks)) {
                 LOGGER.info("Network link for network {} and DNS Zone {} is not provisioned successfully yet!", networkId, dnsZoneName);
                 return false;
             }
@@ -956,30 +821,31 @@ public class AzureClient {
         return true;
     }
 
-    public boolean isNetworkLinkCreated(String networkId, PagedList<VirtualNetworkLinkInner> virtualNetworkLinks) {
-        return virtualNetworkLinks.stream()
+    public boolean isNetworkLinkCreated(String networkId, AzureListResult<VirtualNetworkLinkInner> virtualNetworkLinks) {
+        return virtualNetworkLinks
+                .getStream()
                 .filter(networkLink -> networkId.equals(networkLink.name()))
                 .anyMatch(networkLink -> networkLink.provisioningState().equals(SUCCEEDED)
                         && networkLink.virtualNetworkLinkState().equals(VirtualNetworkLinkState.COMPLETED));
     }
 
-    private <T> T handleAuthException(Supplier<T> function) {
-        return azureAuthExceptionHandler.handleAuthException(function);
+    private <T> T handleException(Supplier<T> function) {
+        return azureExceptionHandler.handleException(function);
     }
 
-    private void handleAuthException(Runnable function) {
-        azureAuthExceptionHandler.handleAuthException(function);
+    private void handleException(Runnable function) {
+        azureExceptionHandler.handleException(function);
     }
 
-    public Completable deleteGenericResourceByIdAsync(String id) {
-        return handleAuthException(() -> azure.genericResources().deleteByIdAsync(id));
+    public Mono<Void> deleteGenericResourceByIdAsync(String id) {
+        return handleException(() -> azure.genericResources().deleteByIdAsync(id));
     }
 
     private DiskEncryptionSetInner createDiskEncryptionSetInner(String sourceVaultId, String encryptionKeyUrl, String location, Map<String, String> tags) {
         SourceVault sourceVault = new SourceVault().withId(sourceVaultId);
         KeyForDiskEncryptionSet keyForDiskEncryptionSet = new KeyForDiskEncryptionSet().withKeyUrl(encryptionKeyUrl).withSourceVault(sourceVault);
         EncryptionSetIdentity eSetId = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
-        return (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+        return new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
                 .withActiveKey(keyForDiskEncryptionSet)
                 .withIdentity(eSetId)
@@ -988,25 +854,24 @@ public class AzureClient {
     }
 
     public DiskEncryptionSetInner getDiskEncryptionSetByName(String resourceGroupName, String diskEncryptionSetName) {
-        return handleAuthException(() -> {
-            // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetsInner
-            DiskEncryptionSetsInner dSetsIn = computeManager.inner().diskEncryptionSets();
-            return dSetsIn.getByResourceGroup(resourceGroupName, diskEncryptionSetName);
-        });
+        return handleException(() ->
+                computeManager.serviceClient()
+                        .getDiskEncryptionSets()
+                        .getByResourceGroup(resourceGroupName, diskEncryptionSetName));
     }
 
     public DiskEncryptionSetInner createDiskEncryptionSet(String diskEncryptionSetName, String encryptionKeyUrl, String location,
             String resourceGroupName, String sourceVaultId, Map<String, String> tags) {
-        return handleAuthException(() -> {
-            // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetsInner
-            DiskEncryptionSetInner desIn = createDiskEncryptionSetInner(sourceVaultId, encryptionKeyUrl, location, tags);
-            DiskEncryptionSetsInner dSetsIn = computeManager.inner().diskEncryptionSets();
-            return dSetsIn.createOrUpdate(resourceGroupName, diskEncryptionSetName, desIn);
+        return handleException(() -> {
+            DiskEncryptionSetInner encryptionSet = createDiskEncryptionSetInner(sourceVaultId, encryptionKeyUrl, location, tags);
+            return computeManager.serviceClient()
+                    .getDiskEncryptionSets()
+                    .createOrUpdate(resourceGroupName, diskEncryptionSetName, encryptionSet);
         });
     }
 
     public boolean keyVaultExists(String resourceGroupName, String vaultName) {
-        return handleAuthException(() -> {
+        return handleException(() -> {
             Vault keyVault = azure.vaults()
                     .getByResourceGroup(resourceGroupName, vaultName);
             return keyVault != null;
@@ -1014,7 +879,7 @@ public class AzureClient {
     }
 
     public void grantKeyVaultAccessPolicyToServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
-        handleAuthException(() -> {
+        handleException(() -> {
             azure.vaults()
                     .getByResourceGroup(resourceGroupName, vaultName)
                     .update()
@@ -1027,7 +892,7 @@ public class AzureClient {
     }
 
     public void modifyInstanceType(String resourceGroupName, String instanceName, String instanceType) {
-        handleAuthException(() -> {
+        handleException(() -> {
             LOGGER.info("Updating instance {} in {} resourcegroup to {} instancetype",
                     instanceName, resourceGroupName, instanceName);
             azure.virtualMachines()
@@ -1039,7 +904,7 @@ public class AzureClient {
     }
 
     public boolean checkKeyVaultAccessPolicyForServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
-        return handleAuthException(() -> {
+        return handleException(() -> {
             List<AccessPolicy> accessPolicies = azure.vaults()
                     .getByResourceGroup(resourceGroupName, vaultName)
                     .accessPolicies();
@@ -1051,7 +916,7 @@ public class AzureClient {
     boolean checkKeyVaultAccessPolicyListForServicePrincipal(List<AccessPolicy> accessPolicies, String principalObjectId) {
         if (accessPolicies != null) {
             for (int i = accessPolicies.size() - 1; i >= 0; i--) {
-                AccessPolicyEntry accessPolicyEntry = accessPolicies.get(i).inner();
+                AccessPolicyEntry accessPolicyEntry = accessPolicies.get(i).innerModel();
                 if (principalObjectId.equals(accessPolicyEntry.objectId())) {
                     return accessPolicyEntry.permissions().keys()
                             .containsAll(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY, KeyPermissions.GET));
@@ -1062,7 +927,7 @@ public class AzureClient {
     }
 
     public void removeKeyVaultAccessPolicyForServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
-        handleAuthException(() -> {
+        handleException(() -> {
             azure.vaults()
                     .getByResourceGroup(resourceGroupName, vaultName)
                     .update()
@@ -1074,15 +939,11 @@ public class AzureClient {
     }
 
     public void deleteDiskEncryptionSet(String resourceGroup, String diskEncryptionSetName) {
-        handleAuthException(() -> {
-            // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetsInner
-            DiskEncryptionSetsInner dSetsIn = computeManager.inner().diskEncryptionSets();
-            dSetsIn.delete(resourceGroup, diskEncryptionSetName);
-        });
+        handleException(() -> computeManager.diskEncryptionSets().deleteByResourceGroup(resourceGroup, diskEncryptionSetName));
     }
 
     public Optional<String> getAccessToken() {
-        return azureClientCredentials.getAccessToken();
+        return azureClientFactory.getAccessToken();
     }
 
     public String getVaultNameFromEncryptionKeyUrl(String encryptionKeyUrl) {

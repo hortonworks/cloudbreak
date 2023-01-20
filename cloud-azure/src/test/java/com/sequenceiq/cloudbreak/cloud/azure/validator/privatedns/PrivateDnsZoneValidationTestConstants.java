@@ -1,9 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns;
 
-import com.microsoft.azure.Page;
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.arm.resources.ResourceId;
-import com.microsoft.rest.RestException;
+import com.azure.resourcemanager.resources.fluentcore.arm.ResourceId;
 
 public class PrivateDnsZoneValidationTestConstants {
 
@@ -46,12 +43,4 @@ public class PrivateDnsZoneValidationTestConstants {
     private static String getPrivateDnsZoneId(String resourceGroupName, String zoneName) {
         return String.format(PRIVATE_DNS_ZONE_ID, SUBSCRIPTION_ID, resourceGroupName, zoneName);
     }
-
-    static class TestPagedList<E> extends PagedList<E> {
-        @Override
-        public Page<E> nextPage(String nextPageLink) throws RestException {
-            return null;
-        }
-    }
-
 }

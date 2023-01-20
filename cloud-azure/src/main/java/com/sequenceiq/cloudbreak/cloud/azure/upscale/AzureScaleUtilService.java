@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -8,14 +9,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.CloudError;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.resources.Deployment;
+import com.azure.core.management.exception.ManagementError;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.resources.models.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTerminationHelperService;
@@ -58,20 +58,20 @@ public class AzureScaleUtilService {
     @Inject
     private AzureTerminationHelperService azureTerminationHelperService;
 
-    public void checkIfQuotaLimitIssued(CloudException e) throws QuotaExceededException {
-        if (e.body() != null && e.body().details() != null) {
-            List<CloudError> errorDetails = e.body().details();
-            for (CloudError errorDetail : errorDetails) {
-                if ("QuotaExceeded".equals(errorDetail.code())) {
+    public void checkIfQuotaLimitIssued(ManagementException e) throws QuotaExceededException {
+        if (e.getValue() != null && e.getValue().getDetails() != null) {
+            List<? extends ManagementError> errorDetails = e.getValue().getDetails();
+            for (ManagementError errorDetail : errorDetails) {
+                if ("QuotaExceeded".equals(errorDetail.getCode())) {
                     Pattern pattern = Pattern.compile(".*Current Limit: ([0-9]+), Current Usage: ([0-9]+), Additional Required: ([0-9]+).*");
-                    Matcher matcher = pattern.matcher(errorDetail.message());
+                    Matcher matcher = pattern.matcher(errorDetail.getMessage());
                     if (matcher.find()) {
                         int currentLimit = Integer.parseInt(matcher.group(CURRENT_LIMIT_GROUP));
                         int currentUsage = Integer.parseInt(matcher.group(CURRENT_USAGE_GROUP));
                         int additionalRequired = Integer.parseInt(matcher.group(ADDITIONAL_REQUIRED_GROUP));
-                        throw new QuotaExceededException(currentLimit, currentUsage, additionalRequired, errorDetail.message(), e);
+                        throw new QuotaExceededException(currentLimit, currentUsage, additionalRequired, errorDetail.getMessage(), e);
                     } else {
-                        LOGGER.warn("Quota exceeded pattern does not match: {}", errorDetail.message());
+                        LOGGER.warn("Quota exceeded pattern does not match: {}", errorDetail.getMessage());
                     }
                 }
             }
@@ -79,7 +79,7 @@ public class AzureScaleUtilService {
     }
 
     public void rollbackResources(AuthenticatedContext ac, AzureClient client, CloudStack stack, CloudContext cloudContext,
-        List<CloudResource> resources, DateTime preDeploymentTime) {
+            List<CloudResource> resources, OffsetDateTime preDeploymentTime) {
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
 
@@ -118,8 +118,8 @@ public class AzureScaleUtilService {
                 .orElseThrow(() -> new CloudConnectorException(String.format("Arm Template not found for: %s  ", stackName)));
     }
 
-    private boolean isTemplateDeploymentObsolete(DateTime preDeploymentTime, Deployment templateDeployment) {
-        DateTime deploymentTimestamp = templateDeployment.timestamp();
+    private boolean isTemplateDeploymentObsolete(OffsetDateTime preDeploymentTime, Deployment templateDeployment) {
+        OffsetDateTime deploymentTimestamp = templateDeployment.timestamp();
         return deploymentTimestamp == null || deploymentTimestamp.isBefore(preDeploymentTime);
     }
 

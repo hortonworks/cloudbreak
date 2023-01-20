@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerContext;
@@ -64,14 +64,14 @@ public class AzureImageService {
             saveImage(ac, azureImageInfo.getImageNameWithRegion(), azureImageInfo.getImageId());
             customImage = Optional.of(
                     client.createImage(azureImageInfo.getImageNameWithRegion(), azureImageInfo.getResourceGroup(), fromVhdUri, azureImageInfo.getRegion()));
-        } catch (CloudException e) {
+        } catch (ManagementException e) {
             LOGGER.warn("Exception when creating custom image", e);
             customImage = handleCustomImageCreationException(azureImageInfo, ac, client, checkerContext, e);
 
             // DataIntegrityViolationException is thrown if multiple parallel launches
             // would cause edge case of inserting multiple db record violating the unique constraint
         } catch (DataIntegrityViolationException e) {
-            LOGGER.warn("Exception on saving image {} due to db unique constraint violation: {}",  azureImageInfo.getImageId(), e.getMessage());
+            LOGGER.warn("Exception on saving image {} due to db unique constraint violation: {}", azureImageInfo.getImageId(), e.getMessage());
             customImage = handleCustomImageCreationException(azureImageInfo, ac, client, checkerContext, e);
         }
         return customImage
@@ -85,7 +85,8 @@ public class AzureImageService {
     }
 
     private Optional<VirtualMachineCustomImage> handleCustomImageCreationException(AzureImageInfo azureImageInfo, AuthenticatedContext ac,
-            AzureClient client, AzureManagedImageCreationCheckerContext checkerContext, Exception originalException) {
+            AzureClient client, AzureManagedImageCreationCheckerContext checkerContext,
+            Exception originalException) {
         Exception onError = originalException;
         try {
             azureManagedImageCreationPoller.startPolling(ac, checkerContext);

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
 import java.util.Map;
 
-import com.microsoft.azure.management.storage.StorageAccountSkuType;
+import com.azure.resourcemanager.storage.models.StorageAccountSkuType;
 
 public class StorageAccountParameters {
 

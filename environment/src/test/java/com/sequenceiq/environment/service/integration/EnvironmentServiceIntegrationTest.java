@@ -45,8 +45,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsDefaultRegionSele
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -103,12 +101,6 @@ public class EnvironmentServiceIntegrationTest {
 
     @Mock
     private ResourceDefinitionRequest resourceDefinitionRequest;
-
-    @Mock
-    private InteractiveLoginRequest interactiveLoginRequest;
-
-    @Mock
-    private InitCodeGrantFlowRequest initCodeGrantFlowRequest;
 
     @MockBean
     private RequestProvider requestProvider;

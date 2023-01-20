@@ -13,8 +13,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.management.compute.EncryptionSetIdentity;
-import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
+import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
+import com.azure.resourcemanager.compute.models.EncryptionSetIdentity;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 

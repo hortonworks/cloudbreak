@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
-import static com.microsoft.azure.management.resources.fluentcore.arm.Region.findByLabelOrName;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
@@ -51,14 +51,14 @@ public class AzureRegionProvider {
         enabledRegions = readEnabledRegions();
     }
 
-    public CloudRegions regions(Region region, Collection<com.microsoft.azure.management.resources.fluentcore.arm.Region> azureRegions,
-        List<String> entitlements) {
+    public CloudRegions regions(Region region, Collection<com.azure.core.management.Region> azureRegions,
+                                List<String> entitlements) {
         Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
         String defaultRegion = armZoneParameterDefault;
         azureRegions = filterByEnabledRegions(azureRegions);
-        for (com.microsoft.azure.management.resources.fluentcore.arm.Region azureRegion : azureRegions) {
+        for (com.azure.core.management.Region azureRegion : azureRegions) {
             Coordinate coordinate = enabledRegions.get(region(azureRegion.label()));
             if (isEntitledFor(coordinate, entitlements)) {
                 cloudRegions.put(region(azureRegion.label()), new ArrayList<>());
@@ -89,8 +89,8 @@ public class AzureRegionProvider {
         return true;
     }
 
-    private Set<com.microsoft.azure.management.resources.fluentcore.arm.Region> filterByEnabledRegions(
-            Collection<com.microsoft.azure.management.resources.fluentcore.arm.Region> azureRegions) {
+    private Set<com.azure.core.management.Region> filterByEnabledRegions(
+            Collection<com.azure.core.management.Region> azureRegions) {
         return azureRegions.stream()
                 .filter(reg -> enabledRegions.containsKey(region(reg.label())))
                 .collect(Collectors.toSet());
@@ -110,8 +110,8 @@ public class AzureRegionProvider {
                         coordinate(
                                 regionCoordinateSpecification.getLongitude(),
                                 regionCoordinateSpecification.getLatitude(),
-                                findByLabelOrName(regionCoordinateSpecification.getName()).label(),
-                                findByLabelOrName(regionCoordinateSpecification.getName()).name(),
+                                RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).label(),
+                                RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).name(),
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements()));
             }

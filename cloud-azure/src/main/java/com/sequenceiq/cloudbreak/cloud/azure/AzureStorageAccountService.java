@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.management.storage.StorageAccount;
+import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.azure.task.storageaccount.StorageAccountCheckerContext;

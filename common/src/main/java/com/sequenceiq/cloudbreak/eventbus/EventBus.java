@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.eventbus;
 
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.google.common.base.Preconditions;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 public class EventBus {
 
@@ -21,7 +23,15 @@ public class EventBus {
         Preconditions.checkNotNull(key, "key must not be null.");
         Preconditions.checkNotNull(event, "event must not be null.");
         event.setKey(key);
-        executor.execute(() -> eventRouter.handle(event));
+        Map<String, String> mdcContext = MDCBuilder.getMdcContextMap();
+        executor.execute(() -> {
+            try {
+                MDCBuilder.buildMdcContextFromMap(mdcContext);
+                eventRouter.handle(event);
+            } finally {
+                MDCBuilder.cleanupMdc();
+            }
+        });
     }
 
     public <T extends Event<?>> void on(String key, Consumer<T> handler) {

@@ -10,12 +10,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,6 @@ import javax.validation.constraints.NotNull;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,14 +36,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.ReflectionUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.CloudError;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.PolicyViolation;
-import com.microsoft.azure.management.compute.VirtualMachine;
+import com.azure.core.management.exception.AdditionalInfo;
+import com.azure.core.management.exception.ManagementError;
+import com.azure.resourcemanager.compute.models.ApiError;
+import com.azure.resourcemanager.compute.models.ApiErrorException;
+import com.azure.resourcemanager.compute.models.PolicyViolation;
+import com.azure.resourcemanager.compute.models.PolicyViolationCategory;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.util.SchedulerProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -57,9 +58,8 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.Retry;
 
-import rx.Completable;
-import rx.plugins.RxJavaHooks;
-import rx.schedulers.Schedulers;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureUtilsTest {
@@ -85,18 +85,16 @@ public class AzureUtilsTest {
     @Mock
     private Retry retryService;
 
+    @Mock
+    private SchedulerProvider schedulerProvider;
+
     @InjectMocks
     private AzureUtils underTest;
 
     @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(underTest, "maxResourceNameLength", MAX_RESOURCE_NAME_LENGTH);
-        RxJavaHooks.setOnIOScheduler(current -> Schedulers.immediate());
-    }
-
-    @AfterEach
-    public void tearDown() {
-        RxJavaHooks.reset();
+        lenient().when(schedulerProvider.io()).thenReturn(Schedulers.immediate());
     }
 
     @Test
@@ -174,7 +172,7 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString())).thenReturn(Completable.complete());
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString())).thenReturn(Mono.empty());
 
         List<CloudVmInstanceStatus> statusesAfterDeallocate = underTest.deallocateInstances(ac,
                 List.of(createCloudInstance("instance1"), createCloudInstance("instance2")));
@@ -195,7 +193,7 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString())).thenReturn(Completable.complete());
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString())).thenReturn(Mono.empty());
 
         List<CloudVmInstanceStatus> statusesAfterDeallocate = underTest.deallocateInstances(ac,
                 List.of(createCloudInstance("instance1"), createCloudInstance("instance2")));
@@ -217,9 +215,9 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance1"))).thenReturn(Completable.complete());
-        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance2"))).thenReturn(Completable.error(new RuntimeException("failed1")));
-        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance3"))).thenReturn(Completable.error(new RuntimeException("failed2")));
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance1"))).thenReturn(Mono.empty());
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
 
         assertThrows(
                 CloudbreakServiceException.class,
@@ -241,7 +239,7 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deleteVirtualMachine(anyString(), anyString())).thenReturn(Completable.complete());
+        when(azureClient.deleteVirtualMachine(anyString(), anyString())).thenReturn(Mono.empty());
 
         List<CloudVmInstanceStatus> statusesAfterDelete = underTest.deleteInstances(ac,
                 List.of(createCloudInstance("instance1"), createCloudInstance("instance2")));
@@ -263,7 +261,7 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deleteVirtualMachine(anyString(), anyString())).thenReturn(Completable.complete());
+        when(azureClient.deleteVirtualMachine(anyString(), anyString())).thenReturn(Mono.empty());
 
         List<CloudVmInstanceStatus> statusesAfterDelete = underTest.deleteInstances(ac,
                 List.of(createCloudInstance("instance1"), createCloudInstance("instance2"), createCloudInstance("instance4")));
@@ -286,9 +284,9 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deleteVirtualMachine(anyString(), eq("instance1"))).thenReturn(Completable.complete());
-        when(azureClient.deleteVirtualMachine(anyString(), eq("instance2"))).thenReturn(Completable.error(new RuntimeException("failed1")));
-        when(azureClient.deleteVirtualMachine(anyString(), eq("instance3"))).thenReturn(Completable.error(new RuntimeException("failed2")));
+        when(azureClient.deleteVirtualMachine(anyString(), eq("instance1"))).thenReturn(Mono.empty());
+        when(azureClient.deleteVirtualMachine(anyString(), eq("instance2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
+        when(azureClient.deleteVirtualMachine(anyString(), eq("instance3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
 
         assertThrows(
                 CloudbreakServiceException.class,
@@ -304,7 +302,7 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deleteVirtualMachine(anyString(), anyString())).thenReturn(Completable.complete());
+        when(azureClient.deleteVirtualMachine(anyString(), anyString())).thenReturn(Mono.empty());
 
         underTest.deleteInstancesByName(ac, "resourceGroup", List.of("instance1", "instance2"));
 
@@ -316,9 +314,9 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deleteVirtualMachine(anyString(), eq("instance1"))).thenReturn(Completable.complete());
-        when(azureClient.deleteVirtualMachine(anyString(), eq("instance2"))).thenReturn(Completable.error(new RuntimeException("failed1")));
-        when(azureClient.deleteVirtualMachine(anyString(), eq("instance3"))).thenReturn(Completable.error(new RuntimeException("failed2")));
+        when(azureClient.deleteVirtualMachine(anyString(), eq("instance1"))).thenReturn(Mono.empty());
+        when(azureClient.deleteVirtualMachine(anyString(), eq("instance2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
+        when(azureClient.deleteVirtualMachine(anyString(), eq("instance3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
 
         assertThrows(
                 CloudbreakServiceException.class,
@@ -330,7 +328,7 @@ public class AzureUtilsTest {
     @Test
     public void deleteNetworkInterfacesShouldSucceed() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(azureClient.deleteNetworkInterfaceAsync(anyString(), anyString())).thenReturn(Completable.complete());
+        when(azureClient.deleteNetworkInterfaceAsync(anyString(), anyString())).thenReturn(Mono.empty());
 
         underTest.deleteNetworkInterfaces(azureClient, "resourceGroup", List.of("network1", "network2"));
 
@@ -340,9 +338,9 @@ public class AzureUtilsTest {
     @Test
     public void deleteNetworkInterfacesShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestFinished() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(azureClient.deleteNetworkInterfaceAsync(anyString(), eq("network1"))).thenReturn(Completable.complete());
-        when(azureClient.deleteNetworkInterfaceAsync(anyString(), eq("network2"))).thenReturn(Completable.error(new RuntimeException("failed1")));
-        when(azureClient.deleteNetworkInterfaceAsync(anyString(), eq("network3"))).thenReturn(Completable.error(new RuntimeException("failed2")));
+        when(azureClient.deleteNetworkInterfaceAsync(anyString(), eq("network1"))).thenReturn(Mono.empty());
+        when(azureClient.deleteNetworkInterfaceAsync(anyString(), eq("network2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
+        when(azureClient.deleteNetworkInterfaceAsync(anyString(), eq("network3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
 
         assertThrows(
                 CloudbreakServiceException.class,
@@ -354,7 +352,7 @@ public class AzureUtilsTest {
     @Test
     public void deletePublicIpsShouldSucceed() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(azureClient.deletePublicIpAddressByNameAsync(anyString(), anyString())).thenReturn(Completable.complete());
+        when(azureClient.deletePublicIpAddressByNameAsync(anyString(), anyString())).thenReturn(Mono.empty());
 
         underTest.deletePublicIps(azureClient, "resourceGroup", List.of("ip1", "ip2"));
 
@@ -364,9 +362,9 @@ public class AzureUtilsTest {
     @Test
     public void deletePublicIpsShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestFinished() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(azureClient.deletePublicIpAddressByNameAsync(anyString(), eq("ip1"))).thenReturn(Completable.complete());
-        when(azureClient.deletePublicIpAddressByNameAsync(anyString(), eq("ip2"))).thenReturn(Completable.error(new RuntimeException("failed1")));
-        when(azureClient.deletePublicIpAddressByNameAsync(anyString(), eq("ip3"))).thenReturn(Completable.error(new RuntimeException("failed2")));
+        when(azureClient.deletePublicIpAddressByNameAsync(anyString(), eq("ip1"))).thenReturn(Mono.empty());
+        when(azureClient.deletePublicIpAddressByNameAsync(anyString(), eq("ip2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
+        when(azureClient.deletePublicIpAddressByNameAsync(anyString(), eq("ip3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
 
         assertThrows(
                 CloudbreakServiceException.class,
@@ -378,7 +376,7 @@ public class AzureUtilsTest {
     @Test
     public void deleteLoadBalancersShouldSucceed() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(azureClient.deleteLoadBalancerAsync(anyString(), anyString())).thenReturn(Completable.complete());
+        when(azureClient.deleteLoadBalancerAsync(anyString(), anyString())).thenReturn(Mono.empty());
 
         underTest.deleteLoadBalancers(azureClient, "resourceGroup", List.of("loadbalancer1", "loadbalancer2"));
 
@@ -388,9 +386,9 @@ public class AzureUtilsTest {
     @Test
     public void deleteLoadBalancersShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestsFinish() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer1"))).thenReturn(Completable.complete());
-        when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer2"))).thenReturn(Completable.error(new RuntimeException("failure message 1")));
-        when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer3"))).thenReturn(Completable.error(new RuntimeException("failure message 2")));
+        when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer1"))).thenReturn(Mono.empty());
+        when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer2"))).thenReturn(Mono.error(new RuntimeException("failure message 1")));
+        when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer3"))).thenReturn(Mono.error(new RuntimeException("failure message 2")));
 
         assertThrows(CloudbreakServiceException.class,
                 () -> underTest.deleteLoadBalancers(azureClient, "resourceGroup", List.of("loadbalancer1", "loadbalancer2", "loadbalancer3")));
@@ -401,7 +399,7 @@ public class AzureUtilsTest {
     @Test
     public void deleteAvailabilitySetsShouldSucceed() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(azureClient.deleteAvailabilitySetAsync(anyString(), anyString())).thenReturn(Completable.complete());
+        when(azureClient.deleteAvailabilitySetAsync(anyString(), anyString())).thenReturn(Mono.empty());
 
         underTest.deleteAvailabilitySets(azureClient, "resourceGroup", List.of("availabilitySet1", "availabilitySet2"));
 
@@ -411,9 +409,9 @@ public class AzureUtilsTest {
     @Test
     public void deleteAvailabilitySetsShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestFinished() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(azureClient.deleteAvailabilitySetAsync(anyString(), eq("availabilitySet1"))).thenReturn(Completable.complete());
-        when(azureClient.deleteAvailabilitySetAsync(anyString(), eq("availabilitySet2"))).thenReturn(Completable.error(new RuntimeException("failed1")));
-        when(azureClient.deleteAvailabilitySetAsync(anyString(), eq("availabilitySet3"))).thenReturn(Completable.error(new RuntimeException("failed2")));
+        when(azureClient.deleteAvailabilitySetAsync(anyString(), eq("availabilitySet1"))).thenReturn(Mono.empty());
+        when(azureClient.deleteAvailabilitySetAsync(anyString(), eq("availabilitySet2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
+        when(azureClient.deleteAvailabilitySetAsync(anyString(), eq("availabilitySet3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
 
         assertThrows(
                 CloudbreakServiceException.class,
@@ -426,7 +424,7 @@ public class AzureUtilsTest {
     @Test
     public void deleteGenericResourcesShouldSucceed() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(azureClient.deleteGenericResourceByIdAsync(anyString())).thenReturn(Completable.complete());
+        when(azureClient.deleteGenericResourceByIdAsync(anyString())).thenReturn(Mono.empty());
 
         underTest.deleteGenericResources(azureClient, List.of("genericResource1", "genericResource2"));
 
@@ -436,9 +434,9 @@ public class AzureUtilsTest {
     @Test
     public void deleteGenericResourcesShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestFinished() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
-        when(azureClient.deleteGenericResourceByIdAsync(eq("genericResource1"))).thenReturn(Completable.complete());
-        when(azureClient.deleteGenericResourceByIdAsync(eq("genericResource2"))).thenReturn(Completable.error(new RuntimeException("failed1")));
-        when(azureClient.deleteGenericResourceByIdAsync(eq("genericResource3"))).thenReturn(Completable.error(new RuntimeException("failed2")));
+        when(azureClient.deleteGenericResourceByIdAsync(eq("genericResource1"))).thenReturn(Mono.empty());
+        when(azureClient.deleteGenericResourceByIdAsync(eq("genericResource2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
+        when(azureClient.deleteGenericResourceByIdAsync(eq("genericResource3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
 
         assertThrows(
                 CloudbreakServiceException.class,
@@ -462,12 +460,12 @@ public class AzureUtilsTest {
 
     @Test
     void convertToCloudConnectorExceptionTestWhenCloudExceptionAndDetails() {
-        CloudError cloudError = new CloudError()
-                .withCode("123")
-                .withMessage("foobar");
-        cloudError.details().add(new CloudError().withCode("123").withMessage("detail1"));
-        cloudError.details().add(new CloudError().withCode("123").withMessage("detail2"));
-        CloudException e = new CloudException("Serious problem", null, cloudError);
+        ApiError cloudError = AzureTestUtils.apiError("123", "foobar");
+        List<ManagementError> details = new ArrayList<>();
+        AzureTestUtils.setDetails(cloudError, details);
+        details.add(AzureTestUtils.managementError("123", "detail1"));
+        details.add(AzureTestUtils.managementError("123", "detail2"));
+        ApiErrorException e = new ApiErrorException("Serious problem", null, cloudError);
 
         CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
@@ -476,38 +474,40 @@ public class AzureUtilsTest {
     }
 
     @Test
-    void convertToCloudConnectorExceptionTestWhenDetailCloudErrorsHaveRequestDisallowedByPolicyCode() throws IOException, NoSuchFieldException {
-        CloudError cloudError = new CloudError()
-                .withCode("InvalidTemplateDeployment")
-                .withMessage("The template deployment failed with multiple errors. Please see details for more information.");
+    void convertToCloudConnectorExceptionTestWhenDetailCloudErrorsHaveRequestDisallowedByPolicyCode() throws NoSuchFieldException {
+        ApiError cloudError = AzureTestUtils.apiError("InvalidTemplateDeployment",
+                "The template deployment failed with multiple errors. Please see details for more information.");
+        List<ManagementError> details = new ArrayList<>();
+        AzureTestUtils.setDetails(cloudError, details);
 
-        PolicyViolation policyViolation = new PolicyViolation("PolicyViolation",
-                new ObjectMapper().createObjectNode().put("policyDefinitionDisplayName", "dbajzath-azure-restricted-policy"));
-        CloudError detail1 = new CloudError()
-                .withCode("RequestDisallowedByPolicy")
-                .withMessage("Resource 'cbimgwu29d62091481040a03' was disallowed by policy. Reasons: 'West US 2 location is disabled'. " +
+        PolicyViolation policyViolation = new PolicyViolation();
+        AzureTestUtils.setField(policyViolation, "category", PolicyViolationCategory.OTHER);
+        AzureTestUtils.setField(policyViolation, "details", "dbajzath-azure-restricted-policy");
+
+        ManagementError detail1 = AzureTestUtils.managementError("RequestDisallowedByPolicy",
+                "Resource 'cbimgwu29d62091481040a03' was disallowed by policy. Reasons: 'West US 2 location is disabled'. " +
                         "See error details for policy resource IDs.");
-        Field field = CloudError.class.getDeclaredField("additionalInfo");
-        ReflectionUtils.makeAccessible(field);
-        ReflectionUtils.setField(field, detail1, List.of(policyViolation));
-        cloudError.details().add(detail1);
-        CloudError detail2 = new CloudError()
-                .withCode("RequestDisallowedByPolicy")
-                .withMessage("Resource 'cbimgwu29d62091481040a03/default' was disallowed by policy. Reasons: 'West US 2 location is disabled'. " +
+
+        AzureTestUtils.setField(detail1, "additionalInfo", List.of(new AdditionalInfo("PolicyViolation", policyViolation)));
+        details.add(detail1);
+
+        ManagementError detail2 = AzureTestUtils.managementError("RequestDisallowedByPolicy",
+                "Resource 'cbimgwu29d62091481040a03/default' was disallowed by policy. Reasons: 'West US 2 location is disabled'. " +
                         "See error details for policy resource IDs.");
-        ReflectionUtils.setField(field, detail2, List.of(policyViolation));
-        cloudError.details().add(detail2);
+        AzureTestUtils.setField(detail2, "additionalInfo", List.of(new AdditionalInfo("PolicyViolation", policyViolation)));
+        details.add(detail2);
 
-        CloudException e = new CloudException("The template deployment failed with multiple errors. Please see details for more information.", null, cloudError);
+        ApiErrorException apiErrorException =
+                new ApiErrorException("The template deployment failed with multiple errors. Please see details for more information.", null, cloudError);
 
-        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Storage account creation");
+        CloudConnectorException result = underTest.convertToCloudConnectorException(apiErrorException, "Storage account creation");
 
         verifyCloudConnectorException(result,
                 "Storage account creation failed, status code InvalidTemplateDeployment, error message: The template deployment failed with multiple errors. " +
                         "Please see details for more information., details: Resource 'cbimgwu29d62091481040a03' was disallowed by policy. " +
-                        "Reasons: 'West US 2 location is disabled'. Policy definition name: dbajzath-azure-restricted-policy, " +
+                        "Reasons: 'West US 2 location is disabled'. Policy definition: Other - dbajzath-azure-restricted-policy, " +
                         "Resource 'cbimgwu29d62091481040a03/default' was disallowed by policy. Reasons: 'West US 2 location is disabled'. " +
-                        "Policy definition name: dbajzath-azure-restricted-policy");
+                        "Policy definition: Other - dbajzath-azure-restricted-policy");
     }
 
     private void verifyCloudConnectorException(CloudConnectorException cloudConnectorException, String messageExpected) {
@@ -516,20 +516,20 @@ public class AzureUtilsTest {
         assertThat(cloudConnectorException).hasNoCause();
     }
 
-    private static CloudException createCloudExceptionWithNoDetails(boolean withBody) {
-        CloudException e;
+    private static ApiErrorException createCloudExceptionWithNoDetails(boolean withBody) {
+        ApiErrorException e;
         if (withBody) {
-            CloudError cloudError = new CloudError();
-            ReflectionTestUtils.setField(cloudError, "details", null);
-            e = new CloudException("Serious problem", null, cloudError);
+            ApiError cloudError = new ApiError();
+            AzureTestUtils.setDetails(cloudError, null);
+            e = new ApiErrorException("Serious problem", null, cloudError);
         } else {
-            e = new CloudException("Serious problem", null);
+            e = new ApiErrorException("Serious problem", null);
         }
         return e;
     }
 
     static Object[][] convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetailsDataProvider() {
-        return new Object[][]{
+        return new Object[][] {
                 // testCaseName e
                 {"CloudException without body", createCloudExceptionWithNoDetails(false)},
                 {"CloudException with body but null details", createCloudExceptionWithNoDetails(true)},
@@ -538,11 +538,12 @@ public class AzureUtilsTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetailsDataProvider")
-    void convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetails(String testCaseName, CloudException e) {
+    void convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetails(String testCaseName, ApiErrorException e) {
         CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
         verifyCloudConnectorException(result,
-                "Checking resources failed: 'com.microsoft.azure.CloudException: Serious problem', please go to Azure Portal for detailed message");
+                "Checking resources failed: 'com.azure.resourcemanager.compute.models.ApiErrorException: Serious problem', " +
+                        "please go to Azure Portal for detailed message");
     }
 
     @Test
@@ -552,7 +553,8 @@ public class AzureUtilsTest {
         CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
         verifyCloudConnectorException(result,
-                "Checking resources failed: 'com.microsoft.azure.CloudException: Serious problem', please go to Azure Portal for detailed message");
+                "Checking resources failed: 'com.azure.resourcemanager.compute.models.ApiErrorException: Serious problem', " +
+                        "please go to Azure Portal for detailed message");
     }
 
     @Test

@@ -15,10 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.management.compute.AvailabilitySet;
-import com.microsoft.azure.management.network.LoadBalancerBackend;
-import com.microsoft.azure.management.network.LoadBalancingRule;
-import com.microsoft.azure.management.network.implementation.BackendAddressPoolInner;
+import com.azure.resourcemanager.compute.models.AvailabilitySet;
+import com.azure.resourcemanager.network.fluent.models.BackendAddressPoolInner;
+import com.azure.resourcemanager.network.models.LoadBalancerBackend;
+import com.azure.resourcemanager.network.models.LoadBalancingRule;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureLoadBalancerMetadataView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -164,7 +164,7 @@ public class AzureLoadBalancerMetadataCollectorTest {
             LoadBalancerBackend backend = mock(LoadBalancerBackend.class);
             BackendAddressPoolInner inner = mock(BackendAddressPoolInner.class);
             when(inner.name()).thenReturn(String.format(GROUP_PATTERN, i, POOL_SUFFIX));
-            when(backend.inner()).thenReturn(inner);
+            when(backend.innerModel()).thenReturn(inner);
             when(rule.backend()).thenReturn(backend);
             when(rule.backendPort()).thenReturn(i);
             rules.put(String.valueOf(i), rule);
