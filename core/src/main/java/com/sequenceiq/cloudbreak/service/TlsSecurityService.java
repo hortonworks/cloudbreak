@@ -6,7 +6,6 @@ import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -14,6 +13,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
@@ -67,7 +68,7 @@ public class TlsSecurityService {
 
     private FixedSizePreloadCache<KeyPair> keyPairCache;
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void init() {
         keyPairCache = new FixedSizePreloadCache<>(keyPairCacheSize, PkiUtil::generateKeypair);
     }

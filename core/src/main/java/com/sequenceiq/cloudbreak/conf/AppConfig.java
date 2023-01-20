@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService.DELAYED_TASK_EXECUTOR;
+
 import java.io.File;
 import java.io.IOException;
 import java.security.Security;
@@ -8,6 +10,7 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -37,6 +40,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.filter.GenericFilterBean;
@@ -55,6 +59,9 @@ import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
 import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 import com.sequenceiq.sdx.client.internal.SdxApiClientParams;
+
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
 @Configuration
 @EnableRetry
@@ -84,6 +91,9 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Value("${cb.intermediate.threadpool.termination.seconds:60}")
     private int intermediateAwaitTerminationSeconds;
+
+    @Value("${cb.delayed.threadpool.core.size:10}")
+    private int delayedCorePoolSize;
 
     @Value("${rest.debug}")
     private boolean restDebug;
@@ -121,6 +131,9 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
+
+    @Inject
+    private MeterRegistry meterRegistry;
 
     private ResourceLoader resourceLoader;
 
@@ -233,6 +246,15 @@ public class AppConfig implements ResourceLoaderAware {
         return environmentNetworkConverters
                 .stream()
                 .collect(Collectors.toMap(EnvironmentNetworkConverter::getCloudPlatform, x -> x));
+    }
+
+    @Bean(name = DELAYED_TASK_EXECUTOR)
+    public ScheduledExecutorService delayedTaskExecutor() {
+        ThreadPoolTaskScheduler executor = new ThreadPoolTaskScheduler();
+        executor.setPoolSize(delayedCorePoolSize);
+        executor.setThreadNamePrefix("delayedExecutor-");
+        executor.initialize();
+        return ExecutorServiceMetrics.monitor(meterRegistry, executor.getScheduledExecutor(), DELAYED_TASK_EXECUTOR, "threadpool");
     }
 
     private Iterable<Resource> loadEtcResources() {
