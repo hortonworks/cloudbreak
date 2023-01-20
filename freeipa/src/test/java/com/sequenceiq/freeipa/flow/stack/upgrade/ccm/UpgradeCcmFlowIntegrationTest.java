@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -110,6 +111,9 @@ class UpgradeCcmFlowIntegrationTest {
 
     @MockBean
     private OperationService operationService;
+
+    @MockBean
+    private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
     @BeforeEach
     public void setup() {

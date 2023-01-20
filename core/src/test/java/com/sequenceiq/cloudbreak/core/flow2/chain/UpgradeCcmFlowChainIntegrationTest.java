@@ -112,6 +112,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.chain.FlowChains;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 
@@ -221,6 +222,9 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @MockBean
     private ClusterApiConnectors clusterApiConnectors;
+
+    @MockBean
+    private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
     @SpyBean
     private FlowChains flowChains;
