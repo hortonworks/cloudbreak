@@ -8,6 +8,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -19,6 +21,8 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
 public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KnoxServiceConfigProvider.class);
 
     private static final String KNOX_AUTORESTART_ON_STOP = "autorestart_on_stop";
 
@@ -51,15 +55,20 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
+        LOGGER.info("The productDetailsView is: {} ", source.getProductDetailsView());
         if (source.getProductDetailsView() != null
                 && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), getCdhProduct(source), getCdhPatchVersion(source))) {
+            LOGGER.info("Configuring Knox topology database.");
             RdsView knoxGatewayRdsView = getRdsView(source);
+            LOGGER.info("The Knox rdsConfig is {}.", knoxGatewayRdsView);
             configList.add(config(DATABASE_TYPE, knoxGatewayRdsView.getSubprotocol()));
             configList.add(config(DATABASE_NAME, knoxGatewayRdsView.getDatabaseName()));
             configList.add(config(DATABASE_HOST, knoxGatewayRdsView.getHost()));
             configList.add(config(DATABASE_PORT, knoxGatewayRdsView.getPort()));
             configList.add(config(DATABASE_USER, knoxGatewayRdsView.getConnectionUserName()));
             configList.add(config(DATABASE_PASSWORD, knoxGatewayRdsView.getConnectionPassword()));
+        } else {
+            LOGGER.info("The Knox database configuration is not supported.");
         }
         configList.add(config(KNOX_AUTORESTART_ON_STOP, Boolean.TRUE.toString()));
         return configList;
@@ -73,6 +82,7 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         String cmVersion = cmTemplateProcessor.getCmVersion().orElse("");
+        LOGGER.info("The cm version is: {} ", cmVersion);
         return isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_1_0);
     }
 
@@ -81,8 +91,11 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
         if (source.getProductDetailsView() != null
                 && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), getCdhProduct(source), getCdhPatchVersion(source))) {
+            LOGGER.info("Configuring Knox topology database.");
             RdsView knoxGatewayRdsView = getRdsView(source);
+            LOGGER.info("The Knox rdsConfig is {}.", knoxGatewayRdsView);
             if (knoxGatewayRdsView.isUseSsl()) {
+                LOGGER.info("The Knox rds will use ssl.");
                 configList.add(config(GATEWAY_DATABASE_SSL_ENABLED, "true"));
                 configList.add(config(GATEWAY_DATABASE_SSL_TRUSTSTORE_FILE, knoxGatewayRdsView.getSslCertificateFilePath()));
             }
