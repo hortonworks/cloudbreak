@@ -37,9 +37,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -51,10 +48,8 @@ import com.sequenceiq.common.api.credential.AppAuthenticationType;
 import com.sequenceiq.common.api.credential.AppCertificateStatus;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBasedRequest;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
-import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.RoleBasedRequest;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -91,12 +86,6 @@ public class AzureCredentialIntegrationTest {
 
     @Mock
     private ResourceDefinitionRequest resourceDefinitionRequest;
-
-    @Mock
-    private InteractiveLoginRequest interactiveLoginRequest;
-
-    @Mock
-    private InitCodeGrantFlowRequest initCodeGrantFlowRequest;
 
     @MockBean
     private RequestProvider requestProvider;
@@ -235,27 +224,6 @@ public class AzureCredentialIntegrationTest {
         assertEquals(AppAuthenticationType.CERTIFICATE, response.getAzure().getAuthenticationType());
         assertEquals(AppCertificateStatus.KEY_GENERATED, response.getAzure().getCertificate().getStatus());
         assertNull(response.getAzure().getRoleBased(), "Since this is app based, therefore role property should be null");
-    }
-
-    @Test
-    public void testCredentialAzureInteractiveLogin() throws InterruptedException {
-        credentialRequest.setName("testcredential");
-        credentialRequest.setCloudPlatform("AZURE");
-        AzureCredentialRequestParameters azureCredentialRequestParameters = new AzureCredentialRequestParameters();
-        azureCredentialRequestParameters.setSubscriptionId("subid");
-        azureCredentialRequestParameters.setTenantId("tenant");
-        RoleBasedRequest roleBasedRequest = new RoleBasedRequest();
-        roleBasedRequest.setDeploymentAddress("alma");
-        roleBasedRequest.setRoleName("role");
-        azureCredentialRequestParameters.setRoleBased(roleBasedRequest);
-        credentialRequest.setAzure(azureCredentialRequestParameters);
-
-        InteractiveLoginResult interactiveLoginResult = new InteractiveLoginResult(1L, Map.of("user_code", USER_CODE, "verification_url", VERIFICATION_URL));
-        when(requestProvider.getInteractiveLoginRequest(any(), any())).thenReturn(interactiveLoginRequest);
-        when(interactiveLoginRequest.await()).thenReturn(interactiveLoginResult);
-        InteractiveCredentialResponse result = client.credentialV1Endpoint().interactiveLogin(credentialRequest);
-        assertEquals(result.getUserCode(), USER_CODE);
-        assertEquals(result.getVerificationUrl(), VERIFICATION_URL);
     }
 
     static class CredentialVerificationMockRequest extends CredentialVerificationRequest {

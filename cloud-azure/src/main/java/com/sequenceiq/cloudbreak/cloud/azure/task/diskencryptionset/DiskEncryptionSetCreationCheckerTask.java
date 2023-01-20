@@ -10,9 +10,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.ProxyResource;
-import com.microsoft.azure.management.compute.EncryptionSetIdentity;
-import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
+import com.azure.core.management.ProxyResource;
+import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
+import com.azure.resourcemanager.compute.models.EncryptionSetIdentity;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollPredicateStateTask;

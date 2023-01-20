@@ -9,9 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
+import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureManagedImageService;
-import com.sequenceiq.cloudbreak.cloud.azure.task.storageaccount.StorageAccountChecker;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
@@ -21,7 +20,7 @@ public class AzureManagedImageCreationCheckerTask extends PollBooleanStateTask {
 
     public static final String NAME = "AzureManagedImageCreationChecker";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StorageAccountChecker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureManagedImageCreationCheckerTask.class);
 
     @Inject
     private AzureManagedImageService azureManagedImageService;

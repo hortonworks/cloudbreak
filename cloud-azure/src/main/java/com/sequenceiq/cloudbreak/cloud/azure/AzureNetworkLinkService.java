@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.VirtualNetworkLinkInner;
+import com.azure.resourcemanager.privatedns.fluent.models.VirtualNetworkLinkInner;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDnsZoneDeploymentParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceIdProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCheckerContext;
@@ -45,7 +45,8 @@ public class AzureNetworkLinkService {
     private AzureResourceIdProviderService azureResourceIdProviderService;
 
     public void checkOrCreateNetworkLinks(AuthenticatedContext authenticatedContext, AzureClient azureClient, AzureNetworkView networkView,
-            String resourceGroup, Map<String, String> tags, Set<AzurePrivateDnsZoneServiceEnum> servicesWithExistingPrivateDnsZone) {
+            String resourceGroup, Map<String, String> tags,
+            Set<AzurePrivateDnsZoneServiceEnum> servicesWithExistingPrivateDnsZone) {
 
         String networkId = networkView.getNetworkId();
         String networkResourceGroup = networkView.getResourceGroupName();
@@ -106,8 +107,8 @@ public class AzureNetworkLinkService {
 
     private void createMissingNetworkLinks(AzureClient azureClient, String azureNetworkId, String resourceGroup,
             Map<String, String> tags, List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices) {
-        for (AzurePrivateDnsZoneServiceEnum service: enabledPrivateEndpointServices) {
-            PagedList<VirtualNetworkLinkInner> networkLinks = azureClient.listNetworkLinksByPrivateDnsZoneName(resourceGroup, service.getDnsZoneName());
+        for (AzurePrivateDnsZoneServiceEnum service : enabledPrivateEndpointServices) {
+            AzureListResult<VirtualNetworkLinkInner> networkLinks = azureClient.listNetworkLinksByPrivateDnsZoneName(resourceGroup, service.getDnsZoneName());
             boolean networkLinkCreated = azureClient.isNetworkLinkCreated(StringUtils.substringAfterLast(azureNetworkId, "/"), networkLinks);
             if (!networkLinkCreated) {
                 LOGGER.debug("Network links for service {} not yet created, creating them now", service.getSubResource());

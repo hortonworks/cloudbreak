@@ -25,20 +25,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.management.compute.CachingTypes;
-import com.microsoft.azure.management.compute.Disk;
-import com.microsoft.azure.management.compute.DiskSkuTypes;
-import com.microsoft.azure.management.compute.Disks;
-import com.microsoft.azure.management.compute.Encryption;
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.compute.implementation.DiskInner;
-import com.microsoft.azure.management.compute.implementation.VirtualMachineInner;
-import com.microsoft.azure.management.keyvault.AccessPolicy;
-import com.microsoft.azure.management.keyvault.AccessPolicyEntry;
-import com.microsoft.azure.management.keyvault.KeyPermissions;
-import com.microsoft.azure.management.keyvault.Permissions;
-import com.microsoft.azure.management.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
-import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
+import com.azure.resourcemanager.compute.fluent.models.DiskInner;
+import com.azure.resourcemanager.compute.fluent.models.VirtualMachineInner;
+import com.azure.resourcemanager.compute.models.CachingTypes;
+import com.azure.resourcemanager.compute.models.Disk;
+import com.azure.resourcemanager.compute.models.DiskSkuTypes;
+import com.azure.resourcemanager.compute.models.Disks;
+import com.azure.resourcemanager.compute.models.Encryption;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.keyvault.models.AccessPolicy;
+import com.azure.resourcemanager.keyvault.models.AccessPolicyEntry;
+import com.azure.resourcemanager.keyvault.models.KeyPermissions;
+import com.azure.resourcemanager.keyvault.models.Permissions;
+import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 
 @ExtendWith(MockitoExtension.class)
 class AzureClientTest {
@@ -46,10 +46,10 @@ class AzureClientTest {
     private static final String DISK_ENCRYPTION_SET_ID = "diskEncryptionSetId";
 
     @Mock
-    private AzureClientCredentials azureClientCredentials;
+    private AzureClientFactory azureClientCredentials;
 
     @Mock
-    private AzureAuthExceptionHandler azureAuthExceptionHandler;
+    private AzureExceptionHandler azureExceptionHandler;
 
     @InjectMocks
     private AzureClient underTest;
@@ -64,7 +64,7 @@ class AzureClientTest {
     private ArgumentCaptor<Encryption> encryptionCaptor;
 
     static Object[][] setupDiskEncryptionWithDesIfNeededTestWhenDesAbsentDataProvider() {
-        return new Object[][]{
+        return new Object[][] {
                 // testCaseName diskEncryptionSetId
                 {"diskEncryptionSetId=null", null},
                 {"diskEncryptionSetId=\"\"", ""},
@@ -76,12 +76,12 @@ class AzureClientTest {
     void setupDiskEncryptionWithDesIfNeededTestWhenDesAbsent(String testCaseName, String diskEncryptionSetId) {
         underTest.setupDiskEncryptionWithDesIfNeeded(diskEncryptionSetId, (Disk.DefinitionStages.WithCreate) withCreateIndexableRefreshableWrapperImpl);
 
-        verify(withCreateIndexableRefreshableWrapperImpl, never()).inner();
+        verify(withCreateIndexableRefreshableWrapperImpl, never()).innerModel();
     }
 
     @Test
     void setupDiskEncryptionWithDesIfNeededTestWhenDesGiven() {
-        when(withCreateIndexableRefreshableWrapperImpl.inner()).thenReturn(diskInner);
+        when(withCreateIndexableRefreshableWrapperImpl.innerModel()).thenReturn(diskInner);
 
         underTest.setupDiskEncryptionWithDesIfNeeded(DISK_ENCRYPTION_SET_ID, (Disk.DefinitionStages.WithCreate) withCreateIndexableRefreshableWrapperImpl);
 
@@ -94,11 +94,11 @@ class AzureClientTest {
     @Test
     void setupDiskEncryptionWithDesIfNeededTestWhenAzureSdkInternalTypeChecks() throws ClassNotFoundException {
         // This class is package private
-        Class<?> clazzDisksImpl = Class.forName("com.microsoft.azure.management.compute.implementation.DisksImpl");
+        Class<?> clazzDisksImpl = Class.forName("com.azure.resourcemanager.compute.implementation.DisksImpl");
         assertThat(Disks.class.isAssignableFrom(clazzDisksImpl)).isTrue();
 
         // This class is package private
-        Class<?> clazzDiskImpl = Class.forName("com.microsoft.azure.management.compute.implementation.DiskImpl");
+        Class<?> clazzDiskImpl = Class.forName("com.azure.resourcemanager.compute.implementation.DiskImpl");
         assertThat(Disk.class.isAssignableFrom(clazzDiskImpl)).isTrue();
         assertThat(Disk.DefinitionStages.WithCreate.class.isAssignableFrom(clazzDiskImpl)).isTrue();
         assertThat(IndexableRefreshableWrapperImpl.class.isAssignableFrom(clazzDiskImpl)).isTrue();
@@ -119,7 +119,7 @@ class AzureClientTest {
         VirtualMachineInner virtualMachineInner = mock(VirtualMachineInner.class);
         VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
 
-        when(virtualMachine.inner()).thenReturn(virtualMachineInner);
+        when(virtualMachine.innerModel()).thenReturn(virtualMachineInner);
         when(virtualMachineInner.withPlan(null)).thenReturn(virtualMachineInner);
         when(virtualMachine.update()).thenReturn(virtualMachineUpdate);
         when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class))).thenReturn(virtualMachineUpdate);
@@ -143,7 +143,7 @@ class AzureClientTest {
         VirtualMachineInner virtualMachineInner = mock(VirtualMachineInner.class);
         VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
 
-        when(virtualMachine.inner()).thenReturn(virtualMachineInner);
+        when(virtualMachine.innerModel()).thenReturn(virtualMachineInner);
         when(virtualMachineInner.withPlan(null)).thenReturn(virtualMachineInner);
         when(virtualMachine.update()).thenReturn(virtualMachineUpdate);
         when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class))).thenReturn(virtualMachineUpdate);
@@ -168,7 +168,7 @@ class AzureClientTest {
         VirtualMachineInner virtualMachineInner = mock(VirtualMachineInner.class);
         VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
 
-        when(virtualMachine.inner()).thenReturn(virtualMachineInner);
+        when(virtualMachine.innerModel()).thenReturn(virtualMachineInner);
         when(virtualMachineInner.withPlan(null)).thenReturn(virtualMachineInner);
         when(virtualMachine.update()).thenReturn(virtualMachineUpdate);
         when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class))).thenReturn(virtualMachineUpdate);
@@ -195,19 +195,19 @@ class AzureClientTest {
         accessPolicies.add(accessPolicy3);
         accessPolicies.add(accessPolicy4);
 
-        when(accessPolicy1.inner()).thenReturn(new AccessPolicyEntry()
+        when(accessPolicy1.innerModel()).thenReturn(new AccessPolicyEntry()
                 .withObjectId("100")
                 .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY, KeyPermissions.GET))));
 
-        when(accessPolicy2.inner()).thenReturn(new AccessPolicyEntry()
+        when(accessPolicy2.innerModel()).thenReturn(new AccessPolicyEntry()
                 .withObjectId("200")
                 .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.UNWRAP_KEY, KeyPermissions.GET))));
 
-        when(accessPolicy3.inner()).thenReturn(new AccessPolicyEntry()
+        when(accessPolicy3.innerModel()).thenReturn(new AccessPolicyEntry()
                 .withObjectId("300")
                 .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.GET))));
 
-        when(accessPolicy4.inner()).thenReturn(new AccessPolicyEntry()
+        when(accessPolicy4.innerModel()).thenReturn(new AccessPolicyEntry()
                 .withObjectId("400")
                 .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY))));
 

@@ -20,11 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.resources.models.Deployment;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.resources.Deployment;
-import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
@@ -99,7 +99,7 @@ public class AzureNetworkConnector implements NetworkConnector {
             String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests, resourceGroup.name());
             String parametersMapAsString = new Json(Map.of()).getValue();
             templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, parametersMapAsString);
-        } catch (CloudException e) {
+        } catch (ManagementException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Network template deployment provisioning");
         } catch (Exception e) {
             LOGGER.warn("Provisioning error:", e);
@@ -145,7 +145,7 @@ public class AzureNetworkConnector implements NetworkConnector {
             String stackName = networkDeletionRequest.getStackName();
             azureTransientDeploymentService.handleTransientDeployment(azureClient, resourceGroupName, stackName);
             azureClient.deleteNetworkInResourceGroup(resourceGroupName, networkDeletionRequest.getNetworkId());
-        } catch (CloudException e) {
+        } catch (ManagementException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Network and template deployment deletion");
         }
     }
@@ -158,7 +158,7 @@ public class AzureNetworkConnector implements NetworkConnector {
                 azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
                 azureClient.deleteResourceGroup(networkDeletionRequest.getResourceGroup());
             }
-        } catch (CloudException e) {
+        } catch (ManagementException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Network resource group deletion");
         }
     }
@@ -195,7 +195,7 @@ public class AzureNetworkConnector implements NetworkConnector {
         AzureClient azureClient = azureClientService.getClient(credential);
         String resourceGroupName = azureUtils.getCustomResourceGroupName(network);
         String networkId = azureUtils.getCustomNetworkId(network);
-        com.microsoft.azure.management.network.Network networkByResourceGroup = azureClient.getNetworkByResourceGroup(resourceGroupName, networkId);
+        com.azure.resourcemanager.network.models.Network networkByResourceGroup = azureClient.getNetworkByResourceGroup(resourceGroupName, networkId);
         if (networkByResourceGroup == null || networkByResourceGroup.addressSpaces().isEmpty()) {
             throw new BadRequestException(String.format("Network could not be fetched from Azure with Resource Group name: %s and VNET id: %s. " +
                             "Please make sure that the name of the VNET is correct and is present in the Resource Group specified.",

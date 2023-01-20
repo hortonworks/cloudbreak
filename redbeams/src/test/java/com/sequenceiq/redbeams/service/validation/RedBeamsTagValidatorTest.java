@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.service.validation;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -32,6 +34,9 @@ public class RedBeamsTagValidatorTest {
     @Inject
     private RedBeamsTagValidator underTest;
 
+    @MockBean(name = "azureClientThreadPool")
+    private ExecutorService executorServicel;
+
     @ParameterizedTest
     @MethodSource("negativeScenarios")
     public void testNegative(String tag, String value, String messagePortion) {
@@ -51,18 +56,18 @@ public class RedBeamsTagValidatorTest {
     public static Object[][] negativeScenarios() {
         return new Object[][] {
 
-                { "",            "azure@cloudera.com prx:pfx:^!=-",  "too short"},
-                {"azureprefix",  "azure@cloudera.com prx:pfx:^!=-",  "regular expression"},
-                {"database_name", "",                                "too short"}
+                {"", "azure@cloudera.com prx:pfx:^!=-", "too short"},
+                {"azureprefix", "azure@cloudera.com prx:pfx:^!=-", "regular expression"},
+                {"database_name", "", "too short"}
         };
     }
 
     public static Object[][] positiveScenarios() {
         return new Object[][] {
 
-                { "azaccount",          "azure@cloudera.com prx:pfx:^!=-"},
-                {"cod_database_name",   "hura"},
-                {"cod_database_crn",    "hura"}
+                {"azaccount", "azure@cloudera.com prx:pfx:^!=-"},
+                {"cod_database_name", "hura"},
+                {"cod_database_crn", "hura"}
         };
     }
 

@@ -7,10 +7,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,19 +23,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
-import com.microsoft.azure.management.msi.Identity;
-import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.management.resources.Subscription;
-import com.microsoft.azure.management.storage.StorageAccount;
+import com.azure.resourcemanager.authorization.fluent.models.RoleAssignmentInner;
+import com.azure.resourcemanager.msi.models.Identity;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
+import com.azure.resourcemanager.resources.models.Subscription;
+import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
@@ -50,11 +51,7 @@ import com.sequenceiq.common.model.FileSystemType;
 @ExtendWith(MockitoExtension.class)
 public class AzureIDBrokerObjectStorageValidatorTest {
 
-    private static final CloudStorageCdpService SERVICE_1 = CloudStorageCdpService.ZEPPELIN_NOTEBOOK;
-
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
-
-    private static final String PATH_1 = "path1";
 
     private static final String SUBSCRIPTION_ID = "a9d4456e-349f-44f6-bc73-aaaaaaaaaaaa";
 
@@ -167,7 +164,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageWhenLoggerStorageAccountScopeThenNoError() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, ABFS_STORAGE_ACCOUNT_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
@@ -186,7 +183,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageWhenLoggerResourceGroupScopeThenNoError() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
@@ -200,7 +197,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageWhenLoggerSubscriptionScopeThenNoError() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
@@ -214,7 +211,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageNonExistingAssumerIdentity() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(null);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
@@ -232,7 +229,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageNonExistingLoggerIdentity() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID);
         when(client.getIdentityById(LOG_IDENTITY)).thenReturn(null);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
@@ -250,12 +247,14 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageNonExistingMapperIdentity() {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
-        PagedList<Identity> identityPagedList = Mockito.spy(PagedList.class);
+        List<Identity> identityPagedList = new ArrayList<>();
         identityPagedList.add(assumer);
         identityPagedList.add(logger);
-        when(client.listIdentities()).thenReturn(identityPagedList);
+        AzureListResult<Identity> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getAll()).thenReturn(identityPagedList);
+        when(client.listIdentities()).thenReturn(azureListResult);
 
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
@@ -275,13 +274,15 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageMappingCaseSensitivityCB6600() {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
-        PagedList<Identity> identityPagedList = Mockito.spy(PagedList.class);
+        List<Identity> identityPagedList = new ArrayList<>();
         when(assumer.id()).thenReturn(USER_IDENTITY_1);
         when(logger.id()).thenReturn(GROUP_IDENTITY_1);
         identityPagedList.add(assumer);
         identityPagedList.add(logger);
-        when(client.listIdentities()).thenReturn(identityPagedList);
-        new RoleASsignmentBuilder(client)
+        AzureListResult<Identity> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getAll()).thenReturn(identityPagedList);
+        when(client.listIdentities()).thenReturn(azureListResult);
+        new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
 
@@ -294,13 +295,15 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageLogLocation() {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
-        PagedList<Identity> identityPagedList = Mockito.spy(PagedList.class);
+        List<Identity> identityPagedList = new ArrayList<>();
         when(assumer.id()).thenReturn(USER_IDENTITY_1);
         when(logger.id()).thenReturn(GROUP_IDENTITY_1);
         identityPagedList.add(assumer);
         identityPagedList.add(logger);
-        when(client.listIdentities()).thenReturn(identityPagedList);
-        new RoleASsignmentBuilder(client)
+        AzureListResult<Identity> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getAll()).thenReturn(identityPagedList);
+        when(client.listIdentities()).thenReturn(azureListResult);
+        new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
 
@@ -313,17 +316,19 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageNoMappedRoles() {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
-        PagedList<Identity> identityPagedList = Mockito.spy(PagedList.class);
+        List<Identity> identityPagedList = new ArrayList<>();
         when(assumer.id()).thenReturn(USER_IDENTITY_1);
         when(logger.id()).thenReturn(GROUP_IDENTITY_1);
         identityPagedList.add(assumer);
         identityPagedList.add(logger);
-        when(client.listIdentities()).thenReturn(identityPagedList);
+        AzureListResult<Identity> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getAll()).thenReturn(identityPagedList);
+        when(client.listIdentities()).thenReturn(azureListResult);
 
         final String wrongAssumerIdentityPrincipalid = "489e3729-aed1-4d54-a95b-b231b70d383f";
         final String wrongLoggerIdentityPrincipalid = "61a70b9b-7331-4fa3-8717-2652fc70434e";
 
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(wrongAssumerIdentityPrincipalid, SUBSCRIPTION_FULL_ID)
                 .withAssignment(wrongLoggerIdentityPrincipalid, STORAGE_RESOURCE_GROUP_NAME);
 
@@ -347,7 +352,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageWithNoRoleAssignments() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client);
+        new RoleAssignmentBuilder(client);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
         underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, "", null, null, resultBuilder);
@@ -364,7 +369,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageWithNoSubscriptionScopeRoleAssignment() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
@@ -376,14 +381,14 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         assertEquals(validationResult.getErrors().get(1), String.format("Identity with id %s has no role assignment. " +
                 "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY));
         assertEquals(validationResult.getErrors().get(0), String.format("Identity with id %s has no role assignment on scope(s) " +
-                "[/subscriptions/%s, %s]. Please check if you've used the correct Identity when setting up Data Access.",
+                        "[/subscriptions/%s, %s]. Please check if you've used the correct Identity when setting up Data Access.",
                 ASSUMER_IDENTITY, SUBSCRIPTION_ID, MANAGEMENT_GROUP_SCOPE));
     }
 
     @Test
     public void testValidateObjectStorageWithSingleResourceGroupAndNoResourceGroupRoleAssignment() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
@@ -397,14 +402,14 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         assertEquals(validationResult.getErrors().get(1), String.format("Identity with id %s has no role assignment. " +
                 "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY));
         assertEquals(validationResult.getErrors().get(0), String.format("Identity with id %s has no role assignment on scope(s) " +
-                "[/subscriptions/%s, %s, %s]. Please check if you've used the correct Identity when setting up Data Access.",
+                        "[/subscriptions/%s, %s, %s]. Please check if you've used the correct Identity when setting up Data Access.",
                 ASSUMER_IDENTITY, SUBSCRIPTION_ID, RESOURCE_GROUP_ID, MANAGEMENT_GROUP_SCOPE));
     }
 
     @Test
     public void testValidateObjectStorageWithManagementGroupScopeRoleAssignment() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, MANAGEMENT_GROUP_SCOPE);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
@@ -419,7 +424,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageWithNoStorageAccountScopeRoleAssignment() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
@@ -437,7 +442,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Test
     public void testValidateObjectStorageWithNoStorageAccount() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
-        new RoleASsignmentBuilder(client)
+        new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString())).thenReturn(Optional.empty());
@@ -477,21 +482,23 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         return List.of(storageLocationBase);
     }
 
-    private static class RoleASsignmentBuilder {
+    private static class RoleAssignmentBuilder {
 
-        private final PagedList<RoleAssignmentInner> roleAssignmentsPagedList;
+        private final List<RoleAssignmentInner> roleAssignments;
 
-        RoleASsignmentBuilder(AzureClient client) {
-            roleAssignmentsPagedList = Mockito.spy(PagedList.class);
-            lenient().when(client.listRoleAssignments()).thenReturn(roleAssignmentsPagedList);
-            lenient().when(client.listRoleAssignmentsByScopeInner(any())).thenReturn(roleAssignmentsPagedList);
+        RoleAssignmentBuilder(AzureClient client) {
+            roleAssignments = new ArrayList<>();
+            AzureListResult<RoleAssignmentInner> azureListResult = mock(AzureListResult.class);
+            lenient().when(azureListResult.getAll()).thenReturn(roleAssignments);
+            lenient().when(client.listRoleAssignments()).thenReturn(azureListResult);
+            lenient().when(client.listRoleAssignmentsByScopeInner(any())).thenReturn(roleAssignments);
         }
 
-        RoleASsignmentBuilder withAssignment(String principalId, String scope) {
-            RoleAssignmentInner roleAssignmentInner = new RoleAssignmentInner()
-                    .withPrincipalId(principalId)
-                    .withScope(scope);
-            roleAssignmentsPagedList.add(roleAssignmentInner);
+        RoleAssignmentBuilder withAssignment(String principalId, String scope) {
+            RoleAssignmentInner roleAssignmentInner = spy(new RoleAssignmentInner()
+                    .withPrincipalId(principalId));
+            lenient().when(roleAssignmentInner.scope()).thenReturn(scope);
+            roleAssignments.add(roleAssignmentInner);
             return this;
         }
     }

@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.network.Network;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.network.models.Network;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDnsZoneDeploymentParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCheckerContext;
@@ -89,7 +89,7 @@ public class AzureResourceDeploymentHelperService {
 
             LOGGER.debug("Creating deployment with name {} in resource group {}", deploymentName, resourceGroup);
             azureClient.createTemplateDeployment(resourceGroup, deploymentName, template, parametersMapAsString);
-        } catch (CloudException e) {
+        } catch (ManagementException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
             throw azureUtils.convertToCloudConnectorException(e, "DNS Zone and network link template deployment");
         } catch (Exception e) {

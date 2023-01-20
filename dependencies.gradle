@@ -26,11 +26,17 @@ ext {
   dnsjavaVersion = '2.1.7'
   httpClientVersion = '4.5.10'
   nettyVersion = '4.1.87.Final'
-  okhttpVersion = '3.14.9'
+  okhttpVersion = '4.10.0'
 
   // Cloud SDKs
   awsSdkVersion = '1.12.261'
-  azureClientAuthVersion = '1.7.14'
+  azureSdkOkHttpVersion = '1.11.4'
+  azureSdkCoreVersion = '1.34.0'
+  azureSdkIdentityVersion = '1.7.2'
+  azureSdkStorageBlobVersion = '12.20.1'
+  azureSdkResourceManagerVersion = '2.22.0'
+  azureSdkResourceManagerMarketplaceVersion = '1.0.0-beta.2'
+  azureSdkResourceManagerDataLakeStoreVersion = '1.0.0-beta.1'
   azureSdkVersion = '1.41.4'
   azureStorageSdkVersion = '8.4.0'
 

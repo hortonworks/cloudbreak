@@ -21,7 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.azure.resourcemanager.compute.models.VirtualMachineSize;
+import com.azure.resourcemanager.compute.models.VirtualMachineSizeTypes;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -165,6 +166,11 @@ class AzurePlatformResourcesTest {
             @Override
             public int maxDataDiskCount() {
                 return 0;
+            }
+
+            @Override
+            public VirtualMachineSizeTypes virtualMachineSizeType() {
+                return VirtualMachineSizeTypes.BASIC_A1;
             }
 
             @Override

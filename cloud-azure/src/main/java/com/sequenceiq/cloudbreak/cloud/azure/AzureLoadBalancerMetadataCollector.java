@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.management.compute.AvailabilitySet;
-import com.microsoft.azure.management.network.LoadBalancerBackend;
-import com.microsoft.azure.management.network.LoadBalancingRule;
+import com.azure.resourcemanager.compute.models.AvailabilitySet;
+import com.azure.resourcemanager.network.models.LoadBalancerBackend;
+import com.azure.resourcemanager.network.models.LoadBalancingRule;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureLoadBalancerMetadataView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -60,7 +60,7 @@ public class AzureLoadBalancerMetadataCollector {
 
     private String generateAvailabilitySetName(AuthenticatedContext ac, LoadBalancerBackend backend) {
         String stackName = ac.getCloudContext().getName();
-        String groupName = backend.inner().name().replace("-pool", "");
+        String groupName = backend.innerModel().name().replace("-pool", "");
         return availabilitySetNameService.generateName(stackName, groupName);
     }
 }

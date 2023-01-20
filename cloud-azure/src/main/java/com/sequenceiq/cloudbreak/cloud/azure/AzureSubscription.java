@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import com.azure.resourcemanager.resources.models.SubscriptionPolicies;
+import com.azure.resourcemanager.resources.models.SubscriptionState;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.microsoft.azure.management.resources.SubscriptionPolicies;
-import com.microsoft.azure.management.resources.SubscriptionState;
 
 public class AzureSubscription {
 

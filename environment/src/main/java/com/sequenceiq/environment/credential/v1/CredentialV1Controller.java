@@ -4,13 +4,11 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,11 +180,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
     public InteractiveCredentialResponse interactiveLogin(@Valid CredentialRequest credentialRequest) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        Credential credential = credentialRequestConverter.convert(credentialRequest);
-        credential.setType(ENVIRONMENT);
-        Map<String, String> result = credentialService.interactiveLogin(accountId, credential);
-        return new InteractiveCredentialResponse(result.get("user_code"), result.get("verification_url"));
+        throw new UnsupportedOperationException("Interactive login is not supported.");
     }
 
     @Override
@@ -199,29 +193,19 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
     public Response initCodeGrantFlow(CredentialRequest credentialRequest) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        Credential credential = credentialRequestConverter.convert(credentialRequest);
-        credential.setType(ENVIRONMENT);
-        String loginURL = credentialService.initCodeGrantFlow(accountId, credential, userCrn);
-        return Response.status(Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
+        throw new UnsupportedOperationException("Init code grant flow is not supported.");
     }
 
     @Override
     @CheckPermissionByResourceName(action = EDIT_CREDENTIAL)
     public Response initCodeGrantFlowOnExisting(@ResourceName String name) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String loginURL = credentialService.initCodeGrantFlow(accountId, name);
-        return Response.status(Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
+        throw new UnsupportedOperationException("Init code grant flow is not supported.");
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
     public CredentialResponse authorizeCodeGrantFlow(String platform, String code, String state) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        Credential credential = credentialService.authorizeCodeGrantFlow(code, state, accountId, platform);
-        notify(ResourceEvent.CREDENTIAL_CREATED);
-        return credentialResponseConverter.convert(credential);
+        throw new UnsupportedOperationException("Authorization code grant flow is not supported.");
     }
 
     @Override

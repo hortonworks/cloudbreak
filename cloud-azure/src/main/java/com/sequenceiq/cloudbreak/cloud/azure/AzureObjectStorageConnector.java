@@ -4,20 +4,20 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.storage.Kind;
-import com.microsoft.azure.management.storage.StorageAccount;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.storage.models.Kind;
+import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureIDBrokerObjectStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -50,6 +50,9 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
 
     @Inject
     private AzureUtils azureUtils;
+
+    @Inject
+    private AzureExceptionHandler azureExceptionHandler;
 
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
@@ -96,9 +99,9 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
                         .build();
             }
             return response;
-        } catch (CloudException e) {
-            if (e.body() != null && StringUtils.equals("AuthorizationFailed", e.body().code())) {
-                LOGGER.error("Object storage validation failed on Azure due to authorization failure: ", e.getMessage());
+        } catch (ManagementException e) {
+            if (azureExceptionHandler.isForbidden(e)) {
+                LOGGER.error("Object storage validation failed on Azure due to authorization failure: {}", e.getMessage());
                 throw new AccessDeniedException("Object storage validation failed on Azure due to authorization failure: ", e);
             }
             throw azureUtils.convertToCloudConnectorException(e, "Object storage validation");

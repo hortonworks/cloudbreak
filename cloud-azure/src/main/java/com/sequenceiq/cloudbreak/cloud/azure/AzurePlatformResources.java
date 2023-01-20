@@ -29,14 +29,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.compute.VirtualMachineSize;
-import com.microsoft.azure.management.msi.Identity;
-import com.microsoft.azure.management.network.Network;
-import com.microsoft.azure.management.network.NetworkSecurityGroup;
-import com.microsoft.azure.management.network.Subnet;
-import com.microsoft.azure.management.privatedns.v2018_09_01.PrivateZone;
-import com.microsoft.azure.management.resources.ResourceGroup;
+import com.azure.core.http.rest.PagedIterable;
+import com.azure.resourcemanager.compute.models.VirtualMachineSize;
+import com.azure.resourcemanager.msi.models.Identity;
+import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
+import com.azure.resourcemanager.network.models.Subnet;
+import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
@@ -126,7 +126,7 @@ public class AzurePlatformResources implements PlatformResources {
                 LOGGER.info("Network with id '{}' does not exist in resource group {}", networkId, resourceGroupName);
             }
         } else {
-            for (Network network : client.getNetworks()) {
+            for (Network network : client.getNetworks().getAll()) {
                 addToResultIfRegionsAreMatch(region, result, network);
             }
         }
@@ -160,7 +160,7 @@ public class AzurePlatformResources implements PlatformResources {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
             CloudSubnet cloudSubnet = new CloudSubnet(subnet.getKey(), subnet.getKey(), null, subnet.getValue().addressPrefix());
-            azureCloudSubnetParametersService.addPrivateEndpointNetworkPolicies(cloudSubnet, subnet.getValue().inner().privateEndpointNetworkPolicies());
+            azureCloudSubnetParametersService.addPrivateEndpointNetworkPolicies(cloudSubnet, subnet.getValue().innerModel().privateEndpointNetworkPolicies());
             subnets.add(cloudSubnet);
             LOGGER.debug("Mapping azure subnet '{}' to cloudSubnet: {}", subnet.getKey(), cloudSubnet);
         }
@@ -225,9 +225,9 @@ public class AzurePlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
-        boolean availabilityZonesNeeded) {
+                                boolean availabilityZonesNeeded) {
         AzureClient client = azureClientService.getClient(cloudCredential);
-        Collection<com.microsoft.azure.management.resources.fluentcore.arm.Region> azureRegions = client.getRegion(region);
+        Collection<com.azure.core.management.Region> azureRegions = client.getRegion(region);
         return azureRegionProvider.regions(region, azureRegions, cloudCredential.getEntitlements());
     }
 
@@ -313,7 +313,7 @@ public class AzurePlatformResources implements PlatformResources {
         if (!"null".equals(region.getRegionName())) {
             identities = client.listIdentitiesByRegion(region.getRegionName());
         } else {
-            identities = client.listIdentities();
+            identities = client.listIdentities().getAll();
         }
         Set<CloudAccessConfig> configs = identities.stream().map(identity -> {
             Map<String, Object> properties = new HashMap<>();
@@ -342,15 +342,14 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Override
     public CloudResourceGroups resourceGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        PagedList<ResourceGroup> resourceGroupPagedList = azureClientService.getClient(cloudCredential).getResourceGroups().list();
-        resourceGroupPagedList.loadAll();
+        PagedIterable<ResourceGroup> resourceGroupPagedList = azureClientService.getClient(cloudCredential).getResourceGroups().list();
         List<CloudResourceGroup> resourceGroups = resourceGroupPagedList.stream().map(rg -> new CloudResourceGroup(rg.name())).collect(Collectors.toList());
         return new CloudResourceGroups(resourceGroups);
     }
 
     @Override
     public CloudPrivateDnsZones privateDnsZones(ExtendedCloudCredential cloudCredential, Map<String, String> filters) {
-        List<PrivateZone> azurePrivateDnsZones = azureClientService.getClient(cloudCredential).getPrivateDnsZoneListFromAllSubscriptions();
+        List<PrivateDnsZone> azurePrivateDnsZones = azureClientService.getClient(cloudCredential).getPrivateDnsZoneListFromAllSubscriptions();
         List<CloudPrivateDnsZone> cloudPrivateDnsZoneList = azurePrivateDnsZones.stream()
                 .map(pdz -> new CloudPrivateDnsZone(pdz.id())).collect(Collectors.toList());
         LOGGER.debug("Found private DNS zones are: {}", cloudPrivateDnsZoneList);

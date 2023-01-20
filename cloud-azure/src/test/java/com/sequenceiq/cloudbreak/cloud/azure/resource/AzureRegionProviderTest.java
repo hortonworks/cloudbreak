@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.azure.core.management.Region;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;

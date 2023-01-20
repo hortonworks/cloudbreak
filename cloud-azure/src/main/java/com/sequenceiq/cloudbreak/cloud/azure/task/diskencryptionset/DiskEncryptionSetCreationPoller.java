@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
+import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;

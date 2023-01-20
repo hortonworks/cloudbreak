@@ -13,10 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.resources.models.Deployment;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceI
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureUpscaleService;
 import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureVerticalScaleService;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -99,6 +100,9 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Inject
     private AzureImageTermsSignerService azureImageTermsSignerService;
 
+    @Inject
+    private AzureExceptionHandler azureExceptionHandler;
+
     @Value("${cb.arm.marketplace.image.automatic.signer:false}")
     private boolean enableAzureImageTermsAutomaticSigner;
 
@@ -157,7 +161,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             List<CloudResource> networkResources = azureCloudResourceService.collectAndSaveNetworkAndSubnet(
                     resourceGroupName, stackName, notifier, cloudContext, subnetNameList, networkName, client);
             azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentTypeWithThreshold, instances, networkResources);
-        } catch (CloudException e) {
+        } catch (ManagementException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Stack provisioning");
         } catch (Exception e) {
             LOGGER.warn("Provisioning error:", e);
@@ -265,11 +269,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                 templateResourceStatus = new CloudResourceStatus(resource, ResourceStatus.DELETED);
             }
             result.add(templateResourceStatus);
-        } catch (CloudException e) {
-            if (e.response().code() == AzureConstants.NOT_FOUND) {
+        } catch (ManagementException e) {
+            if (azureExceptionHandler.isNotFound(e)) {
                 result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED));
             } else {
-                throw new CloudConnectorException(e.body().message(), e);
+                throw new CloudConnectorException(e.getValue().getMessage(), e);
             }
         } catch (RuntimeException e) {
             throw new CloudConnectorException(String.format("Invalid resource exception: %s", e.getMessage()), e);
@@ -297,8 +301,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                 } catch (ActionFailedException ignored) {
                     LOGGER.debug("Resource group not found with name: {}", resourceGroupName);
                 }
-            } catch (CloudException e) {
-                if (e.response().code() != AzureConstants.NOT_FOUND) {
+            } catch (ManagementException e) {
+                if (!azureExceptionHandler.isNotFound(e)) {
                     throw new CloudConnectorException(String.format("Could not delete resource group: %s", resourceGroupName), e);
                 } else {
                     return check(ac, Collections.emptyList());

@@ -21,9 +21,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.network.NetworkInterface;
-import com.microsoft.azure.management.network.NicIPConfiguration;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.network.models.NetworkInterface;
+import com.azure.resourcemanager.network.models.NicIpConfiguration;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -160,7 +160,7 @@ class AzureMetadataCollectorTest {
     private VirtualMachine createVirtualMachine(String name) {
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         NetworkInterface networkInterface = mock(NetworkInterface.class);
-        NicIPConfiguration nicIPConfiguration = mock(NicIPConfiguration.class);
+        NicIpConfiguration nicIPConfiguration = mock(NicIpConfiguration.class);
         when(virtualMachine.name()).thenReturn(name);
         when(virtualMachine.getPrimaryNetworkInterface()).thenReturn(networkInterface);
         when(networkInterface.primaryIPConfiguration()).thenReturn(nicIPConfiguration);

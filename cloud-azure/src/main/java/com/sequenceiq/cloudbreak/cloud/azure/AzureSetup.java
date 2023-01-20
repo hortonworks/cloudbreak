@@ -1,12 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView.TENANT_ID;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.security.InvalidKeyException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,26 +10,22 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import com.microsoft.azure.AzureEnvironment;
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.credentials.ApplicationTokenCredentials;
-import com.microsoft.azure.management.datalake.store.DataLakeStoreAccountManagementClient;
-import com.microsoft.azure.management.datalake.store.implementation.DataLakeStoreAccountManagementClientImpl;
-import com.microsoft.azure.management.datalake.store.models.DataLakeStoreAccountBasic;
-import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobContainerClientBuilder;
+import com.azure.storage.blob.models.BlobStorageException;
+import com.azure.storage.common.StorageSharedKeyCredential;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureHttpClientConfigurer;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageCopyDetails;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageSetupService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -45,9 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -65,6 +55,9 @@ public class AzureSetup implements Setup {
 
     @Inject
     private AzureImageSetupService azureImageSetupService;
+
+    @Inject
+    private AzureHttpClientConfigurer azureHttpClientConfigurer;
 
     @Override
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
@@ -127,7 +120,7 @@ public class AzureSetup implements Setup {
                 parameters.get(PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER),
                 ResourceGroupUsage::valueOf);
 
-        if (StringUtils.isEmpty(resourceGroupName)) {
+        if (Strings.isNullOrEmpty(resourceGroupName)) {
             return;
         }
         if (ResourceGroupUsage.MULTIPLE.equals(resourceGroupUsage)) {
@@ -145,7 +138,7 @@ public class AzureSetup implements Setup {
     }
 
     @Override
-    public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) throws Exception {
+    public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) {
         FileSystemType fileSystemType = spiFileSystem.getType();
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
         if (cloudFileSystems.size() > 2) {
@@ -155,78 +148,35 @@ public class AzureSetup implements Setup {
             LOGGER.info("No filesystem was configured.");
             return;
         }
-        if (FileSystemType.ADLS.equals(fileSystemType)) {
-            validateAdlsFileSystem(credential, spiFileSystem);
-        } else if (FileSystemType.ADLS_GEN_2.equals(fileSystemType)) {
+
+        if (FileSystemType.ADLS_GEN_2.equals(fileSystemType)) {
             validateAdlsGen2FileSystem(spiFileSystem);
         } else {
-            validateWasbFileSystem(spiFileSystem);
+            LOGGER.warn("Not supported file system.");
         }
     }
 
-    private void validateAdlsFileSystem(CloudCredential credential, SpiFileSystem fileSystem) {
-        Map<String, Object> credentialAttributes = credential.getParameters();
-        CloudAdlsView cloudFileSystem = (CloudAdlsView) fileSystem.getCloudFileSystems().get(0);
-        String clientSecret = String.valueOf(credentialAttributes.get(CloudAdlsView.CREDENTIAL_SECRET_KEY));
-        String subscriptionId = String.valueOf(credentialAttributes.get(CloudAdlsView.SUBSCRIPTION_ID));
-        String clientId = String.valueOf(credentialAttributes.get(CloudAdlsView.ACCESS_KEY));
-        String tenantId = StringUtils.isEmpty(cloudFileSystem.getTenantId()) ? credential.getStringParameter(TENANT_ID) : cloudFileSystem.getTenantId();
-        String accountName = cloudFileSystem.getAccountName();
-
-        ApplicationTokenCredentials creds = new ApplicationTokenCredentials(clientId, tenantId, clientSecret, AzureEnvironment.AZURE);
-        DataLakeStoreAccountManagementClient adlsClient = new DataLakeStoreAccountManagementClientImpl(creds);
-        adlsClient.withSubscriptionId(subscriptionId);
-        PagedList<DataLakeStoreAccountBasic> dataLakeStoreAccountPagedList = adlsClient.accounts().list();
-        boolean validAccountname = false;
-
-        List<DataLakeStoreAccountBasic> dataLakeStoreAccountList = new ArrayList<>();
-        while (dataLakeStoreAccountPagedList.hasNextPage()) {
-            dataLakeStoreAccountList.addAll(dataLakeStoreAccountPagedList);
-            dataLakeStoreAccountPagedList.loadNextPage();
-        }
-
-        for (DataLakeStoreAccountBasic account : dataLakeStoreAccountList) {
-            if (account.name().equalsIgnoreCase(accountName)) {
-                validAccountname = true;
-                break;
-            }
-        }
-        if (!validAccountname) {
-            throw new CloudConnectorException("The provided file system account name does not belong to a valid ADLS account");
-        }
-    }
-
-    private void validateAdlsGen2FileSystem(SpiFileSystem fileSystem) throws URISyntaxException, InvalidKeyException, StorageException {
-        CloudAdlsGen2View cloudFileSystem = (CloudAdlsGen2View) fileSystem.getCloudFileSystems().get(0);
-        String accountName = cloudFileSystem.getAccountName();
-        String accountKey = cloudFileSystem.getAccountKey();
-        String connectionString = "DefaultEndpointsProtocol=https;AccountName="
-                + accountName + ";AccountKey=" + accountKey + ";EndpointSuffix=core.windows.net";
-        CloudStorageAccount storageAccount = CloudStorageAccount.parse(connectionString);
-        CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
-        CloudBlobContainer containerReference = blobClient.getContainerReference(TEST_CONTAINER + System.nanoTime());
+    private void validateAdlsGen2FileSystem(SpiFileSystem fileSystem) {
         try {
-            containerReference.createIfNotExists();
-            containerReference.delete();
-        } catch (StorageException e) {
-            if (e.getCause() instanceof UnknownHostException) {
-                throw new CloudConnectorException("The provided account does not belong to a valid storage account");
+            CloudAdlsGen2View cloudFileSystem = (CloudAdlsGen2View) fileSystem.getCloudFileSystems().get(0);
+            String accountName = cloudFileSystem.getAccountName();
+            String accountKey = cloudFileSystem.getAccountKey();
+            if (StringUtils.isEmpty(accountName)) {
+                LOGGER.warn("Account name is empty. Ignoring ADLS_GEN2 validation.");
+                return;
             }
-        }
-    }
-
-    private void validateWasbFileSystem(SpiFileSystem fileSystem) throws URISyntaxException, InvalidKeyException, StorageException {
-        CloudWasbView cloudFileSystem = (CloudWasbView) fileSystem.getCloudFileSystems().get(0);
-        String accountName = cloudFileSystem.getAccountName();
-        String accountKey = cloudFileSystem.getAccountKey();
-        String connectionString = "DefaultEndpointsProtocol=https;AccountName=" + accountName + ";AccountKey=" + accountKey;
-        CloudStorageAccount storageAccount = CloudStorageAccount.parse(connectionString);
-        CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
-        CloudBlobContainer containerReference = blobClient.getContainerReference(TEST_CONTAINER + System.nanoTime());
-        try {
-            containerReference.createIfNotExists();
-            containerReference.delete();
-        } catch (StorageException e) {
+            if (StringUtils.isEmpty(accountKey)) {
+                LOGGER.warn("Account key is empty. Ignoring ADLS_GEN2 validation.");
+                return;
+            }
+            BlobContainerClient blobContainerClient = azureHttpClientConfigurer.configureDefault(new BlobContainerClientBuilder())
+                    .endpoint("https://" + accountName + ".blob.core.windows.net")
+                    .containerName(TEST_CONTAINER + System.nanoTime())
+                    .credential(new StorageSharedKeyCredential(accountName, accountKey))
+                    .buildClient();
+            blobContainerClient.createIfNotExists();
+            blobContainerClient.delete();
+        } catch (BlobStorageException e) {
             if (e.getCause() instanceof UnknownHostException) {
                 throw new CloudConnectorException("The provided account does not belong to a valid storage account");
             }

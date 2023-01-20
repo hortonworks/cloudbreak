@@ -6,11 +6,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -24,12 +26,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.privatedns.v2018_09_01.PrivateZone;
+import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateEndpointServicesProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.PrivateDnsZoneValidationTestConstants.TestPagedList;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +55,7 @@ public class AzureNewPrivateDnsZoneValidatorServiceTest {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
         Set<AzurePrivateDnsZoneServiceEnum> servicesWithExistingPrivateDnsZone = Set.of();
         when(azurePrivateEndpointServicesProvider.getCdpManagedDnsZones(servicesWithExistingPrivateDnsZone)).thenReturn(availableServicesForPrivateEndpoint);
-        PagedList<PrivateZone> privateDnsZoneList = setupPrivateDnsZones();
+        List<PrivateDnsZone> privateDnsZoneList = setupPrivateDnsZones();
 
         underTest.zonesNotConnectedToNetwork(azureClient, NETWORK_NAME, SINGLE_RESOURCE_GROUP_NAME, servicesWithExistingPrivateDnsZone, resultBuilder);
 
@@ -80,9 +81,11 @@ public class AzureNewPrivateDnsZoneValidatorServiceTest {
         verify(azurePrivateDnsZoneValidatorService, never()).privateDnsZonesNotConnectedToNetwork(any(), any(), anyString(), anyString(), any(), any());
     }
 
-    private PagedList<PrivateZone> setupPrivateDnsZones() {
-        PagedList<PrivateZone> privateDnsZoneList = new TestPagedList<>();
-        when(azureClient.getPrivateDnsZoneList()).thenReturn(privateDnsZoneList);
+    private List<PrivateDnsZone> setupPrivateDnsZones() {
+        List<PrivateDnsZone> privateDnsZoneList = new ArrayList<>();
+        AzureListResult<PrivateDnsZone> azureListResult = mock(AzureListResult.class);
+        when(azureListResult.getAll()).thenReturn(privateDnsZoneList);
+        when(azureClient.getPrivateDnsZoneList()).thenReturn(azureListResult);
         return privateDnsZoneList;
     }
 

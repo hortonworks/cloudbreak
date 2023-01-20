@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import java.util.List;
 import java.util.Map;
 
-import com.microsoft.azure.management.compute.VirtualMachine;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 
 public class AzureVirtualMachinesWithStatuses {

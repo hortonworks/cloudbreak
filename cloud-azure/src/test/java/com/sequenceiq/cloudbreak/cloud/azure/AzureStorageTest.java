@@ -2,12 +2,15 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,16 +18,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.resources.Subscription;
-import com.microsoft.azure.management.storage.Kind;
-import com.microsoft.azure.management.storage.StorageAccount;
-import com.microsoft.azure.management.storage.implementation.StorageAccountInner;
+import com.azure.resourcemanager.resources.models.Subscription;
+import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
+import com.azure.resourcemanager.storage.models.Kind;
+import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.storage.SkuTypeResolver;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -138,17 +140,20 @@ public class AzureStorageTest {
     }
 
     private void setupSubscriptions(AzureClient client) {
-        PagedList<Subscription> subscriptionPagedList = Mockito.spy(PagedList.class);
+        List<Subscription> subscriptions = new ArrayList<>();
 
         Subscription subscriptionOne = mock(Subscription.class);
         when(subscriptionOne.subscriptionId()).thenReturn(SUBSCRIPTION_ONE);
-        subscriptionPagedList.add(subscriptionOne);
+        subscriptions.add(subscriptionOne);
 
         Subscription subscriptionTwo = mock(Subscription.class);
         when(subscriptionTwo.subscriptionId()).thenReturn(SUBSCRIPTION_ANOTHER);
-        subscriptionPagedList.add(subscriptionTwo);
+        subscriptions.add(subscriptionTwo);
 
-        when(client.listSubscriptions()).thenReturn(subscriptionPagedList);
+        AzureListResult<Subscription> azureListResult = mock(AzureListResult.class);
+        lenient().when(azureListResult.getAll()).thenReturn(subscriptions);
+        lenient().when(azureListResult.getStream()).thenReturn(subscriptions.stream());
+        when(client.listSubscriptions()).thenReturn(azureListResult);
     }
 
     private CloudCredential createCloudCredential() {

@@ -20,9 +20,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.microsoft.azure.CloudError;
-import com.microsoft.azure.CloudException;
+import com.azure.core.management.exception.ManagementError;
+import com.azure.resourcemanager.compute.models.ApiError;
+import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureTestUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureVirtualMachineService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -117,10 +119,13 @@ public class AzureVerticalScaleServiceTest {
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
         List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
 
-        CloudError cloudError = new CloudError().withCode("code").withMessage("Error happened");
-        cloudError.details().add(new CloudError().withCode("code").withMessage("Please check the power state later"));
+        ApiError cloudError = AzureTestUtils.apiError("code", "Error happened");
+        List<ManagementError> details = new ArrayList<>();
+        AzureTestUtils.setDetails(cloudError, details);
+        ManagementError managementError = AzureTestUtils.managementError("code", "Please check the power state later");
+        details.add(managementError);
         when(azureUtils.getInstanceList(any(CloudStack.class)))
-                .thenThrow(new Retry.ActionFailedException("VMs not started in time.", new CloudException("Error", null, cloudError)));
+                .thenThrow(new Retry.ActionFailedException("VMs not started in time.", new ApiErrorException("Error", null, cloudError)));
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class, () ->
                 underTest.verticalScale(ac, stack, resources, azureStackView, client)
         );

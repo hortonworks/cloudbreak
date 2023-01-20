@@ -15,10 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.azure.resourcemanager.storage.models.StorageAccountSkuType;
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.microsoft.azure.management.storage.StorageAccountSkuType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorageAccountTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;

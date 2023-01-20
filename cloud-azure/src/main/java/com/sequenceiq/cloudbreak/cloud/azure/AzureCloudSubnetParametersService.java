@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.azure.resourcemanager.network.models.VirtualNetworkPrivateEndpointNetworkPolicies;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 
 @Service
@@ -15,11 +16,9 @@ public class AzureCloudSubnetParametersService {
 
     private static final String DISABLED = "disabled";
 
-    private static final String AZURE_RESPONSE_DISABLED = "Disabled";
-
-    public void addPrivateEndpointNetworkPolicies(CloudSubnet cloudSubnet, String azurePrivateEndpointNetworkPolicies) {
-        cloudSubnet.putParameter(PRIVATE_ENDPOINT_NETWORK_POLICIES, AZURE_RESPONSE_DISABLED.equalsIgnoreCase(azurePrivateEndpointNetworkPolicies)
-                ? DISABLED : ENABLED);
+    public void addPrivateEndpointNetworkPolicies(CloudSubnet cloudSubnet, VirtualNetworkPrivateEndpointNetworkPolicies azurePrivateEndpointNetworkPolicies) {
+        cloudSubnet.putParameter(PRIVATE_ENDPOINT_NETWORK_POLICIES,
+                VirtualNetworkPrivateEndpointNetworkPolicies.DISABLED.equals(azurePrivateEndpointNetworkPolicies) ? DISABLED : ENABLED);
     }
 
     public boolean isPrivateEndpointNetworkPoliciesDisabled(CloudSubnet cloudSubnet) {

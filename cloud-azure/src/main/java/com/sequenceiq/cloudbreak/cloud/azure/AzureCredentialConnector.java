@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -12,23 +10,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.AzureEnvironment;
-import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
-import com.sequenceiq.cloudbreak.cloud.azure.client.AuthenticationContextProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.cloud.azure.client.CBRefreshTokenClientProvider;
-import com.sequenceiq.cloudbreak.cloud.azure.client.CbDelegatedTokenCredentials;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionExtractor;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
@@ -42,16 +33,7 @@ public class AzureCredentialConnector implements CredentialConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureCredentialConnector.class);
 
     @Inject
-    private AzureInteractiveLogin azureInteractiveLogin;
-
-    @Inject
     private AzureCredentialAppCreationCommand appCreationCommand;
-
-    @Inject
-    private AuthenticationContextProvider authenticationContextProvider;
-
-    @Inject
-    private CBRefreshTokenClientProvider cbRefreshTokenClientProvider;
 
     @Inject
     private AzurePlatformParameters azurePlatformParameters;
@@ -72,13 +54,10 @@ public class AzureCredentialConnector implements CredentialConnector {
                     return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, null,
                             "Your subscription ID is not valid");
                 } else {
-                    client.getRefreshToken()
-                            .ifPresent(refreshToken -> {
-                                Map<String, String> codeGrantFlowBased = (Map<String, String>) cloudCredential
-                                        .getParameter("azure", Map.class)
-                                        .get(AzureCredentialView.CODE_GRANT_FLOW_BASED);
-                                codeGrantFlowBased.put("refreshToken", refreshToken);
-                            });
+                    Optional<String> accessToken = client.getAccessToken();
+                    if (accessToken.isEmpty()) {
+                        LOGGER.error("Couldn't get access token from azure.");
+                    }
                 }
             } else {
                 LOGGER.info("Keys are generated for the Azure credential: {}, but they are not ACTIVE yet, therefore we just skip the validation",
@@ -99,12 +78,6 @@ public class AzureCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus create(AuthenticatedContext authenticatedContext) {
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.CREATED);
-    }
-
-    @Override
-    public Map<String, String> interactiveLogin(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
-            CredentialNotifier credentialNotifier) {
-        return azureInteractiveLogin.login(cloudContext, extendedCloudCredential, credentialNotifier);
     }
 
     @Override
@@ -135,28 +108,6 @@ public class AzureCredentialConnector implements CredentialConnector {
         }
         AzureCredentialPrerequisites azurePrerequisites = new AzureCredentialPrerequisites(encodedCommand, roleDefJson);
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), azurePrerequisites);
-    }
-
-    @Override
-    public Map<String, String> initCodeGrantFlow(CloudContext cloudContext, CloudCredential cloudCredential) {
-        Map<String, String> parameters = new HashMap<>();
-        AzureCredentialView azureCredential = new AzureCredentialView(cloudCredential);
-
-        ApplicationTokenCredentials applicationCredentials = new ApplicationTokenCredentials(
-                azureCredential.getAccessKey(),
-                azureCredential.getTenantId(),
-                azureCredential.getSecretKey(),
-                AzureEnvironment.AZURE);
-
-        String replyUrl = appCreationCommand.getRedirectURL(azureCredential.getDeploymentAddress());
-        CbDelegatedTokenCredentials creds = new CbDelegatedTokenCredentials(applicationCredentials, replyUrl, authenticationContextProvider,
-                cbRefreshTokenClientProvider);
-
-        String state = UUID.randomUUID().toString();
-        parameters.put("appLoginUrl", creds.generateAuthenticationUrl(state));
-        parameters.put("appReplyUrl", replyUrl);
-        parameters.put("codeGrantFlowState", state);
-        return parameters;
     }
 }
 

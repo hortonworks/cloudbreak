@@ -21,8 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.management.network.Network;
-import com.microsoft.azure.management.resources.Subscription;
+import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.resources.models.Subscription;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceIdProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;

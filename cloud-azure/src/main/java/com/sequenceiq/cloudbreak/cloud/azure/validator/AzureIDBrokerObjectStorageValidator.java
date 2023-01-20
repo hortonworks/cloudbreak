@@ -27,18 +27,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.azure.resourcemanager.authorization.fluent.models.RoleAssignmentInner;
+import com.azure.resourcemanager.msi.models.Identity;
+import com.azure.resourcemanager.resources.fluentcore.arm.ResourceId;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
+import com.azure.resourcemanager.storage.models.Kind;
+import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.gs.collections.api.set.MutableSet;
 import com.gs.collections.impl.factory.Sets;
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
-import com.microsoft.azure.management.msi.Identity;
-import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.management.resources.fluentcore.arm.ResourceId;
-import com.microsoft.azure.management.storage.Kind;
-import com.microsoft.azure.management.storage.StorageAccount;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
@@ -91,7 +91,7 @@ public class AzureIDBrokerObjectStorageValidator {
                             roleAssignments = client.listRoleAssignmentsByScopeInner(resourceGroup.id());
                             singleResourceGroup = Optional.of(resourceGroup);
                         } else {
-                            roleAssignments = client.listRoleAssignments();
+                            roleAssignments = client.listRoleAssignments().getAll();
                             singleResourceGroup = Optional.empty();
                         }
 
@@ -233,7 +233,7 @@ public class AzureIDBrokerObjectStorageValidator {
             return roleAssignmentsOfCurrentSubscription;
         }
 
-        return client.listRoleAssignmentsBySubscription(targetSubscriptionId);
+        return new AzureListResult<>(client.listRoleAssignmentsBySubscription(targetSubscriptionId)).getAll();
     }
 
     private Set<Identity> validateAllMappedIdentities(AzureClient client, CloudFileSystemView cloudFileSystemView,
@@ -247,7 +247,7 @@ public class AzureIDBrokerObjectStorageValidator {
             mappedIdentityIds = mappedIdentityIds.stream()
                     .map(id -> id.replaceFirst("(?i)/resourceGroups/", "/resourcegroups/"))
                     .collect(Collectors.toSet());
-            PagedList<Identity> existingIdentities = client.listIdentities();
+            List<Identity> existingIdentities = client.listIdentities().getAll();
 
             Set<String> existingIdentityIds = existingIdentities.stream().map(Identity::id).collect(Collectors.toSet());
             MutableSet<String> nonExistingIdentityIds = Sets.difference(mappedIdentityIds, existingIdentityIds);

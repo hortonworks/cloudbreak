@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
-import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
+import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
 import com.sequenceiq.cloudbreak.cloud.azure.task.diskencryptionset.DiskEncryptionSetCreationCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.task.diskencryptionset.DiskEncryptionSetCreationCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;

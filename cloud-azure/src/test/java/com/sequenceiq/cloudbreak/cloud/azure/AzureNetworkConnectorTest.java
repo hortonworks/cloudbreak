@@ -32,10 +32,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.azure.core.http.HttpResponse;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.compute.models.ApiErrorException;
+import com.azure.resourcemanager.resources.models.Deployment;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.google.common.collect.Lists;
-import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.resources.Deployment;
-import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.subnet.selector.AzureSubnetSelectorService;
@@ -60,10 +62,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.json.Json;
-
-import okhttp3.MediaType;
-import okhttp3.ResponseBody;
-import retrofit2.Response;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureNetworkConnectorTest {
@@ -199,7 +197,6 @@ public class AzureNetworkConnectorTest {
                 getTags(),
                 Set.of(AzurePrivateDnsZoneServiceEnum.POSTGRES)
         );
-
     }
 
     @Test
@@ -234,7 +231,6 @@ public class AzureNetworkConnectorTest {
         verify(azureClient).deleteNetworkInResourceGroup(RESOURCE_GROUP, NETWORK_ID);
         verify(azureClient, never()).deleteResourceGroup(RESOURCE_GROUP);
         verify(azureClient, never()).getTemplateDeployment(RESOURCE_GROUP, STACK);
-
     }
 
     @Test
@@ -266,7 +262,7 @@ public class AzureNetworkConnectorTest {
 
         when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
         when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
-        when(azureUtils.convertToCloudConnectorException(any(CloudException.class), anyString())).thenReturn(new CloudConnectorException("text"));
+        when(azureUtils.convertToCloudConnectorException(any(ManagementException.class), anyString())).thenReturn(new CloudConnectorException("text"));
         doThrow(createCloudException()).when(azureClient).deleteTemplateDeployment(RESOURCE_GROUP, STACK);
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> {
@@ -313,7 +309,7 @@ public class AzureNetworkConnectorTest {
 
         Network network = new Network(null, Map.of(NETWORK_ID_KEY, networkId));
         CloudCredential credential = new CloudCredential();
-        com.microsoft.azure.management.network.Network azureNetwork = mock(com.microsoft.azure.management.network.Network.class);
+        com.azure.resourcemanager.network.models.Network azureNetwork = mock(com.azure.resourcemanager.network.models.Network.class);
 
         when(azureClientService.getClient(credential)).thenReturn(azureClient);
         when(azureUtils.getCustomResourceGroupName(network)).thenReturn(resourceGroupName);
@@ -332,7 +328,7 @@ public class AzureNetworkConnectorTest {
 
         Network network = new Network(null, Map.of(NETWORK_ID_KEY, networkId));
         CloudCredential credential = new CloudCredential();
-        com.microsoft.azure.management.network.Network azureNetwork = mock(com.microsoft.azure.management.network.Network.class);
+        com.azure.resourcemanager.network.models.Network azureNetwork = mock(com.azure.resourcemanager.network.models.Network.class);
 
         when(azureClientService.getClient(credential)).thenReturn(azureClient);
         when(azureUtils.getCustomResourceGroupName(network)).thenReturn(resourceGroupName);
@@ -358,7 +354,7 @@ public class AzureNetworkConnectorTest {
 
         Network network = new Network(null, Map.of(NETWORK_ID_KEY, networkId));
         CloudCredential credential = new CloudCredential();
-        com.microsoft.azure.management.network.Network azureNetwork = mock(com.microsoft.azure.management.network.Network.class);
+        com.azure.resourcemanager.network.models.Network azureNetwork = mock(com.azure.resourcemanager.network.models.Network.class);
 
         when(azureClientService.getClient(credential)).thenReturn(azureClient);
         when(azureUtils.getCustomResourceGroupName(network)).thenReturn(resourceGroupName);
@@ -477,8 +473,9 @@ public class AzureNetworkConnectorTest {
         return subnetRequest;
     }
 
-    private CloudException createCloudException() {
-        return new CloudException("error", Response.success(ResponseBody.create(MediaType.get("application/json; charset=utf-8"), "error body")));
+    private ApiErrorException createCloudException() {
+        HttpResponse httpResponse = mock(HttpResponse.class);
+        return new ApiErrorException("error", httpResponse);
     }
 
     private NetworkSubnetRequest createSubnetRequest(String s) {

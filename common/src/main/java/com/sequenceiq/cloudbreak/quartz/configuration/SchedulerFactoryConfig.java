@@ -81,5 +81,4 @@ public class SchedulerFactoryConfig {
         executor.initialize();
         return ExecutorServiceMetrics.monitor(meterRegistry, executor.getThreadPoolExecutor(), QUARTZ_TASK_EXECUTOR, "threadpool");
     }
-
 }

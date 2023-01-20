@@ -18,8 +18,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.network.NetworkInterface;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.network.models.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureLoadBalancer;

@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,15 +20,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.compute.OSDisk;
-import com.microsoft.azure.management.compute.StorageProfile;
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.network.Subnet;
-import com.microsoft.azure.management.resources.Deployment;
-import com.microsoft.azure.management.resources.DeploymentOperation;
-import com.microsoft.azure.management.resources.TargetResource;
+import com.azure.core.http.rest.PagedIterable;
+import com.azure.resourcemanager.compute.models.OSDisk;
+import com.azure.resourcemanager.compute.models.StorageProfile;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.network.models.Subnet;
+import com.azure.resourcemanager.resources.models.Deployment;
+import com.azure.resourcemanager.resources.models.DeploymentOperation;
+import com.azure.resourcemanager.resources.models.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -46,9 +49,9 @@ public class AzureCloudResourceService {
     public List<CloudResource> getNetworkResources(List<CloudResource> resources) {
         return resources.stream()
                 .filter(cloudResource -> List.of(
-                        ResourceType.AZURE_SUBNET,
-                        ResourceType.AZURE_NETWORK,
-                        ResourceType.AZURE_RESOURCE_GROUP)
+                                ResourceType.AZURE_SUBNET,
+                                ResourceType.AZURE_NETWORK,
+                                ResourceType.AZURE_RESOURCE_GROUP)
                         .contains(cloudResource.getType()))
                 .collect(Collectors.toList());
     }
@@ -59,7 +62,7 @@ public class AzureCloudResourceService {
     }
 
     public List<CloudResource> getDeploymentCloudResources(Deployment templateDeployment) {
-        PagedList<DeploymentOperation> operations = templateDeployment.deploymentOperations().list();
+        PagedIterable<DeploymentOperation> operations = templateDeployment.deploymentOperations().list();
         List<CloudResource> resourceList = operations.stream()
                 .filter(Predicate.not(Predicate.isEqual(null)))
                 .filter(deploymentOperation -> Objects.nonNull(deploymentOperation.targetResource())
@@ -235,26 +238,34 @@ public class AzureCloudResourceService {
                 .build();
     }
 
-    public List<CloudResource> getAttachedOsDiskResources(List<CloudResource> instanceList,
-            String resourceGroupName, AzureClient client) {
-
-        List<CloudResource> osDiskList = new ArrayList<>();
-        PagedList<VirtualMachine> virtualMachines = client.getVirtualMachines(resourceGroupName);
-        virtualMachines.loadAll();
-
-        instanceList.forEach(vm -> {
-            Optional<VirtualMachine> matchingAzureVmOptional = virtualMachines
-                    .stream()
-                    .filter(azureVirtualMachine -> vm.getName().equals(azureVirtualMachine.name()))
-                    .findFirst();
-            matchingAzureVmOptional.ifPresentOrElse(
-                    matchingAzureVm ->
-                            osDiskList.add(collectOsDisk(vm.getInstanceId(), matchingAzureVm)),
-                    () -> LOGGER.warn("No Azure VM metadata found for the VM: " + vm.getInstanceId()));
-                }
-        );
+    public List<CloudResource> getAttachedOsDiskResources(List<CloudResource> instanceList, String resourceGroupName, AzureClient client) {
+        AzureListResult<VirtualMachine> virtualMachines = client.getVirtualMachines(resourceGroupName);
+        Map<String, CloudResource> instancesByName = new HashMap<>();
+        instanceList.forEach(instance -> {
+            if (Objects.nonNull(instance.getName())) {
+                instancesByName.put(instance.getName(), instance);
+            }
+        });
+        List<CloudResource> osDiskList = virtualMachines
+                .getStream()
+                .takeWhile(instance -> !instancesByName.isEmpty())
+                .reduce(new ArrayList<>(), (acc, azureInstance) -> {
+                    if (instancesByName.containsKey(azureInstance.name())) {
+                        CloudResource vm = instancesByName.remove(azureInstance.name());
+                        acc.add(collectOsDisk(vm.getInstanceId(), azureInstance));
+                    }
+                    return acc;
+                }, this::mergeLists);
+        LOGGER.warn("No Azure VM metadata found for VMs: {}", instancesByName.keySet());
         LOGGER.debug("The following OS disks have been found: {}", osDiskList);
         return osDiskList;
+    }
+
+    private ArrayList<CloudResource> mergeLists(Collection<CloudResource> listOne, Collection<CloudResource> listTwo) {
+        ArrayList<CloudResource> result = new ArrayList<>();
+        result.addAll(listOne);
+        result.addAll(listTwo);
+        return result;
     }
 
     public void saveCloudResources(PersistenceNotifier notifier, CloudContext cloudContext, List<CloudResource> cloudResources) {
