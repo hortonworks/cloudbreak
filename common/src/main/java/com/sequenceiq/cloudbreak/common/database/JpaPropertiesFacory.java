@@ -7,7 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.common.tx.CircuitBreakerType;
 import com.sequenceiq.cloudbreak.common.tx.HibernateNPlusOneCircuitBreaker;
-import com.sequenceiq.cloudbreak.common.tx.HibernateNPlusOneLogger;
+import com.sequenceiq.cloudbreak.common.tx.HibernateStatementStatisticsLogger;
+import com.sequenceiq.cloudbreak.common.tx.HibernateTransactionInterceptor;
 
 public class JpaPropertiesFacory {
 
@@ -17,7 +18,7 @@ public class JpaPropertiesFacory {
     }
 
     public static Properties create(String hbm2ddlStrategy, boolean debug, String dbSchemaName, CircuitBreakerType circuitBreakerType,
-            BatchProperties batchProperties) {
+            BatchProperties batchProperties, boolean enableTransactionInterceptor) {
         Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlStrategy);
         properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
@@ -38,11 +39,14 @@ public class JpaPropertiesFacory {
         if (batchProperties.getBatchVersionedData() != null) {
             properties.setProperty("hibernate.jdbc.batch_versioned_data", Boolean.toString(batchProperties.getBatchVersionedData()));
         }
+        if (enableTransactionInterceptor) {
+            properties.setProperty("hibernate.session_factory.interceptor", HibernateTransactionInterceptor.class.getName());
+        }
 
         LOGGER.info("Hibernate NPlusOne Circuit Breaker type: {}", circuitBreakerType);
         switch (circuitBreakerType) {
             case LOG:
-                properties.setProperty("hibernate.session.events.auto", HibernateNPlusOneLogger.class.getName());
+                properties.setProperty("hibernate.session.events.auto", HibernateStatementStatisticsLogger.class.getName());
                 break;
             case BREAK:
                 LOGGER.warn("Hibernate NPlusOne Circuit Breaker has been enabled!");

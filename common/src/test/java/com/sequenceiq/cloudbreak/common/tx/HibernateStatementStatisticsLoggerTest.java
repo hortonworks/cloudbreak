@@ -6,13 +6,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class HibernateNPlusOneLoggerTest {
+public class HibernateStatementStatisticsLoggerTest {
 
-    private HibernateNPlusOneLogger underTest;
+    private HibernateStatementStatisticsLogger underTest;
 
     @BeforeEach
     public void setUp() {
-        underTest = new HibernateNPlusOneLogger();
+        underTest = new HibernateStatementStatisticsLogger();
     }
 
     @Test
@@ -20,7 +20,7 @@ public class HibernateNPlusOneLoggerTest {
         callSQL(500);
         underTest.end();
 
-        String log = underTest.constructLogline();
+        String log = underTest.constructStatementStatisticLogline();
         assertThat(log, containsString("executing 500 JDBC statements"));
 
         // No Exception shall thrown
@@ -30,8 +30,7 @@ public class HibernateNPlusOneLoggerTest {
     void testWarning() {
         callSQL(501);
         underTest.end();
-
-        String log = underTest.constructLogline();
+        String log = underTest.constructStatementStatisticLogline();
         assertThat(log, containsString("executing 501 JDBC statements"));
         // No Exception shall thrown
     }

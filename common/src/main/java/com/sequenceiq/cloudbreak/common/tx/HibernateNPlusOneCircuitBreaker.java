@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.app.StaticApplicationContext;
 
-public class HibernateNPlusOneCircuitBreaker extends HibernateNPlusOneLogger {
+public class HibernateNPlusOneCircuitBreaker extends HibernateStatementStatisticsLogger {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HibernateNPlusOneCircuitBreaker.class);
 
@@ -21,20 +21,20 @@ public class HibernateNPlusOneCircuitBreaker extends HibernateNPlusOneLogger {
     @Override
     public void jdbcPrepareStatementEnd() {
         super.jdbcPrepareStatementEnd();
-        breakCircuit(getQueryCount());
+        breakCircuit();
     }
 
     @Override
     public void jdbcExecuteStatementEnd() {
         super.jdbcExecuteStatementEnd();
-        breakCircuit(getQueryCount());
+        breakCircuit();
     }
 
-    private void breakCircuit(int queryCount) {
-        if (queryCount > maxStatementBreak) {
-            String message = constructLogline();
+    private void breakCircuit() {
+        int queryCount = getQueryCount();
+        if (getQueryCount() > maxStatementBreak) {
             HibernateNPlusOneException e = new HibernateNPlusOneException(queryCount);
-            LOGGER.error("{} Max allowed: {}", message, maxStatementBreak, e);
+            LOGGER.error("Max allowed statement: {}", maxStatementBreak, e);
             throw e;
         }
     }

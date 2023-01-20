@@ -26,7 +26,7 @@ public class HibernateStatementStatisticsTest {
         underTest.jdbcExecuteStatementStart();
         underTest.jdbcExecuteStatementEnd();
 
-        String log = underTest.constructLogline();
+        String log = underTest.constructStatementStatisticLogline();
 
         assertEquals(2, underTest.getQueryCount(), "Number of executed queries does not match");
         assertThat(log, containsString("preparing 1 JDBC statements"));
