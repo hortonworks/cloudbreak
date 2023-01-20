@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.idbmms.exception;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class IdbmmsOperationErrorStatusTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("fromThrowableDataProvider")
     void fromThrowableTest(String testCaseName, Status.Code code, IdbmmsOperationErrorStatus errorStatusExpected) {
-        assertThat(IdbmmsOperationErrorStatus.fromThrowable(createStatusRuntimeException(code))).isEqualTo(errorStatusExpected);
+        assertEquals(errorStatusExpected, IdbmmsOperationErrorStatus.fromThrowable(createStatusRuntimeException(code)));
     }
 
     @Test

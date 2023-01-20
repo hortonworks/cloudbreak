@@ -6,9 +6,6 @@ buildscript {
     maven { url = "$springRepoUrl" }
     mavenCentral()
   }
-  dependencies {
-    classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarVersion}"
-  }
 }
 
 plugins {
@@ -16,11 +13,10 @@ plugins {
   id "checkstyle"
   id "jacoco"
   id "maven-publish"
-  id "org.springframework.boot" version "2.1.2.RELEASE"
-  id "org.sonarqube" version "${sonarVersion}"
+  id "io.spring.dependency-management"
+  id "org.springframework.boot"
+  id "org.sonarqube"
 }
-
-apply plugin: org.sonarqube.gradle.SonarQubePlugin
 
 sonarqube {
   properties {
@@ -72,7 +68,8 @@ dependencies {
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.6'
   implementation     group: 'com.dyngr',                        name: 'polling',                       version: dyngrPollingVersion
   implementation     group: 'org.freemarker',                   name: 'freemarker',                    version: freemarkerVersion
-  testImplementation group: 'org.mockito',               name: 'mockito-inline',                   version: mockitoVersion
+  implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                     version: jacksonDatabindVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-inline',                       version: mockitoVersion
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }

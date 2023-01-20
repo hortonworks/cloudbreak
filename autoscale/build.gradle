@@ -5,23 +5,17 @@ buildscript {
         maven { url = "$repoUrl" }
         mavenCentral()
     }
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarVersion}"
-    }
 }
 
 plugins {
-    id "org.sonarqube" version "${sonarVersion}"
-    id 'maven-publish'
+    id "java"
+    id "checkstyle"
+    id "jacoco"
+    id "maven-publish"
+    id "io.spring.dependency-management"
+    id "org.springframework.boot"
+    id "org.sonarqube"
 }
-
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'java'
-apply plugin: "jacoco"
-apply plugin: org.sonarqube.gradle.SonarQubePlugin
-
 
 sonarqube {
     properties {

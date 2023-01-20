@@ -1,13 +1,13 @@
-apply plugin: 'com.google.protobuf'
-
 buildscript {
   repositories {
     mavenCentral()
     maven { url = "$repoUrl" }
   }
-  dependencies {
-    classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufPluginVersion}"
-  }
+}
+
+plugins {
+  id "java-library"
+  id "com.google.protobuf"
 }
 
 dependencies {
@@ -22,10 +22,6 @@ dependencies {
   testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
   testImplementation group: 'org.hamcrest',                      name: 'hamcrest',                       version: hamcrestVersion
   testImplementation group: "org.assertj",                       name: "assertj-core",                   version: assertjVersion
-}
-
-checkstyle {
-  checkstyleMain.exclude '**/generated/**'
 }
 
 protobuf {

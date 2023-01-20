@@ -6,9 +6,6 @@ buildscript {
         maven { url = "$springRepoUrl" }
         mavenCentral()
     }
-    dependencies {
-        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarVersion}"
-    }
 }
 
 plugins {
@@ -16,11 +13,10 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'maven-publish'
-    id 'org.springframework.boot' version '2.1.2.RELEASE'
+    id "io.spring.dependency-management" version "1.1.0"
+    id "org.springframework.boot" version "${springBootVersion}"
     id "org.sonarqube" version "${sonarVersion}"
 }
-
-apply plugin: org.sonarqube.gradle.SonarQubePlugin
 
 configurations.all {
     resolutionStrategy {

@@ -8,56 +8,56 @@ buildscript {
     maven { url = "$repoMirrorUrl" }
     maven { url = "$repoUrl" }
     mavenCentral()
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath 'org.ajoberstar.grgit:grgit-gradle:5.0.0'
   }
 }
 
 plugins {
-  id "org.ajoberstar.grgit" version "4.1.1"
+  id "java"
+  id "java-library"
+  id "checkstyle"
+  id "jacoco"
+  id 'idea'
+  id 'eclipse'
+  id "org.ajoberstar.grgit" version "5.0.0-rc.3"
   id "com.github.spotbugs" version "5.0.13"
   id "com.adarshr.test-logger" version "3.2.0"
-  id "nebula.blacklist" version "3.1.0"
-//  id 'nebula.lint' version '17.2.3'
+  id "nebula.resolution-rules" version "9.0.0"
+  id "io.spring.dependency-management" version "1.1.0"
+  id "com.google.protobuf" version "${protobufPluginVersion}" apply false
+  id 'org.springframework.boot' version "${springBootVersion}" apply false
+  id "org.sonarqube" version "${sonarVersion}" apply false
 }
 
 def cmPrivateRepoUser = System.getenv("CM_PRIVATE_REPO_USER") ?: "$defaultCmPrivateRepoUser"
 def cmPrivateRepoPassword = System.getenv("CM_PRIVATE_REPO_PASSWORD") ?: "$defaultCmPrivateRepoPassword"
 
-def springBootApps() {
-  subprojects.findAll { subproject -> subproject.plugins.hasPlugin('org.springframework.boot') }
-}
-
-def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
-// spring dependeny management override, if you remove silent errors can happen
+// spring dependency management override, if you remove silent errors can happen
 ext['junit-jupiter.version'] = "$junitJupiterVersion"
+
+dependencies {
+  resolutionRules files('dependency-rules.json')
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',           version: junitJupiterVersion
+  //adds vintage engine automatically and ensures that Junit4 testcases are run by default for all projects
+  testImplementation(group: "org.junit.vintage",         name: "junit-vintage-engine",           version: junitJupiterVersion) {
+    exclude group: "org.hamcrest", module: "hamcrest-core"
+  }
+}
 
 allprojects {
 
+  group = 'com.sequenceiq'
+
   repositories {
-    maven { url = "$repoMirrorUrl"
+    maven {
+      url = "$repoMirrorUrl"
       content {
         includeGroupByRegex "com.cloudera.cdp.*"
       }
     }
     maven { url = "$cdpRepoUrl" }
     maven { url = "$repoUrl" }
-  }
-
-  apply plugin: 'idea'
-  apply plugin: 'eclipse'
-  apply plugin: 'nebula.blacklist'
-
-  group = 'com.sequenceiq'
-
-  configurations {
-    testRuntime {
-      exclude group: "org.springframework.cloud"
-    }
   }
 
   // override Spring Depenendencies
@@ -71,14 +71,6 @@ allprojects {
 
   // override AWS SDK Depenendencies
   ext['netty.version'] = nettyVersion
-
-  // forbid depenedencies
-  blacklist {
-    flag {
-      block group: 'org.powermock'
-      block group: 'com.cedarsoftware', name: 'json-io'
-    }
-  }
 
   configurations {
     all {
@@ -105,19 +97,32 @@ allprojects {
         force "junit:junit:$junitVersion"
       }
     }
+    testRuntime {
+      exclude group: "org.springframework.cloud"
+    }
   }
 }
 
 subprojects {
-  apply plugin: 'java'
-  apply plugin: 'checkstyle'
-  apply plugin: 'com.github.spotbugs'
-  apply plugin: 'jacoco'
-  apply plugin: 'com.adarshr.test-logger'
-  //apply plugin: org.sonarqube.gradle.SonarQubePlugin
 
   sourceCompatibility = 11
   targetCompatibility = 11
+
+  checkstyle {
+    toolVersion = "10.6.0"
+  }
+
+  checkstyleMain {
+    ignoreFailures = false
+    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+    configDirectory = rootProject.file("config/checkstyle")
+    checkstyleMain.exclude '**/generated/**'
+  }
+
+  checkstyleTest {
+    ignoreFailures = false
+    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+  }
 
   configurations {
     deployerJars
@@ -129,26 +134,13 @@ subprojects {
     all*.exclude group: 'com.zaxxer', module: 'HikariCP-java7'
   }
 
-  dependencies {
-    checkstyle('com.puppycrawl.tools:checkstyle:10.6.0')
-    deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.1.0.RELEASE")
-    testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
-    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
-    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
-    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',           version: junitJupiterVersion
-    //adds vintage engine automatically and ensures that Junit4 testcases are run by default for all projects
-    testImplementation(group: "org.junit.vintage",         name: "junit-vintage-engine",           version: junitJupiterVersion) {
-      exclude group: "org.hamcrest", module: "hamcrest-core"
-    }
-  }
-
   spotbugs {
     toolVersion = "4.7.3"
     excludeFilter = file("$rootProject.projectDir/config/spotbugs/excludeFilter.xml")
     effort = "min"
     ignoreFailures = false
     showProgress = true
-    onlyAnalyze = [ 'com.sequenceiq.cloudbreak.*' ]
+    onlyAnalyze = ['com.sequenceiq.cloudbreak.*']
     maxHeapSize = '2g'
   }
 
@@ -207,21 +199,6 @@ subprojects {
     }
   }
 
-  checkstyle {
-    toolVersion = "8.38"
-  }
-
-  checkstyleMain {
-    ignoreFailures = false
-    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
-    configDirectory = rootProject.file("config/checkstyle")
-  }
-
-  checkstyleTest {
-    ignoreFailures = false
-    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
-  }
-
   test {
     testLogging {
       showStandardStreams false
@@ -259,15 +236,16 @@ subprojects {
   eclipse {
     classpath {
       file.whenMerged {
-        cp -> if (project.hasProperty('protobuf')) {
-          cp.entries = cp.entries.findAll { element -> !element.getPath().startsWith('src/generated')}
-          cp.entries.addAll(
-            [
-              new org.gradle.plugins.ide.eclipse.model.SourceFolder('src/generated/main/java', null),
-              new org.gradle.plugins.ide.eclipse.model.SourceFolder('src/generated/main/grpc', null)
-            ]
-          )
-        }
+        cp ->
+          if (project.hasProperty('protobuf')) {
+            cp.entries = cp.entries.findAll { element -> !element.getPath().startsWith('src/generated') }
+            cp.entries.addAll(
+                    [
+                            new org.gradle.plugins.ide.eclipse.model.SourceFolder('src/generated/main/java', null),
+                            new org.gradle.plugins.ide.eclipse.model.SourceFolder('src/generated/main/grpc', null)
+                    ]
+            )
+          }
       }
     }
   }

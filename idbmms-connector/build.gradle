@@ -1,25 +1,14 @@
-apply plugin: 'com.google.protobuf'
-
 buildscript {
   repositories {
     mavenCentral()
     maven { url = "$repoUrl" }
     maven { url '= "$springRepoUrl"' }
   }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufPluginVersion}"
-  }
 }
 
-apply plugin: 'io.spring.dependency-management'
-
-dependencyManagement {
-  dependencies {
-    dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
-      entry 'spring-boot-starter-test'
-    }
-  }
+plugins {
+  id 'java-library'
+  id 'com.google.protobuf'
 }
 
 dependencies {
@@ -31,14 +20,10 @@ dependencies {
     exclude group: 'org.mockito'
   }
 
-  testImplementation group: 'org.mockito',               name: 'mockito-core',                             version: mockitoVersion
-  testImplementation  ('org.springframework.boot:spring-boot-starter-test') {
-    exclude group: 'junit'
-  }
-}
-
-checkstyle {
-  checkstyleMain.exclude '**/generated/**'
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',           version: junitJupiterVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
 }
 
 protobuf {

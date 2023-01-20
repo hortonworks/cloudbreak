@@ -3,17 +3,12 @@ buildscript {
     mavenCentral()
     maven { url = "$repoUrl" }
   }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufPluginVersion}"
-  }
 }
 
 plugins {
   id "java-library"
+  id "com.google.protobuf"
 }
-
-apply plugin: 'com.google.protobuf'
 
 dependencies {
   api project(':grpc-common')
@@ -44,11 +39,6 @@ dependencies {
   testImplementation group: 'org.assertj',              name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.hamcrest',             name: 'hamcrest',                       version: hamcrestVersion
   testImplementation project(path: ':common', configuration: 'tests')
-}
-
-
-checkstyle {
-  checkstyleMain.exclude '**/generated/**'
 }
 
 protobuf {

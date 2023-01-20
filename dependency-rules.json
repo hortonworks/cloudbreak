@@ -1,0 +1,16 @@
+{
+  "deny": [
+    {
+      "module": "org.powermock:powermock-mockito-release-full",
+      "reason" : "Powermock should not be used",
+      "author" : "dberger",
+      "date" : "2022-12-24T20:00:00.000Z"
+    },
+    {
+      "module": "com.cedarsoftware:json-io",
+      "reason" : "Powermock should not be used",
+      "author" : "dberger",
+      "date" : "2022-12-24T20:00:00.000Z"
+    }
+  ]
+}

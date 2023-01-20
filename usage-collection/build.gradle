@@ -3,13 +3,12 @@ buildscript {
     mavenCentral()
     maven { url = "$repoUrl" }
   }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufPluginVersion}"
-  }
 }
 
-apply plugin: 'com.google.protobuf'
+plugins {
+  id "java-library"
+  id "com.google.protobuf"
+}
 
 dependencies {
   implementation project(':common')
@@ -23,10 +22,6 @@ dependencies {
   }
   testImplementation group: 'org.mockito',                     name: 'mockito-core', version: mockitoVersion
   testImplementation group: 'org.hamcrest',             name: 'hamcrest',     version: hamcrestVersion
-}
-
-checkstyle {
-  checkstyleMain.exclude '**/generated/**'
 }
 
 protobuf {

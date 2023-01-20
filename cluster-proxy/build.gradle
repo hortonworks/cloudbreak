@@ -4,12 +4,12 @@ buildscript {
     maven { url = "$repoUrl" }
     maven { url = "$springRepoUrl" }
   }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-  }
 }
 
-apply plugin: 'io.spring.dependency-management'
+plugins {
+  id 'java-library'
+  id "io.spring.dependency-management"
+}
 
 dependencyManagement {
   dependencies {
@@ -31,8 +31,4 @@ dependencies {
   testImplementation(group: "org.springframework.boot",   name: "spring-boot-starter-test",     version: springBootVersion) {
     exclude group: "junit"
   }
-}
-
-checkstyle {
-  checkstyleMain.exclude '**/generated/**'
 }

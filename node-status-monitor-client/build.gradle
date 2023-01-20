@@ -1,14 +1,14 @@
-apply plugin: 'com.google.protobuf'
-
 buildscript {
   repositories {
     mavenLocal()
     mavenCentral()
     maven { url = "$repoUrl" }
   }
-  dependencies {
-    classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufPluginVersion}"
-  }
+}
+
+plugins {
+  id "java-library"
+  id "com.google.protobuf"
 }
 
 dependencies {
@@ -32,12 +32,9 @@ dependencies {
   implementation            group: 'org.glassfish.jersey.core',        name: 'jersey-common',               version: jerseyCoreVersion
   testImplementation group: 'org.mockito',                      name: 'mockito-core',                version: mockitoVersion
   testImplementation group: 'org.hamcrest',                     name: 'hamcrest',                    version: hamcrestVersion
+  testImplementation(project(":"))
 
   implementation project(':common')
-}
-
-checkstyle {
-  checkstyleMain.exclude '**/generated/**'
 }
 
 protobuf {

@@ -28,7 +28,7 @@ import io.swagger.util.Json;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {EndpointConfig.class, SwaggerConfig.class})
-@TestPropertySource(locations = {"file:./build/resources/main/application.properties", "file:./build/resources/main/application.yml"})
+@TestPropertySource(locations = {"file:./build/resources/main/application.yml"})
 public class SwaggerGenerator {
 
     @MockBean

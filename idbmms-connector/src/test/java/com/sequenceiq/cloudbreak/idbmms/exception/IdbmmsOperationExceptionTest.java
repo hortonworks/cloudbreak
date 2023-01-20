@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.idbmms.exception;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -15,11 +15,11 @@ class IdbmmsOperationExceptionTest {
     // @formatter:off
     // CHECKSTYLE:OFF
     static Object[][] getErrorStatusDataProvider() {
-        return new Object[][] {
+        return new Object[][]{
                 // testCaseName             withCause   code                    errorStatusExpected
-                { "no cause",               false,      null,                   IdbmmsOperationErrorStatus.UNSPECIFIED },
-                { "with cause null",        true,       null,                   IdbmmsOperationErrorStatus.UNSPECIFIED },
-                { "with cause NOT_FOUND",   true,       Status.Code.NOT_FOUND,  IdbmmsOperationErrorStatus.NOT_FOUND },
+                {"no cause", false, null, IdbmmsOperationErrorStatus.UNSPECIFIED},
+                {"with cause null", true, null, IdbmmsOperationErrorStatus.UNSPECIFIED},
+                {"with cause NOT_FOUND", true, Status.Code.NOT_FOUND, IdbmmsOperationErrorStatus.NOT_FOUND},
         };
     }
     // CHECKSTYLE:ON
@@ -35,7 +35,7 @@ class IdbmmsOperationExceptionTest {
         } else {
             e = new IdbmmsOperationException(MESSAGE);
         }
-        assertThat(e.getErrorStatus()).isEqualTo(errorStatusExpected);
+        assertEquals(errorStatusExpected, e.getErrorStatus());
     }
 
     private StatusRuntimeException createStatusRuntimeException(Status.Code code) {

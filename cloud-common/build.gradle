@@ -1,15 +1,14 @@
-apply plugin: 'java'
-apply plugin: 'io.spring.dependency-management'
-
 buildscript {
   repositories {
     maven { url = "$repoUrl" }
     maven { url '= "$springRepoUrl"' }
     mavenCentral()
   }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-  }
+}
+
+plugins {
+    id 'java'
+    id 'java-library'
 }
 
 configurations.all {
@@ -56,7 +55,7 @@ dependencies {
     implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
     implementation group: 'com.dyngr',                             name: 'polling',                        version: dyngrPollingVersion
 
-  testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
+    testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
     testImplementation group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
     testImplementation group: 'org.awaitility',                    name: 'awaitility',                     version: awaitilityVersion
 }

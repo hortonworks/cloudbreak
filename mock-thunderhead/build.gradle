@@ -6,18 +6,16 @@ buildscript {
     maven { url = "$springRepoUrl" }
     mavenCentral()
   }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-  }
 }
 
 plugins {
+    id "java"
     id "maven-publish"
+    id "org.springframework.boot"
 }
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'java'
 
 bootRun {
   systemProperty "spring.profiles.active", System.properties["spring.profiles.active"]

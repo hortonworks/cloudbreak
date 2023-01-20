@@ -4,17 +4,11 @@ buildscript {
         maven { url = "$springRepoUrl" }
         mavenCentral()
     }
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    }
 }
 
 plugins {
     id "java-library"
 }
-
-apply plugin: 'java'
-apply plugin: 'io.spring.dependency-management'
 
 jar {
   baseName = 'authorization-common-api'
