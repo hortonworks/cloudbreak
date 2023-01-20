@@ -74,6 +74,9 @@ public class DatabaseConfig {
     @Value("${redbeams.hibernate.circuitbreaker:LOG}")
     private CircuitBreakerType circuitBreakerType;
 
+    @Value("${redbeams.hibernate.transaction.interceptor:true}")
+    private boolean enableTransactionInterceptor;
+
     @Inject
     @Named("databaseAddress")
     private String databaseAddress;
@@ -123,7 +126,8 @@ public class DatabaseConfig {
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
-        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType, createBatchProperties()));
+        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType, createBatchProperties(),
+                enableTransactionInterceptor));
         entityManagerFactory.afterPropertiesSet();
         return entityManagerFactory.getObject();
     }

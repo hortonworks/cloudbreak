@@ -21,7 +21,7 @@ public class HibernateNPlusOneCircuitBreakerTest {
         callSQL(500);
         underTest.end();
 
-        String log = underTest.constructLogline();
+        String log = underTest.constructStatementStatisticLogline();
         assertThat(log, containsString("executing 500 JDBC statements"));
 
         // No Exception shall thrown
@@ -32,7 +32,7 @@ public class HibernateNPlusOneCircuitBreakerTest {
         callSQL(1500);
         underTest.end();
 
-        String log = underTest.constructLogline();
+        String log = underTest.constructStatementStatisticLogline();
         assertThat(log, containsString("executing 1500 JDBC statements"));
         // No Exception shall thrown
     }

@@ -33,6 +33,18 @@ public class HibernateStatementStatistics extends BaseSessionEventListener {
         return NumberUtils.max(jdbcPrepareStatementCount, jdbcExecuteStatementCount, jdbcPrepareStatementCount);
     }
 
+    public long getJdbcPrepareStatementTime() {
+        return jdbcPrepareStatementTime;
+    }
+
+    public long getJdbcExecuteStatementTime() {
+        return jdbcExecuteStatementTime;
+    }
+
+    public long getJdbcExecuteBatchTime() {
+        return jdbcExecuteBatchTime;
+    }
+
     @Override
     public void jdbcPrepareStatementStart() {
         jdbcPrepStart = System.nanoTime();
@@ -69,7 +81,7 @@ public class HibernateStatementStatistics extends BaseSessionEventListener {
         jdbcExecuteBatchStart = -1;
     }
 
-    public String constructLogline() {
+    public String constructStatementStatisticLogline() {
         return String.format("Hibernate Session Metrics " +
                         "%d s spent preparing %d JDBC statements; " +
                         "%d s spent executing %d JDBC statements; " +

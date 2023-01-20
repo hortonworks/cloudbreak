@@ -74,6 +74,9 @@ public class DatabaseConfig {
     @Value("${cb.hibernate.circuitbreaker:LOG}")
     private CircuitBreakerType circuitBreakerType;
 
+    @Value("${cb.hibernate.transaction.interceptor:true}")
+    private boolean enableTransactionInterceptor;
+
     @Inject
     @Named("databaseAddress")
     private String databaseAddress;
@@ -137,7 +140,8 @@ public class DatabaseConfig {
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
-        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType, createBatchProperties()));
+        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType, createBatchProperties(),
+                enableTransactionInterceptor));
         entityManagerFactory.afterPropertiesSet();
         return entityManagerFactory;
     }
