@@ -31,7 +31,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final int FOUR_CERTS = 4;
 
-    private static final int NUM_CERTS_TOTAL = 16;
+    private static final int NUM_CERTS_TOTAL = 17;
 
     private static final int VERSION_0 = 0;
 
@@ -51,6 +51,9 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final String CERT_ISSUER_AWS_EUS1_0 =
             "CN=Amazon RDS eu-south-1 Root CA,OU=Amazon RDS,O=Amazon Web Services\\, Inc.,ST=Washington,L=Seattle,C=US";
+
+    private static final String CERT_ISSUER_AWS_EUS2_0 =
+            "L=Seattle,CN=Amazon RDS eu-south-2 Root CA RSA2048 G1,ST=WA,OU=Amazon RDS,O=Amazon Web Services\\, Inc.,C=US";
 
     private static final String CERT_ISSUER_AWS_MES1_0 =
             "CN=Amazon RDS me-south-1 Root CA,OU=Amazon RDS,O=Amazon Web Services\\, Inc.,ST=Washington,L=Seattle,C=US";
@@ -96,6 +99,8 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final String CLOUD_PROVIDER_IDENTIFIER_AWS_APE1_0 = "rds-ca-rsa2048-g1";
 
+    private static final String CLOUD_PROVIDER_IDENTIFIER_AWS_EUS2_0 = "rds-ca-rsa2048-g1";
+
     private static final String CLOUD_PROVIDER_IDENTIFIER_AWS_USGW1_0 = "rds-ca-2019-us-gov-west-1";
 
     private static final String CLOUD_PROVIDER_IDENTIFIER_AWS_USGW1_1 = "rds-ca-ecc384-g1";
@@ -119,6 +124,8 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
     private static final String CLOUD_PROVIDER_IDENTIFIER_AWS_APSE3_0 = "rds-ca-rsa2048-g1";
 
     private static final String REGION_EUS1 = "eu-south-1";
+
+    private static final String REGION_EUS2 = "eu-south-2";
 
     private static final String REGION_AFS1 = "af-south-1";
 
@@ -185,6 +192,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
                 Set.of(
                     "aws",
                     "aws." + REGION_EUS1,
+                    "aws." + REGION_EUS2,
                     "aws." + REGION_USGE1,
                     "aws." + REGION_AFS1,
                     "aws." + REGION_MES1,
@@ -368,6 +376,8 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
                 CLOUD_PROVIDER_IDENTIFIER_AWS_MES1_0);
         verifyCertEntry(underTest.getCertByCloudPlatformAndRegionAndVersion(CloudPlatform.AWS.name(), REGION_APE1, VERSION_0), VERSION_0, CERT_ISSUER_AWS_APE1_0,
                 CLOUD_PROVIDER_IDENTIFIER_AWS_APE1_0);
+        verifyCertEntry(underTest.getCertByCloudPlatformAndRegionAndVersion(CloudPlatform.AWS.name(), REGION_EUS2, VERSION_0), VERSION_0, CERT_ISSUER_AWS_EUS2_0,
+                CLOUD_PROVIDER_IDENTIFIER_AWS_EUS2_0);
         verifyCertEntry(underTest.getCertByCloudPlatformAndRegionAndVersion(CloudPlatform.AWS.name(), REGION_USGW1, VERSION_0), VERSION_0,
                 CERT_ISSUER_AWS_USGW1_0, CLOUD_PROVIDER_IDENTIFIER_AWS_USGW1_0);
         verifyCertEntry(underTest.getCertByCloudPlatformAndRegionAndVersion(CloudPlatform.AWS.name(), REGION_APS3, VERSION_0), VERSION_0,
