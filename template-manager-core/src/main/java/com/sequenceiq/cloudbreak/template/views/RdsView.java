@@ -217,4 +217,25 @@ public class RdsView {
     public RdsViewDialect getRdsViewDialect() {
         return rdsViewDialect;
     }
+
+    @Override
+    public String toString() {
+        return "RdsView{" +
+                "connectionURL='" + connectionURL + '\'' +
+                ", useSsl=" + useSsl +
+                ", sslCertificateFilePath='" + sslCertificateFilePath + '\'' +
+                ", connectionDriver='" + connectionDriver + '\'' +
+                ", connectionUserName='" + connectionUserName + '\'' +
+                ", databaseName='" + databaseName + '\'' +
+                ", host='" + host + '\'' +
+                ", hostWithPortWithJdbc='" + hostWithPortWithJdbc + '\'' +
+                ", subprotocol='" + subprotocol + '\'' +
+                ", connectionString='" + connectionString + '\'' +
+                ", port='" + port + '\'' +
+                ", databaseVendor=" + databaseVendor +
+                ", withoutJDBCPrefix='" + withoutJDBCPrefix + '\'' +
+                ", rdsViewDialect=" + rdsViewDialect +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }
