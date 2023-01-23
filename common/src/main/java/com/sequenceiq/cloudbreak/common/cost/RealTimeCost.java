@@ -6,6 +6,8 @@ public class RealTimeCost implements Serializable {
 
     private String envCrn;
 
+    private String resourceCrn;
+
     private String resourceName;
 
     private String type;
@@ -28,6 +30,14 @@ public class RealTimeCost implements Serializable {
 
     public void setEnvCrn(String envCrn) {
         this.envCrn = envCrn;
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public String getResourceName() {

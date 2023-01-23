@@ -72,6 +72,7 @@ public class ClusterCostService {
             ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypes(stack);
             RealTimeCost realTimeCost = new RealTimeCost();
             realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
+            realTimeCost.setResourceCrn(stack.getResourceCrn());
             realTimeCost.setType(stack.getType().name());
             realTimeCost.setResourceName(stack.getName());
             realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost));
