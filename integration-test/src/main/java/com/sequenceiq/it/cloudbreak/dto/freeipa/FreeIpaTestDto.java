@@ -98,10 +98,20 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Override
     public FreeIpaTestDto valid() {
+        int instanceGroupCount;
+        int instanceCountByGroup;
+        if (getCloudProvider().getGovCloud()) {
+            instanceGroupCount = 1;
+            instanceCountByGroup = 2;
+        } else {
+            instanceGroupCount = 1;
+            instanceCountByGroup = 1;
+        }
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withEnvironment(getTestContext().given(EnvironmentTestDto.class).withTunnel(getTestContext().getTunnel()))
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
-                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()), OptionalInt.empty(), OptionalInt.empty())
+                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()), OptionalInt.of(instanceGroupCount),
+                        OptionalInt.of(instanceCountByGroup))
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))

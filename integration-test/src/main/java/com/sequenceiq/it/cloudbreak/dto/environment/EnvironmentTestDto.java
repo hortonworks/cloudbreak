@@ -124,6 +124,11 @@ public class EnvironmentTestDto
         return this;
     }
 
+    public EnvironmentTestDto withFreeIpaNode(Integer instanceCountByGroup) {
+        getRequest().getFreeIpa().setInstanceCountByGroup(instanceCountByGroup);
+        return this;
+    }
+
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
         getRequest().getFreeIpa().setCreate(create);
         return this;

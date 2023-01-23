@@ -285,6 +285,12 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void initiateEnvironmentCreation(TestContext testContext) {
+        int instanceCountByGroup;
+        if (testContext.getCloudProvider().getGovCloud()) {
+            instanceCountByGroup = 2;
+        } else {
+            instanceCountByGroup = 1;
+        }
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
@@ -294,7 +300,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                     .withTelemetry("telemetry")
                     .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.TRUE)
-                    .withOneFreeIpaNode()
+                    .withFreeIpaNode(instanceCountByGroup)
                     .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                             commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
