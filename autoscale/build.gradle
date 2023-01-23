@@ -129,7 +129,7 @@ dependencyManagement {
         dependency group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
         dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '3.5.2'
         dependency group: 'org.springframework',           name: 'spring-context-support',         version: springFrameworkVersion
-        dependency group: 'com.zaxxer',                    name: 'HikariCP',                       version: '3.2.0'
+        dependency group: 'com.zaxxer',                    name: 'HikariCP',                       version: hikariCPVersion
 
         dependency group: 'com.google.code.gson',               name: 'gson',                      version: gsonVersion
         dependency group: 'org.apache.hadoop',                  name: 'hadoop-yarn-api',           version: hadoopVersion

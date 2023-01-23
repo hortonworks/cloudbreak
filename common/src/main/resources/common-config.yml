@@ -146,3 +146,8 @@ cb:
 quartz:
   initialization:
     delay: 30
+
+hikari:
+  pool:
+    readiness:
+      down-if-pool-is-full: false
