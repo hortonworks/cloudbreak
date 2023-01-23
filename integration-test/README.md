@@ -163,3 +163,19 @@ Selected [promotion test cases](https://github.infra.cloudera.com/CDH/cdpmc-qe/t
             - `AZURE_CLIENT_SECRET`: application password
             - `AZURE_TENANT_ID`: tenant ID which is associated with the selected application
 - Run the predefined test suites for L0 promotion. These suite files can be found at [src/main/resources/testsuites/e2e/l0promotion](src/main/resources/testsuites/e2e/l0promotion) directory. Tests can be [run in IDEA](#run-integration-tests-in-idea) or [in Terminal](#run-a-selected-e2e-test-in-terminal).
+
+## Know-how
+
+### PKIX SSL Error
+If you can not run integration tests locally because of `PKIX SSL error` at `Mock Image Catalog call`, then you can solve it with:
+```
+sudo keytool -import -alias mock-infra -noprompt -file "/home/peter/prj/cloudbreak/mock-infrastructure/src/main/resources/keystore/infrastructure-mock.cer" -keystore /etc/ssl/certs/java/cacerts -storepass changeit
+```
+then specify the `Trust Store` for `CB` services using `Mock Image Catalog` (CB, FreeIPA):
+```
+-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+```
+
+***Note:***
+- Check the `/etc/ssl/certs/java` path on your machine then update it in the command if it is needed.
+- This solution is only needed until the [CB-18493](https://jira.cloudera.com/browse/CB-18493) has been solved.
