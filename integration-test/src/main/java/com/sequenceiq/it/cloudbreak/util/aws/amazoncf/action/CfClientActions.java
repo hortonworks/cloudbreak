@@ -41,7 +41,7 @@ public class CfClientActions {
         return client.describeStacks().getStacks().stream().filter(
                 stack ->
                         stack.getTags().stream().anyMatch(tag -> tag.getKey().equals(CLOUDERA_ENVIRONMENT_RESOURCE_NAME) && tag.getValue().equals(crn)
-                        && DO_NOT_LIST_CLOUDFORMATIONS_STATUSES.contains(stack.getStackStatus()))
+                        && !DO_NOT_LIST_CLOUDFORMATIONS_STATUSES.contains(stack.getStackStatus()))
         ).collect(Collectors.toList());
     }
 
