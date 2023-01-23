@@ -86,12 +86,12 @@ public class DatabaseConfig {
 
     @Bean(name = "defaultDataSource")
     public DataSource defaultDataSource() throws SQLException {
-        return getDataSource();
+        return getDataSource("hikari-app-pool");
     }
 
     @Bean(name = "quartzDataSource")
     public DataSource quartzDataSource() throws SQLException {
-        return getDataSource();
+        return getDataSource("hikari-quartz-pool");
     }
 
     @Primary
@@ -100,9 +100,10 @@ public class DatabaseConfig {
         return new RoutingDataSource();
     }
 
-    private HikariDataSource getDataSource() throws SQLException {
+    private HikariDataSource getDataSource(String poolName) throws SQLException {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
         HikariConfig config = new HikariConfig();
+        config.setPoolName(poolName);
         if (ssl) {
             config.addDataSourceProperty("ssl", "true");
             config.addDataSourceProperty("sslfactory", "org.postgresql.ssl.DefaultJavaSSLFactory");

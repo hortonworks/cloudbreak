@@ -27,6 +27,9 @@ management:
     health:
       probes:
         enabled: true
+      group:
+        readiness:
+          include: "readinessState,hikariState"
   metrics:
     distribution:
       sla:
