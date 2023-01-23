@@ -121,17 +121,25 @@ public class CMRepositoryVersionUtil {
         boolean supported = false;
         if (cdhProduct.isPresent()) {
             String cdhVersion = cdhProduct.get().getVersion().split("-")[0];
+            LOGGER.info("The cdhVersion is {}", cdhVersion);
             if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_10)) {
+                LOGGER.info("The cdhVersion {} is newer or equal then {}", cdhVersion, CLOUDERA_STACK_VERSION_7_2_10.getVersion());
                 if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_2)) {
+                    LOGGER.info("The cmVersion {} is newer or equal then {}",
+                            clouderaManagerRepoDetails.getVersion(), CLOUDERAMANAGER_VERSION_7_4_2.getVersion());
                     supported = true;
                 }
             } else if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_9)) {
+                LOGGER.info("The cdhVersion {} is newer or equal then {}", cdhVersion, CLOUDERA_STACK_VERSION_7_2_9.getVersion());
                 if (cdhPatchVersion.isPresent() && cdhPatchVersion.get() >= 1
                         && isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1)) {
+                    LOGGER.info("The cmVersion {} is newer or equal then {} and the patch version is acceptable",
+                            clouderaManagerRepoDetails.getVersion(), CLOUDERAMANAGER_VERSION_7_4_1.getVersion());
                     supported = true;
                 }
             }
         }
+        LOGGER.info("The current cdh and cm version is supported={}", supported);
         return supported;
     }
 
@@ -164,7 +172,7 @@ public class CMRepositoryVersionUtil {
 
     public static boolean isCmServicesHealthCheckAllowed(Optional<String> runtimeVersion) {
         if (runtimeVersion.isPresent()) {
-            LOGGER.info("Runtime version is compared for CM services health check.");
+            LOGGER.info("isCmServicesHealthCheckAllowed Runtime version is compared for CM services health check.");
             return isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_2_12);
         }
         return false;
@@ -172,31 +180,34 @@ public class CMRepositoryVersionUtil {
 
     public static boolean isCmBulkHostsRemovalAllowed(Optional<String> runtimeVersion) {
         if (runtimeVersion.isPresent()) {
-            LOGGER.info("Runtime version is compared for CM bulk hosts removal.");
+            LOGGER.info("isCmBulkHostsRemovalAllowed Runtime version is compared for CM bulk hosts removal.");
             return isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_2_14);
         }
         return false;
     }
 
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
-        LOGGER.info("Compared: Versioned {} with Versioned {}", currentVersion.getVersion(), limitedAPIVersion.getVersion());
+        LOGGER.info("isVersionNewerOrEqualThanLimited Compared: Versioned {} with Versioned {}", currentVersion.getVersion(), limitedAPIVersion.getVersion());
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(currentVersion, limitedAPIVersion) > -1;
     }
 
     public static boolean isVersionNewerOrEqualThanLimited(String currentVersion, Versioned limitedAPIVersion) {
-        LOGGER.info("Compared: String version {} with Versioned {}", currentVersion, limitedAPIVersion.getVersion());
+        LOGGER.info("isVersionNewerOrEqualThanLimited Compared: String version {} with Versioned {}",
+                currentVersion, limitedAPIVersion.getVersion());
         return isVersionNewerOrEqualThanLimited(() -> currentVersion, limitedAPIVersion);
     }
 
     public static boolean isVersionOlderThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
-        LOGGER.info("Compared: Versioned {} with Versioned {}", currentVersion.getVersion(), limitedAPIVersion.getVersion());
+        LOGGER.info("isVersionOlderThanLimited Compared: Versioned {} with Versioned {}",
+                currentVersion.getVersion(), limitedAPIVersion.getVersion());
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(currentVersion, limitedAPIVersion) < 0;
     }
 
     public static boolean isVersionOlderThanLimited(String currentVersion, Versioned limitedAPIVersion) {
-        LOGGER.info("Compared: String version {} with Versioned {}", currentVersion, limitedAPIVersion.getVersion());
+        LOGGER.info("isVersionOlderThanLimited Compared: String version {} with Versioned {}",
+                currentVersion, limitedAPIVersion.getVersion());
         return isVersionOlderThanLimited(() -> currentVersion, limitedAPIVersion);
     }
 }
