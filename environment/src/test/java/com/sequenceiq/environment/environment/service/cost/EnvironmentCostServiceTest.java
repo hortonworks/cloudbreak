@@ -68,10 +68,12 @@ public class EnvironmentCostServiceTest {
     private RealTimeCostResponse getRealTimeCostResponseForClusters() {
         RealTimeCost datalakeRealTimeCost = new RealTimeCost();
         datalakeRealTimeCost.setEnvCrn("ENVIRONMENT_CRN");
+        datalakeRealTimeCost.setResourceCrn("CRN");
         datalakeRealTimeCost.setType("DATALAKE");
         datalakeRealTimeCost.setResourceName("DATALAKE_NAME");
         RealTimeCost datahubRealTimeCost = new RealTimeCost();
         datahubRealTimeCost.setEnvCrn("ENVIRONMENT_CRN");
+        datahubRealTimeCost.setResourceCrn("CRN");
         datahubRealTimeCost.setType("WORKLOAD");
         return new RealTimeCostResponse(Map.of("DATALAKE_CRN", datalakeRealTimeCost, "DATAHUB_CRN", datahubRealTimeCost));
     }

@@ -50,6 +50,7 @@ public class FreeIpaCostService {
             ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypes(stack);
             RealTimeCost realTimeCost = new RealTimeCost();
             realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
+            realTimeCost.setResourceCrn(stack.getResourceCrn());
             realTimeCost.setType("FREEIPA");
             realTimeCost.setResourceName(stack.getResourceName());
             realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost));
