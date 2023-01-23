@@ -54,8 +54,6 @@ class EnvironmentReactorFlowManagerTest {
 
     private static final String USER_CRN = "userCrn";
 
-    private static final String ENVIRONMENT_CRN = "envCrn";
-
     @Mock
     private EventSender eventSender;
 
