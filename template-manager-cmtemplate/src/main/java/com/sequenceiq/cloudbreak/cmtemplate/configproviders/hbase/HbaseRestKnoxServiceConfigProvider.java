@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,7 +11,10 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -20,13 +24,23 @@ public class HbaseRestKnoxServiceConfigProvider implements CmTemplateComponentCo
 
     private static final String RESTSERVER_SECURITY_AUTHENTICATION = "hbase_restserver_security_authentication";
 
+    private static final String HBASE_RPC_PROTECTION = "hbase_rpc_protection";
+
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
-        return List.of(
-                config(RESTSERVER_SECURITY_AUTHENTICATION, "kerberos"));
+        List<ApiClusterTemplateConfig> configs = new ArrayList<>();
+        configs.add(config(RESTSERVER_SECURITY_AUTHENTICATION, "kerberos"));
+        if (entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && templatePreparationObject.getStackType().equals(StackType.DATALAKE)) {
+            configs.add(config(HBASE_RPC_PROTECTION, "privacy"));
+        }
+        return configs;
     }
 
     @Override
