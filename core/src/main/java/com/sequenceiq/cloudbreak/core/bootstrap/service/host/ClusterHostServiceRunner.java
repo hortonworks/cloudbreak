@@ -132,6 +132,8 @@ public class ClusterHostServiceRunner {
 
     private static final int CM_HTTPS_PORT = 7183;
 
+    private static final int JAVA_VERSION = 11;
+
     @Value("${cb.cm.heartbeat.interval}")
     private String cmHeartbeatInterval;
 
@@ -452,6 +454,7 @@ public class ClusterHostServiceRunner {
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
         servicePillar.putAll(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
                 clouderaManagerRepo));
+        servicePillar.putAll(createJavaPillar());
         saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto);
 
@@ -495,9 +498,10 @@ public class ClusterHostServiceRunner {
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
 
         LOGGER.debug("Creating gateway pillar");
-        Map<String, SaltPillarProperties> servicePillar =
-                new HashMap<>(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
+        Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        servicePillar.putAll(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
                         clouderaManagerRepo));
+        servicePillar.putAll(createJavaPillar());
 
         return new SaltConfig(servicePillar, grainsProperties);
     }
@@ -952,5 +956,12 @@ public class ClusterHostServiceRunner {
             LOGGER.warn(message, e);
             throw new CloudbreakException(message, e);
         }
+    }
+
+    private Map<String, SaltPillarProperties> createJavaPillar() {
+        Map<String, Object> config = new HashMap<>();
+        config.put("version", JAVA_VERSION);
+
+        return Map.of("java", new SaltPillarProperties("/java/init.sls", singletonMap("java", config)));
     }
 }
