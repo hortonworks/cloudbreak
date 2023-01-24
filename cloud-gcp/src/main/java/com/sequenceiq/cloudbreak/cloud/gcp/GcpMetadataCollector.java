@@ -149,8 +149,9 @@ public class GcpMetadataCollector implements MetadataCollector {
         String projectId = gcpStackUtil.getProjectId(credential);
         String region = ac.getCloudContext().getLocation().getRegion().getRegionName();
         List<CloudLoadBalancerMetadata> results = new ArrayList<>();
-        Set<CloudResource> forwardingRules = resources.stream()
+        Set<String> names = resources.stream()
                 .filter(resource -> resource.getType().equals(ResourceType.GCP_FORWARDING_RULE))
+                .map(CloudResource::getName)
                 .collect(Collectors.toSet());
         try {
             ForwardingRuleList forwardingRuleList = compute.forwardingRules().list(projectId, region).execute();
@@ -159,13 +160,7 @@ public class GcpMetadataCollector implements MetadataCollector {
             }
             for (ForwardingRule item : forwardingRuleList.getItems()) {
                 LoadBalancerType itemType = gcpLoadBalancerTypeConverter.getScheme(item.getLoadBalancingScheme()).getCbType();
-                Optional<CloudResource> rule = forwardingRules.stream().filter(r -> r.getName().equals(item.getName())).findFirst();
-                if (rule.isPresent() && itemType == LoadBalancerType.PRIVATE &&
-                        LoadBalancerType.GATEWAY_PRIVATE == rule.get().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class)) {
-                    LOGGER.debug("GATEWAY_PRIVATE LoadBalancer selected");
-                    itemType = LoadBalancerType.GATEWAY_PRIVATE;
-                }
-                if (rule.isPresent() && loadBalancerTypes.contains(itemType)) {
+                if (names.contains(item.getName()) && loadBalancerTypes.contains(itemType)) {
                     Map<String, Object> params = getParams(compute, projectId, item);
                     CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
                             .withType(itemType)

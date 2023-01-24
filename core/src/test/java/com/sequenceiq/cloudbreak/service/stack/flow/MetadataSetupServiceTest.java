@@ -78,7 +78,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @ExtendWith(MockitoExtension.class)
-class MetadataSetupServiceTest {
+public class MetadataSetupServiceTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -175,14 +175,14 @@ class MetadataSetupServiceTest {
     private Image image;
 
     @BeforeEach
-    void before() {
+    public void before() {
         stack = new Stack();
         stack.setId(STACK_ID);
         image = createImage();
     }
 
     @Test
-    void saveInstanceMetaDataTestShouldNotSaveInstancesWhenImageNotFound() throws CloudbreakImageNotFoundException {
+    public void saveInstanceMetaDataTestShouldNotSaveInstancesWhenImageNotFound() throws CloudbreakImageNotFoundException {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setId(INSTANCE_GROUP_ID);
         instanceGroup.setGroupName(GROUP_NAME);
@@ -201,7 +201,7 @@ class MetadataSetupServiceTest {
     }
 
     @Test
-    void saveInstanceMetaDataTestOneNewInstance()
+    public void saveInstanceMetaDataTestOneNewInstance()
             throws CloudbreakImageNotFoundException {
         when(imageService.getImage(STACK_ID)).thenReturn(image);
         InstanceGroup instanceGroup = new InstanceGroup();
@@ -230,7 +230,7 @@ class MetadataSetupServiceTest {
     }
 
     @Test
-    void saveInstanceMetaDataTestExistingAvailableInstance() {
+    public void saveInstanceMetaDataTestExistingAvailableInstance() {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setId(INSTANCE_GROUP_ID);
         instanceGroup.setGroupName(GROUP_NAME);
@@ -260,7 +260,7 @@ class MetadataSetupServiceTest {
     }
 
     @Test
-    void saveLoadBalancerMetadata() {
+    public void saveLoadBalancerMetadata() {
         stack.setName(STACK_NAME);
         stack.setCloudPlatform("DEFAULT");
         stack.setEnvironmentCrn(STACK_CRN);
@@ -272,6 +272,7 @@ class MetadataSetupServiceTest {
         Set<LoadBalancer> loadBalancerSet = new HashSet<>();
         loadBalancerSet.add(loadBalancer);
         when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(loadBalancerSet);
+        when(loadBalancerConfigService.generateLoadBalancerEndpoint(stack)).thenCallRealMethod();
 
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
@@ -297,7 +298,7 @@ class MetadataSetupServiceTest {
     }
 
     @Test
-    void saveLoadBalancerMetadataAndSetEndpointToOldStack() {
+    public void saveLoadBalancerMetadataAndSetEndpointToOldStack() {
         Stack oldStack = new Stack();
         oldStack.setId(OLD_STACK_ID);
         oldStack.setName(OLD_STACK_NAME);
@@ -329,6 +330,7 @@ class MetadataSetupServiceTest {
         loadBalancerSet.add(loadBalancer);
         when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(loadBalancerSet);
         when(loadBalancerPersistenceService.findByStackId(OLD_STACK_ID)).thenReturn(new HashSet<>());
+        when(loadBalancerConfigService.generateLoadBalancerEndpoint(stack)).thenCallRealMethod();
 
         StackIdView stackIdView = new StackIdViewImpl(STACK_ID, STACK_NAME, "no");
 
@@ -363,7 +365,7 @@ class MetadataSetupServiceTest {
     }
 
     @Test
-    void saveInstanceMetaDataTestOneTerminatedInstance() {
+    public void saveInstanceMetaDataTestOneTerminatedInstance() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         InstanceGroup instanceGroup = new InstanceGroup();
@@ -393,7 +395,7 @@ class MetadataSetupServiceTest {
     }
 
     @Test
-    void saveInstanceMetaDataTestOneZombieInstance() {
+    public void saveInstanceMetaDataTestOneZombieInstance() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         InstanceGroup instanceGroup = new InstanceGroup();
@@ -436,7 +438,7 @@ class MetadataSetupServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("saveInstanceMetaDataTestServerFlagIsAlreadySetDataProvider")
-    void saveInstanceMetaDataTestServerFlagIsAlreadySet(String testCaseName, String subnetId, String availabilityZone, String rackId)
+    public void saveInstanceMetaDataTestServerFlagIsAlreadySet(String testCaseName, String subnetId, String availabilityZone, String rackId)
             throws CloudbreakImageNotFoundException {
         when(imageService.getImage(STACK_ID)).thenReturn(image);
         InstanceGroup instanceGroup = new InstanceGroup();
@@ -473,7 +475,7 @@ class MetadataSetupServiceTest {
     }
 
     @Test
-    void testSaveInstanceMetadataAndSelectTheRightPGW() throws CloudbreakImageNotFoundException {
+    public void testSaveInstanceMetadataAndSelectTheRightPGW() throws CloudbreakImageNotFoundException {
         List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
         cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id1", new InstanceTemplate("medium", "gateway",
                 10L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L), null, "subnet", "az"),
@@ -541,7 +543,7 @@ class MetadataSetupServiceTest {
     }
 
     @Test
-    void testSaveInstanceMetadataAndSelectTheRightPGWButFQDNDidNotMatchSoFallback() throws CloudbreakImageNotFoundException {
+    public void testSaveInstanceMetadataAndSelectTheRightPGWButFQDNDidNotMatchSoFallback() throws CloudbreakImageNotFoundException {
         List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
         cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id1", new InstanceTemplate("medium", "gateway",
                 10L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L), null, "subnet", "az"),

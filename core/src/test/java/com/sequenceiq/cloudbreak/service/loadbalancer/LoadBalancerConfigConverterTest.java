@@ -61,7 +61,7 @@ public class LoadBalancerConfigConverterTest {
     private static final String BACKEND_SERVICE_NAME = "backend-service-name";
 
     @Mock
-    private TargetGroupPortProvider targetGroupPortProvider;
+    private LoadBalancerConfigService loadBalancerConfigService;
 
     @InjectMocks
     private LoadBalancerConfigConverter underTest;
@@ -92,7 +92,7 @@ public class LoadBalancerConfigConverterTest {
         targetGroup.setType(TargetGroupType.KNOX);
         TargetGroupPortPair portPair = new TargetGroupPortPair(PORT1, PORT2);
 
-        when(targetGroupPortProvider.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair));
 
         TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = underTest.convertTargetGroup(AWS, cloudLoadBalancerMetadata, targetGroup);
         assertNotNull(targetGroupConfigDbWrapper.getAwsConfig());
@@ -114,7 +114,7 @@ public class LoadBalancerConfigConverterTest {
         TargetGroupPortPair portPair1 = new TargetGroupPortPair(PORT1, PORT1);
         TargetGroupPortPair portPair2 = new TargetGroupPortPair(PORT2, PORT2);
 
-        when(targetGroupPortProvider.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair1, portPair2));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair1, portPair2));
 
         TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = underTest.convertTargetGroup(AWS, cloudLoadBalancerMetadata, targetGroup);
         assertNotNull(targetGroupConfigDbWrapper.getAwsConfig());
@@ -133,7 +133,7 @@ public class LoadBalancerConfigConverterTest {
         TargetGroupPortPair portPair1 = new TargetGroupPortPair(PORT1, PORT1);
         TargetGroupPortPair portPair2 = new TargetGroupPortPair(PORT2, PORT2);
 
-        when(targetGroupPortProvider.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair1, portPair2));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair1, portPair2));
 
         TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = underTest.convertTargetGroup(AWS, cloudLoadBalancerMetadata, targetGroup);
         assertNotNull(targetGroupConfigDbWrapper.getAwsConfig());
@@ -169,7 +169,7 @@ public class LoadBalancerConfigConverterTest {
         targetGroup.setType(TargetGroupType.KNOX);
         TargetGroupPortPair portPair = new TargetGroupPortPair(PORT1, PORT2);
 
-        when(targetGroupPortProvider.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair));
 
         TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = underTest.convertTargetGroup(AZURE, cloudLoadBalancerMetadata, targetGroup);
         assertNotNull(targetGroupConfigDbWrapper.getAzureConfig());
@@ -194,7 +194,7 @@ public class LoadBalancerConfigConverterTest {
         TargetGroupPortPair portPair2 = new TargetGroupPortPair(PORT2, PORT2);
         TargetGroupPortPair portPair3 = new TargetGroupPortPair(PORT3, PORT3);
 
-        when(targetGroupPortProvider.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair1, portPair2, portPair3));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair1, portPair2, portPair3));
 
         TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = underTest.convertTargetGroup(AZURE, cloudLoadBalancerMetadata, targetGroup);
         assertNotNull(targetGroupConfigDbWrapper.getAzureConfig());
@@ -230,7 +230,7 @@ public class LoadBalancerConfigConverterTest {
         targetGroup.setType(TargetGroupType.KNOX);
         TargetGroupPortPair portPair = new TargetGroupPortPair(PORT1, PORT2);
 
-        when(targetGroupPortProvider.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair));
 
         TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = underTest.convertTargetGroup(GCP, cloudLoadBalancerMetadata, targetGroup);
         assertNotNull(targetGroupConfigDbWrapper.getGcpConfig());

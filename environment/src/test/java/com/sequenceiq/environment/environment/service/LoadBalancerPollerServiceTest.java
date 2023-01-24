@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,14 +20,12 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
@@ -44,11 +41,11 @@ import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
-class LoadBalancerPollerServiceTest {
+public class LoadBalancerPollerServiceTest {
 
     private static final String LOAD_BALANCER_UPDATE_FINISHED_STATE = "LOAD_BALANCER_UPDATE_FINISHED_STATE";
 
-    private static final String ACCOUNT_ID = "accountId";
+    private static final Long ENV_ID = 1L;
 
     private static final String ENV_CRN = "envCrn";
 
@@ -60,47 +57,41 @@ class LoadBalancerPollerServiceTest {
 
     private static final String DH_NAME2 = "datahubName2";
 
-    @Mock
-    private DatahubService datahubService;
+    private final DatahubService datahubService = Mockito.mock(DatahubService.class);
 
-    @Mock
-    private SdxService sdxService;
+    private final SdxService sdxService = Mockito.mock(SdxService.class);
 
-    @Mock
-    private StackService stackService;
+    private final StackService stackService = Mockito.mock(StackService.class);
 
-    @Mock
-    private FlowEndpoint flowEndpoint;
+    private final FlowEndpoint flowEndpoint = Mockito.mock(FlowEndpoint.class);
 
-    @Mock
-    private EntitlementService entitlementService;
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory
+            = Mockito.mock(RegionAwareInternalCrnGeneratorFactory.class);
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+    private final RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator
+            = Mockito.mock(RegionAwareInternalCrnGenerator.class);
 
-    @Mock
-    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
-
-    @InjectMocks
-    private LoadBalancerPollerService underTest;
+    private final LoadBalancerPollerService underTest =
+        new LoadBalancerPollerService(datahubService, sdxService, stackService, flowEndpoint, regionAwareInternalCrnGeneratorFactory);
 
     @BeforeEach
-    void before() {
+    public void before() {
         ReflectionTestUtils.setField(underTest, "sleepTime", 1);
         ReflectionTestUtils.setField(underTest, "maxTime", 1);
     }
 
     @Test
-    void testPollingNoStacks() {
+    public void testPollingNoStacks() {
         when(sdxService.list(ENV_NAME)).thenReturn(List.of());
+        when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses());
 
-        underTest.updateStackWithLoadBalancer(ACCOUNT_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.DISABLED, false);
+        underTest.updateStackWithLoadBalancer(ENV_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.DISABLED);
 
         verify(stackService, never()).updateLoadBalancer(anySet());
     }
 
     @Test
-    void testPollingForSingleDatalake() {
+    public void testPollingForSingleDatalake() {
         setupDatalakeResponse();
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -109,7 +100,7 @@ class LoadBalancerPollerServiceTest {
         when(flowEndpoint.hasFlowRunningByFlowId(anyString())).thenReturn(setupFinishedFlowCheckResponse());
         when(flowEndpoint.getFlowLogsByFlowId(anyString())).thenReturn(List.of(setupSuccessFlowLogResponse()));
 
-        underTest.updateStackWithLoadBalancer(ACCOUNT_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.ENABLED, false);
+        underTest.updateStackWithLoadBalancer(ENV_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.ENABLED);
 
         verify(stackService, times(1)).updateLoadBalancer(eq(Set.of(DL_NAME)));
         verify(flowEndpoint, times(1)).hasFlowRunningByFlowId(anyString());
@@ -117,7 +108,7 @@ class LoadBalancerPollerServiceTest {
     }
 
     @Test
-    void testPollingForDatalakeAndDatahubs() {
+    public void testPollingForDatalakeAndDatahubs() {
         setupDatalakeResponse();
         setupDatahubResponse();
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
@@ -126,7 +117,7 @@ class LoadBalancerPollerServiceTest {
         when(flowEndpoint.hasFlowRunningByFlowId(anyString())).thenReturn(setupFinishedFlowCheckResponse());
         when(flowEndpoint.getFlowLogsByFlowId(anyString())).thenReturn(List.of(setupSuccessFlowLogResponse()));
 
-        underTest.updateStackWithLoadBalancer(ACCOUNT_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.ENABLED, false);
+        underTest.updateStackWithLoadBalancer(ENV_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.ENABLED);
 
         verify(stackService, times(1)).updateLoadBalancer(eq(Set.of(DL_NAME, DH_NAME1, DH_NAME2)));
         verify(flowEndpoint, times(3)).hasFlowRunningByFlowId(anyString());
@@ -134,24 +125,7 @@ class LoadBalancerPollerServiceTest {
     }
 
     @Test
-    void testPollingForDatalakeAndDatahubsTargeting() {
-        setupDatalakeResponse();
-        setupDatahubResponse();
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(stackService.updateLoadBalancer(eq(Set.of(DL_NAME, DH_NAME1, DH_NAME2)))).thenReturn(setupFlowIdentifiers(3));
-        when(flowEndpoint.hasFlowRunningByFlowId(anyString())).thenReturn(setupFinishedFlowCheckResponse());
-        when(flowEndpoint.getFlowLogsByFlowId(anyString())).thenReturn(List.of(setupSuccessFlowLogResponse()));
-        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ACCOUNT_ID)).thenReturn(true);
-        underTest.updateStackWithLoadBalancer(ACCOUNT_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.DISABLED, true);
-
-        verify(stackService, times(1)).updateLoadBalancer(eq(Set.of(DL_NAME, DH_NAME1, DH_NAME2)));
-        verify(flowEndpoint, times(3)).hasFlowRunningByFlowId(anyString());
-        verify(flowEndpoint, times(3)).getFlowLogsByFlowId(anyString());
-    }
-
-    @Test
-    void testPollingForDatalakeOnly() {
+    public void testPollingForDatalakeOnly() {
         setupDatalakeResponse();
         setupDatahubResponse();
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
@@ -160,7 +134,7 @@ class LoadBalancerPollerServiceTest {
         when(flowEndpoint.hasFlowRunningByFlowId(anyString())).thenReturn(setupFinishedFlowCheckResponse());
         when(flowEndpoint.getFlowLogsByFlowId(anyString())).thenReturn(List.of(setupSuccessFlowLogResponse()));
 
-        underTest.updateStackWithLoadBalancer(ACCOUNT_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.DISABLED, false);
+        underTest.updateStackWithLoadBalancer(ENV_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.DISABLED);
 
         verify(stackService, times(1)).updateLoadBalancer(eq(Set.of(DL_NAME)));
         verify(flowEndpoint, times(1)).hasFlowRunningByFlowId(anyString());
@@ -168,7 +142,7 @@ class LoadBalancerPollerServiceTest {
     }
 
     @Test
-    void testPollingSingleFailure() {
+    public void testPollingSingleFailure() {
         List<FlowIdentifier> flowIdentifiers = setupFlowIdentifiers(3);
         Iterator<FlowIdentifier> iterator = flowIdentifiers.iterator();
         FlowIdentifier failFlowId = iterator.next();
@@ -188,7 +162,7 @@ class LoadBalancerPollerServiceTest {
 
         UpdateFailedException exception =
             assertThrows(UpdateFailedException.class, () ->
-                underTest.updateStackWithLoadBalancer(ACCOUNT_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.ENABLED, false));
+                underTest.updateStackWithLoadBalancer(ENV_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.ENABLED));
 
         verify(flowEndpoint, times(3)).hasFlowRunningByFlowId(anyString());
         verify(flowEndpoint, times(3)).getFlowLogsByFlowId(anyString());
@@ -196,7 +170,7 @@ class LoadBalancerPollerServiceTest {
     }
 
     @Test
-    void testPollingTimeout() {
+    public void testPollingTimeout() {
         ReflectionTestUtils.setField(underTest, "maxTime", 5);
         setupDatalakeResponse();
         setupDatahubResponse();
@@ -208,7 +182,7 @@ class LoadBalancerPollerServiceTest {
 
         UpdateFailedException exception =
             assertThrows(UpdateFailedException.class, () ->
-                underTest.updateStackWithLoadBalancer(ACCOUNT_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.ENABLED, false));
+                underTest.updateStackWithLoadBalancer(ENV_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.ENABLED));
 
         verify(flowEndpoint, times(18)).hasFlowRunningByFlowId(anyString());
         assertEquals(expectedError, exception.getMessage());
@@ -225,7 +199,7 @@ class LoadBalancerPollerServiceTest {
         response1.setName(DH_NAME1);
         StackViewV4Response response2 = new StackViewV4Response();
         response2.setName(DH_NAME2);
-        lenient().when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses(Set.of(response1, response2)));
+        when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses(Set.of(response1, response2)));
     }
 
     private List<FlowIdentifier> setupFlowIdentifiers(int count) {

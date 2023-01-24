@@ -9,28 +9,26 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
-import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
 class EnvironmentLoadBalancerServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
@@ -56,17 +54,12 @@ class EnvironmentLoadBalancerServiceTest {
 
     @Test
     void testNoEnvironmentFound() {
-        EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder().build();
-        NetworkDto network = NetworkDto.builder()
-                .withEndpointGatewaySubnetMetas(Map.of(
-                        "subnet1", new CloudSubnet("11", "subnet1"),
-                        "subnet2", new CloudSubnet("22", "subnet2")
-                ))
-                .build();
+        EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder()
+            .withEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED)
+            .build();
         EnvironmentDto environmentDto = EnvironmentDto.builder()
             .withName(ENV_NAME)
             .withResourceCrn(ENV_CRN)
-            .withNetwork(network)
             .build();
         String expectedError = String.format("Could not find environment '%s' using crn '%s'", ENV_NAME, ENV_CRN);
 
@@ -84,17 +77,12 @@ class EnvironmentLoadBalancerServiceTest {
     }
 
     @Test
-    void testEndpointGatewaySubnetsProvided() {
-        EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder().build();
-        NetworkDto network = NetworkDto.builder()
-                .withEndpointGatewaySubnetMetas(Map.of(
-                        "subnet1", new CloudSubnet("11", "subnet1"),
-                        "subnet2", new CloudSubnet("22", "subnet2")
-                ))
-                .build();
+    void testEndpointGatewayEnabled() {
+        EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder()
+            .withEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED)
+            .build();
         EnvironmentDto environmentDto = EnvironmentDto.builder()
             .withResourceCrn(ENV_CRN)
-            .withNetwork(network)
             .build();
 
         when(environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(anyString(), anyString()))
@@ -111,7 +99,9 @@ class EnvironmentLoadBalancerServiceTest {
 
     @Test
     void testDataLakeLoadBalancerEnabled() {
-        EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder().build();
+        EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder()
+            .withEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED)
+            .build();
         EnvironmentDto environmentDto = EnvironmentDto.builder()
             .withResourceCrn(ENV_CRN)
             .build();
@@ -131,7 +121,9 @@ class EnvironmentLoadBalancerServiceTest {
 
     @Test
     void testNoEntitlements() {
-        EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder().build();
+        EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder()
+            .withEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED)
+            .build();
         EnvironmentDto environmentDto = EnvironmentDto.builder()
             .withResourceCrn(ENV_CRN)
             .build();

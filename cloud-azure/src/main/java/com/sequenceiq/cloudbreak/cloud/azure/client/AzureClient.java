@@ -746,7 +746,6 @@ public class AzureClient {
     public List<String> getLoadBalancerIps(String resourceGroupName, String loadBalancerName, LoadBalancerType loadBalancerType) {
         switch (loadBalancerType) {
             case PRIVATE:
-            case GATEWAY_PRIVATE:
                 return getLoadBalancerPrivateIps(resourceGroupName, loadBalancerName);
             case PUBLIC:
                 return getLoadBalancerIps(resourceGroupName, loadBalancerName);

@@ -80,7 +80,7 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.loadbalancer.TargetGroupPortProvider;
+import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
@@ -135,7 +135,7 @@ public class StackToCloudStackConverter {
     private InstanceGroupService instanceGroupService;
 
     @Inject
-    private TargetGroupPortProvider targetGroupPortProvider;
+    private LoadBalancerConfigService loadBalancerConfigService;
 
     public CloudStack convert(StackDtoDelegate stack) {
         return convert(stack, Collections.emptySet());
@@ -339,7 +339,7 @@ public class StackToCloudStackConverter {
         for (LoadBalancer loadBalancer : loadBalancerPersistenceService.findByStackId(stack.getId())) {
             CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(loadBalancer.getType(), loadBalancer.getSku());
             for (TargetGroup targetGroup : targetGroupPersistenceService.findByLoadBalancerId(loadBalancer.getId())) {
-                Set<TargetGroupPortPair> portPairs = targetGroupPortProvider.getTargetGroupPortPairs(targetGroup);
+                Set<TargetGroupPortPair> portPairs = loadBalancerConfigService.getTargetGroupPortPairs(targetGroup);
                 Set<String> targetInstanceGroupName = instanceGroupService.findByTargetGroupId(targetGroup.getId()).stream()
                         .map(InstanceGroupView::getGroupName)
                         .collect(Collectors.toSet());

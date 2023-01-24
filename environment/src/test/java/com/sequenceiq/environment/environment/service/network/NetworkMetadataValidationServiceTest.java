@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -22,12 +21,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.CloudNetworkService;
-import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
-import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @ExtendWith(MockitoExtension.class)
 class NetworkMetadataValidationServiceTest extends NetworkTest {
@@ -43,8 +39,8 @@ class NetworkMetadataValidationServiceTest extends NetworkTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(false);
-        lenient().when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(false);
+        when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(false);
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(false);
     }
 
     @Test
@@ -94,9 +90,7 @@ class NetworkMetadataValidationServiceTest extends NetworkTest {
 
     private void assertWithPrivateSubnetsAllowed() {
         EnvironmentDto environmentDto = createEnvironmentDto();
-        AwsNetwork network = createNetwork();
-        network.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
-        Environment environment = createEnvironment(network);
+        Environment environment = createEnvironment(createNetwork());
 
         Map<String, CloudSubnet> endpointGatewaySubnets = createDefaultPublicSubnets();
         endpointGatewaySubnets.putAll(createDefaultPrivateSubnets());
@@ -108,30 +102,6 @@ class NetworkMetadataValidationServiceTest extends NetworkTest {
 
         assertEquals(4, subnetResult.size());
         assertEquals(Set.of(ID_1, ID_2, PUBLIC_ID_1, PUBLIC_ID_2), subnetResult.keySet());
-    }
-
-    @Test
-    public void testWithEndpointGatewayPrivateSubnetsPublicEndpointAccessGatewayEnabled() {
-        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(true);
-        Map<String, CloudSubnet> subnets = createDefaultPublicSubnets();
-        Map<String, CloudSubnet> endpointGatewaySubnets = createDefaultPrivateSubnets();
-        EnvironmentDto environmentDto = createEnvironmentDto();
-        environmentDto.setNetwork(NetworkDto.builder()
-                .withSubnetMetas(subnets)
-                .withEndpointGatewaySubnetMetas(endpointGatewaySubnets)
-                .build());
-        AwsNetwork network = createNetwork();
-        network.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
-        network.setSubnetMetas(subnets);
-        network.setEndpointGatewaySubnetMetas(endpointGatewaySubnets);
-        Environment environment = createEnvironment(network);
-
-        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(endpointGatewaySubnets);
-
-        BadRequestException exception = assertThrows(BadRequestException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEndpointGatewaySubnetMetadata(environment, environmentDto)));
-
-        assertTrue(exception.getMessage().startsWith("All subnets that are provided as Endpoint Access Gateway Subnet are PRIVATE"));
     }
 
     @Test

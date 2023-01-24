@@ -11,8 +11,6 @@ public class SubnetTest {
 
     protected static final String PRIVATE_ID_1 = "private-id-1";
 
-    protected static final String PRIVATE_ID_2 = "private-id-2";
-
     protected static final String PUBLIC_ID_1 = "public-id-1";
 
     protected CloudSubnet getPublicCloudSubnet(String id, String availabilityZone) {

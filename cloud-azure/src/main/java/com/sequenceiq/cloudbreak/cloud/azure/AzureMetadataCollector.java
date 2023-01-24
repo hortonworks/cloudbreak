@@ -154,8 +154,8 @@ public class AzureMetadataCollector implements MetadataCollector {
                 Optional<String> ip;
                 if (LoadBalancerType.PUBLIC.equals(type)) {
                     ip = lookupPublicIp(resourceGroup, azureClient, loadBalancerName);
-                } else if (LoadBalancerType.PRIVATE.equals(type) || LoadBalancerType.GATEWAY_PRIVATE.equals(type)) {
-                    ip = lookupPrivateIp(resourceGroup, azureClient, loadBalancerName, type);
+                } else if (LoadBalancerType.PRIVATE.equals(type)) {
+                    ip = lookupPrivateIp(resourceGroup, azureClient, loadBalancerName);
                 } else {
                     ip = Optional.empty();
                 }
@@ -186,8 +186,8 @@ public class AzureMetadataCollector implements MetadataCollector {
         return azurePlatformResources.collectInstanceStorageCount(ac, instanceTypes);
     }
 
-    private Optional<String> lookupPrivateIp(String resourceGroup, AzureClient azureClient, String loadBalancerName, LoadBalancerType type) {
-        List<String> privateIps = azureClient.getLoadBalancerIps(resourceGroup, loadBalancerName, type);
+    private Optional<String> lookupPrivateIp(String resourceGroup, AzureClient azureClient, String loadBalancerName) {
+        List<String> privateIps = azureClient.getLoadBalancerIps(resourceGroup, loadBalancerName, LoadBalancerType.PRIVATE);
         if (privateIps.isEmpty()) {
             LOGGER.warn("Unable to find private ip address for load balancer {}", loadBalancerName);
             return Optional.empty();

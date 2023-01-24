@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativ
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService.DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE;
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService.DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE;
 import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,15 +16,12 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
@@ -66,7 +62,6 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.CommonStatus;
-import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -105,14 +100,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     private static final String TG_NAME_EXTERNAL_NEW = "sta-TG443External-20221028102030";
 
     private static final String TG_NAME_EXTERNAL_NO_HASH = "sta-TG443External";
-
-    private static final String LB_NAME_GWAYPRIV_NEW = "stackn-LBGwayPriv-20221028102030";
-
-    private static final String LB_NAME_GWAYPRIV_NO_HASH = "stackn-LBGwayPriv";
-
-    private static final String TG_NAME_GWAYPRIV_NEW = "sta-TG443GwayPriv-20221028102030";
-
-    private static final String TG_NAME_GWAYPRIV_NO_HASH = "sta-TG443GwayPriv";
 
     private static final String INTERNAL = "Internal";
 
@@ -230,7 +217,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(1)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
         assertEquals(ResourceType.ELASTIC_LOAD_BALANCER, cloudResourceArgumentCaptor.getValue().getType());
-        assertEquals(LoadBalancerType.PRIVATE, cloudResourceArgumentCaptor.getValue().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class));
     }
 
     @Test
@@ -257,7 +243,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(1)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
         assertEquals(ResourceType.ELASTIC_LOAD_BALANCER, cloudResourceArgumentCaptor.getValue().getType());
-        assertEquals(LoadBalancerType.PRIVATE, cloudResourceArgumentCaptor.getValue().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class));
     }
 
     @Test
@@ -295,11 +280,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER.equals(cloudResource.getType())));
         assertTrue(cloudResourceArgumentCaptor.getAllValues().stream()
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP.equals(cloudResource.getType())));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
-                .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(LoadBalancerType.PRIVATE);
     }
 
     @Test
@@ -340,11 +320,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER.equals(cloudResource.getType())));
         assertTrue(cloudResourceArgumentCaptor.getAllValues().stream()
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP.equals(cloudResource.getType())));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
-                .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(LoadBalancerType.PRIVATE);
     }
 
     @Test
@@ -390,11 +365,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP.equals(cloudResource.getType())));
         assertTrue(cloudResourceArgumentCaptor.getAllValues().stream()
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_LISTENER.equals(cloudResource.getType())));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
-                .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(LoadBalancerType.PRIVATE);
     }
 
     @Test
@@ -443,31 +413,28 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP.equals(cloudResource.getType())));
         assertTrue(cloudResourceArgumentCaptor.getAllValues().stream()
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_LISTENER.equals(cloudResource.getType())));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
-                .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(LoadBalancerType.PRIVATE);
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(AwsLoadBalancerScheme.class)
-    void testLaunchLoadBalancerResourcesWhenAllResourcesCouldBeCreated(AwsLoadBalancerScheme awsLoadBalancerScheme) {
+    @ValueSource(booleans = {false, true})
+    void testLaunchLoadBalancerResourcesWhenAllResourcesCouldBeCreated(boolean internal) {
         CloudStack stack = getCloudStack();
-        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer(awsLoadBalancerScheme)));
-        String lbNameNew = getLbName(awsLoadBalancerScheme);
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, awsLoadBalancerScheme.resourceName())).thenReturn(lbNameNew);
-        when(resourceNameService.trimHash(lbNameNew)).thenReturn(getLbNameNoHash(awsLoadBalancerScheme));
+        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(
+                getAwsLoadBalancer(internal ? AwsLoadBalancerScheme.INTERNAL : AwsLoadBalancerScheme.INTERNET_FACING)));
+        String scheme = internal ? INTERNAL : EXTERNAL;
+        String lbNameNew = internal ? LB_NAME_INTERNAL_NEW : LB_NAME_EXTERNAL_NEW;
+        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, scheme)).thenReturn(lbNameNew);
+        when(resourceNameService.trimHash(lbNameNew)).thenReturn(internal ? LB_NAME_INTERNAL_NO_HASH : LB_NAME_EXTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
         LoadBalancer loadBalancer = new LoadBalancer()
                 .withLoadBalancerArn("anARN");
         CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
-        String tgNameNew = getTgName(awsLoadBalancerScheme);
-        when(resourceNameService.resourceName(
-                ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, awsLoadBalancerScheme.resourceName(), USER_FACING_PORT)).thenReturn(tgNameNew);
-        when(resourceNameService.trimHash(tgNameNew)).thenReturn(getTgNameNoHash(awsLoadBalancerScheme));
+        String tgNameNew = internal ? TG_NAME_INTERNAL_NEW : TG_NAME_EXTERNAL_NEW;
+        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, scheme, USER_FACING_PORT))
+                .thenReturn(tgNameNew);
+        when(resourceNameService.trimHash(tgNameNew)).thenReturn(internal ? TG_NAME_INTERNAL_NO_HASH : TG_NAME_EXTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
         TargetGroup targetGroup = new TargetGroup()
@@ -499,11 +466,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
-                .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(awsLoadBalancerScheme.getLoadBalancerType());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -620,11 +582,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
-                .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(existingInternal ? LoadBalancerType.PUBLIC : LoadBalancerType.PRIVATE);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -681,11 +638,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
-                .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(internal ? LoadBalancerType.PRIVATE : LoadBalancerType.PUBLIC);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -747,11 +699,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
-                .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(existingInternal ? LoadBalancerType.PUBLIC : LoadBalancerType.PRIVATE);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -808,11 +755,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
-                .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(internal ? LoadBalancerType.PRIVATE : LoadBalancerType.PUBLIC);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -875,11 +817,6 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
-                .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(existingInternal ? LoadBalancerType.PUBLIC : LoadBalancerType.PRIVATE);
     }
 
     private CloudStack getCloudStack() {
@@ -903,55 +840,4 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .anyMatch(status -> resourceType.equals(status.getCloudResource().getType()) && resourceStatus.equals(status.getStatus()));
     }
 
-    private String getLbName(AwsLoadBalancerScheme awsLoadBalancerScheme) {
-        switch (awsLoadBalancerScheme) {
-            case INTERNET_FACING:
-                return LB_NAME_EXTERNAL_NEW;
-            case GATEWAY_PRIVATE:
-                return LB_NAME_GWAYPRIV_NEW;
-            case INTERNAL:
-                return LB_NAME_INTERNAL_NEW;
-            default:
-                throw new IllegalStateException("Unexpected value: " + awsLoadBalancerScheme);
-        }
-    }
-
-    private String getLbNameNoHash(AwsLoadBalancerScheme awsLoadBalancerScheme) {
-        switch (awsLoadBalancerScheme) {
-            case INTERNET_FACING:
-                return LB_NAME_EXTERNAL_NO_HASH;
-            case GATEWAY_PRIVATE:
-                return LB_NAME_GWAYPRIV_NO_HASH;
-            case INTERNAL:
-                return LB_NAME_INTERNAL_NO_HASH;
-            default:
-                throw new IllegalStateException("Unexpected value: " + awsLoadBalancerScheme);
-        }
-    }
-
-    private String getTgName(AwsLoadBalancerScheme awsLoadBalancerScheme) {
-        switch (awsLoadBalancerScheme) {
-            case INTERNET_FACING:
-                return TG_NAME_EXTERNAL_NEW;
-            case GATEWAY_PRIVATE:
-                return TG_NAME_GWAYPRIV_NEW;
-            case INTERNAL:
-                return TG_NAME_INTERNAL_NEW;
-            default:
-                throw new IllegalStateException("Unexpected value: " + awsLoadBalancerScheme);
-        }
-    }
-
-    private String getTgNameNoHash(AwsLoadBalancerScheme awsLoadBalancerScheme) {
-        switch (awsLoadBalancerScheme) {
-            case INTERNET_FACING:
-                return TG_NAME_EXTERNAL_NO_HASH;
-            case GATEWAY_PRIVATE:
-                return TG_NAME_GWAYPRIV_NO_HASH;
-            case INTERNAL:
-                return TG_NAME_INTERNAL_NO_HASH;
-            default:
-                throw new IllegalStateException("Unexpected value: " + awsLoadBalancerScheme);
-        }
-    }
 }
