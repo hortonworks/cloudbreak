@@ -96,7 +96,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
-import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
+import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
@@ -212,7 +212,7 @@ class ClusterHostServiceRunnerTest {
     private HostAttributeDecorator hostAttributeDecorator;
 
     @Mock
-    private LoadBalancerFqdnUtil loadBalancerFqdnUtil;
+    private LoadBalancerConfigService loadBalancerConfigService;
 
     @Mock
     private IdBrokerService idBrokerService;

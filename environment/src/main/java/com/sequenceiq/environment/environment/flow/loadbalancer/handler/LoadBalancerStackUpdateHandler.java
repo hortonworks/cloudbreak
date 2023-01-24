@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.flow.loadbalancer.handler;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -40,9 +39,8 @@ public class LoadBalancerStackUpdateHandler extends EventSenderAwareHandler<Envi
         EnvironmentDto environmentDto = environmentLoadBalancerDto.getEnvironmentDto();
         try {
             LOGGER.debug("Initating stack load balancer update");
-            loadBalancerPollerService.updateStackWithLoadBalancer(environmentDto.getAccountId(), environmentDto.getResourceCrn(),
-                environmentDto.getName(), environmentLoadBalancerDto.getEndpointAccessGateway(),
-                    CollectionUtils.isNotEmpty(environmentLoadBalancerDto.getEndpointGatewaySubnetIds()));
+            loadBalancerPollerService.updateStackWithLoadBalancer(environmentDto.getId(), environmentDto.getResourceCrn(),
+                environmentDto.getName(), environmentLoadBalancerDto.getEndpointAccessGateway());
 
             LOGGER.debug("Stack load balancer update complete.");
             LoadBalancerUpdateEvent loadBalancerUpdateEvent = LoadBalancerUpdateEvent.LoadBalancerUpdateEventBuilder.aLoadBalancerUpdateEvent()

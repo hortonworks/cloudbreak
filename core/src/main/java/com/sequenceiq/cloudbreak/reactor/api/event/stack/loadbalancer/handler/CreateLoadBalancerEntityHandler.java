@@ -12,12 +12,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -72,9 +70,6 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
     @Inject
     private SubnetSelector subnetSelector;
 
-    @Inject
-    private EntitlementService entitlementService;
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(CreateLoadBalancerEntityRequest.class);
@@ -94,8 +89,7 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
 
             if (environment != null && environment.getNetwork() != null &&
-                    (PublicEndpointAccessGateway.ENABLED.equals(environment.getNetwork().getPublicEndpointAccessGateway()) ||
-                            isTargetingEndpointGateway(environment))) {
+                PublicEndpointAccessGateway.ENABLED.equals(environment.getNetwork().getPublicEndpointAccessGateway())) {
                 enableEndpointGateway(stack, environment);
             }
 
@@ -133,11 +127,6 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
             LOGGER.warn("Failed create load balancer entities and persist them to the database.", e);
             return new CreateLoadBalancerEntityFailure(request.getResourceId(), e);
         }
-    }
-
-    private boolean isTargetingEndpointGateway(DetailedEnvironmentResponse environment) {
-        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(environment.getAccountId()) &&
-                CollectionUtils.isNotEmpty(environment.getNetwork().getEndpointGatewaySubnetIds());
     }
 
     private void enableEndpointGateway(Stack stack, DetailedEnvironmentResponse environment) throws CloudbreakException {

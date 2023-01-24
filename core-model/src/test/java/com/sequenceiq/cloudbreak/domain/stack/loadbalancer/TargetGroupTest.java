@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.common.api.type.TargetGroupType;
 
-class TargetGroupTest {
+public class TargetGroupTest {
 
     @Test
-    void testSetCannotContainDuplicateTypes() {
+    public void testSetCannotContainDuplicateTypes() {
         TargetGroup tg1 = new TargetGroup();
         tg1.setType(TargetGroupType.KNOX);
         TargetGroup tg2 = new TargetGroup();

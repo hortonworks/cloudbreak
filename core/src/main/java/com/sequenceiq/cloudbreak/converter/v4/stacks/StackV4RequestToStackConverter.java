@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -540,8 +539,8 @@ public class StackV4RequestToStackConverter {
                 instanceGroupNetworkV4Request.getAws() != null) {
             EnvironmentNetworkResponse envNetwork = environment == null ? null : environment.getNetwork();
             if (envNetwork != null) {
-                if (PublicEndpointAccessGateway.ENABLED.equals(envNetwork.getPublicEndpointAccessGateway()) || isTargetingEndpointGateway(envNetwork)) {
-                    LOGGER.info("Found AWS stack with endpoint gateway enabled. Selecting endpoint gateway subnet ids.");
+                if (PublicEndpointAccessGateway.ENABLED.equals(envNetwork.getPublicEndpointAccessGateway())) {
+                    LOGGER.info("Found AWS stack with endpoint gatewy enabled. Selecting endpoint gateway subnet ids.");
                     List<String> subnetIds = instanceGroupNetworkV4Request.getAws().getSubnetIds();
                     LOGGER.debug("Endpoint gateway selection: Found instance group network subnet list of {} for instance group {}",
                             subnetIds, instanceGroupName);
@@ -567,11 +566,6 @@ public class StackV4RequestToStackConverter {
                 }
             }
         }
-    }
-
-    private boolean isTargetingEndpointGateway(EnvironmentNetworkResponse network) {
-        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
-                CollectionUtils.isNotEmpty(network.getEndpointGatewaySubnetIds());
     }
 
     private void setNetworkIfApplicable(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {

@@ -5,7 +5,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -20,8 +20,8 @@ public class LoadBalancerEntitlementService {
 
     public void validateNetworkForEndpointGateway(String cloudPlatform, String environmentName, Set<String> endpointGatewaySubnetIds) {
         if (!isEndpointGatewayEntitlementEnabledForPlatform(cloudPlatform)
-                && CollectionUtils.isNotEmpty(endpointGatewaySubnetIds)) {
-            throw new BadRequestException(String.format("Environment %s cannot be created. Endpoint Gateway is not " +
+                && !SetUtils.emptyIfNull(endpointGatewaySubnetIds).isEmpty()) {
+            throw new BadRequestException(String.format("Environment %s cannot be created. Public Endpoint Gateway is not " +
                     "supported on %s platform, or the Endpoint Gateway entitlement is missing.", environmentName, cloudPlatform));
         }
     }

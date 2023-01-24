@@ -4,14 +4,11 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
@@ -41,19 +38,15 @@ public class LoadBalancerEnvUpdateHandler extends EventSenderAwareHandler<Enviro
 
     private final EnvironmentService environmentService;
 
-    private final EntitlementService entitlementService;
-
     protected LoadBalancerEnvUpdateHandler(
             EventSender eventSender,
             NetworkMetadataValidationService networkValidationService,
             NetworkService networkService,
-            EnvironmentService environmentService,
-            EntitlementService entitlementService) {
+            EnvironmentService environmentService) {
         super(eventSender);
         this.networkValidationService = networkValidationService;
         this.networkService = networkService;
         this.environmentService = environmentService;
-        this.entitlementService = entitlementService;
     }
 
     @Override
@@ -76,13 +69,10 @@ public class LoadBalancerEnvUpdateHandler extends EventSenderAwareHandler<Enviro
             LOGGER.debug("Starting endpoint gateway update for environment {}", environmentDto.getResourceCrn());
             NetworkDto networkDto = environmentDto.getNetwork();
 
-            Set<String> endpointGatewaySubnetIds = environmentLoadBalancerDto.getEndpointGatewaySubnetIds();
-            if (PublicEndpointAccessGateway.ENABLED.equals(environmentLoadBalancerDto.getEndpointAccessGateway()) ||
-                    isTargetingEndpointGateway(environment.getAccountId(), endpointGatewaySubnetIds)) {
-                requireNonNull(endpointGatewaySubnetIds);
-                LOGGER.debug("Enabling endpoint gateway on environment network with public IP {}.", environmentLoadBalancerDto.getEndpointAccessGateway());
-                networkDto.setPublicEndpointAccessGateway(environmentLoadBalancerDto.getEndpointAccessGateway());
-                Map<String, CloudSubnet> tempSubnetMetas = endpointGatewaySubnetIds.stream()
+            if (PublicEndpointAccessGateway.ENABLED.equals(environmentLoadBalancerDto.getEndpointAccessGateway())) {
+                LOGGER.debug("Enabling endpoint gateway on environment network.");
+                networkDto.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
+                Map<String, CloudSubnet> tempSubnetMetas = environmentLoadBalancerDto.getEndpointGatewaySubnetIds().stream()
                     .collect(toMap(id -> id, id -> new CloudSubnet(id, null)));
                 networkDto.setEndpointGatewaySubnetMetas(tempSubnetMetas);
 
@@ -91,7 +81,7 @@ public class LoadBalancerEnvUpdateHandler extends EventSenderAwareHandler<Enviro
                     networkValidationService.getEndpointGatewaySubnetMetadata(environment, environmentDto);
 
                 LOGGER.debug("Updating environment network settings.");
-                environment.getNetwork().setPublicEndpointAccessGateway(environmentLoadBalancerDto.getEndpointAccessGateway());
+                environment.getNetwork().setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
                 environment.getNetwork().setEndpointGatewaySubnetMetas(endpointGatewaySubnetMetas);
 
                 LOGGER.debug("Persisting updated network to database.");
@@ -107,7 +97,7 @@ public class LoadBalancerEnvUpdateHandler extends EventSenderAwareHandler<Enviro
                 .withEnvironmentDto(environmentDto)
                 .withEnvironment(environment)
                 .withEndpointAccessGateway(environmentLoadBalancerDto.getEndpointAccessGateway())
-                .withSubnetIds(endpointGatewaySubnetIds)
+                .withSubnetIds(environmentLoadBalancerDto.getEndpointGatewaySubnetIds())
                 .build();
             eventSender().sendEvent(loadBalancerUpdateEvent, envLoadBalancerDtoEvent.getHeaders());
         } catch (Exception e) {
@@ -116,10 +106,5 @@ public class LoadBalancerEnvUpdateHandler extends EventSenderAwareHandler<Enviro
                 EnvironmentStatus.LOAD_BALANCER_ENV_UPDATE_FAILED);
             eventSender().sendEvent(failedEvent, envLoadBalancerDtoEvent.getHeaders());
         }
-    }
-
-    private boolean isTargetingEndpointGateway(String accountId, Set<String> endpointGatewaySubnetIds) {
-        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(accountId) &&
-                CollectionUtils.isNotEmpty(endpointGatewaySubnetIds);
     }
 }

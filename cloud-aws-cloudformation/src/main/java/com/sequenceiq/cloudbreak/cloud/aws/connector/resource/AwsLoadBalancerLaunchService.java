@@ -217,12 +217,11 @@ public class AwsLoadBalancerLaunchService {
             LOGGER.debug(String.format("Checking final status of AWS target group %s", listener.getTargetGroup().getName()));
             createSuccess = createSuccess && isResourceStatusGood(summaries, listener.getTargetGroup().getName());
         }
-        Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES, loadBalancer.getScheme().getLoadBalancerType());
+
         CloudResource.Builder cloudResource = new CloudResource.Builder()
             .withStatus(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
             .withType(ELASTIC_LOAD_BALANCER)
             .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
-            .withParameters(params)
             .withName(loadBalancer.getName());
 
         return new CloudResourceStatus(cloudResource.build(),

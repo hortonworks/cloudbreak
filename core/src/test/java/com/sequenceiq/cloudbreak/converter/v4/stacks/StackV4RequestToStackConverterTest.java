@@ -9,7 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -37,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
@@ -58,11 +61,15 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -83,6 +90,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<StackV4Request> {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
@@ -97,10 +105,22 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     private StackV4RequestToStackConverter underTest;
 
     @Mock
+    private AuthenticatedUserService authenticatedUserService;
+
+    @Mock
+    private PreferencesService preferencesService;
+
+    @Mock
+    private StackService stackService;
+
+    @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private WorkspaceService workspaceService;
+
+    @Mock
+    private CredentialClientService credentialClientService;
 
     @Mock
     private ProviderParameterCalculator providerParameterCalculator;
@@ -174,42 +194,39 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     @Mock
     private EntitlementService entitlementService;
 
+    private Credential credential;
+
     @BeforeEach
     void setUp() {
-        lenient().when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        lenient().when(cloudbreakUser.getUsername()).thenReturn("username");
-        lenient().when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
-        lenient().when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        lenient().when(workspace.getId()).thenReturn(1L);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(cloudbreakUser.getUsername()).thenReturn("username");
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(1L);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
         environmentResponse.setCloudPlatform("AWS");
         environmentResponse.setTunnel(Tunnel.DIRECT);
         environmentResponse.setTags(new TagResponse());
-        lenient().when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
-        lenient().when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
-        lenient().when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
-        lenient().when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
-        lenient().when(datalakeService.getDatalakeCrn(any(), any())).thenReturn("crn");
-        lenient().when(targetedUpscaleSupportService.isUnboundEliminationSupported(anyString())).thenReturn(Boolean.FALSE);
-
-        // GIVEN
-        InstanceGroup instanceGroup = new InstanceGroup();
-        SecurityGroup securityGroup = new SecurityGroup();
-        instanceGroup.setSecurityGroup(securityGroup);
-        instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
-        instanceGroup.setGroupName("master");
-        lenient().when(stackAuthenticationV4RequestToStackAuthenticationConverter.convert(any(StackAuthenticationV4Request.class)))
-                .thenReturn(new StackAuthentication());
-        lenient().when(instanceGroupV4RequestToInstanceGroupConverter.convert(any(InstanceGroupV4Request.class), anyString())).thenReturn(instanceGroup);
-
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
+        when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
+        when(datalakeService.getDatalakeCrn(any(), any())).thenReturn("crn");
+        when(targetedUpscaleSupportService.isUnboundEliminationSupported(anyString())).thenReturn(Boolean.FALSE);
+        credential = Credential.builder()
+                .cloudPlatform("AWS")
+                .build();
     }
 
     @Test
-    void testConvert() {
+    public void testConvert() {
+        initMocks();
         setDefaultRegions(AWS);
         StackV4Request request = getRequest("stack.json");
 
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
         given(telemetryConverter.convert(eq(null), eq(StackType.WORKLOAD), anyString())).willReturn(new Telemetry());
@@ -236,10 +253,13 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     }
 
     @Test
-    void testConvertShouldHaveDefaultTags() {
+    public void testConvertShouldHaveDefaultTags() {
+        initMocks();
         setDefaultRegions(AWS);
         StackV4Request request = getRequest("stack-without-tags.json");
 
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
         given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
@@ -275,7 +295,8 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     }
 
     @Test
-    void testConvertWithLoginUserName() {
+    public void testConvertWithLoginUserName() {
+        initMocks();
         setDefaultRegions(AWS);
         // WHEN
         BadRequestException expectedException = Assertions.assertThrows(BadRequestException.class,
@@ -286,7 +307,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     }
 
     @Test
-    void testWhenRegionIsEmptyButDefaultRegionsAreEmptyThenBadRequestExceptionComes() {
+    public void testWhenRegionIsEmptyButDefaultRegionsAreEmptyThenBadRequestExceptionComes() {
         setDefaultRegions(null);
         StackV4Request request = getRequest("stack.json");
         request.setCloudPlatform(MOCK);
@@ -314,7 +335,12 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         StackV4Request request = getRequest("stack.json");
         request.setCloudPlatform(MOCK);
         request.getPlacement().setRegion(null);
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
 
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
+        given(instanceGroupV4RequestToInstanceGroupConverter.convert(any(InstanceGroupV4Request.class), anyString())).willReturn(instanceGroup);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
         given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
@@ -326,7 +352,8 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     }
 
     @Test
-    void testConvertWithKnoxLoadBalancer() {
+    public void testConvertWithKnoxLoadBalancer() {
+        initMocks();
         setDefaultRegions(AWS);
         StackV4Request request = getRequest("stack-datalake-with-instancegroups.json");
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
@@ -336,7 +363,10 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         loadBalancer.setType(LoadBalancerType.PRIVATE);
         loadBalancer.setTargetGroupSet(Set.of(targetGroup));
 
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
+        given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
         given(telemetryConverter.convert(eq(null), eq(StackType.DATALAKE), anyString())).willReturn(new Telemetry());
         given(loadBalancerConfigService.createLoadBalancers(any(), any(), eq(request))).willReturn(Set.of(loadBalancer));
         // WHEN
@@ -348,12 +378,17 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     }
 
     @Test
-    void testNoLoadBalancersCreatedWhenEntitlementIsDisabled() {
+    public void testNoLoadBalancersCreatedWhenEntitlementIsDisabled() {
+        initMocks();
         setDefaultRegions(AWS);
         StackV4Request request = getRequest("stack-datalake-with-instancegroups.json");
 
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
+        given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
         given(telemetryConverter.convert(eq(null), eq(StackType.DATALAKE), anyString())).willReturn(new Telemetry());
+        given(loadBalancerConfigService.getKnoxGatewayGroups(any(Stack.class))).willReturn(Set.of("master"));
         // WHEN
         Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
         // THEN
@@ -361,7 +396,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     }
 
     @Test
-    void testNoEndpointGatewayLoadBalancerWhenEntitlementIsDisabled() {
+    public void testNoEndpointGatewayLoadBalancerWhenEntitlementIsDisabled() {
         StackV4Request request = setupForEndpointGateway(true);
         // WHEN
         Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
@@ -370,7 +405,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     }
 
     @Test
-    void testNoEndpointGatewayLoadBalancerWhenFlagIsDisabled() {
+    public void testNoEndpointGatewayLoadBalancerWhenFlagIsDisabled() {
         StackV4Request request = setupForEndpointGateway(false);
         // WHEN
         Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
@@ -383,7 +418,19 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         return StackV4Request.class;
     }
 
+    private void initMocks() {
+        // GIVEN
+        InstanceGroup instanceGroup = new InstanceGroup();
+        SecurityGroup securityGroup = new SecurityGroup();
+        instanceGroup.setSecurityGroup(securityGroup);
+        instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
+        instanceGroup.setGroupName("master");
+        given(stackAuthenticationV4RequestToStackAuthenticationConverter.convert(any(StackAuthenticationV4Request.class))).willReturn(new StackAuthentication());
+        given(instanceGroupV4RequestToInstanceGroupConverter.convert(any(InstanceGroupV4Request.class), anyString())).willReturn(instanceGroup);
+    }
+
     private StackV4Request setupForEndpointGateway(boolean enabled) {
+        initMocks();
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
         StackV4Request request = getRequest("stack-datalake-with-instancegroups.json");
 
@@ -395,10 +442,15 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         environmentResponse.setTunnel(Tunnel.DIRECT);
         environmentResponse.setTags(new TagResponse());
         environmentResponse.setNetwork(networkResponse);
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
 
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
+        given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
         given(telemetryConverter.convert(eq(null), eq(StackType.DATALAKE), anyString())).willReturn(new Telemetry());
+        given(loadBalancerConfigService.getKnoxGatewayGroups(any(Stack.class))).willReturn(Set.of("master"));
 
         return request;
     }
@@ -410,7 +462,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     private String getTestRegion(CloudPlatform platform) {
         String region = TEST_REGIONS.get(platform);
         if (region != null) {
-            return platform.name() + ':' + region;
+            return platform.name() + ":" + region;
         }
         throw new IllegalArgumentException("No region has found for platform: " + platform);
     }

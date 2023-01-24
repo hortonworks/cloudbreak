@@ -11,6 +11,8 @@ public class AwsLoadBalancer {
 
     private final AwsLoadBalancerScheme scheme;
 
+    private final String awsScheme;
+
     private final String name;
 
     private final List<AwsListener> listeners;
@@ -23,6 +25,7 @@ public class AwsLoadBalancer {
 
     public AwsLoadBalancer(AwsLoadBalancerScheme scheme) {
         this.scheme = scheme;
+        this.awsScheme = scheme.awsScheme();
         this.name = getLoadBalancerName(scheme);
         this.listeners = new ArrayList<>();
         this.subnetIds = new HashSet<>();
@@ -61,12 +64,8 @@ public class AwsLoadBalancer {
         this.arn = arn;
     }
 
-    /**
-     * AWS Scheme getter, needed for the aws-cf-stack.ftl FreeMarker template, used in model.
-     * @return AWS scheme ("internet-facing" or "internal")
-     */
     public String getAwsScheme() {
-        return scheme.awsScheme();
+        return awsScheme;
     }
 
     public boolean isListenerConfigSet() {

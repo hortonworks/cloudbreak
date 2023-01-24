@@ -38,6 +38,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -76,7 +77,7 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.loadbalancer.TargetGroupPortProvider;
+import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -189,7 +190,7 @@ public class StackToCloudStackConverterTest {
     private InstanceGroupService instanceGroupService;
 
     @Mock
-    private TargetGroupPortProvider targetGroupPortProvider;
+    private LoadBalancerConfigService loadBalancerConfigService;
 
     @Mock
     private DetailedEnvironmentResponse environment;
@@ -205,7 +206,7 @@ public class StackToCloudStackConverterTest {
         when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
-        when(cmTemplateProcessor.getComponentsByHostGroup()).thenReturn(mock(Map.class));
+        when(cmTemplateProcessor.getComponentsByHostGroup()).thenReturn(Mockito.mock(Map.class));
         when(cloudFileSystemViewProvider.getCloudFileSystemView(any(), any(), any())).thenReturn(Optional.empty());
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
@@ -1055,7 +1056,7 @@ public class StackToCloudStackConverterTest {
         when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Set.of(targetGroup));
         when(instanceGroupService.findByTargetGroupId(anyLong())).thenReturn(List.of(instanceGroup1, instanceGroup2));
         TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(443, 8443);
-        when(targetGroupPortProvider.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(targetGroupPortPair));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(targetGroupPortPair));
 
         CloudStack result = underTest.convert(stack);
 
@@ -1099,7 +1100,7 @@ public class StackToCloudStackConverterTest {
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(internalLoadBalancer, externalLoadBalancer));
         when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Set.of(targetGroup));
         when(instanceGroupService.findByTargetGroupId(anyLong())).thenReturn(List.of(instanceGroup1, instanceGroup2));
-        when(targetGroupPortProvider.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(new TargetGroupPortPair(443, 8443)));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(new TargetGroupPortPair(443, 8443)));
         when(stack.getStack()).thenReturn(stack);
 
         CloudStack result = underTest.convert(stack);
@@ -1139,7 +1140,7 @@ public class StackToCloudStackConverterTest {
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
         when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Set.of(targetGroup));
         when(instanceGroupService.findByTargetGroupId(anyLong())).thenReturn(List.of(instanceGroup1));
-        when(targetGroupPortProvider.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(targetGroupPortPair));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(targetGroupPortPair));
 
         CloudStack result = underTest.convert(stack);
 

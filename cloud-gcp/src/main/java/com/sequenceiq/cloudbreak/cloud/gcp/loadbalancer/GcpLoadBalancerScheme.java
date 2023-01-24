@@ -4,7 +4,6 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 
 public enum GcpLoadBalancerScheme {
     INTERNAL("INTERNAL", LoadBalancerType.PRIVATE),
-    GATEWAY_INTERNAL("INTERNAL", LoadBalancerType.GATEWAY_PRIVATE),
     EXTERNAL("EXTERNAL", LoadBalancerType.PUBLIC);
 
     private final String gcpType;

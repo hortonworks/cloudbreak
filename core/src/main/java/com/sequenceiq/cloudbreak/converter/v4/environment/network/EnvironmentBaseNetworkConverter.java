@@ -11,12 +11,9 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -33,9 +30,6 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
 
     @Inject
     private SubnetSelector subnetSelector;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Override
     public Network convertToLegacyNetwork(EnvironmentNetworkResponse source, String availabilityZone) {
@@ -63,15 +57,10 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         attributes.put(SUBNET_ID, cloudSubnet.getId());
         attributes.put(CLOUD_PLATFORM, getCloudPlatform().name());
         attributes.putAll(getAttributesForLegacyNetwork(source));
-        if (PublicEndpointAccessGateway.ENABLED.equals(source.getPublicEndpointAccessGateway()) || isTargetingEndpointGateway(source)) {
+        if (PublicEndpointAccessGateway.ENABLED.equals(source.getPublicEndpointAccessGateway())) {
             attachEndpointGatewaySubnet(source, attributes, cloudSubnet);
         }
         return attributes;
-    }
-
-    private boolean isTargetingEndpointGateway(EnvironmentNetworkResponse network) {
-        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
-                CollectionUtils.isNotEmpty(network.getEndpointGatewaySubnetIds());
     }
 
     /**

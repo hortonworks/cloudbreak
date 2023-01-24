@@ -10,7 +10,6 @@ import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.AWS_INSTANCE;
 import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER;
 import static java.util.Collections.emptyMap;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -76,7 +74,7 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @ExtendWith(MockitoExtension.class)
-class AwsLoadBalancerLaunchServiceTest {
+class AwsLaunchServiceLoadBalancerTest {
 
     private static final String PRIVATE_ID_1 = "private-id-1";
 
@@ -175,11 +173,10 @@ class AwsLoadBalancerLaunchServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
-        List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
+        underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
         verify(cfClient, times(2)).updateStack(any());
         verify(result, times(4)).getStackResourceSummaries();
-        assertEquals(LoadBalancerType.PRIVATE, statuses.get(0).getCloudResource().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class));
     }
 
     @Test
@@ -201,11 +198,10 @@ class AwsLoadBalancerLaunchServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
-        List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
+        underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
         verify(cfClient, times(2)).updateStack(any());
         verify(result, times(4)).getStackResourceSummaries();
-        assertEquals(LoadBalancerType.PUBLIC, statuses.get(0).getCloudResource().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class));
     }
 
     @Test
@@ -227,15 +223,10 @@ class AwsLoadBalancerLaunchServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
-        List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
+        underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
         verify(cfClient, times(2)).updateStack(any());
         verify(result, times(5)).getStackResourceSummaries();
-        Set<LoadBalancerType> loadBalancerTypes = statuses.stream()
-                .map(CloudResourceStatus::getCloudResource)
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
-                .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactlyInAnyOrder(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE);
     }
 
     @Test
@@ -393,7 +384,6 @@ class AwsLoadBalancerLaunchServiceTest {
         assertEquals(com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED, statuses.get(0).getStatus());
         assertEquals(CREATED, statuses.get(0).getCloudResource().getStatus());
         assertEquals(ELASTIC_LOAD_BALANCER, statuses.get(0).getCloudResource().getType());
-        assertEquals(LoadBalancerType.PRIVATE, statuses.get(0).getCloudResource().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class));
     }
 
     @Test
@@ -422,7 +412,6 @@ class AwsLoadBalancerLaunchServiceTest {
         assertEquals(com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.FAILED, statuses.get(0).getStatus());
         assertEquals(FAILED, statuses.get(0).getCloudResource().getStatus());
         assertEquals(ELASTIC_LOAD_BALANCER, statuses.get(0).getCloudResource().getType());
-        assertEquals(LoadBalancerType.PRIVATE, statuses.get(0).getCloudResource().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class));
     }
 
     @Test
@@ -451,7 +440,6 @@ class AwsLoadBalancerLaunchServiceTest {
         assertEquals(com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.FAILED, statuses.get(0).getStatus());
         assertEquals(FAILED, statuses.get(0).getCloudResource().getStatus());
         assertEquals(ELASTIC_LOAD_BALANCER, statuses.get(0).getCloudResource().getType());
-        assertEquals(LoadBalancerType.PRIVATE, statuses.get(0).getCloudResource().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class));
     }
 
     @Test
@@ -480,7 +468,6 @@ class AwsLoadBalancerLaunchServiceTest {
         assertEquals(com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.FAILED, statuses.get(0).getStatus());
         assertEquals(FAILED, statuses.get(0).getCloudResource().getStatus());
         assertEquals(ELASTIC_LOAD_BALANCER, statuses.get(0).getCloudResource().getType());
-        assertEquals(LoadBalancerType.PRIVATE, statuses.get(0).getCloudResource().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class));
     }
 
     @Test
