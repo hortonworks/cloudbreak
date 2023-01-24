@@ -4,12 +4,16 @@ altus:
     s3.endpoint.patterns:
       - pattern: dbusapi.us-west-1
         endpoint: https://cloudera-dbus-prod.s3.amazonaws.com
+        fips-endpoint: https://cloudera-dbus-prod.s3-fips.%s.amazonaws.com
       - pattern: dbusapi.sigma-dev
         endpoint: https://cloudera-dbus-dev.s3.amazonaws.com
+        fips-endpoint: https://cloudera-dbus-dev.s3-fips.%s.amazonaws.com
       - pattern: dbusapi.sigma-int
         endpoint: https://cloudera-dbus-int.s3.amazonaws.com
+        fips-endpoint: https://cloudera-dbus-dev.s3-fips.%s.amazonaws.com
       - pattern: dbusapi.sigma-stage
         endpoint: https://cloudera-dbus-stage.s3.amazonaws.com
+        fips-endpoint: https://cloudera-dbus-dev.s3-fips.%s.amazonaws.com
     connection-check:
       max-time-seconds: 60
       retry-times: 2

@@ -17,6 +17,13 @@ public class DataBusEndpointProvider {
 
     private static final String DATABUS_S3_HTTP_ENDPOINT = "https://%s.s3.amazonaws.com";
 
+    private static final String DATABUS_FIPS_S3_HTTP_ENDPOINT = "https://%s.s3-fips.%s.amazonaws.com";
+
+    private static final String GOV_REGION_INDICATOR = "gov";
+
+    @Value("${aws.fips.use.endpoint:false}")
+    private boolean fipsEnabled;
+
     private final AltusDatabusConfiguration altusDatabusConfiguration;
 
     private final DataBusS3EndpointPatternsConfig dataBusS3EndpointPatternsConfig;
@@ -39,7 +46,19 @@ public class DataBusEndpointProvider {
         return databusUrl;
     }
 
-    public String getDatabusS3Endpoint(String endpoint, boolean forceToUsePatterns) {
+    public String getDatabusS3Endpoint(String endpoint, String region) {
+        return getDatabusS3Endpoint(endpoint, false, region);
+    }
+
+    public String getDatabusS3Endpoint(String endpoint, boolean forceToUsePatterns, String region) {
+        if (StringUtils.isNotEmpty(region) && fipsEnabled && region.contains(GOV_REGION_INDICATOR)) {
+            return getDatabusFipsS3Endpoint(endpoint, forceToUsePatterns, region);
+        } else {
+            return getDatabusS3Endpoint(endpoint, forceToUsePatterns);
+        }
+    }
+
+    private String getDatabusS3Endpoint(String endpoint, boolean forceToUsePatterns) {
         if (StringUtils.isNotBlank(altusDatabusConfiguration.getAltusDatabusS3BucketName()) && !forceToUsePatterns) {
             return String.format(DATABUS_S3_HTTP_ENDPOINT, altusDatabusConfiguration.getAltusDatabusS3BucketName());
         } else {
@@ -47,17 +66,29 @@ public class DataBusEndpointProvider {
         }
     }
 
-    public String getDatabusS3Endpoint(String endpoint) {
-        return getDatabusS3Endpoint(endpoint, false);
+    private String getDatabusFipsS3Endpoint(String endpoint, boolean forceToUsePatterns, String govRegion) {
+        if (StringUtils.isNotBlank(altusDatabusConfiguration.getAltusDatabusS3BucketName()) && !forceToUsePatterns) {
+            return String.format(DATABUS_FIPS_S3_HTTP_ENDPOINT, altusDatabusConfiguration.getAltusDatabusS3BucketName(), govRegion);
+        } else {
+            return getDatabusFipsS3EndpointFromPatterns(endpoint, govRegion);
+        }
     }
 
     private String getDatabusS3EndpointFromPatterns(String endpoint) {
-        String dbusS3Endpoint = null;
         for (DataBusS3EndpointPattern s3EndpointPatternObj : dataBusS3EndpointPatternsConfig.getPatterns()) {
             if (StringUtils.isNotBlank(endpoint) && endpoint.contains(s3EndpointPatternObj.getPattern())) {
                 return s3EndpointPatternObj.getEndpoint();
             }
         }
-        return dbusS3Endpoint;
+        return StringUtils.EMPTY;
+    }
+
+    private String getDatabusFipsS3EndpointFromPatterns(String endpoint, String govRegion) {
+        for (DataBusS3EndpointPattern s3EndpointPatternObj : dataBusS3EndpointPatternsConfig.getPatterns()) {
+            if (StringUtils.isNotBlank(endpoint) && endpoint.contains(s3EndpointPatternObj.getPattern())) {
+                return String.format(s3EndpointPatternObj.getFipsEndpoint(), govRegion);
+            }
+        }
+        return StringUtils.EMPTY;
     }
 }

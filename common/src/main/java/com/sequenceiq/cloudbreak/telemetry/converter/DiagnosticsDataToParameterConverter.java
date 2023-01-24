@@ -54,7 +54,7 @@ public class DiagnosticsDataToParameterConverter {
                 .withAdditionalLogs(request.getAdditionalLogs());
         if (supportBundleConfiguration.isEnabled()) {
             builder.withDbusUrl(databusEndpoint)
-                    .withDbusS3Url(dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint))
+                    .withDbusS3Url(dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint, region))
                     .withSupportBundleDbusStreamName(supportBundleConfiguration.getDbusStreamName())
                     .withSupportBundleDbusAppName(supportBundleConfiguration.getDbusAppName());
         }

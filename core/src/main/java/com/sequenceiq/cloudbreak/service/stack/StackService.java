@@ -1063,4 +1063,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     public String findEnvironmentCrnByStackId(Long id) {
         return stackRepository.findEnvironmentCrnByStackId(id).orElseThrow(notFound("Stack", id));
     }
+
+    public String findRegionByStackId(Long id) {
+        return stackRepository.findRegionByStackId(id).orElseThrow(notFound("Region by stack ID", id));
+    }
 }

@@ -240,7 +240,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         }
         String databusEndpoint = getDatabusEndpoint(stack, telemetry);
         builder.withEndpoint(databusEndpoint)
-                .withS3Endpoint(dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint));
+                .withS3Endpoint(dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint, stack.getRegion()));
         return builder.build();
     }
 

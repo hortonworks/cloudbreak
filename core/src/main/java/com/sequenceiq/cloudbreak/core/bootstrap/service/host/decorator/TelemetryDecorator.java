@@ -140,7 +140,6 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             CdpAccessKeyType cdpAccessKeyType) {
         boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(accountId);
         String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
-        String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint);
         DatabusContext.Builder builder = DatabusContext.builder();
         DataBusCredential dbusCredential = getOrRefreshDataBusCredential(stack, accountId, telemetry, dataBusCredential, cdpAccessKeyType);
         if (telemetry.isAnyDataBusBasedFeatureEnablred()) {
@@ -155,7 +154,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         }
         return builder
                 .withEndpoint(databusEndpoint)
-                .withS3Endpoint(databusS3Endpoint)
+                .withS3Endpoint(dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint, stack.getRegion()))
                 .build();
     }
 

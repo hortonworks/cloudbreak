@@ -315,7 +315,7 @@ public class TelemetryDecoratorTest {
         given(entitlementService.isDatahubDatabusEndpointValidationEnabled(anyString())).willReturn(true);
         given(entitlementService.nodestatusSaltPingEnabled(anyString())).willReturn(true);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("https://dbus-dev.com");
-        given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString())).willReturn("https://cloudera-dbus-dev.amazonaws.com");
+        given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("https://cloudera-dbus-dev.amazonaws.com");
         given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
         given(altusMachineUserService.getCdpAccessKeyType(any())).willReturn(CdpAccessKeyType.ECDSA);
     }
@@ -344,6 +344,7 @@ public class TelemetryDecoratorTest {
         creator.setUserCrn("crn:cdp:iam:us-west-1:accountId:user:name");
         stack.setCreator(creator);
         stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
+        stack.setRegion("region");
         when(stackDto.getStack()).thenReturn(stack);
         when(stackDto.getCluster()).thenReturn(cluster);
         return stackDto;
