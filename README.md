@@ -282,7 +282,7 @@ idea.max.intellisense.filesize=15000
 ```
 Restart IDEA, and Rebuild.
 
-#### Activating CloudBreak Code Styles
+#### Activating Cloudbreak Code Styles
 After importing, be sure to navigate to:
 ```text
 IntelliJ IDEA -> Preferences -> Editor -> Code Style -> Java -> Scheme
@@ -290,6 +290,36 @@ IntelliJ IDEA -> Preferences -> Editor -> Code Style -> Java -> Scheme
 And, select the new scheme `Default (1)`.
 
 Otherwise, IntelliJ will constantly reorder your imports differently from CB conventions.
+
+### PKIX SSL Error - Import Mock-Infrastructure's certificate to your Java trust store before launch FreeIPA or Cloudbreak(core) locally
+[We needed to eliminate](https://github.com/hortonworks/cloudbreak/pull/13278/files#diff-f1e661d9b4ab2d595976d4ed701e8f29907fa1b4a6fac64214dd2549eabd6e40L62-L83) the vulnerable `TrustEveryThingTrustStore` implementation from our code base
+and this indicates that the certificate of the Mock-Infrastructure service needs to be added to the Java trust store **if you run FreeIPA and/or Cloudbreak(core) services locally and would like to create deployments with `mock` provider or simply run the integration tests locally.**
+Because the image catalog could not be downloaded from the mentioned service due to SSL handshake issues, for example:
+```
+{"message":"Creation of FreeIPA failed: Failed to get image catalog: javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target from https://localhost:10090/mock-image-catalog?catalog-name=freeipa-catalog&cb-version=2.68.0-b64&runtime=7.2.15&mock-server-address=localhost:10090","payload":null}
+```
+
+Example import commands, **do not forget to update the path of the certificate to your Cloudbreak repository location:**
+```
+# How to import on Linux
+sudo keytool -import -alias mock-infra -noprompt -file "/home/${USER}/prj/cloudbreak/mock-infrastructure/src/main/resources/keystore/infrastructure-mock.cer" -keystore         /etc/ssl/certs/java/cacerts -storepass changeit
+
+# How to import on MacOS
+keytool -import -alias mock-infra -noprompt -file ~/prj/hortonworks/cloudbreak/mock-infrastructure/src/main/resources/keystore/infrastructure-mock.cer -keystore /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home/lib/security/cacerts -storepass changeit
+```
+
+If you still get the same error then specify the `Trust Store` for `Cloudbreak(core)` and/or `FreeIpa`:
+```
+# How to import on Linux
+-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+
+# How to import on MacOS
+-Djavax.net.ssl.trustStore=/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home/lib/security/cacerts
+```
+
+***Note:***
+- The path of the Java trust store may be different for your development environment, then please update path in the commands to the right location
+- This solution is only needed until the [CB-18493](https://jira.cloudera.com/browse/CB-18493) has been solved.
 
 ### Running Cloudbreak in IDEA
 
