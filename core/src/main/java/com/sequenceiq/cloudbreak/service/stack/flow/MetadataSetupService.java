@@ -65,6 +65,8 @@ public class MetadataSetupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupService.class);
 
+    private static final String ENDPOINT_SUFFIX = "gateway";
+
     @Inject
     private ImageService imageService;
 
@@ -385,7 +387,7 @@ public class MetadataSetupService {
                 loadBalancerEntry.setHostedZoneId(cloudLoadBalancerMetadata.getHostedZoneId());
                 loadBalancerEntry.setIp(cloudLoadBalancerMetadata.getIp());
                 loadBalancerEntry.setType(cloudLoadBalancerMetadata.getType());
-                String endpoint = loadBalancerConfigService.generateLoadBalancerEndpoint(stack);
+                String endpoint = generateLoadBalancerEndpoint(stack);
 
                 List<StackIdView> byEnvironmentCrnAndStackType = stackService.getByEnvironmentCrnAndStackType(stack.getEnvironmentCrn(), StackType.DATALAKE);
                 List<StackStatus> stoppedDatalakes = byEnvironmentCrnAndStackType
@@ -445,6 +447,14 @@ public class MetadataSetupService {
             }
         }
         return new LoadBalancer();
+    }
+
+    private String generateLoadBalancerEndpoint(StackView stack) {
+        StringBuilder name = new StringBuilder()
+                .append(stack.getName())
+                .append('-')
+                .append(ENDPOINT_SUFFIX);
+        return name.toString();
     }
 
 }

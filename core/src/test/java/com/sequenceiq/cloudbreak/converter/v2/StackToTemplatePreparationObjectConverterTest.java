@@ -87,7 +87,7 @@ import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
-import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
+import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -267,7 +267,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     private CloudCredential cloudCredential;
 
     @Mock
-    private LoadBalancerConfigService loadBalancerConfigService;
+    private LoadBalancerFqdnUtil loadBalancerFqdnUtil;
 
     @BeforeEach
     public void setUp() throws IOException, TransactionService.TransactionExecutionException {
@@ -306,7 +306,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getCluster()).thenReturn(sourceCluster);
         when(accountTagClientService.list()).thenReturn(new HashMap<>());
         when(entitlementService.internalTenant(anyString())).thenReturn(true);
-        when(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(anyLong())).thenReturn(null);
+        when(loadBalancerFqdnUtil.getLoadBalancerUserFacingFQDN(anyLong())).thenReturn(null);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))
@@ -713,7 +713,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenLoadBalanceExistsFqdnIsSet() {
         String lbUrl = "loadbalancer.domain";
-        when(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(anyLong())).thenReturn(lbUrl);
+        when(loadBalancerFqdnUtil.getLoadBalancerUserFacingFQDN(anyLong())).thenReturn(lbUrl);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
         when(stackMock.getStack()).thenReturn(stackMock);
 

@@ -36,7 +36,7 @@ public class LoadBalancerConfigConverter {
     static final String MISSING_CLOUD_RESOURCE = "Could not find cloud resource corresponding to this traffic port.";
 
     @Inject
-    private LoadBalancerConfigService loadBalancerConfigService;
+    private TargetGroupPortProvider targetGroupPortProvider;
 
     public LoadBalancerConfigDbWrapper convertLoadBalancer(String cloudPlatform, CloudLoadBalancerMetadata cloudLoadBalancerMetadata) {
         switch (cloudPlatform) {
@@ -134,7 +134,7 @@ public class LoadBalancerConfigConverter {
     }
 
     private Set<Integer> getTrafficPorts(TargetGroup targetGroup) {
-        return loadBalancerConfigService.getTargetGroupPortPairs(targetGroup).stream()
+        return targetGroupPortProvider.getTargetGroupPortPairs(targetGroup).stream()
                 .map(TargetGroupPortPair::getTrafficPort)
                 .collect(Collectors.toSet());
     }

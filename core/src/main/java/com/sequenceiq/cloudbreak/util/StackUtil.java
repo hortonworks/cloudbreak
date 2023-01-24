@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
+import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -69,7 +69,7 @@ public class StackUtil {
     private CredentialClientService credentialClientService;
 
     @Inject
-    private LoadBalancerConfigService loadBalancerConfigService;
+    private LoadBalancerFqdnUtil loadBalancerFqdnUtil;
 
     @Inject
     private HostOrchestrator hostOrchestrator;
@@ -237,7 +237,7 @@ public class StackUtil {
     }
 
     public String extractClusterManagerAddress(StackDtoDelegate stack) {
-        String fqdn = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(stack.getId());
+        String fqdn = loadBalancerFqdnUtil.getLoadBalancerUserFacingFQDN(stack.getId());
         ClusterView cluster = stack.getCluster();
         fqdn = isEmpty(fqdn) ? cluster.getFqdn() : fqdn;
 

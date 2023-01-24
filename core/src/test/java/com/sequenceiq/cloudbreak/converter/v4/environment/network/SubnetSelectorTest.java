@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.environment.network;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -24,7 +25,7 @@ import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @ExtendWith(MockitoExtension.class)
-public class SubnetSelectorTest extends SubnetTest {
+class SubnetSelectorTest extends SubnetTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
@@ -37,46 +38,46 @@ public class SubnetSelectorTest extends SubnetTest {
     private SubnetSelector underTest;
 
     @Test
-    public void testNoSubnetInAvailabilityZone() {
+    void testNoSubnetInAvailabilityZone() {
         EnvironmentNetworkResponse source = new EnvironmentNetworkResponse();
         source.setSubnetMetas(Map.of("key", getCloudSubnet("any")));
 
         Optional<CloudSubnet> subnet = underTest.chooseSubnet(source.getPreferedSubnetId(), source.getSubnetMetas(),
             AZ_1, SelectionFallbackStrategy.ALLOW_FALLBACK);
 
-        assert subnet.isEmpty();
+        assertThat(subnet).isEmpty();
     }
 
     @Test
-    public void testSubnetFoundInAvailabilityZone() {
+    void testSubnetFoundInAvailabilityZone() {
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(Map.of("key", getCloudSubnet(AZ_1)));
 
         Optional<CloudSubnet> subnet = underTest.chooseSubnet(source.getPreferedSubnetId(), source.getSubnetMetas(),
             AZ_1, SelectionFallbackStrategy.ALLOW_FALLBACK);
 
-        assert subnet.isPresent();
+        assertThat(subnet).isPresent();
         assertEquals(PRIVATE_ID_1, subnet.get().getId());
     }
 
     @Test
-    public void testChooseEndpointGatewaySubnetFromEndpointSubnets() {
+    void testChooseEndpointGatewaySubnetFromEndpointSubnets() {
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(Map.of("key", getCloudSubnet(AZ_1)));
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
-        source.setGatewayEndpointSubnetMetas(Map.of("public-key", getPublicCloudSubnet(PUBLIC_ID_1, AZ_1)));
+        source.setGatewayEndpointSubnetMetas(Map.of("key", getPublicCloudSubnet(PUBLIC_ID_1, AZ_1)));
         when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(false);
         when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(false);
 
         Optional<CloudSubnet> subnet =
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));
 
-        assert subnet.isPresent();
+        assertThat(subnet).isPresent();
         assertEquals(PUBLIC_ID_1, subnet.get().getId());
     }
 
     @Test
-    public void testChooseEndpointGatewaySubnetFromEnvironmentSubnets() {
+    void testChooseEndpointGatewaySubnetFromEnvironmentSubnets() {
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(Map.of(
             "key1", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1),
@@ -89,12 +90,32 @@ public class SubnetSelectorTest extends SubnetTest {
         Optional<CloudSubnet> subnet =
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));
 
-        assert subnet.isPresent();
+        assertThat(subnet).isPresent();
         assertEquals(PUBLIC_ID_1, subnet.get().getId());
     }
 
     @Test
-    public void testChooseEndpointGatewaySubnetNoPublicEndpointSubnetsEndpointGatewayValidationEnabled() {
+    void testChooseEndpointGatewaySubnetFromEnvironmentPrivateSubnetsTargeted() {
+        EnvironmentNetworkResponse source = setupResponse();
+        source.setSubnetMetas(Map.of(
+            "key1", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1)
+        ));
+        source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
+        source.setGatewayEndpointSubnetMetas(Map.of(
+            "key2", getPrivateCloudSubnet(PRIVATE_ID_2, AZ_1)
+        ));
+        when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(false);
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(true);
+
+        Optional<CloudSubnet> subnet =
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));
+
+        assertThat(subnet).isPresent();
+        assertEquals(PRIVATE_ID_2, subnet.get().getId());
+    }
+
+    @Test
+    void testChooseEndpointGatewaySubnetNoPublicEndpointSubnetsEndpointGatewayValidationEnabled() {
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(Map.of("key", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1)));
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
@@ -105,11 +126,11 @@ public class SubnetSelectorTest extends SubnetTest {
         Optional<CloudSubnet> subnet =
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));
 
-        assert subnet.isEmpty();
+        assertThat(subnet).isEmpty();
     }
 
     @Test
-    public void testChooseEndpointGatewaySubnetNoPublicEndpointSubnetsEndpointGatewayValidationDisabled() {
+    void testChooseEndpointGatewaySubnetNoPublicEndpointSubnetsEndpointGatewayValidationDisabled() {
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(Map.of("key", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1)));
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
@@ -119,12 +140,12 @@ public class SubnetSelectorTest extends SubnetTest {
         Optional<CloudSubnet> subnet =
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));
 
-        assert subnet.isPresent();
+        assertThat(subnet).isPresent();
         assertEquals(PRIVATE_ID_1, subnet.get().getId());
     }
 
     @Test
-    public void testChooseEndpointGatewaySubnetNoPublicEnvironmentSubnetsEndpointGatewayValidationEnabled() {
+    void testChooseEndpointGatewaySubnetNoPublicEnvironmentSubnetsEndpointGatewayValidationEnabled() {
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(Map.of("key", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1)));
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
@@ -134,11 +155,11 @@ public class SubnetSelectorTest extends SubnetTest {
         Optional<CloudSubnet> subnet =
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));
 
-        assert subnet.isEmpty();
+        assertThat(subnet).isEmpty();
     }
 
     @Test
-    public void testChooseEndpointGatewaySubnetNoPublicEnvironmentSubnetsEndpointGatewayValidationDisabled() {
+    void testChooseEndpointGatewaySubnetNoPublicEnvironmentSubnetsEndpointGatewayValidationDisabled() {
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(Map.of("key", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1)));
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
@@ -147,12 +168,12 @@ public class SubnetSelectorTest extends SubnetTest {
         Optional<CloudSubnet> subnet =
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));
 
-        assert subnet.isPresent();
+        assertThat(subnet).isPresent();
         assertEquals(PRIVATE_ID_1, subnet.get().getId());
     }
 
     @Test
-    public void testChooseSubnetPreferPublic() {
+    void testChooseSubnetPreferPublic() {
         EnvironmentNetworkResponse source = new EnvironmentNetworkResponse();
         source.setSubnetMetas(Map.of(
             "key1", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1),
@@ -162,19 +183,19 @@ public class SubnetSelectorTest extends SubnetTest {
         // Loop to ensure we select the public subnet every time
         for (int i = 0; i < 10; i++) {
             Optional<CloudSubnet> subnet = underTest.chooseSubnetPreferPublic(null, source.getSubnetMetas(), AZ_1);
-            assert subnet.isPresent();
+            assertThat(subnet).isPresent();
             assertEquals(PUBLIC_ID_1, subnet.get().getId());
         }
     }
 
     @Test
-    public void testChooseSubnetPreferPublicWhenNoPublicSubnet() {
+    void testChooseSubnetPreferPublicWhenNoPublicSubnet() {
         EnvironmentNetworkResponse source = new EnvironmentNetworkResponse();
         source.setSubnetMetas(Map.of("key1", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1)));
 
         Optional<CloudSubnet> subnet = underTest.chooseSubnetPreferPublic(null, source.getSubnetMetas(), AZ_1);
 
-        assert subnet.isPresent();
+        assertThat(subnet).isPresent();
         assertEquals(PRIVATE_ID_1, subnet.get().getId());
     }
 

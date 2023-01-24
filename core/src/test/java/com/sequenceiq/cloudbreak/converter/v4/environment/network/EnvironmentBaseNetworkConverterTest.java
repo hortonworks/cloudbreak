@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -36,7 +37,7 @@ import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @ExtendWith(MockitoExtension.class)
-public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
+class EnvironmentBaseNetworkConverterTest extends SubnetTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
@@ -53,8 +54,11 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
     @Mock
     private SubnetSelector subnetSelector;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @Test
-    public void testConvertToLegacyNetworkWhenSubnetNotFound() {
+    void testConvertToLegacyNetworkWhenSubnetNotFound() {
         EnvironmentNetworkResponse source = new EnvironmentNetworkResponse();
         source.setSubnetMetas(Map.of("key", getCloudSubnet("any")));
         when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), any())).thenReturn(Optional.empty());
@@ -66,7 +70,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
     }
 
     @Test
-    public void testConvertToLegacyNetworkWhenSubnetFound() {
+    void testConvertToLegacyNetworkWhenSubnetFound() {
         CloudSubnet subnet = getCloudSubnet(EU_AZ);
         Map<String, CloudSubnet> metas = Map.of("key", subnet);
         EnvironmentNetworkResponse source = setupResponse();
@@ -85,7 +89,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
     }
 
     @Test
-    public void testConvertToLegacyNetworkWithEndpointAccessGateway() {
+    void testConvertToLegacyNetworkWithEndpointAccessGateway() {
         CloudSubnet privateSubnet = getCloudSubnet(AZ_1);
         CloudSubnet publicSubnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
         EnvironmentNetworkResponse source = setupResponse();
@@ -106,7 +110,30 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
     }
 
     @Test
-    public void testConvertToLegacyNetworkWithEndpointAccessGatewayNoPublicSubnets() {
+    void testConvertToLegacyNetworkWithPrivateEndpointAccessGateway() {
+        CloudSubnet privateSubnet = getCloudSubnet(AZ_1);
+        CloudSubnet publicSubnet = getPublicCloudSubnet(PRIVATE_ID_1, AZ_1);
+        EnvironmentNetworkResponse source = setupResponse();
+        source.setSubnetMetas(Map.of("key", privateSubnet));
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(true);
+        source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
+        source.setEndpointGatewaySubnetIds(Set.of(PRIVATE_ID_1));
+        source.setGatewayEndpointSubnetMetas(Map.of("public-key", publicSubnet));
+
+        when(subnetSelector.chooseSubnet(any(), eq(source.getSubnetMetas()), eq(AZ_1), eq(SelectionFallbackStrategy.ALLOW_FALLBACK)))
+                .thenReturn(Optional.of(privateSubnet));
+        when(subnetSelector.chooseSubnetForEndpointGateway(eq(source), eq(privateSubnet.getId()))).thenReturn(Optional.of(publicSubnet));
+
+        Network[] network = new Network[1];
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
+        });
+
+        assertEquals(PRIVATE_ID_1, network[0].getAttributes().getValue(ENDPOINT_GATEWAY_SUBNET_ID));
+    }
+
+    @Test
+    void testConvertToLegacyNetworkWithEndpointAccessGatewayNoPublicSubnets() {
         CloudSubnet privateSubnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(Map.of("key", privateSubnet));
@@ -123,7 +150,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
     }
 
     @Test
-    public void testEndpointGatewayIsDisabledd() {
+    void testEndpointGatewayIsDisabled() {
         CloudSubnet privateSubnet = getCloudSubnet(AZ_1);
         CloudSubnet publicSubnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
         EnvironmentNetworkResponse source = setupResponse();

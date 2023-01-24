@@ -43,7 +43,7 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-public class AzureMetadataCollectorTest {
+class AzureMetadataCollectorTest {
 
     private static final List<CloudInstance> KNOWN_INSTANCES = Collections.emptyList();
 
@@ -81,6 +81,8 @@ public class AzureMetadataCollectorTest {
 
     private static final String SECOND_PUBLIC_IP = "10.32.13.1";
 
+    private static final String GATEWAY_PRIVATE_IP = "10.132.113.101";
+
     @InjectMocks
     private AzureMetadataCollector underTest;
 
@@ -106,7 +108,7 @@ public class AzureMetadataCollectorTest {
     private AzureLoadBalancerMetadataCollector azureLbMetadataCollector;
 
     @Test
-    public void testCollectShouldReturnsTheAllVmMetadata() {
+    void testCollectShouldReturnsTheAllVmMetadata() {
         List<CloudResource> resources = Collections.emptyList();
         List<CloudInstance> vms = createVms();
         CloudResource cloudResource = createCloudResource();
@@ -190,7 +192,7 @@ public class AzureMetadataCollectorTest {
     }
 
     @Test
-    public void testCollectSinglePublicLoadBalancer() {
+    void testCollectSinglePublicLoadBalancer() {
         List<CloudResource> resources = new ArrayList<>();
         CloudResource cloudResource = createCloudResource();
 
@@ -200,7 +202,7 @@ public class AzureMetadataCollectorTest {
         when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
-        final String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
+        String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
         when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, loadBalancerName, LoadBalancerType.PUBLIC))
                 .thenReturn(List.of(PUBLIC_IP));
 
@@ -215,7 +217,7 @@ public class AzureMetadataCollectorTest {
     }
 
     @Test
-    public void testCollectSinglePublicLoadBalancerWithMultipleIps() {
+    void testCollectSinglePublicLoadBalancerWithMultipleIps() {
         List<CloudResource> resources = new ArrayList<>();
         CloudResource cloudResource = createCloudResource();
 
@@ -225,7 +227,7 @@ public class AzureMetadataCollectorTest {
         when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
-        final String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
+        String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
         when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, loadBalancerName, LoadBalancerType.PUBLIC))
                 .thenReturn(List.of(PUBLIC_IP, SECOND_PUBLIC_IP));
 
@@ -234,16 +236,15 @@ public class AzureMetadataCollectorTest {
 
         List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PUBLIC), resources);
 
-
         // We're retrieving only one Public IP address by design
         assertEquals(1, result.size());
         assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
-        final String resultIpAddress = result.get(0).getIp();
+        String resultIpAddress = result.get(0).getIp();
         assertTrue(PUBLIC_IP.equals(resultIpAddress) || SECOND_PUBLIC_IP.equals(resultIpAddress));
     }
 
     @Test
-    public void testCollectPublicAndPrivateLoadBalancer() {
+    void testCollectPublicAndPrivateLoadBalancer() {
         List<CloudResource> resources = new ArrayList<>();
         CloudResource cloudResource = createCloudResource();
 
@@ -253,11 +254,11 @@ public class AzureMetadataCollectorTest {
         when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
-        final String publicLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
+        String publicLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
         when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, publicLoadBalancerName, LoadBalancerType.PUBLIC))
                 .thenReturn(List.of(PUBLIC_IP));
 
-        final String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
+        String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
         when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
                 .thenReturn(List.of(PRIVATE_IP));
 
@@ -282,7 +283,7 @@ public class AzureMetadataCollectorTest {
     }
 
     @Test
-    public void testCollectPrivateLoadBalancer() {
+    void testCollectPrivateLoadBalancer() {
         List<CloudResource> resources = new ArrayList<>();
         CloudResource cloudResource = createCloudResource();
 
@@ -292,7 +293,7 @@ public class AzureMetadataCollectorTest {
         when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
-        final String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
+        String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
         when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
                 .thenReturn(List.of(PRIVATE_IP));
 
@@ -307,7 +308,7 @@ public class AzureMetadataCollectorTest {
     }
 
     @Test
-    public void testCollectPrivateLoadBalancerWithMultipleIps() {
+    void testCollectGatewayPrivateLoadBalancer() {
         List<CloudResource> resources = new ArrayList<>();
         CloudResource cloudResource = createCloudResource();
 
@@ -317,7 +318,32 @@ public class AzureMetadataCollectorTest {
         when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
-        final String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
+        String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.GATEWAY_PRIVATE, STACK_NAME);
+        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.GATEWAY_PRIVATE))
+                .thenReturn(List.of(GATEWAY_PRIVATE_IP));
+
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
+
+        List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.GATEWAY_PRIVATE), resources);
+
+        assertEquals(1, result.size());
+        assertEquals(LoadBalancerType.GATEWAY_PRIVATE, result.get(0).getType());
+        assertEquals(GATEWAY_PRIVATE_IP, result.get(0).getIp());
+    }
+
+    @Test
+    void testCollectPrivateLoadBalancerWithMultipleIps() {
+        List<CloudResource> resources = new ArrayList<>();
+        CloudResource cloudResource = createCloudResource();
+
+        when(authenticatedContext.getCloudContext()).thenReturn(mockCloudContext);
+        when(mockCloudContext.getName()).thenReturn(RESOURCE_GROUP_NAME);
+
+        when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
+        when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
+
+        String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
         when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
                 .thenReturn(List.of(PRIVATE_IP, "10.23.12.1"));
 
@@ -332,7 +358,7 @@ public class AzureMetadataCollectorTest {
     }
 
     @Test
-    public void testCollectLoadBalancerWithNoIps() {
+    void testCollectLoadBalancerWithNoIps() {
         List<CloudResource> resources = new ArrayList<>();
         CloudResource cloudResource = createCloudResource();
 
@@ -353,7 +379,7 @@ public class AzureMetadataCollectorTest {
     }
 
     @Test
-    public void testCollectLoadBalancerSkipsMetadataWhenRuntimeExceptionIsThrown() {
+    void testCollectLoadBalancerSkipsMetadataWhenRuntimeExceptionIsThrown() {
         List<CloudResource> resources = new ArrayList<>();
         CloudResource cloudResource = createCloudResource();
 
@@ -363,7 +389,7 @@ public class AzureMetadataCollectorTest {
         when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
-        final String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
+        String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
         when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
                 .thenThrow(new RuntimeException());
 
