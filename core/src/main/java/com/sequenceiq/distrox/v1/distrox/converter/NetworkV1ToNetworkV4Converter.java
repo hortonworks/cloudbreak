@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,6 +22,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.G
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator;
@@ -47,6 +50,9 @@ public class NetworkV1ToNetworkV4Converter {
 
     @Inject
     private EndpointGatewayNetworkValidator endpointGatewayNetworkValidator;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public NetworkV4Request convertToNetworkV4Request(Pair<NetworkV1Request, DetailedEnvironmentResponse> source) {
         EnvironmentNetworkResponse networkResponse = source.getValue().getNetwork();
@@ -187,7 +193,7 @@ public class NetworkV1ToNetworkV4Converter {
                 response.setSubnetId(networkResponse.getPreferedSubnetId());
             }
 
-            if (PublicEndpointAccessGateway.ENABLED.equals(networkResponse.getPublicEndpointAccessGateway())) {
+            if (PublicEndpointAccessGateway.ENABLED.equals(networkResponse.getPublicEndpointAccessGateway()) || isTargetingEndpointGateway(networkResponse)) {
                 ValidationResult validationResult = endpointGatewayNetworkValidator.validate(new ImmutablePair<>(response.getSubnetId(), networkResponse));
                 if (validationResult.getState() == ValidationResult.State.ERROR || validationResult.hasError()) {
                     throw new BadRequestException("Endpoint gateway subnet validation failed: " + validationResult.getFormattedErrors());
@@ -200,6 +206,11 @@ public class NetworkV1ToNetworkV4Converter {
         }
 
         return response;
+    }
+
+    private boolean isTargetingEndpointGateway(EnvironmentNetworkResponse network) {
+        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
+                CollectionUtils.isNotEmpty(network.getEndpointGatewaySubnetIds());
     }
 
     public NetworkV1Request convertToNetworkV1Request(NetworkV4Request network) {

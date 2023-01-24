@@ -69,7 +69,7 @@ import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
-import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
+import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
@@ -182,7 +182,7 @@ public class StackToTemplatePreparationObjectConverter {
     private GrpcUmsClient grpcUmsClient;
 
     @Inject
-    private LoadBalancerConfigService loadBalancerConfigService;
+    private LoadBalancerFqdnUtil loadBalancerFqdnUtil;
 
     @Inject
     private TransactionService transactionService;
@@ -418,7 +418,7 @@ public class StackToTemplatePreparationObjectConverter {
                 generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
             }
         }
-        generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.ofNullable(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(source.getId())));
+        generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.ofNullable(loadBalancerFqdnUtil.getLoadBalancerUserFacingFQDN(source.getId())));
         generalClusterConfigs.setAccountId(Optional.ofNullable(Crn.safeFromString(source.getResourceCrn()).getAccountId()));
         generalClusterConfigs.setGovCloud(credential.isGovCloud());
         return generalClusterConfigs;

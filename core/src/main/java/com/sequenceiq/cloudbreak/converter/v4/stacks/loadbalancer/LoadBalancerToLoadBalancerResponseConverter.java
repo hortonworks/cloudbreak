@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGrou
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerNamesDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpTargetGroupConfigDb;
-import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
+import com.sequenceiq.cloudbreak.service.loadbalancer.TargetGroupPortProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
@@ -51,7 +51,7 @@ public class LoadBalancerToLoadBalancerResponseConverter {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private LoadBalancerConfigService loadBalancerConfigService;
+    private TargetGroupPortProvider targetGroupPortProvider;
 
     public LoadBalancerResponse convert(LoadBalancer source) {
         LoadBalancerResponse response = new LoadBalancerResponse();
@@ -110,7 +110,7 @@ public class LoadBalancerToLoadBalancerResponseConverter {
             .map(InstanceMetaData::getInstanceId)
             .collect(Collectors.toSet());
         TargetGroupConfigDbWrapper targetGroupConfig = targetGroup.getProviderConfig();
-        Set<TargetGroupPortPair> portPairs = loadBalancerConfigService.getTargetGroupPortPairs(targetGroup);
+        Set<TargetGroupPortPair> portPairs = targetGroupPortProvider.getTargetGroupPortPairs(targetGroup);
 
         return portPairs.stream()
             .map(portPair -> mapPortPairToTargetGroup(instanceIds, targetGroupConfig, portPair))
