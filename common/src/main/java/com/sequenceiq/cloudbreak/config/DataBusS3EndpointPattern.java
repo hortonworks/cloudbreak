@@ -6,6 +6,8 @@ public class DataBusS3EndpointPattern {
 
     private String endpoint;
 
+    private String fipsEndpoint;
+
     public String getPattern() {
         return pattern;
     }
@@ -20,5 +22,13 @@ public class DataBusS3EndpointPattern {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+
+    public String getFipsEndpoint() {
+        return fipsEndpoint;
+    }
+
+    public void setFipsEndpoint(String fipsEndpoint) {
+        this.fipsEndpoint = fipsEndpoint;
     }
 }

@@ -140,6 +140,7 @@ public class TelemetryConfigServiceTest {
         given(altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class))).willReturn(dataBusCredential);
         given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
                 .willReturn(Optional.of(monitoringCredential));
+        given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(true, true, true)));
         // THEN
@@ -166,6 +167,8 @@ public class TelemetryConfigServiceTest {
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
                 .willReturn(Optional.of(monitoringCredential));
+        given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
+        given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(false, true, false)));
         // THEN
@@ -185,6 +188,8 @@ public class TelemetryConfigServiceTest {
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
         Stack stack = createStack(telemetry(false, true, false));
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
+        given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
+        given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(stack);
         // THEN
@@ -211,6 +216,8 @@ public class TelemetryConfigServiceTest {
         Stack stack = createStack(telemetry(false, false, false));
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
+        given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
+        given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(stack);
         // THEN
@@ -228,6 +235,8 @@ public class TelemetryConfigServiceTest {
                 .setClouderaManagerLicenseKey("myLicense")
                 .build();
         given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
+        given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
+        given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
         Telemetry telemetry = telemetry(true, false, false);
         telemetry.getLogging().setS3(null);
         // WHEN
@@ -245,6 +254,7 @@ public class TelemetryConfigServiceTest {
         stack.setId(STACK_ID);
         stack.setTelemetry(telemetry);
         stack.setAccountId("accountId");
+        stack.setRegion("region");
         stack.setResourceCrn("crn:cdp:freeipa:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:11111-2222");
         return stack;
     }

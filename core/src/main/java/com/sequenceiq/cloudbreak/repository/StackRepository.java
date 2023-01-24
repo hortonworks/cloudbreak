@@ -485,4 +485,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.environmentCrn FROM Stack s WHERE s.id = :stackId")
     Optional<String> findEnvironmentCrnByStackId(@Param("stackId") Long stackId);
 
+    @Query("SELECT s.region FROM Stack s WHERE s.id = :stackId")
+    Optional<String> findRegionByStackId(@Param("stackId") Long stackId);
+
 }

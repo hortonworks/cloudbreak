@@ -110,11 +110,10 @@ public class DiagnosticsFlowService {
                         firePreFlightCheckEvents(stackId, String.format("DataBus API ('%s') accessibility", databusEndpoint),
                                 networkNodes, NodeStatusProto.NetworkDetails::getDatabusAccessible);
                     }
-                    String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint, !multiCpRegionSupported);
-                    if (StringUtils.isNotBlank(databusS3Endpoint)) {
-                        firePreFlightCheckEvents(stackId, String.format("DataBus S3 API ('%s') accessibility", databusS3Endpoint),
-                                networkNodes, NodeStatusProto.NetworkDetails::getDatabusS3Accessible, stableNetworkCheckSupported);
-                    }
+                    String region = stackService.findRegionByStackId(stackId);
+                    String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint, !multiCpRegionSupported, region);
+                    firePreFlightCheckEvents(stackId, String.format("DataBus S3 API ('%s') accessibility", databusS3Endpoint),
+                            networkNodes, NodeStatusProto.NetworkDetails::getDatabusS3Accessible, stableNetworkCheckSupported);
                     firePreFlightCheckEvents(stackId, "'archive.cloudera.com' accessibility",
                             networkNodes, NodeStatusProto.NetworkDetails::getArchiveClouderaComAccessible, stableNetworkCheckSupported);
                     firePreFlightCheckEvents(stackId, "S3 endpoint accessibility",
