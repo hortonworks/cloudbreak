@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.sequenceiq.cloudbreak.util.FipsOpenSSLLoaderUtil;
+import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
 
 @EnableScheduling
 @EnableJpaRepositories(basePackages = "com.sequenceiq")
@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.util.FipsOpenSSLLoaderUtil;
 public class RedbeamsApplication {
 
     public static void main(String[] args) {
-        FipsOpenSSLLoaderUtil.registerOpenSSLJniProvider();
+        OpenSSLLoaderUtil.registerOpenSSLJniProvider();
         SpringApplication.run(RedbeamsApplication.class, args);
     }
 

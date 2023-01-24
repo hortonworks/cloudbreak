@@ -35,4 +35,9 @@ RUN JAVA_SECURITY_POLICY_FILE=$JAVA_HOME/conf/security/java.security \
 && N=$(grep -m 1 -n "^fips\.provider\.[[:digit:]]=" $JAVA_SECURITY_POLICY_FILE | cut -d: -f1) \
 && sed -i "$N i fips.provider.1=OpenSSL" $JAVA_SECURITY_POLICY_FILE
 
+RUN JAVA_SECURITY_POLICY_FILE=$JAVA_HOME/conf/security/java.security \
+&& for I in {20..1}; do J=$((I+1)); sed -i "s/security.provider.$I=/security.provider.$J=/" $JAVA_SECURITY_POLICY_FILE; done \
+&& N=$(grep -m 1 -n "^security\.provider\.[[:digit:]]=" $JAVA_SECURITY_POLICY_FILE | cut -d: -f1) \
+&& sed -i "$N i security.provider.1=OpenSSL" $JAVA_SECURITY_POLICY_FILE
+
 ENTRYPOINT ["/start_autoscale_app.sh"]
