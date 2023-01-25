@@ -412,6 +412,30 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         Assertions.assertEquals("sub1", captured.getKey().getAws().getSubnetId());
     }
 
+    @Test
+    void testJavaVersionInStackRequestPassedToDistroXRequest() {
+        StackV4Request source = new StackV4Request();
+        source.setJavaVersion(11);
+
+        DistroXV1Request result = underTest.convert(source);
+
+        assertThat(result.getJavaVersion()).isEqualTo(11);
+    }
+
+    @Test
+    void testJavaVersionInDistroXRequestPassedToStackRequest() {
+        when(environmentClientService.getByName(anyString())).thenReturn(createAwsEnvironment());
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
+
+        DistroXV1Request source = new DistroXV1Request();
+        source.setEnvironmentName("env");
+        source.setJavaVersion(11);
+
+        StackV4Request result = underTest.convert(source);
+
+        assertThat(result.getJavaVersion()).isEqualTo(11);
+    }
+
     private void checkTagsV4WithV1(TagsV4Request input, TagsV1Request result) {
         assertEquals(input.getUserDefined().size(), result.getUserDefined().size());
         assertEquals(input.getApplication().size(), result.getApplication().size());
