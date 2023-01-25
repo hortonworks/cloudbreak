@@ -32,6 +32,9 @@ base:
 {%- if salt['file.file_exists']('/srv/pillar/postgresql/root-certs.sls') %}
     - postgresql.root-certs
 {%- endif %}
+{%- if salt['file.file_exists']('/srv/pillar/java/init.sls') %}
+    - java.init
+{%- endif %}
 
   'G@roles:ad_member or G@roles:ad_leave':
     - match: compound

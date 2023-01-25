@@ -70,6 +70,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
+import com.sequenceiq.cloudbreak.service.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -166,6 +167,9 @@ public class StackCreatorService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private JavaVersionValidator javaVersionValidator;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
         String stackName = stackRequest.getName();
@@ -243,6 +247,7 @@ public class StackCreatorService {
                 StatedImage imgFromCatalog = measure(() -> getImageFromCatalog(imgFromCatalogFuture),
                         LOGGER,
                         "Select the correct image took {} ms");
+                javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackRequest.getJavaVersion(), ThreadBasedUserCrnProvider.getAccountId());
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 Stack newStack = measure(() -> stackService.create(
                             stack, imgFromCatalog, user, workspace, Optional.ofNullable(stackRequest.getResourceCrn())),
