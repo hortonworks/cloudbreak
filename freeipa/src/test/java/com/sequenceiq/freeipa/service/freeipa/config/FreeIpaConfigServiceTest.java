@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,6 +26,7 @@ import org.springframework.core.env.Environment;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -89,6 +91,9 @@ class FreeIpaConfigServiceTest {
     @Mock
     private ProxyConfigDtoService proxyConfigDtoService;
 
+    @Mock
+    private AwsEndpointProvider awsEndpointProvider;
+
     @InjectMocks
     private FreeIpaConfigService underTest;
 
@@ -110,6 +115,7 @@ class FreeIpaConfigServiceTest {
         Stack stack = new Stack();
         stack.setCloudPlatform(CloudPlatform.AWS.name());
         stack.setBackup(backup);
+        stack.setRegion("region");
         stack.setEnvironmentCrn("envcrn");
         Network network = new Network();
         network.setNetworkCidrs(List.of(CIDR));
@@ -124,6 +130,7 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
+        when(awsEndpointProvider.getEndpointString(anyString(), anyString(), anyBoolean())).thenReturn("s3");
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
         Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);
