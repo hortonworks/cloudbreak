@@ -44,6 +44,8 @@ public class S3ConfigProvider {
 
     private static final String S3_ENDPOINT_TEMPLATE = "s3.%s.amazonaws.com";
 
+    private static final String S3_FIPS_ENDPOINT_TEMPLATE = "s3-fips.%s.amazonaws.com";
+
     @Inject
     private LocationHelper locationHelper;
 
@@ -69,7 +71,8 @@ public class S3ConfigProvider {
                     .collect(Collectors.toSet());
             buckets.forEach(bucketName -> {
                 String s3BucketEndpointParam = String.format(S3_BUCKET_ENDPOINT_PARAM_TEMPLATE, bucketName);
-                String s3BucketEndpoint = String.format(S3_ENDPOINT_TEMPLATE, placementView.getRegion());
+                String endpointFormat = source.getGeneralClusterConfigs().isGovCloud() ? S3_FIPS_ENDPOINT_TEMPLATE : S3_ENDPOINT_TEMPLATE;
+                String s3BucketEndpoint = String.format(endpointFormat, placementView.getRegion());
                 hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(s3BucketEndpointParam, s3BucketEndpoint));
             });
         });

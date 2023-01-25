@@ -50,6 +50,8 @@ public class GeneralClusterConfigs {
 
     private Optional<String> accountId = Optional.empty();
 
+    private boolean govCloud;
+
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }
@@ -224,5 +226,13 @@ public class GeneralClusterConfigs {
 
     public void setMultiAzEnabled(boolean multiAzEnabled) {
         this.multiAzEnabled = multiAzEnabled;
+    }
+
+    public boolean isGovCloud() {
+        return govCloud;
+    }
+
+    public void setGovCloud(boolean govCloud) {
+        this.govCloud = govCloud;
     }
 }

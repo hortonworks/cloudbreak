@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -21,7 +22,7 @@ public class GeneralClusterConfigsProvider {
 
     private static final String PENDING_DEFAULT_VALUE = "pending...";
 
-    public GeneralClusterConfigs generalClusterConfigs(StackDtoDelegate stack) {
+    public GeneralClusterConfigs generalClusterConfigs(StackDtoDelegate stack, Credential credential) {
         ClusterView cluster = stack.getCluster();
         boolean gatewayInstanceMetadataPresented = false;
         boolean instanceMetadataPresented = false;
@@ -50,10 +51,11 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setKnoxUserFacingCertConfigured(userFacingCertHasBeenGenerated);
         generalClusterConfigs.setExternalFQDN(cluster.getFqdn());
         generalClusterConfigs.setEnableRangerRaz(cluster.isRangerRazEnabled());
+        generalClusterConfigs.setGovCloud(credential.isGovCloud());
         return generalClusterConfigs;
     }
 
-    public GeneralClusterConfigs generalClusterConfigs(StackV4Request stack, String email, String clusterVariant) {
+    public GeneralClusterConfigs generalClusterConfigs(StackV4Request stack, Credential credential, String email, String clusterVariant) {
         boolean gatewayInstanceMetadataPresented = false;
         int nodeCount = 0;
         for (InstanceGroupV4Request instanceGroup : stack.getInstanceGroups()) {
@@ -81,6 +83,7 @@ public class GeneralClusterConfigsProvider {
                 .map(ClouderaManagerV4Request::getEnableAutoTls)
                 .orElse(Boolean.FALSE);
         generalClusterConfigs.setAutoTlsEnabled(autoTlsEnabled);
+        generalClusterConfigs.setGovCloud(credential.isGovCloud());
         return generalClusterConfigs;
     }
 }

@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -173,6 +174,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     private Stack stackMock;
 
     @Mock
+    private Credential credentialMock;
+
+    @Mock
     private Cluster sourceCluster;
 
     @Mock
@@ -269,6 +273,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private LoadBalancerConfigService loadBalancerConfigService;
 
+    @Mock
+    private AwsEndpointProvider awsEndpointProvider;
+
     @BeforeEach
     public void setUp() throws IOException, TransactionService.TransactionExecutionException {
         MockitoAnnotations.initMocks(this);
@@ -331,7 +338,8 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(grpcUmsClient.listServicePrincipalCloudIdentities(anyString(), anyString())).thenReturn(Collections.EMPTY_LIST);
         when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(stackMock.getId()).thenReturn(1L);
-        when(generalClusterConfigsProvider.generalClusterConfigs(any(StackDtoDelegate.class))).thenReturn(new GeneralClusterConfigs());
+        when(generalClusterConfigsProvider.generalClusterConfigs(any(StackDtoDelegate.class), any(Credential.class)))
+                .thenReturn(new GeneralClusterConfigs());
     }
 
     @Test
@@ -483,18 +491,6 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getBlueprintView()).isSameAs(expected);
-    }
-
-    @Test
-    public void testConvertWhenGeneralClusterConfigsProvidedThenThisShouldBeStored() {
-        GeneralClusterConfigs expected = mock(GeneralClusterConfigs.class);
-        when(generalClusterConfigsProvider.generalClusterConfigs(stackMock)).thenReturn(expected);
-        when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
-        when(stackMock.getStack()).thenReturn(stackMock);
-
-        TemplatePreparationObject result = underTest.convert(stackMock);
-
-        assertThat(result.getGeneralClusterConfigs()).isEqualTo(expected);
     }
 
     @Test
@@ -686,7 +682,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         GeneralClusterConfigs configs = new GeneralClusterConfigs();
         Optional<String> primaryGatewayFqdn = Optional.of("primaryFqdn");
         configs.setPrimaryGatewayInstanceDiscoveryFQDN(primaryGatewayFqdn);
-        when(generalClusterConfigsProvider.generalClusterConfigs(any(Stack.class))).thenReturn(configs);
+        when(generalClusterConfigsProvider.generalClusterConfigs(any(Stack.class), any(Credential.class))).thenReturn(configs);
         when(gatewayConfigService.getPrimaryGatewayIp(any(Stack.class))).thenReturn("10.0.0.1");
         InstanceMetaData dummyMetadata = new InstanceMetaData();
         when(stackMock.getPrimaryGatewayInstance()).thenReturn(dummyMetadata);
