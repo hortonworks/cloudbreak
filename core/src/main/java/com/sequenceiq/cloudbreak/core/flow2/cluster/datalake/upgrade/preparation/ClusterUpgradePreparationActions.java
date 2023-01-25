@@ -11,6 +11,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.prep
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT;
 import static java.util.Collections.singletonList;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.ClusterComponentUpdateService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -56,6 +58,9 @@ public class ClusterUpgradePreparationActions {
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
+
+    @Inject
+    private ClusterComponentUpdateService clusterComponentUpdateService;
 
     @Bean(name = "CLUSTER_UPGRADE_PREPARATION_INIT_STATE")
     public Action<?, ?> initClusterUpgradePreparation() {
@@ -131,6 +136,11 @@ public class ClusterUpgradePreparationActions {
                 LOGGER.debug("Cluster upgrade preparation finish state started.");
                 Long resourceId = payload.getResourceId();
                 ResourceEvent resourceEvent = ResourceEvent.CLUSTER_UPGRADE_PREPARATION_FINISHED;
+                try {
+                    clusterComponentUpdateService.updateOrSavePreparedClusterComponent(resourceId, payload.getImageId());
+                } catch (IOException ex) {
+                    LOGGER.error("Unable to add {} to prepared list of images in ClusterComponent table.", payload.getImageId());
+                }
                 stackUpdater.updateStackStatus(resourceId, CLUSTER_UPGRADE_PREPARATION_FINISHED, messagesService.getMessage(resourceEvent.getMessage()));
                 cloudbreakEventService.fireCloudbreakEvent(resourceId, AVAILABLE.name(), resourceEvent);
                 String nextEventSelector = FINALIZE_CLUSTER_UPGRADE_PREPARATION_EVENT.event();
@@ -186,7 +196,7 @@ public class ClusterUpgradePreparationActions {
     }
 
     private ClusterUpgradePreparationEvent createClusterUpgradePreparationEvent(String selector, ClusterUpgradePreparationEvent payload) {
-        return new ClusterUpgradePreparationEvent(selector, payload.getResourceId(), payload.getClouderaManagerProducts());
+        return new ClusterUpgradePreparationEvent(selector, payload.getResourceId(), payload.getClouderaManagerProducts(), payload.getImageId());
     }
 
 }

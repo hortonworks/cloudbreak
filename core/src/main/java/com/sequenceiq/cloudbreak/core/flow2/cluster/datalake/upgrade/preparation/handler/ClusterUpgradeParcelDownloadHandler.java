@@ -38,11 +38,12 @@ public class ClusterUpgradeParcelDownloadHandler extends ExceptionCatcherEventHa
         LOGGER.debug("Accepting Cluster upgrade parcel download event {}", event);
         ClusterUpgradePreparationEvent request = event.getData();
         Long stackId = request.getResourceId();
+        String imageId = request.getImageId();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             Set<ClouderaManagerProduct> clouderaManagerProducts = request.getClouderaManagerProducts();
             clusterApiConnectors.getConnector(stack).downloadParcels(clouderaManagerProducts);
-            return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_PARCEL_DISTRIBUTION_EVENT.name(), stackId, clouderaManagerProducts);
+            return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_PARCEL_DISTRIBUTION_EVENT.name(), stackId, clouderaManagerProducts, imageId);
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade parcel download failed.", e);
             return new ClusterUpgradePreparationFailureEvent(request.getResourceId(), e);

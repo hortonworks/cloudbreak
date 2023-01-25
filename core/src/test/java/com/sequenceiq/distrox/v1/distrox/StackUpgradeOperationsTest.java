@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.TestConstants.DO_NOT_KEEP_VARIANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
 
@@ -30,12 +32,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.Upg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.component.PreparedImages;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -53,6 +62,8 @@ import com.sequenceiq.flow.api.model.FlowType;
 class StackUpgradeOperationsTest {
 
     private static final long STACK_ID = 1L;
+
+    private static final long CLUSTER_ID = 1L;
 
     private static final String ACCOUNT_ID = "account-id";
 
@@ -103,6 +114,12 @@ class StackUpgradeOperationsTest {
 
     @Mock
     private CloudbreakUser cloudbreakUser;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
+    private ClusterService clusterService;
 
     private NameOrCrn nameOrCrn;
 
@@ -161,6 +178,7 @@ class StackUpgradeOperationsTest {
 
     @Test
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsWorkloadAndReplaceVmDisabled() {
+        doReturn(Optional.of(CLUSTER_ID)).when(clusterService).findClusterIdByStackId(STACK_ID);
         Stack stack = createStack(StackType.WORKLOAD);
         UpgradeV4Request request = createUpgradeRequest(null, null);
         UpgradeV4Response upgradeResponse = new UpgradeV4Response();
@@ -187,6 +205,7 @@ class StackUpgradeOperationsTest {
 
     @Test
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsWorkloadAndReplaceVmEnabled() {
+        doReturn(Optional.of(CLUSTER_ID)).when(clusterService).findClusterIdByStackId(STACK_ID);
         Stack stack = createStack(StackType.WORKLOAD);
         UpgradeV4Request request = createUpgradeRequest(true, null);
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
@@ -252,6 +271,7 @@ class StackUpgradeOperationsTest {
 
     @Test
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsDataLakeAndReplaceVmEnabledAndPrepare() {
+        doReturn(Optional.of(CLUSTER_ID)).when(clusterService).findClusterIdByStackId(STACK_ID);
         Stack stack = createStack(StackType.DATALAKE);
         UpgradeV4Request request = createUpgradeRequest(null, null);
         request.setInternalUpgradeSettings(new InternalUpgradeSettings(false, false, false, true, false));
@@ -283,6 +303,7 @@ class StackUpgradeOperationsTest {
 
     @Test
     void testCheckForClusterUpgradeShouldReturnCompositeErrorWhenBothAttachedDataHubValidationsFail() {
+        doReturn(Optional.of(CLUSTER_ID)).when(clusterService).findClusterIdByStackId(STACK_ID);
         Stack stack = createStack(StackType.DATALAKE);
         UpgradeV4Request request = createUpgradeRequest(null, true);
         StackDto stackDto = new StackDto();
@@ -323,6 +344,7 @@ class StackUpgradeOperationsTest {
 
     @Test
     void testCheckForClusterUpgradeShouldNotValidateUpgradeableDataHubsWhenDataHubUpgradeEntitlementIsGranted() {
+        doReturn(Optional.of(CLUSTER_ID)).when(clusterService).findClusterIdByStackId(STACK_ID);
         Stack stack = createStack(StackType.DATALAKE);
         UpgradeV4Request request = createUpgradeRequest(null, null);
         StackDto stackDto = new StackDto();
@@ -362,11 +384,19 @@ class StackUpgradeOperationsTest {
 
     @Test
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenImageIdIsPresentInRequest() {
+        doReturn(Optional.of(CLUSTER_ID)).when(clusterService).findClusterIdByStackId(STACK_ID);
         Stack stack = createStack(StackType.WORKLOAD);
         UpgradeV4Request request = createUpgradeRequest(null, null);
         request.setImageId(IMAGE_ID);
+        Cluster clusterRef = new Cluster();
+        clusterRef.setId(STACK_ID);
+        ClusterComponent component = new ClusterComponent(ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES,
+                new Json(new PreparedImages(List.of(IMAGE_ID))), clusterRef);
+        doReturn(component).when(clusterComponentConfigProvider).getComponent(STACK_ID, ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES,
+                ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES.name());
         UpgradeV4Response upgradeResponse = new UpgradeV4Response();
         upgradeResponse.setUpgradeCandidates(List.of(new ImageInfoV4Response()));
+        upgradeResponse.getUpgradeCandidates().stream().forEach(imageInfoV4Response -> imageInfoV4Response.setImageId(IMAGE_ID));
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
         when(upgradePreconditionService.notUsingEphemeralVolume(stack)).thenReturn(false);
@@ -378,6 +408,75 @@ class StackUpgradeOperationsTest {
         UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
 
         assertEquals(upgradeResponse, actual);
+        assertEquals(true, upgradeResponse.getUpgradeCandidates().get(0).isPrepared());
+        verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
+        verify(upgradeService).isOsUpgrade(request);
+        verify(upgradePreconditionService).notUsingEphemeralVolume(stack);
+        verify(clusterUpgradeAvailabilityService)
+                .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), true);
+        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, false);
+        verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
+    }
+
+    @Test
+    void testCheckForClusterUpgradeWhenClusterComponentIsNull() {
+        doReturn(Optional.of(CLUSTER_ID)).when(clusterService).findClusterIdByStackId(STACK_ID);
+        Stack stack = createStack(StackType.WORKLOAD);
+        UpgradeV4Request request = createUpgradeRequest(null, null);
+        request.setImageId(IMAGE_ID);
+        doReturn(null).when(clusterComponentConfigProvider).getComponent(STACK_ID, ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES,
+                ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES.name());
+        UpgradeV4Response upgradeResponse = new UpgradeV4Response();
+        upgradeResponse.setUpgradeCandidates(List.of(new ImageInfoV4Response()));
+        upgradeResponse.getUpgradeCandidates().stream().forEach(imageInfoV4Response -> imageInfoV4Response.setImageId(IMAGE_ID));
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
+        when(upgradeService.isOsUpgrade(request)).thenReturn(false);
+        when(upgradePreconditionService.notUsingEphemeralVolume(stack)).thenReturn(false);
+        when(clusterUpgradeAvailabilityService
+                .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), true))
+                .thenReturn(upgradeResponse);
+        when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
+
+        assertEquals(upgradeResponse, actual);
+        assertEquals(false, upgradeResponse.getUpgradeCandidates().get(0).isPrepared());
+        verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
+        verify(upgradeService).isOsUpgrade(request);
+        verify(upgradePreconditionService).notUsingEphemeralVolume(stack);
+        verify(clusterUpgradeAvailabilityService)
+                .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), true);
+        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, false);
+        verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
+    }
+
+    @Test
+    void testCheckForClusterUpgradeWhenJsonParseExceptionIsThrown() {
+        doReturn(Optional.of(CLUSTER_ID)).when(clusterService).findClusterIdByStackId(STACK_ID);
+        Stack stack = createStack(StackType.WORKLOAD);
+        UpgradeV4Request request = createUpgradeRequest(null, null);
+        request.setImageId(IMAGE_ID);
+        Cluster clusterRef = new Cluster();
+        clusterRef.setId(STACK_ID);
+        ClusterComponent component = new ClusterComponent(ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES,
+                new Json(new PreparedImages(List.of(IMAGE_ID + "1"))), clusterRef);
+        doReturn(component).when(clusterComponentConfigProvider).getComponent(CLUSTER_ID, ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES,
+                ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES.name());
+        UpgradeV4Response upgradeResponse = new UpgradeV4Response();
+        upgradeResponse.setUpgradeCandidates(List.of(new ImageInfoV4Response()));
+        upgradeResponse.getUpgradeCandidates().stream().forEach(imageInfoV4Response -> imageInfoV4Response.setImageId(IMAGE_ID));
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
+        when(upgradeService.isOsUpgrade(request)).thenReturn(false);
+        when(upgradePreconditionService.notUsingEphemeralVolume(stack)).thenReturn(false);
+        when(clusterUpgradeAvailabilityService
+                .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), true))
+                .thenReturn(upgradeResponse);
+        when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
+
+        assertEquals(upgradeResponse, actual);
+        assertEquals(false, upgradeResponse.getUpgradeCandidates().get(0).isPrepared());
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(upgradePreconditionService).notUsingEphemeralVolume(stack);

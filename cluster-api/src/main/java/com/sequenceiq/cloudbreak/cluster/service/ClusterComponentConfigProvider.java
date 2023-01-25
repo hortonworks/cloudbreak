@@ -246,6 +246,12 @@ public class ClusterComponentConfigProvider {
         }
     }
 
+    public void deleteClusterComponentByClusterIdAndComponentType(long clusterId, ComponentType componentType) {
+        LOGGER.debug("Component with cluster id {} and component type {} is going to be deleted", clusterId, componentType);
+        componentRepository.deleteComponentByClusterIdAndComponentType(clusterId, componentType);
+        LOGGER.debug("Component with cluster id {} and component type {} is deleted", clusterId, componentType);
+    }
+
     private <T> T retrieveFromAttribute(ClusterComponent component, Class<T> clazz) {
         if (component == null) {
             return null;

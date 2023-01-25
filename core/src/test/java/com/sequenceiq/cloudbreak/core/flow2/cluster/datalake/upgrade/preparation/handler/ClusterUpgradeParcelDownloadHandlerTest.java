@@ -78,7 +78,7 @@ class ClusterUpgradeParcelDownloadHandlerTest {
     }
 
     private HandlerEvent<ClusterUpgradePreparationEvent> createEvent(Set<ClouderaManagerProduct> requiredProducts) {
-        return new HandlerEvent<>(new Event<>(new ClusterUpgradePreparationEvent(DOWNLOAD_PARCELS_EVENT.name(), STACK_ID, requiredProducts)));
+        return new HandlerEvent<>(new Event<>(new ClusterUpgradePreparationEvent(DOWNLOAD_PARCELS_EVENT.name(), STACK_ID, requiredProducts, "")));
     }
 
 }

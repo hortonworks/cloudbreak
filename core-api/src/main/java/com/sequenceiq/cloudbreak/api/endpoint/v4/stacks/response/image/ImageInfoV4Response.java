@@ -17,6 +17,8 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
 
     private ImageComponentVersions componentVersions;
 
+    private boolean prepared;
+
     public ImageInfoV4Response() {
     }
 
@@ -26,6 +28,7 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         this.imageCatalogName = imageCatalogName;
         this.created = created;
         this.date = date;
+        this.prepared = false;
     }
 
     public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, String date,
@@ -36,6 +39,7 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         this.created = created;
         this.date = date;
         this.componentVersions = componentVersions;
+        this.prepared = false;
     }
 
     public String getImageName() {
@@ -96,6 +100,14 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         return this;
     }
 
+    public boolean isPrepared() {
+        return prepared;
+    }
+
+    public void setPrepared(boolean imagePrepared) {
+        prepared = imagePrepared;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -110,7 +122,8 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
                 Objects.equals(imageId, that.imageId) &&
                 Objects.equals(imageCatalogName, that.imageCatalogName) &&
                 Objects.equals(date, that.date) &&
-                Objects.equals(componentVersions, that.componentVersions);
+                Objects.equals(componentVersions, that.componentVersions) &&
+                Objects.equals(prepared, that.prepared);
     }
 
     @Override
@@ -136,6 +149,7 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         return "ImageInfoV4Response{" +
                 "imageName='" + imageName + '\'' +
                 ", imageId='" + imageId + '\'' +
+                ", prepared='" + prepared + '\'' +
                 '}';
     }
 }
