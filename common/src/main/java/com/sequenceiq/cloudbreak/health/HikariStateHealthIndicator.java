@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.health;
 
+import java.lang.management.ThreadInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,10 @@ public class HikariStateHealthIndicator implements HealthIndicator {
 
     private void threadDumpIfNeeded(boolean poolIsFull) {
         if (poolIsFull) {
-            LOGGER.info("Application has run out of open db connections. Thead dump: {}", ThreadUtil.dump());
+            LOGGER.info("Application has run out of open db connections");
+            for (ThreadInfo threadInfo : ThreadUtil.dump()) {
+                LOGGER.debug("ThreadInfo: {}", threadInfo);
+            }
         }
     }
 }

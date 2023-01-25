@@ -9,12 +9,8 @@ public class ThreadUtil {
     private ThreadUtil() {
     }
 
-    public static String dump() {
-        StringBuffer threadDump = new StringBuffer(System.lineSeparator());
+    public static ThreadInfo[] dump() {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-        for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
-            threadDump.append(threadInfo.toString());
-        }
-        return threadDump.toString();
+        return threadMXBean.dumpAllThreads(true, true);
     }
 }
