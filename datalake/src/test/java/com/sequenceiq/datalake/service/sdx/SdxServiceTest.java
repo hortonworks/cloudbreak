@@ -622,6 +622,28 @@ class SdxServiceTest {
     }
 
     @Test
+    void testCreateSdxClusterWithJavaVersionStackRequestContainsRequiredAttributes() throws IOException, TransactionExecutionException {
+        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
+        sdxClusterRequest.setJavaVersion(11);
+        withCloudStorage(sdxClusterRequest);
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        SdxCluster createdSdxCluster = result.getLeft();
+
+        assertThat(createdSdxCluster.getStackRequest()).containsSubsequence("\"javaVersion\":11");
+    }
+
+    @Test
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateWhenBaseLocationSpecifiedShouldCreateStackRequestWithSettedUpBaseLocation()
             throws IOException, TransactionExecutionException {
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());

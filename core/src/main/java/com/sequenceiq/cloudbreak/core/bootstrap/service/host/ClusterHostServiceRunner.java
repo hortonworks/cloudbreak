@@ -461,6 +461,7 @@ public class ClusterHostServiceRunner {
                 clouderaManagerRepo));
         saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto);
+        servicePillar.putAll(createJavaPillar(stack.getJavaVersion()));
 
         addClouderaManagerConfig(stackDto, servicePillar, clouderaManagerRepo, primaryGatewayConfig);
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
@@ -505,6 +506,7 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar =
                 new HashMap<>(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
                         clouderaManagerRepo));
+        servicePillar.putAll(createJavaPillar(stack.getJavaVersion()));
 
         return new SaltConfig(servicePillar, grainsProperties);
     }
@@ -949,6 +951,19 @@ public class ClusterHostServiceRunner {
         grainRunnerParams.setValue("startup_mount");
         grainRunnerParams.setGrainOperation(grainOperation);
         return grainRunnerParams;
+    }
+
+    private Map<String, SaltPillarProperties> createJavaPillar(Integer javaVersion) {
+        if (javaVersion != null) {
+            LOGGER.debug("Creating java pillar with version {}", javaVersion);
+            Map<String, Object> config = new HashMap<>();
+            config.put("version", javaVersion);
+
+            return Map.of("java", new SaltPillarProperties("/java/init.sls", singletonMap("java", config)));
+        } else {
+            LOGGER.debug("Skip java pillar as the version is not specified");
+        }
+        return Collections.emptyMap();
     }
 
     public void createCronForUserHomeCreation(StackDto stackDto, Set<String> candidateHostNames) throws CloudbreakException {

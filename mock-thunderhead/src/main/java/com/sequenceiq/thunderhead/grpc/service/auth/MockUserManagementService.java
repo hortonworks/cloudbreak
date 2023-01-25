@@ -62,6 +62,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_RECIPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FORCED_JAVA_VERSION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_SELECT_INSTANCE_TYPE;
@@ -602,6 +603,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.enforce.aws.native.single.az.enabled}")
     private boolean enforceAwsNativeForSingleAzEnabled;
 
+    @Value("${auth.mock.forced.java.version.enabled}")
+    private boolean forcedJavaVersionEnabled;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -1094,6 +1098,9 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA));
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE));
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB));
+        }
+        if (forcedJavaVersionEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_FORCED_JAVA_VERSION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

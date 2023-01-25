@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -532,6 +533,35 @@ class ClusterHostServiceRunnerTest {
                 .thenReturn(new NodeReachabilityResult(Set.of(TestUtil.node()), new HashSet<>()));
         underTest.createCronForUserHomeCreation(stack, Set.of("fqdn"));
         verify(hostOrchestrator).createCronForUserHomeCreation(eq(gatewayConfigs), eq(Set.of("fqdn")), any());
+    }
+
+    @Test
+    void testAddJavaPillarToSaltConfig() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices();
+        when(stackView.getJavaVersion()).thenReturn(11);
+
+        underTest.runClusterServices(stack, Collections.emptyMap(), false);
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
+
+        assertEquals(getJavaProperties(saltConfig.getValue()).get("version"), 11);
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testAddJavaPillarToRedeployGateway() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices();
+        when(stackView.getJavaVersion()).thenReturn(11);
+
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
+
+        assertEquals(getJavaProperties(saltConfig.getValue()).get("version"), 11);
+    }
+
+    private Map<String, Object> getJavaProperties(SaltConfig saltConfig) {
+        return (Map<String, Object>) saltConfig.getServicePillarConfig().get("java").getProperties().get("java");
     }
 
     private void setupMocksForRunClusterServices() {

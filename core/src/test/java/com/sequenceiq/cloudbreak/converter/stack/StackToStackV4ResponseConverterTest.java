@@ -200,7 +200,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers", "javaVersion"));
+                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
 
         verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
     }
@@ -225,7 +225,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers", "javaVersion"));
+                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
 
         assertNull(result.getCluster());
         verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
@@ -293,6 +293,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         stack.setTerminated(100L);
         stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
         stack.setDatalakeCrn("");
+        stack.setJavaVersion(11);
         return stack;
     }
 }
