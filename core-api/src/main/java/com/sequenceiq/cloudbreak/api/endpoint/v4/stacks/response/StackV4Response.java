@@ -144,6 +144,9 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @ApiModelProperty(StackModelDescription.ENABLE_LOAD_BALANCER)
     private boolean enableLoadBalancer;
 
+    @ApiModelProperty(StackModelDescription.JAVA_VERSION)
+    private Integer javaVersion;
+
     public Long getId() {
         return id;
     }
@@ -423,6 +426,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.govCloud = govCloud;
     }
 
+    public Integer getJavaVersion() {
+        return javaVersion;
+    }
+
+    public void setJavaVersion(Integer javaVersion) {
+        this.javaVersion = javaVersion;
+    }
+
     @Override
     public String toString() {
         return "StackV4Response{ " +
@@ -459,6 +470,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", tunnel=" + tunnel +
                 ", flowIdentifier=" + flowIdentifier +
                 ", externalDatabase=" + externalDatabase +
+                ", javaVersion=" + javaVersion +
                 '}';
     }
 }

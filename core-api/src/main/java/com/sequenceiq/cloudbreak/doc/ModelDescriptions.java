@@ -286,6 +286,7 @@ public class ModelDescriptions {
         public static final String GCP_LOAD_BALANCER_NAME = "The name in GCP of the load balancer forwarding rule";
         public static final String GCP_LB_INSTANCE_GROUP = "The instances listed belong to any group receiving traffic from the loadbalancer for this port";
         public static final String GCP_LB_BACKEND_SERVICE = "The backend service that assigns this instance group to the load balancer";
+        public static final String JAVA_VERSION = "Java version to be forced on virtual machines";
     }
 
     public static class ClusterModelDescription {

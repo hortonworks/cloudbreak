@@ -58,6 +58,8 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     private String variant;
 
+    private Integer javaVersion;
+
     public String getEnvironmentName() {
         return environmentName;
     }
@@ -164,6 +166,14 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     public void setVariant(String variant) {
         this.variant = variant;
+    }
+
+    public Integer getJavaVersion() {
+        return javaVersion;
+    }
+
+    public void setJavaVersion(Integer javaVersion) {
+        this.javaVersion = javaVersion;
     }
 
     @JsonIgnore
