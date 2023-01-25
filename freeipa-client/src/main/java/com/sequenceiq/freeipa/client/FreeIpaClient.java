@@ -328,11 +328,6 @@ public class FreeIpaClient {
         return (Set<Permission>) invoke("permission_find", List.of(), params, type).getResult();
     }
 
-    public int getUsernameLength() throws FreeIpaClientException {
-        Config config = (Config) invoke("config_show", List.of(), Map.of(), Config.class).getResult();
-        return config.getIpamaxusernamelength();
-    }
-
     public Config getConfig() throws FreeIpaClientException {
         Map<String, Object> params = Map.of("all", true);
         return (Config) invoke("config_show", List.of(), params, Config.class).getResult();
@@ -340,6 +335,11 @@ public class FreeIpaClient {
 
     public void setUsernameLength(int length) throws FreeIpaClientException {
         Map<String, Object> params = Map.of("ipamaxusernamelength", length);
+        invoke("config_mod", List.of(), params, Object.class);
+    }
+
+    public void setMaxHostNameLength(int length) throws FreeIpaClientException {
+        Map<String, Object> params = Map.of("ipamaxhostnamelength", length);
         invoke("config_mod", List.of(), params, Object.class);
     }
 

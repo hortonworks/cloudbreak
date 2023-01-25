@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,7 +34,9 @@ import com.sequenceiq.cloudbreak.wiam.client.GrpcWiamClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.User;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
@@ -178,6 +181,94 @@ class FreeIpaPostInstallServiceTest {
         verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
     }
 
+    @Test
+    public void testMaxHostnameConfigModNotInvokedWhenTheConfigValueIsNull() throws Exception {
+        Stack stack = mock(Stack.class);
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        Set<Node> nodes = Set.of(mock(Node.class));
+        FreeIpaClient ipaClient = mock(FreeIpaClient.class);
+        User user = new User();
+        mockUsersyncCommonPart(stack, ipaClient, user);
+        Config ipaConfig = new Config();
+        ipaConfig.setIpamaxusernamelength(5);
+        ipaConfig.setIpamaxhostnamelength(null);
+        when(ipaClient.getConfig()).thenReturn(ipaConfig);
+        when(entitlementService.isWorkloadIamSyncEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                underTest.postInstallFreeIpa(1L, true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        verifyNoInteractions(wiamClient, userSyncService);
+        verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
+        verify(ipaClient, times(0)).setMaxHostNameLength(anyInt());
+    }
+
+    @Test
+    public void testMaxHostnameConfigModInvokedWhenTheConfiguredValueLessThenTheRequiredByMaxFQDNLength() throws Exception {
+        Stack stack = mock(Stack.class);
+        InstanceMetaData gatewayInstanceMetaData = new InstanceMetaData();
+        gatewayInstanceMetaData.setDiscoveryFQDN("shorthostname.domainpart1.domainpart2.clouder.site");
+        when(stack.getPrimaryGateway()).thenReturn(Optional.of(gatewayInstanceMetaData));
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        Set<Node> nodes = Set.of(mock(Node.class));
+        FreeIpaClient ipaClient = mock(FreeIpaClient.class);
+        User user = new User();
+        mockUsersyncCommonPart(stack, ipaClient, user);
+        Config ipaConfig = new Config();
+        ipaConfig.setIpamaxusernamelength(5);
+        ipaConfig.setIpamaxhostnamelength(64);
+        when(ipaClient.getConfig()).thenReturn(ipaConfig);
+        when(entitlementService.isWorkloadIamSyncEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                underTest.postInstallFreeIpa(1L, true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        verifyNoInteractions(wiamClient, userSyncService);
+        verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
+        verify(ipaClient).setMaxHostNameLength(100);
+    }
+
+    @Test
+    public void testMaxHostnameConfigModInvokedWhenTheConfiguredValueLowAndDomainExtremelyLong() throws Exception {
+        Stack stack = mock(Stack.class);
+        InstanceMetaData gatewayInstanceMetaData = new InstanceMetaData();
+        gatewayInstanceMetaData.setDiscoveryFQDN("shorthostname.butaveryveryverylong.domainbuthatismoremorelongthanwhatisexpected." +
+                "domainbuthatismoremorelongthanwhatisexpected.domainbuthatismoremorelongthanwhatisexpected.domainbuthatismoremorelongthanwhatisexpected");
+        when(stack.getPrimaryGateway()).thenReturn(Optional.of(gatewayInstanceMetaData));
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        Set<Node> nodes = Set.of(mock(Node.class));
+        FreeIpaClient ipaClient = mock(FreeIpaClient.class);
+        User user = new User();
+        mockUsersyncCommonPart(stack, ipaClient, user);
+        Config ipaConfig = new Config();
+        ipaConfig.setIpamaxusernamelength(5);
+        ipaConfig.setIpamaxhostnamelength(64);
+        when(ipaClient.getConfig()).thenReturn(ipaConfig);
+        when(entitlementService.isWorkloadIamSyncEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                underTest.postInstallFreeIpa(1L, true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        verifyNoInteractions(wiamClient, userSyncService);
+        verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
+        verify(ipaClient).setMaxHostNameLength(255);
+    }
+
     private void mockUsersyncCommonPart(Stack stack, FreeIpaClient ipaClient, User user) throws FreeIpaClientException {
         when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         lenient().when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
@@ -185,7 +276,10 @@ class FreeIpaPostInstallServiceTest {
         when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(false);
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(ipaClient);
         when(ipaClient.findPermission("Set Password Expiration")).thenReturn(Set.of());
-        when(ipaClient.getUsernameLength()).thenReturn(5);
+        Config ipaConfig = new Config();
+        ipaConfig.setIpamaxusernamelength(5);
+        ipaConfig.setIpamaxhostnamelength(255);
+        when(ipaClient.getConfig()).thenReturn(ipaConfig);
         when(freeIpaClientFactory.getAdminUser()).thenReturn("adminka");
         user.setUid("adminid");
         when(ipaClient.userFind("adminka")).thenReturn(Optional.of(user));

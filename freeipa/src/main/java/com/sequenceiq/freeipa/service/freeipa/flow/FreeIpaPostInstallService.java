@@ -27,6 +27,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdat
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -47,7 +48,9 @@ public class FreeIpaPostInstallService {
 
     private static final String SET_PASSWORD_EXPIRATION_PERMISSION = "Set Password Expiration";
 
-    private static final int MAX_USERNAME_LENGTH = 255;
+    private static final int MAX_NAME_LENGTH = 255;
+
+    private static final int MAX_HOSTNAME_LENGTH_WITH_DELIMITER = 64;
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -132,12 +135,33 @@ public class FreeIpaPostInstallService {
         }
         freeIpaClient.addPermissionToPrivilege(USER_ADMIN_PRIVILEGE, SET_PASSWORD_EXPIRATION_PERMISSION);
         freeIpaPermissionService.setPermissions(stack, freeIpaClient);
-        if (!Objects.equals(MAX_USERNAME_LENGTH, freeIpaClient.getUsernameLength())) {
-            LOGGER.debug("Set maximum username length to {}", MAX_USERNAME_LENGTH);
-            freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);
-        }
+        Config ipaConfig = freeIpaClient.getConfig();
+        updateMaxUsernameLength(freeIpaClient, ipaConfig);
+        updateMaxHostnameLength(stack, freeIpaClient, ipaConfig);
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
         modifyAdminPasswordExpirationIfNeeded(freeIpaClient);
+    }
+
+    private void updateMaxUsernameLength(FreeIpaClient freeIpaClient, Config ipaConfig) throws FreeIpaClientException {
+        if (!Objects.equals(MAX_NAME_LENGTH, ipaConfig.getIpamaxusernamelength())) {
+            LOGGER.debug("Set maximum username length to {}", MAX_NAME_LENGTH);
+            freeIpaClient.setUsernameLength(MAX_NAME_LENGTH);
+        }
+    }
+
+    private void updateMaxHostnameLength(Stack stack, FreeIpaClient freeIpaClient, Config ipaConfig) throws FreeIpaClientException {
+        Integer maxHostNameLength = getMaxHostnameLength(stack);
+        LOGGER.debug("The maximum hostname length that is required by the environment: '{}', the maximum that is configured for IPA: '{}'", maxHostNameLength,
+                ipaConfig.getIpamaxhostnamelength());
+        if (ipaConfig.getIpamaxhostnamelength() != null && ipaConfig.getIpamaxhostnamelength() < maxHostNameLength) {
+            LOGGER.info("Set maximum hostname length to '{}'", maxHostNameLength);
+            freeIpaClient.setMaxHostNameLength(maxHostNameLength);
+        }
+    }
+
+    private Integer getMaxHostnameLength(Stack stack) {
+        int domainLength = stack.getPrimaryGateway().map(im -> im.getDomain().length()).orElse(MAX_NAME_LENGTH);
+        return Math.min(domainLength + MAX_HOSTNAME_LENGTH_WITH_DELIMITER, MAX_NAME_LENGTH);
     }
 
     private void synchronizeUsers(Stack stack) {
