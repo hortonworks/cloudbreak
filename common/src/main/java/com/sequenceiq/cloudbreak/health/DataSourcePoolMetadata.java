@@ -28,7 +28,7 @@ public class DataSourcePoolMetadata {
 
     @Override
     public String toString() {
-        return "HikariMetadataAdapter{" +
+        return "DataSourcePoolMetadata{" +
                 "active=" + active +
                 ", idle=" + idle +
                 ", max=" + max +
