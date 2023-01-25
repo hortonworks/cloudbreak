@@ -251,7 +251,7 @@ public class StackToTemplatePreparationObjectConverter {
                     .withFixInputs(fixInputs)
                     .withBlueprintView(blueprintView)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
-                    .withGeneralClusterConfigs(calculateGeneralClusterConfigs(source))
+                    .withGeneralClusterConfigs(calculateGeneralClusterConfigs(source, credential))
                     .withLdapConfig(ldapView.orElse(null))
                     .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null))
                     .withProductDetails(cm, products)
@@ -402,9 +402,9 @@ public class StackToTemplatePreparationObjectConverter {
         return source.getCluster().getFileSystem() != null && source.getCluster().getFileSystem().getCloudStorage() != null;
     }
 
-    private GeneralClusterConfigs calculateGeneralClusterConfigs(StackDtoDelegate stack) {
+    private GeneralClusterConfigs calculateGeneralClusterConfigs(StackDtoDelegate stack, Credential credential) {
         StackView source = stack.getStack();
-        GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(stack);
+        GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(stack, credential);
         boolean allInstanceGroupsHaveMultiAz = stack.getInstanceGroupViews().stream()
                 .allMatch(ig -> isInstanceGroupsHaveMultiAz(ig, stack));
         generalClusterConfigs.setMultiAzEnabled(allInstanceGroupsHaveMultiAz);
@@ -420,6 +420,7 @@ public class StackToTemplatePreparationObjectConverter {
         }
         generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.ofNullable(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(source.getId())));
         generalClusterConfigs.setAccountId(Optional.ofNullable(Crn.safeFromString(source.getResourceCrn()).getAccountId()));
+        generalClusterConfigs.setGovCloud(credential.isGovCloud());
         return generalClusterConfigs;
     }
 

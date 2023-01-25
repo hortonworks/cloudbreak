@@ -361,7 +361,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenObtainingGeneralClusterConfigsFromGeneralClusterConfigsProviderThenItsReturnValueShouldBeStored() {
         GeneralClusterConfigs expected = new GeneralClusterConfigs();
-        when(generalClusterConfigsProvider.generalClusterConfigs(eq(source), anyString(), anyString())).thenReturn(expected);
+        when(generalClusterConfigsProvider.generalClusterConfigs(eq(source), any(Credential.class), anyString(), anyString()))
+                .thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 

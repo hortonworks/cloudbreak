@@ -165,8 +165,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
             Gateway gateway = source.getCluster().getGateway() == null ? null : stackV4RequestToGatewayConverter.convert(source);
             BlueprintView blueprintView = blueprintViewProvider.getBlueprintView(blueprint);
             Optional<String> version = Optional.ofNullable(blueprintView.getVersion());
-            GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cloudbreakUser.getEmail(),
-                    blueprintService.getBlueprintVariant(blueprint));
+            GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, credential,
+                    cloudbreakUser.getEmail(), blueprintService.getBlueprintVariant(blueprint));
             String gatewaySignKey = null;
             if (gateway != null) {
                 gatewaySignKey = gateway.getSignKey();

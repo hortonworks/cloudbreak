@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
@@ -107,10 +108,14 @@ public class S3ConfigProviderTest {
 
         PlacementView placementView = new PlacementView("region", "az");
 
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setGovCloud(false);
+
         return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withGateway(gateway, "/cb/secret/signkey", new HashSet<>())
                 .withPlacementView(placementView)
+                .withGeneralClusterConfigs(generalClusterConfigs)
                 .withDefaultTags(Map.of("apple", "apple1"))
                 .build();
     }
