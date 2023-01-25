@@ -26,15 +26,17 @@ public class SdxNotificationService {
     @Inject
     private SdxClusterConverter sdxClusterConverter;
 
-    public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, SdxCluster sdx) {
-        LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
-        notificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx),
-                ThreadBasedUserCrnProvider.getUserCrn());
+    public void send(ResourceEvent resourceEvent, SdxCluster sdx) {
+        send(resourceEvent, Collections.singleton(sdx.getClusterName()), sdx);
     }
 
-    public void send(ResourceEvent resourceEvent, SdxCluster sdx) {
+    public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, SdxCluster sdx) {
+        notificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx),
+                getAccountIdFromSdx(sdx));
         LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
-        notificationService.send(resourceEvent, Collections.singleton(sdx.getClusterName()), sdxClusterConverter.sdxClusterToResponse(sdx),
-                ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    private String getAccountIdFromSdx(SdxCluster sdx) {
+        return (sdx.getAccountId() != null) ? sdx.getAccountId() : ThreadBasedUserCrnProvider.getUserCrn();
     }
 }
