@@ -53,6 +53,9 @@ public class SdxClusterRequestBase implements TaggableRequest {
     @Valid
     private List<SdxInstanceGroupRequest> customInstanceGroups;
 
+    @ApiModelProperty(ModelDescriptions.JAVA_VERSION)
+    private Integer javaVersion;
+
     public String getEnvironment() {
         return environment;
     }
@@ -149,6 +152,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.customInstanceGroups = customInstanceGroups;
     }
 
+    public Integer getJavaVersion() {
+        return javaVersion;
+    }
+
+    public void setJavaVersion(Integer javaVersion) {
+        this.javaVersion = javaVersion;
+    }
+
     public void copyTo(SdxClusterRequestBase toInstance) {
         toInstance.setEnvironment(environment);
         toInstance.setClusterShape(clusterShape);
@@ -159,6 +170,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setEnableRangerRaz(enableRangerRaz);
         toInstance.setEnableMultiAz(enableMultiAz);
         toInstance.setCustomInstanceGroups(customInstanceGroups);
+        toInstance.setJavaVersion(javaVersion);
     }
 
     @Override
@@ -170,6 +182,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", aws=" + aws +
                 ", enableRangerRaz=" + enableRangerRaz +
                 ", enableMultiAz=" + enableMultiAz +
+                ", javaVersion=" + javaVersion +
                 '}';
     }
 }

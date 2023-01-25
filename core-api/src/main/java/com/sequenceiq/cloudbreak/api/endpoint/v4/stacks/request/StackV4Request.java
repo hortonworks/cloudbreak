@@ -106,6 +106,9 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     private String variant;
 
+    @ApiModelProperty(value = StackModelDescription.JAVA_VERSION)
+    private Integer javaVersion;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -260,5 +263,13 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     public void setVariant(String variant) {
         this.variant = variant;
+    }
+
+    public Integer getJavaVersion() {
+        return javaVersion;
+    }
+
+    public void setJavaVersion(Integer javaVersion) {
+        this.javaVersion = javaVersion;
     }
 }

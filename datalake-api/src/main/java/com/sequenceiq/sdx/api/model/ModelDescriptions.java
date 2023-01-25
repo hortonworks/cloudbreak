@@ -202,6 +202,8 @@ public class ModelDescriptions {
 
     public static final String BACKUP_TIMESTAMP = "When backup was made (start of the backup procedure)";
 
+    public static final String JAVA_VERSION = "Java version to be forced on virtual machines";
+
     private ModelDescriptions() {
     }
 }
