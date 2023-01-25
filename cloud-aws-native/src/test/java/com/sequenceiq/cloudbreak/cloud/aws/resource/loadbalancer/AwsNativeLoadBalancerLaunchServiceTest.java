@@ -66,7 +66,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.CommonStatus;
-import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -230,7 +230,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(1)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
         assertEquals(ResourceType.ELASTIC_LOAD_BALANCER, cloudResourceArgumentCaptor.getValue().getType());
-        assertEquals(LoadBalancerType.PRIVATE, cloudResourceArgumentCaptor.getValue().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class));
+        assertEquals(LoadBalancerTypeAttribute.PRIVATE,
+                cloudResourceArgumentCaptor.getValue().getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class));
     }
 
     @Test
@@ -257,7 +258,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(1)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
         assertEquals(ResourceType.ELASTIC_LOAD_BALANCER, cloudResourceArgumentCaptor.getValue().getType());
-        assertEquals(LoadBalancerType.PRIVATE, cloudResourceArgumentCaptor.getValue().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class));
+        assertEquals(LoadBalancerTypeAttribute.PRIVATE,
+                cloudResourceArgumentCaptor.getValue().getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class));
     }
 
     @Test
@@ -295,11 +297,11 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER.equals(cloudResource.getType())));
         assertTrue(cloudResourceArgumentCaptor.getAllValues().stream()
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP.equals(cloudResource.getType())));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
+        Set<LoadBalancerTypeAttribute> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
                 .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
+                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class))
                 .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(LoadBalancerType.PRIVATE);
+        assertThat(loadBalancerTypes).containsExactly(LoadBalancerTypeAttribute.PRIVATE);
     }
 
     @Test
@@ -340,11 +342,11 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER.equals(cloudResource.getType())));
         assertTrue(cloudResourceArgumentCaptor.getAllValues().stream()
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP.equals(cloudResource.getType())));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
+        Set<LoadBalancerTypeAttribute> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
                 .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
+                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class))
                 .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(LoadBalancerType.PRIVATE);
+        assertThat(loadBalancerTypes).containsExactly(LoadBalancerTypeAttribute.PRIVATE);
     }
 
     @Test
@@ -390,11 +392,11 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP.equals(cloudResource.getType())));
         assertTrue(cloudResourceArgumentCaptor.getAllValues().stream()
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_LISTENER.equals(cloudResource.getType())));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
+        Set<LoadBalancerTypeAttribute> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
                 .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
+                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class))
                 .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(LoadBalancerType.PRIVATE);
+        assertThat(loadBalancerTypes).containsExactly(LoadBalancerTypeAttribute.PRIVATE);
     }
 
     @Test
@@ -443,11 +445,11 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP.equals(cloudResource.getType())));
         assertTrue(cloudResourceArgumentCaptor.getAllValues().stream()
                 .anyMatch(cloudResource -> ResourceType.ELASTIC_LOAD_BALANCER_LISTENER.equals(cloudResource.getType())));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
+        Set<LoadBalancerTypeAttribute> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
                 .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
+                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class))
                 .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(LoadBalancerType.PRIVATE);
+        assertThat(loadBalancerTypes).containsExactly(LoadBalancerTypeAttribute.PRIVATE);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -499,11 +501,11 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
+        Set<LoadBalancerTypeAttribute> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
                 .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
+                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class))
                 .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(awsLoadBalancerScheme.getLoadBalancerType());
+        assertThat(loadBalancerTypes).containsExactly(Enum.valueOf(LoadBalancerTypeAttribute.class, awsLoadBalancerScheme.getLoadBalancerType().name()));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -620,11 +622,11 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
+        Set<LoadBalancerTypeAttribute> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
                 .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
+                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class))
                 .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(existingInternal ? LoadBalancerType.PUBLIC : LoadBalancerType.PRIVATE);
+        assertThat(loadBalancerTypes).containsExactly(existingInternal ? LoadBalancerTypeAttribute.PUBLIC : LoadBalancerTypeAttribute.PRIVATE);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -681,11 +683,11 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
+        Set<LoadBalancerTypeAttribute> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
                 .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
+                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class))
                 .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(internal ? LoadBalancerType.PRIVATE : LoadBalancerType.PUBLIC);
+        assertThat(loadBalancerTypes).containsExactly(internal ? LoadBalancerTypeAttribute.PRIVATE : LoadBalancerTypeAttribute.PUBLIC);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -747,11 +749,11 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
+        Set<LoadBalancerTypeAttribute> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
                 .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
+                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class))
                 .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(existingInternal ? LoadBalancerType.PUBLIC : LoadBalancerType.PRIVATE);
+        assertThat(loadBalancerTypes).containsExactly(existingInternal ? LoadBalancerTypeAttribute.PUBLIC : LoadBalancerTypeAttribute.PRIVATE);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -808,11 +810,11 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
+        Set<LoadBalancerTypeAttribute> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
                 .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
+                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class))
                 .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(internal ? LoadBalancerType.PRIVATE : LoadBalancerType.PUBLIC);
+        assertThat(loadBalancerTypes).containsExactly(internal ? LoadBalancerTypeAttribute.PRIVATE : LoadBalancerTypeAttribute.PUBLIC);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -875,11 +877,11 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, ResourceStatus.CREATED));
         assertTrue(resourceExistsWithTypeAndStatus(statuses, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, ResourceStatus.CREATED));
-        Set<LoadBalancerType> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
+        Set<LoadBalancerTypeAttribute> loadBalancerTypes = cloudResourceArgumentCaptor.getAllValues().stream()
                 .filter(r -> ResourceType.ELASTIC_LOAD_BALANCER == r.getType())
-                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class))
+                .map(r -> r.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class))
                 .collect(Collectors.toSet());
-        assertThat(loadBalancerTypes).containsExactly(existingInternal ? LoadBalancerType.PUBLIC : LoadBalancerType.PRIVATE);
+        assertThat(loadBalancerTypes).containsExactly(existingInternal ? LoadBalancerTypeAttribute.PUBLIC : LoadBalancerTypeAttribute.PRIVATE);
     }
 
     private CloudStack getCloudStack() {

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.LoadBalancerResourceBuilder;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 
 /**
  * Abstract class for ResourceBuilders that operate based off of the configuration of the loadbalancers in a given stack
@@ -30,8 +31,6 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
  * this covers a situation where instance A and B are both set to service port X, but have different health check ports
  */
 public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResourceBuilder implements LoadBalancerResourceBuilder<GcpContext> {
-
-    public static final String LOADBALANCER_TYPE = "loadBalancerType";
 
     static final String TRAFFICPORT = "trafficport";
 
@@ -78,7 +77,8 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
             });
             hcPortToTrafficPorts.forEach((healthCheckPort, trafficPorts) -> {
                 String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
-                Map<String, Object> parameters = Map.of(TRAFFICPORTS, trafficPorts, HCPORT, healthCheckPort, LOADBALANCER_TYPE, loadBalancer.getType().name());
+                Map<String, Object> parameters = Map.of(TRAFFICPORTS, trafficPorts, HCPORT, healthCheckPort,
+                        CloudResource.ATTRIBUTES, Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getType().name()));
                 resources.add(new CloudResource.Builder().withType(resourceType())
                         .withName(resourceName)
                         .withParameters(parameters)
@@ -89,7 +89,7 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
                 Integer healthCheckPort = targetGroupPortPair.getHealthCheckPort();
                 String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
                 Map<String, Object> parameters = Map.of(TRAFFICPORT, targetGroupPortPair.getTrafficPort(), HCPORT, healthCheckPort,
-                        LOADBALANCER_TYPE, loadBalancer.getType().name());
+                        CloudResource.ATTRIBUTES, Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getType().name()));
                 resources.add(new CloudResource.Builder().withType(resourceType())
                         .withName(resourceName)
                         .withParameters(parameters)

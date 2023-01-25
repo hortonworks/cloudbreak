@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -254,8 +255,8 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                 .map(awsLb -> {
                     LoadBalancerType type = loadBalancerTypeConverter.convert(awsLb.getScheme());
                     Map<String, Object> parameters = awsNativeLbMetadataCollector.getParameters(loadBalancer.getReference(), resources);
-                    LoadBalancerType resourceLbType = loadBalancer.getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class);
-                    if (type == LoadBalancerType.PRIVATE && resourceLbType == LoadBalancerType.GATEWAY_PRIVATE) {
+                    LoadBalancerTypeAttribute resourceLbType = loadBalancer.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class);
+                    if (type == LoadBalancerType.PRIVATE && resourceLbType == LoadBalancerTypeAttribute.GATEWAY_PRIVATE) {
                         LOGGER.debug("GATEWAY_PRIVATE LoadBalancer selected");
                         type = LoadBalancerType.GATEWAY_PRIVATE;
                     }

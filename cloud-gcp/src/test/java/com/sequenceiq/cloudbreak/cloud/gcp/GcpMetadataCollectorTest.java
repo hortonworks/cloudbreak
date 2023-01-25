@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -318,9 +319,12 @@ class GcpMetadataCollectorTest {
             createCloudResource(INSTANCE_NAME_3, ResourceType.GCP_INSTANCE),
             createCloudResource(DISC_NAME, ResourceType.GCP_ATTACHED_DISK),
             createCloudResource(NETWORK_NAME, ResourceType.GCP_NETWORK),
-            createCloudResource(PUBLIC_LB_NAME, ResourceType.GCP_FORWARDING_RULE, Map.of(CloudResource.ATTRIBUTES, LoadBalancerType.PUBLIC)),
-            createCloudResource(GATEWAY_PRIVATE_LB_NAME, ResourceType.GCP_FORWARDING_RULE, Map.of(CloudResource.ATTRIBUTES, LoadBalancerType.GATEWAY_PRIVATE)),
-            createCloudResource(PRIVATE_LB_NAME, ResourceType.GCP_FORWARDING_RULE, Map.of(CloudResource.ATTRIBUTES, LoadBalancerType.PRIVATE)));
+            createCloudResource(PUBLIC_LB_NAME, ResourceType.GCP_FORWARDING_RULE,
+                    Map.of(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.PUBLIC)),
+            createCloudResource(GATEWAY_PRIVATE_LB_NAME, ResourceType.GCP_FORWARDING_RULE,
+                    Map.of(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.GATEWAY_PRIVATE)),
+            createCloudResource(PRIVATE_LB_NAME, ResourceType.GCP_FORWARDING_RULE,
+                    Map.of(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.PRIVATE)));
     }
 
     private CloudResource createCloudResource(String name, ResourceType type) {

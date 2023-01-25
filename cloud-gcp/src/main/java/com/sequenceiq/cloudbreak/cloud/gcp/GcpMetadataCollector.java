@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -161,7 +162,7 @@ public class GcpMetadataCollector implements MetadataCollector {
                 LoadBalancerType itemType = gcpLoadBalancerTypeConverter.getScheme(item.getLoadBalancingScheme()).getCbType();
                 Optional<CloudResource> rule = forwardingRules.stream().filter(r -> r.getName().equals(item.getName())).findFirst();
                 if (rule.isPresent() && itemType == LoadBalancerType.PRIVATE &&
-                        LoadBalancerType.GATEWAY_PRIVATE == rule.get().getParameter(CloudResource.ATTRIBUTES, LoadBalancerType.class)) {
+                        LoadBalancerTypeAttribute.GATEWAY_PRIVATE == rule.get().getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class)) {
                     LOGGER.debug("GATEWAY_PRIVATE LoadBalancer selected");
                     itemType = LoadBalancerType.GATEWAY_PRIVATE;
                 }
