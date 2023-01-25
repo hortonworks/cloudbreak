@@ -16,6 +16,9 @@ public class Config {
     @JsonDeserialize
     private Set<String> ipauserobjectclasses;
 
+    @JsonDeserialize(using = ListFlatteningDeserializer.class)
+    private Integer ipamaxhostnamelength;
+
     public Integer getIpamaxusernamelength() {
         return ipamaxusernamelength;
     }
@@ -32,11 +35,20 @@ public class Config {
         this.ipauserobjectclasses = ipauserobjectclasses;
     }
 
+    public Integer getIpamaxhostnamelength() {
+        return ipamaxhostnamelength;
+    }
+
+    public void setIpamaxhostnamelength(Integer ipamaxhostnamelength) {
+        this.ipamaxhostnamelength = ipamaxhostnamelength;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", Config.class.getSimpleName() + "[", "]")
                 .add("ipamaxusernamelength=" + ipamaxusernamelength)
                 .add("ipauserobjectclasses=" + ipauserobjectclasses)
+                .add("ipamaxhostnamelength=" + ipamaxhostnamelength)
                 .toString();
     }
 }
