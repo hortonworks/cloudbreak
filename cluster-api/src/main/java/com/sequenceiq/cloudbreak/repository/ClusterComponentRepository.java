@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -30,5 +31,9 @@ public interface ClusterComponentRepository extends CrudRepository<ClusterCompon
 
     @Query("SELECT cv FROM ClusterComponent cv WHERE cv.cluster.id = :clusterId")
     Set<ClusterComponent> findComponentByClusterId(@Param("clusterId") Long clusterId);
+
+    @Modifying
+    @Query("DELETE FROM ClusterComponent cv WHERE cv.cluster.id = :clusterId AND cv.componentType = :componentType")
+    void deleteComponentByClusterIdAndComponentType(@Param("clusterId") Long clusterId, @Param("componentType") ComponentType componentType);
 
 }

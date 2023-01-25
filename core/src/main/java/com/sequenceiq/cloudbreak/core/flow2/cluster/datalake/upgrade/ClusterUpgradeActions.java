@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgrad
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeSuccess;
+import com.sequenceiq.cloudbreak.service.ClusterComponentUpdateService;
 import com.sequenceiq.cloudbreak.service.image.ClusterUpgradeTargetImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
@@ -54,6 +56,9 @@ public class ClusterUpgradeActions {
 
     @Inject
     private ImageComponentUpdaterService imageComponentUpdaterService;
+
+    @Inject
+    private ClusterComponentUpdateService clusterComponentUpdateService;
 
     @Bean(name = "CLUSTER_UPGRADE_INIT_STATE")
     public Action<?, ?> initClusterUpgrade() {
@@ -177,6 +182,8 @@ public class ClusterUpgradeActions {
                 StatedImage targetImage = getTargetImage(variables);
                 clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), currentImage, targetImage);
                 stackImageService.removeImageByComponentName(context.getStackId(), TARGET_IMAGE);
+                clusterComponentUpdateService.deleteClusterComponentByComponentTypeAndStackId(context.getStackId(),
+                        ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES);
                 sendEvent(context);
             }
 

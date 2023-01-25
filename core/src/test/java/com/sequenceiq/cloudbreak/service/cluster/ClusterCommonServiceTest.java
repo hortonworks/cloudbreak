@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -32,8 +34,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -54,6 +58,10 @@ public class ClusterCommonServiceTest {
 
     private static final String ACCOUNT_ID = "accountId";
 
+    private static final String COMPONENT_NAME = "COMPONENT_NAME";
+
+    private static final Json ATTRIBUTE_JSON = new Json(Map.of("preparedImages", List.of("image-id")));
+
     private static final long STACK_ID = 1L;
 
     @InjectMocks
@@ -70,6 +78,12 @@ public class ClusterCommonServiceTest {
 
     @Mock
     private ClusterOperationService clusterOperationService;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
+    private ClusterService clusterService;
 
     @BeforeEach
     public void setUp() {

@@ -110,6 +110,12 @@ class ClusterComponentConfigProviderTest {
         }
     }
 
+    @Test
+    void testDeleteComponentByClusterIdAndComponentType() {
+        underTest.deleteClusterComponentByClusterIdAndComponentType(CLUSTER_ID, ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES);
+        verify(componentRepository).deleteComponentByClusterIdAndComponentType(CLUSTER_ID, ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES);
+    }
+
     private ClusterComponent createClusterComponent(Long id) {
         ClusterComponent cc = new ClusterComponent();
         cc.setId(id);

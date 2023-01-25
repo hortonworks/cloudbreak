@@ -56,7 +56,8 @@ public class ClusterUpgradeParcelSettingsPreparationHandler extends ExceptionCat
             Set<ClouderaManagerProduct> clouderaManagerProducts = getRequiredProductsFromImage(stackDto, request.getImageChangeDto());
             LOGGER.debug("The following parcels will be prepared for upgrade: {}", clouderaManagerProducts);
             clusterApiConnectors.getConnector(stackDto).updateParcelSettings(clouderaManagerProducts);
-            return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_PARCEL_DOWNLOAD_EVENT.name(), stackId, clouderaManagerProducts);
+            return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_PARCEL_DOWNLOAD_EVENT.name(), stackId, clouderaManagerProducts,
+                    request.getImageChangeDto().getImageId());
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade parcel settings preparation failed.", e);
             return new ClusterUpgradePreparationFailureEvent(request.getResourceId(), e);

@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,10 +9,12 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
@@ -20,13 +23,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.Upg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.component.PreparedImages;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -75,6 +83,12 @@ public class StackUpgradeOperations {
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private ClusterService clusterService;
 
     public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, String accountId, boolean keepVariant) {
         LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
@@ -130,6 +144,12 @@ public class StackUpgradeOperations {
         boolean getAllImages = request.getImageId() != null;
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
                 request.getInternalUpgradeSettings(), getAllImages);
+        List<String> preparedImages = getPreparedImagesList(stack.getId());
+        upgradeResponse.getUpgradeCandidates().forEach(imageInfoV4Response -> {
+            if (!ObjectUtils.isEmpty(preparedImages) && preparedImages.contains(imageInfoV4Response.getImageId())) {
+                imageInfoV4Response.setPrepared(true);
+            }
+        });
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
         }
@@ -161,5 +181,22 @@ public class StackUpgradeOperations {
         } else {
             return upgradePreconditionService.notUsingEphemeralVolume(stack) && clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster());
         }
+    }
+
+    private List<String> getPreparedImagesList(long stackId) {
+        List<String> preparedImages = Lists.newArrayList();
+        Optional<Long> clusterId = clusterService.findClusterIdByStackId(stackId);
+        if (clusterId.isPresent()) {
+            ClusterComponent clusterComponent = clusterComponentConfigProvider.getComponent(clusterId.get(), ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES,
+                    ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES.name());
+            try {
+                if (!ObjectUtils.isEmpty(clusterComponent)) {
+                    preparedImages = clusterComponent.getAttributes().get(PreparedImages.class).getPreparedImages();
+                }
+            } catch (IOException ex) {
+                LOGGER.error("Unable to read prepared list of images from Cluster Component for stack - {}", stackId);
+            }
+        }
+        return preparedImages;
     }
 }
