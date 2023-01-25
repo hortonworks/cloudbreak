@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 
 @Service
 public class AwsLoadBalancerLaunchService {
@@ -217,7 +218,8 @@ public class AwsLoadBalancerLaunchService {
             LOGGER.debug(String.format("Checking final status of AWS target group %s", listener.getTargetGroup().getName()));
             createSuccess = createSuccess && isResourceStatusGood(summaries, listener.getTargetGroup().getName());
         }
-        Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES, loadBalancer.getScheme().getLoadBalancerType());
+        Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES,
+                Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getScheme().getLoadBalancerType().name()));
         CloudResource.Builder cloudResource = new CloudResource.Builder()
             .withStatus(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
             .withType(ELASTIC_LOAD_BALANCER)

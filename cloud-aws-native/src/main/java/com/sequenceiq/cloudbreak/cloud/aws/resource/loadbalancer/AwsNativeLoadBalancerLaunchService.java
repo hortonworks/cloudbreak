@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -168,7 +169,8 @@ public class AwsNativeLoadBalancerLaunchService {
                     .orElseThrow()
                     .getLoadBalancerArn();
             context.setLoadBalancerArn(loadBalancerArn);
-            Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES, awsLoadBalancer.getScheme().getLoadBalancerType());
+            Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES,
+                    Enum.valueOf(LoadBalancerTypeAttribute.class, awsLoadBalancer.getScheme().getLoadBalancerType().name()));
             loadBalancerResource = new CloudResource.Builder()
                     .withName(loadBalancerName)
                     .withType(ResourceType.ELASTIC_LOAD_BALANCER)

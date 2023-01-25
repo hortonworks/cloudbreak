@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -390,9 +391,9 @@ class AwsNativeMetadataCollectorTest {
     void collectLoadBalancerMetadataWhenTheSpecifiedArnsExists() {
         List<LoadBalancerType> loadBalancerTypes = List.of();
         CloudResource cloudResource = getCloudResource("aCrn", "lbname", null, ELASTIC_LOAD_BALANCER);
-        cloudResource.putParameter(CloudResource.ATTRIBUTES, LoadBalancerType.PRIVATE);
+        cloudResource.putParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.PRIVATE);
         CloudResource secondCloudResource = getCloudResource("secondCrn", "lbnamesecond", null, ELASTIC_LOAD_BALANCER);
-        secondCloudResource.putParameter(CloudResource.ATTRIBUTES, LoadBalancerType.GATEWAY_PRIVATE);
+        secondCloudResource.putParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.GATEWAY_PRIVATE);
         List<CloudResource> cloudResources = List.of(cloudResource, secondCloudResource);
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
         LoadBalancer loadBalancer = new LoadBalancer();
