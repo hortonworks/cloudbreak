@@ -16,3 +16,4 @@ freeipa:
     gcp_service_account:
     http_proxy:
     aws_region:
+    aws_endpoint:

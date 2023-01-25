@@ -34,6 +34,7 @@ config=( # set default values in config array
     [backup_path]="/var/lib/ipa/backup"
     [http_proxy]=""
     [aws_region]=""
+    [aws_endpoint]=""
 )
 
 function get_hostname_from_url()
@@ -220,7 +221,13 @@ if [[ "${config[backup_platform]}" = "AWS" ]]; then
 
     REGION_OPTION=""
     if [[ -n "${config[aws_region]}" ]]; then
-      REGION_OPTION="--region ${config[aws_region]}"
+      if [[ -n "${config[aws_endpoint]}" ]]; then
+        doLog "INFO Using --endpoint-url for upload to S3"
+        REGION_OPTION="--endpoint-url ${config[aws_endpoint]} --region ${config[aws_region]}"
+      else
+        doLog "INFO Using only --region for upload to S3"
+        REGION_OPTION="--region ${config[aws_region]}"
+      fi
     fi
     upload_aws_backup
     remove_local_backups

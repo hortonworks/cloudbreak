@@ -31,6 +31,8 @@ public class FreeIpaBackupConfigView {
 
     private final String awsRegion;
 
+    private final String awsEndpoint;
+
     private String gcpServiceAccount;
 
     @SuppressWarnings("ExecutableStatementCount")
@@ -44,6 +46,7 @@ public class FreeIpaBackupConfigView {
         azureInstanceMsi = builder.azureInstanceMsi;
         proxyUrl = builder.proxyUrl;
         awsRegion = builder.awsRegion;
+        awsEndpoint = builder.awsEndpoint;
         gcpServiceAccount = builder.gcpServiceAccount;
     }
 
@@ -83,6 +86,10 @@ public class FreeIpaBackupConfigView {
         return awsRegion;
     }
 
+    public String getAwsEndpoint() {
+        return awsEndpoint;
+    }
+
     public String getGcpServiceAccount() {
         return gcpServiceAccount;
     }
@@ -104,6 +111,7 @@ public class FreeIpaBackupConfigView {
         map.put("gcp_service_account", ObjectUtils.defaultIfNull(gcpServiceAccount, EMPTY_CONFIG_DEFAULT));
         map.put("http_proxy", ObjectUtils.defaultIfNull(proxyUrl, EMPTY_CONFIG_DEFAULT));
         map.put("aws_region", ObjectUtils.defaultIfNull(awsRegion, EMPTY_CONFIG_DEFAULT));
+        map.put("aws_endpoint", ObjectUtils.defaultIfNull(awsEndpoint, EMPTY_CONFIG_DEFAULT));
         return map;
     }
 
@@ -128,6 +136,8 @@ public class FreeIpaBackupConfigView {
         private String proxyUrl;
 
         private String awsRegion;
+
+        private String awsEndpoint;
 
         public FreeIpaBackupConfigView build() {
             return new FreeIpaBackupConfigView(this);
@@ -175,6 +185,11 @@ public class FreeIpaBackupConfigView {
 
         public Builder withAwsRegion(String awsRegion) {
             this.awsRegion = awsRegion;
+            return this;
+        }
+
+        public Builder withAwsEndpoint(String awsEndpoint) {
+            this.awsEndpoint = awsEndpoint;
             return this;
         }
 

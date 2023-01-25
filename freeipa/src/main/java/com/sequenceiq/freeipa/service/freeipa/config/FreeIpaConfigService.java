@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -10,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
@@ -51,6 +55,9 @@ public class FreeIpaConfigService {
 
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
+
+    @Inject
+    private AwsEndpointProvider awsEndpointProvider;
 
     public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts) {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
@@ -101,6 +108,8 @@ public class FreeIpaConfigService {
             if (backup.getS3() != null) {
                 builder.withPlatform(CloudPlatform.AWS.name());
                 builder.withAwsRegion(stack.getRegion());
+                boolean govCloud = AWS_NATIVE_GOV_VARIANT.variant().getValue().equals(stack.getPlatformvariant());
+                builder.withAwsEndpoint(awsEndpointProvider.getEndpointString(AmazonS3.ENDPOINT_PREFIX, stack.getRegion(), govCloud));
                 LOGGER.debug("Backups will be configured to use S3 storage in {} region.", stack.getRegion());
             } else if (backup.getAdlsGen2() != null) {
                 builder.withPlatform(CloudPlatform.AZURE.name())

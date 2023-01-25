@@ -32,11 +32,16 @@ public class AwsEndpointProvider {
         }
     }
 
-    AwsClientBuilder.EndpointConfiguration endpointConfiguration(String service, String region, boolean govCloud) {
+    public String getEndpointString(String service, String region, boolean govCloud) {
         String servicePart = awsServiceEndpointProvider.service(service, govCloud);
         String regionPart = awsRegionEndpointProvider.region(service, region, govCloud);
-        String endpoint = String.format("https://%s.%s.amazonaws.com", servicePart, regionPart);
+        return String.format("https://%s.%s.amazonaws.com", servicePart, regionPart);
+    }
+
+    AwsClientBuilder.EndpointConfiguration endpointConfiguration(String service, String region, boolean govCloud) {
+        String endpoint = getEndpointString(service, region, govCloud);
         LOGGER.debug("The aws endpoint for the {} service: {}", service, endpoint);
         return new AwsClientBuilder.EndpointConfiguration(endpoint, region);
     }
+
 }
