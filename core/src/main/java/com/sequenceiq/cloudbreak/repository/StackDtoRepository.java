@@ -56,6 +56,7 @@ public interface StackDtoRepository extends Repository<Stack, Long> {
             + "fp as failurePolicy, "
             + "s.onFailureActionAction as onFailureActionAction, "
             + "s.originalName as originalName, "
+            + "s.javaVersion as javaVersion, "
             + "a as stackAuthentication, "
             + "w.id as workspaceId, "
             + "w.name as workspaceName, "
