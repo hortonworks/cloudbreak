@@ -51,7 +51,7 @@ ext {
   accessorSmartVersion = '2.4.7'
   gsonVersion = '2.8.9'
   jacksonVersion = '2.13.4'
-  jacksonDatabindVersion = '2.13.4.2'
+  jacksonDatabindVersion = '2.13.5'
   jsonSmartVersion = '2.4.5'
   snakeYamlVersion = '1.33'
   xerces = '2.12.0'
