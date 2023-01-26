@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -47,9 +46,8 @@ public class EnvironmentInternalV1Controller extends NotificationController impl
     }
 
     @Override
-    @AccountIdNotNeeded
     @InternalOnly
-    public SimpleEnvironmentResponse internalGetByCrn(String crn, boolean withNetwork) {
+    public SimpleEnvironmentResponse internalGetByCrn(@TenantAwareParam String crn, boolean withNetwork) {
         EnvironmentDto environmentDto = environmentService.internalGetByCrn(crn);
         return environmentResponseConverter.dtoToSimpleResponse(environmentDto, withNetwork, false);
     }
