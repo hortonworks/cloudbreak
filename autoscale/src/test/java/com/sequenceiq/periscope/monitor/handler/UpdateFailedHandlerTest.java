@@ -15,8 +15,8 @@ import java.util.stream.IntStream;
 
 import javax.ws.rs.ForbiddenException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -60,7 +60,7 @@ public class UpdateFailedHandlerTest {
     @InjectMocks
     private UpdateFailedHandler underTest;
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
     }

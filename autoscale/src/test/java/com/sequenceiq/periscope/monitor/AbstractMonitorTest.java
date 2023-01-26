@@ -10,8 +10,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.quartz.JobDataMap;
@@ -56,7 +56,7 @@ public class AbstractMonitorTest {
 
     private AbstractMonitor underTest = getMonitor();
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
     }

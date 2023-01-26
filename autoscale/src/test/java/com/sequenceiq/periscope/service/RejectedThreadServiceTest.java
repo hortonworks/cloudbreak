@@ -7,17 +7,17 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RejectedThreadServiceTest {
 
     private final RejectedThreadService underTest = new RejectedThreadService();
@@ -31,8 +31,8 @@ public class RejectedThreadServiceTest {
         underTest.create(task);
 
         List<RejectedThread> allRejectedCluster = underTest.getAllRejectedCluster();
-        Assert.assertFalse(allRejectedCluster.isEmpty());
-        Assert.assertEquals(1L, allRejectedCluster.get(0).getId());
+        Assertions.assertFalse(allRejectedCluster.isEmpty());
+        Assertions.assertEquals(1L, allRejectedCluster.get(0).getId());
     }
 
     @Test
@@ -45,9 +45,9 @@ public class RejectedThreadServiceTest {
         underTest.create(task);
 
         List<RejectedThread> allRejectedCluster = underTest.getAllRejectedCluster();
-        Assert.assertFalse(allRejectedCluster.isEmpty());
-        Assert.assertEquals(1L, allRejectedCluster.get(0).getId());
-        Assert.assertEquals(2L, allRejectedCluster.get(0).getRejectedCount());
+        Assertions.assertFalse(allRejectedCluster.isEmpty());
+        Assertions.assertEquals(1L, allRejectedCluster.get(0).getId());
+        Assertions.assertEquals(2L, allRejectedCluster.get(0).getRejectedCount());
     }
 
     @Test
@@ -59,13 +59,13 @@ public class RejectedThreadServiceTest {
         underTest.create(task);
 
         List<RejectedThread> allRejectedCluster = underTest.getAllRejectedCluster();
-        Assert.assertFalse(allRejectedCluster.isEmpty());
-        Assert.assertEquals(1L, allRejectedCluster.get(0).getId());
+        Assertions.assertFalse(allRejectedCluster.isEmpty());
+        Assertions.assertEquals(1L, allRejectedCluster.get(0).getId());
 
         underTest.remove(response);
 
         allRejectedCluster = underTest.getAllRejectedCluster();
-        Assert.assertTrue(allRejectedCluster.isEmpty());
+        Assertions.assertTrue(allRejectedCluster.isEmpty());
     }
 
     @Test
@@ -76,8 +76,8 @@ public class RejectedThreadServiceTest {
         underTest.create(task);
 
         List<RejectedThread> allRejectedCluster = underTest.getAllRejectedCluster();
-        Assert.assertFalse(allRejectedCluster.isEmpty());
-        Assert.assertEquals(1L, allRejectedCluster.get(0).getId());
+        Assertions.assertFalse(allRejectedCluster.isEmpty());
+        Assertions.assertEquals(1L, allRejectedCluster.get(0).getId());
     }
 
     @Test
@@ -89,9 +89,9 @@ public class RejectedThreadServiceTest {
         underTest.create(task);
 
         List<RejectedThread> allRejectedCluster = underTest.getAllRejectedCluster();
-        Assert.assertFalse(allRejectedCluster.isEmpty());
-        Assert.assertEquals(1L, allRejectedCluster.get(0).getId());
-        Assert.assertEquals(2L, allRejectedCluster.get(0).getRejectedCount());
+        Assertions.assertFalse(allRejectedCluster.isEmpty());
+        Assertions.assertEquals(1L, allRejectedCluster.get(0).getId());
+        Assertions.assertEquals(2L, allRejectedCluster.get(0).getRejectedCount());
     }
 
     @Test
@@ -102,13 +102,13 @@ public class RejectedThreadServiceTest {
         underTest.create(task);
 
         List<RejectedThread> allRejectedCluster = underTest.getAllRejectedCluster();
-        Assert.assertFalse(allRejectedCluster.isEmpty());
-        Assert.assertEquals(1L, allRejectedCluster.get(0).getId());
+        Assertions.assertFalse(allRejectedCluster.isEmpty());
+        Assertions.assertEquals(1L, allRejectedCluster.get(0).getId());
 
         underTest.remove(data);
 
         allRejectedCluster = underTest.getAllRejectedCluster();
-        Assert.assertTrue(allRejectedCluster.isEmpty());
+        Assertions.assertTrue(allRejectedCluster.isEmpty());
     }
 
     private EvaluatorContext getContext(Object data) {

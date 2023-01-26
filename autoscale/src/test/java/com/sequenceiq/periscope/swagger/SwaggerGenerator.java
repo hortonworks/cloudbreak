@@ -6,12 +6,12 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.config.EndpointConfig;
@@ -22,7 +22,7 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 import io.swagger.models.Swagger;
 import io.swagger.util.Json;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = EndpointConfig.class)
 @TestPropertySource(locations = "file:./build/resources/main/application.properties")
 public class SwaggerGenerator {

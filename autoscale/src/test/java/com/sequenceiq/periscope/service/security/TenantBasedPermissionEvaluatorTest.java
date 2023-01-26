@@ -1,17 +1,18 @@
 package com.sequenceiq.periscope.service.security;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
@@ -21,7 +22,7 @@ import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.Clustered;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TenantBasedPermissionEvaluatorTest {
 
     @InjectMocks
@@ -51,14 +52,14 @@ public class TenantBasedPermissionEvaluatorTest {
     @Mock
     private ClusterPertain clusterPertain;
 
-    @Before
+    @BeforeEach
     public void init() {
         when(authentication.isAuthenticated()).thenReturn(true);
-        when(cloudbreakUser.getTenant()).thenReturn("tenant");
-        when(clusterPertain.getTenant()).thenReturn("tenant");
-        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(cluster.getClusterPertain()).thenReturn(clusterPertain);
-        when(clusteredTarget.getCluster()).thenReturn(cluster);
+        lenient().when(cloudbreakUser.getTenant()).thenReturn("tenant");
+        lenient().when(clusterPertain.getTenant()).thenReturn("tenant");
+        lenient().when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        lenient().when(cluster.getClusterPertain()).thenReturn(clusterPertain);
+        lenient().when(clusteredTarget.getCluster()).thenReturn(cluster);
     }
 
     @Test
@@ -67,21 +68,21 @@ public class TenantBasedPermissionEvaluatorTest {
 
         boolean result = underTest.hasPermission(authentication, null, "");
 
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
     }
 
     @Test
     public void testTargetIsNull() {
         boolean result = underTest.hasPermission(authentication, null, "");
 
-        Assert.assertFalse(result);
+        Assertions.assertFalse(result);
     }
 
     @Test
     public void testTargetNotInstanceOfClustered() {
         boolean result = underTest.hasPermission(authentication, new Object(), "");
 
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
     }
 
     @Test
@@ -90,7 +91,7 @@ public class TenantBasedPermissionEvaluatorTest {
 
         boolean result = underTest.hasPermission(authentication, clusteredTarget, "");
 
-        Assert.assertFalse(result);
+        Assertions.assertFalse(result);
     }
 
     @Test
@@ -99,27 +100,27 @@ public class TenantBasedPermissionEvaluatorTest {
 
         boolean result = underTest.hasPermission(authentication, clusteredTarget, "");
 
-        Assert.assertFalse(result);
+        Assertions.assertFalse(result);
     }
 
     @Test
     public void testHasAccess() {
         boolean result = underTest.hasPermission(authentication, clusteredTarget, "");
 
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
     }
 
     @Test
     public void testIsOptional() {
         boolean result = underTest.hasPermission(authentication, Optional.of(clusteredTarget), "");
 
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
     }
 
     @Test
     public void testIsCollection() {
         boolean result = underTest.hasPermission(authentication, Collections.singleton(clusteredTarget), "");
 
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
     }
 }

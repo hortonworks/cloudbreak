@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.controller;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -9,12 +9,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
@@ -26,7 +27,7 @@ import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.NotFoundException;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AutoscaleClusterCommonServiceTest {
 
     private static final String TEST_CLUSTER_NAME = "testcluster";
@@ -47,7 +48,7 @@ public class AutoscaleClusterCommonServiceTest {
 
     private String tenant = "testTenant";
 
-    @Before
+    @BeforeEach
     public void setup() {
         when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
     }
@@ -79,8 +80,8 @@ public class AutoscaleClusterCommonServiceTest {
         when(clusterService.create(autoscaleStackV4Response)).thenReturn(getACluster().get());
 
         Cluster cluster = underTest.getClusterByCrnOrName(NameOrCrn.ofCrn(TEST_CLUSTER_CRN));
-        assertEquals("Cluster Name should match", TEST_CLUSTER_NAME, cluster.getStackName());
-        assertEquals("Cluster CRN should match", TEST_CLUSTER_CRN, cluster.getStackCrn());
+        assertEquals(TEST_CLUSTER_NAME, cluster.getStackName(), "Cluster Name should match");
+        assertEquals(TEST_CLUSTER_CRN, cluster.getStackCrn(), "Cluster CRN should match");
     }
 
     @Test
@@ -92,24 +93,26 @@ public class AutoscaleClusterCommonServiceTest {
         when(clusterService.create(autoscaleStackV4Response)).thenReturn(getACluster().get());
 
         Cluster cluster = underTest.getClusterByCrnOrName(NameOrCrn.ofName(TEST_CLUSTER_NAME));
-        assertEquals("Cluster Name should match", TEST_CLUSTER_NAME, cluster.getStackName());
-        assertEquals("Cluster CRN should match", TEST_CLUSTER_CRN, cluster.getStackCrn());
+        assertEquals(TEST_CLUSTER_NAME, cluster.getStackName(), "Cluster Name should match");
+        assertEquals(TEST_CLUSTER_CRN, cluster.getStackCrn(), "Cluster CRN should match");
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void testGetClusterByNameWhenNotFound() {
         when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.empty());
         when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME, tenant)).thenThrow(NotFoundException.class);
 
-        underTest.getClusterByCrnOrName(NameOrCrn.ofName(TEST_CLUSTER_NAME));
+        Assertions.assertThrows(NotFoundException.class,
+                () -> underTest.getClusterByCrnOrName(NameOrCrn.ofName(TEST_CLUSTER_NAME)));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void testGetClusterByCrnWhenNotFound() {
         when(clusterService.findOneByStackCrnAndTenant(TEST_CLUSTER_CRN, tenant)).thenReturn(Optional.empty());
         when(cloudbreakCommunicator.getAutoscaleClusterByCrn(TEST_CLUSTER_CRN)).thenThrow(NotFoundException.class);
 
-        underTest.getClusterByCrnOrName(NameOrCrn.ofCrn(TEST_CLUSTER_CRN));
+        Assertions.assertThrows(NotFoundException.class,
+                () -> underTest.getClusterByCrnOrName(NameOrCrn.ofCrn(TEST_CLUSTER_CRN)));
     }
 
     private Optional<Cluster> getACluster() {
