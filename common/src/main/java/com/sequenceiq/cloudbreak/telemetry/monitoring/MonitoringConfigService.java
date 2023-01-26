@@ -15,7 +15,7 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MonitoringConfigService.class);
 
-    private static final String ED25519 = "Ed25519";
+    private static final String DEFAULT_ACCESS_KEY_TYPE = "Ed25519";
 
     private static final String SALT_STATE = "monitoring";
 
@@ -49,7 +49,7 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         builder.withMinBackoff(monitoringConfiguration.getAgent().getMinBackoff());
         builder.withMaxBackoff(monitoringConfiguration.getAgent().getMaxBackoff());
         if (monitoringContext.getCredential() != null) {
-            String accessKeyType = StringUtils.defaultIfBlank(monitoringContext.getCredential().getAccessKeyType(), ED25519);
+            String accessKeyType = StringUtils.defaultIfBlank(monitoringContext.getCredential().getAccessKeyType(), DEFAULT_ACCESS_KEY_TYPE);
             builder.withAccessKeyId(monitoringContext.getCredential().getAccessKey())
                     .withPrivateKey(UMSSecretKeyFormatter.formatSecretKey(accessKeyType, monitoringContext.getCredential().getPrivateKey()).toCharArray())
                     .withAccessKeyType(accessKeyType);

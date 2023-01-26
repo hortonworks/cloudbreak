@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.altus;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,10 +11,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -22,8 +25,10 @@ import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -32,6 +37,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
+@ExtendWith(MockitoExtension.class)
 public class AltusMachineUserServiceTest {
 
     private static final String TEST_CRN = "crn:cdp:iam:us-west-1:accountId:user:name";
@@ -62,13 +68,19 @@ public class AltusMachineUserServiceTest {
     @Mock
     private TelemetryFeatureService telemetryFeatureService;
 
+    @Mock
+    private StackDto stackDto;
+
+    @Mock
+    private Image image;
+
     private Stack stack;
 
     private Cluster cluster;
 
     private Telemetry telemetry;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         stack = new Stack();
@@ -114,5 +126,41 @@ public class AltusMachineUserServiceTest {
 
         // THEN
         verify(altusIAMService, times(1)).clearMachineUser(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void testGetCdpAccessKeyTypeNoEntitlement() {
+        when(entitlementService.isECDSABasedAccessKeyEnabled(any())).thenReturn(false);
+        CdpAccessKeyType result = underTest.getCdpAccessKeyType(stackDto);
+        assertEquals(CdpAccessKeyType.ED25519, result);
+    }
+
+    @Test
+    public void testGetCdpAccessKeyTypeGoodPackageVersions() {
+        when(entitlementService.isECDSABasedAccessKeyEnabled(any())).thenReturn(true);
+        when(componentConfigProviderService.findImage(anyLong())).thenReturn(Optional.of(image));
+        when(telemetryFeatureService.isECDSAAccessKeyTypeSupported(any())).thenReturn(true);
+
+        CdpAccessKeyType result = underTest.getCdpAccessKeyType(stackDto);
+        assertEquals(CdpAccessKeyType.ECDSA, result);
+    }
+
+    @Test
+    public void testGetCdpAccessKeyTypeBadPackageVersions() {
+        when(entitlementService.isECDSABasedAccessKeyEnabled(any())).thenReturn(true);
+        when(componentConfigProviderService.findImage(anyLong())).thenReturn(Optional.of(image));
+        when(telemetryFeatureService.isECDSAAccessKeyTypeSupported(any())).thenReturn(false);
+
+        CdpAccessKeyType result = underTest.getCdpAccessKeyType(stackDto);
+        assertEquals(CdpAccessKeyType.ED25519, result);
+    }
+
+    @Test
+    public void testGetCdpAccessKeyTypeNoImage() {
+        when(entitlementService.isECDSABasedAccessKeyEnabled(any())).thenReturn(true);
+        when(componentConfigProviderService.findImage(anyLong())).thenReturn(Optional.empty());
+
+        CdpAccessKeyType result = underTest.getCdpAccessKeyType(stackDto);
+        assertEquals(CdpAccessKeyType.ED25519, result);
     }
 }
