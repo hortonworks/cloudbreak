@@ -16,7 +16,7 @@ public class DatabusConfigService implements TelemetryPillarConfigGenerator<Data
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabusConfigService.class);
 
-    private static final String ED25519 = "Ed25519";
+    private static final String DEFAULT_ACCESS_KEY_TYPE = "Ed25519";
 
     private static final String SALT_STATE = "databus";
 
@@ -24,7 +24,7 @@ public class DatabusConfigService implements TelemetryPillarConfigGenerator<Data
     public DatabusConfigView createConfigs(TelemetryContext context) {
         final DatabusContext databusContext = context.getDatabusContext();
         final DataBusCredential dataBusCredential = databusContext.getCredential();
-        String accessKeySecretAlgorithm = StringUtils.defaultIfBlank(dataBusCredential.getAccessKeyType(), ED25519);
+        String accessKeySecretAlgorithm = StringUtils.defaultIfBlank(dataBusCredential.getAccessKeyType(), DEFAULT_ACCESS_KEY_TYPE);
         return new DatabusConfigView.Builder()
                 .withEnabled(databusContext.isEnabled())
                 .withEndpoint(databusContext.getEndpoint())
