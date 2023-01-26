@@ -2,17 +2,17 @@ package com.sequenceiq.periscope.service;
 
 import static com.sequenceiq.cloudbreak.audit.model.AuditEventName.AUTOSCALE_DATAHUB_CLUSTER;
 import static com.sequenceiq.cloudbreak.audit.model.AuditEventName.MANAGE_AUTOSCALE_DATAHUB_CLUSTER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -40,7 +40,7 @@ public class AuditServiceTest {
     @Mock
     CloudbreakUser cloudbreakUser;
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
     }
@@ -86,7 +86,7 @@ public class AuditServiceTest {
         assertEquals(Crn.Service.DATAHUB.getName(), ((ActorService) auditEvent.getActor()).getActorServiceName());
 
         ServiceEventData serviceEventData = (ServiceEventData) auditEvent.getEventData();
-        assertNotNull("Event Data should be intialized", serviceEventData.getEventDetails());
-        assertTrue("Time stamp should be intialized", serviceEventData.getEventDetails().contains("timestamp"));
+        assertNotNull(serviceEventData.getEventDetails(), "Event Data should be intialized");
+        assertTrue(serviceEventData.getEventDetails().contains("timestamp"), "Time stamp should be intialized");
     }
 }

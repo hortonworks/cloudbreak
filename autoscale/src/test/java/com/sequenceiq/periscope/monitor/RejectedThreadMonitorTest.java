@@ -6,17 +6,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RejectedThreadMonitorTest {
 
     @InjectMocks
@@ -37,7 +37,7 @@ public class RejectedThreadMonitorTest {
 
         Long[] collect = new Long[6];
         monitored.stream().map(RejectedThread::getRejectedCount).collect(Collectors.toList()).toArray(collect);
-        Assert.assertArrayEquals(collect, new Long[]{10L, 6L, 6L, 4L, 3L, 2L});
+        Assertions.assertArrayEquals(collect, new Long[]{10L, 6L, 6L, 4L, 3L, 2L});
     }
 
     private RejectedThread rejectedThread(long count) {

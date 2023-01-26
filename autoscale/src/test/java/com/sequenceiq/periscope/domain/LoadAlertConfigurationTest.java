@@ -1,7 +1,7 @@
 package com.sequenceiq.periscope.domain;
 
 import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAULT_LOAD_BASED_AUTOSCALING_COOLDOWN_MINS;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -43,8 +43,8 @@ public class LoadAlertConfigurationTest {
         if (scaleDownCoolDownMins != -1) {
             underTest.setScaleDownCoolDownMinutes(scaleDownCoolDownMins);
         }
-        assertEquals("Polling CoolDown Mins should match : " + testType, expectedPollingCoolDownMins,
-                TimeUnit.MINUTES.convert(underTest.getPollingCoolDownMillis(), TimeUnit.MILLISECONDS));
+        assertEquals(expectedPollingCoolDownMins, TimeUnit.MINUTES.convert(underTest.getPollingCoolDownMillis(), TimeUnit.MILLISECONDS),
+                "Polling CoolDown Mins should match : " + testType);
     }
 
     public static Stream<Arguments> scaleUpCoolDownMins() {
@@ -67,8 +67,9 @@ public class LoadAlertConfigurationTest {
         if (scaleUpCoolDownMins != -1) {
             underTest.setScaleUpCoolDownMinutes(scaleUpCoolDownMins);
         }
-        assertEquals("Scaleup CoolDown Mins should match : " + testType, expectedScaleUpCoolDownMins,
-                TimeUnit.MINUTES.convert(underTest.getScaleUpCoolDownMillis(), TimeUnit.MILLISECONDS));
+        assertEquals(expectedScaleUpCoolDownMins,
+                TimeUnit.MINUTES.convert(underTest.getScaleUpCoolDownMillis(), TimeUnit.MILLISECONDS),
+                "Scaleup CoolDown Mins should match : " + testType);
     }
 
     public static Stream<Arguments> scaleDownCoolDownMins() {
@@ -91,7 +92,8 @@ public class LoadAlertConfigurationTest {
         if (scaleDownCoolDownMins != -1) {
             underTest.setScaleDownCoolDownMinutes(scaleDownCoolDownMins);
         }
-        assertEquals("ScaleDown CoolDown Mins should match : " + testType, expectedScaleDownCoolDownMins,
-                TimeUnit.MINUTES.convert(underTest.getScaleDownCoolDownMillis(), TimeUnit.MILLISECONDS));
+        assertEquals(expectedScaleDownCoolDownMins,
+                TimeUnit.MINUTES.convert(underTest.getScaleDownCoolDownMillis(), TimeUnit.MILLISECONDS),
+                "ScaleDown CoolDown Mins should match : " + testType);
     }
 }

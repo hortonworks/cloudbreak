@@ -1,8 +1,8 @@
 package com.sequenceiq.periscope.utils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -25,36 +25,36 @@ public class LoggingUtilsTest {
 
         LoggingUtils.buildMdcContext(cluster);
 
-        assertEquals("ResourceCrn should match", AUTOSCALE_RESOURCE_CRN,
-                MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_CRN.toString()));
-        assertEquals("ResourceName should match", AUTOSCALE_RESOURCE_NAME,
-                MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_NAME.toString()));
-        assertEquals("Tenant should match", AUTOSCALE_CLUSTER_TENANT,
-                MDCBuilder.getMdcContextMap().get(LoggerContextKey.TENANT.toString()));
-        assertEquals("UserCrn should match", AUTOSCALE_USER_CRN,
-                MDCBuilder.getMdcContextMap().get(LoggerContextKey.USER_CRN.toString()));
-        assertEquals("Resource Type should match", "AutoscaleCluster",
-                MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_TYPE.toString()));
+        assertEquals(AUTOSCALE_RESOURCE_CRN, MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_CRN.toString()),
+                "ResourceCrn should match");
+        assertEquals(AUTOSCALE_RESOURCE_NAME, MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_NAME.toString()),
+                "ResourceName should match");
+        assertEquals(AUTOSCALE_CLUSTER_TENANT, MDCBuilder.getMdcContextMap().get(LoggerContextKey.TENANT.toString()),
+                "Tenant should match");
+        assertEquals(AUTOSCALE_USER_CRN, MDCBuilder.getMdcContextMap().get(LoggerContextKey.USER_CRN.toString()),
+                "UserCrn should match");
+        assertEquals("AutoscaleCluster", MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_TYPE.toString()),
+                "Resource Type should match");
     }
 
     @Test
     public void testBuildMdcContextWithName() {
         LoggingUtils.buildMdcContextWithName(AUTOSCALE_RESOURCE_NAME);
 
-        assertEquals("ResourceName should match", AUTOSCALE_RESOURCE_NAME,
-                MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_NAME.toString()));
-        assertEquals("Resource Type should match", "AutoscaleCluster",
-                MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_TYPE.toString()));
+        assertEquals(AUTOSCALE_RESOURCE_NAME, MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_NAME.toString()),
+                "ResourceName should match");
+        assertEquals("AutoscaleCluster", MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_TYPE.toString()),
+                "Resource Type should match");
     }
 
     @Test
     public void testBuildMdcContextWithCrn() {
         LoggingUtils.buildMdcContextWithCrn(AUTOSCALE_RESOURCE_CRN);
 
-        assertEquals("ResourceCrn should match", AUTOSCALE_RESOURCE_CRN,
-                MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_CRN.toString()));
-        assertEquals("Resource Type should match", "AutoscaleCluster",
-                MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_TYPE.toString()));
+        assertEquals(AUTOSCALE_RESOURCE_CRN, MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_CRN.toString()),
+                "ResourceCrn should match");
+        assertEquals("AutoscaleCluster", MDCBuilder.getMdcContextMap().get(LoggerContextKey.RESOURCE_TYPE.toString()),
+                "Resource Type should match");
     }
 
     private Cluster getACluster() {

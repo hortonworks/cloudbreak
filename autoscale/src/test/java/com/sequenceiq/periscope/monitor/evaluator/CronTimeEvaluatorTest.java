@@ -1,8 +1,8 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -133,9 +133,8 @@ public class CronTimeEvaluatorTest {
 
         ScalingEvent scalingEvent = validateScheduleBasedScaling("SCALE_UP_MODE", currentHostGroupCount, desiredNodeCount, Optional.empty());
 
-        assertEquals("Scheduled-Based Autoscaling Expeced Node Count should match.",
-                expectedScalingCount.intValue(),
-                scalingEvent.getDesiredAbsoluteHostGroupNodeCount().intValue());
+        assertEquals(expectedScalingCount.intValue(),
+                scalingEvent.getDesiredAbsoluteHostGroupNodeCount().intValue(), "Scheduled-Based Autoscaling Expeced Node Count should match.");
     }
 
     public static Stream<Arguments> scheduleBasedDownScaling() {
@@ -158,12 +157,12 @@ public class CronTimeEvaluatorTest {
                 desiredNodeCount, Optional.of(yarnGivenDecommissionCount));
 
         int targetNodeCount = currentHostGroupCount - desiredNodeCount;
-        assertEquals("Scheduled-Based Autoscaling Expeced Node Count should match.", expectedScalingCount.intValue(),
-                scalingEvent.getDesiredAbsoluteHostGroupNodeCount().intValue());
-        assertEquals("Decommission Node Count Based on Yarn Response should match targetNodeCount.", targetNodeCount,
-                scalingEvent.getDecommissionNodeIds().size());
+        assertEquals(expectedScalingCount.intValue(),
+                scalingEvent.getDesiredAbsoluteHostGroupNodeCount().intValue(), "Scheduled-Based Autoscaling Expeced Node Count should match.");
+        assertEquals(targetNodeCount,
+                scalingEvent.getDecommissionNodeIds().size(), "Decommission Node Count Based on Yarn Response should match targetNodeCount.");
         scalingEvent.getDecommissionNodeIds().forEach(
-                nodeId -> assertTrue("Node Id hostGroup should match", nodeId.contains(testHostGroup))
+                nodeId -> assertTrue(nodeId.contains(testHostGroup), "Node Id hostGroup should match")
         );
     }
 

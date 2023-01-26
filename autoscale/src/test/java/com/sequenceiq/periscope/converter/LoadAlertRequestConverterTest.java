@@ -1,23 +1,23 @@
 package com.sequenceiq.periscope.converter;
 
 import static com.sequenceiq.periscope.api.model.AdjustmentType.LOAD_BASED;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
 import com.sequenceiq.periscope.api.model.ScalingPolicyRequest;
 import com.sequenceiq.periscope.domain.LoadAlert;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LoadAlertRequestConverterTest {
 
     @Mock
@@ -26,7 +26,7 @@ public class LoadAlertRequestConverterTest {
     @InjectMocks
     private LoadAlertRequestConverter underTest = new LoadAlertRequestConverter();
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
     }
@@ -43,14 +43,14 @@ public class LoadAlertRequestConverterTest {
         when(scalingPolicyRequestConverter.convert(any(ScalingPolicyRequest.class))).thenCallRealMethod();
 
         LoadAlert loadAlert = underTest.convert(req);
-        assertEquals("LoadAlert Name should match", loadAlert.getName(), "loadalert");
-        assertEquals("LoadAlert Desc should match", loadAlert.getDescription(), "loadalertdesc");
-        assertEquals("LoadAlert Hostgroup should match",
-                loadAlert.getScalingPolicy().getHostGroup(), "compute");
-        assertEquals("LoadAlert Adjustment Type should match",
-                loadAlert.getScalingPolicy().getAdjustmentType(), LOAD_BASED);
-        assertEquals("LoadAlert Adjustment should match",
-                loadAlert.getScalingPolicy().getScalingAdjustment(), 10);
+        assertEquals(loadAlert.getName(), "loadalert", "LoadAlert Name should match");
+        assertEquals(loadAlert.getDescription(), "loadalertdesc", "LoadAlert Desc should match");
+        assertEquals(loadAlert.getScalingPolicy().getHostGroup(),
+                "compute", "LoadAlert Hostgroup should match");
+        assertEquals(loadAlert.getScalingPolicy().getAdjustmentType(),
+                LOAD_BASED, "LoadAlert Adjustment Type should match");
+        assertEquals(loadAlert.getScalingPolicy().getScalingAdjustment(),
+                10, "LoadAlert Adjustment should match");
     }
 
     private ScalingPolicyRequest getScalingPolicyRequest() {

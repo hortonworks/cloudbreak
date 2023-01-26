@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -8,12 +8,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
@@ -26,7 +26,7 @@ import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UsageReportingServiceTest {
 
     @InjectMocks
@@ -65,18 +65,18 @@ public class UsageReportingServiceTest {
         verify(usageReporter, times(1)).cdpDatahubAutoscaleTriggered(captor.capture());
         UsageProto.CDPDatahubAutoscaleTriggered actual = captor.getValue();
 
-        assertEquals("Tenant should match", "testTenant", actual.getAutoscaleTriggerDetails().getAccountId());
-        assertEquals("Cluster crn should match", "testStackCrn", actual.getAutoscaleTriggerDetails().getClusterCrn());
-        assertEquals("Scaling Action should match", "Scaling was triggered", actual.getAutoscaleTriggerDetails().getAutoscalingAction());
-        assertEquals("Original Node Count should match", 20, actual.getAutoscaleTriggerDetails().getOriginalHostGroupNodeCount());
-        assertEquals("Desired Node Count should match", 30, actual.getAutoscaleTriggerDetails().getDesiredHostGroupNodeCount());
+        assertEquals("testTenant", actual.getAutoscaleTriggerDetails().getAccountId(), "Tenant should match");
+        assertEquals("testStackCrn", actual.getAutoscaleTriggerDetails().getClusterCrn(), "Cluster crn should match");
+        assertEquals("Scaling was triggered", actual.getAutoscaleTriggerDetails().getAutoscalingAction(), "Scaling Action should match");
+        assertEquals(20, actual.getAutoscaleTriggerDetails().getOriginalHostGroupNodeCount(), "Original Node Count should match");
+        assertEquals(30, actual.getAutoscaleTriggerDetails().getDesiredHostGroupNodeCount(), "Desired Node Count should match");
 
-        assertEquals("Alert Policy Type should match", "LOAD_BASED",
-                actual.getAutoscaleTriggerDetails().getAutoscalingPolicyDefinition().getAutoscalePolicyType().name());
-        assertEquals("Alert Policy Parameters should match",
-                "{parameters=LoadAlertConfiguration{minResourceValue=10, maxResourceValue=100, coolDownMinutes=5, scaleUpCoolDownMinutes=null," +
+        assertEquals("LOAD_BASED", actual.getAutoscaleTriggerDetails().getAutoscalingPolicyDefinition().getAutoscalePolicyType().name(),
+                "Alert Policy Type should match");
+        assertEquals("{parameters=LoadAlertConfiguration{minResourceValue=10, maxResourceValue=100, coolDownMinutes=5, scaleUpCoolDownMinutes=null," +
                         " scaleDownCoolDownMinutes=null, maxScaleDownStepSize=100, maxScaleUpStepSize=100}}",
-                actual.getAutoscaleTriggerDetails().getAutoscalingPolicyDefinition().getAutoscalePolicyParameters());
+                actual.getAutoscaleTriggerDetails().getAutoscalingPolicyDefinition().getAutoscalePolicyParameters(),
+                "Alert Policy Parameters should match");
     }
 
     @Test
@@ -107,17 +107,17 @@ public class UsageReportingServiceTest {
         verify(usageReporter, times(1)).cdpDatahubAutoscaleTriggered(captor.capture());
         UsageProto.CDPDatahubAutoscaleTriggered actual = captor.getValue();
 
-        assertEquals("Tenant should match", "testTenant", actual.getAutoscaleTriggerDetails().getAccountId());
-        assertEquals("Cluster crn should match", "testStackCrn", actual.getAutoscaleTriggerDetails().getClusterCrn());
-        assertEquals("Scaling Action should match", "Scaling was triggered", actual.getAutoscaleTriggerDetails().getAutoscalingAction());
-        assertEquals("Original Node Count should match", 20, actual.getAutoscaleTriggerDetails().getOriginalHostGroupNodeCount());
-        assertEquals("Desired Node Count should match", 30, actual.getAutoscaleTriggerDetails().getDesiredHostGroupNodeCount());
+        assertEquals("testTenant", actual.getAutoscaleTriggerDetails().getAccountId(), "Tenant should match");
+        assertEquals("testStackCrn", actual.getAutoscaleTriggerDetails().getClusterCrn(), "Cluster crn should match");
+        assertEquals("Scaling was triggered", actual.getAutoscaleTriggerDetails().getAutoscalingAction(), "Scaling Action should match");
+        assertEquals(20, actual.getAutoscaleTriggerDetails().getOriginalHostGroupNodeCount(), "Original Node Count should match");
+        assertEquals(30, actual.getAutoscaleTriggerDetails().getDesiredHostGroupNodeCount(), "Desired Node Count should match");
 
-        assertEquals("Alert Policy Type should match", "TIME_BASED",
-                actual.getAutoscaleTriggerDetails().getAutoscalingPolicyDefinition().getAutoscalePolicyType().name());
-        assertEquals("Alert Policy Parameters should match",
-                "{cron=0 1 0 1 0, scalingTarget=10, adjustmentType=NODE_COUNT, timeZone=GMT}",
-                actual.getAutoscaleTriggerDetails().getAutoscalingPolicyDefinition().getAutoscalePolicyParameters());
+        assertEquals("TIME_BASED", actual.getAutoscaleTriggerDetails().getAutoscalingPolicyDefinition().getAutoscalePolicyType().name(),
+                "Alert Policy Type should match");
+        assertEquals("{cron=0 1 0 1 0, scalingTarget=10, adjustmentType=NODE_COUNT, timeZone=GMT}",
+                actual.getAutoscaleTriggerDetails().getAutoscalingPolicyDefinition().getAutoscalePolicyParameters(),
+                "Alert Policy Parameters should match");
     }
 
     @Test
@@ -154,12 +154,12 @@ public class UsageReportingServiceTest {
         verify(usageReporter, times(1)).cdpDatahubAutoscaleConfigChanged(captor.capture());
         UsageProto.CDPDatahubAutoscaleConfigChanged actual = captor.getValue();
 
-        assertEquals("UserCrn should match", "testUserCrn", actual.getUserCrn());
-        assertEquals("CluterName should match", "testCluster", actual.getClusterName());
-        assertEquals("CluterCrn should match", "testStackCrn", actual.getClusterCrn());
-        assertEquals("AccountId should match", "testAccount", actual.getAccountId());
-        assertEquals("Policy Count should match", 2, actual.getAutoscalingPolicyDefinitionCount());
-        assertEquals("Autoscaling enabled should match", Boolean.TRUE, actual.getAutoscalingEnabled());
-        assertEquals("Stopstart scaling enabled should match", Boolean.TRUE, actual.getStopStartScalingEnabled());
+        assertEquals("testUserCrn", actual.getUserCrn(), "UserCrn should match");
+        assertEquals("testCluster", actual.getClusterName(), "CluterName should match");
+        assertEquals("testStackCrn", actual.getClusterCrn(), "CluterCrn should match");
+        assertEquals("testAccount", actual.getAccountId(), "AccountId should match");
+        assertEquals(2, actual.getAutoscalingPolicyDefinitionCount(), "Policy Count should match");
+        assertEquals(Boolean.TRUE, actual.getAutoscalingEnabled(), "Autoscaling enabled should match");
+        assertEquals(Boolean.TRUE, actual.getStopStartScalingEnabled(), "Stopstart scaling enabled should match");
     }
 }

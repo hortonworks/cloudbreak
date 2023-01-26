@@ -3,13 +3,13 @@ package com.sequenceiq.periscope.monitor.evaluator;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.EXACT;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.NODE_COUNT;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.PERCENTAGE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -58,7 +58,7 @@ public class ScalingPolicyTargetCalculatorTest {
         );
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
     }
@@ -84,6 +84,6 @@ public class ScalingPolicyTargetCalculatorTest {
         when(scalingPolicyMock.getScalingAdjustment()).thenReturn(scalingAdjument);
 
         int desiredNodeCount = underTest.getDesiredAbsoluteNodeCount(scalingEventMock, currentHostGroupCount);
-        assertEquals("Desired NodeCount should match", expectedScaleUpCount, desiredNodeCount);
+        assertEquals(expectedScaleUpCount, desiredNodeCount, "Desired NodeCount should match");
     }
 }

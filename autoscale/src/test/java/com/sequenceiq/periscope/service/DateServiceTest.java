@@ -1,24 +1,25 @@
 package com.sequenceiq.periscope.service;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.TimeAlert;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DateServiceTest {
 
     @Mock
@@ -27,7 +28,7 @@ public class DateServiceTest {
     @InjectMocks
     private DateService underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
     }
@@ -130,9 +131,10 @@ public class DateServiceTest {
         underTest.validateTimeZone("GMT");
     }
 
-    @Test(expected = ParseException.class)
+    @Test
     public void testValidateTimeZoneWhenInvalid() throws Exception {
-        underTest.validateTimeZone("GMTzen");
+        Assertions.assertThrows(ParseException.class,
+                () -> underTest.validateTimeZone("GMTzen"));
     }
 
     private TimeAlert createTimeAlert(String timeZone) {

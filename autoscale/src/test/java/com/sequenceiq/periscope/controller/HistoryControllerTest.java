@@ -1,20 +1,19 @@
 package com.sequenceiq.periscope.controller;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
 import com.sequenceiq.periscope.converter.HistoryConverter;
@@ -25,11 +24,8 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.NotFoundException;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HistoryControllerTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private HistoryController underTest;
@@ -56,7 +52,7 @@ public class HistoryControllerTest {
 
     private Cluster cluster = new Cluster();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         cluster.setId(clusterId);
         when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
@@ -66,10 +62,8 @@ public class HistoryControllerTest {
     public void testGetHistoryWhenClusterNotFound() {
         when(clusterService.findOneByStackCrnAndTenant(testClusterCrn, tenant)).thenReturn(Optional.empty());
 
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage("cluster 'crn:cdp:iam:us-west-1:%s:cluster:mockuser@cloudera.com' not found.");
-
-        underTest.getHistoryByCrn(testClusterCrn, 10);
+        NotFoundException err = assertThrows(NotFoundException.class, () -> underTest.getHistoryByCrn(testClusterCrn, 10));
+        assertEquals("cluster 'crn:cdp:iam:us-west-1:%s:cluster:mockuser@cloudera.com' not found.", err.getMessage());
     }
 
     @Test
@@ -78,7 +72,7 @@ public class HistoryControllerTest {
         when(historyService.getHistory(clusterId, 10)).thenReturn(List.of());
 
         List<AutoscaleClusterHistoryResponse> historyResponses = underTest.getHistoryByCrn(testClusterCrn, 10);
-        assertEquals("History Response size is 0", 0, historyResponses.size());
+        assertEquals(0, historyResponses.size(), "History Response size is 0");
     }
 
     @Test
@@ -90,7 +84,7 @@ public class HistoryControllerTest {
         when(historyConverter.convertAllToJson(any(List.class))).thenCallRealMethod();
 
         List<AutoscaleClusterHistoryResponse> historyResponses = underTest.getHistoryByCrn(testClusterCrn, 10);
-        assertEquals("History Response size is 2", 2, historyResponses.size());
+        assertEquals(2, historyResponses.size(), "History Response size is 2");
     }
 
     @Test
@@ -101,6 +95,6 @@ public class HistoryControllerTest {
         when(historyConverter.convertAllToJson(any(List.class))).thenCallRealMethod();
 
         List<AutoscaleClusterHistoryResponse> historyResponses = underTest.getHistoryByName(testClusterName, 10);
-        assertEquals("History Response size is 2", 2, historyResponses.size());
+        assertEquals(2, historyResponses.size(), "History Response size is 2");
     }
 }
