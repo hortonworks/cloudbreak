@@ -25,6 +25,9 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZUR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_for_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
@@ -164,6 +167,18 @@ public class EntitlementService {
 
     public boolean gcpAuditEnabled(String accountId) {
         return isEntitlementRegistered(accountId, AUDIT_ARCHIVING_GCP);
+    }
+
+    public boolean enforceAwsNativeForSingleAzFreeipaEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA);
+    }
+
+    public boolean enforceAwsNativeForSingleAzDatahubEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_ENFORCE_AWS_NATIVE_for_SINGLE_AZ_DATAHUB);
+    }
+
+    public boolean enforceAwsNativeForSingleAzDatalakeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE);
     }
 
     public boolean awsNativeEnabled(String accountId) {
