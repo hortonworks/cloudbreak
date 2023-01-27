@@ -60,6 +60,9 @@ export PGSSLMODE=verify-full
 {%- endif %}
 
 errorExit() {
+  if [[ "$CLOSECONNECTIONS" == "true" ]]; then
+    limit_incomming_connection $SERVICE -1
+  fi
   if [ -d "$DATE_DIR" ]; then
     rm -rf -v "$DATE_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
     doLog "Removed directory $DATE_DIR"
@@ -130,7 +133,7 @@ close_existing_connections() {
 limit_incomming_connection() {
   SERVICE=$1
   COUNT=$2
-  doLog "INFO limit existing connections to ${COUNT}"
+  doLog "INFO limit existing connections to ${COUNT} on ${SERVICE}"
   psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "alter user ${SERVICE} connection limit ${COUNT};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to limit connections to ${SERVICE}"
 }
 
