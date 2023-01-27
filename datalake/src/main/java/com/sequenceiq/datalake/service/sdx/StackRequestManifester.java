@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -170,6 +171,9 @@ public class StackRequestManifester {
             setupMultiAz(sdxCluster, environment, stackRequest);
             setupGovCloud(sdxCluster, environment, stackRequest);
             stackRequest.setExternalDatabase(databaseRequestConverter.createExternalDbRequest(sdxCluster));
+            if (entitlementService.enforceAwsNativeForSingleAzDatalakeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+                stackRequest.setVariant("AWS_NATIVE");
+            }
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");
