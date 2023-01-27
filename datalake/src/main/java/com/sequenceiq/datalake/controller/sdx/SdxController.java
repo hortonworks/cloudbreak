@@ -52,6 +52,7 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
+import com.sequenceiq.datalake.service.SdxDeleteService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxRecommendationService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
@@ -137,6 +138,9 @@ public class SdxController implements SdxEndpoint {
     @Inject
     private VerticalScaleService verticalScaleService;
 
+    @Inject
+    private SdxDeleteService sdxDeleteService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name,
@@ -204,15 +208,13 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_DATALAKE)
     public FlowIdentifier delete(@ResourceName String name, Boolean forced) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxService.deleteSdx(userCrn, name, forced);
+        return sdxDeleteService.deleteSdx(ThreadBasedUserCrnProvider.getAccountId(), name, forced);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATALAKE)
     public FlowIdentifier deleteByCrn(@ResourceCrn String clusterCrn, Boolean forced) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxService.deleteSdxByClusterCrn(userCrn, clusterCrn, forced);
+        return sdxDeleteService.deleteSdxByClusterCrn(ThreadBasedUserCrnProvider.getAccountId(), clusterCrn, forced);
     }
 
     @Override

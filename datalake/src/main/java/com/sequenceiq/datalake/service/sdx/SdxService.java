@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.PROVISIONING_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -68,7 +67,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
@@ -119,7 +117,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
-import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.sdx.api.model.SdxAwsBase;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxAzureBase;
@@ -181,9 +178,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private CDPConfigService cdpConfigService;
-
-    @Inject
-    private FlowCancelService flowCancelService;
 
     @Inject
     private OwnerAssignmentService ownerAssignmentService;
@@ -1148,22 +1142,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    public FlowIdentifier deleteSdxByClusterCrn(String userCrn, String clusterCrn, boolean forced) {
-        LOGGER.info("Deleting SDX {}", clusterCrn);
-        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        return sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn)
-                .map(sdxCluster -> deleteSdxCluster(sdxCluster, forced))
-                .orElseThrow(() -> notFound("SDX cluster", clusterCrn).get());
-    }
-
-    public FlowIdentifier deleteSdx(String userCrn, String name, boolean forced) {
-        LOGGER.info("Deleting SDX {}", name);
-        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        return sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name)
-                .map(sdxCluster -> deleteSdxCluster(sdxCluster, forced))
-                .orElseThrow(() -> notFound("SDX cluster", name).get());
-    }
-
     public Optional<String> updateRuntimeVersionFromStackResponse(SdxCluster sdxCluster, StackV4Response stackV4Response) {
         String clusterName = sdxCluster.getClusterName();
         Optional<String> cdpVersionOpt = getCdpVersion(stackV4Response);
@@ -1204,31 +1182,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             return Optional.of(StringUtils.substringBefore(cdpVersion, "-"));
         }
         return Optional.empty();
-    }
-
-    private FlowIdentifier deleteSdxCluster(SdxCluster sdxCluster, boolean forced) {
-        checkIfSdxIsDeletable(sdxCluster, forced);
-        MDCBuilder.buildMdcContext(sdxCluster);
-        sdxClusterRepository.save(sdxCluster);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxDeletion(sdxCluster, forced);
-        flowCancelService.cancelRunningFlows(sdxCluster.getId());
-        return flowIdentifier;
-    }
-
-    private void checkIfSdxIsDeletable(SdxCluster sdxCluster, boolean forced) {
-        SdxStatusEntity actualStatusForSdx = sdxStatusService.getActualStatusForSdx(sdxCluster);
-        if (!forced && actualStatusForSdx.getStatus() != PROVISIONING_FAILED &&
-                sdxCluster.hasExternalDatabase() && StringUtils.isEmpty(sdxCluster.getDatabaseCrn())) {
-            throw new BadRequestException(String.format("Can not find external database for Data Lake, but it was requested: %s. Please use force delete.",
-                    sdxCluster.getClusterName()));
-        }
-        Collection<StackViewV4Response> attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
-        if (!attachedDistroXClusters.isEmpty()) {
-            throw new BadRequestException(String.format("The following Data Hub(s) cluster(s) must be terminated " +
-                            "before deletion of SDX cluster: [%s].",
-                    attachedDistroXClusters.stream().map(StackViewV4Response::getName).collect(Collectors.joining(", "))));
-        }
     }
 
     private String createCrn(@Nonnull String accountId) {

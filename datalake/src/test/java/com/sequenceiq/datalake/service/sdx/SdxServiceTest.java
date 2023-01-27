@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -60,7 +59,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -78,7 +76,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
@@ -121,7 +118,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -130,7 +126,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequestBase;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 
@@ -205,9 +200,6 @@ class SdxServiceTest {
 
     @Mock
     private CDPConfigService cdpConfigService;
-
-    @Mock
-    private FlowCancelService flowCancelService;
 
     @Mock
     private OwnerAssignmentService ownerAssignmentService;
@@ -724,61 +716,6 @@ class SdxServiceTest {
     }
 
     @Test
-    void testDeleteSdxWhenNameIsProvidedAndClusterDoesNotExistShouldThrowNotFoundException() {
-        assertThrows(com.sequenceiq.cloudbreak.common.exception.NotFoundException.class,
-                () -> underTest.deleteSdx(USER_CRN, CLUSTER_NAME, false));
-        verify(sdxClusterRepository, times(1))
-                .findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq(CLUSTER_NAME));
-    }
-
-    @Test
-    void testDeleteSdxWhenNameIsProvidedShouldInitiateSdxDeletionFlow() {
-        SdxCluster sdxCluster = getSdxCluster();
-        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        mockCBCallForDistroXClusters(Sets.newHashSet());
-        underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
-        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
-        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository, times(1)).save(captor.capture());
-        verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
-    }
-
-    @Test
-    void testDeleteSdxWhenSdxHasExternalDatabaseButCrnIsMissingShouldThrowNotFoundException() {
-        SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
-        sdxCluster.setDatabaseCrn(null);
-        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
-        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
-        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.deleteSdx(USER_CRN, "sdx-cluster-name", false));
-        assertEquals(String.format("Can not find external database for Data Lake, but it was requested: %s. Please use force delete.",
-                sdxCluster.getClusterName()), badRequestException.getMessage());
-    }
-
-    @Test
-    void testDeleteSdxWhenSdxHasExternalDatabaseButCrnIsMissingShouldNotThrowNotFoundException() {
-        SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
-        sdxCluster.setDatabaseCrn(null);
-        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
-        sdxStatusEntity.setStatus(DatalakeStatusEnum.PROVISIONING_FAILED);
-        when(sdxReactorFlowManager.triggerSdxDeletion(eq(sdxCluster), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "id"));
-        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
-        underTest.deleteSdx(USER_CRN, "sdx-cluster-name", false);
-        verify(sdxClusterRepository, times(1)).save(sdxCluster);
-        verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
-        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, false);
-        verify(flowCancelService, times(1)).cancelRunningFlows(SDX_ID);
-    }
-
-    @Test
     void testSyncSdxClusterWhenClusterNameSpecifiedShouldCallStackEndpointExactlyOnce() {
         SdxCluster sdxCluser = new SdxCluster();
         sdxCluser.setEnvName("env");
@@ -1109,10 +1046,6 @@ class SdxServiceTest {
         imageV4Response.setImageSetsByProvider(imageSetsByProvider);
         imageV4Response.setStackDetails(stackDetails);
         return imageV4Response;
-    }
-
-    private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {
-        when(distroxService.getAttachedDistroXClusters(anyString())).thenReturn(stackViews);
     }
 
     private void mockEnvironmentCall(SdxClusterResizeRequest sdxClusterResizeRequest, CloudPlatform cloudPlatform) {
@@ -1711,26 +1644,5 @@ class SdxServiceTest {
 
         verifyNoInteractions(sdxReactorFlowManager);
         assertEquals(String.format("SaltStack update cannot be initiated as datalake 'sdx-cluster-name' is currently in '%s' state.", status), ex.getMessage());
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = Status.class, names = {"AVAILABLE", "BACKUP_IN_PROGRESS", "STOPPED", "BACKUP_FAILED"})
-    void testDeleteSdxWhenSdxHasAttachedDataHubsShouldThrowBadRequest(Status dhStatus) {
-        SdxCluster sdxCluster = getSdxCluster();
-        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
-        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
-        StackViewV4Response stackViewV4Response = new StackViewV4Response();
-        stackViewV4Response.setName("existingDistroXCluster");
-        stackViewV4Response.setStatus(dhStatus);
-
-        mockCBCallForDistroXClusters(Sets.newHashSet(stackViewV4Response));
-        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true));
-
-        assertEquals("The following Data Hub(s) cluster(s) must be terminated before deletion of SDX cluster: [existingDistroXCluster].",
-                badRequestException.getMessage());
     }
 }

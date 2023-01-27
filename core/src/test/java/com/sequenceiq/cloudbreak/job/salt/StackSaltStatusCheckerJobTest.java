@@ -35,8 +35,10 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
-import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
-import com.sequenceiq.cloudbreak.service.SaltPasswordStatusService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
+import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -76,6 +78,12 @@ class StackSaltStatusCheckerJobTest {
 
     @Mock
     private JobDetail jobDetail;
+
+    @Mock
+    private RotateSaltPasswordTriggerService rotateSaltPasswordTriggerService;
+
+    @Mock
+    private RotateSaltPasswordValidator rotateSaltPasswordValidator;
 
     private JobKey jobKey;
 
@@ -171,8 +179,8 @@ class StackSaltStatusCheckerJobTest {
             underTest.executeTracedJob(context);
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
-            verify(rotateSaltPasswordService).validateRotateSaltPassword(stackDto);
-            verify(rotateSaltPasswordService, never()).triggerRotateSaltPassword(eq(stackDto), any());
+            verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
+            verify(rotateSaltPasswordTriggerService, never()).triggerRotateSaltPassword(eq(stackDto), any());
         }
 
         @Test
@@ -182,8 +190,8 @@ class StackSaltStatusCheckerJobTest {
             underTest.executeTracedJob(context);
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
-            verify(rotateSaltPasswordService).validateRotateSaltPassword(stackDto);
-            verify(rotateSaltPasswordService, never()).triggerRotateSaltPassword(eq(stackDto), any());
+            verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
+            verify(rotateSaltPasswordTriggerService, never()).triggerRotateSaltPassword(eq(stackDto), any());
         }
 
         @Test
@@ -193,8 +201,8 @@ class StackSaltStatusCheckerJobTest {
             underTest.executeTracedJob(context);
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
-            verify(rotateSaltPasswordService).validateRotateSaltPassword(stackDto);
-            verify(rotateSaltPasswordService).triggerRotateSaltPassword(stackDto, RotateSaltPasswordReason.EXPIRED);
+            verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
+            verify(rotateSaltPasswordTriggerService).triggerRotateSaltPassword(stackDto, RotateSaltPasswordReason.EXPIRED);
         }
 
         @Test
@@ -204,8 +212,8 @@ class StackSaltStatusCheckerJobTest {
             underTest.executeTracedJob(context);
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
-            verify(rotateSaltPasswordService).validateRotateSaltPassword(stackDto);
-            verify(rotateSaltPasswordService).triggerRotateSaltPassword(stackDto, RotateSaltPasswordReason.UNAUTHORIZED);
+            verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
+            verify(rotateSaltPasswordTriggerService).triggerRotateSaltPassword(stackDto, RotateSaltPasswordReason.UNAUTHORIZED);
         }
 
         @Test
@@ -217,7 +225,7 @@ class StackSaltStatusCheckerJobTest {
             underTest.executeTracedJob(context);
 
             verify(saltPasswordStatusService).getSaltPasswordStatus(stackDto);
-            verify(rotateSaltPasswordService).validateRotateSaltPassword(stackDto);
+            verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
             verify(rotateSaltPasswordService).sendFailureUsageReport(stackDto.getResourceCrn(), RotateSaltPasswordReason.UNSET,
                     "Failed to get salt password status: " + cause.getMessage());
         }

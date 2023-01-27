@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordSuccessResponse;
-import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
 
 @Configuration
 public class RotateSaltPasswordActions {
