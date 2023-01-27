@@ -60,6 +60,9 @@ export PGSSLMODE=verify-full
 {%- endif %}
 
 errorExit() {
+  if [[ "$CLOSECONNECTIONS" == "true" ]]; then
+        limit_incomming_connection $SERVICE -1
+  fi
   if [ -d "$DATE_DIR" ]; then
     rm -rf -v "$DATE_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
     doLog "Removed directory $DATE_DIR"
