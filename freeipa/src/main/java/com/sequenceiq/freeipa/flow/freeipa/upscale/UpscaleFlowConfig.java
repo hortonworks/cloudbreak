@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPSCALE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPSCALE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ADD_INSTANCES_FAILED_EVENT;
@@ -65,12 +69,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, UpscaleFlowEvent>
-        implements RetryableFlowConfiguration<UpscaleFlowEvent> {
+        implements RetryableFlowConfiguration<UpscaleFlowEvent>, FreeIpaUseCaseAware {
     private static final List<Transition<UpscaleState, UpscaleFlowEvent>> TRANSITIONS =
             new Transition.Builder<UpscaleState, UpscaleFlowEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
@@ -196,5 +203,18 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
     @Override
     public UpscaleFlowEvent getRetryableEvent() {
         return EDGE_CONFIG.getFailureHandled();
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return UPSCALE_STARTED;
+        } else if (UPSCALE_FINISHED_STATE.equals(flowState)) {
+            return UPSCALE_FINISHED;
+        } else if (UPSCALE_FAIL_STATE.equals(flowState)) {
+            return UPSCALE_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.stack.stop;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.SUSPEND_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.SUSPEND_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.SUSPEND_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent.STOP_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent.STOP_FINALIZED_EVENT;
@@ -14,12 +18,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
-public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopState, StackStopEvent> {
+public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopState, StackStopEvent> implements FreeIpaUseCaseAware {
 
     private static final List<Transition<StackStopState, StackStopEvent>> TRANSITIONS = new Builder<StackStopState, StackStopEvent>()
             .defaultFailureEvent(StackStopEvent.STOP_FAILURE_EVENT)
@@ -65,5 +72,18 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     @Override
     protected FlowEdgeConfig<StackStopState, StackStopEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return SUSPEND_STARTED;
+        } else if (STOP_FINISHED_STATE.equals(flowState)) {
+            return SUSPEND_FINISHED;
+        } else if (STOP_FAILED_STATE.equals(flowState)) {
+            return SUSPEND_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

@@ -1,13 +1,24 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
+import static java.util.function.Function.identity;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
+import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 
 @Component
 public class EnvironmentUseCaseMapper {
@@ -15,76 +26,67 @@ public class EnvironmentUseCaseMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentUseCaseMapper.class);
 
     @Inject
-    private CDPRequestProcessingStepMapper cdpRequestProcessingStepMapper;
+    private List<? extends AbstractFlowConfiguration> flowConfigurations;
 
-    // At the moment we need to introduce a complex logic to figure out the use case
-    public UsageProto.CDPEnvironmentStatus.Value useCase(FlowDetails flow) {
-        UsageProto.CDPEnvironmentStatus.Value useCase = UsageProto.CDPEnvironmentStatus.Value.UNSET;
+    private Map<String, ? extends AbstractFlowConfiguration> flowConfigurationMap;
+
+    private Map<String, ? extends EnvironmentUseCaseAware> useCaseAwareFlowConfigurationMap;
+
+    @PostConstruct
+    void init() {
+        flowConfigurationMap = flowConfigurations.stream()
+                .collect(Collectors.toMap(flowConfiguration -> flowConfiguration.getClass().getSimpleName(), identity()));
+        useCaseAwareFlowConfigurationMap = flowConfigurations.stream()
+                .filter(EnvironmentUseCaseAware.class::isInstance)
+                .map(EnvironmentUseCaseAware.class::cast)
+                .collect(Collectors.toMap(flowConfiguration -> flowConfiguration.getClass().getSimpleName(), identity()));
+    }
+
+    public Value useCase(FlowDetails flow) {
+        Value useCase = UNSET;
         if (flow != null) {
-            if (cdpRequestProcessingStepMapper.isFirstStep(flow)) {
-                if (flow.getFlowType() != null) {
-                    useCase = firstStepToUseCaseMapping(flow.getFlowType());
-                }
-            } else if (cdpRequestProcessingStepMapper.isLastStep(flow)) {
-                useCase = lastStepToUseCaseMapping(flow.getNextFlowState());
-            }
+            useCase = getUseCase(flow);
         }
+        LOGGER.debug("Calculated use-case: {} for flow: {}", useCase, flow);
         return useCase;
     }
 
-    private UsageProto.CDPEnvironmentStatus.Value firstStepToUseCaseMapping(String flowType) {
-        UsageProto.CDPEnvironmentStatus.Value useCase = UsageProto.CDPEnvironmentStatus.Value.UNSET;
-        switch (flowType) {
-            case "EnvCreationFlowConfig":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED;
-                break;
-            case "EnvDeleteFlowConfig":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.DELETE_STARTED;
-                break;
-            case "EnvStartFlowConfig":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.RESUME_STARTED;
-                break;
-            case "EnvStopFlowConfig":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.SUSPEND_STARTED;
-                break;
-            default:
-                LOGGER.debug("Flow type: {}", flowType);
+    private Value getUseCase(FlowDetails flow) {
+        if (StringUtils.isEmpty(flow.getNextFlowState()) || StringUtils.isEmpty(flow.getFlowType())) {
+            return UNSET;
         }
-        LOGGER.debug("Mapping flow type to use-case: {}, {}", flowType, useCase);
-        return useCase;
+        if (!flowConfigurationMap.containsKey(flow.getFlowType())) {
+            LOGGER.debug("Missing flow configuration for type: {}", flow.getFlowType());
+            return UNSET;
+        }
+        AbstractFlowConfiguration flowConfiguration = flowConfigurationMap.get(flow.getFlowType());
+        Enum nextFlowState = getFlowStateEnum(flowConfiguration.getStateType(), flow.getNextFlowState());
+        if (nextFlowState == null) {
+            LOGGER.warn("Missing flow state enum for type: {}, state: {}", flowConfiguration.getStateType(), flow.getNextFlowState());
+            return UNSET;
+        }
+        return getUseCaseFromFlowConfiguration(nextFlowState, flow.getFlowType());
     }
 
-    private UsageProto.CDPEnvironmentStatus.Value lastStepToUseCaseMapping(String nextFlowState) {
-        UsageProto.CDPEnvironmentStatus.Value useCase = UsageProto.CDPEnvironmentStatus.Value.UNSET;
-        switch (nextFlowState) {
-            case "ENV_CREATION_FINISHED_STATE":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.CREATE_FINISHED;
-                break;
-            case "ENV_CREATION_FAILED_STATE":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.CREATE_FAILED;
-                break;
-            case "ENV_DELETE_FINISHED_STATE":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.DELETE_FINISHED;
-                break;
-            case "ENV_DELETE_FAILED_STATE":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.DELETE_FAILED;
-                break;
-            case "ENV_START_FINISHED_STATE":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.RESUME_FINISHED;
-                break;
-            case "ENV_START_FAILED_STATE":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.RESUME_FAILED;
-                break;
-            case "ENV_STOP_FINISHED_STATE":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FINISHED;
-                break;
-            case "ENV_STOP_FAILED_STATE":
-                useCase = UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FAILED;
-                break;
-            default:
-                LOGGER.debug("Next flow state: {}", nextFlowState);
+    private Value getUseCaseFromFlowConfiguration(Enum nextFlowState, String flowType) {
+        if (!useCaseAwareFlowConfigurationMap.containsKey(flowType)) {
+            LOGGER.warn("Missing use case aware flow configuration for type: {}", flowType);
+            return UNSET;
+        } else {
+            EnvironmentUseCaseAware useCaseAwareFlowConfiguration = useCaseAwareFlowConfigurationMap.get(flowType);
+            return useCaseAwareFlowConfiguration.getUseCaseForFlowState(nextFlowState);
         }
-        LOGGER.debug("Mapping next flow state to use-case: {}, {}", nextFlowState, useCase);
-        return useCase;
+    }
+
+    private Enum<? extends FlowState> getFlowStateEnum(Class<? extends Enum> stateClass, String stateValue) {
+        if (StringUtils.isEmpty(stateValue) || stateClass == null) {
+            return null;
+        }
+        try {
+            return Enum.valueOf(stateClass, stateValue);
+        } catch (Exception e) {
+            LOGGER.warn("Cannot get enum for class: {}, value: {}", stateClass, stateValue, e);
+            return null;
+        }
     }
 }

@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.stack.termination;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.DELETE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.DELETE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.DELETE_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.CCM_KEY_DEREGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.EXECUTE_PRE_TERMINATION_RECIPES_FINISHED_EVENT;
@@ -25,11 +29,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
-public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackTerminationState, StackTerminationEvent> {
+public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackTerminationState, StackTerminationEvent> implements FreeIpaUseCaseAware {
 
     private static final List<Transition<StackTerminationState, StackTerminationEvent>> TRANSITIONS =
             new Builder<StackTerminationState, StackTerminationEvent>()
@@ -75,5 +82,18 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     @Override
     public String getDisplayName() {
         return "Terminate stack";
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return DELETE_STARTED;
+        } else if (TERMINATION_FINISHED_STATE.equals(flowState)) {
+            return DELETE_FINISHED;
+        } else if (TERMINATION_FAILED_STATE.equals(flowState)) {
+            return DELETE_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

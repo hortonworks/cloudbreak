@@ -1,22 +1,25 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
+import static java.util.function.Function.identity;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.google.common.annotations.VisibleForTesting;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
+import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 
 @Component
 public class FreeIpaUseCaseMapper {
@@ -24,116 +27,98 @@ public class FreeIpaUseCaseMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUseCaseMapper.class);
 
     @Inject
-    private CDPRequestProcessingStepMapper cdpRequestProcessingStepMapper;
+    private List<? extends AbstractFlowConfiguration> flowConfigurations;
 
-    private Map<Pair, UsageProto.CDPFreeIPAStatus.Value> firstStepUseCaseMap;
+    @Inject
+    private List<? extends FlowEventChainFactory> flowEventChainFactories;
 
-    @VisibleForTesting
+    private Map<String, ? extends AbstractFlowConfiguration> flowConfigurationMap;
+
+    private Map<String, ? extends FreeIpaUseCaseAware> useCaseAwareFlowConfigurationMap;
+
+    private Map<String, ? extends FreeIpaUseCaseAware> useCaseAwareFlowEventChainFactoryMap;
+
     @PostConstruct
-    void initUseCaseMaps() {
-        firstStepUseCaseMap = new HashMap<>();
-        firstStepUseCaseMap.put(Pair.of("ProvisionFlowEventChainFactory", "StackProvisionFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.CREATE_STARTED);
-        firstStepUseCaseMap.put(Pair.of("", "StackTerminationFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.DELETE_STARTED);
-        firstStepUseCaseMap.put(Pair.of("", "StackStopFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.SUSPEND_STARTED);
-        firstStepUseCaseMap.put(Pair.of("", "StackStartFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.RESUME_STARTED);
-        firstStepUseCaseMap.put(Pair.of("", "UpscaleFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED);
-        firstStepUseCaseMap.put(Pair.of("", "DownscaleFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.DOWNSCALE_STARTED);
-        firstStepUseCaseMap.put(Pair.of("", "FreeIpaVerticalScaleFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.VERTICAL_SCALE_STARTED);
-        firstStepUseCaseMap.put(Pair.of("UpgradeFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.UPGRADE_STARTED);
-        firstStepUseCaseMap.put(Pair.of("UpgradeCcmFlowEventChainFactory", "UpgradeCcmFlowConfig"),
-                UsageProto.CDPFreeIPAStatus.Value.CCM_UPGRADE_STARTED);
+    void init() {
+        flowConfigurationMap = flowConfigurations.stream()
+                .collect(Collectors.toMap(flowConfiguration -> flowConfiguration.getClass().getSimpleName(), identity()));
+        useCaseAwareFlowConfigurationMap = flowConfigurations.stream()
+                .filter(FreeIpaUseCaseAware.class::isInstance)
+                .map(FreeIpaUseCaseAware.class::cast)
+                .collect(Collectors.toMap(flowConfiguration -> flowConfiguration.getClass().getSimpleName(), identity()));
+        useCaseAwareFlowEventChainFactoryMap = flowEventChainFactories.stream()
+                .filter(FreeIpaUseCaseAware.class::isInstance)
+                .map(FreeIpaUseCaseAware.class::cast)
+                .collect(Collectors.toMap(flowEventChainFactory -> flowEventChainFactory.getClass().getSimpleName(), identity()));
     }
 
-    public UsageProto.CDPFreeIPAStatus.Value useCase(FlowDetails flow) {
-        UsageProto.CDPFreeIPAStatus.Value useCase = UsageProto.CDPFreeIPAStatus.Value.UNSET;
+    public Value useCase(FlowDetails flow) {
+        Value useCase = UNSET;
         if (flow != null) {
-            String rootFlowChainType = defaultIfEmpty(flow.getFlowChainType(), "");
-            if (cdpRequestProcessingStepMapper.isFirstStep(flow)) {
-                useCase = firstStepToUseCaseMapping(rootFlowChainType, flow.getFlowType());
-            } else if (cdpRequestProcessingStepMapper.isLastStep(flow)) {
-                useCase = lastStepToUseCaseMapping(rootFlowChainType, flow.getFlowType(), flow.getNextFlowState());
-            }
+            useCase = getUseCase(flow);
         }
-        LOGGER.debug("FlowDetails: {}, Usecase: {}", flow, useCase);
+        LOGGER.debug("Calculated use-case: {} for flow: {}", useCase, flow);
         return useCase;
     }
 
-    private UsageProto.CDPFreeIPAStatus.Value firstStepToUseCaseMapping(String rootFlowChainType, String flowType) {
-        UsageProto.CDPFreeIPAStatus.Value useCase =
-                firstStepUseCaseMap.getOrDefault(Pair.of(rootFlowChainType, flowType), UsageProto.CDPFreeIPAStatus.Value.UNSET);
-        LOGGER.debug("Mapping flow type to use-case: [flowchain: {}, flow: {}]: usecase: {}", rootFlowChainType, flowType, useCase);
-        return useCase;
-    }
-
-    //CHECKSTYLE:OFF: CyclomaticComplexity
-    private UsageProto.CDPFreeIPAStatus.Value lastStepToUseCaseMapping(String rootFlowChainType, String flowType, String nextFlowState) {
-        UsageProto.CDPFreeIPAStatus.Value useCase = UsageProto.CDPFreeIPAStatus.Value.UNSET;
-        String rootFlowType = StringUtils.isNotEmpty(rootFlowChainType) ? rootFlowChainType : flowType;
-        if (rootFlowType != null) {
-            switch (rootFlowType) {
-                case "ProvisionFlowEventChainFactory":
-                    useCase = getFreeIpaStatus(nextFlowState, "FREEIPA_PROVISION_FINISHED_STATE",
-                            UsageProto.CDPFreeIPAStatus.Value.CREATE_FINISHED,
-                            UsageProto.CDPFreeIPAStatus.Value.CREATE_FAILED);
-                    break;
-                case "StackTerminationFlowConfig":
-                    useCase = getFreeIpaStatus(nextFlowState, "TERMINATION_FINISHED_STATE",
-                            UsageProto.CDPFreeIPAStatus.Value.DELETE_FINISHED,
-                            UsageProto.CDPFreeIPAStatus.Value.DELETE_FAILED);
-                    break;
-                case "StackStopFlowConfig":
-                    useCase = getFreeIpaStatus(nextFlowState, "STOP_FINISHED_STATE",
-                            UsageProto.CDPFreeIPAStatus.Value.SUSPEND_FINISHED,
-                            UsageProto.CDPFreeIPAStatus.Value.SUSPEND_FAILED);
-                    break;
-                case "StackStartFlowConfig":
-                    useCase = getFreeIpaStatus(nextFlowState, "START_FINISHED_STATE",
-                            UsageProto.CDPFreeIPAStatus.Value.RESUME_FINISHED,
-                            UsageProto.CDPFreeIPAStatus.Value.RESUME_FAILED);
-                    break;
-                case "UpscaleFlowConfig":
-                    useCase = getFreeIpaStatus(nextFlowState, "UPSCALE_FINISHED_STATE",
-                            UsageProto.CDPFreeIPAStatus.Value.UPSCALE_FINISHED,
-                            UsageProto.CDPFreeIPAStatus.Value.UPSCALE_FAILED);
-                    break;
-                case "DownscaleFlowConfig":
-                    useCase = getFreeIpaStatus(nextFlowState, "DOWNSCALE_FINISHED_STATE",
-                            UsageProto.CDPFreeIPAStatus.Value.DOWNSCALE_FINISHED,
-                            UsageProto.CDPFreeIPAStatus.Value.DOWNSCALE_FAILED);
-                    break;
-                case "FreeIpaVerticalScaleFlowConfig":
-                    useCase = getFreeIpaStatus(nextFlowState, "STACK_VERTICALSCALE_FINISHED_STATE",
-                            UsageProto.CDPFreeIPAStatus.Value.VERTICAL_SCALE_FINISHED,
-                            UsageProto.CDPFreeIPAStatus.Value.VERTICAL_SCALE_FAILED);
-                    break;
-                case "UpgradeFlowEventChainFactory":
-                    useCase = getFreeIpaStatus(nextFlowState, "FLOWCHAIN_FINALIZE_FINISHED_STATE",
-                            UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FINISHED,
-                            UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FAILED);
-                    break;
-                case "UpgradeCcmFlowEventChainFactory":
-                    useCase = getFreeIpaStatus(nextFlowState, "UPDATE_USERDATA_FINISHED_STATE",
-                            UsageProto.CDPFreeIPAStatus.Value.CCM_UPGRADE_FINISHED,
-                            UsageProto.CDPFreeIPAStatus.Value.CCM_UPGRADE_FAILED);
-                    break;
-                default:
-                    LOGGER.debug("Next flow state: {}", nextFlowState);
-            }
+    private Value getUseCase(FlowDetails flow) {
+        if (StringUtils.isEmpty(flow.getNextFlowState()) || StringUtils.isEmpty(flow.getFlowType())) {
+            return UNSET;
         }
-        LOGGER.debug("Mapping next flow state to use-case: [flowchain: {}, flow:{}, nextflowstate: {}]: {}",
-                rootFlowChainType, flowType, nextFlowState, useCase);
-        return useCase;
-    }
-    //CHECKSTYLE:ON
-
-    private UsageProto.CDPFreeIPAStatus.Value getFreeIpaStatus(String nextFlowState, String finishedFlowState,
-            UsageProto.CDPFreeIPAStatus.Value finishedStatus, UsageProto.CDPFreeIPAStatus.Value failedStatus) {
-        if (nextFlowState.equals(finishedFlowState)) {
-            return finishedStatus;
-        } else if (nextFlowState.contains("_FAIL")) {
-            return failedStatus;
+        if (!flowConfigurationMap.containsKey(flow.getFlowType())) {
+            LOGGER.debug("Missing flow configuration for type: {}", flow.getFlowType());
+            return UNSET;
         }
-        return UsageProto.CDPFreeIPAStatus.Value.UNSET;
+        AbstractFlowConfiguration flowConfiguration = flowConfigurationMap.get(flow.getFlowType());
+        Enum nextFlowState = getFlowStateEnum(flowConfiguration.getStateType(), flow.getNextFlowState());
+        if (nextFlowState == null) {
+            LOGGER.warn("Missing flow state enum for type: {}, state: {}", flowConfiguration.getStateType(), flow.getNextFlowState());
+            return UNSET;
+        }
+        String rootFlowChainType = getRootFlowChainType(flow.getFlowChainType());
+        if (StringUtils.isNotEmpty(rootFlowChainType)) {
+            return getUseCaseFromFlowEventChainFactory(nextFlowState, rootFlowChainType);
+        } else {
+            return getUseCaseFromFlowConfiguration(nextFlowState, flow.getFlowType());
+        }
     }
 
+    private Value getUseCaseFromFlowConfiguration(Enum nextFlowState, String flowType) {
+        if (!useCaseAwareFlowConfigurationMap.containsKey(flowType)) {
+            LOGGER.warn("Missing use case aware flow configuration for type: {}", flowType);
+            return UNSET;
+        } else {
+            FreeIpaUseCaseAware useCaseAwareFlowConfiguration = useCaseAwareFlowConfigurationMap.get(flowType);
+            return useCaseAwareFlowConfiguration.getUseCaseForFlowState(nextFlowState);
+        }
+    }
+
+    private Value getUseCaseFromFlowEventChainFactory(Enum nextFlowState, String rootFlowChainType) {
+        if (!useCaseAwareFlowEventChainFactoryMap.containsKey(rootFlowChainType)) {
+            LOGGER.debug("Missing use case aware flow event chain factory: {}", rootFlowChainType);
+            return UNSET;
+        } else {
+            FreeIpaUseCaseAware useCaseAwareFlowEventChainFactory = useCaseAwareFlowEventChainFactoryMap.get(rootFlowChainType);
+            return useCaseAwareFlowEventChainFactory.getUseCaseForFlowState(nextFlowState);
+        }
+    }
+
+    private Enum<? extends FlowState> getFlowStateEnum(Class<? extends Enum> stateClass, String stateValue) {
+        if (StringUtils.isEmpty(stateValue) || stateClass == null) {
+            return null;
+        }
+        try {
+            return Enum.valueOf(stateClass, stateValue);
+        } catch (Exception e) {
+            LOGGER.warn("Cannot get enum for class: {}, value: {}", stateClass, stateValue, e);
+            return null;
+        }
+    }
+
+    private String getRootFlowChainType(String flowChainTypes) {
+        if (StringUtils.isNotEmpty(flowChainTypes)) {
+            return flowChainTypes.split("/")[0];
+        }
+        return "";
+    }
 }

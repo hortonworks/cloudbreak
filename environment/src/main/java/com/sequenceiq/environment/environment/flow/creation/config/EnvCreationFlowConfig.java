@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.flow.creation.config;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_CREATION_VALIDATION_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_INITIALIZATION_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE;
@@ -27,15 +31,18 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseAware;
 import com.sequenceiq.environment.environment.flow.creation.EnvCreationState;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.flow.api.model.operation.OperationType;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreationState, EnvCreationStateSelectors>
-        implements RetryableFlowConfiguration<EnvCreationStateSelectors> {
+        implements RetryableFlowConfiguration<EnvCreationStateSelectors>, EnvironmentUseCaseAware {
 
     private static final List<Transition<EnvCreationState, EnvCreationStateSelectors>> TRANSITIONS
             = new Transition.Builder<EnvCreationState, EnvCreationStateSelectors>().defaultFailureEvent(FAILED_ENV_CREATION_EVENT)
@@ -129,5 +136,18 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
     @Override
     public OperationType getFlowOperationType() {
         return OperationType.PROVISION;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return CREATE_STARTED;
+        } else if (ENV_CREATION_FINISHED_STATE.equals(flowState)) {
+            return CREATE_FINISHED;
+        } else if (ENV_CREATION_FAILED_STATE.equals(flowState)) {
+            return CREATE_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

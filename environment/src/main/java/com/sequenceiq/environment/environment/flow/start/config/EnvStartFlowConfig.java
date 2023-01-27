@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.flow.start.config;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.RESUME_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.RESUME_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.RESUME_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
 import static com.sequenceiq.environment.environment.flow.start.EnvStartState.ENV_START_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.start.EnvStartState.ENV_START_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.start.EnvStartState.FINAL_STATE;
@@ -21,14 +25,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseAware;
 import com.sequenceiq.environment.environment.flow.start.EnvStartState;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class EnvStartFlowConfig extends AbstractFlowConfiguration<EnvStartState, EnvStartStateSelectors>
-        implements RetryableFlowConfiguration<EnvStartStateSelectors> {
+        implements RetryableFlowConfiguration<EnvStartStateSelectors>, EnvironmentUseCaseAware {
 
     private static final List<Transition<EnvStartState, EnvStartStateSelectors>> TRANSITIONS = new Transition.Builder<EnvStartState, EnvStartStateSelectors>()
             .defaultFailureEvent(FAILED_ENV_START_EVENT)
@@ -85,5 +92,18 @@ public class EnvStartFlowConfig extends AbstractFlowConfiguration<EnvStartState,
     @Override
     public EnvStartStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_ENV_START_EVENT;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return RESUME_STARTED;
+        } else if (ENV_START_FINISHED_STATE.equals(flowState)) {
+            return RESUME_FINISHED;
+        } else if (ENV_START_FAILED_STATE.equals(flowState)) {
+            return RESUME_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

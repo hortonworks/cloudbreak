@@ -6,8 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.CDPEnvironmentStructuredFlowEventToCDPEnvironmentRequestedConverter;
@@ -35,18 +34,15 @@ public class CDPEnvironmentLogger implements CDPTelemetryEventLogger {
 
     @Override
     public void log(CDPStructuredFlowEvent cdpStructuredFlowEvent) {
-
-        FlowDetails flow = cdpStructuredFlowEvent.getFlow();
-        UsageProto.CDPEnvironmentStatus.Value useCase = environmentUseCaseMapper.useCase(flow);
-        LOGGER.debug("Telemetry use case: {}", useCase);
-
-        if (cdpStructuredFlowEvent instanceof CDPEnvironmentStructuredFlowEvent &&
-                useCase != UsageProto.CDPEnvironmentStatus.Value.UNSET) {
-            LOGGER.debug("Sending usage report for {}", cdpStructuredFlowEvent.getOperation().getResourceType());
-            usageReporter.cdpEnvironmentRequested(
-                    environmentRequestedConverter.convert((CDPEnvironmentStructuredFlowEvent) cdpStructuredFlowEvent));
-            usageReporter.cdpEnvironmentStatusChanged(
-                    statusChangedConverter.convert((CDPEnvironmentStructuredFlowEvent) cdpStructuredFlowEvent, useCase));
+        if (cdpStructuredFlowEvent instanceof CDPEnvironmentStructuredFlowEvent) {
+            Value useCase = environmentUseCaseMapper.useCase(cdpStructuredFlowEvent.getFlow());
+            if (useCase != Value.UNSET) {
+                LOGGER.debug("Sending usage report for {}", cdpStructuredFlowEvent.getOperation().getResourceType());
+                usageReporter.cdpEnvironmentRequested(
+                        environmentRequestedConverter.convert((CDPEnvironmentStructuredFlowEvent) cdpStructuredFlowEvent));
+                usageReporter.cdpEnvironmentStatusChanged(
+                        statusChangedConverter.convert((CDPEnvironmentStructuredFlowEvent) cdpStructuredFlowEvent, useCase));
+            }
         }
     }
 }

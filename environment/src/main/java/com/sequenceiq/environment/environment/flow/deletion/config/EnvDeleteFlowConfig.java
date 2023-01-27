@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.flow.deletion.config;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.DELETE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.DELETE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.DELETE_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.CLUSTER_DEFINITION_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.ENV_DELETE_FAILED_STATE;
@@ -34,14 +38,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseAware;
 import com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteState, EnvDeleteStateSelectors>
-        implements RetryableFlowConfiguration<EnvDeleteStateSelectors> {
+        implements RetryableFlowConfiguration<EnvDeleteStateSelectors>, EnvironmentUseCaseAware {
 
     private static final List<Transition<EnvDeleteState, EnvDeleteStateSelectors>> TRANSITIONS
             = new Transition.Builder<EnvDeleteState, EnvDeleteStateSelectors>().defaultFailureEvent(EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT)
@@ -124,5 +131,18 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
     @Override
     protected FlowEdgeConfig<EnvDeleteState, EnvDeleteStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return DELETE_STARTED;
+        } else if (ENV_DELETE_FINISHED_STATE.equals(flowState)) {
+            return DELETE_FINISHED;
+        } else if (ENV_DELETE_FAILED_STATE.equals(flowState)) {
+            return DELETE_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

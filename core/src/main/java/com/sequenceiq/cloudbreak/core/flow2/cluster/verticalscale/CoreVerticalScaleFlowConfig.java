@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.VERTICAL_SCALE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.VERTICAL_SCALE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.VERTICAL_SCALE_STARTED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.FINALIZED_EVENT;
@@ -16,11 +20,16 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
-public class CoreVerticalScaleFlowConfig extends StackStatusFinalizerAbstractFlowConfig<CoreVerticalScaleState, CoreVerticalScaleEvent> {
+public class CoreVerticalScaleFlowConfig extends StackStatusFinalizerAbstractFlowConfig<CoreVerticalScaleState, CoreVerticalScaleEvent>
+        implements ClusterUseCaseAware {
+
     private static final List<Transition<CoreVerticalScaleState, CoreVerticalScaleEvent>> TRANSITIONS =
             new Builder<CoreVerticalScaleState, CoreVerticalScaleEvent>()
 
@@ -76,6 +85,19 @@ public class CoreVerticalScaleFlowConfig extends StackStatusFinalizerAbstractFlo
     @Override
     public String getDisplayName() {
         return "Vertical scaling on the stack";
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return VERTICAL_SCALE_STARTED;
+        } else if (STACK_VERTICALSCALE_FINISHED_STATE.equals(flowState)) {
+            return VERTICAL_SCALE_FINISHED;
+        } else if (flowState.toString().endsWith("FAILED_STATE")) {
+            return VERTICAL_SCALE_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 
 }

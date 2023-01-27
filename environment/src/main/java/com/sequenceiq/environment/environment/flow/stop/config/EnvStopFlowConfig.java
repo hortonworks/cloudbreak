@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.flow.stop.config;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.SUSPEND_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
 import static com.sequenceiq.environment.environment.flow.stop.EnvStopState.ENV_STOP_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.stop.EnvStopState.ENV_STOP_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.stop.EnvStopState.FINAL_STATE;
@@ -19,14 +23,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseAware;
 import com.sequenceiq.environment.environment.flow.stop.EnvStopState;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class EnvStopFlowConfig extends AbstractFlowConfiguration<EnvStopState, EnvStopStateSelectors>
-        implements RetryableFlowConfiguration<EnvStopStateSelectors> {
+        implements RetryableFlowConfiguration<EnvStopStateSelectors>, EnvironmentUseCaseAware {
 
     private static final List<Transition<EnvStopState, EnvStopStateSelectors>> TRANSITIONS = new Transition.Builder<EnvStopState, EnvStopStateSelectors>()
             .defaultFailureEvent(FAILED_ENV_STOP_EVENT)
@@ -80,5 +87,18 @@ public class EnvStopFlowConfig extends AbstractFlowConfiguration<EnvStopState, E
     @Override
     public EnvStopStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_ENV_STOP_EVENT;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return SUSPEND_STARTED;
+        } else if (ENV_STOP_FINISHED_STATE.equals(flowState)) {
+            return SUSPEND_FINISHED;
+        } else if (ENV_STOP_FAILED_STATE.equals(flowState)) {
+            return SUSPEND_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

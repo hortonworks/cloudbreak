@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestar
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 
-enum ClusterDownscaleState implements FlowState {
+public enum ClusterDownscaleState implements FlowState {
     INIT_STATE,
     COLLECT_CANDIDATES_STATE,
     DECOMMISSION_STATE,
