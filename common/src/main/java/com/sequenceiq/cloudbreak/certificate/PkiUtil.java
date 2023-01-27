@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
@@ -52,6 +53,7 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.signers.PSSSigner;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -233,13 +235,14 @@ public class PkiUtil {
 
     public static KeyPair fromPrivateKeyPem(String privateKeyContent) {
         BufferedReader br = new BufferedReader(new StringReader(privateKeyContent));
+        Security.addProvider(new BouncyCastleProvider());
         try (PEMParser pp = new PEMParser(br)) {
             PEMKeyPair pemKeyPair = (PEMKeyPair) pp.readObject();
             return new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
         } catch (IOException e) {
             LOGGER.info("Cannot parse KeyPair from private key PEM content, skip it. {}", e.getMessage(), e);
-            return null;
         }
+        return null;
     }
 
     public static X509Certificate fromCertificatePem(String certPem) {
