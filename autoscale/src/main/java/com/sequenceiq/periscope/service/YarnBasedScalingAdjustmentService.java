@@ -4,7 +4,6 @@ import static com.sequenceiq.periscope.model.ScalingAdjustmentType.REGULAR;
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.STOPSTART;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -48,31 +47,21 @@ public class YarnBasedScalingAdjustmentService {
     @Inject
     private ScalingEventSender eventSender;
 
-    private LoadAlert loadAlert;
-
-    private LoadAlertConfiguration loadAlertConfiguration;
-
-    private String policyHostGroup;
-
-    private Map<String, String> hostFqdnsToInstanceId;
-
-    private List<String> servicesHealthyInstanceIds;
-
-    private List<String> stoppedHostInstanceIds;
-
     public void pollYarnMetricsAndScaleCluster(Cluster cluster, String pollingUserCrn, boolean stopStartEnabled, StackV4Response stackV4Response)
             throws Exception {
 
-        loadAlert = cluster.getLoadAlerts().iterator().next();
-        policyHostGroup = loadAlert.getScalingPolicy().getHostGroup();
-        loadAlertConfiguration = loadAlert.getLoadAlertConfiguration();
+        LoadAlert loadAlert = cluster.getLoadAlerts().iterator().next();
+        LoadAlertConfiguration loadAlertConfiguration = loadAlert.getLoadAlertConfiguration();
+        String policyHostGroup = loadAlert.getScalingPolicy().getHostGroup();
 
-        hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policyHostGroup);
-        servicesHealthyInstanceIds = stackResponseUtils.getCloudInstanceIdsWithServicesHealthyForHostGroup(stackV4Response, policyHostGroup);
-        stoppedHostInstanceIds = stackResponseUtils.getStoppedCloudInstanceIdsInHostGroup(stackV4Response, policyHostGroup);
+        LoadAlertPolicyHostGroupInstanceInfo policyHostGroupInstanceInfo =
+                new LoadAlertPolicyHostGroupInstanceInfo(loadAlert, policyHostGroup,
+                        stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policyHostGroup),
+                        stackResponseUtils.getCloudInstanceIdsWithServicesHealthyForHostGroup(stackV4Response, policyHostGroup),
+                        stackResponseUtils.getStoppedCloudInstanceIdsInHostGroup(stackV4Response, policyHostGroup));
 
-        int serviceHealthyHostGroupSize = servicesHealthyInstanceIds.size();
-        int existingHostGroupSize = hostFqdnsToInstanceId.size();
+        int serviceHealthyHostGroupSize = policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size();
+        int existingHostGroupSize = policyHostGroupInstanceInfo.getHostFqdnsToInstanceId().size();
 
         int maxResourceValueOffset = loadAlertConfiguration.getMaxResourceValue() - (stopStartEnabled ? serviceHealthyHostGroupSize : existingHostGroupSize);
         int minResourceValueOffset = serviceHealthyHostGroupSize - loadAlertConfiguration.getMinResourceValue();
@@ -82,28 +71,31 @@ public class YarnBasedScalingAdjustmentService {
 
         LOGGER.info("Various counts: hostFqdnsToInstanceId={}, servicesHealthyHostFqdnsToInstanceId: {}, stoppedHostFqdnsToInstanceId: {}, " +
                         "maxResourceValueOffset={}, minResourceValueOffset={}, maxAllowedUpScale={}, maxAllowedDownScale={}",
-                existingHostGroupSize, serviceHealthyHostGroupSize, stoppedHostInstanceIds.size(),
+                existingHostGroupSize, serviceHealthyHostGroupSize, policyHostGroupInstanceInfo.getStoppedHostInstanceIds().size(),
                 maxResourceValueOffset, minResourceValueOffset, maxAllowedUpScale, maxAllowedDownScale);
 
         Optional<Integer> maxDecommissionNodeCount = Optional.of(maxResourceValueOffset)
                 .filter(mandatoryDownscale -> mandatoryDownscale < 0).map(downscale -> -1 * downscale);
 
         YarnScalingServiceV1Response yarnResponse =
-                yarnMetricsClient.getYarnMetricsForCluster(cluster, stackV4Response, policyHostGroup, pollingUserCrn, maxDecommissionNodeCount);
+                yarnMetricsClient.getYarnMetricsForCluster(cluster, stackV4Response, policyHostGroupInstanceInfo.getPolicyHostGroup(),
+                        pollingUserCrn, maxDecommissionNodeCount);
 
         if (cluster.getUpdateFailedDetails() != null && pollingUserCrn.equals(cluster.getMachineUserCrn())) {
             // Successful YARN API call
+            LOGGER.info("Successfully polled YARN with machineUser: {}, resetting UpdateFailedDetails for cluster: {}", cluster.getMachineUserCrn(),
+                    cluster.getStackCrn());
             clusterService.setUpdateFailedDetails(cluster.getId(), null);
         }
 
-        int yarnRecommendedScaleUpCount = yarnResponseUtils.getYarnRecommendedScaleUpCount(yarnResponse, policyHostGroup);
+        int yarnRecommendedScaleUpCount = yarnResponseUtils.getYarnRecommendedScaleUpCount(yarnResponse, policyHostGroupInstanceInfo.getPolicyHostGroup());
         int finalScaleUpCount = IntStream.of(yarnRecommendedScaleUpCount,
                 maxAllowedUpScale, loadAlertConfiguration.getMaxScaleUpStepSize()).min().getAsInt();
 
         int allowedDownscale = maxDecommissionNodeCount.orElse(maxAllowedDownScale);
         allowedDownscale = Math.min(allowedDownscale, loadAlertConfiguration.getMaxScaleDownStepSize());
         List<String> yarnRecommendedDecommissionHosts =
-                yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(yarnResponse, hostFqdnsToInstanceId);
+                yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(yarnResponse, policyHostGroupInstanceInfo.getHostFqdnsToInstanceId());
         List<String> finalHostsToDecommission = yarnRecommendedDecommissionHosts.stream()
                 .limit(allowedDownscale).collect(Collectors.toList());
 
@@ -113,7 +105,7 @@ public class YarnBasedScalingAdjustmentService {
 
         ScalingAdjustmentType adjustmentType = !stopStartEnabled ? REGULAR : STOPSTART;
 
-        publishScalingEventIfNeeded(cluster, finalScaleUpCount, stackV4Response, finalHostsToDecommission, adjustmentType);
+        publishScalingEventIfNeeded(cluster, finalScaleUpCount, stackV4Response, finalHostsToDecommission, adjustmentType, policyHostGroupInstanceInfo);
     }
 
     protected boolean isCoolDownTimeElapsed(String clusterCrn, String coolDownAction, long expectedCoolDownMillis, long lastClusterScalingActivity) {
@@ -130,29 +122,31 @@ public class YarnBasedScalingAdjustmentService {
     }
 
     private void publishScalingEventIfNeeded(Cluster cluster, int finalScaleUpCount, StackV4Response stackV4Response, List<String> hostsToDecommission,
-            ScalingAdjustmentType adjustmentType) {
-        if (upscalable(cluster, finalScaleUpCount))  {
+            ScalingAdjustmentType adjustmentType, LoadAlertPolicyHostGroupInstanceInfo policyHostGroupInstanceInfo)  {
+        LoadAlert loadAlert = policyHostGroupInstanceInfo.getLoadAlert();
+        if (upscalable(cluster, loadAlert.getLoadAlertConfiguration(), finalScaleUpCount)) {
             if (STOPSTART.equals(adjustmentType)) {
-                Integer existingClusterNodeCount = stackV4Response.getNodeCount() - stoppedHostInstanceIds.size();
-                eventSender.sendStopStartScaleUpEvent(loadAlert, existingClusterNodeCount, servicesHealthyInstanceIds.size(), finalScaleUpCount);
-            } else {
-                eventSender.sendScaleUpEvent(loadAlert, stackV4Response.getNodeCount(), hostFqdnsToInstanceId.size(), servicesHealthyInstanceIds.size(),
+                Integer existingClusterNodeCount = stackV4Response.getNodeCount() - policyHostGroupInstanceInfo.getStoppedHostInstanceIds().size();
+                eventSender.sendStopStartScaleUpEvent(loadAlert, existingClusterNodeCount, policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(),
                         finalScaleUpCount);
+            } else {
+                eventSender.sendScaleUpEvent(loadAlert, stackV4Response.getNodeCount(), policyHostGroupInstanceInfo.getHostFqdnsToInstanceId().size(),
+                        policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), finalScaleUpCount);
             }
-        } else if (downscalable(cluster, hostsToDecommission)) {
-            eventSender.sendScaleDownEvent(loadAlert, servicesHealthyInstanceIds.size(), hostsToDecommission, servicesHealthyInstanceIds.size(),
-                    adjustmentType);
+
+        } else if (downscalable(cluster, loadAlert.getLoadAlertConfiguration(), hostsToDecommission)) {
+            eventSender.sendScaleDownEvent(loadAlert, policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), hostsToDecommission,
+                    policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), adjustmentType);
         }
     }
 
-    private boolean upscalable(Cluster cluster, int finalScaleUpCount) {
+    private boolean upscalable(Cluster cluster, LoadAlertConfiguration loadAlertConfiguration, int finalScaleUpCount) {
         return finalScaleUpCount > 0 && isCoolDownTimeElapsed(cluster.getStackCrn(), "scaled-up",
                 loadAlertConfiguration.getScaleUpCoolDownMillis(), cluster.getLastScalingActivity());
     }
 
-    private boolean downscalable(Cluster cluster, List<String> hostsToDecommission) {
+    private boolean downscalable(Cluster cluster, LoadAlertConfiguration loadAlertConfiguration, List<String> hostsToDecommission) {
         return !hostsToDecommission.isEmpty() && isCoolDownTimeElapsed(cluster.getStackCrn(), "scaled-down",
                 loadAlertConfiguration.getScaleDownCoolDownMillis(), cluster.getLastScalingActivity());
     }
-
 }
