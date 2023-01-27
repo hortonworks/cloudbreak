@@ -15,7 +15,7 @@ if [[ `git status --porcelain` ]]; then
   git add .
   git commit -m "[JENKINS-AUTOMATION] Update Base image for $NEW_IMAGE"
   git push origin $BRANCH_NAME
-  git request-pull $BRANCH_NAME https://github.com/hortonworks/cloudbreak.git master
+  docker run --rm -it doktoric/gh-cli:1.0 gh pr create --title "Update Base image for $NEW_IMAGE" --body "Automated Pull request to update base image" --base master --head $BRANCH_NAME
 else
   echo "No new base image from RE DB"
 fi
