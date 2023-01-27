@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.STOP_START_UPSCALE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.STOP_START_UPSCALE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.STOP_START_UPSCALE_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 
 import java.util.Map;
@@ -10,20 +14,23 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
-public class StopStartUpscaleFlowEventChainFactory implements FlowEventChainFactory<StackAndClusterUpscaleTriggerEvent> {
+public class StopStartUpscaleFlowEventChainFactory implements FlowEventChainFactory<StackAndClusterUpscaleTriggerEvent>, ClusterUseCaseAware {
     @Inject
     private StackDtoService stackDtoService;
 
@@ -42,6 +49,21 @@ public class StopStartUpscaleFlowEventChainFactory implements FlowEventChainFact
         addStackSyncTriggerEvent(event, flowEventChain);
         addClusterScaleTriggerEventIfNeeded(event, stackView, flowEventChain);
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum flowState) {
+        if (StopStartUpscaleState.INIT_STATE.equals(flowState)) {
+            return STOP_START_UPSCALE_STARTED;
+        } else if (StopStartUpscaleState.STOPSTART_UPSCALE_FINALIZE_STATE.equals(flowState)) {
+            return STOP_START_UPSCALE_FINISHED;
+        } else if (flowState.toString().endsWith("FAILED_STATE") &&
+                !StopStartUpscaleState.STOPSTART_UPSCALE_START_INSTANCE_FAILED_STATE.equals(flowState) &&
+                !StopStartUpscaleState.STOPSTART_UPSCALE_HOSTS_COMMISSION_FAILED_STATE.equals(flowState)) {
+            return STOP_START_UPSCALE_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 
     // TODO CB-14929: Is a stack sync actually required?

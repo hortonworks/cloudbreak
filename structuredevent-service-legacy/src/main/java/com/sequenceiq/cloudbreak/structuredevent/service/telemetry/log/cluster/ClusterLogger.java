@@ -6,8 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatahubRequestedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatahubStatusChangedConverter;
@@ -42,12 +41,8 @@ public class ClusterLogger implements LegacyTelemetryEventLogger {
 
     @Override
     public void log(StructuredFlowEvent structuredFlowEvent) {
-
-        FlowDetails flow = structuredFlowEvent.getFlow();
-        UsageProto.CDPClusterStatus.Value useCase = clusterUseCaseMapper.useCase(flow);
-        LOGGER.debug("Telemetry use case: {}", useCase);
-
-        if (useCase != UsageProto.CDPClusterStatus.Value.UNSET) {
+        Value useCase = clusterUseCaseMapper.useCase(structuredFlowEvent.getFlow());
+        if (useCase != Value.UNSET) {
             String resourceType = structuredFlowEvent.getOperation().getResourceType();
             if (resourceType != null) {
                 switch (resourceType) {

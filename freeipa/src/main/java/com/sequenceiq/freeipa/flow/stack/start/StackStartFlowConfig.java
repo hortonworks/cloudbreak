@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.stack.start;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.RESUME_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.RESUME_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.RESUME_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.COLLECT_METADATA_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.COLLECT_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.STACK_START_EVENT;
@@ -23,11 +27,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
-public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartState, StackStartEvent> {
+public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartState, StackStartEvent> implements FreeIpaUseCaseAware {
 
     private static final List<Transition<StackStartState, StackStartEvent>> TRANSITIONS = new Builder<StackStartState, StackStartEvent>()
             .defaultFailureEvent(START_FAILURE_EVENT)
@@ -72,5 +79,18 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     @Override
     protected FlowEdgeConfig<StackStartState, StackStartEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return RESUME_STARTED;
+        } else if (START_FINISHED_STATE.equals(flowState)) {
+            return RESUME_FINISHED;
+        } else if (START_FAILED_STATE.equals(flowState)) {
+            return RESUME_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

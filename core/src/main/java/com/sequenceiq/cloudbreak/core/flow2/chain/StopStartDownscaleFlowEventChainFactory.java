@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.STOP_START_DOWNSCALE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.STOP_START_DOWNSCALE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.STOP_START_DOWNSCALE_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 
 import java.util.Map;
@@ -11,20 +15,23 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
-public class StopStartDownscaleFlowEventChainFactory implements FlowEventChainFactory<ClusterAndStackDownscaleTriggerEvent> {
+public class StopStartDownscaleFlowEventChainFactory implements FlowEventChainFactory<ClusterAndStackDownscaleTriggerEvent>, ClusterUseCaseAware {
 
     @Inject
     private StackDtoService stackDtoService;
@@ -63,6 +70,21 @@ public class StopStartDownscaleFlowEventChainFactory implements FlowEventChainFa
         }
 
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum flowState) {
+        if (StopStartDownscaleState.INIT_STATE.equals(flowState)) {
+            return STOP_START_DOWNSCALE_STARTED;
+        } else if (StopStartDownscaleState.STOPSTART_DOWNSCALE_FINALIZE_STATE.equals(flowState)) {
+            return STOP_START_DOWNSCALE_FINISHED;
+        } else if (flowState.toString().endsWith("FAILED_STATE") &&
+                !StopStartDownscaleState.STOPSTART_DOWNSCALE_STOP_INSTANCES_FAILED_STATE.equals(flowState) &&
+                !StopStartDownscaleState.STOPSTART_DOWNSCALE_DECOMMISSION_VIA_CM_FAILED_STATE.equals(flowState)) {
+            return STOP_START_DOWNSCALE_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 
     private void addStackSyncTriggerEvent(ClusterAndStackDownscaleTriggerEvent event, Queue<Selectable> flowEventChain) {

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.diagnostics.config;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_CLEANUP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_FINISHED_STATE;
@@ -35,15 +39,18 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.flow.api.model.operation.OperationType;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DiagnosticsCollectionFlowConfig extends StackStatusFinalizerAbstractFlowConfig<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>
-        implements RetryableFlowConfiguration<DiagnosticsCollectionStateSelectors> {
+        implements RetryableFlowConfiguration<DiagnosticsCollectionStateSelectors>, ClusterUseCaseAware {
 
     private static final List<Transition<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>> TRANSITIONS
             = new Transition.Builder<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>()
@@ -158,5 +165,18 @@ public class DiagnosticsCollectionFlowConfig extends StackStatusFinalizerAbstrac
     @Override
     public DiagnosticsCollectionStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return DIAGNOSTIC_COLLECTION_STARTED;
+        } else if (DIAGNOSTICS_COLLECTION_FINISHED_STATE.equals(flowState)) {
+            return DIAGNOSTIC_COLLECTION_FINISHED;
+        } else if (flowState.toString().endsWith("FAILED_STATE")) {
+            return DIAGNOSTIC_COLLECTION_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

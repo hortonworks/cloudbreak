@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCertificateRenewEvent.CLUSTER_CERTIFICATES_REDEPLOY_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCertificateRenewEvent.CLUSTER_CERTIFICATES_REDEPLOY_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCertificateRenewEvent.CLUSTER_CERTIFICATE_REISSUE_EVENT;
@@ -17,13 +21,16 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class ClusterCertificateRenewFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ClusterCertificateRenewState, ClusterCertificateRenewEvent>
-        implements RetryableFlowConfiguration<ClusterCertificateRenewEvent> {
+        implements RetryableFlowConfiguration<ClusterCertificateRenewEvent>, ClusterUseCaseAware {
 
     private static final List<Transition<ClusterCertificateRenewState, ClusterCertificateRenewEvent>> TRANSITIONS =
             new Transition.Builder<ClusterCertificateRenewState, ClusterCertificateRenewEvent>().defaultFailureEvent(CLUSTER_CERTIFICATE_RENEW_FAILED_EVENT)
@@ -79,5 +86,18 @@ public class ClusterCertificateRenewFlowConfig extends StackStatusFinalizerAbstr
     @Override
     public FlowTriggerCondition getFlowTriggerCondition() {
         return getApplicationContext().getBean(ClusterCertificateRenewTriggerCondition.class);
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return RENEW_PUBLIC_CERT_STARTED;
+        } else if (CLUSTER_CERTIFICATE_RENEWAL_FINISHED_STATE.equals(flowState)) {
+            return RENEW_PUBLIC_CERT_FINISHED;
+        } else if (flowState.toString().endsWith("FAILED_STATE")) {
+            return RENEW_PUBLIC_CERT_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

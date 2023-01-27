@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.REPAIR_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.REPAIR_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.REPAIR_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -25,6 +29,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
@@ -35,6 +40,7 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.embedded.UpgradeEmbeddedDBPreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
@@ -60,6 +66,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -68,11 +75,13 @@ import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeState;
 import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
+import com.sequenceiq.flow.core.chain.init.config.FlowChainInitState;
 import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 
 @Component
-public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory<ClusterRepairTriggerEvent> {
+public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory<ClusterRepairTriggerEvent>, ClusterUseCaseAware {
 
     public static final String DEFAULT_DB_VERSION = "10";
 
@@ -120,6 +129,21 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         RepairConfig repairConfig = createRepairConfig(event, stackDto.getCluster());
         Queue<Selectable> flowTriggers = createFlowTriggers(event, repairConfig, stackDto);
         return new FlowTriggerEventQueue(getName(), event, flowTriggers);
+    }
+
+    @Override
+    public CDPClusterStatus.Value getUseCaseForFlowState(Enum flowState) {
+        if (FlowChainInitState.INIT_STATE.equals(flowState)) {
+            return REPAIR_STARTED;
+        } else if (FlowChainFinalizeState.FLOWCHAIN_FINALIZE_FINISHED_STATE.equals(flowState)) {
+            return REPAIR_FINISHED;
+        } else if (flowState.toString().endsWith("FAILED_STATE") &&
+                !ClusterDownscaleState.DECOMISSION_FAILED_STATE.equals(flowState) &&
+                !ClusterDownscaleState.REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_STATE.equals(flowState)) {
+            return REPAIR_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 
     private RepairConfig createRepairConfig(ClusterRepairTriggerEvent event, ClusterView clusterView) {

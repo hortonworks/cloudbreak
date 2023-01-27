@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.chain;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPGRADE_STARTED;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_EVENT;
 
 import java.util.ArrayList;
@@ -14,14 +18,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeState;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
+import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateState;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
@@ -32,7 +41,7 @@ import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTrig
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 
 @Component
-public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<UpgradeEvent> {
+public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<UpgradeEvent>, FreeIpaUseCaseAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeFlowEventChainFactory.class);
 
@@ -63,6 +72,19 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         flowEventChain.addAll(createScaleEventsAndChangePgw(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
         flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, true, event.getOperationId()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (SaltUpdateState.INIT_STATE.equals(flowState)) {
+            return UPGRADE_STARTED;
+        } else if (FlowChainFinalizeState.FLOWCHAIN_FINALIZE_FINISHED_STATE.equals(flowState)) {
+            return UPGRADE_FINISHED;
+        } else if (flowState.toString().contains("_FAIL")) {
+            return UPGRADE_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 
     private List<Selectable> createScaleEventsAndChangePgw(UpgradeEvent event, int instanceCountForUpscale, int instanceCountForDownscale,

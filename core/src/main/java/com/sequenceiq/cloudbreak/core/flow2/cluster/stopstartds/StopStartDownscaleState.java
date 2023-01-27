@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestar
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 
-enum StopStartDownscaleState implements FlowState {
+public enum StopStartDownscaleState implements FlowState {
 
     INIT_STATE,
     STOPSTART_DOWNSCALE_GET_RECOVERY_CANDIDATES_STATE,

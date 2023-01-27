@@ -189,6 +189,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         }
     }
 
+    public Class<S> getStateType() {
+        return stateType;
+    }
+
     static class MachineConfiguration<S, E> {
         private final StateMachineConfigurationBuilder<S, E> configurationBuilder;
 

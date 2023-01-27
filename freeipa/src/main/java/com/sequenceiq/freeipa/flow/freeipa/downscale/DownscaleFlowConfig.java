@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.DOWNSCALE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.DOWNSCALE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.DOWNSCALE_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.CLUSTERPROXY_REGISTRATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.CLUSTERPROXY_REGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.COLLECT_RESOURCES_FAILED_EVENT;
@@ -59,12 +63,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleState, DownscaleFlowEvent>
-        implements RetryableFlowConfiguration<DownscaleFlowEvent> {
+        implements RetryableFlowConfiguration<DownscaleFlowEvent>, FreeIpaUseCaseAware {
     private static final List<Transition<DownscaleState, DownscaleFlowEvent>> TRANSITIONS =
             new Transition.Builder<DownscaleState, DownscaleFlowEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
@@ -182,5 +189,18 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
     @Override
     public DownscaleFlowEvent getRetryableEvent() {
         return EDGE_CONFIG.getFailureHandled();
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return DOWNSCALE_STARTED;
+        } else if (DOWNSCALE_FINISHED_STATE.equals(flowState)) {
+            return DOWNSCALE_FINISHED;
+        } else if (DOWNSCALE_FAIL_STATE.equals(flowState)) {
+            return DOWNSCALE_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

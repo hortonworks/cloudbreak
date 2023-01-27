@@ -6,8 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeIpaStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.CDPFreeIpaStructuredFlowEventToCDPFreeIpaStatusChangedConverter;
@@ -31,16 +30,13 @@ public class CDPFreeIpaLogger implements CDPTelemetryEventLogger {
 
     @Override
     public void log(CDPStructuredFlowEvent cdpStructuredFlowEvent) {
-
-        FlowDetails flow = cdpStructuredFlowEvent.getFlow();
-        UsageProto.CDPFreeIPAStatus.Value useCase = freeIpaUseCaseMapper.useCase(flow);
-        LOGGER.debug("Telemetry use case: {}", useCase);
-
-        if (cdpStructuredFlowEvent instanceof CDPFreeIpaStructuredFlowEvent &&
-                useCase != UsageProto.CDPFreeIPAStatus.Value.UNSET) {
-            LOGGER.debug("Sending usage report for {}", cdpStructuredFlowEvent.getOperation().getResourceType());
-            usageReporter.cdpFreeIpaStatusChanged(
-                    statusChangedConverter.convert((CDPFreeIpaStructuredFlowEvent) cdpStructuredFlowEvent, useCase));
+        if (cdpStructuredFlowEvent instanceof CDPFreeIpaStructuredFlowEvent) {
+            Value useCase = freeIpaUseCaseMapper.useCase(cdpStructuredFlowEvent.getFlow());
+            if (useCase != Value.UNSET) {
+                LOGGER.debug("Sending usage report for {}", cdpStructuredFlowEvent.getOperation().getResourceType());
+                usageReporter.cdpFreeIpaStatusChanged(
+                        statusChangedConverter.convert((CDPFreeIpaStructuredFlowEvent) cdpStructuredFlowEvent, useCase));
+            }
         }
     }
 }
