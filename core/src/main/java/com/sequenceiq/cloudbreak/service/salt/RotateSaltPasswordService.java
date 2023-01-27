@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.service.salt;
 
 import java.util.List;
 import java.util.Map;
@@ -14,24 +14,19 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.SaltBootstrapVersionChecker;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
-import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
-import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class RotateSaltPasswordService {
@@ -47,9 +42,6 @@ public class RotateSaltPasswordService {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
-
-    @Inject
     private SecurityConfigService securityConfigService;
 
     @Inject
@@ -59,46 +51,10 @@ public class RotateSaltPasswordService {
     private ClusterBootstrapper clusterBootstrapper;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
-    private ReactorFlowManager flowManager;
-
-    public void validateRotateSaltPassword(StackDto stack) {
-        if (stack.getStatus().isStopped()) {
-            throw new BadRequestException("Rotating SaltStack user password is not supported for stopped clusters");
-        }
-        if (!entitlementService.isSaltUserPasswordRotationEnabled(stack.getAccountId())) {
-            throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
-        }
-        if (stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().isEmpty()) {
-            throw new IllegalStateException("Rotating SaltStack user password is not supported when there are no available gateway instances");
-        }
-        if (!isChangeSaltuserPasswordSupported(stack) && stack.getNotTerminatedInstanceMetaData().stream().anyMatch(im -> !im.isRunning())) {
-            // fallback implementation re-bootstraps all nodes, so they have to be running
-            throw new IllegalStateException("Rotating SaltStack user password is only supported when all instances are running");
-        }
-    }
-
-    private boolean isChangeSaltuserPasswordSupported(StackDto stack) {
-        return stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
-                .map(InstanceMetadataView::getImage)
-                .allMatch(image -> saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(image));
-    }
-
-    public FlowIdentifier triggerRotateSaltPassword(StackDto stack, RotateSaltPasswordReason reason) {
-        validateRotateSaltPassword(stack);
-        RotateSaltPasswordType rotateSaltPasswordType = getRotateSaltPasswordType(stack);
-        LOGGER.info("Triggering rotate salt password for stack {} with type {}", stack.getId(), rotateSaltPasswordType);
-        return flowManager.triggerRotateSaltPassword(stack.getId(), reason, rotateSaltPasswordType);
-    }
-
-    private RotateSaltPasswordType getRotateSaltPasswordType(StackDto stack) {
-        return isChangeSaltuserPasswordSupported(stack) ? RotateSaltPasswordType.SALT_BOOTSTRAP_ENDPOINT : RotateSaltPasswordType.FALLBACK;
-    }
+    private RotateSaltPasswordValidator rotateSaltPasswordValidator;
 
     public void rotateSaltPassword(StackDto stack) throws CloudbreakOrchestratorException {
-        validateRotateSaltPassword(stack);
+        rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
         SecurityConfig securityConfig = stack.getSecurityConfig();
         String oldPassword = securityConfig.getSaltSecurityConfig().getSaltPassword();
         String newPassword = PasswordUtil.generatePassword();

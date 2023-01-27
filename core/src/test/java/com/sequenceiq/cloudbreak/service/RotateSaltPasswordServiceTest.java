@@ -30,12 +30,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.SaltBootstrapVersionChecker;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -44,7 +41,8 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.quartz.saltstatuschecker.SaltStatusCheckerConfig;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -71,9 +69,6 @@ class RotateSaltPasswordServiceTest {
     private SecurityConfigService securityConfigService;
 
     @Mock
-    private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
-
-    @Mock
     private EntitlementService entitlementService;
 
     @Mock
@@ -89,10 +84,10 @@ class RotateSaltPasswordServiceTest {
     private StackDto stack;
 
     @Mock
-    private ReactorFlowManager flowManager;
+    private InstanceMetadataView instanceMetadataView;
 
     @Mock
-    private InstanceMetadataView instanceMetadataView;
+    private RotateSaltPasswordValidator rotateSaltPasswordValidator;
 
     @Captor
     private ArgumentCaptor<String> stringArgumentCaptor;
@@ -139,49 +134,10 @@ class RotateSaltPasswordServiceTest {
     }
 
     @Test
-    public void testRotateSaltPasswordOnStoppedStack() {
-        when(stack.getStatus()).thenReturn(Status.STOPPED);
-
-        assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating SaltStack user password is not supported for stopped clusters");
-    }
-
-    @Test
-    public void testRotateSaltPasswordOnStackInAccountWithoutEntitlement() {
-        when(entitlementService.isSaltUserPasswordRotationEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating SaltStack user password is not supported in your account");
-    }
-
-    @Test
-    public void testRotateSaltPasswordOnStackWithoutAvailableGateway() {
-        when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(List.of());
-
-        Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Rotating SaltStack user password is not supported when there are no available gateway instances");
-    }
-
-    @Test
-    public void testRotateSaltPasswordOnStackWithNotRunningInstanceAndFallbackImplementation() {
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setInstanceStatus(InstanceStatus.STOPPED);
-        when(stack.getNotTerminatedInstanceMetaData()).thenReturn(List.of(instanceMetaData));
-
-        Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Rotating SaltStack user password is only supported when all instances are running");
-    }
-
-    @Test
     public void testRotateSaltPasswordOnStackWithNotRunningInstanceAndDefaultImplementation() {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(InstanceStatus.STOPPED);
         lenient().when(stack.getNotTerminatedInstanceMetaData()).thenReturn(List.of(instanceMetaData));
-        when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(any())).thenReturn(true);
 
         Assertions.assertThatCode(() -> underTest.rotateSaltPassword(stack))
                 .doesNotThrowAnyException();
@@ -250,24 +206,6 @@ class RotateSaltPasswordServiceTest {
                         "please remove the user manually with the command 'userdel saltuser' on node(s) [1.1.1.1, 1.1.1.2] and retry the operation.");
 
         verify(securityConfigService, never()).changeSaltPassword(eq(securityConfig), any());
-    }
-
-    @Test
-    void getRotateSaltPasswordTypeFallback() {
-        when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(any())).thenReturn(false);
-
-        underTest.triggerRotateSaltPassword(stack, RotateSaltPasswordReason.MANUAL);
-
-        verify(flowManager).triggerRotateSaltPassword(stack.getId(), RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.FALLBACK);
-    }
-
-    @Test
-    void getRotateSaltPasswordTypeSaltBootstrapEndpoint() {
-        when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(any())).thenReturn(true);
-
-        underTest.triggerRotateSaltPassword(stack, RotateSaltPasswordReason.MANUAL);
-
-        verify(flowManager).triggerRotateSaltPassword(stack.getId(), RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.SALT_BOOTSTRAP_ENDPOINT);
     }
 
     @Test

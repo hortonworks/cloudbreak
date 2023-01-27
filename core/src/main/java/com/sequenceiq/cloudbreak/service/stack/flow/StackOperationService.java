@@ -48,14 +48,15 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
-import com.sequenceiq.cloudbreak.service.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
+import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -117,7 +118,10 @@ public class StackOperationService {
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     @Inject
-    private RotateSaltPasswordService rotateSaltPasswordService;
+    private RotateSaltPasswordTriggerService rotateSaltPasswordTriggerService;
+
+    @Inject
+    private RotateSaltPasswordValidator rotateSaltPasswordValidator;
 
     @Inject
     private SaltPasswordStatusService saltPasswordStatusService;
@@ -459,8 +463,8 @@ public class StackOperationService {
     public FlowIdentifier rotateSaltPassword(@NotNull NameOrCrn nameOrCrn, String accountId, RotateSaltPasswordReason reason) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        rotateSaltPasswordService.validateRotateSaltPassword(stack);
-        return rotateSaltPasswordService.triggerRotateSaltPassword(stack, reason);
+        rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
+        return rotateSaltPasswordTriggerService.triggerRotateSaltPassword(stack, reason);
     }
 
     public SaltPasswordStatus getSaltPasswordStatus(@NotNull NameOrCrn nameOrCrn, String accountId) {
