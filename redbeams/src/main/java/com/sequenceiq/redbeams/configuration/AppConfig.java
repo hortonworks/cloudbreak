@@ -2,8 +2,11 @@ package com.sequenceiq.redbeams.configuration;
 
 import static com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService.DELAYED_TASK_EXECUTOR;
 
+import java.io.IOException;
+import java.security.Security;
 import java.util.concurrent.ScheduledExecutorService;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -71,6 +74,11 @@ public class AppConfig implements ResourceLoaderAware {
     private MeterRegistry meterRegistry;
 
     private ResourceLoader resourceLoader;
+
+    @PostConstruct
+    public void init() throws IOException {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+    }
 
     @Bean
     public AsyncTaskExecutor intermediateBuilderExecutor() {

@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -247,14 +249,17 @@ public class FreeIpaClientBuilder {
     }
 
     private SSLContext setupSSLContext(String clientCert, String clientKey, String serverCert) throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        SSLContext context;
         if (StringUtils.isNoneBlank(clientCert, clientKey, serverCert)) {
-            return SSLContexts.custom()
+            context = SSLContexts.custom()
                     .loadTrustMaterial(KeystoreUtils.createTrustStore(serverCert), null)
                     .loadKeyMaterial(KeystoreUtils.createKeyStore(clientCert, clientKey), "consul".toCharArray())
                     .build();
         } else {
-            return CertificateTrustManager.sslContext();
+            context = CertificateTrustManager.sslContext();
         }
+        return context;
     }
 
     private URL getIpaUrl(String apiAddress, int port, String basePath, String context) throws MalformedURLException {

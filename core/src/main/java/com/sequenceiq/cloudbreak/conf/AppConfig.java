@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService.
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -138,6 +139,8 @@ public class AppConfig implements ResourceLoaderAware {
 
     @PostConstruct
     public void init() throws IOException {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
         ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
         PropertySourceLoader load = new YamlPropertySourceLoader();
         for (Resource resource : patternResolver.getResources("classpath*:*-images.yml")) {
