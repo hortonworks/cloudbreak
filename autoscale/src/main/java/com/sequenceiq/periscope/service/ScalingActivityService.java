@@ -3,25 +3,29 @@ package com.sequenceiq.periscope.service;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
 import static com.sequenceiq.periscope.api.model.ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS;
+import static com.sequenceiq.periscope.api.model.ActivityStatus.SCALING_FLOW_IN_PROGRESS;
 import static com.sequenceiq.periscope.api.model.ActivityStatus.UPSCALE_TRIGGER_SUCCESS;
 import static com.sequenceiq.periscope.service.NotFoundException.notFound;
+import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.MINUTES;
+
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -91,11 +95,13 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
         return scalingActivityRepository.save(scalingActivity);
     }
 
-    public void updateWithFlowIdAndTriggerStatus(FlowIdentifier flowIdentifier, String operationId, ActivityStatus activityStatus, String clusterCrn) {
-        ScalingActivity scalingActivity = findByOperationIdAndClusterCrn(operationId, clusterCrn);
+    public void update(Long activityId, FlowIdentifier flowIdentifier, ActivityStatus activityStatus, String reason) {
+        ScalingActivity scalingActivity = scalingActivityRepository.findById(activityId)
+                .orElseThrow(NotFoundException.notFound("ScalingActivity", activityId));
         scalingActivity.setFlowId(flowIdentifier.getPollableId());
         scalingActivity.setActivityStatus(activityStatus);
-        LOGGER.info("Updating ScalingActivity: {} with FlowInformation and ActivityStatus: {}", operationId, activityStatus);
+        scalingActivity.setScalingActivityReason(reason);
+        LOGGER.info("Updating ScalingActivity: {} with FlowInformation and ActivityStatus: {}", activityId, activityStatus);
         save(scalingActivity);
     }
 
@@ -104,21 +110,33 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
         return scalingActivityRepository.findByOperationIdAndClusterCrn(operationId, clusterCrn).orElseThrow(notFound("ScalingActivity", operationId));
     }
 
-    public List<Long> findAllIdsOlderThanDurationForCluster(Cluster cluster, long durationInMinutes) {
-        Date startTimeBefore = Date.from(Instant.now().minus(durationInMinutes, MINUTES));
-        return scalingActivityRepository.findAllByClusterWithStartTimeBefore(cluster.getId(), startTimeBefore)
-                .stream().map(ScalingActivity::getId).collect(Collectors.toList());
+    public void setEndTime(Long scalingActivityId, long endTimeMillis) {
+        scalingActivityRepository.setEndTimeForScalingActivity(scalingActivityId, new Date(endTimeMillis));
+    }
+
+    public void setActivityStatusForIds(Collection<Long> ids, ActivityStatus status) {
+        scalingActivityRepository.setActivityStatusesInIds(ids, status);
+    }
+
+    public void setActivityStatusAndReasonForIds(Collection<Long> ids, ActivityStatus status, String message) {
+        scalingActivityRepository.setActivityStatusAndReasonInIds(ids, status, message);
+    }
+
+    public void setEndTimes(Map<Long, Long> idsWithCompletedFlows) {
+        List<ScalingActivity> activities = newArrayList(scalingActivityRepository.findAllById(idsWithCompletedFlows.keySet()));
+        activities.forEach(sc -> sc.setEndTime(new Date(idsWithCompletedFlows.get(sc.getId()))));
+        scalingActivityRepository.saveAll(activities);
     }
 
     public List<ScalingActivity> findAllInGivenDurationForCluster(NameOrCrn clusterNameOrCrn, long durationInMinutes, Pageable pageable) {
-        Date startTimeAfter = Date.from(Instant.now().minus(durationInMinutes, MINUTES));
+        Date startTimeAfter = Date.from(now().minus(durationInMinutes, MINUTES));
         return clusterNameOrCrn.hasName() ?
                 scalingActivityRepository.findAllByClusterNameWithStartTimeAfter(clusterNameOrCrn.getName(), startTimeAfter, pageable) :
                 scalingActivityRepository.findAllByClusterCrnWithStartTimeAfter(clusterNameOrCrn.getCrn(), startTimeAfter, pageable);
     }
 
     public List<ScalingActivity> findAllByFailedStatusesInGivenDuration(NameOrCrn clusterNameOrCrn, long durationInMinutes, Pageable pageable) {
-        Date startTimeAfter = Date.from(Instant.now().minus(durationInMinutes, MINUTES));
+        Date startTimeAfter = Date.from(now().minus(durationInMinutes, MINUTES));
         return clusterNameOrCrn.hasName() ?
                 scalingActivityRepository.findAllByClusterNameAndInStatusesWithTimeAfter(clusterNameOrCrn.getName(),
                         newArrayList(ActivityStatus.DOWNSCALE_TRIGGER_FAILED, ActivityStatus.UPSCALE_TRIGGER_FAILED, ActivityStatus.METRICS_COLLECTION_FAILED,
@@ -136,24 +154,17 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
                 scalingActivityRepository.findAllByClusterCrnBetweenInterval(clusterNameOrCrn.getCrn(), startTimeFrom, startTimeUntil, pageable);
     }
 
-    public List<ScalingActivity> findAllScalingActivityWithStatusesForCluster(Cluster cluster, Collection<ActivityStatus> statuses) {
-        return scalingActivityRepository.findAllByClusterAndInStatuses(cluster.getId(), statuses);
+    public List<ScalingActivity> findAllByIds(Collection<Long> ids) {
+        return newArrayList(scalingActivityRepository.findAllById(ids));
     }
 
-    public List<Long> findAllIdsOfSuccessfulScalingActivityForCluster(Cluster cluster) {
-        return findAllScalingActivityWithStatusesForCluster(cluster, newArrayList(UPSCALE_TRIGGER_SUCCESS, DOWNSCALE_TRIGGER_SUCCESS))
-                .stream().map(ScalingActivity::getId).collect(Collectors.toList());
-    }
-
-    public List<ScalingActivity> findAllByStatusBetweenIntervalForCluster(Cluster cluster, ActivityStatus status, long timestampFrom,
-            long timestampUntil) {
-        Date startTimeUntil = Date.from(Instant.ofEpochMilli(timestampUntil));
-        Date startTimeFrom = Date.from(Instant.ofEpochMilli(timestampFrom));
-        return scalingActivityRepository.findAllByClusterAndActivityStatusBetweenInterval(cluster.getId(), status, startTimeFrom, startTimeUntil);
+    public Set<Long> findAllIdsOfSuccessfulAndInProgressScalingActivity() {
+        return Sets.newConcurrentHashSet(scalingActivityRepository.findAllIdsInActivityStatuses(newArrayList(UPSCALE_TRIGGER_SUCCESS,
+                DOWNSCALE_TRIGGER_SUCCESS, SCALING_FLOW_IN_PROGRESS), Sort.by("startTime")));
     }
 
     public Set<Long> findAllInStatusesThatStartedBefore(Collection<ActivityStatus> statuses, long durationInHours) {
-        Date startTimeFrom = new Date(Instant.now().minus(durationInHours, ChronoUnit.HOURS).toEpochMilli());
+        Date startTimeFrom = new Date(now().minus(durationInHours, ChronoUnit.HOURS).toEpochMilli());
         return Sets.newConcurrentHashSet(scalingActivityRepository.findAllIdsInActivityStatusesWithStartTimeBefore(statuses, startTimeFrom));
     }
 

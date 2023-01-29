@@ -21,6 +21,8 @@ public class ScalingEvent extends ApplicationEvent {
 
     private transient Integer existingServiceHealthyHostGroupNodeCount;
 
+    private transient Long activityId;
+
     private transient ScalingAdjustmentType scalingAdjustmentType;
 
     public ScalingEvent(BaseAlert alert) {
@@ -77,5 +79,13 @@ public class ScalingEvent extends ApplicationEvent {
 
     public void setScalingAdjustmentType(ScalingAdjustmentType scalingAdjustmentType) {
         this.scalingAdjustmentType = scalingAdjustmentType;
+    }
+
+    public Long getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(Long activityId) {
+        this.activityId = activityId;
     }
 }

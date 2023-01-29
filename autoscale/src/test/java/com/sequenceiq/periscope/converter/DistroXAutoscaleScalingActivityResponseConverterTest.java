@@ -5,8 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.EnumSet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,7 +21,7 @@ import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.ScalingActivity;
 
 @ExtendWith(MockitoExtension.class)
-public class DistroXAutoscaleScalingActivityResponseConverterTest {
+class DistroXAutoscaleScalingActivityResponseConverterTest {
 
     private static final String TEST_OPERATION_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
 
@@ -34,7 +35,13 @@ public class DistroXAutoscaleScalingActivityResponseConverterTest {
     private DistroXAutoscaleScalingActivityResponseConverter underTest = new DistroXAutoscaleScalingActivityResponseConverter();
 
     @Test
-    public void testConvertScalingActivityToResponse() {
+    void testAllActivityStatusesNeedToBeMapped() {
+        EnumSet<ActivityStatus> allStatuses = EnumSet.allOf(ActivityStatus.class);
+        assertThat(allStatuses).hasSameElementsAs(underTest.getActivityStatusMap().keySet());
+    }
+
+    @Test
+    void testConvertScalingActivityToResponse() {
         Cluster testCluster = getACluster();
         ScalingActivity testScalingActivity = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_SUCCESS, Instant.now().toEpochMilli(),
                 Instant.now().minus(30, MINUTES).toEpochMilli());

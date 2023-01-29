@@ -25,37 +25,40 @@ public class ScalingEventSender {
     private EventPublisher eventPublisher;
 
     public void sendScaleUpEvent(BaseAlert baseAlert, Integer existingClusterNodeCount, Integer existingHostGroupSize, Integer servicesHealthyHostGroupSize,
-            Integer targetScaleUpCount) {
+            Integer targetScaleUpCount, Long scalingActivityId) {
         ScalingEvent scalingEvent = new ScalingEvent(baseAlert);
         scalingEvent.setExistingHostGroupNodeCount(existingHostGroupSize);
         scalingEvent.setExistingServiceHealthyHostGroupNodeCount(servicesHealthyHostGroupSize);
         scalingEvent.setExistingClusterNodeCount(existingClusterNodeCount);
         scalingEvent.setDesiredAbsoluteHostGroupNodeCount(existingHostGroupSize + targetScaleUpCount);
         scalingEvent.setScalingAdjustmentType(REGULAR);
+        scalingEvent.setActivityId(scalingActivityId);
         LOGGER.info("Triggering scaleUp event: {} for cluster: {}", scalingEvent, baseAlert.getCluster().getStackCrn());
         eventPublisher.publishEvent(scalingEvent);
     }
 
     public void sendStopStartScaleUpEvent(BaseAlert baseAlert, Integer existingClusterNodeCount, Integer servicesHealthyHostGroupSize,
-            Integer targetScaleUpCount) {
+            Integer targetScaleUpCount, Long scalingActivityId) {
         ScalingEvent scalingEvent = new ScalingEvent(baseAlert);
         scalingEvent.setExistingHostGroupNodeCount(servicesHealthyHostGroupSize);
         scalingEvent.setExistingServiceHealthyHostGroupNodeCount(servicesHealthyHostGroupSize);
         scalingEvent.setExistingClusterNodeCount(existingClusterNodeCount);
         scalingEvent.setDesiredAbsoluteHostGroupNodeCount(servicesHealthyHostGroupSize + targetScaleUpCount);
         scalingEvent.setScalingAdjustmentType(STOPSTART);
+        scalingEvent.setActivityId(scalingActivityId);
         LOGGER.info("Triggering stop-start scaleUp event: {} for cluster: {}", scalingEvent, baseAlert.getCluster().getStackCrn());
         eventPublisher.publishEvent(scalingEvent);
     }
 
     public void sendScaleDownEvent(BaseAlert baseAlert, Integer existingHostGroupSize, List<String> hostsToDecommission,
-            Integer servicesHealthyHostGroupSize, ScalingAdjustmentType adjustmentType) {
+            Integer servicesHealthyHostGroupSize, ScalingAdjustmentType adjustmentType, Long scalingActivityId) {
         ScalingEvent scalingEvent = new ScalingEvent(baseAlert);
         scalingEvent.setExistingHostGroupNodeCount(existingHostGroupSize);
         scalingEvent.setExistingServiceHealthyHostGroupNodeCount(servicesHealthyHostGroupSize);
         scalingEvent.setDesiredAbsoluteHostGroupNodeCount(existingHostGroupSize - hostsToDecommission.size());
         scalingEvent.setDecommissionNodeIds(hostsToDecommission);
         scalingEvent.setScalingAdjustmentType(adjustmentType);
+        scalingEvent.setActivityId(scalingActivityId);
         LOGGER.info("Triggering scaleDown event: {} for cluster: {}", scalingEvent, baseAlert.getCluster().getStackCrn());
         eventPublisher.publishEvent(scalingEvent);
     }

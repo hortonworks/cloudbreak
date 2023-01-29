@@ -34,6 +34,32 @@ public class MessageCode {
 
     public static final String AUTOSCALING_TRIGGER_FAILURE = "autoscale.trigger.failure";
 
+    public static final String AUTOSCALE_YARN_RECOMMENDATION_SUCCESS = "autoscale.yarn.recommendation.success";
+
+    public static final String AUTOSCALE_YARN_RECOMMENDATION_FAILED = "autoscale.yarn.recommendation.failure";
+
+    public static final String AUTOSCALE_UPSCALE_TRIGGER_SUCCESS = "autoscale.upscale.trigger.success";
+
+    public static final String AUTOSCALE_DOWNSCALE_TRIGGER_SUCCESS_NODE_LIST = "autoscale.downscale.trigger.success.node.list";
+
+    public static final String AUTOSCALE_DOWNSCALE_TRIGGER_SUCCESS = "autoscale.downscale.trigger.success";
+
+    public static final String AUTOSCALE_UPSCALE_TRIGGER_FAILURE = "autoscale.upscale.trigger.failure";
+
+    public static final String AUTOSCALE_DOWNSCALE_TRIGGER_FAILURE = "autoscale.downscale.trigger.failure";
+
+    public static final String AUTOSCALE_SCHEDULE_BASED_UPSCALE = "autoscale.time.based.upscale";
+
+    public static final String AUTOSCALE_SCHEDULE_BASED_DOWNSCALE = "autoscale.time.based.downscale";
+
+    public static final String AUTOSCALE_MANDATORY_UPSCALE = "autoscale.mandatory.upscale";
+
+    public static final String AUTOSCALE_MANDATORY_DOWNSCALE = "autoscale.mandatory.downscale";
+
+    public static final String AUTOSCALE_SCALING_FLOW_FAILED = "autoscale.scaling.flow.failure";
+
+    public static final String AUTOSCALE_SCALING_ACTIVITY_UNKNOWN = "autoscale.scaling.activity.unknown";
+
     public static final String SCHEDULE_CONFIG_OVERLAPS = "autoscale.schedule.config.overlap";
 
     public static final String CLUSTER_EXISTS_FOR_CRN = "autoscale.cluster.exists.for.crn";

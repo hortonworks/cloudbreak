@@ -67,6 +67,8 @@ periscope:
       enabled: true
     cleanup-monitor:
       enabled: true
+    update-monitor:
+      enabled: true
   scaling-activity:
     cleanup-event-age.hours: 24
 

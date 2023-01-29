@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -38,12 +39,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
+import com.sequenceiq.periscope.domain.ScalingActivity;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.model.ScalingAdjustmentType;
 import com.sequenceiq.periscope.model.adjustment.MandatoryScalingAdjustmentParameters;
@@ -62,6 +67,8 @@ class StopStartScalingAdjustmentServiceTest {
     private static final Long CLUSTER_ID = 1L;
 
     private static final String STACK_CRN = "crn:cdp:datahub:us-west-1:9d74eee4-1cad-46d7-b645-7ccf9edbb73d:cluster:1ce07c57-74be-4egd-820d-e81a98d9e151";
+
+    private static final String TEST_MESSAGE = " test message";
 
     private static final Integer COOLDOWN_MINUTES = 2;
 
@@ -85,6 +92,15 @@ class StopStartScalingAdjustmentServiceTest {
 
     @Mock
     private EventPublisher eventPublisher;
+
+    @Mock
+    private ScalingActivityService scalingActivityService;
+
+    @Mock
+    private Clock clock;
+
+    @Mock
+    private CloudbreakMessagesService messagesService;
 
     @Captor
     private ArgumentCaptor<ScalingEvent> eventCaptor;
@@ -233,10 +249,15 @@ class StopStartScalingAdjustmentServiceTest {
     }
 
     private void setupBasicMocks(YarnScalingServiceV1Response yarnResponse) throws Exception {
-        lenient().doCallRealMethod().when(scalingEventSender).sendScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt(), anyInt());
-        lenient().doCallRealMethod().when(scalingEventSender).sendStopStartScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt());
+        ScalingActivity scalingActivity = mock(ScalingActivity.class);
+
+        lenient().doCallRealMethod().when(scalingEventSender).sendScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt(), anyInt(), anyLong());
+        lenient().doCallRealMethod().when(scalingEventSender).sendStopStartScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt(), anyLong());
         lenient().doCallRealMethod().when(scalingEventSender).sendScaleDownEvent(any(BaseAlert.class), anyInt(), anyList(), anyInt(),
-                any(ScalingAdjustmentType.class));
+                any(ScalingAdjustmentType.class), anyLong());
+        lenient().doReturn(TEST_MESSAGE).when(messagesService).getMessageWithArgs(anyString(), any());
+        lenient().doCallRealMethod().when(clock).getCurrentTimeMillis();
+        lenient().doReturn(scalingActivity).when(scalingActivityService).create(any(Cluster.class), any(ActivityStatus.class), anyString(), anyLong());
         doCallRealMethod().when(stackResponseUtils).getCloudInstanceIdsForHostGroup(any(StackV4Response.class), anyString());
         doCallRealMethod().when(stackResponseUtils).getCloudInstanceIdsWithServicesHealthyForHostGroup(any(StackV4Response.class), anyString());
         doCallRealMethod().when(stackResponseUtils).getStoppedCloudInstanceIdsInHostGroup(any(StackV4Response.class), anyString());

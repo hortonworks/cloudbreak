@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.service;
 
+import static com.sequenceiq.periscope.api.model.ActivityStatus.METRICS_COLLECTION_SUCCESS;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_YARN_RECOMMENDATION_SUCCESS;
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.REGULAR;
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.STOPSTART;
 
@@ -15,9 +17,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
+import com.sequenceiq.periscope.domain.ScalingActivity;
 import com.sequenceiq.periscope.model.ScalingAdjustmentType;
 import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Response;
 import com.sequenceiq.periscope.monitor.client.YarnMetricsClient;
@@ -32,8 +37,21 @@ public class YarnBasedScalingAdjustmentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(YarnBasedScalingAdjustmentService.class);
 
+    private static final String UPSCALE_MESSAGE = "Proceeding with cluster upscale";
+
+    private static final String DOWNSCALE_MESSAGE = "Proceeding with cluster downscale";
+
     @Inject
     private YarnResponseUtils yarnResponseUtils;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private ScalingActivityService scalingActivityService;
+
+    @Inject
+    private Clock clock;
 
     @Inject
     private StackResponseUtils stackResponseUtils;
@@ -99,13 +117,16 @@ public class YarnBasedScalingAdjustmentService {
         List<String> finalHostsToDecommission = yarnRecommendedDecommissionHosts.stream()
                 .limit(allowedDownscale).collect(Collectors.toList());
 
+        String yarnRecommendationMessage = messagesService.getMessageWithArgs(AUTOSCALE_YARN_RECOMMENDATION_SUCCESS, yarnRecommendedScaleUpCount,
+                yarnRecommendedDecommissionHosts, finalScaleUpCount, finalHostsToDecommission);
         LOGGER.info("yarnRecommendedScaleUpCount={}, yarnRecommendedDecommission={}, determinedScaleUpCount (based on step-size and maxAllowedUpscale): {}, " +
                         "determinedDecommissionHosts (based on step-size and maxAllowedDownscale): {}",
                 yarnRecommendedScaleUpCount, yarnRecommendedDecommissionHosts, finalScaleUpCount, finalHostsToDecommission);
 
         ScalingAdjustmentType adjustmentType = !stopStartEnabled ? REGULAR : STOPSTART;
 
-        publishScalingEventIfNeeded(cluster, finalScaleUpCount, stackV4Response, finalHostsToDecommission, adjustmentType, policyHostGroupInstanceInfo);
+        publishScalingEventIfNeeded(cluster, finalScaleUpCount, stackV4Response, finalHostsToDecommission, adjustmentType, policyHostGroupInstanceInfo,
+                yarnRecommendationMessage);
     }
 
     protected boolean isCoolDownTimeElapsed(String clusterCrn, String coolDownAction, long expectedCoolDownMillis, long lastClusterScalingActivity) {
@@ -122,21 +143,25 @@ public class YarnBasedScalingAdjustmentService {
     }
 
     private void publishScalingEventIfNeeded(Cluster cluster, int finalScaleUpCount, StackV4Response stackV4Response, List<String> hostsToDecommission,
-            ScalingAdjustmentType adjustmentType, LoadAlertPolicyHostGroupInstanceInfo policyHostGroupInstanceInfo)  {
+            ScalingAdjustmentType adjustmentType, LoadAlertPolicyHostGroupInstanceInfo policyHostGroupInstanceInfo, String yarnRecommendationMessage) {
         LoadAlert loadAlert = policyHostGroupInstanceInfo.getLoadAlert();
+        StringBuilder sb = new StringBuilder(yarnRecommendationMessage);
         if (upscalable(cluster, loadAlert.getLoadAlertConfiguration(), finalScaleUpCount)) {
+            ScalingActivity scalingActivity =
+                    scalingActivityService.create(cluster, METRICS_COLLECTION_SUCCESS, sb.append(UPSCALE_MESSAGE).toString(), clock.getCurrentTimeMillis());
             if (STOPSTART.equals(adjustmentType)) {
                 Integer existingClusterNodeCount = stackV4Response.getNodeCount() - policyHostGroupInstanceInfo.getStoppedHostInstanceIds().size();
                 eventSender.sendStopStartScaleUpEvent(loadAlert, existingClusterNodeCount, policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(),
-                        finalScaleUpCount);
+                        finalScaleUpCount, scalingActivity.getId());
             } else {
                 eventSender.sendScaleUpEvent(loadAlert, stackV4Response.getNodeCount(), policyHostGroupInstanceInfo.getHostFqdnsToInstanceId().size(),
-                        policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), finalScaleUpCount);
+                        policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), finalScaleUpCount, scalingActivity.getId());
             }
-
         } else if (downscalable(cluster, loadAlert.getLoadAlertConfiguration(), hostsToDecommission)) {
+            ScalingActivity scalingActivity = scalingActivityService.create(cluster, METRICS_COLLECTION_SUCCESS, sb.append(DOWNSCALE_MESSAGE).toString(),
+                    clock.getCurrentTimeMillis());
             eventSender.sendScaleDownEvent(loadAlert, policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), hostsToDecommission,
-                    policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), adjustmentType);
+                    policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), adjustmentType, scalingActivity.getId());
         }
     }
 
