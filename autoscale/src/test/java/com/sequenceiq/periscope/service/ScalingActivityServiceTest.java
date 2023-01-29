@@ -6,6 +6,7 @@ import static com.sequenceiq.periscope.api.model.ActivityStatus.SCALING_FLOW_SUC
 import static com.sequenceiq.periscope.api.model.ActivityStatus.UPSCALE_TRIGGER_SUCCESS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -38,7 +39,11 @@ class ScalingActivityServiceTest {
 
     private static final String TEST_OPERATION_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
 
+    private static final Long TEST_ACTIVITY_ID = 1L;
+
     private static final String TEST_ACTIVITY_REASON = "triggerReason";
+
+    private static final String TEST_ACTIVITY_REASON_2 = "triggerReason2";
 
     private static final String TEST_FLOW_ID = "36d52d56-bcc7-434a-8468-1d2d66eba0a9";
 
@@ -78,10 +83,10 @@ class ScalingActivityServiceTest {
     void testUpdateWithFlowDetails() {
         ActivityStatus newStatus = SCALING_FLOW_IN_PROGRESS;
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, TEST_FLOW_ID);
-        ScalingActivity scalingActivity = createScalingActivity(getCluster(), UPSCALE_TRIGGER_SUCCESS, TEST_ACTIVITY_REASON, null);
-        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByOperationIdAndClusterCrn(anyString(), anyString());
+        ScalingActivity scalingActivity = createScalingActivity(TEST_ACTIVITY_ID, getCluster(), UPSCALE_TRIGGER_SUCCESS, TEST_ACTIVITY_REASON, null);
+        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findById(anyLong());
 
-        underTest.updateWithFlowIdAndTriggerStatus(flowIdentifier, TEST_OPERATION_ID, newStatus, CLOUDBREAK_STACK_CRN);
+        underTest.update(TEST_ACTIVITY_ID, flowIdentifier, newStatus, TEST_ACTIVITY_REASON_2);
 
         verify(scalingActivityRepository, times(1)).save(captor.capture());
         ScalingActivity result = captor.getValue();
@@ -89,11 +94,12 @@ class ScalingActivityServiceTest {
         assertThat(result).isInstanceOf(ScalingActivity.class);
         assertThat(result.getActivityStatus()).isEqualTo(newStatus);
         assertThat(result.getFlowId()).isEqualTo(TEST_FLOW_ID);
+        assertThat(result.getScalingActivityReason()).isEqualTo(TEST_ACTIVITY_REASON_2);
     }
 
     @Test
     void testFindByOperationId() {
-        ScalingActivity scalingActivity = createScalingActivity(getCluster(), SCALING_FLOW_SUCCESS, TEST_ACTIVITY_REASON, TEST_FLOW_ID);
+        ScalingActivity scalingActivity = createScalingActivity(TEST_ACTIVITY_ID, getCluster(), SCALING_FLOW_SUCCESS, TEST_ACTIVITY_REASON, TEST_FLOW_ID);
         doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByOperationIdAndClusterCrn(anyString(), anyString());
 
         ScalingActivity result = underTest.findByOperationIdAndClusterCrn(TEST_OPERATION_ID, CLOUDBREAK_STACK_CRN);
@@ -117,8 +123,9 @@ class ScalingActivityServiceTest {
         return cluster;
     }
 
-    private ScalingActivity createScalingActivity(Cluster cluster, ActivityStatus status, String reason, String flowId) {
+    private ScalingActivity createScalingActivity(Long id, Cluster cluster, ActivityStatus status, String reason, String flowId) {
         ScalingActivity scalingActivity = new ScalingActivity();
+        scalingActivity.setId(id);
         scalingActivity.setActivityStatus(status);
         scalingActivity.setCluster(cluster);
         scalingActivity.setScalingActivityReason(reason);

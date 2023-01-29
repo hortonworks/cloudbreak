@@ -1,5 +1,11 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
+import static com.sequenceiq.periscope.api.model.ActivityStatus.METRICS_COLLECTION_FAILED;
+import static com.sequenceiq.periscope.api.model.ActivityStatus.SCHEDULE_BASED_DOWNSCALE;
+import static com.sequenceiq.periscope.api.model.ActivityStatus.SCHEDULE_BASED_UPSCALE;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_SCHEDULE_BASED_DOWNSCALE;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_SCHEDULE_BASED_UPSCALE;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_YARN_RECOMMENDATION_FAILED;
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.REGULAR;
 import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAULT_MAX_SCALE_DOWN_STEP_SIZE;
 
@@ -21,11 +27,14 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ScalingActivity;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.domain.UpdateFailedDetails;
@@ -41,6 +50,7 @@ import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.HistoryService;
+import com.sequenceiq.periscope.service.ScalingActivityService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
@@ -82,10 +92,16 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     private StackResponseUtils stackResponseUtils;
 
     @Inject
+    private ScalingActivityService scalingActivityService;
+
+    @Inject
     private ScalingPolicyTargetCalculator scalingPolicyTargetCalculator;
 
     @Inject
     private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private Clock clock;
 
     private long clusterId;
 
@@ -153,20 +169,26 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
 
     private void publish(TimeAlert alert) {
         ScalingEvent event = new ScalingEvent(alert);
+        String scalingActivityMsg;
 
         StackV4Response stackV4Response = cloudbreakCommunicator.getByCrn(alert.getCluster().getStackCrn());
         int hostGroupNodeCount = stackResponseUtils.getNodeCountForHostGroup(stackV4Response, alert.getScalingPolicy().getHostGroup());
         int desiredAbsoluteNodeCount = scalingPolicyTargetCalculator.getDesiredAbsoluteNodeCount(event, hostGroupNodeCount);
         int targetIncrementNodeCount = desiredAbsoluteNodeCount - hostGroupNodeCount;
+        ActivityStatus status = SCHEDULE_BASED_UPSCALE;
 
         event.setExistingHostGroupNodeCount(hostGroupNodeCount);
         event.setDesiredAbsoluteHostGroupNodeCount(desiredAbsoluteNodeCount);
         event.setExistingClusterNodeCount(stackV4Response.getNodeCount());
         event.setScalingAdjustmentType(REGULAR);
+        scalingActivityMsg = messagesService.getMessageWithArgs(AUTOSCALE_SCHEDULE_BASED_UPSCALE, targetIncrementNodeCount);
         if (targetIncrementNodeCount < 0) {
             populateDecommissionCandidates(event, stackV4Response, alert.getCluster(), alert.getScalingPolicy(), -targetIncrementNodeCount);
+            status = SCHEDULE_BASED_DOWNSCALE;
+            scalingActivityMsg = messagesService.getMessageWithArgs(AUTOSCALE_SCHEDULE_BASED_DOWNSCALE, event.getDecommissionNodeIds());
         }
-
+        ScalingActivity scalingActivity = scalingActivityService.create(alert.getCluster(), status, scalingActivityMsg, clock.getCurrentTimeMillis());
+        event.setActivityId(scalingActivity.getId());
         eventPublisher.publishEvent(event);
         LOGGER.debug("Time alert '{}' triggered  for cluster '{}'", alert.getName(), alert.getCluster().getStackCrn());
     }
@@ -186,6 +208,9 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
         } catch (Exception ex) {
             LOGGER.error("Error retrieving decommission candidates for  policy '{}', adjustment type '{}', cluster '{}'",
                     policy.getName(), policy.getAdjustmentType(), cluster.getStackCrn(), ex);
+            ScalingActivity activity = scalingActivityService.create(cluster, METRICS_COLLECTION_FAILED,
+                    messagesService.getMessageWithArgs(AUTOSCALE_YARN_RECOMMENDATION_FAILED, ex), clock.getCurrentTimeMillis());
+            scalingActivityService.setEndTime(activity.getId(), clock.getCurrentTimeMillis());
         }
     }
 

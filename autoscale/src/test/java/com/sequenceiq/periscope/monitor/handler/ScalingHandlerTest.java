@@ -91,6 +91,7 @@ public class ScalingHandlerTest {
         List nodeIds = List.of("nodeId1", "nodeId2", "nodeId3");
         int expectedNodeCount = hostGroupNodeCount - nodeIds.size();
         ScalingAdjustmentType scalingType = ScalingAdjustmentType.REGULAR;
+        Long activityId = 1234L;
 
         when(scalingEventMock.getAlert()).thenReturn(loadAlertMock);
         when(loadAlertMock.getCluster()).thenReturn(cluster);
@@ -103,8 +104,9 @@ public class ScalingHandlerTest {
         when(scalingEventMock.getDecommissionNodeIds()).thenReturn(nodeIds);
         when(scalingEventMock.getExistingServiceHealthyHostGroupNodeCount()).thenReturn(hostGroupNodeCount);
         when(scalingEventMock.getScalingAdjustmentType()).thenReturn(scalingType);
+        when(scalingEventMock.getActivityId()).thenReturn(activityId);
         when(applicationContext.getBean("ScalingRequest", cluster, scalingPolicyMock,
-                clusterNodeSize, hostGroupNodeCount, expectedNodeCount, nodeIds, hostGroupNodeCount, scalingType)).thenReturn(runnableMock);
+                clusterNodeSize, hostGroupNodeCount, expectedNodeCount, nodeIds, hostGroupNodeCount, scalingType, activityId)).thenReturn(runnableMock);
 
         underTest.onApplicationEvent(scalingEventMock);
 
@@ -170,6 +172,7 @@ public class ScalingHandlerTest {
         when(scalingEventMock.getDesiredAbsoluteHostGroupNodeCount()).thenReturn(currentHostGroupCount + scalingAdjument);
         when(scalingEventMock.getExistingServiceHealthyHostGroupNodeCount()).thenReturn(currentHostGroupCount);
         when(scalingEventMock.getScalingAdjustmentType()).thenReturn(ScalingAdjustmentType.REGULAR);
+        when(scalingEventMock.getActivityId()).thenReturn(1234L);
 
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(baseAlertMock.getCluster()).thenReturn(cluster);
@@ -177,7 +180,7 @@ public class ScalingHandlerTest {
 
         when(scalingEventMock.getDecommissionNodeIds()).thenCallRealMethod();
         when(applicationContext.getBean("ScalingRequest", cluster, scalingPolicyMock,
-                currentClusterNodeCount, currentHostGroupCount, expectedScaleUpCount, List.of(), currentHostGroupCount, ScalingAdjustmentType.REGULAR))
+                currentClusterNodeCount, currentHostGroupCount, expectedScaleUpCount, List.of(), currentHostGroupCount, ScalingAdjustmentType.REGULAR, 1234L))
                 .thenReturn(runnableMock);
 
         underTest.onApplicationEvent(scalingEventMock);

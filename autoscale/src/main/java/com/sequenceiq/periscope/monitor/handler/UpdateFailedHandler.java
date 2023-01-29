@@ -1,5 +1,9 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import static com.sequenceiq.periscope.api.model.ActivityStatus.METRICS_COLLECTION_FAILED;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_YARN_RECOMMENDATION_FAILED;
+import static java.time.Instant.now;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,11 +21,13 @@ import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ScalingActivity;
 import com.sequenceiq.periscope.domain.UpdateFailedDetails;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
+import com.sequenceiq.periscope.service.ScalingActivityService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
 
 @Component
@@ -42,6 +48,9 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
 
     @Inject
     private AltusMachineUserService altusMachineUserService;
+
+    @Inject
+    private ScalingActivityService scalingActivityService;
 
     private final Map<Long, Integer> updateFailures = new ConcurrentHashMap<>();
 
@@ -73,8 +82,11 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             }
             suspendCluster(cluster);
             updateFailures.remove(autoscaleClusterId);
+            ScalingActivity activity = scalingActivityService.create(cluster, METRICS_COLLECTION_FAILED,
+                    messagesService.getMessageWithArgs(AUTOSCALE_YARN_RECOMMENDATION_FAILED, event.getCausedBy()), now().toEpochMilli());
+            scalingActivityService.setEndTime(activity.getId(), now().toEpochMilli());
             historyService.createEntry(ScalingStatus.TRIGGER_FAILED, messagesService.getMessageWithArgs(MessageCode.AUTOSCALING_TRIGGER_FAILURE,
-                            event.getPollingUserCrn()), cluster);
+                    event.getPollingUserCrn()), cluster);
             LOGGER.debug("Suspended cluster monitoring for cluster '{}' due to failing update attempts", cluster.getStackCrn());
         }
     }

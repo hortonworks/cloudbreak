@@ -20,15 +20,15 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.authorization.service.ResourceAuthorizationService;
@@ -50,7 +50,7 @@ import com.sequenceiq.periscope.repository.ScalingActivityRepository;
 import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 import com.sequenceiq.periscope.testcontext.EndpointTestContext;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = EndpointTestContext.class)
 @ActiveProfiles("test")
 public class DistroXAutoScaleScalingActivityV1EndpointTest {
@@ -138,7 +138,7 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
 
     private DistroXAutoScaleScalingActivityV1Endpoint distroXAutoScaleScalingActivityV1Endpoint;
 
-    @Before
+    @BeforeEach
     public void setup() {
         distroXAutoScaleScalingActivityV1Endpoint = new AutoscaleUserCrnClientBuilder(String.format(SERVICE_ADDRESS, port))
                 .build().withCrn(TEST_USER_CRN).distroXAutoScaleScalingActivityV1Endpoint();
@@ -216,8 +216,8 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         scalingActivityRepository.deleteAll();
         clusterRepository.deleteAll();
         clusterPertainRepository.deleteAll();

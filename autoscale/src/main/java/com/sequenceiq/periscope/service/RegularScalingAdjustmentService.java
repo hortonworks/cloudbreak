@@ -1,5 +1,9 @@
 package com.sequenceiq.periscope.service;
 
+import static com.sequenceiq.periscope.api.model.ActivityStatus.MANDATORY_DOWNSCALE;
+import static com.sequenceiq.periscope.api.model.ActivityStatus.MANDATORY_UPSCALE;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_MANDATORY_DOWNSCALE;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_MANDATORY_UPSCALE;
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.REGULAR;
 
 import java.util.List;
@@ -14,8 +18,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
+import com.sequenceiq.periscope.domain.ScalingActivity;
 import com.sequenceiq.periscope.model.adjustment.MandatoryScalingAdjustmentParameters;
 import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Response;
 import com.sequenceiq.periscope.monitor.client.YarnMetricsClient;
@@ -40,6 +47,15 @@ public class RegularScalingAdjustmentService implements MandatoryScalingAdjustme
     @Inject
     private YarnResponseUtils yarnResponseUtils;
 
+    @Inject
+    private ScalingActivityService scalingActivityService;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private Clock clock;
+
     @Override
     public void performMandatoryAdjustment(Cluster cluster, String pollingUserCrn, StackV4Response stackResponse,
             MandatoryScalingAdjustmentParameters scalingAdjustmentParameters) {
@@ -63,18 +79,20 @@ public class RegularScalingAdjustmentService implements MandatoryScalingAdjustme
         if (scalingAdjustmentParameters.getUpscaleAdjustment() != null) {
             Integer targetScaleUpCount = Math.min(scalingAdjustmentParameters.getUpscaleAdjustment(),
                     loadAlert.getLoadAlertConfiguration().getMaxScaleUpStepSize());
-
+            String mandatoryUpscaleMsg = messagesService.getMessageWithArgs(AUTOSCALE_MANDATORY_UPSCALE, targetScaleUpCount, REGULAR);
+            ScalingActivity scalingActivity = scalingActivityService.create(cluster, MANDATORY_UPSCALE, mandatoryUpscaleMsg, clock.getCurrentTimeMillis());
             scalingEventSender.sendScaleUpEvent(loadAlert, existingClusterNodeCount, policyHostGroupInstanceInfo.getHostFqdnsToInstanceId().size(),
                     policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(),
-                    targetScaleUpCount);
+                    targetScaleUpCount, scalingActivity.getId());
             LOGGER.info("Triggered mandatory adjustment ScaleUp for Cluster '{}', NodeCount '{}', HostGroup '{}'", cluster.getStackCrn(),
                     targetScaleUpCount, policyHostGroupInstanceInfo.getPolicyHostGroup());
         } else if (scalingAdjustmentParameters.getDownscaleAdjustment() != null) {
             List<String> hostsToDecommission = collectRegularDownscaleRecommendations(cluster,
                     pollingUserCrn, stackV4Response, scalingAdjustmentParameters.getDownscaleAdjustment(), policyHostGroupInstanceInfo);
-
+            String mandatoryDownscaleMsg = messagesService.getMessageWithArgs(AUTOSCALE_MANDATORY_DOWNSCALE, hostsToDecommission, REGULAR);
+            ScalingActivity scalingActivity = scalingActivityService.create(cluster, MANDATORY_DOWNSCALE, mandatoryDownscaleMsg, clock.getCurrentTimeMillis());
             scalingEventSender.sendScaleDownEvent(loadAlert, policyHostGroupInstanceInfo.getHostFqdnsToInstanceId().size(), hostsToDecommission,
-                    policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), REGULAR);
+                    policyHostGroupInstanceInfo.getServicesHealthyInstanceIds().size(), REGULAR, scalingActivity.getId());
             LOGGER.info("Triggered mandatory adjustment ScaleDown for Cluster '{}', HostsToDecommission '{}', HostGroup '{}'",
                     cluster.getStackCrn(), hostsToDecommission, policyHostGroupInstanceInfo.getPolicyHostGroup());
         }

@@ -8,6 +8,7 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -75,7 +76,22 @@ public interface ScalingActivityRepository extends PagingAndSortingRepository<Sc
     List<Long> findAllIdsInActivityStatusesWithStartTimeBefore(@Param("statuses") Collection<ActivityStatus> statuses,
             @Param("startTimeBefore") Date startTimeBefore);
 
+    @Query("SELECT st.id FROM ScalingActivity st WHERE st.activityStatus IN :statuses")
+    List<Long> findAllIdsInActivityStatuses(@Param("statuses") List<ActivityStatus> statuses, Sort sort);
+
     @Modifying
     @Query("DELETE FROM ScalingActivity st WHERE st.cluster.id = :clusterId")
     void deleteAllByCluster(@Param("clusterId") Long clusterId);
+
+    @Modifying
+    @Query("UPDATE ScalingActivity st SET st.activityStatus = :status WHERE st.id IN :ids")
+    void setActivityStatusesInIds(@Param("ids") Collection<Long> ids, @Param("status") ActivityStatus status);
+
+    @Modifying
+    @Query("UPDATE ScalingActivity st SET st.endTime = :endTime WHERE st.id = :id")
+    void setEndTimeForScalingActivity(@Param("id") Long id, @Param("endTime") Date endTime);
+
+    @Modifying
+    @Query("UPDATE ScalingActivity st SET st.activityStatus = :status, st.scalingActivityReason = :message WHERE st.id IN :ids")
+    void setActivityStatusAndReasonInIds(@Param("ids") Collection<Long> ids, @Param("status") ActivityStatus status, @Param("message") String message);
 }

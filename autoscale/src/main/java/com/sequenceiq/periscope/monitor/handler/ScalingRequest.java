@@ -1,10 +1,21 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import static com.sequenceiq.flow.api.model.FlowIdentifier.notTriggered;
+import static com.sequenceiq.periscope.api.model.ActivityStatus.DOWNSCALE_TRIGGER_FAILED;
+import static com.sequenceiq.periscope.api.model.ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS;
+import static com.sequenceiq.periscope.api.model.ActivityStatus.UPSCALE_TRIGGER_FAILED;
+import static com.sequenceiq.periscope.api.model.ActivityStatus.UPSCALE_TRIGGER_SUCCESS;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_DOWNSCALE_TRIGGER_FAILURE;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_DOWNSCALE_TRIGGER_SUCCESS;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_DOWNSCALE_TRIGGER_SUCCESS_NODE_LIST;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_UPSCALE_TRIGGER_FAILURE;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_UPSCALE_TRIGGER_SUCCESS;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ACTIVITY_NODE_LIMIT_EXCEEDED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ACTIVITY_SUCCESS;
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.REGULAR;
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.STOPSTART;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +39,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -39,6 +51,7 @@ import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AuditService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
+import com.sequenceiq.periscope.service.ScalingActivityService;
 import com.sequenceiq.periscope.service.UsageReportingService;
 import com.sequenceiq.periscope.service.configuration.LimitsConfigurationService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
@@ -64,6 +77,8 @@ public class ScalingRequest implements Runnable {
     private final Cluster cluster;
 
     private final ScalingPolicy policy;
+
+    private final Long scalingActivityId;
 
     private List<String> decommissionNodeIds;
 
@@ -97,9 +112,12 @@ public class ScalingRequest implements Runnable {
     @Inject
     private LimitsConfigurationService limitsConfigurationService;
 
+    @Inject
+    private ScalingActivityService scalingActivityService;
+
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int existingClusterNodeCount, int existingHostGroupNodeCount,
             int desiredHostGroupNodeCount, List<String> decommissionNodeIds, int serviceHealthyHostGroupNodeCount,
-            ScalingAdjustmentType scalingAdjustmentType) {
+            ScalingAdjustmentType scalingAdjustmentType, Long activityId) {
         this.cluster = cluster;
         this.policy = policy;
         this.existingClusterNodeCount = existingClusterNodeCount;
@@ -108,6 +126,7 @@ public class ScalingRequest implements Runnable {
         this.decommissionNodeIds = decommissionNodeIds;
         this.existingServiceHealthyHostGroupCount = serviceHealthyHostGroupNodeCount;
         this.scalingAdjustmentType = scalingAdjustmentType;
+        this.scalingActivityId = activityId;
     }
 
     @Override
@@ -146,22 +165,27 @@ public class ScalingRequest implements Runnable {
         ScalingStatus scalingStatus = null;
         String stackCrn = cluster.getStackCrn();
         String userCrn = cluster.getClusterPertain().getUserCrn();
+        FlowIdentifier flowIdentifier = notTriggered();
         try {
 
             LOGGER.info("Sending request to add '{}' instance(s) into host group '{}', triggered adjustmentType '{}', cluster '{}', user '{}'",
                     scalingAdjustment, hostGroup, policy.getAdjustmentType(), stackCrn, userCrn);
             if (REGULAR.equals(scalingAdjustmentType)) {
-                cloudbreakCommunicator.putStackForCluster(cluster, populateUpdateStackJson(scalingAdjustment, hostGroup));
+                flowIdentifier = cloudbreakCommunicator.putStackForCluster(cluster, populateUpdateStackJson(scalingAdjustment, hostGroup));
             } else if (STOPSTART.equals(scalingAdjustmentType)) {
-                cloudbreakCommunicator.putStackStartInstancesForCluster(cluster, populateUpdateStackJson(scalingAdjustment, hostGroup));
+                flowIdentifier = cloudbreakCommunicator.putStackStartInstancesForCluster(cluster, populateUpdateStackJson(scalingAdjustment, hostGroup));
             }
-
+            String upscaleTriggerSuccessMsg = messagesService.getMessageWithArgs(AUTOSCALE_UPSCALE_TRIGGER_SUCCESS, scalingAdjustment, scalingAdjustmentType);
+            scalingActivityService.update(scalingActivityId, flowIdentifier, UPSCALE_TRIGGER_SUCCESS, upscaleTriggerSuccessMsg);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
         } catch (RuntimeException e) {
             scalingStatus = ScalingStatus.FAILED;
             statusReason = getMessageForCBException(e);
+            String upscaleTriggerFailedMsg = messagesService.getMessageWithArgs(AUTOSCALE_UPSCALE_TRIGGER_FAILURE, e, statusReason);
+            scalingActivityService.update(scalingActivityId, flowIdentifier, UPSCALE_TRIGGER_FAILED, upscaleTriggerFailedMsg);
+            scalingActivityService.setEndTime(scalingActivityId, Instant.now().toEpochMilli());
             LOGGER.error("Couldn't trigger upscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
                     hostGroup, cluster.getStackCrn(), desiredHostGroupNodeCount, statusReason, e);
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED);
@@ -187,16 +211,20 @@ public class ScalingRequest implements Runnable {
             hostGroupAdjustmentJson.setHostGroup(hostGroup);
             hostGroupAdjustmentJson.setValidateNodeCount(false);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            // TODO CB-14929: CB-15153 List of nodes not provided. Do we really need to support this? Can Periscope always specify the list of nodes?
-            cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint()
+            FlowIdentifier flowIdentifier = cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint()
                     .putCluster(stackCrn, cluster.getClusterPertain().getUserId(), updateClusterJson);
             scalingStatus = ScalingStatus.SUCCESS;
+            String downscaleTriggerSuccessMsg = messagesService.getMessageWithArgs(AUTOSCALE_DOWNSCALE_TRIGGER_SUCCESS, scalingAdjustment);
+            scalingActivityService.update(scalingActivityId, flowIdentifier, DOWNSCALE_TRIGGER_SUCCESS, downscaleTriggerSuccessMsg);
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
             statusReason = getMessageForCBException(e);
+            String downscaleTriggerFailedMsg = messagesService.getMessageWithArgs(AUTOSCALE_DOWNSCALE_TRIGGER_FAILURE, e, statusReason);
+            scalingActivityService.update(scalingActivityId, notTriggered(), DOWNSCALE_TRIGGER_FAILED, downscaleTriggerFailedMsg);
+            scalingActivityService.setEndTime(scalingActivityId, Instant.now().toEpochMilli());
             LOGGER.error("Couldn't trigger downscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
                     hostGroup, cluster.getStackCrn(), desiredHostGroupNodeCount, statusReason, e);
         } finally {
@@ -209,15 +237,19 @@ public class ScalingRequest implements Runnable {
         String hostGroup = policy.getHostGroup();
         String statusReason = null;
         ScalingStatus scalingStatus = null;
+        FlowIdentifier flowIdentifier = notTriggered();
         try {
             LOGGER.info("Sending request to remove  nodeIdCount '{}', nodeId(s) '{}' from host group '{}', cluster '{}', user '{}'",
                     decommissionNodeIds.size(), decommissionNodeIds, hostGroup, cluster.getStackCrn(),
                     cluster.getClusterPertain().getUserCrn());
             if (REGULAR.equals(scalingAdjustmentType)) {
-                cloudbreakCommunicator.decommissionInstancesForCluster(cluster, decommissionNodeIds);
+                flowIdentifier = cloudbreakCommunicator.decommissionInstancesForCluster(cluster, decommissionNodeIds);
             } else if (STOPSTART.equals(scalingAdjustmentType)) {
-                cloudbreakCommunicator.stopInstancesForCluster(cluster, decommissionNodeIds);
+                flowIdentifier = cloudbreakCommunicator.stopInstancesForCluster(cluster, decommissionNodeIds);
             }
+            String downscaleTriggerSuccessMsg = messagesService.getMessageWithArgs(AUTOSCALE_DOWNSCALE_TRIGGER_SUCCESS_NODE_LIST, decommissionNodeIds,
+                    scalingAdjustmentType);
+            scalingActivityService.update(scalingActivityId, flowIdentifier, DOWNSCALE_TRIGGER_SUCCESS, downscaleTriggerSuccessMsg);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
@@ -225,6 +257,9 @@ public class ScalingRequest implements Runnable {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
             statusReason = getMessageForCBException(e);
+            String downscaleTriggerFailureMsg = messagesService.getMessageWithArgs(AUTOSCALE_DOWNSCALE_TRIGGER_FAILURE, e, statusReason);
+            scalingActivityService.update(scalingActivityId, flowIdentifier, DOWNSCALE_TRIGGER_FAILED, downscaleTriggerFailureMsg);
+            scalingActivityService.setEndTime(scalingActivityId, Instant.now().toEpochMilli());
             LOGGER.error("Couldn't trigger decommissioning for host group '{}', cluster '{}', decommissionNodeCount '{}', " +
                             "decommissionNodeIds '{}', error '{}' ", hostGroup, cluster.getStackCrn(), decommissionNodeIds.size(),
                     decommissionNodeIds, statusReason, e);
@@ -332,5 +367,15 @@ public class ScalingRequest implements Runnable {
     @VisibleForTesting
     void setCloudbreakCommunicator(CloudbreakCommunicator cloudbreakCommunicator) {
         this.cloudbreakCommunicator = cloudbreakCommunicator;
+    }
+
+    @VisibleForTesting
+    void setMessagesService(CloudbreakMessagesService messagesService) {
+        this.messagesService = messagesService;
+    }
+
+    @VisibleForTesting
+    void setScalingActivityService(ScalingActivityService scalingActivityService) {
+        this.scalingActivityService = scalingActivityService;
     }
 }

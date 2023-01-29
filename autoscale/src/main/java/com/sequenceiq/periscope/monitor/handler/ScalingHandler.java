@@ -62,7 +62,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
             Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy,
                     event.getExistingClusterNodeCount(), hostGroupNodeCount, desiredAbsoluteHostGroupNodeCount,
                     event.getDecommissionNodeIds(),
-                    event.getExistingServiceHealthyHostGroupNodeCount(), event.getScalingAdjustmentType());
+                    event.getExistingServiceHealthyHostGroupNodeCount(), event.getScalingAdjustmentType(), event.getActivityId());
 
             executorService.submit(scalingRequest);
             rejectedThreadService.remove(cluster.getId());
