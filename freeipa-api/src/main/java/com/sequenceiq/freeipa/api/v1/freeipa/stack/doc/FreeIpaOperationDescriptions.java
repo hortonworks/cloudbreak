@@ -4,6 +4,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String CREATE = "Create FreeIPA stack";
 
     public static final String COST = "Show FreeIPA cost";
+    public static final String CO2 = "Show FreeIPA CO2 cost";
     public static final String REGISTER_CHILD_ENVIRONMENT = "Register a child environment";
     public static final String DEREGISTER_CHILD_ENVIRONMENT = "Deregister a child environment";
     public static final String GET_BY_ENVID = "Get FreeIPA stack by environment CRN";

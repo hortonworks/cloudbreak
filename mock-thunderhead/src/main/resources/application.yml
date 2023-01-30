@@ -107,7 +107,8 @@ auth:
     environment.edit.proxy.enable: true
     upgrade.skip.attached.datahubs.check.enable: false
     targeting.subnets.for.endpoint.access.gateway.enable: true
-    cost.calculation.enable: false
+    cost.calculation.enable: true
+    co2.calculation.enable: true
     enforce.aws.native.single.az.enabled: false
 crn:
   partition: cdp

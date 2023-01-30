@@ -22,6 +22,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_VERTICAL_SCALE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
@@ -593,6 +594,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.cost.calculation.enable}")
     private boolean costCalculationEnabled;
 
+    @Value("${auth.mock.co2.calculation.enable}")
+    private boolean co2CalculationEnabled;
+
     @Value("${auth.mock.aws.gp3.enable}")
     private boolean awsGp3DiskSupportEnabled;
 
@@ -1080,6 +1084,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (costCalculationEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_COST_CALCULATION));
+        }
+        if (co2CalculationEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_CO2_CALCULATION));
         }
         if (awsGp3DiskSupportEnabled) {
             builder.addEntitlements(createEntitlement(AWS_GP3_ROOT_VOLUME_AS_DEFAULT));

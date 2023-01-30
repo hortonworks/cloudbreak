@@ -15,6 +15,7 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXCostV1Endpoint;
 
 @Controller
 public class DistroXCostV1Controller implements DistroXCostV1Endpoint {
+
     @Inject
     private ClusterCostService clusterCostService;
 

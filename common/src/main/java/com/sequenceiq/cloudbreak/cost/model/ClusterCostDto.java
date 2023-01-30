@@ -36,7 +36,7 @@ public class ClusterCostDto {
     }
 
     public boolean isComputeRunning() {
-        return !status.startsWith("STOPPED") && !status.startsWith("DELETED");
+        return !status.startsWith("STOPPED");
     }
 
     @Override
