@@ -8,22 +8,31 @@ public class ClusterUpgradeServiceValidationEvent extends StackEvent {
 
     private final boolean lockComponents;
 
+    private final String targetRuntime;
+
     @JsonCreator
     public ClusterUpgradeServiceValidationEvent(
             @JsonProperty("resourceId") Long resourceId,
-            @JsonProperty("lockComponents") boolean lockComponents) {
+            @JsonProperty("lockComponents") boolean lockComponents,
+            @JsonProperty("targetRuntime") String targetRuntime) {
         super(ClusterUpgradeValidationHandlerSelectors.VALIDATE_SERVICES_EVENT.name(), resourceId);
         this.lockComponents = lockComponents;
+        this.targetRuntime = targetRuntime;
     }
 
     public boolean isLockComponents() {
         return lockComponents;
     }
 
+    public String getTargetRuntime() {
+        return targetRuntime;
+    }
+
     @Override
     public String toString() {
         return "ClusterUpgradeServiceValidationEvent{" +
                 "lockComponents=" + lockComponents +
+                "targetRuntime=" + targetRuntime +
                 "} " + super.toString();
     }
 }
