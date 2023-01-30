@@ -294,7 +294,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                     .withTelemetry("telemetry")
                     .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.TRUE)
-                    .withOneFreeIpaNode()
+                    .withFreeIpaNodes(getFreeIpaInstanceCountByProdiver(testContext))
                     .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                             commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
@@ -350,5 +350,13 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
             throw new IllegalArgumentException("SDX Cloud Storage does not exist!");
         }
         return cloudStorage.getRequest();
+    }
+
+    protected int getFreeIpaInstanceCountByProdiver(TestContext testContext) {
+        if (testContext.getCloudProvider().getGovCloud()) {
+            return 2;
+        } else {
+            return 1;
+        }
     }
 }
