@@ -3,7 +3,11 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptySet;
@@ -39,6 +43,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -131,6 +136,8 @@ public class ClusterHostServiceRunner {
     private static final int CM_HTTP_PORT = 7180;
 
     private static final int CM_HTTPS_PORT = 7183;
+
+    private static final ImmutableList<String> CLOUD_PROVIDERS = ImmutableList.of(AWS.name(), AZURE.name(), GCP.name());
 
     @Value("${cb.cm.heartbeat.interval}")
     private String cmHeartbeatInterval;
@@ -654,10 +661,13 @@ public class ClusterHostServiceRunner {
                                 "missed_heartbeat_interval", cmMissedHeartbeatInterval,
                                 "disable_auto_bundle_collection", disableAutoBundleCollection,
                                 "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
+                                "cloud_provider_setup_supported", (CLOUD_PROVIDERS.contains(stackDto.getCloudPlatform()) &&
+                                        isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_6_2)),
+                                "cloud_provider", stackDto.getCloudPlatform(),
                                 "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1),
-                                "cloudera_scm_sudo_access", CMRepositoryVersionUtil.isSudoAccessNeededForHostCertRotation(clouderaManagerRepo)),
-                        "mgmt_service_directories", serviceLocations.getAllVolumePath(),
-                        "address", primaryGatewayConfig.getPrivateAddress()))));
+                                "cloudera_scm_sudo_access", CMRepositoryVersionUtil.isSudoAccessNeededForHostCertRotation(clouderaManagerRepo),
+                                "mgmt_service_directories", serviceLocations.getAllVolumePath(),
+                                "address", primaryGatewayConfig.getPrivateAddress())))));
     }
 
     private void decoratePillarWithTags(StackView stack, Map<String, SaltPillarProperties> servicePillarConfig) {
