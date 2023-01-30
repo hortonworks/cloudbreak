@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
+import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.COMPLETED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
@@ -19,12 +20,11 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
@@ -66,13 +66,12 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
         freeipa.when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .then(freeIpaCloudFormationStackDoesExist())
-                .given(SdxTestDto.class)
-                .withCloudStorage()
-                .withExternalDatabase(getDatabaseRequest())
-                .when(sdxTestClient.create())
-                .await(SdxClusterStatusResponse.RUNNING)
-                .given(freeIpa, FreeIpaTestDto.class)
                 .when(freeIpaTestClient.upgrade())
+                .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
+                .given(FreeIpaOperationStatusTestDto.class)
+                .withOperationId(((FreeIpaTestDto) testContext.get(freeIpa)).getOperationId())
+                .await(COMPLETED)
+                .given(freeIpa, FreeIpaTestDto.class)
                 .await(FREEIPA_AVAILABLE, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .then(freeIpaCloudFromationStackDoesNotExist())
                 .validate();
