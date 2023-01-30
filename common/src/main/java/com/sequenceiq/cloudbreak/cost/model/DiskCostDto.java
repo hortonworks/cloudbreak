@@ -48,4 +48,13 @@ public class DiskCostDto {
     public void setPricePerDiskGB(double pricePerDiskGB) {
         this.pricePerDiskGB = pricePerDiskGB;
     }
+
+    @Override
+    public String toString() {
+        return "DiskCostDto{" +
+                "size=" + size +
+                ", count=" + count +
+                ", pricePerDiskGB=" + pricePerDiskGB +
+                '}';
+    }
 }

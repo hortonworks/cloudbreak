@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +21,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PricingCache;
+import com.sequenceiq.cloudbreak.co2.model.ClusterCO2Dto;
+import com.sequenceiq.cloudbreak.co2.model.DiskCO2Dto;
+import com.sequenceiq.cloudbreak.co2.model.InstanceGroupCO2Dto;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.cloudera.ClouderaCostCache;
@@ -69,42 +71,63 @@ public class InstanceTypeCollectorServiceTest {
     @InjectMocks
     private InstanceTypeCollectorService underTest;
 
-    @BeforeEach
-    void setup() {
+    @Test
+    void getAllInstanceTypesForCost() {
         when(instanceMetaDataService.countByInstanceGroupId(420L)).thenReturn(2);
         when(clouderaCostCache.getPriceByType(any())).thenReturn(0.5);
-        when(pricingCaches.containsKey(any())).thenReturn(Boolean.TRUE);
-        when(pricingCaches.get(any())).thenReturn(pricingCache);
-    }
-
-    @Test
-    void getAllInstanceTypes() {
+        when(pricingCaches.containsKey(any(CloudPlatform.class))).thenReturn(Boolean.TRUE);
+        when(pricingCaches.get(any(CloudPlatform.class))).thenReturn(pricingCache);
         when(pricingCache.getPriceForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(Optional.of(0.5));
-        when(pricingCache.getCpuCountForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(Optional.of(8));
-        when(pricingCache.getMemoryForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(Optional.of(16));
         when(pricingCache.getStoragePricePerGBHour(eq(REGION), any(), anyInt())).thenReturn(Optional.of(MAGIC_PRICE_PER_DISK_GB));
         when(instanceGroupService.getInstanceGroupViewByStackId(69L)).thenReturn(List.of(getInstanceGroup("gp2")));
         when(credentialClientService.getByEnvironmentCrn(any())).thenReturn(getCredential("AZURE"));
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
-            Optional<ClusterCostDto> clusterCostDto = underTest.getAllInstanceTypes(getStack("AZURE"));
+            Optional<ClusterCostDto> clusterCostDto = underTest.getAllInstanceTypesForCost(getStack("AZURE"));
 
             Assertions.assertTrue(clusterCostDto.isPresent());
-            assertions(clusterCostDto.get());
+            Assertions.assertEquals("AVAILABLE", clusterCostDto.get().getStatus());
+            Assertions.assertEquals(REGION.toLowerCase(), clusterCostDto.get().getRegion());
+            Optional<InstanceGroupCostDto> instanceGroupCostDtoOptional = clusterCostDto.get().getInstanceGroups().stream().findFirst();
+            Assertions.assertTrue(instanceGroupCostDtoOptional.isPresent());
+            InstanceGroupCostDto instanceGroupCostDto = instanceGroupCostDtoOptional.get();
+            Assertions.assertEquals(1.0, instanceGroupCostDto.getTotalProviderPrice());
+            Assertions.assertEquals(1.0, instanceGroupCostDto.getTotalClouderaPrice());
+            Optional<DiskCostDto> diskCostDtoOptional = instanceGroupCostDto.getDisksPerInstance().stream().findFirst();
+            Assertions.assertTrue(diskCostDtoOptional.isPresent());
+            DiskCostDto diskCostDto = diskCostDtoOptional.get();
+            Assertions.assertEquals(500, diskCostDto.getTotalDiskSizeInGb());
+            Assertions.assertEquals(MAGIC_PRICE_PER_DISK_GB * 2 * 250, diskCostDto.getTotalDiskPrice());
         });
     }
 
-    private void assertions(ClusterCostDto clusterCostDto) {
-        Assertions.assertEquals("AVAILABLE", clusterCostDto.getStatus());
-        Assertions.assertEquals(REGION.toLowerCase(), clusterCostDto.getRegion());
-        InstanceGroupCostDto instanceGroupCostDto = clusterCostDto.getInstanceGroups().get(0);
-        Assertions.assertEquals(1.0, instanceGroupCostDto.getTotalProviderPrice());
-        Assertions.assertEquals(8, instanceGroupCostDto.getCoresPerInstance());
-        Assertions.assertEquals(16, instanceGroupCostDto.getMemoryPerInstance());
-        Assertions.assertEquals(1.0, instanceGroupCostDto.getTotalClouderaPrice());
-        DiskCostDto diskCostDto = instanceGroupCostDto.getDisksPerInstance().get(0);
-        Assertions.assertEquals(500, diskCostDto.getTotalDiskSizeInGb());
-        Assertions.assertEquals(MAGIC_PRICE_PER_DISK_GB * 2 * 250, diskCostDto.getTotalDiskPrice());
+    @Test
+    void getAllInstanceTypesForCO2() {
+        when(instanceMetaDataService.countByInstanceGroupId(420L)).thenReturn(2);
+        when(pricingCaches.containsKey(any(CloudPlatform.class))).thenReturn(Boolean.TRUE);
+        when(pricingCaches.get(any(CloudPlatform.class))).thenReturn(pricingCache);
+        when(pricingCache.getCpuCountForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(Optional.of(8));
+        when(pricingCache.getMemoryForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(Optional.of(16));
+        when(instanceGroupService.getInstanceGroupViewByStackId(69L)).thenReturn(List.of(getInstanceGroup("gp2")));
+        when(credentialClientService.getByEnvironmentCrn(any())).thenReturn(getCredential("AWS"));
+
+        ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
+            Optional<ClusterCO2Dto> clusterCO2Dto = underTest.getAllInstanceTypesForCO2(getStack("AWS"));
+
+            Assertions.assertTrue(clusterCO2Dto.isPresent());
+            Assertions.assertEquals("AVAILABLE", clusterCO2Dto.get().getStatus());
+            Assertions.assertEquals(REGION, clusterCO2Dto.get().getRegion());
+            Optional<InstanceGroupCO2Dto> instanceGroupCO2DtoOptional = clusterCO2Dto.get().getInstanceGroups().stream().findFirst();
+            Assertions.assertTrue(instanceGroupCO2DtoOptional.isPresent());
+            InstanceGroupCO2Dto instanceGroupCO2Dto = instanceGroupCO2DtoOptional.get();
+            Assertions.assertEquals(8, instanceGroupCO2Dto.getvCPUs());
+            Assertions.assertEquals(16, instanceGroupCO2Dto.getMemory());
+            Optional<DiskCO2Dto> diskCO2DtoOptional = instanceGroupCO2Dto.getDisksPerInstance().stream().findFirst();
+            Assertions.assertTrue(diskCO2DtoOptional.isPresent());
+            DiskCO2Dto diskCO2Dto = diskCO2DtoOptional.get();
+            Assertions.assertEquals(2, diskCO2Dto.getCount());
+            Assertions.assertEquals(250, diskCO2Dto.getSize());
+        });
     }
 
     private Stack getStack(String cloudPlatform) {

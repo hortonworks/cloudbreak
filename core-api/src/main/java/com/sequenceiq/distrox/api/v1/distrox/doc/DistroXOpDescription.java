@@ -56,6 +56,7 @@ public class DistroXOpDescription {
     public static final String MODIFY_PROXY_CONFIG_INTERNAL = "Modify proxy config of stack";
 
     public static final String COST = "Get cost calculation for Distrox clusters";
+    public static final String CO2 = "Get CO2 cost calculation for Distro clusters";
 
     private DistroXOpDescription() {
     }

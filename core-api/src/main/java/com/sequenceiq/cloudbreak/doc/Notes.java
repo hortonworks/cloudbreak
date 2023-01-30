@@ -94,6 +94,7 @@ public class Notes {
     public static final String MODIFY_PROXY_CONFIG_NOTES = "Trigger modify proxy config for the stack";
 
     public static final String CLUSTER_COST_NOTES = "Costs of clusters";
+    public static final String CLUSTER_CO2_NOTES = "CO2 cost of clusters";
 
     private Notes() {
     }
