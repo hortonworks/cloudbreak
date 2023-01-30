@@ -27,7 +27,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_for_SINGLE_AZ_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
@@ -1114,7 +1114,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enforceAwsNativeForSingleAzEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA));
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE));
-            builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_for_SINGLE_AZ_DATAHUB));
+            builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
