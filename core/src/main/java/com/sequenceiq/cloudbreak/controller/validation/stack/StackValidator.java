@@ -59,7 +59,8 @@ public class StackValidator {
 
     private void validateVariant(Stack source, ValidationResultBuilder validationBuilder) {
         String variant = source.getPlatformVariant();
-        boolean awsNativeEnabled = entitlementService.awsNativeEnabled(Crn.safeFromString(source.getResourceCrn()).getAccountId());
+        boolean awsNativeEnabled =
+                entitlementService.awsNativeEnabled(Crn.safeFromString(source.getResourceCrn()).getAccountId());
         boolean awsNativeDatalakeEnabled = entitlementService.awsNativeDataLakeEnabled(Crn.safeFromString(source.getResourceCrn()).getAccountId());
         if ((WORKLOAD.equals(source.getType()) || LEGACY.equals(source.getType()))
                 && AWS_NATIVE_VARIANT.variant().value().equals(variant) && !awsNativeEnabled) {

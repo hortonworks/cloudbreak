@@ -273,7 +273,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         if ((environment.getCredential().getGovCloud() != null && environment.getCredential().getGovCloud())
                 && CloudPlatform.AWS.name().equals(environment.getCloudPlatform())) {
             createFreeIpaRequest.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
-        } else if (multiAzRequired && CloudPlatform.AWS.name().equals(environment.getCloudPlatform())) {
+        } else if ((multiAzRequired || entitlementService.enforceAwsNativeForSingleAzFreeipaEnabled(environment.getAccountId()))
+                && CloudPlatform.AWS.name().equals(environment.getCloudPlatform())) {
             createFreeIpaRequest.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         }
     }
