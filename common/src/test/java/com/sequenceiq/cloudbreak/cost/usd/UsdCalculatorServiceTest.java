@@ -22,7 +22,7 @@ public class UsdCalculatorServiceTest {
     void calculateProviderCost() {
         double providerCost = underTest.calculateProviderCost(getClusterCostDto());
 
-        Assertions.assertEquals(5.00, providerCost);
+        Assertions.assertEquals(15.00, providerCost);
     }
 
     @Test
@@ -36,7 +36,7 @@ public class UsdCalculatorServiceTest {
         // provider cost per disk: 2 * 100 * 0,01 = 2.00
         DiskCostDto diskCostDto = new DiskCostDto(2, 100, 0.01);
 
-        // provider cost per instance group: (6 * 0.50) + 2.00 = 5.00
+        // provider cost per instance group: 6 * (0.50 + 2.00) = 15.00
         InstanceGroupCostDto instanceGroupCostDto = new InstanceGroupCostDto();
         instanceGroupCostDto.setCount(6);
         instanceGroupCostDto.setPricePerInstance(0.50);

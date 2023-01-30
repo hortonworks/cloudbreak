@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cost;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -20,6 +19,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PricingCache;
+import com.sequenceiq.cloudbreak.co2.CO2CostCalculatorService;
+import com.sequenceiq.cloudbreak.co2.CO2EmissionFactorService;
+import com.sequenceiq.cloudbreak.co2.model.ClusterCO2Dto;
+import com.sequenceiq.cloudbreak.common.co2.RealTimeCO2;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
@@ -35,6 +38,9 @@ public class ClusterCostServiceTest {
     private UsdCalculatorService usdCalculatorService;
 
     @Mock
+    private CO2CostCalculatorService co2CostCalculatorService;
+
+    @Mock
     private InstanceTypeCollectorService instanceTypeCollectorService;
 
     @Mock
@@ -46,18 +52,20 @@ public class ClusterCostServiceTest {
     @Mock
     private Map<CloudPlatform, PricingCache> pricingCacheMap;
 
+    @Mock
+    private Map<CloudPlatform, CO2EmissionFactorService> co2EmissionFactorServiceMap;
+
     @InjectMocks
     private ClusterCostService underTest;
 
     @Test
     void getCosts() {
-        lenient().when(pricingCacheMap.containsKey(any())).thenReturn(Boolean.TRUE);
-        when(entitlementService.isUsdCostCalculationEnabled(any())).thenReturn(true);
+        when(entitlementService.isUsdCostCalculationEnabled(any())).thenReturn(Boolean.TRUE);
         when(stackDtoService.findNotTerminatedByResourceCrnsAndCloudPlatforms(any(), any())).thenReturn(List.of(getStack()));
         when(stackDtoService.findNotTerminatedByEnvironmentCrnsAndCloudPlatforms(any(), any())).thenReturn(List.of(getStack()));
         when(usdCalculatorService.calculateProviderCost(any())).thenReturn(0.5);
         when(usdCalculatorService.calculateClouderaCost(any(), any())).thenReturn(0.5);
-        when(instanceTypeCollectorService.getAllInstanceTypes(any())).thenReturn(new ClusterCostDto());
+        when(instanceTypeCollectorService.getAllInstanceTypesForCost(any())).thenReturn(new ClusterCostDto());
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             Map<String, RealTimeCost> costs = underTest.getCosts(List.of("RESOURCE_CRN"), List.of("ENV_CRN"));
@@ -66,6 +74,23 @@ public class ClusterCostServiceTest {
             RealTimeCost realTimeCost = costs.get("RESOURCE_CRN");
             Assertions.assertEquals(0.5, realTimeCost.getHourlyProviderUsd());
             Assertions.assertEquals(0.5, realTimeCost.getHourlyClouderaUsd());
+        });
+    }
+
+    @Test
+    void getCO2() {
+        when(entitlementService.isCO2CalculationEnabled(any())).thenReturn(Boolean.TRUE);
+        when(stackDtoService.findNotTerminatedByResourceCrnsAndCloudPlatforms(any(), any())).thenReturn(List.of(getStack()));
+        when(stackDtoService.findNotTerminatedByEnvironmentCrnsAndCloudPlatforms(any(), any())).thenReturn(List.of(getStack()));
+        when(co2CostCalculatorService.calculateCO2InGrams(any())).thenReturn(10.0);
+        when(instanceTypeCollectorService.getAllInstanceTypesForCO2(any())).thenReturn(new ClusterCO2Dto());
+
+        ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
+            Map<String, RealTimeCO2> costs = underTest.getCO2(List.of("RESOURCE_CRN"), List.of("ENV_CRN"));
+
+            Assertions.assertEquals(1, costs.size());
+            RealTimeCO2 realTimeCO2 = costs.get("RESOURCE_CRN");
+            Assertions.assertEquals(10.0, realTimeCO2.getHourlyCO2InGrams());
         });
     }
 

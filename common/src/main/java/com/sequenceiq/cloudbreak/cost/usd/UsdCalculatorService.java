@@ -18,7 +18,7 @@ public class UsdCalculatorService {
                 price += instanceGroup.getTotalProviderPrice();
             }
             for (DiskCostDto diskCostDto : instanceGroup.getDisksPerInstance()) {
-                price += diskCostDto.getTotalDiskPrice();
+                price += instanceGroup.getCount() * diskCostDto.getTotalDiskPrice();
             }
         }
         return price;

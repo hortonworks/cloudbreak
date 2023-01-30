@@ -260,4 +260,9 @@ public class OperationDescriptions {
 
         public static final String LIST_BY_ENV = "List costs based on cluster crns and environment crns";
     }
+
+    public static class CO2OpDescription {
+        public static final String LIST = "List CO2 cost based on cluster CRNs";
+        public static final String LIST_BY_ENV = "List CO2 costs based on cluster CRNs and environment CRNs";
+    }
 }

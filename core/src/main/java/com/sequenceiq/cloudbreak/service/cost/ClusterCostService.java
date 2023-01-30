@@ -17,6 +17,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PricingCache;
+import com.sequenceiq.cloudbreak.co2.CO2CostCalculatorService;
+import com.sequenceiq.cloudbreak.co2.CO2EmissionFactorService;
+import com.sequenceiq.cloudbreak.co2.model.ClusterCO2Dto;
+import com.sequenceiq.cloudbreak.common.co2.RealTimeCO2;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cost.CostCalculationNotEnabledException;
@@ -34,6 +38,9 @@ public class ClusterCostService {
     private UsdCalculatorService usdCalculatorService;
 
     @Inject
+    private CO2CostCalculatorService co2CostCalculatorService;
+
+    @Inject
     private InstanceTypeCollectorService instanceTypeCollectorService;
 
     @Inject
@@ -44,6 +51,9 @@ public class ClusterCostService {
 
     @Inject
     private Map<CloudPlatform, PricingCache> pricingCacheMap;
+
+    @Inject
+    private Map<CloudPlatform, CO2EmissionFactorService> co2EmissionFactorServiceMap;
 
     public Map<String, RealTimeCost> getCosts(List<String> clusterCrns, List<String> environmentCrns) {
         errorIfCostCalculationFeatureIsNotEnabled();
@@ -69,7 +79,7 @@ public class ClusterCostService {
                 continue;
             }
 
-            ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypes(stack);
+            ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypesForCost(stack);
             RealTimeCost realTimeCost = new RealTimeCost();
             realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
             realTimeCost.setResourceCrn(stack.getResourceCrn());
@@ -82,10 +92,51 @@ public class ClusterCostService {
         return realTimeCosts;
     }
 
+    public Map<String, RealTimeCO2> getCO2(List<String> clusterCrns, List<String> environmentCrns) {
+        errorIfCO2CalculationFeatureIsNotEnabled();
+        Map<String, RealTimeCO2> realTimeCO2Map = new HashMap<>();
+        List<StackView> stacksByCrns = Lists.newArrayList();
+        List<StackView> stackByEnvs = Lists.newArrayList();
+
+        if (CollectionUtils.isNotEmpty(clusterCrns)) {
+            stacksByCrns = stackDtoService.findNotTerminatedByResourceCrnsAndCloudPlatforms(clusterCrns, co2EmissionFactorServiceMap.keySet());
+        }
+        if (CollectionUtils.isNotEmpty(environmentCrns)) {
+            stackByEnvs = stackDtoService.findNotTerminatedByEnvironmentCrnsAndCloudPlatforms(environmentCrns, co2EmissionFactorServiceMap.keySet());
+        }
+
+        List<StackView> stacks = ListUtils.union(stacksByCrns, stackByEnvs);
+        for (StackView stack : stacks) {
+            Status stackStatus = stack.getStatus();
+            if (stackStatus == Status.DELETE_COMPLETED || stackStatus == Status.DELETED_ON_PROVIDER_SIDE) {
+                LOGGER.info("Stack with crn {} has DELETE_COMPLETED / DELETED_ON_PROVIDER_SIDE status, " +
+                        "therefore CO2 calculation for this stack is skipped.", stack.getResourceCrn());
+                continue;
+            }
+
+            ClusterCO2Dto clusterCO2Dto = instanceTypeCollectorService.getAllInstanceTypesForCO2(stack);
+            RealTimeCO2 realTimeCO2 = new RealTimeCO2();
+            realTimeCO2.setEnvCrn(stack.getEnvironmentCrn());
+            realTimeCO2.setResourceCrn(stack.getResourceCrn());
+            realTimeCO2.setType(stack.getType().name());
+            realTimeCO2.setResourceName(stack.getResourceName());
+            realTimeCO2.setHourlyCO2InGrams(co2CostCalculatorService.calculateCO2InGrams(clusterCO2Dto));
+            realTimeCO2Map.put(stack.getResourceCrn(), realTimeCO2);
+        }
+        return realTimeCO2Map;
+    }
+
     private void errorIfCostCalculationFeatureIsNotEnabled() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (!entitlementService.isUsdCostCalculationEnabled(accountId)) {
             throw new CostCalculationNotEnabledException("Cost calculation features are not enabled!");
+        }
+    }
+
+    private void errorIfCO2CalculationFeatureIsNotEnabled() {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        if (!entitlementService.isCO2CalculationEnabled(accountId)) {
+            throw new CostCalculationNotEnabledException("CO2 calculation feature is not enabled!");
         }
     }
 }

@@ -22,6 +22,6 @@ public class SdxCostController implements SdxCostEndpoint {
     @Override
     @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
     public RealTimeCostResponse list(@ResourceCrnList List<String> sdxCrns) {
-        return sdxCostService.getCosts(sdxCrns);
+        return new RealTimeCostResponse(sdxCostService.getCosts(sdxCrns));
     }
 }
