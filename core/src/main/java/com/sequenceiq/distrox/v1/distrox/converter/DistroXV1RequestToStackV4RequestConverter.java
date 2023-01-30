@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -81,6 +83,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
     @Inject
     private DistroXDatabaseRequestToStackDatabaseRequestConverter databaseRequestConverter;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public StackV4Request convert(DistroXV1Request source) {
         DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(source.getEnvironmentName()))
                 .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
@@ -111,9 +116,18 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setGatewayPort(source.getGatewayPort());
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         request.setEnableLoadBalancer(source.isEnableLoadBalancer());
-        request.setVariant(source.getVariant());
+        calculateVariant(source, request);
         checkMultipleGatewayNodes(source);
         return request;
+    }
+
+    private void calculateVariant(DistroXV1Request source, StackV4Request request) {
+        if (CloudPlatform.AWS.equals(source.getCloudPlatform()) &&
+                entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            request.setVariant("AWS_NATIVE");
+        } else {
+            request.setVariant(source.getVariant());
+        }
     }
 
     private void checkMultipleGatewayNodes(DistroXV1Request distroXV1Request) {
