@@ -13,6 +13,8 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 @Component
 public class CredentialResponseToCloudCredentialConverter {
 
+    private static final boolean SKIP_ORG_POLICY_DECISIONS = true;
+
     @Inject
     private SecretService secretService;
 
@@ -22,7 +24,7 @@ public class CredentialResponseToCloudCredentialConverter {
         }
         String attributes = secretService.getByResponse(credentialResponse.getAttributes());
         return new CloudCredential(credentialResponse.getCrn(), credentialResponse.getName(), new Json(attributes).getMap(), credentialResponse.getAccountId(),
-                new CloudCredentialSettings(credentialResponse.isVerifyPermissions(), credentialResponse.isSkipOrgPolicyDecisions()));
+                new CloudCredentialSettings(credentialResponse.isVerifyPermissions(), SKIP_ORG_POLICY_DECISIONS));
     }
 
 }
