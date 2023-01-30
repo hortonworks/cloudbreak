@@ -101,7 +101,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withEnvironment(getTestContext().given(EnvironmentTestDto.class).withTunnel(getTestContext().getTunnel()))
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
-                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()), OptionalInt.empty(), OptionalInt.empty())
+                .withInstanceGroupsEntity()
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
@@ -215,6 +215,20 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         }
         getRequest().setInstanceGroups(instanceGroupRequests);
         return this;
+    }
+
+    private FreeIpaTestDto withInstanceGroupsEntity() {
+        OptionalInt instanceGroupCount;
+        OptionalInt instanceCountByGroup;
+        if (getCloudProvider().getGovCloud()) {
+            instanceGroupCount = OptionalInt.of(1);
+            instanceCountByGroup = OptionalInt.of(2);
+        } else {
+            instanceGroupCount = OptionalInt.empty();
+            instanceCountByGroup = OptionalInt.empty();
+        }
+        return withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()), instanceGroupCount,
+                instanceCountByGroup);
     }
 
     private Function<InstanceGroupV4Request, InstanceGroupRequest> mapInstanceGroupRequest(OptionalInt instanceCountByGroup) {
