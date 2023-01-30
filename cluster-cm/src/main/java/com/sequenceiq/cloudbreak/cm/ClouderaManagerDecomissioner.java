@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -558,6 +559,36 @@ public class ClouderaManagerDecomissioner {
         } catch (ApiException e) {
             LOGGER.error("Failed to stop management services.", e);
             throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    public void stopRolesOnHosts(StackDtoDelegate stack, ApiClient client, Set<String> hosts) throws CloudbreakException {
+        try {
+            LOGGER.info("Stop roles on hosts: {}", hosts);
+            HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
+            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, FULL_REQUEST_VIEW);
+            LOGGER.info("Hosts from CM: {}", hostRefList);
+            List<String> stillAvailableHostsForStopRolesCommand = hostRefList.getItems().stream()
+                    .map(ApiHost::getHostname)
+                    .filter(hosts::contains)
+                    .collect(Collectors.toList());
+            if (!stillAvailableHostsForStopRolesCommand.isEmpty()) {
+                ApiHostNameList items = new ApiHostNameList().items(stillAvailableHostsForStopRolesCommand);
+                ApiCommand apiCommand = clouderaManagerApiFactory.getClouderaManagerResourceApi(client).hostsStopRolesCommand(items);
+                ExtendedPollingResult extendedPollingResult =
+                        clouderaManagerPollingServiceProvider.startPollingStopRolesCommand(stack, client, apiCommand.getId());
+                if (extendedPollingResult.isExited()) {
+                    throw new CancellationException("Cluster was terminated while waiting for stop roles on hosts");
+                } else if (extendedPollingResult.isTimeout()) {
+                    throw new CloudbreakServiceException(
+                            String.format("Cloudera Manager stop roles command {} timed out. CM command Id: %s", apiCommand.getId()));
+                }
+            } else {
+                LOGGER.info("Don't run stop roles command because instances are filtered out");
+            }
+        } catch (ApiException e) {
+            LOGGER.error("Failed to stop roles on nodes: {}", hosts, e);
+            throw new CloudbreakServiceException("Failed to stop roles on nodes: " + hosts, e);
         }
     }
 

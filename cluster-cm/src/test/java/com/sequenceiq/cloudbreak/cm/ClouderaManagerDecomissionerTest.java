@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -26,6 +27,7 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,6 +44,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
+import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostTemplateList;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -53,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
@@ -200,6 +204,62 @@ class ClouderaManagerDecomissionerTest {
 
         verify(hostsResourceApi, times(1)).readHosts(any(), any(), any());
         verify(hostsResourceApi, never()).deleteHost(any());
+    }
+
+    @Test
+    public void testStopRolesOnHosts() throws CloudbreakException, ApiException {
+        StackDtoDelegate stack = getStack();
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        ApiHostList apiHostList = new ApiHostList();
+        apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host2.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
+        when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
+        ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
+        BigDecimal apiCommandId = BigDecimal.ONE;
+        when(clouderaManagerResourceApi.hostsStopRolesCommand(apiHostNameListArgumentCaptor.capture())).thenReturn(getApiCommand(apiCommandId));
+        ExtendedPollingResult extendedPollingResult = mock(ExtendedPollingResult.class);
+        when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(client), eq(apiCommandId))).thenReturn(extendedPollingResult);
+
+        underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com", "host2.example.com"));
+        verify(clouderaManagerResourceApi, times(1)).hostsStopRolesCommand(any());
+        assertThat(apiHostNameListArgumentCaptor.getValue().getItems()).containsOnly("host1.example.com", "host2.example.com");
+    }
+
+    @Test
+    public void testStopRolesOnHostsOneNodeFilteredOut() throws CloudbreakException, ApiException {
+        StackDtoDelegate stack = getStack();
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        ApiHostList apiHostList = new ApiHostList();
+        apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
+        when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
+        ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
+        BigDecimal apiCommandId = BigDecimal.ONE;
+        when(clouderaManagerResourceApi.hostsStopRolesCommand(apiHostNameListArgumentCaptor.capture())).thenReturn(getApiCommand(apiCommandId));
+        ExtendedPollingResult extendedPollingResult = mock(ExtendedPollingResult.class);
+        when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(client), eq(apiCommandId))).thenReturn(extendedPollingResult);
+
+        underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com", "host2.example.com"));
+        verify(clouderaManagerResourceApi, times(1)).hostsStopRolesCommand(any());
+        assertThat(apiHostNameListArgumentCaptor.getValue().getItems()).containsOnly("host1.example.com");
+    }
+
+    @Test
+    public void testStopRolesOnHostsAllNodeFilteredOut() throws CloudbreakException, ApiException {
+        StackDtoDelegate stack = getStack();
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        ApiHostList apiHostList = new ApiHostList();
+        apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
+        when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
+
+        underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com", "host2.example.com"));
+        verify(clouderaManagerResourceApi, times(0)).hostsStopRolesCommand(any());
     }
 
     private InstanceGroup createInstanceGroup() {
