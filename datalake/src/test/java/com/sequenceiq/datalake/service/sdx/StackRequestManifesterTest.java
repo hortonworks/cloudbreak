@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -69,6 +70,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class StackRequestManifesterTest {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
 
     private static final String ENVIRONMENT_CRN = "crn:myEnvironment";
 
@@ -179,7 +182,7 @@ public class StackRequestManifesterTest {
         doNothing().when(multiAzDecorator).decorateStackRequestWithAwsNative(any(), any());
         doNothing().when(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
 
-        underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
 
         String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
         assertThat(variant).isEqualTo("AWS_NATIVE");
@@ -218,7 +221,7 @@ public class StackRequestManifesterTest {
         doNothing().when(multiAzDecorator).decorateStackRequestWithAwsNative(any(), any());
         doNothing().when(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
 
-        underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
 
         String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
         assertThat(variant).isEqualTo("AWS_NATIVE_GOV");

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -24,8 +25,10 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.service.upgrade.OrderedOSUpgradeRequestProvider;
 import com.sequenceiq.datalake.service.upgrade.SdxUpgradeValidationResultProvider;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class SdxUpgradeService {
@@ -55,6 +58,9 @@ public class SdxUpgradeService {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private OrderedOSUpgradeRequestProvider orderedOSUpgradeRequestProvider;
 
     public void changeImage(Long id, UpgradeOptionV4Response upgradeOption) {
         SdxCluster cluster = sdxService.getById(id);
@@ -97,10 +103,7 @@ public class SdxUpgradeService {
     public String getImageId(Long id) {
         SdxCluster cluster = sdxService.getById(id);
         try {
-            StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () ->
-                    stackV4Endpoint.get(0L, cluster.getClusterName(), Set.of(), cluster.getAccountId()));
+            StackV4Response stackV4Response = retrieveStack(cluster);
             return stackV4Response.getImage().getId();
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
@@ -113,18 +116,20 @@ public class SdxUpgradeService {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         String clusterName = sdxCluster.getClusterName();
         LOGGER.info("Trying to update the runtime version from Cloudbreak for cluster: {}", clusterName);
-        StackV4Response stack = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> stackV4Endpoint.get(0L, clusterName, Set.of(), sdxCluster.getAccountId()));
+        StackV4Response stack = retrieveStack(sdxCluster);
         return sdxService.updateRuntimeVersionFromStackResponse(sdxCluster, stack);
+    }
+
+    private StackV4Response retrieveStack(SdxCluster sdxCluster) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Set.of(), sdxCluster.getAccountId()));
     }
 
     public String getCurrentImageCatalogName(Long id) {
         SdxCluster cluster = sdxService.getById(id);
         try {
-            StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> stackV4Endpoint.get(0L, cluster.getClusterName(), Set.of(), cluster.getAccountId()));
+            StackV4Response stackV4Response = retrieveStack(cluster);
             return stackV4Response.getImage().getCatalogName();
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
@@ -133,20 +138,34 @@ public class SdxUpgradeService {
         }
     }
 
-    public void upgradeOs(Long id, boolean keepVariant) {
+    public void upgradeOs(Long id, boolean rollingUpgradeEnabled, boolean keepVariant) {
         SdxCluster cluster = sdxService.getById(id);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", cluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> stackV4Endpoint.upgradeOsInternal(0L, cluster.getClusterName(), initiatorUserCrn, keepVariant));
+                    () -> callOsUpgrade(cluster, initiatorUserCrn, rollingUpgradeEnabled, keepVariant));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Stack upgrade failed on cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
             throw new CloudbreakApiException(message, e);
         }
+    }
+
+    private FlowIdentifier callOsUpgrade(SdxCluster cluster, String initiatorUserCrn, boolean rollingUpgradeEnabled, boolean keepVariant) {
+        if (rollingUpgradeEnabled && SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape())) {
+            OrderedOSUpgradeSetRequest request = createOrderedOSUpgradeSetRequest(cluster);
+            return stackV4Endpoint.upgradeOsByUpgradeSetsInternal(cluster.getCrn(), request);
+        } else {
+            return stackV4Endpoint.upgradeOsInternal(0L, cluster.getClusterName(), initiatorUserCrn, keepVariant);
+        }
+    }
+
+    private OrderedOSUpgradeSetRequest createOrderedOSUpgradeSetRequest(SdxCluster cluster) {
+        StackV4Response stackV4Response = retrieveStack(cluster);
+        return orderedOSUpgradeRequestProvider.createMediumDutyOrderedOSUpgradeSetRequest(stackV4Response);
     }
 
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {

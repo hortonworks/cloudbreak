@@ -121,7 +121,13 @@ public class UpgradeService {
         }
     }
 
-    public FlowIdentifier osUpgradeByUpgradeSets(StackView stack, ImageChangeDto imageChangeDto, List<OrderedOSUpgradeSet> upgradeSets) {
+    public FlowIdentifier upgradeOsByUpgradeSets(StackView stack, String imageId, List<OrderedOSUpgradeSet> upgradeSets) {
+        Image image = findImage(stack);
+        ImageChangeDto imageChangeDto = getImageChangeDto(imageId, stack.getId(), image);
+        return upgradeOsByUpgradeSets(stack, imageChangeDto, upgradeSets);
+    }
+
+    public FlowIdentifier upgradeOsByUpgradeSets(StackView stack, ImageChangeDto imageChangeDto, List<OrderedOSUpgradeSet> upgradeSets) {
         MDCBuilder.buildMdcContext(stack);
         ClusterComponent clusterComponent = clusterBootstrapper.updateSaltComponent(stack);
         try {
@@ -168,12 +174,20 @@ public class UpgradeService {
         if (lockedComponentService.isComponentsLocked(stack, imageId)) {
             throw new BadRequestException("Upgrade preparation is not necessary in case of OS upgrade.");
         }
+        Image image = findImage(stack.getStack());
+        ImageChangeDto imageChangeDto = getImageChangeDto(imageId, stack.getId(), image);
+        return flowManager.triggerClusterUpgradePreparation(stack.getId(), imageChangeDto, false);
+    }
+
+    private ImageChangeDto getImageChangeDto(String imageId, Long stackId, Image image) {
+        return new ImageChangeDto(stackId, imageId, image.getImageCatalogName(), image.getImageCatalogUrl());
+    }
+
+    private Image findImage(StackView stack) {
         try {
-            Image image = componentConfigProviderService.getImage(stack.getId());
-            ImageChangeDto imageChangeDto = new ImageChangeDto(stack.getId(), imageId, image.getImageCatalogName(), image.getImageCatalogUrl());
-            return flowManager.triggerClusterUpgradePreparation(stack.getId(), imageChangeDto, false);
+            return componentConfigProviderService.getImage(stack.getId());
         } catch (CloudbreakImageNotFoundException e) {
-            throw new NotFoundException(String.format("Image with ID [%s] not found", imageId), e);
+            throw new NotFoundException(String.format("Image not found for stack [%s]", stack.getName()), e);
         }
     }
 
@@ -183,7 +197,7 @@ public class UpgradeService {
 
     private UpgradeOptionV4Response getUpgradeOption(String accountId, StackView stack, User user)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        Image image = componentConfigProviderService.getImage(stack.getId());
+        Image image = findImage(stack);
         UpgradeOptionV4Response upgradeResponse;
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairResult = clusterRepairService.repairWithDryRun(stack.getId());
         if (repairResult.isSuccess()) {

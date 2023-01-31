@@ -109,6 +109,7 @@ auth:
     upgrade.skip.attached.datahubs.check.enable: false
     targeting.subnets.for.endpoint.access.gateway.enable: true
     cost.calculation.enable: false
+    enforce.aws.native.single.az.enabled: false
 crn:
   partition: cdp
   region: us-west-1
