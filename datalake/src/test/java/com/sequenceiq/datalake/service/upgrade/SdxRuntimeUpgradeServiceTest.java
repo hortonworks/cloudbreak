@@ -43,12 +43,12 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
-import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
@@ -86,7 +86,8 @@ public class SdxRuntimeUpgradeServiceTest {
 
     private static final boolean ROLLING_UPGRADE_ENABLED = true;
 
-    private static final DatalakeDrSkipOptions SKIP_OPTIONS = new DatalakeDrSkipOptions(false, false, false);
+    private static final DatalakeDrSkipOptions SKIP_OPTIONS =
+            new DatalakeDrSkipOptions(false, false, false, false);
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
@@ -282,7 +283,8 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     public void testSkipOptionsShouldBePassedToDrService() {
-        DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(true, true, true);
+        DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(true, true, true, true);
+        sdxUpgradeRequest.setSkipValidation(true);
         sdxUpgradeRequest.setSkipAtlasMetadata(true);
         sdxUpgradeRequest.setSkipRangerAudits(true);
         sdxUpgradeRequest.setSkipRangerMetadata(true);

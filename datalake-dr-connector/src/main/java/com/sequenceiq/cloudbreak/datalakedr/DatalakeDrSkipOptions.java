@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.flow.dr;
+package com.sequenceiq.cloudbreak.datalakedr;
 
 import java.util.Objects;
 
@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DatalakeDrSkipOptions {
+
+    private final boolean skipValidation;
 
     private final boolean skipAtlasMetadata;
 
@@ -15,12 +17,18 @@ public class DatalakeDrSkipOptions {
 
     @JsonCreator
     public DatalakeDrSkipOptions(
+            @JsonProperty("skipValidation") boolean skipValidation,
             @JsonProperty("skipAtlasMetadata") boolean skipAtlasMetadata,
             @JsonProperty("skipRangerAudits") boolean skipRangerAudits,
             @JsonProperty("skipRangerMetadata") boolean skipRangerMetadata) {
+        this.skipValidation = skipValidation;
         this.skipAtlasMetadata = skipAtlasMetadata;
         this.skipRangerAudits = skipRangerAudits;
         this.skipRangerMetadata = skipRangerMetadata;
+    }
+
+    public boolean isSkipValidation() {
+        return skipValidation;
     }
 
     public boolean isSkipAtlasMetadata() {
@@ -38,7 +46,8 @@ public class DatalakeDrSkipOptions {
     @Override
     public String toString() {
         return "DatalakeDrSkipOptions{" +
-                "skipAtlasMetadata=" + skipAtlasMetadata +
+                "skipValidation=" + skipValidation +
+                ", skipAtlasMetadata=" + skipAtlasMetadata +
                 ", skipRangerAudits=" + skipRangerAudits +
                 ", skipRangerMetadata=" + skipRangerMetadata +
                 '}';
@@ -53,11 +62,12 @@ public class DatalakeDrSkipOptions {
             return false;
         }
         DatalakeDrSkipOptions other = (DatalakeDrSkipOptions) o;
-        return skipAtlasMetadata == other.skipAtlasMetadata && skipRangerAudits == other.skipRangerAudits && skipRangerMetadata == other.skipRangerMetadata;
+        return skipValidation == other.skipValidation && skipAtlasMetadata == other.skipAtlasMetadata &&
+                skipRangerAudits == other.skipRangerAudits && skipRangerMetadata == other.skipRangerMetadata;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(skipAtlasMetadata, skipRangerAudits, skipRangerMetadata);
+        return Objects.hash(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata);
     }
 }

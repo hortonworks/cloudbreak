@@ -40,7 +40,7 @@ public class SdxBackupInternalAction implements Action<SdxInternalTestDto, SdxCl
         LOGGER.info(format(" Internal SDX '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
         SdxBackupResponse sdxBackupResponse = client.getDefaultClient()
                 .sdxBackupEndpoint()
-                .backupDatalakeByName(sdxName, backupLocation, backupName, false, false, false);
+                .backupDatalakeByName(sdxName, backupLocation, backupName, false, false, false, false);
         testDto.setFlow("SDX backup", sdxBackupResponse.getFlowIdentifier());
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
                 .sdxEndpoint()

@@ -30,13 +30,13 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
-import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -150,11 +150,12 @@ public class SdxRuntimeUpgradeService {
         validateRollingUpgrade(request, cluster);
         String imageId = determineImageId(request, upgradeCandidates);
         boolean skipBackup = request != null && Boolean.TRUE.equals(request.getSkipBackup());
+        boolean skipValidation = request != null && Boolean.TRUE.equals(request.isSkipValidation());
         boolean skipAtlasMetadata = request != null && Boolean.TRUE.equals(request.isSkipAtlasMetadata());
         boolean skipRangerAudits = request != null && Boolean.TRUE.equals(request.isSkipRangerAudits());
         boolean skipRangerMetadata = request != null && Boolean.TRUE.equals(request.isSkipRangerMetadata());
         boolean rollingUpgradeEnabled = request != null && Boolean.TRUE.equals(request.getRollingUpgradeEnabled());
-        DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(skipAtlasMetadata, skipRangerAudits, skipRangerMetadata);
+        DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster, shouldReplaceVmsAfterUpgrade(request), skipBackup, skipOptions,
                 rollingUpgradeEnabled, request.isKeepVariant());
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), Collections.singletonList(imageId));

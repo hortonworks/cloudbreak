@@ -4,8 +4,8 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.SdxEvent;
-import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 
 public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 

@@ -105,6 +105,8 @@ public class ModelDescriptions {
 
     public static final String SKIP_BACKUP = "Option to skip the backup before the upgrade.";
 
+    public static final String SKIP_VALIDATION = "Option to skip validation before the backup/restore.";
+
     public static final String SKIP_ATLAS = "Option to skip the backup/restore of Atlas data.";
 
     public static final String SKIP_RANGER_AUDIT = "Option to skip the backup/restore of Ranger Audit data.";
