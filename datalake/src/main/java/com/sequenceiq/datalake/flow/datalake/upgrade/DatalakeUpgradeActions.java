@@ -51,6 +51,8 @@ public class DatalakeUpgradeActions {
 
     private static final String REPLACE_VMS_AFTER_UPGRADE = "REPAIR_AFTER_UPGRADE";
 
+    private static final String ROLLING_UPGRADE_ENABLED = "ROLLING_UPGRADE_ENABLED";
+
     private static final String KEEP_VARIANT = "KEEP_VARIANT";
 
     @Inject
@@ -73,6 +75,7 @@ public class DatalakeUpgradeActions {
                 super.prepareExecution(payload, variables);
                 variables.put(TARGET_IMAGE, payload.getImageId());
                 variables.put(REPLACE_VMS_AFTER_UPGRADE, payload.isReplaceVms());
+                variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
                 variables.put(KEEP_VARIANT, payload.isKeepVariant());
             }
 
@@ -176,8 +179,11 @@ public class DatalakeUpgradeActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeVmReplaceEvent payload, Map<Object, Object> variables) {
                 if ((boolean) variables.get(REPLACE_VMS_AFTER_UPGRADE)) {
-                    LOGGER.info("Start Datalake upgrade vm replacement for {} ", payload.getResourceId());
-                    sdxUpgradeService.upgradeOs(payload.getResourceId(), Boolean.TRUE.equals(variables.get(KEEP_VARIANT)));
+                    boolean rollingUpgradeEnabled = Boolean.TRUE.equals(variables.get(ROLLING_UPGRADE_ENABLED));
+                    boolean keepVariant = Boolean.TRUE.equals(variables.get(KEEP_VARIANT));
+                    LOGGER.info("Start Datalake upgrade vm replacement for {} rolling upgrade enabled: {}, keepVariant: {}",
+                            payload.getResourceId(), rollingUpgradeEnabled, keepVariant);
+                    sdxUpgradeService.upgradeOs(payload.getResourceId(), rollingUpgradeEnabled, keepVariant);
                     sendEvent(context, new SdxEvent(DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT.event(), context));
                 } else {
                     LOGGER.info("Vm replacement is not required for {} ", payload.getResourceId());
