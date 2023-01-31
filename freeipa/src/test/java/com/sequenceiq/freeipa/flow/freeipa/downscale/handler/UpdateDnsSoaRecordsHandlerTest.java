@@ -1,65 +1,50 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.handler;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.model.DnsZone;
-import com.sequenceiq.freeipa.client.model.IpaServer;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsRequest;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsResponse;
+import com.sequenceiq.freeipa.service.freeipa.dns.DnsSoaRecordService;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateDnsSoaRecordsHandlerTest {
 
     @Mock
-    private FreeIpaClientFactory freeIpaClientFactory;
-
-    @Mock
-    private EventBus eventBus;
+    private DnsSoaRecordService dnsSoaRecordService;
 
     @InjectMocks
     private UpdateDnsSoaRecordsHandler underTest;
 
     @Test
-    void testResultContainsServerFqdns() throws Exception {
-        String zoneName = "example.com.";
+    void testAccept() throws Exception {
         String fqdn1 = "foo1.example.com";
-        String fqdn2 = "foo2.example.com";
-        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
-        IpaServer mockIpaServer1 = mock(IpaServer.class);
-        IpaServer mockIpaServer2 = mock(IpaServer.class);
-        DnsZone dnsZone = mock(DnsZone.class);
-        when(freeIpaClientFactory.getFreeIpaClientForStackId(any())).thenReturn(mockIpaClient);
-        when(mockIpaClient.findAllServers()).thenReturn(Set.of(mockIpaServer1, mockIpaServer2));
-        Mockito.lenient().when(mockIpaServer1.getFqdn()).thenReturn(fqdn1);
-        when(mockIpaServer2.getFqdn()).thenReturn(fqdn2);
-        when(mockIpaClient.findAllDnsZone()).thenReturn(Set.of(dnsZone));
-        when(dnsZone.getIdnssoamname()).thenReturn(fqdn1 + ".");
-        when(dnsZone.getIdnsname()).thenReturn(zoneName);
-
-
-        CleanupEvent cleanupEvent = new CleanupEvent(1L, Set.of(), Set.of(fqdn1), Set.of(), Set.of(), Set.of(), "", "", "", "");
+        String fqdn2 = "foo2.example.com.";
+        CleanupEvent cleanupEvent = new CleanupEvent(1L, Set.of(), Set.of(fqdn1, fqdn2), Set.of(), Set.of(), Set.of(), "", "", "", "");
         UpdateDnsSoaRecordsRequest request = new UpdateDnsSoaRecordsRequest(cleanupEvent);
 
-        underTest.accept(new Event<>(request));
+        UpdateDnsSoaRecordsResponse result = (UpdateDnsSoaRecordsResponse) underTest.doAccept(new HandlerEvent<>(new Event<>(request)));
 
-        verify(eventBus).notify(eq("UPDATEDNSSOARECORDSRESPONSE"), any(Event.class));
-        verify(mockIpaClient).setDnsZoneAuthoritativeNameserver(eq(zoneName), eq(fqdn2 + "."));
+        ArgumentCaptor<Set<String>> fqdnCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(dnsSoaRecordService).updateSoaRecords(eq(1L), fqdnCaptor.capture());
+        Set<String> fqdns = fqdnCaptor.getValue();
+        assertTrue(fqdns.contains("foo1.example.com."));
+        assertTrue(fqdns.contains("foo2.example.com."));
+        assertEquals(2, fqdns.size());
+        assertEquals(1L, result.getResourceId());
     }
 }
