@@ -35,6 +35,7 @@ public interface SdxRestoreEndpoint {
     SdxRestoreResponse restoreDatalakeByName(@PathParam("name") String name,
             @QueryParam("backupId") String backupId,
             @QueryParam("backupLocationOverride") String backupLocationOverride,
+            @QueryParam("skipValidation") boolean skipValidation,
             @QueryParam("skipAtlasMetadata") boolean skipAtlasMetadata,
             @QueryParam("skipRangerAudits") boolean skipRangerAudits,
             @QueryParam("skipRangerMetadata") boolean skipRangerMetadata);

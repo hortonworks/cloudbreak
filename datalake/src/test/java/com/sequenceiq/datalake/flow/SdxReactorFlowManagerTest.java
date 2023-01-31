@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -37,7 +38,6 @@ import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
-import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
@@ -61,7 +61,7 @@ class SdxReactorFlowManagerTest {
 
     private static final boolean ROLLING_UPGRADE_ENABLED = true;
 
-    private static final DatalakeDrSkipOptions SKIP_OPTIONS = new DatalakeDrSkipOptions(false, false, false);
+    private static final DatalakeDrSkipOptions SKIP_OPTIONS = new DatalakeDrSkipOptions(false, false, false, false);
 
     @Mock
     private EntitlementService entitlementService;

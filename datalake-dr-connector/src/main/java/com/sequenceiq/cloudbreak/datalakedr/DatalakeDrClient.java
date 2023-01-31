@@ -60,7 +60,7 @@ public class DatalakeDrClient {
     }
 
     public DatalakeBackupStatusResponse triggerBackup(String datalakeName, String backupLocation, String backupName, String actorCrn,
-            boolean skipAtlasMetadata, boolean skipRangerAudits, boolean skipRangerMetadata) {
+            DatalakeDrSkipOptions datalakeDrSkipOptions) {
         if (!datalakeDrConfig.isConfigured()) {
             return missingConnectorResponseOnBackup();
         }
@@ -74,13 +74,16 @@ public class DatalakeDrClient {
                 .setBackupLocation(backupLocation)
                 .setCloseDbConnections(true);
 
-        if (skipAtlasMetadata) {
+        if (datalakeDrSkipOptions.isSkipValidation()) {
+            builder.setSkipValidation(true);
+        }
+        if (datalakeDrSkipOptions.isSkipAtlasMetadata()) {
             builder.setSkipAtlasMetadata(SkipFlag.SKIP);
         }
-        if (skipRangerAudits) {
+        if (datalakeDrSkipOptions.isSkipRangerAudits()) {
             builder.setSkipRangerAudits(SkipFlag.SKIP);
         }
-        if (skipRangerMetadata) {
+        if (datalakeDrSkipOptions.isSkipRangerMetadata()) {
             builder.setSkipRangerHmsMetadata(SkipFlag.SKIP);
         }
         if (!Strings.isNullOrEmpty(backupName)) {
@@ -112,7 +115,7 @@ public class DatalakeDrClient {
     }
 
     public DatalakeRestoreStatusResponse triggerRestore(String datalakeName, String backupId, String backupLocationOverride, String actorCrn,
-            boolean skipAtlasMetadata, boolean skipRangerAudits, boolean skipRangerMetadata) {
+            DatalakeDrSkipOptions datalakeDrSkipOptions) {
         if (!datalakeDrConfig.isConfigured()) {
             return missingConnectorResponseOnRestore();
         }
@@ -124,13 +127,16 @@ public class DatalakeDrClient {
         if (!Strings.isNullOrEmpty(backupId)) {
             builder.setBackupId(backupId);
         }
-        if (skipAtlasMetadata) {
+        if (datalakeDrSkipOptions.isSkipValidation()) {
+            builder.setSkipValidation(true);
+        }
+        if (datalakeDrSkipOptions.isSkipAtlasMetadata()) {
             builder.setSkipAtlasMetadata(SkipFlag.SKIP);
         }
-        if (skipRangerAudits) {
+        if (datalakeDrSkipOptions.isSkipRangerAudits()) {
             builder.setSkipRangerAudits(SkipFlag.SKIP);
         }
-        if (skipRangerMetadata) {
+        if (datalakeDrSkipOptions.isSkipRangerMetadata()) {
             builder.setSkipRangerHmsMetadata(SkipFlag.SKIP);
         }
         if (!Strings.isNullOrEmpty(backupLocationOverride)) {

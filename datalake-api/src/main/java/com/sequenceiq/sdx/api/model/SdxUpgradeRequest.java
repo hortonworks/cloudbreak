@@ -36,6 +36,9 @@ public class SdxUpgradeRequest {
     @ApiModelProperty(ModelDescriptions.ROLLING_UPGRADE_ENABLED)
     private Boolean rollingUpgradeEnabled;
 
+    @ApiModelProperty(ModelDescriptions.SKIP_VALIDATION)
+    private boolean skipValidation;
+
     @ApiModelProperty(ModelDescriptions.SKIP_ATLAS)
     private boolean skipAtlasMetadata;
 
@@ -166,6 +169,14 @@ public class SdxUpgradeRequest {
         return Objects.isNull(imageId) &&
                 Objects.isNull(runtime) &&
                 !Boolean.TRUE.equals(lockComponents);
+    }
+
+    public boolean isSkipValidation() {
+        return skipValidation;
+    }
+
+    public void setSkipValidation(boolean skipValidation) {
+        this.skipValidation = skipValidation;
     }
 
     public boolean isSkipAtlasMetadata() {

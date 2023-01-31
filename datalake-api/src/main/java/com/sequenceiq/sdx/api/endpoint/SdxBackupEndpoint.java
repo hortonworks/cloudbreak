@@ -38,6 +38,7 @@ public interface SdxBackupEndpoint {
     SdxBackupResponse backupDatalakeByName(@PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation,
             @QueryParam("backupName") String backupName,
+            @QueryParam("skipValidation") boolean skipValidation,
             @QueryParam("skipAtlasMetadata") boolean skipAtlasMetadata,
             @QueryParam("skipRangerAudits") boolean skipRangerAudits,
             @QueryParam("skipRangerMetadata") boolean skipRangerMetadata);

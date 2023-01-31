@@ -23,13 +23,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
-import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -63,7 +63,7 @@ public class DatalakeRestoreActionsTest {
 
     private static final String RESTORE_ID = "restore_id";
 
-    private static final DatalakeDrSkipOptions SKIP_OPTIONS = new DatalakeDrSkipOptions(false, false, false);
+    private static final DatalakeDrSkipOptions SKIP_OPTIONS = new DatalakeDrSkipOptions(false, false, false, false);
 
     @InjectMocks
     private final DatalakeRestoreActions underTest = new DatalakeRestoreActions();
@@ -136,7 +136,7 @@ public class DatalakeRestoreActionsTest {
 
     @Test
     public void testSkipOptionsPassedIntoRestoreCall() throws Exception {
-        DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(true, true, true);
+        DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(true, true, true, true);
 
         when(sdxBackupRestoreService.triggerDatalakeRestore(eq(NEW_SDX_ID), any(), any(), eq(USER_CRN), eq(skipOptions)))
                 .thenReturn(new DatalakeRestoreStatusResponse(BACKUP_ID, RESTORE_ID, DatalakeOperationStatus.State.STARTED, null));

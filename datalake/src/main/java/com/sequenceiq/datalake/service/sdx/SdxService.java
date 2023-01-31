@@ -93,6 +93,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -107,7 +108,6 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
-import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
@@ -602,7 +602,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
         newSdxCluster.setStackRequest(stackRequest);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
-                new DatalakeDrSkipOptions(sdxClusterResizeRequest.isSkipAtlasMetadata(),
+                new DatalakeDrSkipOptions(sdxClusterResizeRequest.isSkipValidation(), sdxClusterResizeRequest.isSkipAtlasMetadata(),
                         sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()));
         return Pair.of(sdxCluster, flowIdentifier);
     }

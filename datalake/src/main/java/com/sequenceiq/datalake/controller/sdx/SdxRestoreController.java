@@ -9,9 +9,9 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
@@ -46,12 +46,12 @@ public class SdxRestoreController implements SdxRestoreEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
-    public SdxRestoreResponse restoreDatalakeByName(@ResourceName String name, String backupId, String backupLocationOverride, boolean skipAtlasMetadata,
-            boolean skipRangerAudits,
-            boolean skipRangerMetadata) {
+    public SdxRestoreResponse restoreDatalakeByName(@ResourceName String name, String backupId, String backupLocationOverride,
+                                                    boolean skipValidation, boolean skipAtlasMetadata, boolean skipRangerAudits,
+                                                    boolean skipRangerMetadata) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxBackupRestoreService.triggerDatalakeRestore(sdxCluster, name, backupId, backupLocationOverride,
-                new DatalakeDrSkipOptions(skipAtlasMetadata, skipRangerAudits, skipRangerMetadata));
+                new DatalakeDrSkipOptions(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata));
     }
 
     @Override

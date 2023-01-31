@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxEvent;
-import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFailureReason;
 import com.sequenceiq.datalake.flow.dr.event.DatalakeDatabaseDrStartBaseEvent;
 

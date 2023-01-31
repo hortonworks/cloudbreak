@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
@@ -56,7 +57,6 @@ import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
-import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFailureReason;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
@@ -143,8 +143,7 @@ public class SdxBackupRestoreService {
         LOGGER.info("Triggering datalake backup for datalake: '{}' in '{}' env",
                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
         return datalakeDrClient.triggerBackup(
-                sdxCluster.getClusterName(), backupLocation, backupName, userCrn,
-                skipOptions.isSkipAtlasMetadata(), skipOptions.isSkipRangerAudits(), skipOptions.isSkipRangerMetadata());
+                sdxCluster.getClusterName(), backupLocation, backupName, userCrn, skipOptions);
     }
 
     public DatalakeBackupStatusResponse triggerDatalakeBackupValidation(Long id, String backupLocation, String userCrn) {
@@ -485,8 +484,7 @@ public class SdxBackupRestoreService {
         LOGGER.info("Triggering datalake restore for datalake: '{}' in '{}' env from backupId '{}",
                 sdxCluster.getClusterName(), sdxCluster.getEnvName(), backupId);
         return datalakeDrClient.triggerRestore(
-                sdxCluster.getClusterName(), backupId, backupLocationOverride, userCrn,
-                skipOptions.isSkipAtlasMetadata(), skipOptions.isSkipRangerAudits(), skipOptions.isSkipRangerMetadata());
+                sdxCluster.getClusterName(), backupId, backupLocationOverride, userCrn, skipOptions);
     }
 
     public SdxRestoreStatusResponse getDatalakeRestoreStatus(String datalakeName, String restoreId, String backupName, String userCrn) {

@@ -21,6 +21,9 @@ public class SdxClusterResizeRequest {
     @NotNull
     private SdxClusterShape clusterShape;
 
+    @ApiModelProperty(ModelDescriptions.SKIP_VALIDATION)
+    private boolean skipValidation;
+
     @ApiModelProperty(ModelDescriptions.SKIP_ATLAS)
     private boolean skipAtlasMetadata;
 
@@ -44,6 +47,14 @@ public class SdxClusterResizeRequest {
 
     public void setClusterShape(SdxClusterShape clusterShape) {
         this.clusterShape = clusterShape;
+    }
+
+    public boolean isSkipValidation() {
+        return skipValidation;
+    }
+
+    public void setSkipValidation(boolean skipValidation) {
+        this.skipValidation = skipValidation;
     }
 
     public boolean isSkipAtlasMetadata() {
