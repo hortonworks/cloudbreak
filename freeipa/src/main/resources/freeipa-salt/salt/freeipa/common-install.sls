@@ -111,3 +111,26 @@ restart_sssd_if_reconfigured:
     - failhard: True
     - watch:
       - file: /etc/sssd/sssd.conf
+
+{% if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 8 %}
+  
+/etc/named/ipa-ext.conf:
+  file.managed:
+    - source: salt://freeipa/templates/ipa-ext.conf
+
+/etc/named/ipa-options-ext.conf:
+  file.append:
+    - text:
+        - allow-recursion { trusted_network; };
+        - allow-query-cache  { trusted_network; };
+    - require:
+        - file: /etc/named/ipa-ext.conf
+
+restart_named_if_reconfigured:
+  service.running:
+    - name: named-pkcs11
+    - failhard: True
+    - watch:
+        - file: /etc/named/ipa-options-ext.conf
+
+{% endif %}
