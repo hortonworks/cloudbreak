@@ -272,8 +272,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @InternalOnly
-    public FlowIdentifier upgradeOsByUpgradeSetsInternal(@TenantAwareParam @ResourceCrn String crn, OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest) {
-        Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
+    public FlowIdentifier upgradeOsByUpgradeSetsInternal(Long workspaceId, @TenantAwareParam @ResourceCrn String crn,
+            OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest) {
         return stackUpgradeOperations.upgradeOsByUpgradeSets(NameOrCrn.ofCrn(crn), workspaceId, orderedOsUpgradeSetRequest.getImageId(),
                 orderedOsUpgradeSetRequest.getOrderedOsUpgradeSets());
     }
