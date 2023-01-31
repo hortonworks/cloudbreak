@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -19,6 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 
@@ -69,6 +71,9 @@ class ProvisionerServiceTest {
 
     private static final String SDX_NAME = "sdx";
 
+    private static final String CONSTRAINT_VIOLATION_ERROR_MESSAGE_TEMPLATE =
+            "Error with resource [STACK], error: [Key (name, workspace_id)=(%s, 1) already exists.]";
+
     @Mock
     private SdxClusterRepository sdxClusterRepository;
 
@@ -117,6 +122,31 @@ class ProvisionerServiceTest {
 
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
         verify(sdxClusterRepository, times(1)).save(any(SdxCluster.class));
+        verify(stackV4Endpoint, times(1)).getByCrn(eq(0L), eq(sdxCluster.getCrn()), isNull());
+    }
+
+    @Test
+    void startProvisioningPostInternalTimedOutRetriedAndFailedWithConstraintViolation() {
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setId(1L);
+        when(stackV4Endpoint.getByCrn(anyLong(), nullable(String.class), nullable(Set.class)))
+                .thenThrow(new NotFoundException())
+                .thenReturn(stackV4Response);
+        String errorMessage = String.format(CONSTRAINT_VIOLATION_ERROR_MESSAGE_TEMPLATE, sdxCluster.getName());
+        BadRequestException badRequestException = new BadRequestException(errorMessage);
+        when(stackV4Endpoint.postInternal(anyLong(), any(StackV4Request.class), nullable(String.class)))
+                .thenThrow(badRequestException);
+        when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(eq(badRequestException))).thenReturn(errorMessage);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startStackProvisioning(clusterId, getEnvironmentResponse()));
+
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
+        verify(sdxClusterRepository, times(1)).save(any(SdxCluster.class));
+        verify(stackV4Endpoint, times(2)).getByCrn(eq(0L), eq(sdxCluster.getCrn()), any());
     }
 
     @Test
@@ -399,6 +429,7 @@ class ProvisionerServiceTest {
     private SdxCluster generateValidSdxCluster(long id) {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(id);
+        sdxCluster.setName("sdx");
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxCluster.setEnvName("envir");
         sdxCluster.setAccountId("hortonworks");

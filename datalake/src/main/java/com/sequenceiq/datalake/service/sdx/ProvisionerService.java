@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -41,6 +42,9 @@ public class ProvisionerService {
     public static final int DELETE_FAILED_RETRY_COUNT = 3;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionerService.class);
+
+    private static final String CONSTRAINT_VIOLATION_ERROR_MESSAGE_TEMPLATE =
+            "Error with resource [STACK], error: [Key (name, workspace_id)=(%s, 1) already exists.]";
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -168,17 +172,10 @@ public class ProvisionerService {
             });
             StackV4Response stackV4Response;
             try {
-                stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        () ->
-                        stackV4Endpoint.getByCrn(0L, sdxCluster.getCrn(), null));
+                stackV4Response = getStackByCrn(sdxCluster);
             } catch (NotFoundException e) {
                 LOGGER.info("Stack does not exist on cloudbreak side, POST new cluster: {}", sdxCluster.getClusterName(), e);
-                String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-                stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        () ->
-                        stackV4Endpoint.postInternal(0L, stackV4Request, initiatorUserCrn));
+                stackV4Response = postNewClusterAndHandleIfStackAlreadyExists(stackV4Request, sdxCluster);
             }
             sdxCluster.setStackId(stackV4Response.getId());
             sdxCluster.setStackCrn(stackV4Response.getCrn());
@@ -192,6 +189,29 @@ public class ProvisionerService {
         } catch (IOException e) {
             LOGGER.info("Cannot parse stackrequest to json", e);
             throw new RuntimeException("Cannot write stackrequest to json: " + e.getMessage());
+        }
+    }
+
+    private StackV4Response getStackByCrn(SdxCluster sdxCluster) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> stackV4Endpoint.getByCrn(0L, sdxCluster.getCrn(), null));
+    }
+
+    private StackV4Response postNewClusterAndHandleIfStackAlreadyExists(StackV4Request stackV4Request, SdxCluster sdxCluster) {
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.postInternal(0L, stackV4Request, initiatorUserCrn));
+        } catch (BadRequestException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            if (errorMessage != null && errorMessage.contains(String.format(CONSTRAINT_VIOLATION_ERROR_MESSAGE_TEMPLATE, sdxCluster.getName()))) {
+                LOGGER.warn("The stack already exists despite pre-checks, probably due to a retried POST request. Fetching stack and proceed.");
+                return getStackByCrn(sdxCluster);
+            } else {
+                throw e;
+            }
         }
     }
 
