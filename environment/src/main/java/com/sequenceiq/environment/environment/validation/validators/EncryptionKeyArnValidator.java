@@ -104,9 +104,11 @@ public class EncryptionKeyArnValidator {
                     platformResources().encryptionKeys(extendedCloudCredential, region, Collections.emptyMap()));
             List<String> keyArns = encryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).collect(Collectors.toList());
             if (keyArns.stream().noneMatch(s -> s.equals(encryptionKeyArn))) {
-                validationResultBuilder.error("Following encryption keys are retrieved from the cloud " + keyArns +
+                validationResultBuilder.warning("Following encryption keys are retrieved from the cloud " + keyArns +
                                 " . The provided encryption key " + encryptionKeyArn +
-                        " does not exist in the given region's encryption key list for this credential.");
+                        " does not exist in the given region's encryption key list for this credential." +
+                        " This is possible if the key is present in a different AWS Account." +
+                        " Please ensure that the Key is present" + "and have valid permissions otherwise would result to failures in EBS volume creation");
 
             }
         } catch (Exception e) {

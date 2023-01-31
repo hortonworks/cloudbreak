@@ -106,14 +106,15 @@ class EncryptionKeyArnValidatorTest {
         testInput1.setName("arn:aws:kms:eu-west-2:123456789012:key/1a2b3c4d-5e6f-jjjj-9i0j-1k2l3m4n5o6p");
         CloudEncryptionKeys cloudEncryptionKeys = new CloudEncryptionKeys(Set.of(testInput, testInput1));
         when(retryService.testWith2SecDelayMax15Times(any(Supplier.class))).thenReturn(cloudEncryptionKeys);
-
         ValidationResult validationResult = underTest.validate(environmentValidationDto);
-        assertTrue(validationResult.hasError());
-        assertEquals(String.format("Following encryption keys are retrieved from the cloud " +
-                        cloudEncryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).collect(Collectors.toList()) +
-                        " . The provided encryption key " + invalidKey +
-                        " does not exist in the given region's encryption key list for this credential."),
-                validationResult.getFormattedErrors());
+        assertTrue(validationResult.hasWarning());
+        assertEquals(String.format("Following encryption keys are retrieved from the cloud "
+                        + cloudEncryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).collect(Collectors.toList()) +
+                                " . The provided encryption key " + invalidKey +
+                                " does not exist in the given region's encryption key list for this credential." +
+                                " This is possible if the key is present in a different AWS Account." +
+                        " Please ensure that the Key is present" + "and have valid permissions otherwise would result to failures in EBS volume creation"),
+                validationResult.getFormattedWarnings());
     }
 
     @Test
