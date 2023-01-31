@@ -24,8 +24,10 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
-import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
-import com.sequenceiq.cloudbreak.service.SaltPasswordStatusService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
+import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @DisallowConcurrentExecution
@@ -91,6 +93,12 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
     private RotateSaltPasswordService rotateSaltPasswordService;
 
     @Inject
+    private RotateSaltPasswordTriggerService rotateSaltPasswordTriggerService;
+
+    @Inject
+    private RotateSaltPasswordValidator rotateSaltPasswordValidator;
+
+    @Inject
     private SaltPasswordStatusService saltPasswordStatusService;
 
     @Override
@@ -115,7 +123,7 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
                     } else if (null == stackStatus || IGNORED_STATES.contains(stackStatus)) {
                         LOGGER.debug("Stack salt sync is skipped, stack state is {}", stackStatus);
                     } else if (SYNCABLE_STATES.contains(stackStatus)) {
-                        rotateSaltPasswordService.validateRotateSaltPassword(stack);
+                        rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
                         RegionAwareInternalCrnGenerator dataHub = regionAwareInternalCrnGeneratorFactory.datahub();
                         ThreadBasedUserCrnProvider.doAs(dataHub.getInternalCrnForServiceAsString(), () -> rotateSaltPasswordIfNeeded(stack));
                     } else {
@@ -138,7 +146,7 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
             if (reasonOptional.isPresent()) {
                 RotateSaltPasswordReason reason = reasonOptional.get();
                 LOGGER.info("Triggering salt password rotation for status {} with reason {}", status, reason);
-                rotateSaltPasswordService.triggerRotateSaltPassword(stack, reason);
+                rotateSaltPasswordTriggerService.triggerRotateSaltPassword(stack, reason);
             } else {
                 LOGGER.debug("Salt password rotation is not needed for status {}", status);
             }

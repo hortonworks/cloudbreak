@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.service.salt;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -18,13 +18,14 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.quartz.saltstatuschecker.SaltStatusCheckerConfig;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 
 @Service
 public class SaltPasswordStatusService {
 
-    protected static final String SALTUSER = "saltuser";
+    private static final String SALTUSER = "saltuser";
 
-    protected static final String UNAUTHORIZED_RESPONSE = "Status: 401 Unauthorized Response";
+    private static final String UNAUTHORIZED_RESPONSE = "Status: 401 Unauthorized Response";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltPasswordStatusService.class);
 
