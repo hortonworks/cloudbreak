@@ -202,13 +202,13 @@ public class SdxUpgradeServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
         when(orderedOSUpgradeRequestProvider.createMediumDutyOrderedOSUpgradeSetRequest(stackV4Response)).thenReturn(orderedOSUpgradeSetRequest);
-        when(stackV4Endpoint.upgradeOsByUpgradeSetsInternal(sdxCluster.getCrn(), orderedOSUpgradeSetRequest)).thenReturn(flowIdentifier);
+        when(stackV4Endpoint.upgradeOsByUpgradeSetsInternal(0L, sdxCluster.getCrn(), orderedOSUpgradeSetRequest)).thenReturn(flowIdentifier);
 
         underTest.upgradeOs(STACK_ID, true, true);
 
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", sdxCluster);
         verify(stackV4Endpoint).get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString());
-        verify(stackV4Endpoint).upgradeOsByUpgradeSetsInternal(sdxCluster.getCrn(), orderedOSUpgradeSetRequest);
+        verify(stackV4Endpoint).upgradeOsByUpgradeSetsInternal(0L, sdxCluster.getCrn(), orderedOSUpgradeSetRequest);
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
     }
 
