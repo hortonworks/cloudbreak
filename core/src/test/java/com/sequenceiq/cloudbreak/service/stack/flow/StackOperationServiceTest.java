@@ -62,13 +62,14 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
-import com.sequenceiq.cloudbreak.service.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
+import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -137,10 +138,13 @@ public class StackOperationServiceTest {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private RotateSaltPasswordService rotateSaltPasswordService;
+    private SaltPasswordStatusService saltPasswordStatusService;
 
     @Mock
-    private SaltPasswordStatusService saltPasswordStatusService;
+    private RotateSaltPasswordTriggerService rotateSaltPasswordTriggerService;
+
+    @Mock
+    private RotateSaltPasswordValidator rotateSaltPasswordValidator;
 
     @Test
     public void testStartWhenStackAvailable() {
@@ -474,14 +478,14 @@ public class StackOperationServiceTest {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollableId");
-        when(rotateSaltPasswordService.triggerRotateSaltPassword(stackDto, REASON)).thenReturn(flowIdentifier);
+        when(rotateSaltPasswordTriggerService.triggerRotateSaltPassword(stackDto, REASON)).thenReturn(flowIdentifier);
 
         FlowIdentifier result = underTest.rotateSaltPassword(nameOrCrn, ACCOUNT_ID, REASON);
 
         assertEquals(flowIdentifier, result);
         verify(stackDtoService).getByNameOrCrn(nameOrCrn, ACCOUNT_ID);
-        verify(rotateSaltPasswordService).validateRotateSaltPassword(stackDto);
-        verify(rotateSaltPasswordService).triggerRotateSaltPassword(stackDto, REASON);
+        verify(rotateSaltPasswordValidator).validateRotateSaltPassword(stackDto);
+        verify(rotateSaltPasswordTriggerService).triggerRotateSaltPassword(stackDto, REASON);
     }
 
     @Test
