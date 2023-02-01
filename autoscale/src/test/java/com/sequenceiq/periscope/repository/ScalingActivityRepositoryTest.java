@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -64,7 +66,7 @@ class ScalingActivityRepositoryTest {
 
     @Test
     void testFindByOperationId() {
-        ScalingActivity result = underTest.findByOperationId(TEST_OPERATION_ID).orElse(null);
+        ScalingActivity result = underTest.findByOperationIdAndClusterCrn(TEST_OPERATION_ID, CLOUDBREAK_STACK_CRN_1).orElse(null);
 
         assertThat(result).isNotNull().isEqualTo(testScalingActivity);
     }
@@ -75,10 +77,11 @@ class ScalingActivityRepositoryTest {
         ScalingActivity scalingActivity1 = createScalingActivity(cluster, ActivityStatus.METRICS_COLLECTION_SUCCESS, Instant.now().toEpochMilli());
         ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS, Instant.now().toEpochMilli());
 
+        testCluster.setStackName("testCluster");
         saveScalingActivity(cluster, scalingActivity1);
         saveScalingActivity(testCluster, scalingActivity2);
 
-        List<ScalingActivity> result = underTest.findAllByCluster(testCluster.getId());
+        List<ScalingActivity> result = underTest.findAllByCluster(testCluster.getStackName());
 
         assertThat(result).hasSize(2).hasSameElementsAs(asList(testScalingActivity, scalingActivity2));
     }
@@ -102,7 +105,7 @@ class ScalingActivityRepositoryTest {
     }
 
     @Test
-    void testFindAllByClusterWithStartTimeAfter() {
+    void testFindAllByClusterWithStartTimeAfterUsingClusterCrn() {
         Instant now = Instant.now();
         ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
                 now.minus(5, MINUTES).toEpochMilli());
@@ -113,10 +116,30 @@ class ScalingActivityRepositoryTest {
 
         saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3);
 
-        List<ScalingActivity> result = underTest.findAllByClusterWithStartTimeAfter(testCluster.getId(),
-                new Date(now.minus(10, MINUTES).toEpochMilli()));
+        Pageable pageable = PageRequest.of(0, 10);
+        List<ScalingActivity> result = underTest.findAllByClusterCrnWithStartTimeAfter(testCluster.getStackCrn(),
+                new Date(now.minus(10, MINUTES).toEpochMilli()), pageable);
 
         assertThat(result).hasSize(3).hasSameElementsAs(asList(testScalingActivity, scalingActivity1, scalingActivity2));
+    }
+
+    @Test
+    void testFindAllByClusterWithStartTimeAfterUsingClusterName() {
+        Instant now = Instant.now();
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                now.minus(5, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_FAILED,
+                now.minus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
+                now.minus(30, MINUTES).toEpochMilli());
+
+        saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3);
+
+        Pageable pageable = PageRequest.of(0, 1);
+        List<ScalingActivity> result = underTest.findAllByClusterNameWithStartTimeAfter(testCluster.getStackName(),
+                new Date(now.minus(10, MINUTES).toEpochMilli()), pageable);
+
+        assertThat(result).hasSize(1).hasSameElementsAs(asList(testScalingActivity));
     }
 
     @Test
@@ -163,7 +186,56 @@ class ScalingActivityRepositoryTest {
     }
 
     @Test
-    void testFindAllByClusterBetweenInterval() {
+    void testfindAllByClusterAndInStatusesAndInGivenIntervalUsingClusterCrn() {
+        Instant now = Instant.now();
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
+                now.minus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_FAILED,
+                now.minus(15, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_FAILED,
+                now.plus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity4 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                now.plus(25, MINUTES).toEpochMilli());
+
+        Set<ActivityStatus> statuses = Set.of(ActivityStatus.METRICS_COLLECTION_FAILED, ActivityStatus.UPSCALE_TRIGGER_FAILED);
+
+        Date start = new Date(now.minus(30, MINUTES).toEpochMilli());
+        saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3, scalingActivity4);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        List<ScalingActivity> result = underTest.findAllByClusterCrnAndInStatusesWithTimeAfter(testCluster.getStackCrn(),
+                statuses, start, pageable);
+
+        assertThat(result).hasSize(3).hasSameElementsAs(asList(scalingActivity2, scalingActivity3, scalingActivity4));
+    }
+
+    @Test
+    void testfindAllByClusterAndInStatusesAndInGivenIntervalUsingClusterName() {
+        Instant now = Instant.now();
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
+                now.minus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_SUCCESS,
+                now.minus(15, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_SUCCESS,
+                now.plus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity4 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_SUCCESS,
+                now.plus(15, MINUTES).toEpochMilli());
+
+        Set<ActivityStatus> statuses = Set.of(ActivityStatus.METRICS_COLLECTION_FAILED, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                ActivityStatus.DOWNSCALE_TRIGGER_FAILED, ActivityStatus.SCALING_FLOW_FAILED);
+
+        Date start = new Date(now.minus(30, MINUTES).toEpochMilli());
+        saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3, scalingActivity4);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        List<ScalingActivity> result = underTest.findAllByClusterNameAndInStatusesWithTimeAfter(testCluster.getStackName(),
+                statuses, start, pageable);
+
+        assertThat(result).hasSize(0).hasSameElementsAs(List.of());
+    }
+
+    @Test
+    void testFindAllByClusterBetweenIntervalUsingClusterCrn() {
         Instant now = Instant.now();
         ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
                 now.minus(10, MINUTES).toEpochMilli());
@@ -178,16 +250,43 @@ class ScalingActivityRepositoryTest {
 
         Date start = new Date(now.minus(10, MINUTES).toEpochMilli());
         Date end = new Date(now.plus(10, MINUTES).toEpochMilli());
+        Pageable pageable = PageRequest.of(0, 10);
 
-        List<ScalingActivity> result = underTest.findAllByClusterBetweenInterval(testCluster.getId(), start, end);
+        List<ScalingActivity> result = underTest.findAllByClusterCrnBetweenInterval(testCluster.getStackCrn(), start, end, pageable);
 
         assertThat(result).hasSize(2).hasSameElementsAs(asList(testScalingActivity, scalingActivity1));
+    }
+
+    @Test
+    void testFindAllByClusterBetweenIntervalUsingClusterName() {
+        Instant now = Instant.now();
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
+                now.minus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_FAILED,
+                now.minus(15, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_FAILED,
+                now.plus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity4 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                now.plus(15, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity5 = createScalingActivity(testCluster, ActivityStatus.SCALING_FLOW_IN_PROGRESS,
+                now.minus(5, MINUTES).toEpochMilli());
+
+        saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3, scalingActivity4);
+
+        Date start = new Date(now.minus(10, MINUTES).toEpochMilli());
+        Date end = new Date(now.plus(10, MINUTES).toEpochMilli());
+        Pageable pageable = PageRequest.of(1, 1);
+
+        List<ScalingActivity> result = underTest.findAllByClusterNameBetweenInterval(testCluster.getStackName(), start, end, pageable);
+
+        assertThat(result).hasSize(1).hasSameElementsAs(asList(scalingActivity1));
     }
 
     @Test
     void testDeleteAllForCluster() {
         Instant now = Instant.now();
         Cluster cluster = getACluster();
+        testCluster.setStackName("testCluster");
 
         ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
                 now.minus(10, MINUTES).toEpochMilli());
@@ -203,8 +302,9 @@ class ScalingActivityRepositoryTest {
         saveScalingActivity(cluster, scalingActivity3, scalingActivity4);
 
         underTest.deleteAllByCluster(testCluster.getId());
-        List<ScalingActivity> postDelete = underTest.findAllByCluster(testCluster.getId());
-        List<ScalingActivity> undeleted = underTest.findAllByCluster(cluster.getId());
+        List<ScalingActivity> postDelete = underTest.findAllByCluster(testCluster.getStackName());
+        List<ScalingActivity> undeleted = underTest.findAllByCluster(cluster.getStackName());
+
 
         assertThat(postDelete).isEmpty();
         assertThat(undeleted).hasSize(2).hasSameElementsAs(asList(scalingActivity3, scalingActivity4));
@@ -256,6 +356,7 @@ class ScalingActivityRepositoryTest {
         cluster.setState(ClusterState.RUNNING);
         cluster.setAutoscalingEnabled(Boolean.TRUE);
         cluster.setStackType(StackType.WORKLOAD);
+        cluster.setStackName("testCluster2");
 
         ClusterPertain clusterPertain = new ClusterPertain();
         clusterPertain.setTenant(TEST_TENANT);
