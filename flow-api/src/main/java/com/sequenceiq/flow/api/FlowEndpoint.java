@@ -13,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
@@ -93,7 +92,7 @@ public interface FlowEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get flow logs by a list of flow ids - Input size max 50", produces = "application/json", notes = "Flow log operations",
             nickname = "getFlowLogsByFlowIds")
-    Page<FlowLogResponse> getFlowLogsByFlowIds(@NotNull @Size(max = 50, message = "Input size should not be over 50")
+    List<FlowLogResponse> getFlowLogsByFlowIds(@NotNull @Size(max = 50, message = "Input size should not be over 50")
         @QueryParam("flowIds") List<String> flowIds,
         @Min(value = 1, message = "Page size should be greater than 0") @QueryParam("size") int size, @QueryParam("page") int page);
 
@@ -103,7 +102,7 @@ public interface FlowEndpoint {
     @ApiOperation(value = "Gets flow check responses for parent chains - Input size max 50",
             produces = "application/json", notes = "Flow check log operations",
             nickname = "getFlowChainsStatusesByChainIds")
-    Page<FlowCheckResponse> getFlowChainsStatusesByChainIds(@NotNull @Size(max = 50, message = "Input size should not be over 50")
+    List<FlowCheckResponse> getFlowChainsStatusesByChainIds(@NotNull @Size(max = 50, message = "Input size should not be over 50")
         @QueryParam("chainIds") List<String> chainIds,
         @Min(value = 1, message = "Page size should be greater than 0") @QueryParam("size") int size, @QueryParam("page") int page);
 }
