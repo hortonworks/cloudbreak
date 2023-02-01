@@ -4,9 +4,12 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -104,6 +107,7 @@ import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
+import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -144,6 +148,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public static final String SDX_RESIZE_NAME_SUFFIX = "-md";
 
     public static final long WORKSPACE_ID_DEFAULT = 0L;
+
+    public static final Map<CloudPlatform, Versioned> MIN_RUNTIME_VERSION_FOR_RAZ = new HashMap<>() {
+        {
+            put(AWS, () -> "7.2.2");
+            put(AZURE, () -> "7.2.2");
+            put(GCP, () -> "7.2.16");
+        }
+    };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
@@ -203,6 +215,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
+
+    @Inject
+    private PlatformConfig platformConfig;
 
     @Inject
     private VirtualMachineConfiguration virtualMachineConfiguration;
@@ -436,8 +451,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
             sdxClusterRequest.getCloudStorage().setBaseLocation(trimmedBaseLocation);
         } else if (!CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform.name()) &&
-                !CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform.name()) &&
-                !CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name()) &&
+                !GCP.equalsIgnoreCase(cloudPlatform.name()) &&
+                !MOCK.equalsIgnoreCase(cloudPlatform.name()) &&
                 internalStackV4Request == null) {
             throw new BadRequestException("Cloud storage parameter is required.");
         }
@@ -573,8 +588,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             newSdxCluster.setCloudStorageBaseLocation(sdxCluster.getCloudStorageBaseLocation());
             newSdxCluster.setCloudStorageFileSystemType(sdxCluster.getCloudStorageFileSystemType());
         } else if (!CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform.name()) &&
-                !CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform.name()) &&
-                !CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name())) {
+                !GCP.equalsIgnoreCase(cloudPlatform.name()) &&
+                !MOCK.equalsIgnoreCase(cloudPlatform.name())) {
             throw new BadRequestException("Cloud storage parameter is required.");
         }
 
@@ -938,14 +953,17 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (razEnabled) {
             CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
-            if (!(AWS.equals(cloudPlatform) || AZURE.equals(cloudPlatform))) {
-                validationBuilder.error("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.");
-            }
-            if (!isRazSupported(runtime, cloudPlatform)) {
-                String errorMsg = AWS.equals(cloudPlatform) ?
-                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version greater than or equal to 7.2.2 and not " :
-                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version greater than or equal to 7.2.1 and not ";
-                validationBuilder.error(errorMsg + runtime);
+            if (!platformConfig.getRazSupportedPlatforms().contains(cloudPlatform)) {
+                validationBuilder.error(String.format("Provisioning Ranger Raz is only valid for %s",
+                        platformConfig.getRazSupportedPlatforms().stream()
+                                .map(CloudPlatform::getDislayName)
+                                .collect(Collectors.joining(", "))));
+            } else if (!isRazSupported(runtime, cloudPlatform)) {
+                validationBuilder.error(String.format("Provisioning Ranger Raz on %s is only valid for Cloudera Runtime version greater than or " +
+                                "equal to %s and not %s", cloudPlatform.getDislayName(),
+                        MIN_RUNTIME_VERSION_FOR_RAZ.get(cloudPlatform).getVersion(), runtime));
+            } else if (cloudPlatform.equals(GCP) && !entitlementService.isRazForGcpEnabled(Crn.safeFromString(environment.getCreator()).getAccountId())) {
+                validationBuilder.error("Provisioning Ranger Raz on GCP is not enabled for this account");
             }
         }
         ValidationResult validationResult = validationBuilder.build();
@@ -1003,7 +1021,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             return true;
         }
         Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, () -> AWS.equals(cloudPlatform) ? "7.2.2" : "7.2.1") > -1;
+        return versionComparator.compare(() -> runtime, MIN_RUNTIME_VERSION_FOR_RAZ.get(cloudPlatform)) > -1;
     }
 
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
@@ -1047,7 +1065,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                         "decides runtime version.");
             }
         } else if (imageSettingsV4Request != null && clusterRequest.getRuntime() == null) {
-            if (cloudPlatform.equals(CloudPlatform.MOCK)) {
+            if (cloudPlatform.equals(MOCK)) {
                 clusterRequest.setRuntime(MEDIUM_DUTY_REQUIRED_VERSION);
             } else {
                 validationBuilder.error("SDX cluster request has null runtime version and null image response. It cannot " +

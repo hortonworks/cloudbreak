@@ -65,6 +65,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
@@ -1107,6 +1108,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_RAW_S3))
                                 .addEntitlements(createEntitlement(CDP_CM_BULK_HOSTS_REMOVAL))
                                 .addEntitlements(createEntitlement(CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS))
+                                .addEntitlements(createEntitlement(CDP_GCP_RAZ))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(accountId)
                                 .setExternalAccountId("external-" + accountId)

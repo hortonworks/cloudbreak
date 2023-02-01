@@ -353,7 +353,7 @@ public class ModelDescriptions {
         public static final String GCP_PARAMETERS = "gcp specific parameters for cloud storage";
         public static final String VARIANT = "Cluster manager variant";
         public static final String CLOUD_STORAGE_LOCATIONS = "storage locations by CDP services";
-        public static final String ENABLE_RANGER_RAZ = "Enables Ranger Raz for the cluster on S3 and ADLSv2.";
+        public static final String ENABLE_RANGER_RAZ = "Enables Ranger Raz for the cluster on S3, ADLSv2 and GCS.";
         public static final String CERTIFICATE_ROTATION_TYPE = "the type of the certificate rotation";
         public static final String CERT_EXPIRATION = "Indicates the certificate status on the cluster";
         public static final String ROTATE_SALT_PASSWORD_REASON = "Indicates why the salt password rotation was started";
