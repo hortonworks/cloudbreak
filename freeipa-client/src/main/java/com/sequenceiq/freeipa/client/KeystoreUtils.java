@@ -43,7 +43,7 @@ public class KeystoreUtils {
         StringReader reader = new StringReader(serverCert);
         try (PEMParser pemParser = new PEMParser(reader)) {
             X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
-            Certificate caCertificate = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
+            Certificate caCertificate = new JcaX509CertificateConverter().getCertificate(certificateHolder);
 
             KeyStore trustStore = KeyStore.getInstance("JKS");
             trustStore.load(null);
@@ -57,7 +57,7 @@ public class KeystoreUtils {
 
         try (PEMParser pemParser = new PEMParser(reader)) {
             X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
-            return new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
+            return new JcaX509CertificateConverter().getCertificate(certificateHolder);
         }
     }
 
