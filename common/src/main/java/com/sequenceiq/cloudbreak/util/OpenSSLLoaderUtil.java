@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.crypto.provider.OpenSSLJniProvider;
 
-public class FipsOpenSSLLoaderUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FipsOpenSSLLoaderUtil.class);
+public class OpenSSLLoaderUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenSSLLoaderUtil.class);
 
     // CHECKSTYLE:OFF
     /**
@@ -19,7 +19,7 @@ public class FipsOpenSSLLoaderUtil {
     // CHECKSTYLE:ON
     private static final String SUN_PKCS_11_NSS_FIPS_PROVIDER_NAME = "SunPKCS11-NSS-FIPS";
 
-    private FipsOpenSSLLoaderUtil() {
+    private OpenSSLLoaderUtil() {
     }
 
     public static void registerOpenSSLJniProvider() {
@@ -27,8 +27,16 @@ public class FipsOpenSSLLoaderUtil {
         if (sunNSSFipsProvider != null) {
             LOGGER.info("Registering OpenSSLJniProvider, because FIPS related security provider '{}' is available.", SUN_PKCS_11_NSS_FIPS_PROVIDER_NAME);
             OpenSSLJniProvider.register();
+            LOGGER.info("Registered OpenSSLJniProvider for FIPS.");
         } else {
-            LOGGER.info("OpenSSLJniProvider doesn't need to be registered because '{}' is NOT available.", SUN_PKCS_11_NSS_FIPS_PROVIDER_NAME);
+            LOGGER.info("OpenSSLJniProvider doesn't need to be registered because '{}' is NOT available. Let's try it anyway",
+                    SUN_PKCS_11_NSS_FIPS_PROVIDER_NAME);
+            try {
+                OpenSSLJniProvider.register();
+                LOGGER.info("Registered OpenSSLJniProvider for non FIPS env.");
+            } catch (Throwable e) {
+                LOGGER.warn("Couldn't register OpenSSLJniProvider. Using default implementation.", e);
+            }
         }
     }
 }

@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.Security;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,6 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -215,8 +213,8 @@ public class FreeIpaClientBuilder {
 
                 throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(String.format(
                         "Encountered unexpected response from FreeIPA; details:%n%n"
-                        + "code: %s%n"
-                        + "headers: %s", response.getStatusLine().getStatusCode(), anonymize(Arrays.toString(response.getAllHeaders()))),
+                                + "code: %s%n"
+                                + "headers: %s", response.getStatusLine().getStatusCode(), anonymize(Arrays.toString(response.getAllHeaders()))),
                         response.getStatusLine().getStatusCode()));
             }
         }
@@ -232,8 +230,8 @@ public class FreeIpaClientBuilder {
             throw new FreeIpaClientException("Unable to obtain FreeIPA session cookie");
         } else if (sortedCookies.size() > 1) {
             List<String> cookieDetails = sortedCookies.stream()
-                            .map(this::cookieString)
-                            .collect(Collectors.toList());
+                    .map(this::cookieString)
+                    .collect(Collectors.toList());
             LOGGER.debug("Found multiple cookies [{}]", cookieDetails);
         }
         return sortedCookies.get(0);
@@ -249,17 +247,14 @@ public class FreeIpaClientBuilder {
     }
 
     private SSLContext setupSSLContext(String clientCert, String clientKey, String serverCert) throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
-        SSLContext context;
         if (StringUtils.isNoneBlank(clientCert, clientKey, serverCert)) {
-            context = SSLContexts.custom()
+            return SSLContexts.custom()
                     .loadTrustMaterial(KeystoreUtils.createTrustStore(serverCert), null)
                     .loadKeyMaterial(KeystoreUtils.createKeyStore(clientCert, clientKey), "consul".toCharArray())
                     .build();
         } else {
-            context = CertificateTrustManager.sslContext();
+            return CertificateTrustManager.sslContext();
         }
-        return context;
     }
 
     private URL getIpaUrl(String apiAddress, int port, String basePath, String context) throws MalformedURLException {
