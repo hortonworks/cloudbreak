@@ -119,14 +119,6 @@ public class EnvironmentValidatorService {
         this.ipaMinimumInstanceCountByGroup = ipaMinimumInstanceCountByGroup;
     }
 
-    public void validateFMSRecipesEntitlement(EnvironmentCreationDto creationDto) {
-        if (!entitlementService.isFmsRecipesEnabled(creationDto.getAccountId())
-                && creationDto.getFreeIpaCreation().getRecipes() != null
-                && creationDto.getFreeIpaCreation().getRecipes().size() > 0) {
-            throw new BadRequestException("FreeIpa recipe support is not enabled for this account");
-        }
-    }
-
     public void validateFreeipaRecipesExistsByName(Set<String> resourceNames) {
         recipeService.validateFreeipaRecipesExistsByName(resourceNames);
     }

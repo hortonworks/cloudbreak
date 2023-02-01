@@ -233,7 +233,7 @@ class FreeIpaRecipeServiceTest {
     }
 
     @Test
-    void testAttachRecipesIfEntitlementDisabled() {
+    void testAttachRecipesHasExistingRecipes() {
         List<String> recipes = List.of("recipe3", "recipe4");
         RecipeAttachDetachRequest recipeAttachDetachRequest = new RecipeAttachDetachRequest();
         recipeAttachDetachRequest.setRecipes(recipes);
@@ -242,29 +242,12 @@ class FreeIpaRecipeServiceTest {
         String accid = "accid";
         when(stackService.getResourceBasicViewByEnvironmentCrnAndAccountId("crn", accid)).thenReturn(getBasicView(1L, "crn"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
-        when(entitlementService.isFmsRecipesEnabled(accid)).thenReturn(false);
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () -> freeIpaRecipeService.attachRecipes(accid,
-                recipeAttachDetachRequest));
-        assertEquals("FreeIpa recipe support is not enabled for this account", badRequestException.getMessage());
-    }
-
-    @Test
-    void testAttachRecipesIfEntitlementEnabledAndHasExistingRecipes() {
-        List<String> recipes = List.of("recipe3", "recipe4");
-        RecipeAttachDetachRequest recipeAttachDetachRequest = new RecipeAttachDetachRequest();
-        recipeAttachDetachRequest.setRecipes(recipes);
-        recipeAttachDetachRequest.setEnvironmentCrn("crn");
-        List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(2L, "recipe2"));
-        String accid = "accid";
-        when(stackService.getResourceBasicViewByEnvironmentCrnAndAccountId("crn", accid)).thenReturn(getBasicView(1L, "crn"));
-        when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
-        when(entitlementService.isFmsRecipesEnabled(accid)).thenReturn(true);
         freeIpaRecipeService.attachRecipes(accid, recipeAttachDetachRequest);
         verify(recipeAttachmentChecker, times(0)).isRecipeAttachmentAvailable(1L);
     }
 
     @Test
-    void testAttachRecipesIfEntitlementEnabledAndNoExistingRecipesAndAttachmentNotAvailable() {
+    void testAttachRecipesNoExistingRecipesAndAttachmentNotAvailable() {
         List<String> recipes = List.of("recipe3", "recipe4");
         RecipeAttachDetachRequest recipeAttachDetachRequest = new RecipeAttachDetachRequest();
         recipeAttachDetachRequest.setRecipes(recipes);
@@ -273,7 +256,6 @@ class FreeIpaRecipeServiceTest {
         String accid = "accid";
         when(stackService.getResourceBasicViewByEnvironmentCrnAndAccountId("crn", accid)).thenReturn(getBasicView(1L, "crn"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
-        when(entitlementService.isFmsRecipesEnabled(accid)).thenReturn(true);
         when(recipeAttachmentChecker.isRecipeAttachmentAvailable(1L)).thenReturn(false);
         BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () -> freeIpaRecipeService.attachRecipes(accid,
                 recipeAttachDetachRequest));
@@ -282,7 +264,7 @@ class FreeIpaRecipeServiceTest {
     }
 
     @Test
-    void testAttachRecipesIfEntitlementEnabledAndNoExistingRecipesAndAttachmentAvailable() {
+    void testAttachRecipesNoExistingRecipesAndAttachmentAvailable() {
         List<String> recipes = List.of("recipe3", "recipe4");
         RecipeAttachDetachRequest recipeAttachDetachRequest = new RecipeAttachDetachRequest();
         recipeAttachDetachRequest.setRecipes(recipes);
@@ -291,7 +273,6 @@ class FreeIpaRecipeServiceTest {
         String accid = "accid";
         when(stackService.getResourceBasicViewByEnvironmentCrnAndAccountId("crn", accid)).thenReturn(getBasicView(1L, "crn"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
-        when(entitlementService.isFmsRecipesEnabled(accid)).thenReturn(true);
         when(recipeAttachmentChecker.isRecipeAttachmentAvailable(1L)).thenReturn(true);
         freeIpaRecipeService.attachRecipes(accid, recipeAttachDetachRequest);
         verify(recipeAttachmentChecker, times(1)).isRecipeAttachmentAvailable(1L);
@@ -307,7 +288,6 @@ class FreeIpaRecipeServiceTest {
         String accid = "accid";
         when(stackService.getResourceBasicViewByEnvironmentCrnAndAccountId("crn", accid)).thenReturn(getBasicView(1L, "crn"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
-        when(entitlementService.isFmsRecipesEnabled(accid)).thenReturn(true);
         ArgumentCaptor<Collection> validationArgumentCaptor = ArgumentCaptor.forClass(Collection.class);
         freeIpaRecipeService.attachRecipes(accid, recipeAttachDetachRequest);
         verify(recipeCrnListProviderService).validateRequestedRecipesExistsByName(validationArgumentCaptor.capture());
@@ -329,7 +309,6 @@ class FreeIpaRecipeServiceTest {
         String accid = "accid";
         when(stackService.getResourceBasicViewByEnvironmentCrnAndAccountId("crn", accid)).thenReturn(getBasicView(1L, "crn"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
-        when(entitlementService.isFmsRecipesEnabled(accid)).thenReturn(true);
         ArgumentCaptor<Collection> validationArgumentCaptor = ArgumentCaptor.forClass(Collection.class);
         freeIpaRecipeService.attachRecipes(accid, recipeAttachDetachRequest);
         verify(recipeCrnListProviderService).validateRequestedRecipesExistsByName(validationArgumentCaptor.capture());

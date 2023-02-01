@@ -134,7 +134,6 @@ class EnvironmentCreationServiceTest {
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
-        verify(validatorService, Mockito.times(1)).validateFMSRecipesEntitlement(environmentCreationDto);
         verify(validatorService, Mockito.times(0)).validatePublicKey(any());
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
