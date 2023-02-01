@@ -33,8 +33,7 @@ import com.sequenceiq.periscope.domain.ScalingActivity;
 @DataJpaTest
 class ScalingActivityRepositoryTest {
 
-    private static final String TEST_ACTIVITY_CRN = "crn:cdp:autoscale:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:datahubAutoscaleActivity:6d" +
-            "d833d4-7bc6-4a65-992a-b5da3400312c";
+    private static final String TEST_OPERATION_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
 
     private static final String TEST_REASON = "test trigger reason";
 
@@ -64,8 +63,8 @@ class ScalingActivityRepositoryTest {
     }
 
     @Test
-    void testFindByTriggerCrn() {
-        ScalingActivity result = underTest.findByActivityCrn(TEST_ACTIVITY_CRN).orElse(null);
+    void testFindByOperationId() {
+        ScalingActivity result = underTest.findByOperationId(TEST_OPERATION_ID).orElse(null);
 
         assertThat(result).isNotNull().isEqualTo(testScalingActivity);
     }
@@ -267,7 +266,7 @@ class ScalingActivityRepositoryTest {
 
     private ScalingActivity createScalingActivity(Cluster cluster, ActivityStatus status, long creationTimestamp) {
         ScalingActivity scalingActivity = new ScalingActivity();
-        scalingActivity.setActivityCrn(TEST_ACTIVITY_CRN);
+        scalingActivity.setOperationId(TEST_OPERATION_ID);
         scalingActivity.setScalingActivityReason(TEST_REASON);
         scalingActivity.setActivityStatus(status);
         scalingActivity.setStartTime(new Date(creationTimestamp));

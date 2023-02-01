@@ -20,8 +20,8 @@ import com.sequenceiq.periscope.domain.ScalingActivity;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface ScalingActivityRepository extends CrudRepository<ScalingActivity, Long> {
 
-    @Query("SELECT st FROM ScalingActivity st WHERE st.activityCrn = :activityCrn")
-    Optional<ScalingActivity> findByActivityCrn(@Param("activityCrn") String activityCrn);
+    @Query("SELECT st FROM ScalingActivity st WHERE st.operationId = :operationId")
+    Optional<ScalingActivity> findByOperationId(@Param("operationId") String operationId);
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.id = :clusterId")
     List<ScalingActivity> findAllByCluster(@Param("clusterId") Long clusterId);

@@ -36,8 +36,7 @@ import com.sequenceiq.periscope.repository.ScalingActivityRepository;
 @ExtendWith(MockitoExtension.class)
 class ScalingActivityServiceTest {
 
-    private static final String TEST_ACTIVITY_CRN = "crn:cdp:autoscale:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:" +
-            "datahubAutoscaleActivity:6dd833d4-7bc6-4a65-992a-b5da3400312c";
+    private static final String TEST_OPERATION_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
 
     private static final String TEST_ACTIVITY_REASON = "triggerReason";
 
@@ -78,9 +77,9 @@ class ScalingActivityServiceTest {
         ActivityStatus newStatus = SCALING_FLOW_IN_PROGRESS;
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, TEST_FLOW_ID);
         ScalingActivity scalingActivity = createScalingActivity(getCluster(), UPSCALE_TRIGGER_SUCCESS, TEST_ACTIVITY_REASON, null);
-        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByActivityCrn(anyString());
+        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByOperationId(anyString());
 
-        underTest.updateWithFlowIdAndTriggerStatus(flowIdentifier, TEST_ACTIVITY_CRN, newStatus);
+        underTest.updateWithFlowIdAndTriggerStatus(flowIdentifier, TEST_OPERATION_ID, newStatus);
 
         verify(scalingActivityRepository, times(1)).save(captor.capture());
         ScalingActivity result = captor.getValue();
@@ -91,19 +90,19 @@ class ScalingActivityServiceTest {
     }
 
     @Test
-    void testFindByTriggerCrn() {
+    void testFindByOperationId() {
         ScalingActivity scalingActivity = createScalingActivity(getCluster(), SCALING_FLOW_SUCCESS, TEST_ACTIVITY_REASON, TEST_FLOW_ID);
-        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByActivityCrn(anyString());
+        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByOperationId(anyString());
 
-        ScalingActivity result = underTest.findByCrn(TEST_ACTIVITY_CRN);
+        ScalingActivity result = underTest.findByOperationId(TEST_OPERATION_ID);
 
-        verify(scalingActivityRepository).findByActivityCrn(TEST_ACTIVITY_CRN);
+        verify(scalingActivityRepository).findByOperationId(TEST_OPERATION_ID);
         assertThat(result).isNotNull();
     }
 
     @Test
-    void testNotFoundByTriggerCrn() {
-        assertThatThrownBy(() -> underTest.findByCrn(TEST_ACTIVITY_CRN)).isInstanceOf(NotFoundException.class);
+    void testNotFoundUsingOperationId() {
+        assertThatThrownBy(() -> underTest.findByOperationId(TEST_OPERATION_ID)).isInstanceOf(NotFoundException.class);
     }
 
     private Cluster getCluster() {

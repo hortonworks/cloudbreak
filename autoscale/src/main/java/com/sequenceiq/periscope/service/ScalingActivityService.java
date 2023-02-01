@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -20,9 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -37,13 +35,10 @@ public class ScalingActivityService {
     @Inject
     private ScalingActivityRepository scalingActivityRepository;
 
-    @Inject
-    private RegionAwareCrnGenerator regionAwareCrnGenerator;
-
     public ScalingActivity create(Cluster cluster, ActivityStatus activityStatus, String reason, long creationTimestamp) {
         ScalingActivity scalingActivity = new ScalingActivity();
         scalingActivity.setCluster(cluster);
-        scalingActivity.setActivityCrn(createScalingActivityCrn(Crn.safeFromString(cluster.getClusterPertain().getUserCrn()).getAccountId()));
+        scalingActivity.setOperationId(UUID.randomUUID().toString());
         scalingActivity.setActivityStatus(activityStatus);
         scalingActivity.setScalingActivityReason(reason);
         scalingActivity.setStartTime(new Date(creationTimestamp));
@@ -51,17 +46,17 @@ public class ScalingActivityService {
         return scalingActivityRepository.save(scalingActivity);
     }
 
-    public void updateWithFlowIdAndTriggerStatus(FlowIdentifier flowIdentifier, String activityCrn, ActivityStatus activityStatus) {
-        ScalingActivity scalingActivity = findByCrn(activityCrn);
+    public void updateWithFlowIdAndTriggerStatus(FlowIdentifier flowIdentifier, String operationId, ActivityStatus activityStatus) {
+        ScalingActivity scalingActivity = findByOperationId(operationId);
         scalingActivity.setFlowId(flowIdentifier.getPollableId());
         scalingActivity.setActivityStatus(activityStatus);
-        LOGGER.info("Updating ScalingActivity: {} with FlowInformation and ActivityStatus: {}", activityCrn, activityStatus);
+        LOGGER.info("Updating ScalingActivity: {} with FlowInformation and ActivityStatus: {}", operationId, activityStatus);
         save(scalingActivity);
     }
 
-    public ScalingActivity findByCrn(String activityCrn) {
-        LOGGER.info("Retrieving ScalingActivity by crn: {}", activityCrn);
-        return scalingActivityRepository.findByActivityCrn(activityCrn).orElseThrow(notFound("ScalingActivity", activityCrn));
+    public ScalingActivity findByOperationId(String operationId) {
+        LOGGER.info("Retrieving ScalingActivity by Id: {}", operationId);
+        return scalingActivityRepository.findByOperationId(operationId).orElseThrow(notFound("ScalingActivity", operationId));
     }
 
     public List<ScalingActivity> findAllForCluster(Long clusterId) {
@@ -108,9 +103,5 @@ public class ScalingActivityService {
 
     public void save(ScalingActivity scalingActivity) {
         scalingActivityRepository.save(scalingActivity);
-    }
-
-    private String createScalingActivityCrn(String accountId) {
-        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.SCALING_ACTIVITY, accountId);
     }
 }

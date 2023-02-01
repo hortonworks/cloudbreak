@@ -26,8 +26,12 @@ public class ScalingActivity implements Clustered {
     @SequenceGenerator(name  = "scaling_activity_generator", sequenceName = "scaling_activity_id_seq", allocationSize = 1)
     private Long id;
 
+    @Deprecated
     @Column(name = "activity_crn")
     private String activityCrn;
+
+    @Column(name = "operation_id")
+    private String operationId;
 
     @Column(name = "flow_id")
     private String flowId;
@@ -58,12 +62,22 @@ public class ScalingActivity implements Clustered {
         this.id = id;
     }
 
+    @Deprecated
     public String getActivityCrn() {
         return activityCrn;
     }
 
+    @Deprecated
     public void setActivityCrn(String activityCrn) {
         this.activityCrn = activityCrn;
+    }
+
+    public String getOperationId() {
+        return operationId;
+    }
+
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
     }
 
     public String getFlowId() {
@@ -119,7 +133,7 @@ public class ScalingActivity implements Clustered {
     public String toString() {
         return "ScalingActivity{" +
                 "id=" + id +
-                ", activityCrn='" + activityCrn + '\'' +
+                ", operationId='" + operationId + '\'' +
                 ", flowId='" + flowId + '\'' +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
