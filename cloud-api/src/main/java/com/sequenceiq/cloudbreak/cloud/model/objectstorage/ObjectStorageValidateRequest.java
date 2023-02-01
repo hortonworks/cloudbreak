@@ -29,6 +29,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
     private BackupOperationType backupOperationType;
 
+    private boolean skipOrgPolicyDecisions;
+
     private AzureParameters azure;
 
     private MockAccountMappingSettings mockAccountMappingSettings;
@@ -44,6 +46,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.logsLocationBase = builder.logsLocationBase;
         this.backupLocationBase = builder.backupLocationBase;
         this.backupOperationType = builder.backupOperationType;
+        this.skipOrgPolicyDecisions = builder.skipOrgPolicyDecisions;
         this.mockAccountMappingSettings = builder.mockAccountMappingSettings;
         this.azure = builder.azure;
     }
@@ -108,6 +111,14 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.backupOperationType = backupOperationType;
     }
 
+    public void setSkipOrgPolicyDecisions(boolean skipOrgPolicyDecisions) {
+        this.skipOrgPolicyDecisions = skipOrgPolicyDecisions;
+    }
+
+    public boolean isSkipOrgPolicyDecisions() {
+        return skipOrgPolicyDecisions;
+    }
+
     public MockAccountMappingSettings getMockAccountMappingSettings() {
         return mockAccountMappingSettings;
     }
@@ -141,12 +152,13 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
                 Objects.equals(logsLocationBase, request.logsLocationBase) &&
                 Objects.equals(backupLocationBase, request.backupLocationBase) &&
                 Objects.equals(backupOperationType, request.backupOperationType) &&
+                Objects.equals(skipOrgPolicyDecisions, request.skipOrgPolicyDecisions) &&
                 Objects.equals(azure, request.azure);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(credential, cloudPlatform, cloudStorageRequest, spiFileSystem, logsLocationBase, azure);
+        return Objects.hash(credential, cloudPlatform, cloudStorageRequest, spiFileSystem, logsLocationBase, skipOrgPolicyDecisions, azure);
     }
 
     @Override
@@ -158,6 +170,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
                 ", logsLocationBase='" + logsLocationBase + '\'' +
                 ", backupLocationBase='" + backupLocationBase + '\'' +
                 ", backupOperationType='" + backupOperationType + '\'' +
+                ", skipOrgPolicyDecisions='" + skipOrgPolicyDecisions + '\'' +
                 '}';
     }
 
@@ -186,6 +199,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         private String backupLocationBase;
 
         private BackupOperationType backupOperationType;
+
+        private boolean skipOrgPolicyDecisions;
 
         private MockAccountMappingSettings mockAccountMappingSettings;
 
@@ -227,6 +242,11 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
             } else {
                 this.backupOperationType = BackupOperationType.ANY;
             }
+            return this;
+        }
+
+        public Builder withSkipOrgPolicyDecisions() {
+            this.skipOrgPolicyDecisions = true;
             return this;
         }
 

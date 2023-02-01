@@ -67,7 +67,7 @@ public class AwsIDBrokerObjectStorageValidator {
                     cloudFileSystem.getCloudIdentityType(), resultBuilder);
             if (instanceProfile != null) {
                 CloudIdentityType cloudIdentityType = cloudFileSystem.getCloudIdentityType();
-                boolean skipOrgPolicyDecisions = validationRequest.getCredential().getCredentialSettings().isSkipOrgPolicyDecisions();
+                boolean skipOrgPolicyDecisions = skipOrgPolicyDecisions(validationRequest);
                 if (CloudIdentityType.ID_BROKER.equals(cloudIdentityType)) {
                     validateIDBroker(validationRequest, iam, instanceProfile, cloudFileSystem, accountId, skipOrgPolicyDecisions, resultBuilder);
                 } else if (CloudIdentityType.LOG.equals(cloudIdentityType)) {
@@ -76,6 +76,11 @@ public class AwsIDBrokerObjectStorageValidator {
             }
         }
         return resultBuilder.build();
+    }
+
+    private boolean skipOrgPolicyDecisions(ObjectStorageValidateRequest validationRequest) {
+        return validationRequest.getCredential().getCredentialSettings().isSkipOrgPolicyDecisions()
+                || validationRequest.isSkipOrgPolicyDecisions();
     }
 
     private void validateIDBroker(ObjectStorageValidateRequest validationRequest, AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,

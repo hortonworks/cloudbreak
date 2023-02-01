@@ -162,6 +162,7 @@ public class CloudStorageValidator {
                 .withCloudStorageRequest(cloudStorageRequest)
                 .withBackupLocationBase(backupLocation)
                 .withBackupOperationType(backupOperationType)
+                .withSkipOrgPolicyDecisions()
                 .withAzureParameters(getSingleResourceGroupName(environment));
         if (environment.getIdBrokerMappingSource() == MOCK) {
             result.withMockSettings(environment.getLocation().getName(), environment.getAdminGroupName());
