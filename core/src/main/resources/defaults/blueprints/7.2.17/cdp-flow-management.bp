@@ -138,7 +138,7 @@
                 "value": "-Xms8g"
               },
               {
-                "name": "java.arg.7",
+                "name": "java.arg.tmp.dir",
                 "value": "${nifi.working.directory}/tmp"
               },
               {
