@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordFai
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordSuccessResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
-import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;

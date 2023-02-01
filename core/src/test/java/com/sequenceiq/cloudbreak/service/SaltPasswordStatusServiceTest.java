@@ -23,9 +23,14 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.quartz.saltstatuschecker.SaltStatusCheckerConfig;
+import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
 
 @ExtendWith(MockitoExtension.class)
 class SaltPasswordStatusServiceTest {
+
+    private static final String SALTUSER = "saltuser";
+
+    private static final String UNAUTHORIZED_RESPONSE = "Status: 401 Unauthorized Response";
 
     private static final String ACCOUNT_ID = "0";
 
@@ -64,7 +69,7 @@ class SaltPasswordStatusServiceTest {
         when(clock.getCurrentLocalDateTime()).thenReturn(LocalDateTime.now());
         when(saltStatusCheckerConfig.getPasswordExpiryThresholdInDays()).thenReturn(14);
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SaltPasswordStatusService.SALTUSER)).thenReturn(LocalDate.now().minusMonths(2));
+        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SALTUSER)).thenReturn(LocalDate.now().minusMonths(2));
 
         SaltPasswordStatus result = underTest.getSaltPasswordStatus(stack);
 
@@ -76,7 +81,7 @@ class SaltPasswordStatusServiceTest {
         when(clock.getCurrentLocalDateTime()).thenReturn(LocalDateTime.now());
         when(saltStatusCheckerConfig.getPasswordExpiryThresholdInDays()).thenReturn(14);
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SaltPasswordStatusService.SALTUSER)).thenReturn(LocalDate.now().plusMonths(2));
+        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SALTUSER)).thenReturn(LocalDate.now().plusMonths(2));
 
         SaltPasswordStatus result = underTest.getSaltPasswordStatus(stack);
 
@@ -86,10 +91,10 @@ class SaltPasswordStatusServiceTest {
     @Test
     void unauthorizedSaltPasswordRotationNeeded() throws Exception {
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        RuntimeException causeCause = new RuntimeException(SaltPasswordStatusService.UNAUTHORIZED_RESPONSE);
+        RuntimeException causeCause = new RuntimeException(UNAUTHORIZED_RESPONSE);
         RuntimeException cause = new RuntimeException("Ooops", causeCause);
         CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("Failed", cause);
-        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SaltPasswordStatusService.SALTUSER)).thenThrow(exception);
+        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SALTUSER)).thenThrow(exception);
 
         SaltPasswordStatus result = underTest.getSaltPasswordStatus(stack);
 
@@ -100,7 +105,7 @@ class SaltPasswordStatusServiceTest {
     void errorWhileSaltPasswordRotationNeeded() throws Exception {
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
         CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("Unexpected failure");
-        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SaltPasswordStatusService.SALTUSER)).thenThrow(exception);
+        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SALTUSER)).thenThrow(exception);
 
         SaltPasswordStatus result = underTest.getSaltPasswordStatus(stack);
 
