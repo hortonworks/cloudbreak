@@ -157,7 +157,7 @@ public class SdxUpgradeService {
     private FlowIdentifier callOsUpgrade(SdxCluster cluster, String initiatorUserCrn, boolean rollingUpgradeEnabled, boolean keepVariant) {
         if (rollingUpgradeEnabled && SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape())) {
             OrderedOSUpgradeSetRequest request = createOrderedOSUpgradeSetRequest(cluster);
-            return stackV4Endpoint.upgradeOsByUpgradeSetsInternal(cluster.getCrn(), request);
+            return stackV4Endpoint.upgradeOsByUpgradeSetsInternal(0L, cluster.getCrn(), request);
         } else {
             return stackV4Endpoint.upgradeOsInternal(0L, cluster.getClusterName(), initiatorUserCrn, keepVariant);
         }
