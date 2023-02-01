@@ -7,9 +7,10 @@ import java.util.Optional;
 
 import javax.transaction.Transactional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -18,32 +19,54 @@ import com.sequenceiq.periscope.domain.ScalingActivity;
 
 @EntityType(entityClass = ScalingActivity.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface ScalingActivityRepository extends CrudRepository<ScalingActivity, Long> {
+public interface ScalingActivityRepository extends PagingAndSortingRepository<ScalingActivity, Long> {
 
-    @Query("SELECT st FROM ScalingActivity st WHERE st.operationId = :operationId")
-    Optional<ScalingActivity> findByOperationId(@Param("operationId") String operationId);
+    @Query("SELECT st FROM ScalingActivity st WHERE st.operationId = :operationId AND st.cluster.stackCrn = :clusterCrn")
+    Optional<ScalingActivity> findByOperationIdAndClusterCrn(@Param("operationId") String operationId, @Param("clusterCrn") String clusterCrn);
 
-    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.id = :clusterId")
-    List<ScalingActivity> findAllByCluster(@Param("clusterId") Long clusterId);
+    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackName = :clusterName")
+    List<ScalingActivity> findAllByCluster(@Param("clusterName") String clusterName);
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.id = :clusterId AND st.startTime < :startTimeBefore ORDER BY st.startTime DESC")
     List<ScalingActivity> findAllByClusterWithStartTimeBefore(@Param("clusterId") Long clusterId, @Param("startTimeBefore") Date startTimeBefore);
 
-    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.id = :clusterId AND st.startTime >= :startTimeAfter ORDER BY st.startTime DESC")
-    List<ScalingActivity> findAllByClusterWithStartTimeAfter(@Param("clusterId") Long clusterId, @Param("startTimeAfter") Date startTimeAfter);
+    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackName = :clusterName" +
+            " AND st.startTime >= :startTimeAfter ORDER BY st.startTime DESC")
+    List<ScalingActivity> findAllByClusterNameWithStartTimeAfter(@Param("clusterName") String clusterName,
+            @Param("startTimeAfter") Date startTimeAfter, Pageable pageable);
+
+    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackCrn = :clusterCrn" +
+            " AND st.startTime >= :startTimeAfter ORDER BY st.startTime DESC")
+    List<ScalingActivity> findAllByClusterCrnWithStartTimeAfter(@Param("clusterCrn") String clusterCrn,
+            @Param("startTimeAfter") Date startTimeAfter, Pageable pageable);
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.id = :clusterId AND st.activityStatus = :activityStatus AND st.startTime >= :startTimeFrom " +
             "AND st.startTime < :startTimeUntil ORDER BY st.startTime DESC")
     List<ScalingActivity> findAllByClusterAndActivityStatusBetweenInterval(@Param("clusterId") Long clusterId,
             @Param("activityStatus") ActivityStatus activityStatus, @Param("startTimeFrom") Date startTimeFrom, @Param("startTimeUntil") Date startTimeUntil);
 
+    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackName = :clusterName" +
+            " AND st.activityStatus IN :statuses AND st.startTime >= :startTimeAfter ORDER BY st.startTime DESC")
+    List<ScalingActivity> findAllByClusterNameAndInStatusesWithTimeAfter(@Param("clusterName") String clusterName,
+            @Param("statuses") Collection<ActivityStatus> statuses, @Param("startTimeAfter") Date startTimeAfter, Pageable pageable);
+
+    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackCrn = :clusterCrn" +
+            " AND st.activityStatus IN :statuses AND st.startTime >= :startTimeAfter ORDER BY st.startTime DESC")
+    List<ScalingActivity> findAllByClusterCrnAndInStatusesWithTimeAfter(@Param("clusterCrn") String clusterCrn,
+            @Param("statuses") Collection<ActivityStatus> statuses, @Param("startTimeAfter") Date startTimeAfter, Pageable pageable);
+
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.id = :clusterId AND st.activityStatus IN :statuses")
     List<ScalingActivity> findAllByClusterAndInStatuses(@Param("clusterId") Long clusterId, @Param("statuses") Collection<ActivityStatus> statuses);
 
-    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.id = :clusterId AND st.startTime >= :startTimeFrom " +
-            "AND st.startTime < :startTimeUntil ORDER BY st.startTime DESC")
-    List<ScalingActivity> findAllByClusterBetweenInterval(@Param("clusterId") Long clusterId, @Param("startTimeFrom") Date startTimeFrom,
-            @Param("startTimeUntil") Date startTimeUntil);
+    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackName = :clusterName " +
+            "AND st.startTime >= :startTimeFrom AND st.startTime < :startTimeUntil ORDER BY st.startTime DESC")
+    List<ScalingActivity> findAllByClusterNameBetweenInterval(@Param("clusterName") String clusterName, @Param("startTimeFrom") Date startTimeFrom,
+            @Param("startTimeUntil") Date startTimeUntil, Pageable pageable);
+
+    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackCrn = :clusterCrn " +
+            "AND st.startTime >= :startTimeFrom AND st.startTime < :startTimeUntil ORDER BY st.startTime DESC")
+    List<ScalingActivity> findAllByClusterCrnBetweenInterval(@Param("clusterCrn") String clusterCrn, @Param("startTimeFrom") Date startTimeFrom,
+            @Param("startTimeUntil") Date startTimeUntil, Pageable pageable);
 
     @Query("SELECT st.id FROM ScalingActivity st WHERE st.endTime <= :endTimeBefore")
     List<Long> findAllIdsWithEndTimeBefore(@Param("endTimeBefore") Date endTimeBefore);
