@@ -100,8 +100,6 @@ public class EnvironmentCreationService {
         loadBalancerEntitlementService.validateNetworkForEndpointGateway(creationDto.getCloudPlatform(), creationDto.getName(),
                 getIfNotNull(creationDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetIds));
 
-        validatorService.validateFMSRecipesEntitlement(creationDto);
-
         if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
                     creationDto.getName(), creationDto.getAccountId()));
