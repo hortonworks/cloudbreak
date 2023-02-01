@@ -64,6 +64,41 @@ public class RangerRazBaseConfigProviderTest {
     }
 
     @Test
+    public void getServiceTypesConfigWhenGcpDataLakeAnd7210ShouldAddProperty() {
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.10"));
+
+        TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
+                .withStackType(StackType.DATALAKE)
+                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", blueprintTextProcessor))
+                .withCloudPlatform(CloudPlatform.GCP)
+                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withDataLakeView(new DatalakeView(false))
+                .build();
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+
+        assertEquals(1, roleConfigs.size());
+        assertEquals("<property><name>ranger.raz.bootstrap.servicetypes</name><value>gs</value></property>", roleConfigs.get(0).getValue());
+    }
+
+    @Test
+    public void getServiceTypesConfigWhenGcpDataHubAnd7210ShouldNotAddProperty() {
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.10"));
+
+        TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
+                .withStackType(StackType.WORKLOAD)
+                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", blueprintTextProcessor))
+                .withCloudPlatform(CloudPlatform.GCP)
+                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withDataLakeView(new DatalakeView(false))
+                .build();
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
+
+        assertEquals(0, roleConfigs.size());
+    }
+
+    @Test
     public void getServiceTypesConfigWheAzureAnd729ShouldNOTAddProperty() {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.9"));
@@ -98,12 +133,12 @@ public class RangerRazBaseConfigProviderTest {
     }
 
     @Test
-    public void getServiceTypesConfigWheAGCPAnd729ShouldNOTAddProperty() {
+    public void getServiceTypesConfigWhenGcpDataLakeAnd729ShouldNOTAddProperty() {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.9"));
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
-                .withStackType(StackType.WORKLOAD)
+                .withStackType(StackType.DATALAKE)
                 .withBlueprintView(new BlueprintView("", "7.2.9", "CDH", blueprintTextProcessor))
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
@@ -115,14 +150,14 @@ public class RangerRazBaseConfigProviderTest {
     }
 
     @Test
-    public void getServiceTypesConfigWheAGCPAnd7210ShouldNOTAddProperty() {
+    public void getServiceTypesConfigWheAYarnAnd7210ShouldNOTAddProperty() {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.10"));
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.WORKLOAD)
                 .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", blueprintTextProcessor))
-                .withCloudPlatform(CloudPlatform.GCP)
+                .withCloudPlatform(CloudPlatform.YARN)
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .withDataLakeView(new DatalakeView(false))
                 .build();

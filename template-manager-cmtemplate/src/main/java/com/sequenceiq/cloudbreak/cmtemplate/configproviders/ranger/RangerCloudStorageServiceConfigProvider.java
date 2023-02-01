@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.common.model.CloudStorageCdpService.HBASE_ROOT;
 import static com.sequenceiq.common.model.CloudStorageCdpService.HIVE_METASTORE_EXTERNAL_WAREHOUSE;
@@ -47,8 +46,7 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         String cmVersion = templatePreparationObject.getProductDetailsView().getCm().getVersion();
         CloudPlatform cloudPlatform = templatePreparationObject.getCloudPlatform();
-        if (CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_2)
-                && (cloudPlatform.equals(CloudPlatform.AWS) || cloudPlatform.equals(CloudPlatform.AZURE))) {
+        if (CMRepositoryVersionUtil.isRazConfigurationSupported(cmVersion, cloudPlatform, templatePreparationObject.getStackType())) {
             List<String> cloudPaths = new ArrayList<>();
             ConfigUtils.getStorageLocationForServiceProperty(templatePreparationObject, HIVE_METASTORE_DIR)
                     .ifPresent(location -> cloudPaths.add(HIVE_METASTORE_WAREHOUSE.name() + "=" + location.getValue()));

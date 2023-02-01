@@ -37,7 +37,9 @@ public class RangerRazDatalakeConfigProviderTest {
         return new Object[][]{
                 // testCaseName cloudPlatform
                 {"CloudPlatform.AWS", CloudPlatform.AWS},
-                {"CloudPlatform.AZURE", CloudPlatform.AZURE}
+                {"CloudPlatform.AZURE", CloudPlatform.AZURE},
+                {"CloudPlatform.GCP", CloudPlatform.GCP}
+
         };
     }
 
@@ -132,7 +134,8 @@ public class RangerRazDatalakeConfigProviderTest {
         return new Object[][]{
                 // testCaseName cloudPlatform runtime
                 {"CloudPlatform.AWS", CloudPlatform.AWS, "7.2.2"},
-                {"CloudPlatform.AZURE", CloudPlatform.AZURE, "7.2.1"}
+                {"CloudPlatform.AZURE", CloudPlatform.AZURE, "7.2.2"},
+                {"CloudPlatform.GCP", CloudPlatform.GCP, "7.9.0"}
         };
     }
 
@@ -164,6 +167,28 @@ public class RangerRazDatalakeConfigProviderTest {
                 () -> assertEquals("RANGER_RAZ_SERVER", roleConfigGroups.get(0).getRoleType()),
                 () -> assertEquals("ranger-RANGER_RAZ_SERVER", roleConfigGroups.get(0).getRefName())
         );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformAndCmVersionDataProvider")
+    @DisplayName("DH is used with the right CM and Raz is requested, no additional service needs to be added to the template")
+    void getAdditionalServicesWhenRazIsEnabledWithRightCmButDataHub(String testCaseName, CloudPlatform cloudPlatform, String cmVersion) {
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion(cmVersion);
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setEnableRangerRaz(true);
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView idbroker = new HostgroupView("idbroker", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.WORKLOAD)
+                .withCloudPlatform(cloudPlatform)
+                .withProductDetails(cmRepo, List.of())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withHostgroupViews(Set.of(master, idbroker))
+                .build();
+        Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
+
+        assertEquals(0, additionalServices.size());
     }
 
     @ParameterizedTest(name = "{0}")

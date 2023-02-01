@@ -1,11 +1,20 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
+
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -73,6 +82,22 @@ public class CMRepositoryVersionUtil {
     public static final Versioned CFM_VERSION_2_2_3_0 = () -> "2.2.3.0";
 
     public static final Versioned CDPD_VERSION_7_2_11 = () -> "7.2.11";
+
+    public static final Map<CloudPlatform, Versioned> MIN_CM_VERSION_FOR_RAZ = new HashMap<>() {
+        {
+            put(AWS, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2);
+            put(AZURE, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2);
+            put(GCP, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_0);
+        }
+    };
+
+    public static final Map<CloudPlatform, List<StackType>> RAZ_ENABLED_CLOUD_PLATFORMS = new HashMap<>() {
+        {
+            put(AWS, List.of(StackType.DATALAKE, StackType.WORKLOAD));
+            put(AZURE, List.of(StackType.DATALAKE, StackType.WORKLOAD));
+            put(GCP, List.of(StackType.DATALAKE));
+        }
+    };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMRepositoryVersionUtil.class);
 
@@ -143,21 +168,21 @@ public class CMRepositoryVersionUtil {
         return supported;
     }
 
-    public static boolean isRazConfigurationSupportedInDatalake(ClouderaManagerRepo clouderaManagerRepoDetails, CloudPlatform cloudPlatform) {
-        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger support in Datalake");
-        return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion,
-                CloudPlatform.AWS == cloudPlatform ? CLOUDERAMANAGER_VERSION_7_2_2 : CLOUDERAMANAGER_VERSION_7_2_1);
+    public static boolean isRazConfigurationSupported(String cmVersion, CloudPlatform cloudPlatform, StackType stackType) {
+        LOGGER.info("CM Version {} is compared for Raz support for {} in {}", cmVersion, cloudPlatform, stackType);
+        return isRazSupportedForCloudAndStack(cloudPlatform, stackType)
+                && isVersionNewerOrEqualThanLimited(cmVersion, (MIN_CM_VERSION_FOR_RAZ).get(cloudPlatform));
     }
 
-    public static boolean isRazConfigurationSupportedInDatahub(ClouderaManagerRepo clouderaManagerRepoDetails) {
-        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger support in Datahub");
-        return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_2_2);
+    public static boolean isRazSupportedForCloudAndStack(CloudPlatform cloudPlatform, StackType stackType) {
+        LOGGER.info("Cloud Platform {} is compared for Raz support in {}", cloudPlatform, stackType);
+        return RAZ_ENABLED_CLOUD_PLATFORMS.getOrDefault(cloudPlatform, Collections.emptyList()).contains(stackType);
     }
 
-    public static boolean isRazTokenConfigurationSupported(String cdhVersion, CloudPlatform cloudPlatform) {
+    public static boolean isRazTokenConfigurationSupported(String cdhVersion, CloudPlatform cloudPlatform, StackType stackType) {
         LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger token support in Data Hub and Data Lake");
         return isVersionNewerOrEqualThanLimited(() -> cdhVersion, CLOUDERA_STACK_VERSION_7_2_10)
-                && (cloudPlatform.equals(CloudPlatform.AWS) || cloudPlatform.equals(CloudPlatform.AZURE));
+                && isRazSupportedForCloudAndStack(cloudPlatform, stackType);
     }
 
     public static boolean isSudoAccessNeededForHostCertRotation(ClouderaManagerRepo clouderaManagerRepoDetails) {

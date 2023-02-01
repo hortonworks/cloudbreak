@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.configuration;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +43,9 @@ public class PlatformConfig {
     @Value("${datalake.supported.externaldb.sslenforcement.platform:AWS,AZURE}")
     private Set<CloudPlatform> dbServiceSslEnforcementSupportedPlatforms;
 
+    @Value("${datalake.supported.raz.platform:AWS,AZURE,GCP}")
+    private List<CloudPlatform> razSupportedPlatforms;
+
     @Inject
     private Set<DatabaseServerParameterSetter> databaseServerParameterSetters;
 
@@ -57,6 +61,10 @@ public class PlatformConfig {
 
     public boolean isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform cloudPlatform) {
         return dbServiceSslEnforcementSupportedPlatforms.contains(cloudPlatform);
+    }
+
+    public List<CloudPlatform> getRazSupportedPlatforms() {
+        return razSupportedPlatforms;
     }
 
     public Set<CloudPlatform> getSupportedExternalDatabasePlatforms() {
