@@ -558,6 +558,7 @@ public enum ResourceEvent {
     DATALAKE_BACKUP_VALIDATION_IN_PROGRESS("datalake.backup.validation.in.progress"),
     DATALAKE_RESTORE_IN_PROGRESS("datalake.restore.in.progress"),
     DATALAKE_BACKUP_FINISHED("datalake.backup.finished"),
+    DATALAKE_BACKUP_CANCELLED("datalake.backup.cancelled"),
     DATALAKE_BACKUP_VALIDATION_FINISHED("datalake.backup.validation.finished"),
     DATALAKE_RESTORE_FINISHED("datalake.restore.finished"),
     DATALAKE_BACKUP_FAILED("datalake.backup.failed"),

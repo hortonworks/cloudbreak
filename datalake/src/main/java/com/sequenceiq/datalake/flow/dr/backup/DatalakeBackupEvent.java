@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.dr.backup;
 
+import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupCancelledEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupCouldNotStartEvent;
@@ -17,10 +18,12 @@ public enum DatalakeBackupEvent implements FlowEvent {
     DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT("DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT"),
     DATALAKE_FULL_BACKUP_IN_PROGRESS_EVENT(EventSelectorUtil.selector(DatalakeFullBackupInProgressEvent.class)),
     DATALAKE_BACKUP_SUCCESS_EVENT(EventSelectorUtil.selector(DatalakeBackupSuccessEvent.class)),
+    DATALAKE_BACKUP_CANCELLED_EVENT(EventSelectorUtil.selector(DatalakeBackupCancelledEvent.class)),
     DATALAKE_DATABASE_BACKUP_FAILED_EVENT(EventSelectorUtil.selector(DatalakeDatabaseBackupFailedEvent.class)),
     DATALAKE_BACKUP_FAILED_EVENT(EventSelectorUtil.selector(DatalakeBackupFailedEvent.class)),
     DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT("DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT"),
     DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT("DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT"),
+    DATALAKE_BACKUP_CANCEL_HANDLED_EVENT("DATALAKE_BACKUP_CANCEL_HANDLED_EVENT"),
     DATALAKE_BACKUP_FAILURE_HANDLED_EVENT("DATALAKE_BACKUP_FAILURE_HANDLED_EVENT");
 
     private final String event;

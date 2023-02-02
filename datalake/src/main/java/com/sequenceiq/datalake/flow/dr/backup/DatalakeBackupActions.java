@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.dr.backup;
 
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_CANCEL_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT;
@@ -29,6 +30,7 @@ import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupCancelledEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupCouldNotStartEvent;
@@ -264,6 +266,32 @@ public class DatalakeBackupActions {
 
             @Override
             protected Object getFailurePayload(DatalakeBackupSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return DatalakeDatabaseBackupFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
+    @Bean(name = "DATALAKE_BACKUP_CANCELLED_STATE")
+    public Action<?, ?> cancelledBackupAction() {
+        return new AbstractSdxAction<>(DatalakeBackupCancelledEvent.class) {
+
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    DatalakeBackupCancelledEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, DatalakeBackupCancelledEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Sdx backup was cancelled with sdx id: {}", payload.getResourceId());
+                sendEvent(context, DATALAKE_BACKUP_CANCEL_HANDLED_EVENT.event(), payload);
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                        ResourceEvent.DATALAKE_BACKUP_CANCELLED,
+                        "Datalake backup cancelled", payload.getResourceId());
+            }
+
+            @Override
+            protected Object getFailurePayload(DatalakeBackupCancelledEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return DatalakeDatabaseBackupFailedEvent.from(payload, ex);
             }
         };
