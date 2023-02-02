@@ -107,6 +107,8 @@ public class StackDetails implements Serializable {
 
     private CustomConfigurationsDetails customConfigurations;
 
+    private Integer javaVersion;
+
     public Long getId() {
         return id;
     }
@@ -337,5 +339,13 @@ public class StackDetails implements Serializable {
 
     public void setCustomConfigurations(CustomConfigurationsDetails customConfigurations) {
         this.customConfigurations = customConfigurations;
+    }
+
+    public Integer getJavaVersion() {
+        return javaVersion;
+    }
+
+    public void setJavaVersion(Integer javaVersion) {
+        this.javaVersion = javaVersion;
     }
 }

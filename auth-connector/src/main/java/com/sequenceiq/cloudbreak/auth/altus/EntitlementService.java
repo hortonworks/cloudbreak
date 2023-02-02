@@ -66,7 +66,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLU
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_RECIPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FORCED_JAVA_VERSION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
@@ -612,10 +611,6 @@ public class EntitlementService {
 
     public boolean isWiamUsersyncRoutingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, WORKLOAD_IAM_USERSYNC_ROUTING);
-    }
-
-    public boolean isForcedJavaVersionEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_FORCED_JAVA_VERSION);
     }
 
     public List<String> getEntitlements(String accountId) {

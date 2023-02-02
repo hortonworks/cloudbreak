@@ -63,7 +63,17 @@ public class StructuredEventToCDPVersionDetailsConverter {
                             .collect(Collectors.toList());
 
                     versionDetails.setAll(String.join(", ", formattedPackageVersions));
+
+
                 }
+            }
+
+            if (stackDetails.getJavaVersion() != null) {
+                versionDetails.setJavaVersion(stackDetails.getJavaVersion().toString());
+                versionDetails.setJavaVersionForced(true);
+            } else if (image != null && image.getPackageVersions() != null) {
+                versionDetails.setJavaVersion(image.getPackageVersions().getOrDefault("java", ""));
+                versionDetails.setJavaVersionForced(false);
             }
         }
 
