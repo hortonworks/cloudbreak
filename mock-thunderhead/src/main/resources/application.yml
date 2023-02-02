@@ -110,7 +110,6 @@ auth:
     targeting.subnets.for.endpoint.access.gateway.enable: true
     cost.calculation.enable: false
     enforce.aws.native.single.az.enabled: false
-    forced.java.version.enabled: true
 crn:
   partition: cdp
   region: us-west-1

@@ -97,6 +97,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -202,6 +203,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
+
+    @Inject
+    private VirtualMachineConfiguration virtualMachineConfiguration;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -407,6 +411,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         LOGGER.info("Creating SDX cluster with name {}", name);
         String accountId = getAccountIdFromCrn(userCrn);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
+        validateJavaVersion(sdxClusterRequest.getJavaVersion(), accountId);
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform);
@@ -944,6 +949,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    private void validateJavaVersion(Integer javaVersion, String accountId) {
+        if (javaVersion != null) {
+            if (!virtualMachineConfiguration.getSupportedJavaVersions().contains(javaVersion)) {
+                throw new BadRequestException(String.format("Java version %d is not supported.", javaVersion));
+            }
         }
     }
 

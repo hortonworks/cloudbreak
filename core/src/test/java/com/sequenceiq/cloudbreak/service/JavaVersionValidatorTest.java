@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -13,9 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class JavaVersionValidatorTest {
@@ -25,7 +26,7 @@ class JavaVersionValidatorTest {
     private static final int JAVA_VERSION_11 = 11;
 
     @Mock
-    private EntitlementService entitlementService;
+    private VirtualMachineConfiguration virtualMachineConfiguration;
 
     @Mock
     private Image image;
@@ -39,26 +40,26 @@ class JavaVersionValidatorTest {
     }
 
     @Test
-    public void shouldNotFailInCaseOfImageSupportsJavaVersionAndAccountEntitledToForceIt() {
-        when(entitlementService.isForcedJavaVersionEnabled(ACCOUNT_ID)).thenReturn(true);
+    public void shouldNotFailInCaseOfImageSupportsJavaVersion() {
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(List.of(JAVA_VERSION_11));
         when(image.getPackageVersions()).thenReturn(Map.of(String.format("java%d", JAVA_VERSION_11), "anyvalue"));
 
         victim.validateImage(image, JAVA_VERSION_11, ACCOUNT_ID);
     }
 
     @Test
-    public void shoudlFailOnAccountNotEntitledToForceJavaVersion() {
-        when(entitlementService.isForcedJavaVersionEnabled(ACCOUNT_ID)).thenReturn(false);
+    public void shouldFailInCaseOfJavaVersionNotSupportedByTheVirtualMachineConfiguration() {
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(List.of());
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> victim.validateImage(image, JAVA_VERSION_11, ACCOUNT_ID));
 
-        assertEquals("Forcing java version is not supported in your account.", exception.getMessage());
+        assertEquals("Java version 11 is not supported.", exception.getMessage());
     }
 
     @Test
     public void shoudlFailOnJavaVersionIsNotSupportedByTheImage() {
-        when(entitlementService.isForcedJavaVersionEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(List.of(JAVA_VERSION_11));
         when(image.getPackageVersions()).thenReturn(Collections.emptyMap());
         when(image.getUuid()).thenReturn("imageuuid");
 
