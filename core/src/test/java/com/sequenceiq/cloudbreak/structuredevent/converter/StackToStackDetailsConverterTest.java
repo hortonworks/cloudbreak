@@ -65,6 +65,7 @@ public class StackToStackDetailsConverterTest {
         Assertions.assertEquals(stack.getTunnel().name(), actual.getTunnel());
         Assertions.assertEquals(stack.getType().name(), actual.getType());
         Assertions.assertEquals("ON_ROOT_VOLUME", actual.getDatabaseType());
+        Assertions.assertEquals(stack.getJavaVersion(), actual.getJavaVersion());
     }
 
     @Test
@@ -154,6 +155,7 @@ public class StackToStackDetailsConverterTest {
         stack.setInstanceGroups(new HashSet<>());
         stack.setTags(new Json(""));
         stack.setCluster(new Cluster());
+        stack.setJavaVersion(11);
         return stack;
     }
 }
