@@ -2,20 +2,20 @@ package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.kerby.kerberos.kerb.keytab.Keytab;
-import org.apache.kerby.kerberos.kerb.keytab.KeytabEntry;
-import org.apache.kerby.kerberos.kerb.type.KerberosTime;
-import org.apache.kerby.kerberos.kerb.type.base.EncryptionKey;
-import org.apache.kerby.kerberos.kerb.type.base.EncryptionType;
-import org.apache.kerby.kerberos.kerb.type.base.PrincipalName;
+import org.apache.directory.server.kerberos.shared.keytab.Keytab;
+import org.apache.directory.server.kerberos.shared.keytab.KeytabEncoder;
+import org.apache.directory.server.kerberos.shared.keytab.KeytabEntry;
+import org.apache.directory.shared.kerberos.KerberosTime;
+import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
+import org.apache.directory.shared.kerberos.codec.types.PrincipalNameType;
+import org.apache.directory.shared.kerberos.components.EncryptionKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class UserKeytabGenerator {
     // expirementiation we've found that for user principles, keytab entries with kvno of zero
     // works fine (in fact, any arbitrary number should work), regardless of what the actual key
     // versions are set in the KDC / Directory Server.
-    private static final int KEY_VERSION_NUMBER_ZERO = 0;
+    private static final byte KEY_VERSION_NUMBER_ZERO = 0;
 
     @Inject
     private Clock clock;
@@ -46,15 +46,13 @@ public class UserKeytabGenerator {
         requireNonNull(realm, "realm must not be null");
         requireNonNull(actorKerberosKey, "actorKerberosKey must not be null");
 
-        PrincipalName principalName = new PrincipalName(user + '@' + realm);
-
-        EncryptionType encryptionType = EncryptionType.fromValue(actorKerberosKey.getKeyType());
+        EncryptionType encryptionType = EncryptionType.getTypeByValue(actorKerberosKey.getKeyType());
         byte[] key = Base64.getDecoder().decode(actorKerberosKey.getKeyValue());
         EncryptionKey encryptionKey = new EncryptionKey(encryptionType, key);
 
         KerberosTime time = new KerberosTime(clock.getCurrentTimeMillis());
 
-        return new KeytabEntry(principalName, time, KEY_VERSION_NUMBER_ZERO, encryptionKey);
+        return new KeytabEntry(user + '@' + realm, PrincipalNameType.KRB_NT_PRINCIPAL.getValue(), time, KEY_VERSION_NUMBER_ZERO, encryptionKey);
     }
 
     public String generateKeytabBase64(String username, String realm, List<ActorKerberosKey> actorKerberosKeys) {
@@ -68,13 +66,10 @@ public class UserKeytabGenerator {
                 .map(key -> toKeytabEntry(username, realm, key))
                 .collect(Collectors.toList());
         Keytab keytab = new Keytab();
-        keytab.addKeytabEntries(keytabEntries);
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            keytab.store(outputStream);
-            byte[] keyBytes = outputStream.toByteArray();
-            return Base64.getEncoder().encodeToString(keyBytes);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to generate keytab", e);
-        }
+        keytab.setEntries(keytabEntries);
+        KeytabEncoder encoder = new KeytabEncoder();
+        ByteBuffer keyByteBuffer = encoder.write(keytab.getKeytabVersion(), keytab.getEntries());
+
+        return Base64.getEncoder().encodeToString(keyByteBuffer.array());
     }
 }
