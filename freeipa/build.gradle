@@ -67,7 +67,7 @@ dependencies {
     exclude group: 'org.hibernate', module: 'hibernate-envers'
   }
   implementation     group: 'com.google.guava',          name: 'guava',                                version: guavaVersion
-  implementation     group: 'org.apache.kerby',          name: 'kerb-util',                            version: '2.0.2'
+  implementation     group: 'org.apache.directory.server', name: 'apacheds-kerberos-codec',            version: '2.0.0.AM26'
 
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.6'
   implementation     group: 'com.dyngr',                        name: 'polling',                       version: dyngrPollingVersion
