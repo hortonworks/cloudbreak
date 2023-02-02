@@ -405,12 +405,12 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             "WHERE s.id = :id")
     Optional<PayloadContext> findStackAsPayloadContext(@Param("id") Long id);
 
-    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name " +
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
             "FROM Stack s " +
             "WHERE s.id = :resourceId")
     Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
 
-    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name " +
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
             "FROM Stack s " +
             "LEFT JOIN s.stackStatus ss " +
             "WHERE s.terminated = null " +

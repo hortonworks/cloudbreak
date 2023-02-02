@@ -111,7 +111,9 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     List<Environment> findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
             @Param("parentEnvironmentId") Long parentEnvironmentId);
 
-    @Query("SELECT e.resourceCrn as remoteResourceId, e.id as localId, e.name as name FROM Environment e WHERE e.archived = false " +
+    @Query("SELECT e.resourceCrn as remoteResourceId, e.id as localId, e.name as name, e.cloudPlatform as provider " +
+            "FROM Environment e " +
+            "WHERE e.archived = false " +
             "and e.status not in (:statuses)")
     List<JobResource> findAllRunningAndStatusNotIn(@Param("statuses") Collection<EnvironmentStatus> statuses);
 
@@ -124,8 +126,9 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             "WHERE e.id = :id")
     Optional<PayloadContext> findStackAsPayloadContext(@Param("id") Long id);
 
-    @Query("SELECT e.resourceCrn as remoteResourceId, e.id as localId, e.name as name " +
-            "FROM Environment e WHERE e.id = :resourceId")
+    @Query("SELECT e.resourceCrn as remoteResourceId, e.id as localId, e.name as name, e.cloudPlatform as provider " +
+            "FROM Environment e " +
+            "WHERE e.id = :resourceId")
     Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
 
     @Query("SELECT e.resourceCrn as resourceCrn, e.id as id, e.name as name " +
