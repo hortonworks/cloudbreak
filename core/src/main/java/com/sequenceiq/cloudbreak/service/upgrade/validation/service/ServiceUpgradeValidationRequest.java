@@ -8,9 +8,12 @@ public class ServiceUpgradeValidationRequest {
 
     private final boolean lockComponents;
 
-    public ServiceUpgradeValidationRequest(Stack stack, boolean lockComponents) {
+    private final String targetRuntime;
+
+    public ServiceUpgradeValidationRequest(Stack stack, boolean lockComponents, String targetRuntime) {
         this.stack = stack;
         this.lockComponents = lockComponents;
+        this.targetRuntime = targetRuntime;
     }
 
     public Stack getStack() {
@@ -19,5 +22,9 @@ public class ServiceUpgradeValidationRequest {
 
     public boolean isLockComponents() {
         return lockComponents;
+    }
+
+    public String getTargetRuntime() {
+        return targetRuntime;
     }
 }

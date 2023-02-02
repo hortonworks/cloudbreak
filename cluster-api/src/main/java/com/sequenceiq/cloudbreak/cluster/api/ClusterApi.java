@@ -141,6 +141,10 @@ public interface ClusterApi {
         return clusterModificationService().getRoleConfigValueByServiceType(clusterName, roleConfigGroup, serviceType, configName);
     }
 
+    default boolean isRolePresent(String clusterName, String roleConfigGroup, String serviceType) {
+        return clusterModificationService().isRolePresent(clusterName, roleConfigGroup, serviceType);
+    }
+
     default void rotateHostCertificates(String sshUser, KeyPair sshKeyPair, String subAltName) throws CloudbreakException {
         clusterSecurityService().rotateHostCertificates(sshUser, sshKeyPair, subAltName);
     }

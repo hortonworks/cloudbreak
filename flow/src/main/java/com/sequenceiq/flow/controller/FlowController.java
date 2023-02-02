@@ -1,5 +1,8 @@
 package com.sequenceiq.flow.controller;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Objects.isNull;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -70,13 +73,15 @@ public class FlowController implements FlowEndpoint {
 
     @Override
     @AccountIdNotNeeded
-    public Page<FlowLogResponse> getFlowLogsByFlowIds(List<String> flowIds, int size, int page) {
-        return flowService.getFlowLogsByIds(flowIds, PageRequest.of(page, size));
+    public List<FlowLogResponse> getFlowLogsByFlowIds(List<String> flowIds, int size, int page) {
+        Page<FlowLogResponse> response = flowService.getFlowLogsByIds(flowIds, PageRequest.of(page, size));
+        return isNull(response) ? newArrayList() : response.getContent();
     }
 
     @Override
     @AccountIdNotNeeded
-    public Page<FlowCheckResponse> getFlowChainsStatusesByChainIds(List<String> chainIds, int size, int page) {
-        return flowService.getFlowChainsByChainIds(chainIds, PageRequest.of(page, size));
+    public List<FlowCheckResponse> getFlowChainsStatusesByChainIds(List<String> chainIds, int size, int page) {
+        Page<FlowCheckResponse> response = flowService.getFlowChainsByChainIds(chainIds, PageRequest.of(page, size));
+        return isNull(response) ? newArrayList() : response.getContent();
     }
 }
