@@ -15,8 +15,10 @@ import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupCancelledEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeFullBackupWaitRequest;
@@ -68,9 +70,22 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
             LOGGER.info("Start polling datalake full backup status for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration,
                     TimeUnit.MINUTES);
-            sdxBackupRestoreService.waitForDatalakeDrBackupToComplete(sdxId, request.getOperationId(), request.getUserId(),
+            DatalakeBackupStatusResponse backupStatusResponse = sdxBackupRestoreService.waitForDatalakeDrBackupToComplete(
+                    sdxId, request.getOperationId(), request.getUserId(),
                     pollingConfig, "Full backup");
-            response = new DatalakeBackupSuccessEvent(sdxId, userId, request.getOperationId());
+            switch (backupStatusResponse.getState()) {
+                case CANCELLED:
+                    response = new DatalakeBackupCancelledEvent(sdxId, userId, request.getOperationId());
+                    break;
+                case SUCCESSFUL:
+                case VALIDATION_SUCCESSFUL:
+                    response = new DatalakeBackupSuccessEvent(sdxId, userId, request.getOperationId());
+                    break;
+                // failed states are handled via Exception catch block
+                default:
+                    LOGGER.warn("Unknown datalake backup status, assuming successful backup: {}", backupStatusResponse.getState());
+                    response = new DatalakeBackupSuccessEvent(sdxId, userId, request.getOperationId());
+            }
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Full backup polling exited before timeout. Cause: ", userBreakException);
             response = new DatalakeBackupFailedEvent(sdxId, userId, userBreakException);

@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus.State;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -426,13 +427,14 @@ public class SdxBackupRestoreService {
         }
     }
 
-    public void waitForDatalakeDrBackupToComplete(Long id, String backupId, String userCrn, PollingConfig pollingConfig,
+    public DatalakeBackupStatusResponse waitForDatalakeDrBackupToComplete(Long id, String backupId, String userCrn, PollingConfig pollingConfig,
             String pollingMessage) {
         SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
-        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+        DatalakeBackupStatusResponse response = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> getBackupStatusAttemptResult(sdxCluster, backupId, userCrn, pollingMessage));
+        return response;
     }
 
     private AttemptResult<DatalakeBackupStatusResponse> getBackupStatusAttemptResult(SdxCluster sdxCluster, String backupId,
@@ -453,6 +455,8 @@ public class SdxBackupRestoreService {
                     LOGGER.info("Backup for datalake {} complete with status {}", sdxCluster.getClusterName(), response.getState());
                     if (response.isFailed()) {
                         return sdxFullDrFailed(sdxCluster, response.getFailureReason(), pollingMessage);
+                    } else if (response.getState() == State.CANCELLED) {
+                        return sdxFullDrCancelled(sdxCluster, response);
                     } else {
                         return sdxFullDrSucceeded(sdxCluster, response);
                     }
@@ -547,6 +551,11 @@ public class SdxBackupRestoreService {
 
     private AttemptResult<DatalakeBackupStatusResponse> sdxFullDrSucceeded(SdxCluster sdxCluster, DatalakeBackupStatusResponse response) {
         LOGGER.info("Full DR operation for SDX cluster {} is successful", sdxCluster.getClusterName());
+        return AttemptResults.finishWith(response);
+    }
+
+    private AttemptResult<DatalakeBackupStatusResponse> sdxFullDrCancelled(SdxCluster sdxCluster, DatalakeBackupStatusResponse response) {
+        LOGGER.info("Full DR operation for SDX cluster {} is cancelled", sdxCluster.getClusterName());
         return AttemptResults.finishWith(response);
     }
 
