@@ -33,7 +33,7 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s FROM Stack s WHERE s.terminated = -1")
     List<Stack> findAllRunning();
 
-    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name " +
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
             "FROM Stack s " +
             "WHERE s.terminated = -1 and s.stackStatus.status not in (:statuses)")
     List<JobResource> findAllRunningAndStatusNotIn(@Param("statuses") Collection<Status> statuses);
@@ -163,7 +163,8 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
             "WHERE s.id = :id")
     Optional<PayloadContext> getStackAsPayloadContextById(@Param("id") Long id);
 
-    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name FROM Stack s " +
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
+            "FROM Stack s " +
             "WHERE s.id = :resourceId")
     Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
 

@@ -22,7 +22,5 @@ public interface MetricService {
 
     <T> void registerGaugeMetric(Metric metric, T object, ToDoubleFunction<T> valueFunction, Map<String, String> tags);
 
-    <T extends Number> T registerGaugeMetric(Metric metric, T number, Map<String, String> tags);
-
     void recordTransactionTime(TransactionMetricsContext transactionMetricsContext, long duration);
 }

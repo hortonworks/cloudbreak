@@ -27,12 +27,12 @@ public interface DBStackRepository extends JpaRepository<DBStack, Long>, JobReso
     @Query("SELECT d.id FROM DBStack d LEFT JOIN d.dbStackStatus dss WHERE d.id IN :dbStackIds AND dss.status IN :statuses")
     Set<Long> findAllByIdInAndStatusIn(@Param("dbStackIds") Set<Long> dbStackIds, @Param("statuses") Set<Status> statuses);
 
-    @Query("SELECT d.id as localId, d.resourceCrn as remoteResourceId, d.name as name " +
+    @Query("SELECT d.id as localId, d.resourceCrn as remoteResourceId, d.name as name, d.cloudPlatform as provider " +
             "FROM DBStack d LEFT JOIN d.dbStackStatus dss " +
             "WHERE dss.status IN :statuses")
     Set<JobResource> findAllDbStackByStatusIn(@Param("statuses") Set<Status> statuses);
 
-    @Query("SELECT d.id as localId, d.resourceCrn as remoteResourceId, d.name as name " +
+    @Query("SELECT d.id as localId, d.resourceCrn as remoteResourceId, d.name as name, d.cloudPlatform as provider " +
             "FROM DBStack d " +
             "WHERE d.id = :resourceId")
     Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
