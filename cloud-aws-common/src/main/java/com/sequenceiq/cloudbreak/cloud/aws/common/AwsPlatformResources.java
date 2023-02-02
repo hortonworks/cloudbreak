@@ -84,6 +84,8 @@ import com.amazonaws.services.identitymanagement.model.Role;
 import com.amazonaws.services.kms.model.AliasListEntry;
 import com.amazonaws.services.kms.model.DescribeKeyRequest;
 import com.amazonaws.services.kms.model.DescribeKeyResult;
+import com.amazonaws.services.kms.model.KeyListEntry;
+import com.amazonaws.services.kms.model.KeyMetadata;
 import com.amazonaws.services.kms.model.ListAliasesRequest;
 import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
@@ -841,42 +843,44 @@ public class AwsPlatformResources implements PlatformResources {
         CloudEncryptionKeys cloudEncryptionKeys = new CloudEncryptionKeys(new HashSet<>());
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         AmazonKmsClient client = awsClient.createAWSKMS(awsCredentialView, region.value());
-        try {
-            ListKeysRequest listKeysRequest = new ListKeysRequest();
-            ListKeysResult listKeysResult = client.listKeys(listKeysRequest);
-            ListAliasesResult listAliasesResult = client.listAliases(new ListAliasesRequest());
 
-            for (AliasListEntry keyListEntry : listAliasesResult.getAliases()) {
+        try {
+            List<KeyListEntry> listKeyResult = getListKeyResult(client);
+            List<AliasListEntry> listAliasesResult = getListAliasResult(client);
+            for (AliasListEntry aliasListEntry : listAliasesResult) {
+                String targetKeyId = aliasListEntry.getTargetKeyId();
                 try {
-                    listKeysResult.getKeys().stream()
-                            .filter(item -> item.getKeyId().equals(keyListEntry.getTargetKeyId())).findFirst()
+                    listKeyResult.stream()
+                            .filter(item -> item.getKeyId().equals(targetKeyId)).findFirst()
                             .ifPresent(item -> {
                                 DescribeKeyRequest describeKeyRequest = new DescribeKeyRequest().withKeyId(item.getKeyId());
                                 DescribeKeyResult describeKeyResult = client.describeKey(describeKeyRequest);
+                                KeyMetadata keyMetaData = describeKeyResult.getKeyMetadata();
                                 Map<String, Object> meta = new HashMap<>();
-                                meta.put("aWSAccountId", describeKeyResult.getKeyMetadata().getAWSAccountId());
-                                meta.put("creationDate", describeKeyResult.getKeyMetadata().getCreationDate());
-                                meta.put("enabled", describeKeyResult.getKeyMetadata().getEnabled());
-                                meta.put("expirationModel", describeKeyResult.getKeyMetadata().getExpirationModel());
-                                meta.put("keyManager", describeKeyResult.getKeyMetadata().getKeyManager());
-                                meta.put("keyState", describeKeyResult.getKeyMetadata().getKeyState());
-                                meta.put("keyUsage", describeKeyResult.getKeyMetadata().getKeyUsage());
-                                meta.put("origin", describeKeyResult.getKeyMetadata().getOrigin());
-                                meta.put("validTo", describeKeyResult.getKeyMetadata().getValidTo());
+                                meta.put("awsAccountId", keyMetaData.getAWSAccountId());
+                                meta.put("creationDate", keyMetaData.getCreationDate());
+                                meta.put("enabled", keyMetaData.getEnabled());
+                                meta.put("expirationModel", keyMetaData.getExpirationModel());
+                                meta.put("keyManager", keyMetaData.getKeyManager());
+                                meta.put("keyState", keyMetaData.getKeyState());
+                                meta.put("keyUsage", keyMetaData.getKeyUsage());
+                                meta.put("origin", keyMetaData.getOrigin());
+                                meta.put("validTo", keyMetaData.getValidTo());
 
-                                if (!CloudConstants.AWS.equalsIgnoreCase(describeKeyResult.getKeyMetadata().getKeyManager())) {
+                                if (!CloudConstants.AWS.equalsIgnoreCase(keyMetaData.getKeyManager())) {
                                     CloudEncryptionKey key = new CloudEncryptionKey(
                                             item.getKeyArn(),
-                                            describeKeyResult.getKeyMetadata().getKeyId(),
-                                            describeKeyResult.getKeyMetadata().getDescription(),
-                                            keyListEntry.getAliasName().replace("alias/", ""),
+                                            keyMetaData.getKeyId(),
+                                            keyMetaData.getDescription(),
+                                            aliasListEntry.getAliasName().replace("alias/", ""),
                                             meta);
                                     cloudEncryptionKeys.getCloudEncryptionKeys().add(key);
                                 }
                             });
                 } catch (AmazonServiceException e) {
                     if (e.getStatusCode() == UNAUTHORIZED) {
-                        String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
+                        String policyMessage = "Could not fetch the encryption keys since the user does not have enough " +
+                                "permission to perform the DescribeKey operation.";
                         LOGGER.error(policyMessage, e);
                     } else {
                         LOGGER.info(queryFailedMessage, e);
@@ -887,7 +891,7 @@ public class AwsPlatformResources implements PlatformResources {
             }
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
-                String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
+                String policyMessage = "Could not fetch the encryption keys since the user does not have enough permission to perform the ListKeys operation.";
                 LOGGER.error(policyMessage, ase);
                 throw new CloudUnauthorizedException(policyMessage, ase);
             } else {
@@ -899,6 +903,30 @@ public class AwsPlatformResources implements PlatformResources {
             throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
         }
         return cloudEncryptionKeys;
+    }
+
+    private List<KeyListEntry> getListKeyResult(AmazonKmsClient client) {
+        String nextMarker = null;
+        List<KeyListEntry> kmsKeys = new ArrayList<>();
+        do {
+            ListKeysRequest listKeysRequest = new ListKeysRequest().withMarker(nextMarker);
+            ListKeysResult listKeysResult = client.listKeys(listKeysRequest);
+            kmsKeys.addAll(listKeysResult.getKeys());
+            nextMarker = listKeysResult.getNextMarker();
+        } while (nextMarker != null);
+        return kmsKeys;
+    }
+
+    private List<AliasListEntry> getListAliasResult(AmazonKmsClient client) {
+        String aliasNextMarker = null;
+        List<AliasListEntry> aliasListEntries = new ArrayList<>();
+        do {
+            ListAliasesRequest listAliasesRequest = new ListAliasesRequest().withMarker(aliasNextMarker);
+            ListAliasesResult listAliasesResult = client.listAliases(listAliasesRequest);
+            aliasListEntries.addAll(listAliasesResult.getAliases());
+            aliasNextMarker = listAliasesResult.getNextMarker();
+        } while (aliasNextMarker != null);
+        return aliasListEntries;
     }
 
     @Override

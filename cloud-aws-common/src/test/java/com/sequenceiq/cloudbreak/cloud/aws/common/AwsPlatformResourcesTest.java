@@ -114,6 +114,8 @@ public class AwsPlatformResourcesTest {
 
     private static final String NOT_ENABLED_AZ_NAME = "not-enabled-az";
 
+    private static final int KMS_KEYS_COUNT = 100;
+
     @InjectMocks
     private AwsPlatformResources underTest;
 
@@ -315,6 +317,57 @@ public class AwsPlatformResourcesTest {
         CloudEncryptionKeys cloudEncryptionKeys = underTest.encryptionKeys(cloudCredential, region("London"), new HashMap<>());
 
         assertEquals(4L, cloudEncryptionKeys.getCloudEncryptionKeys().size());
+    }
+
+    @Test
+    public void collectEncryptionKeysWhenWeGetBackInfoThenItShouldReturnListWithPaginatedElements() {
+        ListKeysResult listKeysResultWithMarker = new ListKeysResult();
+        ListKeysResult listKeysResult = new ListKeysResult();
+
+        List<KeyListEntry> listEntriesPage1 = new ArrayList<>();
+        List<KeyListEntry> listEntriesPage2 = new ArrayList<>();
+        for (int i = 0; i < KMS_KEYS_COUNT / 2; i++) {
+            listEntriesPage1.add(keyListEntry(i));
+        }
+
+        for (int i = KMS_KEYS_COUNT / 2; i < KMS_KEYS_COUNT; i++) {
+            listEntriesPage2.add(keyListEntry(i));
+        }
+
+        listKeysResultWithMarker.setKeys(listEntriesPage1);
+        listKeysResultWithMarker.setNextMarker("testMarker");
+
+        listKeysResult.setKeys(listEntriesPage2);
+
+        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
+        describeKeyResult.setKeyMetadata(new KeyMetadata());
+
+        ListAliasesResult listAliasesResultWithMarker = new ListAliasesResult();
+        ListAliasesResult listAliasesResult = new ListAliasesResult();
+
+        List<AliasListEntry> aliasListEntriesPage1 = new ArrayList<>();
+        List<AliasListEntry> aliasListEntriesPage2 = new ArrayList<>();
+        for (int i = 0; i < KMS_KEYS_COUNT / 2; i++) {
+            aliasListEntriesPage1.add(aliasListEntry(i));
+        }
+
+        for (int i = KMS_KEYS_COUNT / 2; i < KMS_KEYS_COUNT; i++) {
+            aliasListEntriesPage2.add(aliasListEntry(i));
+        }
+
+        listAliasesResultWithMarker.setAliases(aliasListEntriesPage1);
+        listAliasesResultWithMarker.setNextMarker("testMarker");
+
+        listAliasesResult.setAliases(aliasListEntriesPage2);
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
+        when(awskmsClient.listKeys(any(ListKeysRequest.class))).thenReturn(listKeysResultWithMarker, listKeysResult);
+        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenReturn(describeKeyResult);
+        when(awskmsClient.listAliases(any(ListAliasesRequest.class))).thenReturn(listAliasesResultWithMarker, listAliasesResult);
+
+        CloudEncryptionKeys cloudEncryptionKeys = underTest.encryptionKeys(cloudCredential, region("London"), new HashMap<>());
+
+        assertEquals(KMS_KEYS_COUNT, cloudEncryptionKeys.getCloudEncryptionKeys().size());
     }
 
     @Test
