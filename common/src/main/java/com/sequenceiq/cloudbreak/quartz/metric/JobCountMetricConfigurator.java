@@ -2,18 +2,18 @@ package com.sequenceiq.cloudbreak.quartz.metric;
 
 import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.JOB_GROUP;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 
 @Component
 public class JobCountMetricConfigurator {
@@ -24,20 +24,15 @@ public class JobCountMetricConfigurator {
     private GroupNameToJobCountFunction groupNameToJobCountFunction;
 
     @Inject
-    private Scheduler scheduler;
+    private List<MetricService> metricServices;
 
     @Inject
-    private MetricService metricService;
+    private List<? extends JobSchedulerService> jobSchedulerServices;
 
     @PostConstruct
     public void init() {
-        try {
-            for (String groupName : scheduler.getJobGroupNames()) {
-                metricService.registerGaugeMetric(QuartzMetricType.JOB_COUNT, groupName, groupNameToJobCountFunction,
-                        Map.of(JOB_GROUP.name(), groupName));
-            }
-        } catch (SchedulerException e) {
-            LOGGER.error("Cannot create job count metrics", e);
-        }
-    }
+        jobSchedulerServices.forEach(jobSchedulerService ->
+                metricServices.forEach(metricService -> metricService.registerGaugeMetric(QuartzMetricType.JOB_COUNT, jobSchedulerService.getJobGroup(),
+                        groupNameToJobCountFunction, Map.of(JOB_GROUP.name(), jobSchedulerService.getJobGroup()))));
+}
 }

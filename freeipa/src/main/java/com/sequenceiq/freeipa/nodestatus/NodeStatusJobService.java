@@ -22,12 +22,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 import com.sequenceiq.freeipa.entity.Stack;
 
 @Component
-public class NodeStatusJobService {
+public class NodeStatusJobService implements JobSchedulerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NodeStatusJobService.class);
 
@@ -118,5 +119,10 @@ public class NodeStatusJobService {
 
     private Class<? extends Job> getJobClass() {
         return NodeStatusJob.class;
+    }
+
+    @Override
+    public String getJobGroup() {
+        return JOB_GROUP;
     }
 }

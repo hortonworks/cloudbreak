@@ -24,13 +24,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
-public class StatusCheckerJobService {
+public class StatusCheckerJobService implements JobSchedulerService {
 
     public static final String SYNC_JOB_TYPE = "syncJobType";
 
@@ -169,5 +170,10 @@ public class StatusCheckerJobService {
 
     private Date delayedStart(int delayInSeconds) {
         return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(delayInSeconds)));
+    }
+
+    @Override
+    public String getJobGroup() {
+        return JOB_GROUP;
     }
 }

@@ -26,12 +26,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.StorageType;
+import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.service.ConsumptionService;
 
 @Service
-public class StorageConsumptionJobService {
+public class StorageConsumptionJobService implements JobSchedulerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageConsumptionJobService.class);
 
@@ -203,5 +204,10 @@ public class StorageConsumptionJobService {
     private Date delayedFirstStart() {
         int delayInSeconds = RANDOM.nextInt((int) TimeUnit.MINUTES.toSeconds(storageConsumptionConfig.getIntervalInMinutes()));
         return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(delayInSeconds)));
+    }
+
+    @Override
+    public String getJobGroup() {
+        return JOB_GROUP;
     }
 }

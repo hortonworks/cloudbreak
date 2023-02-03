@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
@@ -13,6 +14,7 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 
+@Primary
 @Service("MetricService")
 public class CloudbreakMetricService extends AbstractMetricService {
 
@@ -38,8 +40,8 @@ public class CloudbreakMetricService extends AbstractMetricService {
     }
 
     @Override
-    protected String getMetricPrefix() {
-        return METRIC_PREFIX;
+    protected Optional<String> getMetricPrefix() {
+        return Optional.of(METRIC_PREFIX);
     }
 
     private String[] nullableValueTags(String... tags) {

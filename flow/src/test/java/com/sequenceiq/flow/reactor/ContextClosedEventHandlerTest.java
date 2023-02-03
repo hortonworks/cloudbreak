@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.reactor;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.TestComponent;
@@ -36,8 +38,8 @@ class ContextClosedEventHandlerTest {
     static class TestMetricService extends AbstractMetricService {
 
         @Override
-        protected String getMetricPrefix() {
-            return "test";
+        protected Optional<String> getMetricPrefix() {
+            return Optional.of("test");
         }
     }
 

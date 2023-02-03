@@ -20,11 +20,9 @@ import org.mockito.Mock;
 import org.quartz.Scheduler;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
@@ -44,7 +42,6 @@ import com.sequenceiq.cloudbreak.cloud.response.AwsCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
-import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -341,12 +338,6 @@ public class CredentialExperienceTest {
 
         @MockBean
         private EditCredentialRequestToCredentialConverter editCredentialRequestToCredentialConverter;
-
-        @Bean
-        @Primary
-        MetricService metricService() {
-            return new EnvironmentMetricService();
-        }
 
     }
 

@@ -1,11 +1,15 @@
 package com.sequenceiq.freeipa.metrics;
 
+import java.util.Optional;
+
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
 import com.sequenceiq.freeipa.entity.Stack;
 
+@Primary
 @Service
 public class FreeIpaMetricService extends AbstractMetricService {
 
@@ -31,7 +35,7 @@ public class FreeIpaMetricService extends AbstractMetricService {
     }
 
     @Override
-    protected String getMetricPrefix() {
-        return METRIC_PREFIX;
+    protected Optional<String> getMetricPrefix() {
+        return Optional.of(METRIC_PREFIX);
     }
 }

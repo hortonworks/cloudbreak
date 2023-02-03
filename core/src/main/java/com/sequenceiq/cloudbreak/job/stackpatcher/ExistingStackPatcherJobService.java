@@ -17,12 +17,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.quartz.JobDataMapProvider;
+import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
 
 @Service
-public class ExistingStackPatcherJobService {
+public class ExistingStackPatcherJobService implements JobSchedulerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExistingStackPatcherJobService.class);
 
@@ -101,5 +102,10 @@ public class ExistingStackPatcherJobService {
                         .withMisfireHandlingInstructionNextWithExistingCount())
                 .startAt(existingStackPatchService.getFirstStart())
                 .build();
+    }
+
+    @Override
+    public String getJobGroup() {
+        return JOB_GROUP;
     }
 }

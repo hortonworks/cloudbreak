@@ -19,10 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.quartz.JobDataMapProvider;
+import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
-public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?>> {
+public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?>> implements JobSchedulerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltStatusCheckerJobService.class);
 
@@ -90,5 +91,10 @@ public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?
     private Date delayedStart() {
         int intervalInSeconds = (int) TimeUnit.MINUTES.toSeconds(saltStatusCheckerConfig.getIntervalInMinutes());
         return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(RandomUtil.getInt(intervalInSeconds))));
+    }
+
+    @Override
+    public String getJobGroup() {
+        return JOB_GROUP;
     }
 }
