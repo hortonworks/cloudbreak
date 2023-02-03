@@ -272,8 +272,8 @@ public class LoadBalancerConfigService {
                 && LoadBalancerSku.STANDARD.equals(sku)
                 && !Optional.of(network)
                             .map(EnvironmentNetworkResponse::getAzure)
-                            .map(EnvironmentNetworkAzureParams::isNoOutboundLoadBalancer)
-                            .orElse(false);
+                            .map(EnvironmentNetworkAzureParams::getNoOutboundLoadBalancer)
+                            .orElse(network.isExistingNetwork());
     }
 
     private void setupLoadBalancer(boolean dryRun, Stack stack, Set<LoadBalancer> loadBalancers, TargetGroup targetGroup, LoadBalancerType type) {

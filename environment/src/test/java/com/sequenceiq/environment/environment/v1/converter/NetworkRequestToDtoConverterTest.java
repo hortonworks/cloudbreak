@@ -64,7 +64,7 @@ public class NetworkRequestToDtoConverterTest {
         assertEquals(network.getAzure().getNoPublicIp(), actual.getAzure().isNoPublicIp());
         assertEquals(network.getAzure().getDatabasePrivateDnsZoneId(), actual.getAzure().getDatabasePrivateDnsZoneId());
         assertEquals(network.getAzure().getAksPrivateDnsZoneId(), actual.getAzure().getAksPrivateDnsZoneId());
-        assertEquals(network.getAzure().isNoOutboundLoadBalancer(), actual.getAzure().isNoOutboundLoadBalancer());
+        assertEquals(network.getAzure().getNoOutboundLoadBalancer(), actual.getAzure().getNoOutboundLoadBalancer());
         assertCommonFields(network, actual);
     }
 

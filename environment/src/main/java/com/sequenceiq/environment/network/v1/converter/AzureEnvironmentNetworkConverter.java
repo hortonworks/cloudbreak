@@ -49,7 +49,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             azureNetwork.setResourceGroupName(azureParams.getResourceGroupName());
             azureNetwork.setNoPublicIp(azureParams.isNoPublicIp());
             azureNetwork.setAksPrivateDnsZoneId(azureParams.getAksPrivateDnsZoneId());
-            azureNetwork.setNoOutboundLoadBalancer(azureParams.isNoOutboundLoadBalancer());
+            azureNetwork.setNoOutboundLoadBalancer(azureParams.getNoOutboundLoadBalancer());
             if (ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT.equals(network.getServiceEndpointCreation())) {
                 azureNetwork.setDatabasePrivateDnsZoneId(azureParams.getDatabasePrivateDnsZoneId());
             }
@@ -104,7 +104,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 .withNoPublicIp(azureNetwork.getNoPublicIp())
                                 .withDatabasePrivateDnsZoneId(azureNetwork.getDatabasePrivateDnsZoneId())
                                 .withAksPrivateDnsZoneId(azureNetwork.getAksPrivateDnsZoneId())
-                                .withNoOutboundLoadBalancer(azureNetwork.isNoOutboundLoadBalancer())
+                                .withNoOutboundLoadBalancer(azureNetwork.getNoOutboundLoadBalancer())
                                 .build())
                 .build();
     }
@@ -137,7 +137,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         param.put(NETWORK_ID, azureNetwork.getNetworkId());
         param.put(DATABASE_PRIVATE_DNS_ZONE_ID, azureNetwork.getDatabasePrivateDnsZoneId());
         param.put(AKS_PRIVATE_DNS_ZONE_ID, azureNetwork.getAksPrivateDnsZoneId());
-        param.put(NO_OUTBOUND_LOAD_BALANCER, azureNetwork.isNoOutboundLoadBalancer());
+        param.put(NO_OUTBOUND_LOAD_BALANCER, azureNetwork.getNoOutboundLoadBalancer());
         return new Network(null, param);
     }
 }
