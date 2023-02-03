@@ -1029,6 +1029,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
+    public boolean isRolePresent(String clusterName, String roleConfigGroup, String serviceType) {
+        return configService.isRolePresent(apiClient, clusterName, roleConfigGroup, serviceType);
+    }
+
+    @Override
     public boolean isServicePresent(String clusterName, String serviceType) {
         boolean servicePresent = false;
         try {

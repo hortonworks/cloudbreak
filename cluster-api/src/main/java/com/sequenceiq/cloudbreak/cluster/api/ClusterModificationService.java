@@ -56,6 +56,8 @@ public interface ClusterModificationService {
     ParcelOperationStatus removeUnusedParcels(Set<ClusterComponentView> usedParcelComponents, Set<String> parcelNamesFromImage)
             throws CloudbreakException;
 
+    boolean isRolePresent(String clusterName, String roleConfigGroup, String serviceType);
+
     boolean isServicePresent(String clusterName, String serviceType);
 
     default void stopComponents(Map<String, String> components, String hostname) {
