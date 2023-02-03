@@ -82,6 +82,8 @@ public class ClusterUpgradeValidationActions {
 
     private static final String UPGRADE_IMAGE_INFO = "upgradeImageInfo";
 
+    private static final String TARGET_RUNTIME = "targetRuntime";
+
     @Inject
     private StackService stackService;
 
@@ -144,6 +146,7 @@ public class ClusterUpgradeValidationActions {
                 variables.put(TARGET_IMAGE, targetImage);
                 variables.put(UPGRADE_IMAGE_INFO, upgradeImageInfo);
                 String targetVersion = targetImage.getPackageVersions().getOrDefault(ImagePackageVersion.STACK.getDisplayName(), "");
+                variables.put(TARGET_RUNTIME, targetVersion);
                 if (CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetVersion, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16)) {
                     ClusterUpgradeS3guardValidationEvent event = new ClusterUpgradeS3guardValidationEvent(payload.getResourceId(),
                             payload.getImageId());
@@ -277,7 +280,8 @@ public class ClusterUpgradeValidationActions {
             protected void doExecute(StackContext context, ClusterUpgradeFreeIpaStatusValidationFinishedEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Starting to validate services.");
                 boolean lockComponents = (Boolean) variables.get(LOCK_COMPONENTS);
-                ClusterUpgradeServiceValidationEvent event = new ClusterUpgradeServiceValidationEvent(payload.getResourceId(), lockComponents);
+                String targetRuntime = (String) variables.get(TARGET_RUNTIME);
+                ClusterUpgradeServiceValidationEvent event = new ClusterUpgradeServiceValidationEvent(payload.getResourceId(), lockComponents, targetRuntime);
                 sendEvent(context, event.selector(), event);
             }
 

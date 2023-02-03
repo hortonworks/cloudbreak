@@ -173,7 +173,24 @@ public class ClouderaManagerConfigService {
 
     private String getServiceNameValue(String clusterName, String serviceType, ServicesResourceApi servicesResourceApi) {
         return getServiceName(clusterName, serviceType, servicesResourceApi).orElseThrow(
-                () -> new NotFoundException(String.format("No service found with %s service type", serviceType)));
+                () -> new NotFoundException(String.format("No service name found with %s service type", serviceType)));
+    }
+
+    public boolean isRolePresent(ApiClient apiClient, String clusterName, String roleType, String serviceType) {
+        LOGGER.debug("Looking for role name for cluster {}, roleType {}, and serviceType {}", clusterName, roleType, serviceType);
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(apiClient);
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
+        try {
+            String serviceName = getServiceNameValue(clusterName, serviceType, servicesResourceApi);
+            getRoleConfigGroupNameByTypeAndServiceName(roleType, clusterName, serviceName, roleConfigGroupsResourceApi);
+            return true;
+        } catch (NotFoundException e) {
+            LOGGER.debug("Role not found for cluster {}, roleType {}, and serviceType {}", clusterName, roleType, serviceType, e);
+            return false;
+        } catch (ApiException e) {
+            LOGGER.debug("Failed to get role name for cluster {}, roleType {}, and serviceType {}", clusterName, roleType, serviceType, e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
     }
 
     private String getRoleConfigGroupNameByTypeAndServiceName(String roleType, String clusterName, String serviceName,
