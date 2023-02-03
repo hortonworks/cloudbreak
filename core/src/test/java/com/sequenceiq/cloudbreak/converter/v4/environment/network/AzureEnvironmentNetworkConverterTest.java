@@ -84,7 +84,7 @@ class AzureEnvironmentNetworkConverterTest {
         when(azure.getResourceGroupName()).thenReturn(RESOURCE_GROUP_NAME);
         when(azure.getNoPublicIp()).thenReturn(true);
         when(azure.getDatabasePrivateDnsZoneId()).thenReturn(DATABASE_PRIVATE_DNS_ZONE_ID);
-        when(azure.isNoOutboundLoadBalancer()).thenReturn(true);
+        when(azure.getNoOutboundLoadBalancer()).thenReturn(true);
 
         Map<String, Object> result = converter.getAttributesForLegacyNetwork(environmentNetworkResponse);
 
