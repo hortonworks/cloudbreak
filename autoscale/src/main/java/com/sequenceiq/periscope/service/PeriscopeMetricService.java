@@ -1,14 +1,17 @@
 package com.sequenceiq.periscope.service;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
 import com.sequenceiq.periscope.domain.MetricType;
 
+@Primary
 @Service("MetricService")
 public class PeriscopeMetricService extends AbstractMetricService {
 
@@ -26,7 +29,7 @@ public class PeriscopeMetricService extends AbstractMetricService {
     }
 
     @Override
-    protected String getMetricPrefix() {
-        return METRIC_PREFIX;
+    protected Optional<String> getMetricPrefix() {
+        return Optional.of(METRIC_PREFIX);
     }
 }

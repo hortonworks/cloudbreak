@@ -21,11 +21,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
-public class StructuredSynchronizerJobService {
+public class StructuredSynchronizerJobService implements JobSchedulerService {
 
     private static final String JOB_GROUP = "structured-synchronizer-jobs";
 
@@ -125,5 +126,10 @@ public class StructuredSynchronizerJobService {
     private Date delayedStart() {
         return Date.from(ZonedDateTime.now().toInstant().plus(
                 Duration.ofSeconds(RandomUtil.getInt(structuredSynchronizerConfig.getIntervalInHours() * SECONDS_IN_HOUR))));
+    }
+
+    @Override
+    public String getJobGroup() {
+        return JOB_GROUP;
     }
 }

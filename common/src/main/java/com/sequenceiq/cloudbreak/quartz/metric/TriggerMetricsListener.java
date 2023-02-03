@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.TRIGGER_GR
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -22,7 +23,7 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 public class TriggerMetricsListener extends TriggerListenerSupport {
 
     @Inject
-    private MetricService metricService;
+    private List<MetricService> metricServices;
 
     @Override
     public String getName() {
@@ -35,22 +36,22 @@ public class TriggerMetricsListener extends TriggerListenerSupport {
         Date triggerTime = trigger.getPreviousFireTime() == null ? trigger.getStartTime() : trigger.getPreviousFireTime();
         Duration triggerDelay = Duration.between(triggerTime.toInstant(), Instant.now());
         getLog().debug("Trigger fired with group: {}, name: {}, delay: {} ms", triggerKey.getGroup(), triggerKey.getName(), triggerDelay.toMillis());
-        metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_FIRED,
+        metricServices.forEach(metricService -> metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_FIRED,
                 TRIGGER_GROUP.name(), triggerKey.getGroup(),
-                PROVIDER.name(), QuartzMetricUtil.getProvider(context.getJobDetail().getJobDataMap()));
+                PROVIDER.name(), QuartzMetricUtil.getProvider(context.getJobDetail().getJobDataMap())));
 
-        metricService.recordTimerMetric(QuartzMetricType.TRIGGER_DELAYED, triggerDelay,
+        metricServices.forEach(metricService -> metricService.recordTimerMetric(QuartzMetricType.TRIGGER_DELAYED, triggerDelay,
                 TRIGGER_GROUP.name(), triggerKey.getGroup(),
-                PROVIDER.name(), QuartzMetricUtil.getProvider(context.getJobDetail().getJobDataMap()));
+                PROVIDER.name(), QuartzMetricUtil.getProvider(context.getJobDetail().getJobDataMap())));
     }
 
     @Override
     public void triggerMisfired(Trigger trigger) {
         TriggerKey triggerKey = trigger.getKey();
         getLog().warn("Trigger misfired with group: {}, name: {}", triggerKey.getGroup(), triggerKey.getName());
-        metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_MISFIRED,
+        metricServices.forEach(metricService -> metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_MISFIRED,
                 TRIGGER_GROUP.name(), triggerKey.getGroup(),
-                PROVIDER.name(), QuartzMetricUtil.getProvider(trigger.getJobDataMap()));
+                PROVIDER.name(), QuartzMetricUtil.getProvider(trigger.getJobDataMap())));
     }
 
     @Override
@@ -58,8 +59,8 @@ public class TriggerMetricsListener extends TriggerListenerSupport {
         TriggerKey triggerKey = trigger.getKey();
         getLog().debug("Trigger completed with group: {}, name: {}, triggerInstructionCode: {}",
                 triggerKey.getGroup(), triggerKey.getName(), triggerInstructionCode);
-        metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_COMPLETED,
+        metricServices.forEach(metricService -> metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_COMPLETED,
                 TRIGGER_GROUP.name(), triggerKey.getGroup(),
-                PROVIDER.name(), QuartzMetricUtil.getProvider(trigger.getJobDataMap()));
+                PROVIDER.name(), QuartzMetricUtil.getProvider(trigger.getJobDataMap())));
     }
 }

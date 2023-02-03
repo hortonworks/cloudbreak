@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.quartz.metric;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.quartz.SchedulerException;
@@ -12,12 +14,12 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 public class SchedulerMetricsListener extends SchedulerListenerSupport {
 
     @Inject
-    private MetricService metricService;
+    private List<MetricService> metricServices;
 
     @Override
     public void schedulerError(String msg, SchedulerException cause) {
         getLog().warn("Scheduler error occured: {}", msg, cause);
-        metricService.incrementMetricCounter(QuartzMetricType.SCHEDULER_ERROR);
+        metricServices.forEach(metricService -> metricService.incrementMetricCounter(QuartzMetricType.SCHEDULER_ERROR));
     }
 
     @Override

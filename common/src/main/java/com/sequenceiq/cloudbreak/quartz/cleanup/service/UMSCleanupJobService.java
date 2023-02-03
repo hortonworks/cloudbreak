@@ -14,10 +14,11 @@ import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.cleanup.UMSCleanupConfig;
 import com.sequenceiq.cloudbreak.quartz.cleanup.job.UMSCleanupJob;
 
-public abstract class UMSCleanupJobService<T extends UMSCleanupJob> {
+public abstract class UMSCleanupJobService<T extends UMSCleanupJob> implements JobSchedulerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UMSCleanupJobService.class);
 
@@ -76,5 +77,10 @@ public abstract class UMSCleanupJobService<T extends UMSCleanupJob> {
         } catch (SchedulerException e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
         }
+    }
+
+    @Override
+    public String getJobGroup() {
+        return JOB_GROUP;
     }
 }

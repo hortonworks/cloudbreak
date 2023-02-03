@@ -19,10 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
-public class FlowCleanupJobService {
+public class FlowCleanupJobService implements JobSchedulerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowCleanupJobService.class);
 
@@ -88,5 +89,10 @@ public class FlowCleanupJobService {
 
     private Date delayedFirstStart() {
         return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofHours(RandomUtil.getInt(flowCleanupConfig.getIntervalInHours()))));
+    }
+
+    @Override
+    public String getJobGroup() {
+        return JOB_GROUP;
     }
 }

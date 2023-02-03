@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -82,7 +83,11 @@ public abstract class AbstractMetricService implements MetricService {
     }
 
     private String getMetricName(Metric metric) {
-        return getMetricPrefix() + '.' + metric.getMetricName().toLowerCase();
+        if (getMetricPrefix().isPresent()) {
+            return getMetricPrefix().get() + '.' + metric.getMetricName().toLowerCase();
+        } else {
+            return metric.getMetricName().toLowerCase();
+        }
     }
 
     @Override
@@ -108,5 +113,5 @@ public abstract class AbstractMetricService implements MetricService {
         recordTimer(duration, MetricType.DB_TRANSACTION_ID);
     }
 
-    protected abstract String getMetricPrefix();
+    protected abstract Optional<String> getMetricPrefix();
 }

@@ -21,10 +21,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
-public class ArchiveInstanceMetaDataJobService {
+public class ArchiveInstanceMetaDataJobService implements JobSchedulerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInstanceMetaDataJobService.class);
 
@@ -117,5 +118,10 @@ public class ArchiveInstanceMetaDataJobService {
     private Date delayedFirstStart() {
         int delayInMinutes = RandomUtil.getInt((int) TimeUnit.HOURS.toMinutes(properties.getIntervalInHours()));
         return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(delayInMinutes)));
+    }
+
+    @Override
+    public String getJobGroup() {
+        return JOB_GROUP;
     }
 }
