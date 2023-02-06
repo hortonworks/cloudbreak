@@ -4,9 +4,9 @@ public class MonitoringAuthConfig {
 
     private final String username;
 
-    private final char[] password;
+    private final String password;
 
-    public MonitoringAuthConfig(String username, char[] password) {
+    public MonitoringAuthConfig(String username, String password) {
         this.username = username;
         this.password = password;
     }
@@ -15,7 +15,7 @@ public class MonitoringAuthConfig {
         return username;
     }
 
-    public char[] getPassword() {
+    public String getPassword() {
         return password;
     }
 }

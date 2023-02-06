@@ -15,7 +15,7 @@ public class NodeStatusConfigView implements TelemetryConfigView {
 
     private final String serverUsername;
 
-    private final char[] serverPassword;
+    private final String serverPassword;
 
     private final boolean saltPingEnabled;
 
@@ -42,7 +42,7 @@ public class NodeStatusConfigView implements TelemetryConfigView {
 
         private String serverUsername;
 
-        private char[] serverPassword;
+        private String serverPassword;
 
         private boolean saltPingEnabled;
 
@@ -55,7 +55,7 @@ public class NodeStatusConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withServerPassword(char[] serverPassword) {
+        public Builder withServerPassword(String serverPassword) {
             this.serverPassword = serverPassword;
             return this;
         }

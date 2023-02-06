@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.quartz.saltstatuschecker;
 
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -22,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.quartz.JobDataMapProvider;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?>> {
 
@@ -30,8 +29,6 @@ public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?
     private static final String JOB_GROUP = "stack-salt-status-checker-jobs";
 
     private static final String TRIGGER_GROUP = "stack-salt-status-checker-triggers";
-
-    private static final Random RANDOM = new SecureRandom();
 
     @Inject
     private SaltStatusCheckerConfig saltStatusCheckerConfig;
@@ -92,6 +89,6 @@ public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?
 
     private Date delayedStart() {
         int intervalInSeconds = (int) TimeUnit.MINUTES.toSeconds(saltStatusCheckerConfig.getIntervalInMinutes());
-        return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(RANDOM.nextInt(intervalInSeconds))));
+        return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(RandomUtil.getInt(intervalInSeconds))));
     }
 }

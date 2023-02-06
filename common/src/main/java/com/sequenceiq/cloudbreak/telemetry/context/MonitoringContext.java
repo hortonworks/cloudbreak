@@ -21,7 +21,7 @@ public class MonitoringContext {
 
     private final boolean cmAutoTls;
 
-    private final char[] sharedPassword;
+    private final String sharedPassword;
 
     private MonitoringContext(Builder builder) {
         this.enabled = builder.enabled;
@@ -58,7 +58,7 @@ public class MonitoringContext {
         return cmAuth;
     }
 
-    public char[] getSharedPassword() {
+    public String getSharedPassword() {
         return sharedPassword;
     }
 
@@ -96,7 +96,7 @@ public class MonitoringContext {
 
         private MonitoringAuthConfig cmAuth;
 
-        private char[] sharedPassword;
+        private String sharedPassword;
 
         private MonitoringClusterType clusterType;
 
@@ -139,7 +139,7 @@ public class MonitoringContext {
             return this;
         }
 
-        public Builder withSharedPassword(char[] sharedPassword) {
+        public Builder withSharedPassword(String sharedPassword) {
             this.sharedPassword = sharedPassword;
             return this;
         }

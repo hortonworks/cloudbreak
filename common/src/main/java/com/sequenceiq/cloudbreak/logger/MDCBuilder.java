@@ -15,6 +15,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.util.ReflectionUtils;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -206,7 +207,7 @@ public class MDCBuilder {
     public static String getFieldValue(Object o, String field) {
         try {
             Field privateStringField = FieldUtils.getField(o.getClass(), field, true);
-            privateStringField.setAccessible(true);
+            ReflectionUtils.makeAccessible(privateStringField);
             return privateStringField.get(o).toString();
         } catch (Exception ignored) {
             return null;
@@ -220,7 +221,7 @@ public class MDCBuilder {
                     .filter(Objects::nonNull)
                     .findFirst();
             if (field.isPresent()) {
-                field.get().setAccessible(true);
+                ReflectionUtils.makeAccessible(field.get());
                 return field.get().get(o).toString();
             }
         } catch (Exception ignored) {

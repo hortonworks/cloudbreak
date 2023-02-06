@@ -12,6 +12,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.service.secret.SecretOperationException;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
@@ -39,7 +40,7 @@ public class RecursiveSecretAspectService {
                 for (Field field : entity.getClass().getDeclaredFields()) {
                     if (field.isAnnotationPresent(SecretValue.class)) {
                         LOGGER.info("Found SecretValue annotation on {} in entity of type {}", field, entity.getClass());
-                        field.setAccessible(true);
+                        ReflectionUtils.makeAccessible(field);
                         Object fieldValue = field.get(entity);
                         if (fieldValue instanceof Secret) {
                             Secret value = (Secret) field.get(entity);
@@ -87,7 +88,7 @@ public class RecursiveSecretAspectService {
                 for (Field field : entity.getClass().getDeclaredFields()) {
                     if (field.isAnnotationPresent(SecretValue.class)) {
                         LOGGER.info("Found SecretValue annotation on {} in entity of type {}", field, entity.getClass());
-                        field.setAccessible(true);
+                        ReflectionUtils.makeAccessible(field);
                         Object fieldValue = field.get(entity);
                         if (fieldValue instanceof Secret) {
                             Secret path = (Secret) field.get(entity);

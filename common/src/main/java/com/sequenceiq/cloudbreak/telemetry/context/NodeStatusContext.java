@@ -4,7 +4,7 @@ public class NodeStatusContext {
 
     private final String username;
 
-    private final char[] password;
+    private final String password;
 
     private final boolean saltPingEnabled;
 
@@ -22,7 +22,7 @@ public class NodeStatusContext {
         return username;
     }
 
-    public char[] getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -43,7 +43,7 @@ public class NodeStatusContext {
 
         private String username;
 
-        private char[] password;
+        private String password;
 
         private boolean saltPingEnabled;
 
@@ -59,7 +59,7 @@ public class NodeStatusContext {
             return this;
         }
 
-        public Builder withPassword(char[] password) {
+        public Builder withPassword(String password) {
             this.password = password;
             return this;
         }

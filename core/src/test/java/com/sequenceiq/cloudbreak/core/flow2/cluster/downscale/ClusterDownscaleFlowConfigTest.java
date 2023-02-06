@@ -102,7 +102,7 @@ class ClusterDownscaleFlowConfigTest {
     private ClusterDownscaleEvent extractEventFromAbstractFlowConfigurationTransition(Transition<ClusterDownscaleState, ClusterDownscaleEvent> transition)
             throws IllegalAccessException {
         Field field = ReflectionUtils.findField(Transition.class, "event");
-        field.setAccessible(true);
+        ReflectionUtils.makeAccessible(field);
         return (ClusterDownscaleEvent) field.get(transition);
     }
 

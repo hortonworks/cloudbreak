@@ -34,9 +34,9 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final String cmUsername;
 
-    private final char[] cmPassword;
+    private final String cmPassword;
 
-    private final char[] localPassword;
+    private final String localPassword;
 
     private final Integer cmMetricsExporterPort;
 
@@ -138,7 +138,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return cmUsername;
     }
 
-    public char[] getCmPassword() {
+    public String getCmPassword() {
         return cmPassword;
     }
 
@@ -162,7 +162,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return scrapeIntervalSeconds;
     }
 
-    public char[] getLocalPassword() {
+    public String getLocalPassword() {
         return localPassword;
     }
 
@@ -253,7 +253,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("cmPassword", defaultIfNull(this.cmPassword, EMPTY_CONFIG_DEFAULT));
         map.put("cmMetricsExporterPort", defaultIfNull(this.cmMetricsExporterPort, DEFAULT_CM_SMON_PORT));
         map.put("cmAutoTls", defaultIfNull(this.cmAutoTls, true));
-        map.put("localPassword", this.localPassword != null ? new String(this.localPassword) : EMPTY_CONFIG_DEFAULT);
+        map.put("localPassword", this.localPassword != null ? this.localPassword : EMPTY_CONFIG_DEFAULT);
         map.put("nodeExporterUser", defaultIfNull(this.nodeExporterUser, EMPTY_CONFIG_DEFAULT));
         map.put("nodeExporterPort", this.nodeExporterPort);
         map.put("nodeExporterCollectors", defaultIfNull(this.nodeExporterCollectors, new ArrayList<>()));
@@ -303,9 +303,9 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         private String cmUsername;
 
-        private char[] cmPassword;
+        private String cmPassword;
 
-        private char[] localPassword;
+        private String localPassword;
 
         private Integer cmMetricsExporterPort;
 
@@ -397,7 +397,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withCMPassword(char[] cmPassword) {
+        public Builder withCMPassword(String cmPassword) {
             this.cmPassword = cmPassword;
             return this;
         }
@@ -417,7 +417,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withLocalPassword(char[] localPassword) {
+        public Builder withLocalPassword(String localPassword) {
             this.localPassword = localPassword;
             return this;
         }

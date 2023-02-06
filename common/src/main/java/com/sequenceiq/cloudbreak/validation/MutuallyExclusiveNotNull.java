@@ -12,6 +12,7 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull.MutuallyExclusiveNotNullValidator;
 
@@ -78,7 +79,7 @@ public @interface MutuallyExclusiveNotNull {
 
         private Object getFieldValue(Object value, String fieldName) throws NoSuchFieldException, IllegalAccessException {
             Field field = getInheritedDeclaredField(value.getClass(), fieldName);
-            field.setAccessible(true);
+            ReflectionUtils.makeAccessible(field);
             return field.get(value);
         }
 

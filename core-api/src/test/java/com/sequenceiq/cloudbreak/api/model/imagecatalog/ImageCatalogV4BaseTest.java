@@ -64,9 +64,9 @@ public class ImageCatalogV4BaseTest {
 
         for (Entry<String, Object> entry : Map.of("HTTP_CONTENT_SIZE_VALIDATOR", httpContentSizeValidator, "HTTP_HELPER", httpHelper).entrySet()) {
             Field field = ReflectionUtils.findField(ImageCatalogValidator.class, entry.getKey());
-            field.setAccessible(true);
+            ReflectionUtils.makeAccessible(field);
             Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
+            ReflectionUtils.makeAccessible(modifiersField);
             modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
             field.set(null, entry.getValue());
         }

@@ -11,6 +11,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
@@ -38,7 +39,7 @@ public class SecretAspectService {
                 for (Field field : entity.getClass().getDeclaredFields()) {
                     if (field.isAnnotationPresent(SecretValue.class)) {
                         LOGGER.debug("Found SecretValue annotation on {}", field);
-                        field.setAccessible(true);
+                        ReflectionUtils.makeAccessible(field);
                         Secret value = (Secret) field.get(entity);
                         if (value != null && value.getRaw() != null && value.getSecret() == null) {
                             String accountId = findAccountId(entity);
@@ -82,7 +83,7 @@ public class SecretAspectService {
                 for (Field field : entity.getClass().getDeclaredFields()) {
                     if (field.isAnnotationPresent(SecretValue.class)) {
                         LOGGER.debug("Found SecretValue annotation on {}", field);
-                        field.setAccessible(true);
+                        ReflectionUtils.makeAccessible(field);
                         Secret path = (Secret) field.get(entity);
                         if (path != null && path.getSecret() != null) {
                             secretService.delete(path.getSecret());

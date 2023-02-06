@@ -171,7 +171,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             builder.saltPingEnabled();
         }
         if (StringUtils.isNotBlank(stack.getCdpNodeStatusMonitorPassword())) {
-            builder.withPassword(stack.getCdpNodeStatusMonitorPassword().toCharArray());
+            builder.withPassword(stack.getCdpNodeStatusMonitorPassword());
         }
         return builder
                 .withUsername(stack.getCdpNodeStatusMonitorUser())

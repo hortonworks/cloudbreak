@@ -488,7 +488,7 @@ public class AzureUtilsTest {
                 .withMessage("Resource 'cbimgwu29d62091481040a03' was disallowed by policy. Reasons: 'West US 2 location is disabled'. " +
                         "See error details for policy resource IDs.");
         Field field = CloudError.class.getDeclaredField("additionalInfo");
-        field.setAccessible(true);
+        ReflectionUtils.makeAccessible(field);
         ReflectionUtils.setField(field, detail1, List.of(policyViolation));
         cloudError.details().add(detail1);
         CloudError detail2 = new CloudError()

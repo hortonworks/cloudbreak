@@ -802,7 +802,7 @@ public class TestUtil {
 
     public static void setSecretField(Class<?> clazz, String fieldName, Object target, String raw, String secret) {
         Field field = ReflectionUtils.findField(clazz, fieldName);
-        field.setAccessible(true);
+        ReflectionUtils.makeAccessible(field);
         try {
             field.set(target, new Secret(raw, secret));
         } catch (IllegalAccessException ignore) {

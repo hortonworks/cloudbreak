@@ -49,8 +49,10 @@ public final class FileReaderUtils {
     }
 
     public static String readFileFromPathBase64(String fileName) throws IOException {
-        String br = IOUtils.toString(new FileInputStream(fileName));
-        return BaseEncoding.base64().encode(br.getBytes());
+        try (FileInputStream fileInputStream = new FileInputStream(fileName)) {
+            String br = IOUtils.toString(fileInputStream);
+            return BaseEncoding.base64().encode(br.getBytes());
+        }
     }
 
     public static String readBinaryFileFromPath(Path path) throws IOException {
