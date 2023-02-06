@@ -71,7 +71,7 @@ public class FlowLogUtil {
         if (flowLogs.size() > 2) {
             FlowLogWithoutPayload lastFlowLog = flowLogs.get(0);
             FlowLogWithoutPayload secondLastFlowLog = flowLogs.get(1);
-            LOGGER.debug("Last two log items: {}, {}", lastFlowLog, secondLastFlowLog);
+            LOGGER.debug("Last two log items: {}, {}", lastFlowLog.minimizedString(), secondLastFlowLog.minimizedString());
             return lastFlowLog.getFinalized()
                     && (failHandledEvents.contains(secondLastFlowLog.getNextEvent())
                     || StateStatus.FAILED.equals(secondLastFlowLog.getStateStatus()));
