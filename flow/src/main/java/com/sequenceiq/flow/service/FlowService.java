@@ -25,7 +25,6 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -41,10 +40,8 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
-import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
 import com.sequenceiq.flow.converter.FlowLogConverter;
-import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.domain.FlowChainLog;
@@ -69,9 +66,6 @@ public class FlowService {
 
     @Resource
     private Set<String> failHandledEvents;
-
-    @Inject
-    private FlowProgressResponseConverter flowProgressResponseConverter;
 
     @Inject
     private FlowLogConverter flowLogConverter;
@@ -247,24 +241,6 @@ public class FlowService {
 
     private boolean isPending(FlowLogWithoutPayload flowLog) {
         return !Boolean.TRUE.equals(flowLog.getFinalized()) || StateStatus.PENDING.equals(flowLog.getStateStatus());
-    }
-
-    public FlowProgressResponse getLastFlowProgressByResourceCrn(String resourceCrn) {
-        checkState(Crn.isCrn(resourceCrn));
-        LOGGER.info("Getting flow logs (progress) by resource crn {}", resourceCrn);
-        List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByResourceCrnOrName(resourceCrn);
-        FlowProgressResponse response = flowProgressResponseConverter.convert(flowLogs, resourceCrn);
-        if (StringUtils.isBlank(response.getFlowId())) {
-            throw new NotFoundException(String.format("Not found any historical flow data for requested resource (crn: %s)", resourceCrn));
-        }
-        return flowProgressResponseConverter.convert(flowLogs, resourceCrn);
-    }
-
-    public List<FlowProgressResponse> getFlowProgressListByResourceCrn(String resourceCrn) {
-        checkState(Crn.isCrn(resourceCrn));
-        LOGGER.info("Getting flow logs (progress) for all recent flows by resource crn {}", resourceCrn);
-        List<FlowLog> flowLogs = flowLogDBService.getAllFlowLogsByResourceCrnOrName(resourceCrn);
-        return flowProgressResponseConverter.convertList(flowLogs, resourceCrn);
     }
 
     public Optional<OperationFlowsView> getLastFlowOperationByResourceCrn(String resourceCrn) {

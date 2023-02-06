@@ -78,7 +78,6 @@ import com.sequenceiq.environment.environment.service.EnvironmentCreationService
 import com.sequenceiq.environment.environment.service.EnvironmentDeletionService;
 import com.sequenceiq.environment.environment.service.EnvironmentLoadBalancerService;
 import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
-import com.sequenceiq.environment.environment.service.EnvironmentProgressService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStackConfigUpdateService;
 import com.sequenceiq.environment.environment.service.EnvironmentStartService;
@@ -91,6 +90,7 @@ import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConvert
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.flow.service.FlowProgressService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 @Controller
@@ -126,7 +126,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentLoadBalancerService environmentLoadBalancerService;
 
-    private final EnvironmentProgressService environmentProgressService;
+    private final FlowProgressService flowProgressService;
 
     private final EnvironmentFiltering environmentFiltering;
 
@@ -146,7 +146,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentService environmentService,
             EnvironmentCreationService environmentCreationService,
             EnvironmentDeletionService environmentDeletionService,
-            EnvironmentProgressService environmentProgressService,
+            FlowProgressService flowProgressService,
             EnvironmentModificationService environmentModificationService,
             EnvironmentStartService environmentStartService,
             EnvironmentStopService environmentStopService,
@@ -166,7 +166,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
         this.environmentDeletionService = environmentDeletionService;
-        this.environmentProgressService = environmentProgressService;
+        this.flowProgressService = flowProgressService;
         this.environmentModificationService = environmentModificationService;
         this.environmentStartService = environmentStartService;
         this.environmentStopService = environmentStopService;
@@ -458,13 +458,13 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public FlowProgressResponse getLastFlowLogProgressByResourceCrn(@ResourceCrn String resourceCrn) {
-        return environmentProgressService.getLastFlowProgressByResourceCrn(resourceCrn);
+        return flowProgressService.getLastFlowProgressByResourceCrn(resourceCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@ResourceCrn String resourceCrn) {
-        return environmentProgressService.getFlowProgressListByResourceCrn(resourceCrn);
+        return flowProgressService.getFlowProgressListByResourceCrn(resourceCrn);
     }
 
     @Override
