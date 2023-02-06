@@ -6,6 +6,8 @@ import java.util.Arrays;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import org.springframework.util.ReflectionUtils;
+
 import com.sequenceiq.common.api.util.ValidatorUtil;
 
 public class ExactlyOneNonNullValidator implements ConstraintValidator<ValidIfExactlyOneNonNull, Object> {
@@ -32,7 +34,7 @@ public class ExactlyOneNonNullValidator implements ConstraintValidator<ValidIfEx
         for (String fieldName : fields) {
             try {
                 Field f = clazz.getDeclaredField(fieldName);
-                f.setAccessible(true);
+                ReflectionUtils.makeAccessible(f);
                 if (f.get(value) != null) {
                     numNonNull++;
                 }

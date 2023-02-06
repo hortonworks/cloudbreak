@@ -2,12 +2,10 @@ package com.sequenceiq.cloudbreak.quartz.statuschecker.service;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
-import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -29,6 +27,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
+import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
 public class StatusCheckerJobService {
@@ -43,8 +42,6 @@ public class StatusCheckerJobService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatusCheckerJobService.class);
 
-    private static final Random RANDOM = new SecureRandom();
-
     @Inject
     private StatusCheckerConfig statusCheckerConfig;
 
@@ -57,7 +54,7 @@ public class StatusCheckerJobService {
     public <T> void schedule(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource);
         Trigger trigger = buildJobTrigger(jobDetail, resource.getJobResource(),
-                statusCheckerConfig.getSnoozeSeconds() + RANDOM.nextInt(statusCheckerConfig.getIntervalInSeconds()),
+                statusCheckerConfig.getSnoozeSeconds() + RandomUtil.getInt(statusCheckerConfig.getIntervalInSeconds()),
                 statusCheckerConfig.getIntervalInSeconds());
         schedule(jobDetail, trigger, resource.getJobResource());
     }

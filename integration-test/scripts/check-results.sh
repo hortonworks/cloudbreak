@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #please don't add this property to Jenkins
-#this value changed 2023.02.02 from 4.6 to 4.62 (additional FreeIPA creation in MockSdxBlueprintLoadTests, MockSdxResizeTests, MockSdxRetryTests, MockSdxTests)
-: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="4.62GB"}
+#this value changed 2023.02.02 from 4.6 to 4.65 (additional FreeIPA creation in MockSdxBlueprintLoadTests, MockSdxResizeTests, MockSdxRetryTests, MockSdxTests)
+: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="4.65GB"}
 
 status_code=0
 

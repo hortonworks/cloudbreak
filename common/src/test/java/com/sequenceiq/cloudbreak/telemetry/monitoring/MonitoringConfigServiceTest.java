@@ -118,11 +118,11 @@ public class MonitoringConfigServiceTest {
         MonitoringContext monitoringContext = MonitoringContext
                 .builder()
                 .enabled()
-                .withCmAuth(new MonitoringAuthConfig("user", "pass".toCharArray()))
+                .withCmAuth(new MonitoringAuthConfig("user", "pass"))
                 .withCmAutoTls(true)
                 .withClusterType(MonitoringClusterType.CLOUDERA_MANAGER)
                 .withRemoteWriteUrl("myendpoint")
-                .withSharedPassword("mypass".toCharArray())
+                .withSharedPassword("mypass")
                 .withCredential(cred)
                 .build();
         telemetryContext.setMonitoringContext(monitoringContext);

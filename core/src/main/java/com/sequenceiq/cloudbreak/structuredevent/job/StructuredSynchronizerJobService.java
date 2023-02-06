@@ -2,11 +2,9 @@ package com.sequenceiq.cloudbreak.structuredevent.job;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -24,6 +22,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
 public class StructuredSynchronizerJobService {
@@ -33,8 +32,6 @@ public class StructuredSynchronizerJobService {
     private static final String TRIGGER_GROUP = "structured-synchronizer-triggers";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredSynchronizerJobService.class);
-
-    private static final Random RANDOM = new SecureRandom();
 
     private static final int SECONDS_IN_HOUR = 3600;
 
@@ -127,6 +124,6 @@ public class StructuredSynchronizerJobService {
 
     private Date delayedStart() {
         return Date.from(ZonedDateTime.now().toInstant().plus(
-                Duration.ofSeconds(RANDOM.nextInt(structuredSynchronizerConfig.getIntervalInHours() * SECONDS_IN_HOUR))));
+                Duration.ofSeconds(RandomUtil.getInt(structuredSynchronizerConfig.getIntervalInHours() * SECONDS_IN_HOUR))));
     }
 }

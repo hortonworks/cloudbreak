@@ -80,7 +80,7 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         return SALT_STATE;
     }
 
-    private void fillExporterConfigs(MonitoringConfigView.Builder builder, char[] localPassword) {
+    private void fillExporterConfigs(MonitoringConfigView.Builder builder, String localPassword) {
         builder.withLocalPassword(localPassword);
         if (monitoringConfiguration.getNodeExporter() != null) {
             builder.withNodeExporterUser(monitoringConfiguration.getNodeExporter().getUser())

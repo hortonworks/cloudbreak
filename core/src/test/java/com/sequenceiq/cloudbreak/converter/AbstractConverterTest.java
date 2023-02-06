@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ReflectionUtils;
 
 import com.google.common.collect.ObjectArrays;
 import com.sequenceiq.cloudbreak.TestException;
@@ -48,7 +49,7 @@ public class AbstractConverterTest {
 
     private boolean isFieldNull(Object obj, Field field) {
         try {
-            field.setAccessible(true);
+            ReflectionUtils.makeAccessible(field);
             return field.get(obj) == null;
         } catch (IllegalAccessException | IllegalArgumentException e) {
             throw new TestException(e.getMessage());

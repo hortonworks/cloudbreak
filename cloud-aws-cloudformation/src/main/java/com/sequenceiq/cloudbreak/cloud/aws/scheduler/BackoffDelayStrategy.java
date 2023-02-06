@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.amazonaws.waiters.PollingStrategy;
 import com.amazonaws.waiters.PollingStrategyContext;
+import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 public class BackoffDelayStrategy implements PollingStrategy.DelayStrategy {
     private static final int POLLING_INTERVAL = 5;
@@ -18,7 +19,7 @@ public class BackoffDelayStrategy implements PollingStrategy.DelayStrategy {
     @Override
     public void delayBeforeNextRetry(PollingStrategyContext pollingStrategyContext) throws InterruptedException {
         int requestAttempted = pollingStrategyContext.getRetriesAttempted();
-        Double secondToWait = Math.min(POLLING_INTERVAL * Math.pow(2, requestAttempted) + RANDOM.nextInt(POLLING_INTERVAL), MAX_POLLING_INTERVAL);
+        Double secondToWait = Math.min(POLLING_INTERVAL * Math.pow(2, requestAttempted) + RandomUtil.getInt(POLLING_INTERVAL), MAX_POLLING_INTERVAL);
         Thread.sleep(secondToWait.longValue() * THOUSAND);
     }
 }

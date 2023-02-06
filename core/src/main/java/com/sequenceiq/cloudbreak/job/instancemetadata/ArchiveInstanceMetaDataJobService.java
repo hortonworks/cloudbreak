@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.job.instancemetadata;
 
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -23,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.util.RandomUtil;
+
 @Service
 public class ArchiveInstanceMetaDataJobService {
 
@@ -31,8 +31,6 @@ public class ArchiveInstanceMetaDataJobService {
     private static final String JOB_GROUP = "archive-instancemetadata-jobs";
 
     private static final String TRIGGER_GROUP = "archive-instancemetadata-triggers";
-
-    private static final Random RANDOM = new SecureRandom();
 
     @Inject
     private ArchiveInstanceMetaDataConfig properties;
@@ -117,7 +115,7 @@ public class ArchiveInstanceMetaDataJobService {
     }
 
     private Date delayedFirstStart() {
-        int delayInMinutes = RANDOM.nextInt((int) TimeUnit.HOURS.toMinutes(properties.getIntervalInHours()));
+        int delayInMinutes = RandomUtil.getInt((int) TimeUnit.HOURS.toMinutes(properties.getIntervalInHours()));
         return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(delayInMinutes)));
     }
 }

@@ -171,7 +171,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             MonitoringAuthConfig cmAuthConfig = null;
             if (cluster.getCloudbreakClusterManagerMonitoringUser() != null && cluster.getCloudbreakClusterManagerMonitoringPassword() != null) {
                 String cmMonitoringUser = cluster.getCloudbreakClusterManagerMonitoringUser();
-                char[] cmMonitoringPassword = cluster.getCloudbreakClusterManagerMonitoringPassword().toCharArray();
+                String cmMonitoringPassword = cluster.getCloudbreakClusterManagerMonitoringPassword();
                 cmAuthConfig = new MonitoringAuthConfig(cmMonitoringUser, cmMonitoringPassword);
                 builder.withCmAutoTls(cluster.getAutoTlsEnabled());
             }
@@ -242,7 +242,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             builder.saltPingEnabled();
         }
         if (StringUtils.isNotBlank(cluster.getCdpNodeStatusMonitorPassword())) {
-            builder.withPassword(cluster.getCdpNodeStatusMonitorPassword().toCharArray());
+            builder.withPassword(cluster.getCdpNodeStatusMonitorPassword());
         }
         return builder
                 .withUsername(cluster.getCdpNodeStatusMonitorUser())

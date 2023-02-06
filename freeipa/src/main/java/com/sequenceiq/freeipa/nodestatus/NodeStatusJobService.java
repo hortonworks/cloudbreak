@@ -2,11 +2,9 @@ package com.sequenceiq.freeipa.nodestatus;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -25,14 +23,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.util.RandomUtil;
 import com.sequenceiq.freeipa.entity.Stack;
 
 @Component
 public class NodeStatusJobService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NodeStatusJobService.class);
-
-    private static final Random RANDOM = new SecureRandom();
 
     private static final String JOB_NAME = "node-status-checker-job";
 
@@ -57,7 +54,7 @@ public class NodeStatusJobService {
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource);
-        Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(nodeStatusJobConfig.getIntervalInSeconds()));
+        Trigger trigger = buildJobTrigger(jobDetail, RandomUtil.getInt(nodeStatusJobConfig.getIntervalInSeconds()));
         try {
             LOGGER.info("Unscheduling Node status job with name: '{}' and group: '{}'", JOB_NAME, JOB_GROUP);
             unschedule(resource.getJobResource().getLocalId());

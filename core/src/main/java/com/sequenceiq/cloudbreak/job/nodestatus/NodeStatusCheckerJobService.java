@@ -2,11 +2,9 @@ package com.sequenceiq.cloudbreak.job.nodestatus;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -25,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
 public class NodeStatusCheckerJobService {
@@ -34,8 +33,6 @@ public class NodeStatusCheckerJobService {
     private static final String JOB_GROUP = "nodestatus-checker-jobs";
 
     private static final String TRIGGER_GROUP = "nodestatus-checker-triggers";
-
-    private static final Random RANDOM = new SecureRandom();
 
     @Inject
     private NodeStatusCheckerConfig properties;
@@ -48,7 +45,7 @@ public class NodeStatusCheckerJobService {
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource);
-        Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(properties.getIntervalInSeconds()));
+        Trigger trigger = buildJobTrigger(jobDetail, RandomUtil.getInt(properties.getIntervalInSeconds()));
         schedule(jobDetail, trigger, resource.getJobResource().getLocalId());
     }
 
