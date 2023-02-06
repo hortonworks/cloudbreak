@@ -867,6 +867,20 @@ message CDPCMLWorkspaceStatus {
     MIGRATION_FINISHED = 58;
     // The status when the CDSW migration has failed.
     MIGRATION_FAILED = 59;
+
+    // The status when the CDSW migration readiness check has started.
+    MIGRATION_READINESS_CHECK_STARTED = 60;
+    // The status when the CDSW migration readiness check has finished.
+    MIGRATION_READINESS_CHECK_FINISHED = 61;
+    // The status when the CDSW migration readiness check has failed.
+    MIGRATION_READINESS_CHECK_FAILED = 62;
+
+    // The status when the validate CDSW migration has started.
+    VALIDATE_MIGRATION_STARTED = 63;
+    // The status when the validate CDSW migration has finished.
+    VALIDATE_MIGRATION_FINISHED = 64;
+    // The status when the validate CDSW migration has failed.
+    VALIDATE_MIGRATION_FAILED = 65;
   }
 }
 
@@ -1930,6 +1944,10 @@ message CDPVersionDetails {
   string osPatchLevel = 5;
   // Key value pairs of every version what we know
   string all = 6;
+  // Java Version
+  string javaVersion = 7;
+  // Java Version forced to be used
+  bool javaVersionForced = 8;
 }
 
 message CDPClusterDetails {
@@ -2317,6 +2335,8 @@ message CDPDFServiceRequested {
   string actorCrn = 13;
   // Is private cluster
   bool privateCluster = 14;
+  // Is validation skipped for enable and update requests
+  bool runValidations = 15;
 }
 
 message CDPDFServiceStatusChanged {
@@ -2365,6 +2385,8 @@ message CDPDFServiceUpgradeRequested {
   bool loadBalancerAccessRestricted = 14;
   // CRN of the actor that created the request
   string actorCrn = 15;
+  // Is validation skipped for upgrade request
+  bool runValidations = 16;
 }
 
 message CDPDFServiceUpgradeStatusChanged {
@@ -3335,6 +3357,8 @@ message CDPCDEJobRunStatusChanged {
   uint64 ended = 7;
   // Indicates the duration of the job run
   int32 duration = 9;
+  // cde-client header
+  string client = 10;
 }
 
 // Generated when a CDP CDE job is created or is modified.
@@ -3347,6 +3371,8 @@ message CDPCDEJobCreated {
   CDPCDEJobDetails job = 3;
   // Status: Created, modified or deleted.
   CDPCDEEventType.Value eventType = 4;
+  // cde-client header
+  string client = 5;
 }
 
 // Type for CDPCDE event generated.
@@ -3373,6 +3399,8 @@ message CDPCDEResourceCreated {
   CDPCDEResourceDetails resource = 3;
   // Status: Created, modified or deleted.
   CDPCDEEventType.Value eventType = 4;
+  // cde-client header
+  string client = 5;
 }
 
 // Metadata about AWS CDE service when it was created or updated.
@@ -3823,12 +3851,8 @@ message CDPTrialEnvironment {
 
 // The pattern and status for CDP Trial workloads.
 message CDPTrialWorkload {
-  // Pattern used by the trial workload. Currently supported CDP trial workload patterns are CDPONE_SELF_SERVICE_EXPLORATORY_ANALYTICS, CDPONE_BI_AT_SCALE, CDPONE_REAL_TIME_OPERATIONAL_INSIGHTS, CDPONE_OPEN_DATA_LAKEHOUSE, CDPONE_LOW_CODE_ANALYTICS_APP.
-  // CDPONE_SELF_SERVICE_EXPLORATORY_ANALYTICS - Indicates self-service exploratory analytics pattern for CDPOne.
-  // CDPONE_BI_AT_SCALE - Indicates business intelligence at scale pattern for CDPOne.
-  // CDPONE_REAL_TIME_OPERATIONAL_INSIGHTS - Indicates real-time operational insights pattern for CDPOne.
-  // CDPONE_OPEN_DATA_LAKEHOUSE - Indicates open data lakehouse pattern for CDPOne.
-  // CDPONE_LOW_CODE_ANALYTICS_APP - Indicates Low Code Analytics App(Studio) pattern for CDPOne.
+  // Pattern used by the trial workload. Currently supported CDP trial workload patterns are CDP_OPEN_DATA_LAKEHOUSE.
+  // CDP_OPEN_DATA_LAKEHOUSE - Indicates open data lakehouse pattern for CDP.
   string pattern = 1;
   // Status of the workload deployment for the trial.
   CDPTrialWorkloadStatus.Value status = 2;

@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
+import com.sequenceiq.cloudbreak.service.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -169,6 +170,9 @@ public class StackCreatorServiceTest {
 
     @Mock
     private NodeCountLimitValidator nodeCountLimitValidator;
+
+    @Mock
+    private JavaVersionValidator javaVersionValidator;
 
     @Test
     public void shouldThrowBadRequestWhenRecipeIsMissing() {
