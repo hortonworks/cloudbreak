@@ -229,6 +229,7 @@ public class StackV4RequestToStackConverter {
 
         Set<LoadBalancer> loadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, source);
         stack.setLoadBalancers(loadBalancers);
+        stack.setJavaVersion(source.getJavaVersion());
         return stack;
     }
 

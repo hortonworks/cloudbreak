@@ -116,7 +116,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTelemetry(getTelemetryRequest(environment, sdxClusterResponse));
         request.setGatewayPort(source.getGatewayPort());
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
-        request.setEnableLoadBalancer(source.isEnableLoadBalancer());
+        request.setEnableLoadBalancer(source.isEnableLoadBalancer());      
+        request.setJavaVersion(source.getJavaVersion());
         calculateVariant(environment, source, request);
         checkMultipleGatewayNodes(source);
         return request;
@@ -244,6 +245,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setGatewayPort(source.getGatewayPort());
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         request.setEnableLoadBalancer(source.isEnableLoadBalancer());
+        request.setJavaVersion(source.getJavaVersion());
+
         return request;
     }
 

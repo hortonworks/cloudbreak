@@ -155,3 +155,8 @@ hikari:
   pool:
     readiness:
       down-if-pool-is-full: false
+
+vm:
+  supportedJavaVersions:
+  - 8
+  - 11

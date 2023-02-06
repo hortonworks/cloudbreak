@@ -242,6 +242,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     @Convert(converter = DnsResolverTypeConverter.class)
     private DnsResolverType domainDnsResolver;
 
+    private Integer javaVersion;
+
     /**
      * Specifically used for cases in which the stack has been detached during a resize operation.
      * This allows us to retain the original stack name which can be necessary when resources are defined around
@@ -1067,6 +1069,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.originalName = originalName;
     }
 
+    public Integer getJavaVersion() {
+        return javaVersion;
+    }
+
+    public void setJavaVersion(Integer javaVersion) {
+        this.javaVersion = javaVersion;
+    }
+
     @Override
     public List<InstanceGroupView> getInstanceGroupViews() {
         return new ArrayList<>(instanceGroups);
@@ -1120,6 +1130,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", externalDatabaseCreationType=" + externalDatabaseCreationType +
                 ", externalDatabaseEngineVersion=" + externalDatabaseEngineVersion +
                 ", originalName=" + originalName +
+                ", javaVersion=" + javaVersion +
                 '}';
     }
 

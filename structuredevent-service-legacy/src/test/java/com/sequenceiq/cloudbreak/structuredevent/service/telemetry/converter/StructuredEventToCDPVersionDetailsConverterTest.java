@@ -38,6 +38,8 @@ class StructuredEventToCDPVersionDetailsConverterTest {
         Assert.assertEquals("", flowVersionDetails.getCrVersion());
         Assert.assertEquals("", flowVersionDetails.getOsPatchLevel());
         Assert.assertEquals("", flowVersionDetails.getSaltVersion());
+        Assert.assertEquals("", flowVersionDetails.getJavaVersion());
+        Assert.assertFalse(flowVersionDetails.getJavaVersionForced());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
 
@@ -48,6 +50,8 @@ class StructuredEventToCDPVersionDetailsConverterTest {
         Assert.assertEquals("", syncVersionDetails.getCrVersion());
         Assert.assertEquals("", syncVersionDetails.getOsPatchLevel());
         Assert.assertEquals("", syncVersionDetails.getSaltVersion());
+        Assert.assertEquals("", flowVersionDetails.getJavaVersion());
+        Assert.assertFalse(flowVersionDetails.getJavaVersionForced());
     }
 
     @Test
@@ -63,7 +67,9 @@ class StructuredEventToCDPVersionDetailsConverterTest {
         Assert.assertEquals("2021-02-04", flowVersionDetails.getOsPatchLevel());
         Assert.assertEquals("3000.5", flowVersionDetails.getSaltVersion());
         Assert.assertEquals("bootstrap=something, cdh-build-number=22, cm-build-number=11, cm=7.3.0, date=2021-02-04," +
-                " salt=3000.5, stack=7.2.7", flowVersionDetails.getAll());
+                " java=8, salt=3000.5, stack=7.2.7", flowVersionDetails.getAll());
+        Assert.assertEquals("8", flowVersionDetails.getJavaVersion());
+        Assert.assertFalse(flowVersionDetails.getJavaVersionForced());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(createStackDetails());
@@ -76,7 +82,21 @@ class StructuredEventToCDPVersionDetailsConverterTest {
         Assert.assertEquals("2021-02-04", syncVersionDetails.getOsPatchLevel());
         Assert.assertEquals("3000.5", syncVersionDetails.getSaltVersion());
         Assert.assertEquals("bootstrap=something, cdh-build-number=22, cm-build-number=11, cm=7.3.0, date=2021-02-04," +
-                " salt=3000.5, stack=7.2.7", syncVersionDetails.getAll());
+                " java=8, salt=3000.5, stack=7.2.7", syncVersionDetails.getAll());
+        Assert.assertEquals("8", flowVersionDetails.getJavaVersion());
+        Assert.assertFalse(flowVersionDetails.getJavaVersionForced());
+    }
+
+    @Test
+    public void testJavaVersionForced() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        StackDetails stackDetails = createStackDetails();
+        stackDetails.setJavaVersion(11);
+        structuredFlowEvent.setStack(stackDetails);
+
+        UsageProto.CDPVersionDetails flowVersionDetails = underTest.convert(structuredFlowEvent);
+        Assert.assertEquals("11", flowVersionDetails.getJavaVersion());
+        Assert.assertTrue(flowVersionDetails.getJavaVersionForced());
     }
 
     private StackDetails createStackDetails() {
@@ -91,7 +111,8 @@ class StructuredEventToCDPVersionDetailsConverterTest {
                 "cdh-build-number", "22",
                 "date", "2021-02-04",
                 "salt", "3000.5",
-                "bootstrap", "something"));
+                "bootstrap", "something",
+                "java", "8"));
 
         return stackDetails;
     }
