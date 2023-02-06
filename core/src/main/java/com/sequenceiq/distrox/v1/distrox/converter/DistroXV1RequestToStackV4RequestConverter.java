@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,13 +118,13 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         request.setEnableLoadBalancer(source.isEnableLoadBalancer());
         request.setJavaVersion(source.getJavaVersion());
-        calculateVariant(source, request);
+        calculateVariant(environment, source, request);
         checkMultipleGatewayNodes(source);
         return request;
     }
 
-    private void calculateVariant(DistroXV1Request source, StackV4Request request) {
-        if (CloudPlatform.AWS.equals(source.getCloudPlatform()) &&
+    private void calculateVariant(DetailedEnvironmentResponse environment, DistroXV1Request source, StackV4Request request) {
+        if (StringUtils.equals(environment.getCloudPlatform(), "AWS") &&
                 entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
             request.setVariant("AWS_NATIVE");
         } else {
