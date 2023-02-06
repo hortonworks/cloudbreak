@@ -33,6 +33,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
@@ -55,6 +57,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 
 @ExtendWith(MockitoExtension.class)
 class DistroXV1RequestToStackV4RequestConverterTest {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
 
     @Mock
     private DistroXAuthenticationToStaAuthenticationConverter authenticationConverter;
@@ -89,6 +93,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
     @Mock
     private DistroXDatabaseRequestToStackDatabaseRequestConverter databaseRequestConverter;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private DistroXV1RequestToStackV4RequestConverter underTest;
 
@@ -97,6 +104,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         when(environmentClientService.getByName(anyString())).thenReturn(createAwsEnvironment());
         when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
         when(databaseRequestConverter.convert(any(DistroXDatabaseRequest.class))).thenReturn(createDatabaseRequest());
+        when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
 
         DistroXV1Request source = new DistroXV1Request();
         source.setEnvironmentName("envname");
@@ -104,10 +112,14 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.HA);
         databaseRequest.setDatabaseEngineVersion("13");
         source.setExternalDatabase(databaseRequest);
-        StackV4Request convert = underTest.convert(source);
+        StackV4Request convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
         assertThat(convert.getExternalDatabase()).isNotNull();
         assertThat(convert.getExternalDatabase().getAvailabilityType()).isEqualTo(DatabaseAvailabilityType.HA);
         assertThat(convert.getExternalDatabase().getDatabaseEngineVersion()).isEqualTo("13");
+
+        when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.TRUE);
+        convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+        assertThat(convert.getVariant()).isEqualTo("AWS_NATIVE");
     }
 
     @Test
@@ -124,11 +136,16 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         when(environmentClientService.getByName(source.getEnvironmentName())).thenReturn(env);
         when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
         when(databaseRequestConverter.convert(any(DistroXDatabaseRequest.class))).thenReturn(createDatabaseRequest());
+        when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
 
-        StackV4Request convert = underTest.convert(source);
+        StackV4Request convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
 
         assertThat(convert.getExternalDatabase()).isNotNull();
         assertThat(convert.getExternalDatabase().getAvailabilityType()).isEqualTo(DatabaseAvailabilityType.HA);
+
+        when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.TRUE);
+        convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+        assertThat(convert.getVariant()).isEqualTo("AWS_NATIVE");
     }
 
     @ParameterizedTest
@@ -431,7 +448,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         source.setEnvironmentName("env");
         source.setJavaVersion(11);
 
-        StackV4Request result = underTest.convert(source);
+        StackV4Request result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
 
         assertThat(result.getJavaVersion()).isEqualTo(11);
     }
