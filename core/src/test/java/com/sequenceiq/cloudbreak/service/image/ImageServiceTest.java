@@ -32,6 +32,8 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -67,6 +69,8 @@ public class ImageServiceTest {
 
     private static final String DEFAULT_REGION_EXISTING_ID = "ami-09fea90f257c85514";
 
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
     @Mock
     private ImageCatalogService imageCatalogService;
 
@@ -90,6 +94,9 @@ public class ImageServiceTest {
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private ImageService underTest;
@@ -339,7 +346,14 @@ public class ImageServiceTest {
 
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
-        String imageName = underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> {
+                    try {
+                        return underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+                    } catch (CloudbreakImageNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
         assertEquals("ami-09fea90f257c85513", imageName);
     }
 
@@ -353,7 +367,13 @@ public class ImageServiceTest {
                         REGION, EXISTING_ID,
                         DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
 
-        String imageName = underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+            } catch (CloudbreakImageNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
         assertEquals("ami-09fea90f257c85514", imageName);
     }
 
@@ -364,8 +384,9 @@ public class ImageServiceTest {
 
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
-        Exception exception = assertThrows(CloudbreakImageNotFoundException.class, () ->
-                underTest.determineImageName(PLATFORM, imageCatalogPlatform, "fake-region", image));
+        Exception exception = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                        () -> assertThrows(CloudbreakImageNotFoundException.class,
+                                () -> underTest.determineImageName(PLATFORM, imageCatalogPlatform, "fake-region", image)));
         String exceptionMessage = "Virtual machine image couldn't be found in image";
         MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(exceptionMessage));
     }

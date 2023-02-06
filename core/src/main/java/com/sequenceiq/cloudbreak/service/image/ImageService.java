@@ -16,11 +16,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,8 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -87,6 +91,9 @@ public class ImageService {
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProviderService.getImage(stackId);
@@ -246,11 +253,19 @@ public class ImageService {
 
     private String selectImageByRegionPreferDefault(String translatedRegion, Map<String, String> imagesByRegion, String platform)
             throws CloudbreakImageNotFoundException {
-            return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
-                    .or(() -> findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion))
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
+                    .or(supplyAlternativeImageWhenEntitlementAllows(translatedRegion, imagesByRegion, accountId))
                     .orElseThrow(() -> new CloudbreakImageNotFoundException(
                             String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
                                     imagesByRegion, platform, translatedRegion)));
+    }
+
+    @NotNull
+    private Supplier<Optional<? extends String>> supplyAlternativeImageWhenEntitlementAllows(String translatedRegion, Map<String, String> imagesByRegion,
+            String accountId) {
+        return () -> entitlementService.azureOnlyMarketplaceImagesEnabled(accountId) ? Optional.empty()
+                : findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion);
     }
 
     private String selectImageByRegion(String translatedRegion, Map<String, String> imagesByRegion, String platform) throws CloudbreakImageNotFoundException {
