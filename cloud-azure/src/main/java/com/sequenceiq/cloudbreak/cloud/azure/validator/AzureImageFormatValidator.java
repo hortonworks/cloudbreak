@@ -49,23 +49,23 @@ public class AzureImageFormatValidator implements Validator {
         Image image = cloudStack.getImage();
         String imageUri = image.getImageName();
 
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (isVhdImageFormat(image)) {
+            checkEntitlement("Checking presence of 'Only Azure Marketplace Images Enabled' entitlement for VHD image {}",
+                    imageUri,
+                    entitlementService.azureOnlyMarketplaceImagesEnabled(accountId),
+                    "Your image %s seems to be a VHD image, but only Azure Marketplace images allowed in your account! ");
             LOGGER.debug("Image {} seems to be a valid VHD image", imageUri);
-
         } else if (isMarketplaceImageFormat(image)) {
-            LOGGER.debug("Checking presence of Azure Marketplace entitlement for Marketplace image {}", imageUri);
-            String accountId = ThreadBasedUserCrnProvider.getAccountId();
-            if (!entitlementService.azureMarketplaceImagesEnabled(accountId)) {
-                String errorMessage = String.format("Your image %s seems to be an Azure Marketplace image! "
-                        + "If you would like to use it please open Cloudera support ticket to enable this capability!", imageUri);
-                LOGGER.warn(errorMessage);
-                throw new CloudConnectorException(errorMessage);
-            }
+            checkEntitlement("Checking presence of Azure Marketplace entitlement for Marketplace image {}",
+                    imageUri,
+                    !entitlementService.azureMarketplaceImagesEnabled(accountId),
+                    "Your image %s seems to be an Azure Marketplace image! ");
             LOGGER.debug("Checking if Terms and Conditions for your Azure Marketplace image {} are accepted", imageUri);
             AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(image);
             if (isAutomaticTermsSignerDisabled() && areTermsNotSigned(ac, azureMarketplaceImage)) {
                 String errorMessage = String.format("Your image %s seems to be an Azure Marketplace image, "
-                        + "however its Terms and Conditions are not accepted! Please accept them and retry upgrade. " +
+                        + "however its Terms and Conditions are not accepted! Please accept them and retry the provisioning or upgrade. " +
                         "On how to accept the Terms and Conditions of the image please refer to azure documentation " +
                         "at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", imageUri);
                 LOGGER.warn(errorMessage);
@@ -76,6 +76,15 @@ public class AzureImageFormatValidator implements Validator {
 
         } else {
             String errorMessage = String.format("Your image name %s is invalid. Please check the desired format in the documentation!", imageUri);
+            LOGGER.warn(errorMessage);
+            throw new CloudConnectorException(errorMessage);
+        }
+    }
+
+    private void checkEntitlement(String logMessage, String imageUri, boolean entitlement, String error) {
+        LOGGER.debug(logMessage, imageUri);
+        if (entitlement) {
+            String errorMessage = String.format(error + "If you would like to use it please open Cloudera support ticket to enable this capability!", imageUri);
             LOGGER.warn(errorMessage);
             throw new CloudConnectorException(errorMessage);
         }

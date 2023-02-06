@@ -68,9 +68,27 @@ public class AzureImageFormatValidatorTest {
     void testImageHasValidVhdFormat() {
         Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
+        when(entitlementService.azureOnlyMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(false);
 
-        underTest.validate(authenticatedContext, cloudStack);
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack));
 
+        verify(entitlementService, times(0)).azureMarketplaceImagesEnabled(any());
+        verify(azureImageTermsSignerService, never()).isSigned(eq(AZURE_SUBSCRIPTION_ID), any(), any());
+    }
+
+    @Test
+    void testVhdImageOnlyAzureMarketplaceImageAllowed() {
+        Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
+        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
+        when(entitlementService.azureOnlyMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
+
+        CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
+
+        String expected = "Your image https://cldrwestus2.blob.core.windows.net/images/cb-cdh-726-210326090153.vhd seems to be a VHD image, " +
+                "but only Azure Marketplace images allowed in your account! " +
+                "If you would like to use it please open Cloudera support ticket to enable this capability!";
+        assertEquals(expected, exception.getMessage());
         verify(entitlementService, times(0)).azureMarketplaceImagesEnabled(any());
         verify(azureImageTermsSignerService, never()).isSigned(eq(AZURE_SUBSCRIPTION_ID), any(), any());
     }
@@ -118,7 +136,7 @@ public class AzureImageFormatValidatorTest {
                 () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
 
         assertEquals("Your image cloudera:cdp-7_2:freeipa:1.0.2103081333 seems to be an Azure Marketplace image, however " +
-                        "its Terms and Conditions are not accepted! Please accept them and retry upgrade. " +
+                        "its Terms and Conditions are not accepted! Please accept them and retry the provisioning or upgrade. " +
                         "On how to accept the Terms and Conditions of the image " +
                         "please refer to azure documentation at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.",
                 exception.getMessage());
@@ -132,8 +150,11 @@ public class AzureImageFormatValidatorTest {
                 "default-id", new HashMap<>());
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.validate(authenticatedContext, cloudStack));
-
+        CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
+        String expected = "Your image name cldrwestus2.blob.core.windows.net/images/cb-cdh-726-210326090153.vhd\" is invalid. " +
+                "Please check the desired format in the documentation!";
+        assertEquals(expected, exception.getMessage());
     }
 
     private void setupAuthenticatedContext() {
