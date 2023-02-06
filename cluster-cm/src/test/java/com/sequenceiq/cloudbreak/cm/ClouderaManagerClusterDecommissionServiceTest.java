@@ -70,6 +70,9 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     private ApiClient v31Client;
 
     @Mock
+    private ApiClient v51Client;
+
+    @Mock
     private ApiClient v45Client;
 
     private StackDtoDelegate stack = createStack();
@@ -86,6 +89,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
         ReflectionTestUtils.setField(underTest, "applicationContext", applicationContext);
         ReflectionTestUtils.setField(underTest, "v31Client", v31Client);
         ReflectionTestUtils.setField(underTest, "v45Client", v45Client);
+        ReflectionTestUtils.setField(underTest, "v51Client", v51Client);
     }
 
     @Test
@@ -206,6 +210,13 @@ public class ClouderaManagerClusterDecommissionServiceTest {
         underTest.removeHostsFromCluster(hosts);
 
         verify(clouderaManagerDecomissioner, times(1)).removeHostsFromCluster(eq(stack), eq(hosts), eq(v45Client));
+    }
+
+    @Test
+    public void stopRolesOnHostsTest() throws CloudbreakException {
+        Set<String> hosts = Set.of("host1", "host2");
+        underTest.stopRolesOnHosts(hosts);
+        verify(clouderaManagerDecomissioner, times(1)).stopRolesOnHosts(stack, v51Client, hosts);
     }
 
     private Stack createStack() {

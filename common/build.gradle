@@ -76,7 +76,7 @@ dependencies {
   implementation (group: 'com.fasterxml.jackson.core',      name: 'jackson-databind',               version: jacksonDatabindVersion) {
     force = true
   }
-  api group: 'org.springframework.security',                name: 'spring-security-jwt',              version: '1.0.8.RELEASE'
+  api group: 'org.springframework.security',                name: 'spring-security-jwt',              version: '1.1.1.RELEASE'
   api group: 'org.springframework.security',                name: 'spring-security-core',             version: springSecurityVersion
   api group: 'org.springframework.security',                name: 'spring-security-config',           version: springSecurityVersion
   api group: 'com.cloudera.crypto',                         name: 'openssl-provider',                 version: clouderaCryptoOpenSslProviderVersion

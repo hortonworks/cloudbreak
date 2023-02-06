@@ -21,12 +21,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -49,6 +51,9 @@ public abstract class AbstractRdsConfigProvider {
 
     @Inject
     private RedbeamsDbServerConfigurer dbServerConfigurer;
+
+    @Inject
+    private EmbeddedDatabaseService embeddedDatabaseService;
 
     @Inject
     private SecretService secretService;
@@ -114,7 +119,7 @@ public abstract class AbstractRdsConfigProvider {
             } else {
                 LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
                 String databaseHost = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
-                newRdsConfig = createNewRdsConfig(stack, cluster, databaseHost, getDb(), getDbUser(), getDbPort());
+                newRdsConfig = createNewRdsConfigForEmbeddedDatabase(stack, cluster, databaseHost, getDb(), getDbUser(), getDbPort());
             }
             populateNewRdsConfig(stack, cluster, newRdsConfig);
         }
@@ -141,7 +146,7 @@ public abstract class AbstractRdsConfigProvider {
             } else {
                 LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
                 String databaseHost = stackDto.getPrimaryGatewayInstance().getDiscoveryFQDN();
-                newRdsConfig = createNewRdsConfig(stack, cluster, databaseHost, getDb(), getDbUser(), getDbPort());
+                newRdsConfig = createNewRdsConfigForEmbeddedDatabase(stack, cluster, databaseHost, getDb(), getDbUser(), getDbPort());
             }
             populateNewRdsConfig(stack.getCreator(), stackDto.getWorkspaceId(), cluster.getId(), newRdsConfig);
         }
@@ -163,12 +168,14 @@ public abstract class AbstractRdsConfigProvider {
      * @param dbPort     port for database connections (through gateway)
      * @return RDSConfig object for database
      */
-    private RDSConfig createNewRdsConfig(StackView stack, ClusterView cluster, String databaseHost, String dbName, String dbUserName, String dbPort) {
+    private RDSConfig createNewRdsConfigForEmbeddedDatabase(StackView stack, ClusterView cluster, String databaseHost, String dbName, String dbUserName,
+            String dbPort) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setName(getRdsType().name() + '_' + stack.getName() + stack.getId());
         rdsConfig.setConnectionUserName(dbUserName);
         rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
         rdsConfig.setConnectionURL(String.format("jdbc:postgresql://%s:%s/%s", databaseHost, dbPort, dbName));
+        rdsConfig.setSslMode(RdsSslMode.fromBoolean(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stack, cluster)));
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         rdsConfig.setType(getRdsType().name());
         rdsConfig.setConnectionDriver(DatabaseVendor.POSTGRES.connectionDriver());

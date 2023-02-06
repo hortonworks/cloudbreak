@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.progress.ProgressV4Endpoint;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.flow.service.FlowService;
+import com.sequenceiq.flow.service.FlowProgressService;
 import com.sequenceiq.sdx.api.model.SdxProgressListResponse;
 import com.sequenceiq.sdx.api.model.SdxProgressResponse;
 
@@ -21,11 +21,11 @@ public class ProgressService {
     private ProgressV4Endpoint progressV4Endpoint;
 
     @Inject
-    private FlowService flowService;
+    private FlowProgressService flowProgressService;
 
     public SdxProgressResponse getLastFlowProgressByResourceCrn(String resourceCrn) {
         SdxProgressResponse response = new SdxProgressResponse();
-        response.setLastFlowOperation(flowService.getLastFlowProgressByResourceCrn(resourceCrn));
+        response.setLastFlowOperation(flowProgressService.getLastFlowProgressByResourceCrn(resourceCrn));
         try {
             response.setLastInternalFlowOperation(progressV4Endpoint.getLastFlowLogProgressByResourceCrn(resourceCrn));
         } catch (NotFoundException notFoundException) {
@@ -36,7 +36,7 @@ public class ProgressService {
 
     public SdxProgressListResponse getFlowProgressListByResourceCrn(String resourceCrn) {
         SdxProgressListResponse response = new SdxProgressListResponse();
-        response.setRecentFlowOperations(flowService.getFlowProgressListByResourceCrn(resourceCrn));
+        response.setRecentFlowOperations(flowProgressService.getFlowProgressListByResourceCrn(resourceCrn));
         try {
             response.setRecentInternalFlowOperations(progressV4Endpoint.getFlowLogsProgressByResourceCrn(resourceCrn));
         } catch (NotFoundException notFoundException) {

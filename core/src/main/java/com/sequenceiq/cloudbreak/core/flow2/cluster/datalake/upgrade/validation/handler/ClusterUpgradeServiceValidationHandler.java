@@ -41,7 +41,9 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
         Long stackId = request.getResourceId();
         try {
             Stack stack = getStack(stackId);
-            serviceUpgradeValidators.forEach(validator -> validator.validate(new ServiceUpgradeValidationRequest(stack, request.isLockComponents())));
+            ServiceUpgradeValidationRequest validationRequest =
+                    new ServiceUpgradeValidationRequest(stack, request.isLockComponents(), request.getTargetRuntime());
+            serviceUpgradeValidators.forEach(validator -> validator.validate(validationRequest));
             return new ClusterUpgradeValidationFinishedEvent(stackId);
         } catch (UpgradeValidationFailedException e) {
             LOGGER.warn("Cluster upgrade service validation failed", e);

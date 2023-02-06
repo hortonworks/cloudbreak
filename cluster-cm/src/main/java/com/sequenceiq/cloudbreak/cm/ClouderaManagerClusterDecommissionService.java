@@ -54,6 +54,8 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
 
     private ApiClient v45Client;
 
+    private ApiClient v51Client;
+
     public ClouderaManagerClusterDecommissionService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
@@ -73,6 +75,11 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
             v45Client = clouderaManagerApiClientProvider.getV45Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             LOGGER.warn("Client init failed for V45 client!");
+        }
+        try {
+            v51Client = clouderaManagerApiClientProvider.getV51Client(stack.getGatewayPort(), user, password, clientConfig);
+        } catch (ClouderaManagerClientInitException e) {
+            LOGGER.warn("Client init failed for V51 client!");
         }
     }
 
@@ -141,6 +148,11 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
             LOGGER.error("Couldn't restart stale services", e);
             throw new CloudbreakException("Couldn't restart stale services", e);
         }
+    }
+
+    @Override
+    public void stopRolesOnHosts(Set<String> hosts) throws CloudbreakException {
+        clouderaManagerDecomissioner.stopRolesOnHosts(stack, v51Client, hosts);
     }
 
     @Override

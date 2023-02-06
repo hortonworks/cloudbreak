@@ -97,6 +97,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -202,6 +203,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
+
+    @Inject
+    private VirtualMachineConfiguration virtualMachineConfiguration;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -407,6 +411,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         LOGGER.info("Creating SDX cluster with name {}", name);
         String accountId = getAccountIdFromCrn(userCrn);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
+        validateJavaVersion(sdxClusterRequest.getJavaVersion(), accountId);
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform);
@@ -440,7 +445,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         externalDatabaseConfigurer.configure(cloudPlatform, sdxClusterRequest.getExternalDatabase(), sdxCluster);
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
-                internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request);
+                internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request, sdxClusterRequest.getJavaVersion());
         overrideDefaultTemplateValues(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), accountId);
         validateRecipes(sdxClusterRequest, stackRequest, userCrn);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
@@ -575,7 +580,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         newSdxCluster.setDatabaseAvailabilityType(sdxCluster.getDatabaseAvailabilityType());
         newSdxCluster.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
-        StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null);
+        StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null,
+                stackV4Response.getJavaVersion());
         if (shape == SdxClusterShape.MEDIUM_DUTY_HA) {
             // This is added to make sure the host name used by Light and Medium duty are not the same.
             CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
@@ -670,29 +676,29 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private StackV4Request getStackRequest(SdxClusterShape shape, boolean razEnabled, StackV4Request internalStackV4Request, CloudPlatform cloudPlatform,
-            String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request) {
+            String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request, Integer javaVersion) {
+        StackV4Request stackV4Request = internalStackV4Request;
         if (internalStackV4Request == null) {
-            StackV4Request stackRequest = cdpConfigService.getConfigForKey(
+            stackV4Request = cdpConfigService.getConfigForKey(
                     new CDPConfigKey(cloudPlatform, shape, runtimeVersion));
-            if (stackRequest == null) {
+            if (stackV4Request == null) {
                 LOGGER.error("Can't find template for cloudplatform: {}, shape {}, cdp version: {}", cloudPlatform, shape, runtimeVersion);
                 throw new BadRequestException("Can't find template for cloudplatform: " + cloudPlatform + ", shape: " + shape +
                         ", runtime version: " + runtimeVersion);
             }
-            stackRequest.getCluster().setRangerRazEnabled(razEnabled);
-
             if (imageSettingsV4Request != null) {
-                stackRequest.setImage(imageSettingsV4Request);
+                stackV4Request.setImage(imageSettingsV4Request);
             }
-
-            return stackRequest;
-        } else {
-            // We have provided a --ranger-raz-enabled flag in the CLI, but it will
-            // get overwritten if you use a custom json (using --cli-json). To avoid
-            // this, we will set the raz enablement here as well. See CB-7474 for more details
-            internalStackV4Request.getCluster().setRangerRazEnabled(razEnabled);
-            return internalStackV4Request;
         }
+
+        // We have provided a --ranger-raz-enabled flag in the CLI, but it will
+        // get overwritten if you use a custom json (using --cli-json). To avoid
+        // this, we will set the raz enablement here. See CB-7474 for more details
+        stackV4Request.getCluster().setRangerRazEnabled(razEnabled);
+
+        stackV4Request.setJavaVersion(javaVersion);
+
+        return stackV4Request;
     }
 
     private String getRuntime(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request, ImageV4Response imageV4Response) {
@@ -943,6 +949,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    private void validateJavaVersion(Integer javaVersion, String accountId) {
+        if (javaVersion != null) {
+            if (!virtualMachineConfiguration.getSupportedJavaVersions().contains(javaVersion)) {
+                throw new BadRequestException(String.format("Java version %d is not supported.", javaVersion));
+            }
         }
     }
 

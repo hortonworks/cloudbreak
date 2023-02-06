@@ -145,9 +145,6 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
     }
 
     private void validateRecipeAttachmentAllowed(String accountId, Set<String> existingRecipes, Long stackId) {
-        if (!entitlementService.isFmsRecipesEnabled(accountId)) {
-            throw new BadRequestException("FreeIpa recipe support is not enabled for this account");
-        }
         if (existingRecipes.isEmpty()) {
             boolean recipeAttachmentAvailable = recipeAttachmentChecker.isRecipeAttachmentAvailable(stackId);
             if (!recipeAttachmentAvailable) {

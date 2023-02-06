@@ -47,6 +47,7 @@ public class MockSdxTests extends AbstractMockTest {
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
 
+    @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
@@ -69,6 +70,9 @@ public class MockSdxTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(sdxCustom, SdxCustomTestDto.class)
                 .withCustomInstanceGroup("master", "xlarge")
                 .when(sdxTestClient.createCustom(), key(sdxCustom))
@@ -95,6 +99,9 @@ public class MockSdxTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
@@ -120,6 +127,9 @@ public class MockSdxTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withTemplate(jsonObject)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
@@ -131,7 +141,7 @@ public class MockSdxTests extends AbstractMockTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running CloudSdxInternalTestDtobreak",
+            given = "there is a running Cloudbreak",
             when = "start an sdx cluster with different CM and CDH versions",
             then = "versions should be correct"
     )
@@ -156,6 +166,9 @@ public class MockSdxTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)

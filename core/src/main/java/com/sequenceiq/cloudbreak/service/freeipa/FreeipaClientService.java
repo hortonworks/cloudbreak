@@ -53,11 +53,11 @@ public class FreeipaClientService {
             }
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Failed to GET FreeIPA by environment crn: %s, due to: %s. %s.", environmentCrn, e.getMessage(), errorMessage);
+            String message = String.format("Failed to GET FreeIPA by environment CRN: %s, due to: %s. %s.", environmentCrn, e.getMessage(), errorMessage);
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         } catch (ProcessingException | IllegalStateException e) {
-            String message = String.format("Failed to GET FreeIPA by environment crn: %s, due to: %s.", environmentCrn, e.getMessage());
+            String message = String.format("Failed to GET FreeIPA by environment CRN: %s, due to: %s.", environmentCrn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
@@ -76,11 +76,11 @@ public class FreeipaClientService {
             return Optional.empty();
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Failed to GET FreeIPA by environment crn: %s, due to: %s. %s.", environmentCrn, e.getMessage(), errorMessage);
+            String message = String.format("Failed to GET FreeIPA by environment CRN: %s, due to: %s. %s.", environmentCrn, e.getMessage(), errorMessage);
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         } catch (ProcessingException | IllegalStateException e) {
-            String message = String.format("Failed to GET FreeIPA by environment crn: %s, due to: %s.", environmentCrn, e.getMessage());
+            String message = String.format("Failed to GET FreeIPA by environment CRN: %s, due to: %s.", environmentCrn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
@@ -121,4 +121,27 @@ public class FreeipaClientService {
     public List<String> recipes(String accountId) {
         return utilV1Endpoint.usedRecipes(accountId);
     }
+
+    public String getRootCertificateByEnvironmentCrn(String environmentCrn) {
+        try {
+            if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+                LOGGER.info("The user CRN is internal CRN, so we call freeipa on internal endpoint");
+                String accountId = Crn.fromString(environmentCrn).getAccountId();
+                return freeIpaV1Endpoint.getRootCertificateInternal(environmentCrn, accountId);
+            } else {
+                return freeIpaV1Endpoint.getRootCertificate(environmentCrn);
+            }
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to GET FreeIPA root certificate by environment CRN: %s, due to: %s. %s.", environmentCrn, e.getMessage(),
+                    errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException | IllegalStateException e) {
+            String message = String.format("Failed to GET FreeIPA root certificate by environment CRN: %s, due to: %s.", environmentCrn, e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
 }

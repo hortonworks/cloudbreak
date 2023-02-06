@@ -12,6 +12,8 @@ public abstract class JobResourceAdapter<T> {
 
     public static final String REMOTE_RESOURCE_CRN = "remoteResourceCrn";
 
+    public static final String PROVIDER = "provider";
+
     private JobResource jobResource;
 
     public JobResourceAdapter(Long id, ApplicationContext context) {
@@ -43,8 +45,11 @@ public abstract class JobResourceAdapter<T> {
 
     public JobDataMap toJobDataMap() {
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(LOCAL_ID, getJobResource().getLocalId());
-        jobDataMap.put(REMOTE_RESOURCE_CRN, getJobResource().getRemoteResourceId());
+        jobDataMap.put(LOCAL_ID, jobResource.getLocalId());
+        jobDataMap.put(REMOTE_RESOURCE_CRN, jobResource.getRemoteResourceId());
+        if (jobResource.getProvider() != null && jobResource.getProvider().isPresent()) {
+            jobDataMap.put(PROVIDER, jobResource.getProvider().get());
+        }
         return jobDataMap;
     }
 

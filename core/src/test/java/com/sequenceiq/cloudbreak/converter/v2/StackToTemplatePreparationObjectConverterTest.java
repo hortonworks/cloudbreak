@@ -78,6 +78,7 @@ import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
+import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewProvider;
@@ -89,7 +90,6 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
@@ -159,7 +159,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     private SdxClientService sdxClientService;
 
     @Mock
-    private RedbeamsDbCertificateProvider dbCertificateProvider;
+    private DatabaseSslService databaseSslService;
 
     @Mock
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
@@ -278,7 +278,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @BeforeEach
     public void setUp() throws IOException, TransactionService.TransactionExecutionException {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
@@ -336,7 +336,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(idBrokerService.getByCluster(anyLong())).thenReturn(idbroker);
         when(idBrokerService.save(any(IdBroker.class))).thenReturn(idbroker);
         when(grpcUmsClient.listServicePrincipalCloudIdentities(anyString(), anyString())).thenReturn(Collections.EMPTY_LIST);
-        when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+        when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(stackMock.getId()).thenReturn(1L);
         when(generalClusterConfigsProvider.generalClusterConfigs(any(StackDtoDelegate.class), any(Credential.class)))
                 .thenReturn(new GeneralClusterConfigs());

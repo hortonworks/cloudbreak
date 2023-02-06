@@ -74,7 +74,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;
-import com.sequenceiq.cloudbreak.service.progress.ProgressService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -108,6 +107,7 @@ import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse.Builder;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.flow.domain.RetryableFlow;
+import com.sequenceiq.flow.service.FlowProgressService;
 
 @Controller
 public class DistroXV1Controller implements DistroXV1Endpoint {
@@ -143,7 +143,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private DiagnosticsService diagnosticsService;
 
     @Inject
-    private ProgressService progressService;
+    private FlowProgressService progressService;
 
     @Inject
     private OperationService operationService;

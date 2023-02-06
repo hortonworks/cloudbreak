@@ -272,8 +272,19 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public String getRootCertificate(@ResourceCrn @TenantAwareParam String environmentCrn) {
+    public String getRootCertificate(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
+        try {
+            return freeIpaRootCertificateService.getRootCertificate(environmentCrn, accountId);
+        } catch (FreeIpaClientException e) {
+            throw new FreeIpaClientExceptionWrapper(e);
+        }
+    }
+
+    @Override
+    @InternalOnly
+    public String getRootCertificateInternal(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
+            @AccountId String accountId) {
         try {
             return freeIpaRootCertificateService.getRootCertificate(environmentCrn, accountId);
         } catch (FreeIpaClientException e) {

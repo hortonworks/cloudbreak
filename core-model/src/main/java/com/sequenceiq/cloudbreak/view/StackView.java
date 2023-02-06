@@ -131,6 +131,8 @@ public interface StackView extends MdcContextInfoProvider {
 
     String getCcmV2AgentCrn();
 
+    Integer getJavaVersion();
+
     default boolean isDatalake() {
         return getType() == StackType.DATALAKE;
     }

@@ -1,3 +1,17 @@
+/opt/salt/scripts/set_default_java_version.sh:
+  file.managed:
+    - source:
+        - salt://java/scripts/set_default_java_version.sh
+    - makedirs: True
+    - mode: 755
+
+set_default_java_version:
+  cmd.run:
+    - name: /opt/salt/scripts/set_default_java_version.sh
+    - env:
+        - TARGET_JAVA_VERSION: {{salt['pillar.get']('java:version')}}
+    - require:
+      - file: /opt/salt/scripts/set_default_java_version.sh
 
 #java-1.7.0-openjdk-devel:
 #  pkg.installed: []

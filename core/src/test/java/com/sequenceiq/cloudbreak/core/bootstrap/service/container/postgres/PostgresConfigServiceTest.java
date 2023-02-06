@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,23 +19,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider.RedbeamsDbSslDetails;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)
 class PostgresConfigServiceTest {
@@ -56,19 +58,13 @@ class PostgresConfigServiceTest {
     private RedbeamsDbServerConfigurer dbServerConfigurer;
 
     @Mock
-    private RedbeamsDbCertificateProvider dbCertificateProvider;
-
-    @Mock
-    private ExternalDatabaseConfig externalDatabaseConfig;
-
-    @Mock
     private EmbeddedDatabaseConfigProvider embeddedDatabaseConfigProvider;
 
     @Mock
-    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
+    private DatabaseSslService databaseSslService;
 
     @Mock
-    private ClusterService clusterService;
+    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
 
     @InjectMocks
     private PostgresConfigService underTest;
@@ -83,34 +79,47 @@ class PostgresConfigServiceTest {
     }
 
     @Test
-    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslDisabled() {
+    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslDisabledFromDatabaseSslService() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         when(stack.getStack()).thenReturn(new Stack());
         Cluster cluster = new Cluster();
         cluster.setDbSslEnabled(false);
         cluster.setDbSslRootCertBundle(null);
         when(stack.getCluster()).thenReturn(cluster);
-        when(dbCertificateProvider.getRelatedSslCerts(any())).thenReturn(new RedbeamsDbSslDetails(new HashSet<>(), false));
+        when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(new HashSet<>(), false));
 
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
         verify(upgradeRdsBackupRestoreStateParamsProvider, times(1)).createParamsForRdsBackupRestore(stack, "");
+        verify(databaseSslService, never()).isDbSslEnabledByClusterView(any(StackView.class), any(ClusterView.class));
     }
 
-    @Test
-    void decorateServicePillarWithPostgresIfNeededTest2CertsWhenSslDisabled() {
+    static Object[][] sslDisabledFromClusterDataProvider() {
+        return new Object[][]{
+                // dbSslEnabled, dbSslRootCertBundle
+                {false, ""},
+                {false, " "},
+        };
+    }
+
+    @ParameterizedTest()
+    @MethodSource("sslDisabledFromClusterDataProvider")
+    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslDisabledFromCluster(boolean dbSslEnabled, String dbSslRootCertBundle) {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
-        when(stack.getStack()).thenReturn(new Stack());
+        StackView stackView = new Stack();
+        when(stack.getStack()).thenReturn(stackView);
         Cluster cluster = new Cluster();
-        cluster.setDbSslEnabled(false);
-        cluster.setDbSslRootCertBundle("");
+        cluster.setDbSslEnabled(dbSslEnabled);
+        cluster.setDbSslRootCertBundle(dbSslRootCertBundle);
         when(stack.getCluster()).thenReturn(cluster);
+        when(databaseSslService.isDbSslEnabledByClusterView(stackView, cluster)).thenReturn(dbSslEnabled);
 
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
         verify(upgradeRdsBackupRestoreStateParamsProvider, times(1)).createParamsForRdsBackupRestore(stack, "");
+        verify(databaseSslService, never()).getDbSslDetailsForCreationAndUpdateInCluster(any(StackDto.class));
     }
 
     @Test
@@ -121,11 +130,12 @@ class PostgresConfigServiceTest {
         Cluster cluster = new Cluster();
         cluster.setDbSslEnabled(false);
         when(stack.getCluster()).thenReturn(cluster);
-        when(dbCertificateProvider.getRelatedSslCerts(any())).thenReturn(new RedbeamsDbSslDetails(new HashSet<>(), false));
+        when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(new HashSet<>(), false));
 
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
+        verify(databaseSslService, never()).isDbSslEnabledByClusterView(any(StackView.class), any(ClusterView.class));
     }
 
     @Test
@@ -139,7 +149,8 @@ class PostgresConfigServiceTest {
         cluster.setDbSslEnabled(false);
         stackView.setCluster(cluster);
         when(stack.getCluster()).thenReturn(cluster);
-        when(dbCertificateProvider.getRelatedSslCerts(any())).thenReturn(new RedbeamsDbSslDetails(new HashSet<>(), true));
+        when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(new HashSet<>(), false));
+
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isNotEmpty();
@@ -154,6 +165,8 @@ class PostgresConfigServiceTest {
         Map<String, Object> reusedDatabases = (Map<String, Object>) properties.get("postgres");
         assertThat(reusedDatabases).isNotNull();
         assertThat(reusedDatabases).containsOnly(entry("recovery_reused_databases", List.of("HIVE")), entry(POSTGRES_VERSION, DBVERSION));
+
+        verify(databaseSslService, never()).isDbSslEnabledByClusterView(any(StackView.class), any(ClusterView.class));
     }
 
     @ParameterizedTest(name = "sslEnabledForStack={0}")
@@ -172,9 +185,9 @@ class PostgresConfigServiceTest {
         when(stack.getStack()).thenReturn(stackView);
         when(stack.getCluster()).thenReturn(cluster);
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
-        when(clusterService.updateDbSslCert(any(), any())).thenReturn("cert1\ncert2");
-        when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
-        when(dbCertificateProvider.getRelatedSslCerts(stack)).thenReturn(new RedbeamsDbSslDetails(rootCerts, sslEnabledForStack));
+        when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+        when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, sslEnabledForStack));
+
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         SaltPillarProperties saltPillarProperties = servicePillar.get(POSTGRES_COMMON);
@@ -190,8 +203,10 @@ class PostgresConfigServiceTest {
         assertThat(rootSslCertsMap).containsOnly(
                 entry("ssl_certs", "cert1\ncert2"),
                 entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
-                entry("ssl_restart_required", false),
-                entry("ssl_enabled", sslEnabledForStack));
+                entry("ssl_restart_required", "false"),
+                entry("ssl_enabled", String.valueOf(sslEnabledForStack)));
+
+        verify(databaseSslService, never()).isDbSslEnabledByClusterView(any(StackView.class), any(ClusterView.class));
     }
 
     @ParameterizedTest(name = "sslEnabledForStackAndRestartRequired={0}")
@@ -207,8 +222,10 @@ class PostgresConfigServiceTest {
         cluster.setDatabaseServerCrn("crn");
         when(stack.getStack()).thenReturn(stackView);
         when(stack.getCluster()).thenReturn(cluster);
-        when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+        when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
+        when(databaseSslService.isDbSslEnabledByClusterView(stackView, cluster)).thenReturn(sslEnabledForStack);
+
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         SaltPillarProperties saltPillarProperties = servicePillar.get(POSTGRES_COMMON);
@@ -224,7 +241,9 @@ class PostgresConfigServiceTest {
         assertThat(rootSslCertsMap).containsOnly(
                 entry("ssl_certs", "cert1"),
                 entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
-                entry("ssl_restart_required", true),
-                entry("ssl_enabled", sslEnabledForStack));
+                entry("ssl_restart_required", "true"),
+                entry("ssl_enabled", String.valueOf(sslEnabledForStack)));
+
+        verify(databaseSslService, never()).getDbSslDetailsForCreationAndUpdateInCluster(any(StackDto.class));
     }
 }

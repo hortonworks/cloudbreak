@@ -60,7 +60,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRON
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_RECIPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
@@ -1014,9 +1013,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableFreeipaDelayedStopStart) {
             builder.addEntitlements(createEntitlement(CDP_FMS_DELAYED_STOP_START));
-        }
-        if (enableFreeIpaRecipes) {
-            builder.addEntitlements(createEntitlement(CDP_FMS_RECIPE));
         }
         if (enableUnboundElimination) {
             builder.addEntitlements(createEntitlement(CDP_UNBOUND_ELIMINATION));

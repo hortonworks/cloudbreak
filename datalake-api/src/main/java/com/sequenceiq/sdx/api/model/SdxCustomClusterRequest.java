@@ -1,5 +1,7 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.Set;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -17,6 +19,9 @@ public class SdxCustomClusterRequest extends SdxClusterRequestBase {
     @ApiModelProperty(ModelDescriptions.IMAGE_SETTINGS)
     private ImageSettingsV4Request imageSettingsV4Request;
 
+    @ApiModelProperty(ModelDescriptions.RECIPES)
+    private Set<SdxRecipe> recipes;
+
     public ImageSettingsV4Request getImageSettingsV4Request() {
         return imageSettingsV4Request;
     }
@@ -29,16 +34,26 @@ public class SdxCustomClusterRequest extends SdxClusterRequestBase {
         return null;
     }
 
+    public Set<SdxRecipe> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(Set<SdxRecipe> recipes) {
+        this.recipes = recipes;
+    }
+
     @Override
     public String toString() {
         return "SdxCustomClusterRequest{" + "base=" + super.toString() +
                 ", imageSettingsV4Request=" + imageSettingsV4Request +
+                ", recipes=" + recipes +
                 '}';
     }
 
     public Pair<SdxClusterRequest, ImageSettingsV4Request> convertToPair() {
         SdxClusterRequest newRequest = new SdxClusterRequest();
         copyTo(newRequest);
+        newRequest.setRecipes(recipes);
 
         return new Pair<SdxClusterRequest, ImageSettingsV4Request>() {
             @Override

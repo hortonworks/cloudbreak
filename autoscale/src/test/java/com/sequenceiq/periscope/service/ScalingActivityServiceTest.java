@@ -44,6 +44,8 @@ class ScalingActivityServiceTest {
 
     private static final String TEST_USER_CRN = "crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:91e155cb-ceac-4a76-94e1-de1ex3edb570";
 
+    private static final String CLOUDBREAK_STACK_CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:878605d9-f9e9-44c6-9da6-e4bce9570ef5";
+
     @InjectMocks
     private ScalingActivityService underTest;
 
@@ -77,9 +79,9 @@ class ScalingActivityServiceTest {
         ActivityStatus newStatus = SCALING_FLOW_IN_PROGRESS;
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, TEST_FLOW_ID);
         ScalingActivity scalingActivity = createScalingActivity(getCluster(), UPSCALE_TRIGGER_SUCCESS, TEST_ACTIVITY_REASON, null);
-        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByOperationId(anyString());
+        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByOperationIdAndClusterCrn(anyString(), anyString());
 
-        underTest.updateWithFlowIdAndTriggerStatus(flowIdentifier, TEST_OPERATION_ID, newStatus);
+        underTest.updateWithFlowIdAndTriggerStatus(flowIdentifier, TEST_OPERATION_ID, newStatus, CLOUDBREAK_STACK_CRN);
 
         verify(scalingActivityRepository, times(1)).save(captor.capture());
         ScalingActivity result = captor.getValue();
@@ -92,17 +94,17 @@ class ScalingActivityServiceTest {
     @Test
     void testFindByOperationId() {
         ScalingActivity scalingActivity = createScalingActivity(getCluster(), SCALING_FLOW_SUCCESS, TEST_ACTIVITY_REASON, TEST_FLOW_ID);
-        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByOperationId(anyString());
+        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByOperationIdAndClusterCrn(anyString(), anyString());
 
-        ScalingActivity result = underTest.findByOperationId(TEST_OPERATION_ID);
+        ScalingActivity result = underTest.findByOperationIdAndClusterCrn(TEST_OPERATION_ID, CLOUDBREAK_STACK_CRN);
 
-        verify(scalingActivityRepository).findByOperationId(TEST_OPERATION_ID);
+        verify(scalingActivityRepository).findByOperationIdAndClusterCrn(TEST_OPERATION_ID, CLOUDBREAK_STACK_CRN);
         assertThat(result).isNotNull();
     }
 
     @Test
     void testNotFoundUsingOperationId() {
-        assertThatThrownBy(() -> underTest.findByOperationId(TEST_OPERATION_ID)).isInstanceOf(NotFoundException.class);
+        assertThatThrownBy(() -> underTest.findByOperationIdAndClusterCrn(TEST_OPERATION_ID, CLOUDBREAK_STACK_CRN)).isInstanceOf(NotFoundException.class);
     }
 
     private Cluster getCluster() {

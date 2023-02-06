@@ -850,45 +850,45 @@ public class AwsPlatformResources implements PlatformResources {
             for (AliasListEntry aliasListEntry : listAliasesResult) {
                 String targetKeyId = aliasListEntry.getTargetKeyId();
                 try {
-                            listKeyResult.stream()
-                                    .filter(item -> item.getKeyId().equals(targetKeyId)).findFirst()
-                                    .ifPresent(item -> {
-                                        DescribeKeyRequest describeKeyRequest = new DescribeKeyRequest().withKeyId(item.getKeyId());
-                                        DescribeKeyResult describeKeyResult = client.describeKey(describeKeyRequest);
-                                        KeyMetadata keyMetaData = describeKeyResult.getKeyMetadata();
-                                        Map<String, Object> meta = new HashMap<>();
-                                        meta.put("awsAccountId", keyMetaData.getAWSAccountId());
-                                        meta.put("creationDate", keyMetaData.getCreationDate());
-                                        meta.put("enabled", keyMetaData.getEnabled());
-                                        meta.put("expirationModel", keyMetaData.getExpirationModel());
-                                        meta.put("keyManager", keyMetaData.getKeyManager());
-                                        meta.put("keyState", keyMetaData.getKeyState());
-                                        meta.put("keyUsage", keyMetaData.getKeyUsage());
-                                        meta.put("origin", keyMetaData.getOrigin());
-                                        meta.put("validTo", keyMetaData.getValidTo());
+                    listKeyResult.stream()
+                            .filter(item -> item.getKeyId().equals(targetKeyId)).findFirst()
+                            .ifPresent(item -> {
+                                DescribeKeyRequest describeKeyRequest = new DescribeKeyRequest().withKeyId(item.getKeyId());
+                                DescribeKeyResult describeKeyResult = client.describeKey(describeKeyRequest);
+                                KeyMetadata keyMetaData = describeKeyResult.getKeyMetadata();
+                                Map<String, Object> meta = new HashMap<>();
+                                meta.put("awsAccountId", keyMetaData.getAWSAccountId());
+                                meta.put("creationDate", keyMetaData.getCreationDate());
+                                meta.put("enabled", keyMetaData.getEnabled());
+                                meta.put("expirationModel", keyMetaData.getExpirationModel());
+                                meta.put("keyManager", keyMetaData.getKeyManager());
+                                meta.put("keyState", keyMetaData.getKeyState());
+                                meta.put("keyUsage", keyMetaData.getKeyUsage());
+                                meta.put("origin", keyMetaData.getOrigin());
+                                meta.put("validTo", keyMetaData.getValidTo());
 
-                                        if (!CloudConstants.AWS.equalsIgnoreCase(keyMetaData.getKeyManager())) {
-                                            CloudEncryptionKey key = new CloudEncryptionKey(
-                                                    item.getKeyArn(),
-                                                    keyMetaData.getKeyId(),
-                                                    keyMetaData.getDescription(),
-                                                    aliasListEntry.getAliasName().replace("alias/", ""),
-                                                    meta);
-                                            cloudEncryptionKeys.getCloudEncryptionKeys().add(key);
-                                        }
-                                    });
-                        } catch (AmazonServiceException e) {
-                            if (e.getStatusCode() == UNAUTHORIZED) {
-                                String policyMessage = "Could not fetch the encryption keys since the user does not have enough " +
-                                        "permission to perform the DescribeKey operation.";
-                                LOGGER.error(policyMessage, e);
-                            } else {
-                                LOGGER.info(queryFailedMessage, e);
-                            }
-                        } catch (Exception e) {
-                            LOGGER.warn(queryFailedMessage, e);
-                        }
+                                if (!CloudConstants.AWS.equalsIgnoreCase(keyMetaData.getKeyManager())) {
+                                    CloudEncryptionKey key = new CloudEncryptionKey(
+                                            item.getKeyArn(),
+                                            keyMetaData.getKeyId(),
+                                            keyMetaData.getDescription(),
+                                            aliasListEntry.getAliasName().replace("alias/", ""),
+                                            meta);
+                                    cloudEncryptionKeys.getCloudEncryptionKeys().add(key);
+                                }
+                            });
+                } catch (AmazonServiceException e) {
+                    if (e.getStatusCode() == UNAUTHORIZED) {
+                        String policyMessage = "Could not fetch the encryption keys since the user does not have enough " +
+                                "permission to perform the DescribeKey operation.";
+                        LOGGER.error(policyMessage, e);
+                    } else {
+                        LOGGER.info(queryFailedMessage, e);
                     }
+                } catch (Exception e) {
+                    LOGGER.warn(queryFailedMessage, e);
+                }
+            }
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
                 String policyMessage = "Could not fetch the encryption keys since the user does not have enough permission to perform the ListKeys operation.";

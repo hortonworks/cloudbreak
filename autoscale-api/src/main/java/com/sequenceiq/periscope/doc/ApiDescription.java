@@ -6,6 +6,7 @@ public class ApiDescription {
     public static final String CONFIGURATION_DESCRIPTION = "Operations on configurations";
     public static final String HISTORY_DESCRIPTION = "Operations on histories";
     public static final String CLUSTERS_DESCRIPTION = "Operations on clusters";
+    public static final String SCALING_ACTIVITY_DESCRIPTION = "opertions on scaling activities";
     public static final String POLICIES_DESCRIPTION = "Operations on policies";
 
     private ApiDescription() {
@@ -86,6 +87,11 @@ public class ApiDescription {
 
     public static class ClusterOpDescription {
         public static final String CLUSTER_POST = "create cluster";
+        public static final String SCALING_ACTIVITIES_GET_ALL = "Get all scaling activities";
+        public static final String FAILED_SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES = "Get all failed scaling activities in given duration in minutes";
+        public static final String SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL = "Get all scaling activities between start and end time in epoch milliseconds";
+        public static final String SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES = "Get all scaling activities in given time duration in minutes";
+        public static final String SCALING_OPERATION_ID = "Get a particular scaling activity using it's operation ID";
         public static final String CLUSTER_PUT = "modify cluster";
         public static final String CLUSTER_GET = "retrieve cluster";
         public static final String CLUSTER_GET_ALL = "retrieve all cluster";
@@ -121,6 +127,12 @@ public class ApiDescription {
         public static final String STACK_TYPE = "Type of stack in Cloudbreak";
         public static final String STATE = "State of the cluster";
         public static final String TIME_ALERTS = "Time based alerts of the cluster";
+        public static final String OPERATION_ID = "operation ID of the particular scaling activity";
+        public static final String FLOW_ID = "flow id of the scaling activity";
+        public static final String START_TIME = "start time of the scaling activity";
+        public static final String END_TIME = "end time of the activity";
+        public static final String ACTIVITY_STATUS = "Status of the scaling activity";
+        public static final String ACTIVITY_REASON = "Reason for the scaling activity";
         public static final String LOAD_ALERTS = "Load based alerts of the cluster";
         public static final String SCALING_CONFIGURATION = "Scaling configuration for the cluster";
     }

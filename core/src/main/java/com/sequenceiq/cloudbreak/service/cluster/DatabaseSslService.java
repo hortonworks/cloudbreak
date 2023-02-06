@@ -1,0 +1,174 @@
+package com.sequenceiq.cloudbreak.service.cluster;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
+
+@Service
+public class DatabaseSslService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSslService.class);
+
+    private static final String ENABLED = "enabled";
+
+    private static final String DISABLED = "disabled";
+
+    @Value("${cb.externaldatabase.ssl.rootcerts.path:}")
+    private String certsPath;
+
+    @Inject
+    private RedbeamsDbServerConfigurer dbServerConfigurer;
+
+    @Inject
+    private RedbeamsDbCertificateProvider dbCertificateProvider;
+
+    @Inject
+    private EmbeddedDatabaseService embeddedDatabaseService;
+
+    @Inject
+    private FreeipaClientService freeipaClientService;
+
+    @Inject
+    private DatalakeService datalakeService;
+
+    @Inject
+    private ClusterService clusterService;
+
+    public String getSslCertsFilePath() {
+        return certsPath;
+    }
+
+    public boolean isDbSslEnabledByClusterView(StackView stackView, ClusterView clusterView) {
+        return Optional.ofNullable(clusterView.getDbSslEnabled())
+                .or(() -> {
+                    LOGGER.warn("Cluster.dbSslEnabled is null for stack '{}' with CRN '{}'. Assuming false.", stackView.getName(), stackView.getResourceCrn());
+                    return Optional.of(Boolean.FALSE);
+                })
+                .get();
+    }
+
+    public DatabaseSslDetails getDbSslDetailsForCreationAndUpdateInCluster(StackDto stackDto) {
+        return getDbSslDetailsAndUpdateInClusterInternal(stackDto, true);
+    }
+
+    public DatabaseSslDetails getDbSslDetailsForRotationAndUpdateInCluster(StackDto stackDto) {
+        return getDbSslDetailsAndUpdateInClusterInternal(stackDto, false);
+    }
+
+    private DatabaseSslDetails getDbSslDetailsAndUpdateInClusterInternal(StackDto stackDto, boolean creation) {
+        LOGGER.info("Invocation mode: {}", creation ? "Creation" : "Rotation");
+        DatabaseSslDetails sslDetails = dbCertificateProvider.getRelatedSslCerts(stackDto);
+        LOGGER.info("SslDetails from RedbeamsDbCertificateProvider: {}", sslDetails);
+        decorateSslDetailsWithEmbeddedDatabase(stackDto, sslDetails, creation);
+        LOGGER.info("SslDetails after decorating with embedded DB: {}", sslDetails);
+        clusterService.updateDbSslCert(stackDto.getCluster().getId(), sslDetails);
+        return sslDetails;
+    }
+
+    private void decorateSslDetailsWithEmbeddedDatabase(StackDto stackDto, DatabaseSslDetails sslDetails, boolean creation) {
+        StackView stackView = stackDto.getStack();
+        ClusterView cluster = stackDto.getCluster();
+        boolean sslEnforcementForStackEmbeddedDatabaseEnabled;
+        if (isEmbeddedDatabase(cluster)) {
+            // Update sslEnabledForStack; its value in the RedbeamsDbCertificateProvider response is always expected to be false when the stack uses an
+            // embedded DB.
+            if (sslDetails.isSslEnabledForStack()) {
+                throw new IllegalStateException("Mismatching sslDetails.sslEnabledForStack in RedbeamsDbCertificateProvider response. " +
+                        "Expecting false because the stack uses an embedded DB, but it was true.");
+            }
+            sslEnforcementForStackEmbeddedDatabaseEnabled = isSslEnforcementForEmbeddedDatabaseEnabled(stackView, cluster, creation);
+            sslDetails.setSslEnabledForStack(sslEnforcementForStackEmbeddedDatabaseEnabled);
+            LOGGER.info("SSL enforcement is {} for the stack embedded DB", sslEnforcementForStackEmbeddedDatabaseEnabled ? ENABLED : DISABLED);
+        } else {
+            sslEnforcementForStackEmbeddedDatabaseEnabled = false;
+            LOGGER.info("SSL enforcement is {} for the stack external DB", sslDetails.isSslEnabledForStack() ? ENABLED : DISABLED);
+        }
+
+        if (sslEnforcementForStackEmbeddedDatabaseEnabled || isSslEnforcementForDatalakeEmbeddedDatabaseEnabled(stackView, creation)) {
+            LOGGER.info("Including the SSL root cert of the embedded DB");
+            Set<String> sslCertsNew = new HashSet<>(sslDetails.getSslCerts());
+            sslCertsNew.add(getEmbeddedDatabaseRootCertificate(stackView));
+            sslDetails.setSslCerts(sslCertsNew);
+        } else {
+            LOGGER.info("No need to include the SSL root cert of the embedded DB");
+        }
+    }
+
+    private boolean isSslEnforcementForDatalakeEmbeddedDatabaseEnabled(StackView stackView, boolean creation) {
+        boolean response = false;
+        if (StackType.WORKLOAD.equals(stackView.getType())) {
+            Optional<Stack> datalakeStackOpt = datalakeService.getDatalakeStackByDatahubStack(stackView);
+            LOGGER.debug("Gathering datalake and its DB if exists for the datahub cluster");
+            if (datalakeStackOpt.isPresent()) {
+                Stack datalakeStack = datalakeStackOpt.get();
+                Cluster datalakeCluster = datalakeStack.getCluster();
+                if (isEmbeddedDatabase(datalakeCluster)) {
+                    response = isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster, creation);
+                    LOGGER.info("SSL enforcement is {} for the parent datalake stack embedded DB", response ? ENABLED : DISABLED);
+                } else {
+                    LOGGER.info("The parent datalake stack uses an external DB");
+                }
+            } else {
+                LOGGER.warn("No datalake resource could be found for the datahub cluster");
+            }
+        } else {
+            LOGGER.debug("Stack is not a datahub cluster");
+        }
+        return response;
+    }
+
+    private boolean isEmbeddedDatabase(ClusterView clusterView) {
+        return !dbServerConfigurer.isRemoteDatabaseRequested(clusterView.getDatabaseServerCrn());
+    }
+
+    private boolean isSslEnforcementForEmbeddedDatabaseEnabled(StackView stackView, ClusterView clusterView, boolean creation) {
+        boolean response;
+        String stackName = stackView.getName();
+        String stackCrn = stackView.getResourceCrn();
+        if (creation) {
+            response = embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView);
+            LOGGER.info("Retrieving dbSslEnabled from EmbeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled() for stack '{}' with CRN '{}': {}",
+                    stackName, stackCrn, response);
+        } else {
+            // The stack dbSslEnabled flag is not expected to change after cluster provisioning, so its recent value from Cluster shall be honored in Rotation
+            // mode. The only potential exception would be the migration of a non-SSL DB to an SSL one, but this is not currently supported or considered.
+            //
+            // Furthermore, Cluster.dbSslEnabled is only reliable when the stack uses an embedded DB. When using an external DB, the sslEnabledForStack in the
+            // RedbeamsDbCertificateProvider response is the one that matters. This is because legacy clusters with external DB & SSL enforcement
+            // enabled may not have this flag initialized at all (i.e. left as null). On the other hand, if null and using an embedded DB, we can be sure it
+            // was supposed to be false.
+            response = isDbSslEnabledByClusterView(stackView, clusterView);
+            LOGGER.info("Retrieving dbSslEnabled from Cluster for stack '{}' with CRN '{}': {}", stackName, stackCrn, response);
+        }
+        return response;
+    }
+
+    private String getEmbeddedDatabaseRootCertificate(StackView stackView) {
+        String rootCertificate = freeipaClientService.getRootCertificateByEnvironmentCrn(stackView.getEnvironmentCrn());
+        if (StringUtils.isBlank(rootCertificate)) {
+            throw new IllegalStateException("Got a blank FreeIPA root certificate.");
+        }
+        return rootCertificate;
+    }
+
+}

@@ -8,7 +8,7 @@ ext {
   caffeineVersion = '2.8.1'
   springBootVersion = '2.5.12'
   springDataJpaFrameworkVersion = '2.4.2'
-  springFrameworkVersion = '5.3.23'
+  springFrameworkVersion = '5.3.25'
   springSecurityVersion = '5.6.9'
 
   // Polling
@@ -76,7 +76,7 @@ ext {
   bouncycastleVersion = '1.70'
 
   // Cloudera
-  cmClientVersion = '7.6.0'
+  cmClientVersion = '7.9.0'
   clouderaCryptoOpenSslProviderVersion = '1.0.0-b8'
 
   // Testing

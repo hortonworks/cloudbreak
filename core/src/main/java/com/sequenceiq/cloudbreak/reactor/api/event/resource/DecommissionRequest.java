@@ -30,4 +30,12 @@ public class DecommissionRequest extends AbstractClusterScaleRequest {
     public ClusterDownscaleDetails getDetails() {
         return details;
     }
+
+    @Override
+    public String toString() {
+        return "DecommissionRequest{" +
+                "privateIds=" + privateIds +
+                ", details=" + details +
+                "} " + super.toString();
+    }
 }

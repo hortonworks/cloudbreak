@@ -167,7 +167,15 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.TEXT_PLAIN)
     @ApiOperation(value = FreeIpaOperationDescriptions.GET_ROOTCERTIFICATE_BY_ENVID, produces = MediaType.TEXT_PLAIN, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "getFreeIpaRootCertificateByEnvironmentV1")
-    String getRootCertificate(@QueryParam("environment") @NotEmpty String environmentCrn);
+    String getRootCertificate(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn);
+
+    @GET
+    @Path("internal/ca.crt")
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(value = FreeIpaOperationDescriptions.INTERNAL_GET_ROOTCERTIFICATE_BY_ENVID_AND_ACCOUNTID, produces = MediaType.TEXT_PLAIN,
+            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "internalGetFreeIpaRootCertificateByEnvironmentV1")
+    String getRootCertificateInternal(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
+            @QueryParam("accountId") @AccountId String accountId);
 
     @DELETE
     @Path("")

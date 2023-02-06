@@ -5,6 +5,8 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -18,8 +20,12 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 public class MockSdxRetryTests extends AbstractMockTest {
 
     @Inject
+    private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
     private SdxTestClient sdxTestClient;
 
+    @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
@@ -40,6 +46,8 @@ public class MockSdxRetryTests extends AbstractMockTest {
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(Status.AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .mockSpi().launch().post()

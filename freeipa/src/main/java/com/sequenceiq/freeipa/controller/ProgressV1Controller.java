@@ -11,14 +11,14 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.flow.service.FlowProgressService;
 import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
-import com.sequenceiq.freeipa.service.ProgressService;
 
 @Controller
 public class ProgressV1Controller implements ProgressV1Endpoint {
 
     @Inject
-    private ProgressService progressService;
+    private FlowProgressService progressService;
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)

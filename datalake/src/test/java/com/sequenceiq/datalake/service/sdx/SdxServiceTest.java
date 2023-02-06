@@ -98,6 +98,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.FileSystemType;
@@ -227,6 +228,9 @@ class SdxServiceTest {
 
     @Mock
     private CloudbreakFlowService cloudbreakFlowService;
+
+    @Mock
+    private VirtualMachineConfiguration virtualMachineConfiguration;
 
     @InjectMocks
     private SdxService underTest;
@@ -611,6 +615,30 @@ class SdxServiceTest {
         assertThat(createdSdxCluster.getStackRequest()).containsSubsequence(
                 "{\"aws\":{\"spot\":{\"percentage\":100,\"maxPrice\":0.9}}",
                 "{\"aws\":{\"spot\":{\"percentage\":100,\"maxPrice\":0.9}}");
+    }
+
+    @Test
+    void testCreateSdxClusterWithJavaVersionStackRequestContainsRequiredAttributes() throws IOException, TransactionExecutionException {
+        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(List.of(11));
+
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
+        sdxClusterRequest.setJavaVersion(11);
+        withCloudStorage(sdxClusterRequest);
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        SdxCluster createdSdxCluster = result.getLeft();
+
+        assertThat(createdSdxCluster.getStackRequest()).containsSubsequence("\"javaVersion\":11");
     }
 
     @Test
@@ -1687,5 +1715,20 @@ class SdxServiceTest {
 
         verifyNoInteractions(sdxReactorFlowManager);
         assertEquals(String.format("SaltStack update cannot be initiated as datalake 'sdx-cluster-name' is currently in '%s' state.", status), ex.getMessage());
+    }
+
+    @Test
+    void testCreateSdxClusterFialsInCaseOfForcedJavaVersionIsNotSupportedByTheVirtualMachineConfiguration() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, MEDIUM_DUTY_HA);
+        sdxClusterRequest.setJavaVersion(11);
+
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(
+                anyString(), anyString())).thenReturn(Collections.emptyList());
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Collections.emptyList());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                        underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
+        assertEquals("Java version 11 is not supported.", badRequestException.getMessage());
     }
 }
