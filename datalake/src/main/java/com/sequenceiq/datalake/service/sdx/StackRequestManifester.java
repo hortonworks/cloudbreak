@@ -170,7 +170,8 @@ public class StackRequestManifester {
             setupMultiAz(sdxCluster, environment, stackRequest);
             setupGovCloud(sdxCluster, environment, stackRequest);
             stackRequest.setExternalDatabase(databaseRequestConverter.createExternalDbRequest(sdxCluster));
-            if (entitlementService.enforceAwsNativeForSingleAzDatalakeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
+                    entitlementService.enforceAwsNativeForSingleAzDatalakeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
                 stackRequest.setVariant("AWS_NATIVE");
             }
             return stackRequest;
