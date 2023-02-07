@@ -318,16 +318,15 @@ public class SdxBackupRestoreService {
         } else if (isStackOrClusterStatusFailed(stackV4Response.getStatus())) {
             LOGGER.info("{} failed for Stack {} with status {}", pollingMessage, stackV4Response.getName(), stackV4Response.getStatus());
             return sdxDrFailed(sdxCluster, stackV4Response.getStatusReason(), pollingMessage);
-        } else if (isStackOrClusterStatusFailed(stackV4Response.getCluster().getStatus())) {
-            LOGGER.info("{} failed for Cluster {} status {}", pollingMessage, stackV4Response.getCluster().getName(),
-                    stackV4Response.getCluster().getStatus());
-            return sdxDrFailed(sdxCluster, stackV4Response.getCluster().getStatusReason(), pollingMessage);
+        } else if (isStackOrClusterStatusFailed(cluster.getStatus())) {
+            LOGGER.info("{} failed for Cluster {} status {}", pollingMessage, cluster.getName(), cluster.getStatus());
+            return sdxDrFailed(sdxCluster, cluster.getStatusReason(), pollingMessage);
         } else if (FINISHED.equals(flowState)) {
             LOGGER.info("Flow finished, but Backup/Restore is not complete: {}", sdxCluster.getClusterName());
             return sdxDrFailed(sdxCluster, "stack is in improper state", pollingMessage);
         } else {
-            LOGGER.info("Flow is unknown state");
-            return sdxDrFailed(sdxCluster, "Flow is unknown state", pollingMessage);
+            LOGGER.info("{} for Stack {} failed with unhandled status: {}", pollingMessage, stackV4Response.getName(), stackV4Response.getStatus());
+            return sdxDrFailed(sdxCluster, stackV4Response.getStatusReason(), pollingMessage);
         }
     }
 
@@ -339,7 +338,8 @@ public class SdxBackupRestoreService {
      */
     private boolean isStackOrClusterStatusFailed(Status status) {
         return Status.BACKUP_FAILED.equals(status) ||
-                Status.RESTORE_FAILED.equals(status);
+                Status.RESTORE_FAILED.equals(status) ||
+                Status.UPDATE_FAILED.equals(status);
     }
 
     private AttemptResult<StackV4Response> sdxDrFailed(SdxCluster sdxCluster, String statusReason, String pollingMessage) {
