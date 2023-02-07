@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.core.stats;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.groupingBy;
 
 import java.text.DecimalFormat;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
@@ -27,6 +29,7 @@ import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowOperationStats;
 import com.sequenceiq.flow.repository.FlowOperationStatsRepository;
+import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 @Component
 public class FlowOperationStatisticsService {
@@ -49,11 +52,20 @@ public class FlowOperationStatisticsService {
 
     private final FlowProgressResponseConverter flowProgressResponseConverter;
 
+    private final FlowLogDBService flowLogDBService;
+
     public FlowOperationStatisticsService(FlowOperationStatsRepository flowOperationStatsRepository, PayloadContextProvider payloadContextProvider,
-            FlowProgressResponseConverter flowProgressResponseConverter) {
+            FlowProgressResponseConverter flowProgressResponseConverter, FlowLogDBService flowLogDBService) {
         this.flowOperationStatsRepository = flowOperationStatsRepository;
         this.payloadContextProvider = payloadContextProvider;
         this.flowProgressResponseConverter = flowProgressResponseConverter;
+        this.flowLogDBService = flowLogDBService;
+    }
+
+    public Optional<OperationFlowsView> getLastFlowOperationByResourceCrn(String resourceCrn) {
+        checkState(Crn.isCrn(resourceCrn));
+        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnInFlowChain(resourceCrn);
+        return createOperationResponse(resourceCrn, flowLogs);
     }
 
     public Optional<OperationFlowsView> createOperationResponse(String resourceCrn, List<FlowLog> flowLogs) {

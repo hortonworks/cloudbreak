@@ -11,7 +11,7 @@ import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
 import com.sequenceiq.flow.api.model.operation.OperationResource;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.flow.converter.OperationDetailsPopulator;
-import com.sequenceiq.flow.service.FlowService;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 
@@ -19,14 +19,14 @@ import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 public class FlowOperationService {
 
     @Inject
-    private FlowService flowService;
+    private FlowOperationStatisticsService flowOperationStatisticsService;
 
     @Inject
     private OperationDetailsPopulator operationDetailsPopulator;
 
     public OperationView getOperationProgressByEnvironmentCrn(String environmentCrn, boolean detailed) {
         OperationView operationView = new OperationView();
-        Optional<OperationFlowsView> operationFlowsViewOpt = flowService.getLastFlowOperationByResourceCrn(environmentCrn);
+        Optional<OperationFlowsView> operationFlowsViewOpt = flowOperationStatisticsService.getLastFlowOperationByResourceCrn(environmentCrn);
         if (operationFlowsViewOpt.isPresent()) {
             OperationFlowsView operationFlowsView = operationFlowsViewOpt.get();
             OperationResource operationResource = OperationResource.FREEIPA;

@@ -21,7 +21,7 @@ import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.flow.converter.OperationDetailsPopulator;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
-import com.sequenceiq.flow.service.FlowService;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.freeipa.flow.chain.ProvisionFlowEventChainFactory;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -38,7 +38,7 @@ public class FlowOperationServiceTest {
     private FlowOperationService underTest;
 
     @Mock
-    private FlowService flowService;
+    private FlowOperationStatisticsService flowOperationStatisticsService;
 
     @Mock
     private OperationDetailsPopulator operationDetailsPopulator;
@@ -51,7 +51,7 @@ public class FlowOperationServiceTest {
         // GIVEN
         ProvisionFlowEventChainFactory provisionFlowEventChainFactory = new ProvisionFlowEventChainFactory();
         FlowTriggerEventQueue eventQueue = provisionFlowEventChainFactory.createFlowTriggerEventQueue(new StackEvent(null, null));
-        given(flowService.getLastFlowOperationByResourceCrn(anyString()))
+        given(flowOperationStatisticsService.getLastFlowOperationByResourceCrn(anyString()))
                 .willReturn(Optional.of(operationFlowsView));
         given(operationFlowsView.getOperationType()).willReturn(OperationType.PROVISION);
         given(operationDetailsPopulator

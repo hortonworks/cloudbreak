@@ -40,10 +40,8 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
-import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
 import com.sequenceiq.flow.converter.FlowLogConverter;
 import com.sequenceiq.flow.core.FlowConstants;
-import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
@@ -69,9 +67,6 @@ public class FlowService {
 
     @Inject
     private FlowLogConverter flowLogConverter;
-
-    @Inject
-    private FlowOperationStatisticsService flowOperationStatisticsService;
 
     public FlowLogResponse getLastFlowById(String flowId) {
         LOGGER.info("Getting last flow log by flow id {}", flowId);
@@ -241,12 +236,6 @@ public class FlowService {
 
     private boolean isPending(FlowLogWithoutPayload flowLog) {
         return !Boolean.TRUE.equals(flowLog.getFinalized()) || StateStatus.PENDING.equals(flowLog.getStateStatus());
-    }
-
-    public Optional<OperationFlowsView> getLastFlowOperationByResourceCrn(String resourceCrn) {
-        checkState(Crn.isCrn(resourceCrn));
-        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnInFlowChain(resourceCrn);
-        return flowOperationStatisticsService.createOperationResponse(resourceCrn, flowLogs);
     }
 
     public Page<FlowLogResponse> getFlowLogsByIds(List<String> flowIds, Pageable pageable) {
