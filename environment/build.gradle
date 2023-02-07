@@ -79,6 +79,7 @@ dependencies {
     implementation     project(':cluster-dns-connector')
     implementation     project(":sdx-connector")
     implementation     project(':usage-collection')
+    implementation     project(':wiam-connector')
 
     implementation     group: "org.yaml",                  name: "snakeyaml",                                version: snakeYamlVersion
     implementation     group: "com.google.code.gson",      name: "gson",                                     version: gsonVersion

@@ -5,7 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.wiam.client.GrpcWiamClient;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
@@ -28,13 +31,20 @@ public class SynchronizeUsersHandler extends EventSenderAwareHandler<Environment
 
     private final FreeIpaService freeIpaService;
 
+    private final GrpcWiamClient wiamClient;
+
+    private final EntitlementService entitlementService;
+
     @Value("${environment.freeipa.synchronizeOnStart:}")
     private boolean synchronizeOnStartEnabled;
 
-    protected SynchronizeUsersHandler(EventSender eventSender, FreeIpaPollerService freeIpaPollerService, FreeIpaService freeIpaService) {
+    protected SynchronizeUsersHandler(EventSender eventSender, FreeIpaPollerService freeIpaPollerService, FreeIpaService freeIpaService,
+            GrpcWiamClient wiamClient, EntitlementService entitlementService) {
         super(eventSender);
         this.freeIpaPollerService = freeIpaPollerService;
         this.freeIpaService = freeIpaService;
+        this.wiamClient = wiamClient;
+        this.entitlementService = entitlementService;
     }
 
     @Override
@@ -54,8 +64,16 @@ public class SynchronizeUsersHandler extends EventSenderAwareHandler<Environment
                                 freeIpa.getStatus().name());
                     }
                 });
-
-                freeIpaPollerService.waitForSynchronizeUsers(environmentDto.getId(), environmentDto.getResourceCrn());
+                if (entitlementService.isWiamUsersyncRoutingEnabled(environmentDto.getAccountId())) {
+                    LOGGER.debug("Initiating usersync via WIAM");
+                    try {
+                        wiamClient.syncUsersInEnvironment(environmentDto.getAccountId(), environmentDto.getResourceCrn(), MDCBuilder.getOrGenerateRequestId());
+                    } catch (Exception e) {
+                        LOGGER.error("Initiating usersync via WIAM failed", e);
+                    }
+                } else {
+                    freeIpaPollerService.waitForSynchronizeUsers(environmentDto.getId(), environmentDto.getResourceCrn());
+                }
             }
             EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                     .withSelector(EnvStartStateSelectors.FINISH_ENV_START_EVENT.selector())

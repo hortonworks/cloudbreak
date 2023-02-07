@@ -7,6 +7,7 @@ import com.cloudera.thunderhead.service.workloadiam.WorkloadIamGrpc;
 import com.cloudera.thunderhead.service.workloadiam.WorkloadIamGrpc.WorkloadIamBlockingStub;
 import com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersResponse;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
 
@@ -16,9 +17,12 @@ public class WiamClient {
 
     private final String actorCrn;
 
-    public WiamClient(ManagedChannel channel, String actorCrn) {
+    private final long grpcTimeoutSec;
+
+    public WiamClient(ManagedChannel channel, String actorCrn, long grpcTimeoutSec) {
         this.channel = channel;
         this.actorCrn = actorCrn;
+        this.grpcTimeoutSec = grpcTimeoutSec;
     }
 
     public SyncUsersResponse syncUsersInEnvironment(String accountId, String environmentCrn, String requestId) {
@@ -33,6 +37,8 @@ public class WiamClient {
     private WorkloadIamBlockingStub newStub(String requestId) {
         checkNotNull(requestId, "requestId should not be null.");
         return WorkloadIamGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(grpcTimeoutSec),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 }

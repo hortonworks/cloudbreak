@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersResponse;
@@ -18,6 +19,9 @@ import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 public class GrpcWiamClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcWiamClient.class);
+
+    @Value("${wiam.grpc.timeout.sec:60}")
+    private long grpcTimeoutSec;
 
     @Qualifier("wiamManagedChannelWrapper")
     @Inject
@@ -35,6 +39,6 @@ public class GrpcWiamClient {
     }
 
     private WiamClient createClient() {
-        return new WiamClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString());
+        return new WiamClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), grpcTimeoutSec);
     }
 }
