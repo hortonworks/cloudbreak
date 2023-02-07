@@ -73,7 +73,8 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             }
             suspendCluster(cluster);
             updateFailures.remove(autoscaleClusterId);
-            historyService.createEntry(ScalingStatus.TRIGGER_FAILED, messagesService.getMessage(MessageCode.AUTOSCALING_TRIGGER_FAILURE), cluster);
+            historyService.createEntry(ScalingStatus.TRIGGER_FAILED, messagesService.getMessageWithArgs(MessageCode.AUTOSCALING_TRIGGER_FAILURE,
+                            event.getPollingUserCrn()), cluster);
             LOGGER.debug("Suspended cluster monitoring for cluster '{}' due to failing update attempts", cluster.getStackCrn());
         }
     }

@@ -10,15 +10,18 @@ public class UpdateFailedEvent extends ApplicationEvent {
 
     private boolean withMachineUser;
 
+    private String pollingUserCrn;
+
     public UpdateFailedEvent(long clusterId) {
         super(clusterId);
     }
 
-    public UpdateFailedEvent(Object source, Exception causedBy, long lastExceptionTimestamp, boolean withMachineUser) {
+    public UpdateFailedEvent(Object source, Exception causedBy, long lastExceptionTimestamp, boolean withMachineUser, String userCrn) {
         super(source);
         this.causedBy = causedBy;
         this.lastExceptionTimestamp = lastExceptionTimestamp;
         this.withMachineUser = withMachineUser;
+        this.pollingUserCrn = userCrn;
     }
 
     public long getClusterId() {
@@ -35,5 +38,9 @@ public class UpdateFailedEvent extends ApplicationEvent {
 
     public boolean isWithMachineUser() {
         return withMachineUser;
+    }
+
+    public String getPollingUserCrn() {
+        return pollingUserCrn;
     }
 }
