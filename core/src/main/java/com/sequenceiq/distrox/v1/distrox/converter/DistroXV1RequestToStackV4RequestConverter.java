@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -124,9 +124,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
     }
 
     private void calculateVariant(DetailedEnvironmentResponse environment, DistroXV1Request source, StackV4Request request) {
-        if (StringUtils.equals(environment.getCloudPlatform(), "AWS") &&
+        if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
                 entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            request.setVariant("AWS_NATIVE");
+            request.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         } else {
             request.setVariant(source.getVariant());
         }
