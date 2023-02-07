@@ -35,7 +35,7 @@ import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.flow.converter.OperationDetailsPopulator;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
-import com.sequenceiq.flow.service.FlowService;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 
 @ExtendWith(MockitoExtension.class)
 public class OperationServiceTest {
@@ -55,7 +55,7 @@ public class OperationServiceTest {
     private OperationService underTest;
 
     @Mock
-    private FlowService flowService;
+    private FlowOperationStatisticsService flowOperationStatisticsService;
 
     @Mock
     private DatabaseService databaseService;
@@ -80,7 +80,7 @@ public class OperationServiceTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new OperationService(flowService, databaseService, stackOperations, operationDetailsPopulator);
+        underTest = new OperationService(flowOperationStatisticsService, databaseService, stackOperations, operationDetailsPopulator);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class OperationServiceTest {
         // GIVEN
         ProvisionFlowEventChainFactory provisionFlowEventChainFactory = new ProvisionFlowEventChainFactory();
         FlowTriggerEventQueue eventQueue = provisionFlowEventChainFactory.createFlowTriggerEventQueue(new StackEvent(null, null));
-        given(flowService.getLastFlowOperationByResourceCrn(anyString()))
+        given(flowOperationStatisticsService.getLastFlowOperationByResourceCrn(anyString()))
                 .willReturn(Optional.of(operationFlowsView));
         given(operationFlowsView.getOperationType()).willReturn(OperationType.PROVISION);
         given(operationDetailsPopulator.createOperationView(operationFlowsView, OperationResource.DATALAKE, EXPECTED_TYPE_LIST))
@@ -106,7 +106,7 @@ public class OperationServiceTest {
     @Test
     public void testGetOperationProgressByResourceCrnWithDatahub() {
         // GIVEN
-        given(flowService.getLastFlowOperationByResourceCrn(anyString()))
+        given(flowOperationStatisticsService.getLastFlowOperationByResourceCrn(anyString()))
                 .willReturn(Optional.of(operationFlowsView));
         given(operationFlowsView.getOperationType()).willReturn(OperationType.PROVISION);
         given(operationDetailsPopulator.createOperationView(operationFlowsView, OperationResource.DATAHUB, EXPECTED_TYPE_LIST))
@@ -126,7 +126,7 @@ public class OperationServiceTest {
     @Test
     public void testGetOperationProgressByResourceCrnWithFailedRemoteDbResponse() {
         // GIVEN
-        given(flowService.getLastFlowOperationByResourceCrn(anyString()))
+        given(flowOperationStatisticsService.getLastFlowOperationByResourceCrn(anyString()))
                 .willReturn(Optional.of(operationFlowsView));
         given(operationFlowsView.getOperationType()).willReturn(OperationType.PROVISION);
         given(operationDetailsPopulator.createOperationView(operationFlowsView, OperationResource.DATAHUB, EXPECTED_TYPE_LIST))

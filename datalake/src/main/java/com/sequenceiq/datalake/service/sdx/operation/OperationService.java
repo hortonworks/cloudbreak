@@ -19,7 +19,7 @@ import com.sequenceiq.flow.api.model.operation.OperationResource;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.flow.converter.OperationDetailsPopulator;
-import com.sequenceiq.flow.service.FlowService;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 
 @Component
 public class OperationService {
@@ -32,22 +32,22 @@ public class OperationService {
 
     private final DatabaseService databaseService;
 
-    private final FlowService flowService;
+    private final FlowOperationStatisticsService flowOperationStatisticsService;
 
     private final OperationDetailsPopulator operationDetailsPopulator;
 
-    public OperationService(OperationV4Endpoint operationV4Endpoint, SdxService sdxService, DatabaseService databaseService, FlowService flowService,
-            OperationDetailsPopulator operationDetailsPopulator) {
+    public OperationService(OperationV4Endpoint operationV4Endpoint, SdxService sdxService, DatabaseService databaseService,
+            FlowOperationStatisticsService flowOperationStatisticsService, OperationDetailsPopulator operationDetailsPopulator) {
         this.operationV4Endpoint = operationV4Endpoint;
         this.sdxService = sdxService;
         this.databaseService = databaseService;
-        this.flowService = flowService;
+        this.flowOperationStatisticsService = flowOperationStatisticsService;
         this.operationDetailsPopulator = operationDetailsPopulator;
     }
 
     public OperationView getOperationProgressByResourceCrn(String resourceCrn, boolean detailed) {
         OperationView sdxOperationView = new OperationView();
-        Optional<OperationFlowsView> operationFlowsViewOpt = flowService.getLastFlowOperationByResourceCrn(resourceCrn);
+        Optional<OperationFlowsView> operationFlowsViewOpt = flowOperationStatisticsService.getLastFlowOperationByResourceCrn(resourceCrn);
         if (operationFlowsViewOpt.isPresent()) {
             OperationFlowsView operationFlowsView = operationFlowsViewOpt.get();
             OperationType operationType = operationFlowsView.getOperationType();

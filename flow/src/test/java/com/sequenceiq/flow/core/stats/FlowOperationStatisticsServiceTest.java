@@ -31,6 +31,7 @@ import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowOperationStats;
 import com.sequenceiq.flow.repository.FlowOperationStatsRepository;
+import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 @ExtendWith(MockitoExtension.class)
 public class FlowOperationStatisticsServiceTest {
@@ -51,12 +52,15 @@ public class FlowOperationStatisticsServiceTest {
     private FlowProgressResponseConverter flowProgressResponseConverter;
 
     @Mock
+    private FlowLogDBService flowLogDBService;
+
+    @Mock
     private AbstractFlowConfiguration flowConfiguration;
 
     @BeforeEach
     public void setUp() {
         underTest = new FlowOperationStatisticsService(flowOperationStatsRepository, payloadContextProvider,
-                flowProgressResponseConverter);
+                flowProgressResponseConverter, flowLogDBService);
     }
 
     @Test
