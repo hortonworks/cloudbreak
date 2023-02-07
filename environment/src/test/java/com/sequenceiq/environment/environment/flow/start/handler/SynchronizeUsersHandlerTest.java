@@ -7,6 +7,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -22,7 +23,9 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.wiam.client.GrpcWiamClient;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
@@ -41,6 +44,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 class SynchronizeUsersHandlerTest {
 
     private static final String ENV_CRN = "someCrnValue";
+
+    private static final String ENV_ACC = "accId";
 
     private static final long ENV_ID = 100L;
 
@@ -68,6 +73,12 @@ class SynchronizeUsersHandlerTest {
     @Mock
     private Event.Headers eventHeaders;
 
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private GrpcWiamClient wiamClient;
+
     @InjectMocks
     private SynchronizeUsersHandler underTest;
 
@@ -77,6 +88,7 @@ class SynchronizeUsersHandlerTest {
         when(environmentDtoEvent.getHeaders()).thenReturn(eventHeaders);
         lenient().when(mockEnvironmentDto.getResourceCrn()).thenReturn(ENV_CRN);
         lenient().when(mockEnvironmentDto.getId()).thenReturn(ENV_ID);
+        lenient().when(mockEnvironmentDto.getAccountId()).thenReturn(ENV_ACC);
         when(environmentDto.getEnvironmentDto()).thenReturn(mockEnvironmentDto);
     }
 
@@ -92,6 +104,27 @@ class SynchronizeUsersHandlerTest {
 
         verify(eventSender, never()).sendEvent(any(EnvStartFailedEvent.class), eq(eventHeaders));
         verify(freeIpaPollerService, times(1)).waitForSynchronizeUsers(ENV_ID, ENV_CRN);
+
+        ArgumentCaptor<EnvStartEvent> startEventCaptor = ArgumentCaptor.forClass(EnvStartEvent.class);
+        verify(eventSender, times(1)).sendEvent(startEventCaptor.capture(), eq(eventHeaders));
+        EnvStartEvent envStartEvent = startEventCaptor.getValue();
+        assertThat(envStartEvent.selector()).isEqualTo(EnvStartStateSelectors.FINISH_ENV_START_EVENT.selector());
+    }
+
+    @Test
+    void testWhenFreeIpaIsAvailableAndEnabledThenSynchronizeUsingWiam() {
+        ReflectionTestUtils.setField(underTest, "synchronizeOnStartEnabled", true);
+
+        when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
+        when(describeFreeIpaResponse.getAvailabilityStatus()).thenReturn(AvailabilityStatus.AVAILABLE);
+        when(describeFreeIpaResponse.getStatus()).thenReturn(Status.AVAILABLE);
+        when(entitlementService.isWiamUsersyncRoutingEnabled(any())).thenReturn(Boolean.TRUE);
+
+        underTest.accept(environmentDtoEvent);
+
+        verify(eventSender, never()).sendEvent(any(EnvStartFailedEvent.class), eq(eventHeaders));
+        verifyNoInteractions(freeIpaPollerService);
+        verify(wiamClient).syncUsersInEnvironment(eq(ENV_ACC), eq(ENV_CRN), any());
 
         ArgumentCaptor<EnvStartEvent> startEventCaptor = ArgumentCaptor.forClass(EnvStartEvent.class);
         verify(eventSender, times(1)).sendEvent(startEventCaptor.capture(), eq(eventHeaders));

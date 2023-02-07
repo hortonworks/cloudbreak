@@ -344,3 +344,4 @@ ccmRevertJob:
 wiam:
   host: localhost
   port: 8982
+  grpc.timeout.sec: 60
