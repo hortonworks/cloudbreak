@@ -77,9 +77,10 @@ public class InstanceTypeCollectorServiceTest {
         when(clouderaCostCache.getPriceByType(any())).thenReturn(0.5);
         when(pricingCaches.containsKey(any(CloudPlatform.class))).thenReturn(Boolean.TRUE);
         when(pricingCaches.get(any(CloudPlatform.class))).thenReturn(pricingCache);
-        when(pricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
+        when(pricingCache.getPriceForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(0.5);
         when(pricingCache.getStoragePricePerGBHour(eq(REGION), any(), anyInt())).thenReturn(MAGIC_PRICE_PER_DISK_GB);
         when(instanceGroupService.getInstanceGroupViewByStackId(69L)).thenReturn(List.of(getInstanceGroup("gp2")));
+        when(credentialClientService.getByEnvironmentCrn(any())).thenReturn(getCredential("AZURE"));
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             ClusterCostDto clusterCostDto = underTest.getAllInstanceTypesForCost(getStack("AZURE"));

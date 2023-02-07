@@ -30,6 +30,8 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
+import com.amazonaws.services.pricing.AWSPricing;
+import com.amazonaws.services.pricing.AWSPricingClientBuilder;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.AmazonRDSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
@@ -45,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonPricingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
@@ -210,6 +213,14 @@ public abstract class AwsClient {
                 .withClientConfiguration(getDefaultClientConfiguration());
         awsEndpointProvider.setupEndpoint(clientBuilder, AmazonRDS.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
         return new AmazonRdsClient(proxy(clientBuilder.build(), awsCredential, regionName), awsPageCollector);
+    }
+
+    public AmazonPricingClient createPricingClient(AwsCredentialView awsCredential, String regionName) {
+        AWSPricingClientBuilder clientBuilder = AWSPricingClientBuilder.standard()
+                .withCredentials(getCredentialProvider(awsCredential))
+                .withRegion(regionName);
+        awsEndpointProvider.setupEndpoint(clientBuilder, AWSPricing.ENDPOINT_PREFIX, regionName, awsCredential.isGovernmentCloudEnabled());
+        return new AmazonPricingClient(proxy(clientBuilder.build(), awsCredential, regionName), retry);
     }
 
     protected ClientConfiguration getDefaultClientConfiguration() {

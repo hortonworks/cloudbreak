@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 public interface PricingCache {
 
-    double getPriceForInstanceType(String region, String instanceType);
+    double getPriceForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential);
 
     int getCpuCountForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential);
 

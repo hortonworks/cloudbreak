@@ -47,6 +47,8 @@ public class AzurePricingCache implements PricingCache {
 
     private static final String AZURE_DISK_SIZES_JSON_LOCATION = "cost/azure-disk-sizes.json";
 
+    private static final double AZURE_DEFAULT_STORAGE_PRICE = 5.89;
+
     private static final int MAX_ATTEMPTS = 5;
 
     private static final int BACKOFF_DELAY = 500;
@@ -57,6 +59,10 @@ public class AzurePricingCache implements PricingCache {
 
     @Inject
     private CloudParameterService cloudParameterService;
+
+    private final Map<String, Map<String, Double>> storagePricingCache = loadStoragePricing();
+
+    private final Map<String, Map<String, Map<String, Integer>>> azureDiskSizes = loadAzureDiskSizes();
 
     private static Map<String, Map<String, Double>> loadStoragePricing() {
         ClassPathResource classPathResource = new ClassPathResource(AZURE_STORAGE_PRICING_JSON_LOCATION);
@@ -87,7 +93,7 @@ public class AzurePricingCache implements PricingCache {
     }
 
     @Cacheable(cacheNames = "azureCostCache", key = "{ #region, #instanceType }")
-    public double getPriceForInstanceType(String region, String instanceType) {
+    public double getPriceForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
         PriceResponse priceResponse = getPriceResponse(region, instanceType);
         return priceResponse.getItems().stream().findFirst()
                 .orElseThrow(() -> new NotFoundException(
@@ -109,17 +115,16 @@ public class AzurePricingCache implements PricingCache {
 
     @Cacheable(cacheNames = "azureCostCache", key = "{ #region, #storageType, #volumeSize }")
     public double getStoragePricePerGBHour(String region, String storageType, int volumeSize) {
-        if (volumeSize == 0 || storageType == null) {
-            LOGGER.info("The provided volumeSize is 0 or the storageType is null, so returning 0.0 as storage price per GBHour.");
+        if (volumeSize == 0) {
             return 0.0;
         }
-        Map<String, Double> pricesForRegion = loadStoragePricing().getOrDefault(region, Map.of());
+        Map<String, Double> pricesForRegion = storagePricingCache.getOrDefault(region, Map.of());
         String specificStorageType = getSpecificAzureStorageTypeBySize(storageType, volumeSize);
-        return pricesForRegion.getOrDefault(specificStorageType, 0.0) / HOURS_IN_30_DAYS;
+        return pricesForRegion.getOrDefault(specificStorageType, AZURE_DEFAULT_STORAGE_PRICE) / HOURS_IN_30_DAYS / volumeSize;
     }
 
     private String getSpecificAzureStorageTypeBySize(String storageType, int volumeSize) {
-        Map<String, Map<String, Integer>> specificVolumeTypes = loadAzureDiskSizes().getOrDefault(storageType, Map.of());
+        Map<String, Map<String, Integer>> specificVolumeTypes = azureDiskSizes.getOrDefault(storageType, Map.of());
         for (Map.Entry<String, Map<String, Integer>> entry : specificVolumeTypes.entrySet()) {
             if (volumeSize > entry.getValue().get("minSize") && volumeSize <= entry.getValue().get("maxSize")) {
                 return entry.getKey();

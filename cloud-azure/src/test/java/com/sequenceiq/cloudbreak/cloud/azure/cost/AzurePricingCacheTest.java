@@ -30,6 +30,8 @@ public class AzurePricingCacheTest {
 
     private static final String INSTANCE_TYPE = "instanceType";
 
+    private static final double AZURE_DEFAULT_STORAGE_PRICE = 0.008180555556;
+
     @InjectMocks
     private AzurePricingCache underTest;
 
@@ -41,7 +43,7 @@ public class AzurePricingCacheTest {
         AzurePricingCache spiedUnderTest = spy(underTest);
         doReturn(getPriceResponse()).when(spiedUnderTest).retryableGetPriceResponse(any());
 
-        double price = spiedUnderTest.getPriceForInstanceType(REGION, INSTANCE_TYPE);
+        double price = spiedUnderTest.getPriceForInstanceType(REGION, INSTANCE_TYPE, null);
 
         Assertions.assertEquals(0.69, price);
     }
@@ -70,9 +72,9 @@ public class AzurePricingCacheTest {
         double standardssd = underTest.getStoragePricePerGBHour("westus2", "StandardSSD_LRS", 500);
         double standardhdd = underTest.getStoragePricePerGBHour("westus2", "StandardHDD", 500);
 
-        Assertions.assertEquals(0.09244, premiumssd, 0.00001);
-        Assertions.assertEquals(0.05333, standardssd, 0.00001);
-        Assertions.assertEquals(0.03022, standardhdd, 0.00001);
+        Assertions.assertEquals(0.00018489, premiumssd, 0.00001);
+        Assertions.assertEquals(0.00010666, standardssd, 0.00001);
+        Assertions.assertEquals(0.00006044, standardhdd, 0.00001);
     }
 
     @Test
@@ -80,8 +82,8 @@ public class AzurePricingCacheTest {
         AzurePricingCache spiedUnderTest = spy(underTest);
         doReturn(getPriceResponse()).when(spiedUnderTest).retryableGetPriceResponse(any());
 
-        double price1 = spiedUnderTest.getPriceForInstanceType(REGION, INSTANCE_TYPE);
-        double price2 = spiedUnderTest.getPriceForInstanceType(REGION, INSTANCE_TYPE);
+        double price1 = spiedUnderTest.getPriceForInstanceType(REGION, INSTANCE_TYPE, null);
+        double price2 = spiedUnderTest.getPriceForInstanceType(REGION, INSTANCE_TYPE, null);
 
         Assertions.assertEquals(0.69, price1);
         Assertions.assertEquals(0.69, price2);
@@ -109,14 +111,14 @@ public class AzurePricingCacheTest {
     void getStoragePriceWithNullStorageType() {
         double price = underTest.getStoragePricePerGBHour("eastus", null, 100);
 
-        Assertions.assertEquals(0.0, price);
+        Assertions.assertEquals(AZURE_DEFAULT_STORAGE_PRICE / 100, price, 0.00001);
     }
 
     @Test
     void getStoragePriceWithUnknownStorageType() {
         double price = underTest.getStoragePricePerGBHour("eastus", "unknown", 100);
 
-        Assertions.assertEquals(0.0, price);
+        Assertions.assertEquals(AZURE_DEFAULT_STORAGE_PRICE / 100, price, 0.00001);
     }
 
     @Test

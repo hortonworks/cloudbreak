@@ -49,6 +49,7 @@ public class FreeIpaInstanceTypeCollectorService {
     public ClusterCostDto getAllInstanceTypesForCost(Stack stack) {
         String region = stack.getRegion();
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
+        Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
 
         ClusterCostDto clusterCostDto = new ClusterCostDto();
         clusterCostDto.setStatus(stack.getStackStatus().getStatus().name());
@@ -56,7 +57,7 @@ public class FreeIpaInstanceTypeCollectorService {
 
         List<InstanceGroupCostDto> instanceGroupCostDtos = new ArrayList<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            getInstanceGroupCostDto(region, cloudPlatform, instanceGroup).ifPresent(instanceGroupCostDtos::add);
+            getInstanceGroupCostDto(region, cloudPlatform, instanceGroup, credential).ifPresent(instanceGroupCostDtos::add);
         }
         clusterCostDto.setInstanceGroups(instanceGroupCostDtos);
         return clusterCostDto;
@@ -81,12 +82,14 @@ public class FreeIpaInstanceTypeCollectorService {
         return clusterCO2Dto;
     }
 
-    private Optional<InstanceGroupCostDto> getInstanceGroupCostDto(String region, CloudPlatform cloudPlatform, InstanceGroup instanceGroup) {
+    private Optional<InstanceGroupCostDto> getInstanceGroupCostDto(String region, CloudPlatform cloudPlatform,
+            InstanceGroup instanceGroup, Credential credential) {
         if (pricingCacheMap.containsKey(cloudPlatform)) {
             PricingCache pricingCache = pricingCacheMap.get(cloudPlatform);
             String instanceType = instanceGroup.getTemplate().getInstanceType();
             InstanceGroupCostDto instanceGroupCostDto = new InstanceGroupCostDto();
-            instanceGroupCostDto.setPricePerInstance(pricingCache.getPriceForInstanceType(region, instanceType));
+            instanceGroupCostDto.setPricePerInstance(pricingCache.getPriceForInstanceType(region, instanceType,
+                    convertCredentialToExtendedCloudCredential(credential, cloudPlatform)));
             instanceGroupCostDto.setClouderaPricePerInstance(clouderaCostCache.getPriceByType(instanceType));
             instanceGroupCostDto.setCount(instanceGroup.getInstanceMetaData().size());
 
