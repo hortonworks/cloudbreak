@@ -1,10 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.cost;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,10 +19,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.pricing.AWSPricing;
 import com.amazonaws.services.pricing.model.GetProductsRequest;
 import com.amazonaws.services.pricing.model.GetProductsResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsCredentialVerifier;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonPricingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.Attributes;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.OfferTerm;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.PriceDimension;
@@ -25,6 +32,13 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.PriceListElement;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.PricePerUnit;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.Product;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.Terms;
+import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,73 +48,119 @@ public class AwsPricingCacheTest {
 
     private static final String INSTANCE_TYPE = "instanceType";
 
+    private static final double AWS_DEFAULT_STORAGE_PRICE = 0.00007638888889;
+
     @Mock
-    private AWSPricing awsPricing;
+    private CommonAwsClient awsClient;
+
+    @Mock
+    private AmazonPricingClient awsPricingClient;
+
+    @Mock
+    private CloudParameterService cloudParameterService;
+
+    @Mock
+    private AwsCredentialVerifier awsCredentialVerifier;
 
     @InjectMocks
     private AwsPricingCache underTest;
 
     @BeforeEach
     void setup() {
-        lenient().when(awsPricing.getProducts(any(GetProductsRequest.class))).thenReturn(getGetProductsResult());
+        lenient().when(awsClient.createPricingClient(any(), any())).thenReturn(awsPricingClient);
+        lenient().when(awsPricingClient.getProducts(any(GetProductsRequest.class))).thenReturn(getGetProductsResult());
+    }
+
+    @Test
+    void getUsdPriceWhenNoPermission() throws AwsPermissionMissingException {
+        doThrow(new AwsPermissionMissingException()).when(awsCredentialVerifier).validateAws(any(), anyString());
+
+        Optional<Double> price = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
+
+        Assertions.assertTrue(price.isEmpty());
     }
 
     @Test
     void getUsdPrice() {
-        double price = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE);
+        Optional<Double> price = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
 
-        Assertions.assertEquals(0.69, price);
+        Assertions.assertTrue(price.isPresent());
+        Assertions.assertEquals(0.69, price.get());
     }
 
     @Test
     void getCpuCount() {
-        int cpu = underTest.getCpuCountForInstanceType(REGION, INSTANCE_TYPE, null);
+        when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any())).thenReturn(getCloudVmTypes());
 
-        Assertions.assertEquals(69, cpu);
+        Optional<Integer> cpu = underTest.getCpuCountForInstanceType(REGION, INSTANCE_TYPE,
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
+
+        Assertions.assertTrue(cpu.isPresent());
+        Assertions.assertEquals(69, cpu.get());
     }
 
     @Test
     void getMemory() {
-        int memory = underTest.getMemoryForInstanceType(REGION, INSTANCE_TYPE, null);
+        when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any())).thenReturn(getCloudVmTypes());
 
-        Assertions.assertEquals(420, memory);
+        Optional<Integer> memory = underTest.getMemoryForInstanceType(REGION, INSTANCE_TYPE,
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
+
+        Assertions.assertTrue(memory.isPresent());
+        Assertions.assertEquals(420, memory.get());
     }
 
     @Test
     void getUsdPriceAlreadyInCache() {
-        double price1 = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE);
-        double price2 = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE);
+        Optional<Double> price1 = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
+        Optional<Double> price2 = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
 
-        Assertions.assertEquals(0.69, price1);
-        Assertions.assertEquals(0.69, price2);
+        Assertions.assertTrue(price1.isPresent());
+        Assertions.assertTrue(price2.isPresent());
+        Assertions.assertEquals(0.69, price1.get());
+        Assertions.assertEquals(0.69, price2.get());
     }
 
     @Test
     void getStoragePriceWithZeroVolumeSize() {
-        double price = underTest.getStoragePricePerGBHour("eu-central-1", "gp2", 0);
+        Optional<Double> price = underTest.getStoragePricePerGBHour(REGION, "gp2", 0);
 
-        Assertions.assertEquals(0.0, price);
+        Assertions.assertTrue(price.isEmpty());
     }
 
     @Test
     void getStoragePriceWithNullStorageType() {
-        double price = underTest.getStoragePricePerGBHour("eu-central-1", null, 100);
+        Optional<Double> price = underTest.getStoragePricePerGBHour(REGION, "unknown", 100);
 
-        Assertions.assertEquals(0.0, price);
+        Assertions.assertTrue(price.isPresent());
+        Assertions.assertEquals(AWS_DEFAULT_STORAGE_PRICE, price.get(), 0.0001);
     }
 
     @Test
     void getStoragePriceWithUnknownStorageType() {
-        double price = underTest.getStoragePricePerGBHour("eu-central-1", "unknown", 100);
+        Optional<Double> price = underTest.getStoragePricePerGBHour(REGION, "unknown", 100);
 
-        Assertions.assertEquals(0.0, price);
+        Assertions.assertTrue(price.isPresent());
+        Assertions.assertEquals(AWS_DEFAULT_STORAGE_PRICE, price.get(), 0.0001);
     }
 
     @Test
     void getStoragePrice() {
-        double price = underTest.getStoragePricePerGBHour("eu-central-1", "gp2", 1000);
+        Optional<Double> price = underTest.getStoragePricePerGBHour(REGION, "gp2", 1000);
 
-        Assertions.assertNotEquals(0.0, price);
+        Assertions.assertTrue(price.isPresent());
+        Assertions.assertNotEquals(0.0, price.get());
+    }
+
+    private CloudVmTypes getCloudVmTypes() {
+        VmTypeMeta vmTypeMeta = new VmTypeMeta();
+        vmTypeMeta.setProperties(Map.of("Cpu", 69, "Memory", 420));
+        VmType vmType = VmType.vmTypeWithMeta(INSTANCE_TYPE, vmTypeMeta, false);
+        return new CloudVmTypes(Map.of(REGION, Set.of(vmType)), null);
     }
 
     private GetProductsResult getGetProductsResult() {

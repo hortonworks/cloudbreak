@@ -69,4 +69,15 @@ public class PriceListElement {
     public void setPublicationDate(Date publicationDate) {
         this.publicationDate = publicationDate;
     }
+
+    @Override
+    public String toString() {
+        return "PriceListElement{" +
+                "product=" + product +
+                ", serviceCode='" + serviceCode + '\'' +
+                ", terms=" + terms +
+                ", version='" + version + '\'' +
+                ", publicationDate=" + publicationDate +
+                '}';
+    }
 }

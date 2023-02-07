@@ -25,4 +25,11 @@ public class PricePerUnit {
     public void setUsd(double usd) {
         this.usd = usd;
     }
+
+    @Override
+    public String toString() {
+        return "PricePerUnit{" +
+                "usd=" + usd +
+                '}';
+    }
 }

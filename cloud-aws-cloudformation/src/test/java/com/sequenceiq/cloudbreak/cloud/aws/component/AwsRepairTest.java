@@ -95,6 +95,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -198,6 +199,9 @@ public class AwsRepairTest {
 
     @Mock
     private AmazonEc2Client amazonEC2Client;
+
+    @MockBean
+    private CloudParameterService cloudParameterService;
 
     @MockBean
     private AmazonEfsClient amazonEfsClient;
