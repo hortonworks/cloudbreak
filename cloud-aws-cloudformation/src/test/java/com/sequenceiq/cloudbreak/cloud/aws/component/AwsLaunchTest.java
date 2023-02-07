@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -147,6 +148,9 @@ public class AwsLaunchTest {
 
     @Mock
     private AmazonEc2Client amazonEc2Client;
+
+    @MockBean
+    private CloudParameterService cloudParameterService;
 
     @MockBean
     private AmazonElasticFileSystemClient amazonElasticFileSystemClient;

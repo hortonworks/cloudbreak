@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -78,17 +79,18 @@ public class InstanceTypeCollectorServiceTest {
 
     @Test
     void getAllInstanceTypes() {
-        when(pricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
-        when(pricingCache.getCpuCountForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(8);
-        when(pricingCache.getMemoryForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(16);
-        when(pricingCache.getStoragePricePerGBHour(eq(REGION), any(), anyInt())).thenReturn(MAGIC_PRICE_PER_DISK_GB);
+        when(pricingCache.getPriceForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(Optional.of(0.5));
+        when(pricingCache.getCpuCountForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(Optional.of(8));
+        when(pricingCache.getMemoryForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(Optional.of(16));
+        when(pricingCache.getStoragePricePerGBHour(eq(REGION), any(), anyInt())).thenReturn(Optional.of(MAGIC_PRICE_PER_DISK_GB));
         when(instanceGroupService.getInstanceGroupViewByStackId(69L)).thenReturn(List.of(getInstanceGroup("gp2")));
         when(credentialClientService.getByEnvironmentCrn(any())).thenReturn(getCredential("AZURE"));
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
-            ClusterCostDto clusterCostDto = underTest.getAllInstanceTypes(getStack("AZURE"));
+            Optional<ClusterCostDto> clusterCostDto = underTest.getAllInstanceTypes(getStack("AZURE"));
 
-            assertions(clusterCostDto);
+            Assertions.assertTrue(clusterCostDto.isPresent());
+            assertions(clusterCostDto.get());
         });
     }
 

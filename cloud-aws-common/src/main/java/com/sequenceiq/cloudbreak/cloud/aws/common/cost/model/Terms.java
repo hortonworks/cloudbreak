@@ -39,4 +39,12 @@ public class Terms {
     public void setReserved(Map<String, OfferTerm> reserved) {
         this.reserved = reserved;
     }
+
+    @Override
+    public String toString() {
+        return "Terms{" +
+                "onDemand=" + onDemand +
+                ", reserved=" + reserved +
+                '}';
+    }
 }

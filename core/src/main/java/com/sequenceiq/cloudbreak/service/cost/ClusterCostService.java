@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cost;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -69,15 +70,17 @@ public class ClusterCostService {
                 continue;
             }
 
-            ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypes(stack);
-            RealTimeCost realTimeCost = new RealTimeCost();
-            realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
-            realTimeCost.setResourceCrn(stack.getResourceCrn());
-            realTimeCost.setType(stack.getType().name());
-            realTimeCost.setResourceName(stack.getName());
-            realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost));
-            realTimeCost.setHourlyClouderaUsd(usdCalculatorService.calculateClouderaCost(clusterCost, realTimeCost.getType()));
-            realTimeCosts.put(stack.getResourceCrn(), realTimeCost);
+            Optional<ClusterCostDto> clusterCost = instanceTypeCollectorService.getAllInstanceTypes(stack);
+            if (clusterCost.isPresent()) {
+                RealTimeCost realTimeCost = new RealTimeCost();
+                realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
+                realTimeCost.setResourceCrn(stack.getResourceCrn());
+                realTimeCost.setType(stack.getType().name());
+                realTimeCost.setResourceName(stack.getName());
+                realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost.get()));
+                realTimeCost.setHourlyClouderaUsd(usdCalculatorService.calculateClouderaCost(clusterCost.get(), realTimeCost.getType()));
+                realTimeCosts.put(stack.getResourceCrn(), realTimeCost);
+            }
         }
         return realTimeCosts;
     }

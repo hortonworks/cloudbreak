@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -45,7 +46,7 @@ public class InstanceTypeCollectorService {
     @Inject
     private ClouderaCostCache clouderaCostCache;
 
-    public ClusterCostDto getAllInstanceTypes(StackView stack) {
+    public Optional<ClusterCostDto> getAllInstanceTypes(StackView stack) {
         String region = stack.getRegion();
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
@@ -56,34 +57,50 @@ public class InstanceTypeCollectorService {
 
         List<InstanceGroupCostDto> instanceGroupCostDtos = new ArrayList<>();
         for (InstanceGroupView instanceGroupView : instanceGroupService.getInstanceGroupViewByStackId(stack.getId())) {
-            getInstanceGroupCostDto(region, cloudPlatform, credential, instanceGroupView).ifPresent(instanceGroupCostDtos::add);
+            getInstanceGroupCostDto(region, cloudPlatform, instanceGroupView, credential).ifPresent(instanceGroupCostDtos::add);
+        }
+
+        if (instanceGroupCostDtos.isEmpty()) {
+            return Optional.empty();
         }
         clusterCostDto.setInstanceGroups(instanceGroupCostDtos);
-        return clusterCostDto;
+        return Optional.of(clusterCostDto);
     }
 
     private Optional<InstanceGroupCostDto> getInstanceGroupCostDto(String region, CloudPlatform cloudPlatform,
-            Credential credential, InstanceGroupView instanceGroupView) {
-        if (pricingCacheMap.containsKey(cloudPlatform)) {
-            PricingCache pricingCache = pricingCacheMap.get(cloudPlatform);
+            InstanceGroupView instanceGroupView, Credential credential) {
+        if (!pricingCacheMap.containsKey(cloudPlatform)) {
+            return Optional.empty();
+        }
+
+        PricingCache pricingCache = pricingCacheMap.get(cloudPlatform);
+        Template template = instanceGroupView.getTemplate();
+        String instanceType = template == null ? "" : template.getInstanceType();
+        ExtendedCloudCredential extendedCloudCredential = convertCredentialToExtendedCloudCredential(credential, cloudPlatform);
+        Optional<Double> pricePerInstance = pricingCache.getPriceForInstanceType(region, instanceType, extendedCloudCredential);
+        Optional<Integer> coresPerInstance = pricingCache.getCpuCountForInstanceType(region, instanceType, extendedCloudCredential);
+        Optional<Integer> memoryPerInstance = pricingCache.getMemoryForInstanceType(region, instanceType, extendedCloudCredential);
+
+        if (pricePerInstance.isPresent() && coresPerInstance.isPresent() && memoryPerInstance.isPresent()) {
             int count = instanceMetaDataService.countByInstanceGroupId(instanceGroupView.getId());
-            Template template = instanceGroupView.getTemplate();
-            String instanceType = template == null ? "" : template.getInstanceType();
             InstanceGroupCostDto instanceGroupCostDto = new InstanceGroupCostDto();
-            instanceGroupCostDto.setPricePerInstance(pricingCache.getPriceForInstanceType(region, instanceType));
-            instanceGroupCostDto.setCoresPerInstance(pricingCache.getCpuCountForInstanceType(region, instanceType,
-                    convertCredentialToExtendedCloudCredential(credential, cloudPlatform)));
-            instanceGroupCostDto.setMemoryPerInstance(pricingCache.getMemoryForInstanceType(region, instanceType,
-                    convertCredentialToExtendedCloudCredential(credential, cloudPlatform)));
+            instanceGroupCostDto.setPricePerInstance(pricePerInstance.get());
+            instanceGroupCostDto.setCoresPerInstance(coresPerInstance.get());
+            instanceGroupCostDto.setMemoryPerInstance(memoryPerInstance.get());
             instanceGroupCostDto.setClouderaPricePerInstance(clouderaCostCache.getPriceByType(instanceType));
             instanceGroupCostDto.setType(instanceType);
             instanceGroupCostDto.setCount(count);
 
             List<DiskCostDto> diskCostDtos = new ArrayList<>();
-            for (VolumeTemplate volumeTemplate : template.getVolumeTemplates()) {
-                DiskCostDto diskCostDto = new DiskCostDto(volumeTemplate.getVolumeCount(), volumeTemplate.getVolumeSize(),
-                        pricingCache.getStoragePricePerGBHour(region, volumeTemplate.getVolumeType(), volumeTemplate.getVolumeSize()));
-                diskCostDtos.add(diskCostDto);
+            Set<VolumeTemplate> volumeTemplates = template == null ? Set.of() : template.getVolumeTemplates();
+            for (VolumeTemplate volumeTemplate : volumeTemplates) {
+                String volumeType = volumeTemplate.getVolumeType();
+                Integer volumeSize = volumeTemplate.getVolumeSize();
+                Optional<Double> storagePricePerGBHour = pricingCache.getStoragePricePerGBHour(region, volumeType, volumeSize);
+                if (storagePricePerGBHour.isPresent()) {
+                    DiskCostDto diskCostDto = new DiskCostDto(volumeTemplate.getVolumeCount(), volumeTemplate.getVolumeSize(), storagePricePerGBHour.get());
+                    diskCostDtos.add(diskCostDto);
+                }
             }
             instanceGroupCostDto.setDisksPerInstance(diskCostDtos);
             return Optional.of(instanceGroupCostDto);

@@ -276,6 +276,16 @@
       "Resource": [
         "arn:aws-us-gov:ssm:*:*:parameter/aws/service/eks/optimized-ami/*"
       ]
+    },
+    {
+      "Sid": "PriceListService",
+      "Action": [
+        "pricing:GetProducts"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ]
     }
   ],
   "Version": "2012-10-17"
