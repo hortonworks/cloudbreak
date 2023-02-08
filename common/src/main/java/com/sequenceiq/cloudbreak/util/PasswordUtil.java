@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -30,6 +31,10 @@ public class PasswordUtil {
 
     public static String getRandomAlphabetic(int count) {
         return generate(count, true, false);
+    }
+
+    public static String getRandomAlphabeticWithLowerCaseOnly(int count) {
+        return getRandomAlphabetic(count).toLowerCase(Locale.ROOT);
     }
 
     public static String getRandomNumeric(int count) {

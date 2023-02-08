@@ -1,30 +1,23 @@
 package com.sequenceiq.redbeams.service;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.util.RandomUtil;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Service
 public class UserGeneratorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserGeneratorService.class);
 
-    private static final int MAX_RANDOM_INT_FOR_CHARACTER = 26;
-
     private static final int USER_NAME_LENGTH = 10;
 
     public String generateUserName() {
-        return RandomUtil.getRandom().ints(0, MAX_RANDOM_INT_FOR_CHARACTER)
-                .limit(USER_NAME_LENGTH)
-                .boxed()
-                .map(i -> Character.toString((char) ('a' + i)))
-                .collect(Collectors.joining());
+        return PasswordUtil.getRandomAlphabeticWithLowerCaseOnly(USER_NAME_LENGTH);
     }
 
     /**

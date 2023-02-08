@@ -30,8 +30,8 @@ public class NodeStatusConfigView implements TelemetryConfigView {
         Map<String, Object> map = new HashMap<>();
         map.put("serverUsername", ObjectUtils.defaultIfNull(this.serverUsername, EMPTY_CONFIG_DEFAULT));
         String serverSha256Password = EMPTY_CONFIG_DEFAULT;
-        if (this.serverPassword != null && StringUtils.isNotBlank(new String(this.serverPassword))) {
-            serverSha256Password = new String(this.serverPassword);
+        if (this.serverPassword != null && StringUtils.isNotBlank(this.serverPassword)) {
+            serverSha256Password = this.serverPassword;
         }
         map.put("serverPassword", serverSha256Password);
         map.put("saltPingEnabled", saltPingEnabled);

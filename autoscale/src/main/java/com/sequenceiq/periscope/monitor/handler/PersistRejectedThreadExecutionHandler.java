@@ -39,7 +39,7 @@ public class PersistRejectedThreadExecutionHandler extends AbortPolicy {
             });
             adapterClass = (Class<? extends Callable<Object>>) adapter.getClass();
             runnableInAdapter = adapterClass.getDeclaredField("task");
-            runnableInAdapter.setAccessible(true);
+            ReflectionUtils.makeAccessible(runnableInAdapter);
         } catch (NoSuchFieldException e) {
             throw new ExceptionInInitializerError(e);
         }

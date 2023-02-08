@@ -28,10 +28,10 @@ public class UserGeneratorServiceTest {
     }
 
     @Test
-    public void testGenerateUserName() {
+    public void testGenerateUserNameWhenTheLengthOfTheStringMustBeTen() {
         String userName = underTest.generateUserName();
 
-        assertEquals(userName.length(), USERNAME_LENGTH);
+        assertEquals(USERNAME_LENGTH, userName.length());
         assertTrue(userName, userName.matches("[a-z]*"));
     }
 

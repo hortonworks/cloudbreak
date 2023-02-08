@@ -26,8 +26,9 @@ public class GcpHttpClientConfig {
 
     private KeyStore getCertificateTrustStore() throws IOException, GeneralSecurityException {
         KeyStore certTrustStore = SecurityUtils.getDefaultKeyStore();
-        InputStream keyStoreStream = GoogleUtils.class.getResourceAsStream("google.p12");
-        SecurityUtils.loadKeyStore(certTrustStore, Objects.requireNonNull(keyStoreStream), "notasecret");
+        try (InputStream keyStoreStream = GoogleUtils.class.getResourceAsStream("google.p12")) {
+            SecurityUtils.loadKeyStore(certTrustStore, Objects.requireNonNull(keyStoreStream), "notasecret");
+        }
         return certTrustStore;
     }
 }
