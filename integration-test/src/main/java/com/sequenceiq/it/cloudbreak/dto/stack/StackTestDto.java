@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STAC
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -82,6 +83,8 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
             awaitWithClient(STACK_DELETED, client);
         } catch (NotFoundException nfe) {
             LOGGER.info("resource not found, thus cleanup not needed.");
+        } catch (NullPointerException npe) {
+            LOGGER.info("there is no client");
         }
     }
 
@@ -177,6 +180,6 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Override
     public String getCrn() {
-        return getResponse().getCrn();
+        return Optional.ofNullable(getResponse()).map(response -> getResponse().getCrn()).orElse(null);
     }
 }

@@ -289,7 +289,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .when(distroXClient.create(), key(DISTRO_X_STACK))
                 .enableVerification()
                 .await(STACK_AVAILABLE)
-                .mockCm().cmImportClusterTemplate().post().bodyContains(MOCK_HOSTNAME, 1).verify()
+                .mockCm().cmImportClusterTemplate().post().bodyContains(MOCK_HOSTNAME, 2).verify()
                 .validate();
     }
 

@@ -31,7 +31,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final int FOUR_CERTS = 4;
 
-    private static final int NUM_CERTS_TOTAL = 17;
+    private static final int NUM_CERTS_TOTAL = 19;
 
     private static final int VERSION_0 = 0;
 
@@ -199,7 +199,8 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
                     "aws." + REGION_APE1,
                     "aws." + REGION_USGW1,
                     "aws." + REGION_APS3,
-                    "azure"
+                    "azure",
+                    "mock.london"
                 )
         );
     }

@@ -414,7 +414,11 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public U getClientForCleanup() {
-        String accountId = Crn.safeFromString(getCrn()).getAccountId();
+        String crn = getCrn();
+        if (crn == null) {
+            return null;
+        }
+        String accountId = Crn.safeFromString(crn).getAccountId();
         return getTestContext().getAdminMicroserviceClient(getClass(), accountId);
     }
 }

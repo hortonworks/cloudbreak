@@ -22,6 +22,7 @@ import com.sequenceiq.redbeams.controller.v4.database.DatabaseV4Controller;
 import com.sequenceiq.redbeams.controller.v4.databaseserver.DatabaseServerV4Controller;
 import com.sequenceiq.redbeams.controller.v4.operation.OperationV4Controller;
 import com.sequenceiq.redbeams.controller.v4.progress.ProgressV4Controller;
+import com.sequenceiq.redbeams.controller.v4.support.SupportController;
 
 @ApplicationPath(RedbeamsApi.API_ROOT_CONTEXT)
 @Configuration
@@ -34,7 +35,8 @@ public class EndpointConfig extends ResourceConfig {
             OperationV4Controller.class,
             FlowController.class,
             FlowPublicController.class,
-            AuthorizationInfoController.class
+            AuthorizationInfoController.class,
+            SupportController.class
     );
 
     @Value("${redbeams.structuredevent.rest.enabled:false}")

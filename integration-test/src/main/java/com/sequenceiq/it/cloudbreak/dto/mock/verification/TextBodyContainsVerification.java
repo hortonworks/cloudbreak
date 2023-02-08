@@ -35,7 +35,6 @@ public class TextBodyContainsVerification implements Verification {
         context.setCalls(accepted);
     }
 
-    @Override
     public String getValue() {
         return body;
     }
