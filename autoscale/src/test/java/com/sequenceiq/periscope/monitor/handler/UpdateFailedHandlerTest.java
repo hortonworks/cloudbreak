@@ -39,6 +39,8 @@ public class UpdateFailedHandlerTest {
 
     private static final String CLOUDBREAK_STACK_CRN = "someCrn";
 
+    private static final String POLLING_USER = "someOtherCrn";
+
     @Mock
     private ClusterService clusterService;
 
@@ -91,7 +93,7 @@ public class UpdateFailedHandlerTest {
         Cluster cluster = getARunningCluster();
         when(clusterService.findById(anyLong())).thenReturn(cluster);
 
-        UpdateFailedEvent failedEvent = new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID, new ForbiddenException(), System.currentTimeMillis(), true);
+        UpdateFailedEvent failedEvent = new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID, new ForbiddenException(), System.currentTimeMillis(), true, POLLING_USER);
         IntStream.range(0, 4).forEach(i -> underTest.onApplicationEvent(failedEvent));
 
         verify(clusterService, times(4)).findById(AUTOSCALE_CLUSTER_ID);
@@ -104,9 +106,9 @@ public class UpdateFailedHandlerTest {
     public void testOnApplicationEventWhenFailsFiveTimesWithForbiddenError() {
         Cluster cluster = getARunningCluster();
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(messagesService.getMessage(anyString())).thenReturn("trigger failed");
+        when(messagesService.getMessageWithArgs(anyString(), any())).thenReturn("trigger failed");
 
-        UpdateFailedEvent failedEvent = new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID, new ForbiddenException(), System.currentTimeMillis(), true);
+        UpdateFailedEvent failedEvent = new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID, new ForbiddenException(), System.currentTimeMillis(), true, POLLING_USER);
         IntStream.range(0, 5).forEach(i -> underTest.onApplicationEvent(failedEvent));
 
         verify(clusterService, times(5)).findById(AUTOSCALE_CLUSTER_ID);
@@ -120,7 +122,7 @@ public class UpdateFailedHandlerTest {
     public void testOnApplicationEventWhenFailsFiveTimes() {
         Cluster cluster = getARunningCluster();
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(messagesService.getMessage(anyString())).thenReturn("trigger failed");
+        when(messagesService.getMessageWithArgs(anyString(), any())).thenReturn("trigger failed");
 
         IntStream.range(0, 5).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID)));
 
