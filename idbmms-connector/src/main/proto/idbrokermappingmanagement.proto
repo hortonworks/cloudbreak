@@ -4,6 +4,7 @@ package idbrokermappingmanagement;
 
 option java_package = "com.cloudera.thunderhead.service.idbrokermappingmanagement";
 option java_outer_classname = "IdBrokerMappingManagementProto";
+option go_package = "com/cloudera/cdp/protobuf";
 
 import "version.proto";
 
@@ -17,33 +18,34 @@ import "version.proto";
 service IdBrokerMappingManagement {
   // Get the service version.
   rpc GetVersion (version.VersionRequest)
-    returns (version.VersionResponse) {}
+      returns (version.VersionResponse) {}
 
   // Get all ID Broker mappings for an environment.
   rpc GetMappings (GetMappingsRequest)
-    returns (GetMappingsResponse) {}
+      returns (GetMappingsResponse) {}
 
   // Set all ID Broker mappings for an environment. WARNING: overwrites all
-  // existing mapping state, including the dataAccessRole and the baselineRole.
+  // existing mapping state, including the dataAccessRole, the baselineRole,
+  // and the rangerCloudAccessAuthorizerRole.
   rpc SetMappings (SetMappingsRequest)
-    returns (SetMappingsResponse) {}
+      returns (SetMappingsResponse) {}
 
   // Deletes all ID Broker mappings for an environment.
   rpc DeleteMappings (DeleteMappingsRequest)
-    returns (DeleteMappingsResponse) {}
+      returns (DeleteMappingsResponse) {}
 
   // Sync ID Broker mappings for an environment to all associated datalake clusters.
   rpc SyncMappings (SyncMappingsRequest)
-    returns (SyncMappingsResponse) {}
+      returns (SyncMappingsResponse) {}
 
   // Get the status of an ID Broker mapping sync attempt.
   rpc GetMappingsSyncStatus (GetMappingsSyncStatusRequest)
-    returns (GetMappingsSyncStatusResponse) {}
+      returns (GetMappingsSyncStatusResponse) {}
 
   // Get all ID Broker mappings for an environment in a form that matches
   // ID Broker's configuration model.
   rpc GetMappingsConfig (GetMappingsConfigRequest)
-    returns (GetMappingsConfigResponse) {}
+      returns (GetMappingsConfigResponse) {}
 }
 
 message GetMappingsRequest {
@@ -60,12 +62,15 @@ message GetMappingsResponse {
   // mappings for data access services.
   map<string, string> mappings = 2;
   // The cloud provider role to which data access services will be mapped
-  // (e.g., an ARN in AWS, a Resource ID in Azure).
+  // (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
   string dataAccessRole = 3;
   // The cloud provider role associated with the baseline instance identity
-  // (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-  // that write to cloud storage will be mapped to this role.
+  // (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+  // services that write to cloud storage will be mapped to this role.
   string baselineRole = 4;
+  // The cloud provider role to which the Ranger RAZ service will be mapped
+  // (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+  string rangerCloudAccessAuthorizerRole = 5;
 }
 
 message SetMappingsRequest {
@@ -77,12 +82,15 @@ message SetMappingsRequest {
   // mappings for data access services.
   map<string, string> mappings = 3;
   // The cloud provider role to which data access services will be mapped
-  // (e.g., an ARN in AWS, a Resource ID in Azure).
+  // (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
   string dataAccessRole = 4;
   // The cloud provider role associated with the baseline instance identity
-  // (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-  // that write to cloud storage will be mapped to this role.
+  // (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+  // services that write to cloud storage will be mapped to this role.
   string baselineRole = 5;
+  // The cloud provider role to which the Ranger RAZ service will be mapped
+  // (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+  string rangerCloudAccessAuthorizerRole = 6;
 }
 
 message SetMappingsResponse {
@@ -92,12 +100,15 @@ message SetMappingsResponse {
   // mappings for data access services.
   map<string, string> mappings = 2;
   // The cloud provider role to which data access services will be mapped
-  // (e.g., an ARN in AWS, a Resource ID in Azure).
+  // (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
   string dataAccessRole = 3;
   // The cloud provider role associated with the baseline instance identity
-  // (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-  // that write to cloud storage will be mapped to this role.
+  // (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+  // services that write to cloud storage will be mapped to this role.
   string baselineRole = 4;
+  // The cloud provider role to which the Ranger RAZ service will be mapped
+  // (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+  string rangerCloudAccessAuthorizerRole = 5;
 }
 
 message DeleteMappingsRequest {

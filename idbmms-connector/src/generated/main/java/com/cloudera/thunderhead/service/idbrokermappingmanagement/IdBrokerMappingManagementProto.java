@@ -862,7 +862,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
@@ -872,7 +872,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
@@ -884,8 +884,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
@@ -895,8 +895,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
@@ -904,6 +904,28 @@ java.lang.String defaultValue);
      */
     com.google.protobuf.ByteString
         getBaselineRoleBytes();
+
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+     * @return The rangerCloudAccessAuthorizerRole.
+     */
+    java.lang.String getRangerCloudAccessAuthorizerRole();
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+     * @return The bytes for rangerCloudAccessAuthorizerRole.
+     */
+    com.google.protobuf.ByteString
+        getRangerCloudAccessAuthorizerRoleBytes();
   }
   /**
    * Protobuf type {@code idbrokermappingmanagement.GetMappingsResponse}
@@ -920,6 +942,7 @@ java.lang.String defaultValue);
     private GetMappingsResponse() {
       dataAccessRole_ = "";
       baselineRole_ = "";
+      rangerCloudAccessAuthorizerRole_ = "";
     }
 
     @java.lang.Override
@@ -1080,7 +1103,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
@@ -1102,7 +1125,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
@@ -1128,8 +1151,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
@@ -1151,8 +1174,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
@@ -1167,6 +1190,54 @@ java.lang.String defaultValue);
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         baselineRole_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RANGERCLOUDACCESSAUTHORIZERROLE_FIELD_NUMBER = 5;
+    private volatile java.lang.Object rangerCloudAccessAuthorizerRole_;
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+     * @return The rangerCloudAccessAuthorizerRole.
+     */
+    @java.lang.Override
+    public java.lang.String getRangerCloudAccessAuthorizerRole() {
+      java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        rangerCloudAccessAuthorizerRole_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+     * @return The bytes for rangerCloudAccessAuthorizerRole.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRangerCloudAccessAuthorizerRoleBytes() {
+      java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        rangerCloudAccessAuthorizerRole_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -1202,6 +1273,9 @@ java.lang.String defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, baselineRole_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rangerCloudAccessAuthorizerRole_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, rangerCloudAccessAuthorizerRole_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -1231,6 +1305,9 @@ java.lang.String defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, baselineRole_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rangerCloudAccessAuthorizerRole_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, rangerCloudAccessAuthorizerRole_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -1254,6 +1331,8 @@ java.lang.String defaultValue);
           .equals(other.getDataAccessRole())) return false;
       if (!getBaselineRole()
           .equals(other.getBaselineRole())) return false;
+      if (!getRangerCloudAccessAuthorizerRole()
+          .equals(other.getRangerCloudAccessAuthorizerRole())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -1276,6 +1355,8 @@ java.lang.String defaultValue);
       hash = (53 * hash) + getDataAccessRole().hashCode();
       hash = (37 * hash) + BASELINEROLE_FIELD_NUMBER;
       hash = (53 * hash) + getBaselineRole().hashCode();
+      hash = (37 * hash) + RANGERCLOUDACCESSAUTHORIZERROLE_FIELD_NUMBER;
+      hash = (53 * hash) + getRangerCloudAccessAuthorizerRole().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1433,6 +1514,8 @@ java.lang.String defaultValue);
 
         baselineRole_ = "";
 
+        rangerCloudAccessAuthorizerRole_ = "";
+
         return this;
       }
 
@@ -1465,6 +1548,7 @@ java.lang.String defaultValue);
         result.mappings_.makeImmutable();
         result.dataAccessRole_ = dataAccessRole_;
         result.baselineRole_ = baselineRole_;
+        result.rangerCloudAccessAuthorizerRole_ = rangerCloudAccessAuthorizerRole_;
         onBuilt();
         return result;
       }
@@ -1526,6 +1610,10 @@ java.lang.String defaultValue);
           baselineRole_ = other.baselineRole_;
           onChanged();
         }
+        if (!other.getRangerCloudAccessAuthorizerRole().isEmpty()) {
+          rangerCloudAccessAuthorizerRole_ = other.rangerCloudAccessAuthorizerRole_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -1575,6 +1663,11 @@ java.lang.String defaultValue);
 
                 break;
               } // case 34
+              case 42: {
+                rangerCloudAccessAuthorizerRole_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -1805,7 +1898,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
@@ -1826,7 +1919,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
@@ -1848,7 +1941,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
@@ -1868,7 +1961,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
@@ -1883,7 +1976,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
@@ -1906,8 +1999,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
@@ -1928,8 +2021,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
@@ -1951,8 +2044,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
@@ -1972,8 +2065,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
@@ -1988,8 +2081,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
@@ -2004,6 +2097,107 @@ java.lang.String defaultValue);
   checkByteStringIsUtf8(value);
         
         baselineRole_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object rangerCloudAccessAuthorizerRole_ = "";
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+       * @return The rangerCloudAccessAuthorizerRole.
+       */
+      public java.lang.String getRangerCloudAccessAuthorizerRole() {
+        java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          rangerCloudAccessAuthorizerRole_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+       * @return The bytes for rangerCloudAccessAuthorizerRole.
+       */
+      public com.google.protobuf.ByteString
+          getRangerCloudAccessAuthorizerRoleBytes() {
+        java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          rangerCloudAccessAuthorizerRole_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+       * @param value The rangerCloudAccessAuthorizerRole to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRangerCloudAccessAuthorizerRole(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        rangerCloudAccessAuthorizerRole_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRangerCloudAccessAuthorizerRole() {
+        
+        rangerCloudAccessAuthorizerRole_ = getDefaultInstance().getRangerCloudAccessAuthorizerRole();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+       * @param value The bytes for rangerCloudAccessAuthorizerRole to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRangerCloudAccessAuthorizerRoleBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        rangerCloudAccessAuthorizerRole_ = value;
         onChanged();
         return this;
       }
@@ -2179,7 +2373,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 4;</code>
@@ -2189,7 +2383,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 4;</code>
@@ -2201,8 +2395,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 5;</code>
@@ -2212,8 +2406,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 5;</code>
@@ -2221,6 +2415,28 @@ java.lang.String defaultValue);
      */
     com.google.protobuf.ByteString
         getBaselineRoleBytes();
+
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 6;</code>
+     * @return The rangerCloudAccessAuthorizerRole.
+     */
+    java.lang.String getRangerCloudAccessAuthorizerRole();
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 6;</code>
+     * @return The bytes for rangerCloudAccessAuthorizerRole.
+     */
+    com.google.protobuf.ByteString
+        getRangerCloudAccessAuthorizerRoleBytes();
   }
   /**
    * Protobuf type {@code idbrokermappingmanagement.SetMappingsRequest}
@@ -2239,6 +2455,7 @@ java.lang.String defaultValue);
       environmentNameOrCrn_ = "";
       dataAccessRole_ = "";
       baselineRole_ = "";
+      rangerCloudAccessAuthorizerRole_ = "";
     }
 
     @java.lang.Override
@@ -2476,7 +2693,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 4;</code>
@@ -2498,7 +2715,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 4;</code>
@@ -2524,8 +2741,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 5;</code>
@@ -2547,8 +2764,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 5;</code>
@@ -2563,6 +2780,54 @@ java.lang.String defaultValue);
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         baselineRole_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RANGERCLOUDACCESSAUTHORIZERROLE_FIELD_NUMBER = 6;
+    private volatile java.lang.Object rangerCloudAccessAuthorizerRole_;
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 6;</code>
+     * @return The rangerCloudAccessAuthorizerRole.
+     */
+    @java.lang.Override
+    public java.lang.String getRangerCloudAccessAuthorizerRole() {
+      java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        rangerCloudAccessAuthorizerRole_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 6;</code>
+     * @return The bytes for rangerCloudAccessAuthorizerRole.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRangerCloudAccessAuthorizerRoleBytes() {
+      java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        rangerCloudAccessAuthorizerRole_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -2601,6 +2866,9 @@ java.lang.String defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, baselineRole_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rangerCloudAccessAuthorizerRole_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, rangerCloudAccessAuthorizerRole_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -2632,6 +2900,9 @@ java.lang.String defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, baselineRole_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rangerCloudAccessAuthorizerRole_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, rangerCloudAccessAuthorizerRole_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -2657,6 +2928,8 @@ java.lang.String defaultValue);
           .equals(other.getDataAccessRole())) return false;
       if (!getBaselineRole()
           .equals(other.getBaselineRole())) return false;
+      if (!getRangerCloudAccessAuthorizerRole()
+          .equals(other.getRangerCloudAccessAuthorizerRole())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -2680,6 +2953,8 @@ java.lang.String defaultValue);
       hash = (53 * hash) + getDataAccessRole().hashCode();
       hash = (37 * hash) + BASELINEROLE_FIELD_NUMBER;
       hash = (53 * hash) + getBaselineRole().hashCode();
+      hash = (37 * hash) + RANGERCLOUDACCESSAUTHORIZERROLE_FIELD_NUMBER;
+      hash = (53 * hash) + getRangerCloudAccessAuthorizerRole().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2839,6 +3114,8 @@ java.lang.String defaultValue);
 
         baselineRole_ = "";
 
+        rangerCloudAccessAuthorizerRole_ = "";
+
         return this;
       }
 
@@ -2872,6 +3149,7 @@ java.lang.String defaultValue);
         result.mappings_.makeImmutable();
         result.dataAccessRole_ = dataAccessRole_;
         result.baselineRole_ = baselineRole_;
+        result.rangerCloudAccessAuthorizerRole_ = rangerCloudAccessAuthorizerRole_;
         onBuilt();
         return result;
       }
@@ -2938,6 +3216,10 @@ java.lang.String defaultValue);
           baselineRole_ = other.baselineRole_;
           onChanged();
         }
+        if (!other.getRangerCloudAccessAuthorizerRole().isEmpty()) {
+          rangerCloudAccessAuthorizerRole_ = other.rangerCloudAccessAuthorizerRole_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -2992,6 +3274,11 @@ java.lang.String defaultValue);
 
                 break;
               } // case 42
+              case 50: {
+                rangerCloudAccessAuthorizerRole_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -3371,7 +3658,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 4;</code>
@@ -3392,7 +3679,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 4;</code>
@@ -3414,7 +3701,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 4;</code>
@@ -3434,7 +3721,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 4;</code>
@@ -3449,7 +3736,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 4;</code>
@@ -3472,8 +3759,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 5;</code>
@@ -3494,8 +3781,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 5;</code>
@@ -3517,8 +3804,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 5;</code>
@@ -3538,8 +3825,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 5;</code>
@@ -3554,8 +3841,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 5;</code>
@@ -3570,6 +3857,107 @@ java.lang.String defaultValue);
   checkByteStringIsUtf8(value);
         
         baselineRole_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object rangerCloudAccessAuthorizerRole_ = "";
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 6;</code>
+       * @return The rangerCloudAccessAuthorizerRole.
+       */
+      public java.lang.String getRangerCloudAccessAuthorizerRole() {
+        java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          rangerCloudAccessAuthorizerRole_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 6;</code>
+       * @return The bytes for rangerCloudAccessAuthorizerRole.
+       */
+      public com.google.protobuf.ByteString
+          getRangerCloudAccessAuthorizerRoleBytes() {
+        java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          rangerCloudAccessAuthorizerRole_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 6;</code>
+       * @param value The rangerCloudAccessAuthorizerRole to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRangerCloudAccessAuthorizerRole(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        rangerCloudAccessAuthorizerRole_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRangerCloudAccessAuthorizerRole() {
+        
+        rangerCloudAccessAuthorizerRole_ = getDefaultInstance().getRangerCloudAccessAuthorizerRole();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 6;</code>
+       * @param value The bytes for rangerCloudAccessAuthorizerRole to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRangerCloudAccessAuthorizerRoleBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        rangerCloudAccessAuthorizerRole_ = value;
         onChanged();
         return this;
       }
@@ -3715,7 +4103,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
@@ -3725,7 +4113,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
@@ -3737,8 +4125,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
@@ -3748,8 +4136,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
@@ -3757,6 +4145,28 @@ java.lang.String defaultValue);
      */
     com.google.protobuf.ByteString
         getBaselineRoleBytes();
+
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+     * @return The rangerCloudAccessAuthorizerRole.
+     */
+    java.lang.String getRangerCloudAccessAuthorizerRole();
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+     * @return The bytes for rangerCloudAccessAuthorizerRole.
+     */
+    com.google.protobuf.ByteString
+        getRangerCloudAccessAuthorizerRoleBytes();
   }
   /**
    * Protobuf type {@code idbrokermappingmanagement.SetMappingsResponse}
@@ -3773,6 +4183,7 @@ java.lang.String defaultValue);
     private SetMappingsResponse() {
       dataAccessRole_ = "";
       baselineRole_ = "";
+      rangerCloudAccessAuthorizerRole_ = "";
     }
 
     @java.lang.Override
@@ -3933,7 +4344,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
@@ -3955,7 +4366,7 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role to which data access services will be mapped
-     * (e.g., an ARN in AWS, a Resource ID in Azure).
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
@@ -3981,8 +4392,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
@@ -4004,8 +4415,8 @@ java.lang.String defaultValue);
     /**
      * <pre>
      * The cloud provider role associated with the baseline instance identity
-     * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-     * that write to cloud storage will be mapped to this role.
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+     * services that write to cloud storage will be mapped to this role.
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
@@ -4020,6 +4431,54 @@ java.lang.String defaultValue);
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         baselineRole_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RANGERCLOUDACCESSAUTHORIZERROLE_FIELD_NUMBER = 5;
+    private volatile java.lang.Object rangerCloudAccessAuthorizerRole_;
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+     * @return The rangerCloudAccessAuthorizerRole.
+     */
+    @java.lang.Override
+    public java.lang.String getRangerCloudAccessAuthorizerRole() {
+      java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        rangerCloudAccessAuthorizerRole_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cloud provider role to which the Ranger RAZ service will be mapped
+     * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+     * </pre>
+     *
+     * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+     * @return The bytes for rangerCloudAccessAuthorizerRole.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRangerCloudAccessAuthorizerRoleBytes() {
+      java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        rangerCloudAccessAuthorizerRole_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -4055,6 +4514,9 @@ java.lang.String defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, baselineRole_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rangerCloudAccessAuthorizerRole_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, rangerCloudAccessAuthorizerRole_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -4084,6 +4546,9 @@ java.lang.String defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, baselineRole_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rangerCloudAccessAuthorizerRole_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, rangerCloudAccessAuthorizerRole_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -4107,6 +4572,8 @@ java.lang.String defaultValue);
           .equals(other.getDataAccessRole())) return false;
       if (!getBaselineRole()
           .equals(other.getBaselineRole())) return false;
+      if (!getRangerCloudAccessAuthorizerRole()
+          .equals(other.getRangerCloudAccessAuthorizerRole())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -4129,6 +4596,8 @@ java.lang.String defaultValue);
       hash = (53 * hash) + getDataAccessRole().hashCode();
       hash = (37 * hash) + BASELINEROLE_FIELD_NUMBER;
       hash = (53 * hash) + getBaselineRole().hashCode();
+      hash = (37 * hash) + RANGERCLOUDACCESSAUTHORIZERROLE_FIELD_NUMBER;
+      hash = (53 * hash) + getRangerCloudAccessAuthorizerRole().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4286,6 +4755,8 @@ java.lang.String defaultValue);
 
         baselineRole_ = "";
 
+        rangerCloudAccessAuthorizerRole_ = "";
+
         return this;
       }
 
@@ -4318,6 +4789,7 @@ java.lang.String defaultValue);
         result.mappings_.makeImmutable();
         result.dataAccessRole_ = dataAccessRole_;
         result.baselineRole_ = baselineRole_;
+        result.rangerCloudAccessAuthorizerRole_ = rangerCloudAccessAuthorizerRole_;
         onBuilt();
         return result;
       }
@@ -4379,6 +4851,10 @@ java.lang.String defaultValue);
           baselineRole_ = other.baselineRole_;
           onChanged();
         }
+        if (!other.getRangerCloudAccessAuthorizerRole().isEmpty()) {
+          rangerCloudAccessAuthorizerRole_ = other.rangerCloudAccessAuthorizerRole_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -4428,6 +4904,11 @@ java.lang.String defaultValue);
 
                 break;
               } // case 34
+              case 42: {
+                rangerCloudAccessAuthorizerRole_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -4658,7 +5139,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
@@ -4679,7 +5160,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
@@ -4701,7 +5182,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
@@ -4721,7 +5202,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
@@ -4736,7 +5217,7 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role to which data access services will be mapped
-       * (e.g., an ARN in AWS, a Resource ID in Azure).
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
@@ -4759,8 +5240,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
@@ -4781,8 +5262,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
@@ -4804,8 +5285,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
@@ -4825,8 +5306,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
@@ -4841,8 +5322,8 @@ java.lang.String defaultValue);
       /**
        * <pre>
        * The cloud provider role associated with the baseline instance identity
-       * (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
-       * that write to cloud storage will be mapped to this role.
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure). Non-data access
+       * services that write to cloud storage will be mapped to this role.
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
@@ -4857,6 +5338,107 @@ java.lang.String defaultValue);
   checkByteStringIsUtf8(value);
         
         baselineRole_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object rangerCloudAccessAuthorizerRole_ = "";
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+       * @return The rangerCloudAccessAuthorizerRole.
+       */
+      public java.lang.String getRangerCloudAccessAuthorizerRole() {
+        java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          rangerCloudAccessAuthorizerRole_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+       * @return The bytes for rangerCloudAccessAuthorizerRole.
+       */
+      public com.google.protobuf.ByteString
+          getRangerCloudAccessAuthorizerRoleBytes() {
+        java.lang.Object ref = rangerCloudAccessAuthorizerRole_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          rangerCloudAccessAuthorizerRole_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+       * @param value The rangerCloudAccessAuthorizerRole to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRangerCloudAccessAuthorizerRole(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        rangerCloudAccessAuthorizerRole_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRangerCloudAccessAuthorizerRole() {
+        
+        rangerCloudAccessAuthorizerRole_ = getDefaultInstance().getRangerCloudAccessAuthorizerRole();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud provider role to which the Ranger RAZ service will be mapped
+       * (e.g., a role ARN in AWS, an MSI Resource ID in Azure).
+       * </pre>
+       *
+       * <code>string rangerCloudAccessAuthorizerRole = 5;</code>
+       * @param value The bytes for rangerCloudAccessAuthorizerRole to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRangerCloudAccessAuthorizerRoleBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        rangerCloudAccessAuthorizerRole_ = value;
         onChanged();
         return this;
       }
@@ -12315,78 +12897,82 @@ java.lang.String defaultValue);
       "\n\037idbrokermappingmanagement.proto\022\031idbro" +
       "kermappingmanagement\032\rversion.proto\"E\n\022G" +
       "etMappingsRequest\022\021\n\taccountId\030\001 \001(\t\022\034\n\024" +
-      "environmentNameOrCrn\030\002 \001(\t\"\335\001\n\023GetMappin" +
+      "environmentNameOrCrn\030\002 \001(\t\"\206\002\n\023GetMappin" +
       "gsResponse\022\027\n\017mappingsVersion\030\001 \001(\003\022N\n\010m" +
       "appings\030\002 \003(\0132<.idbrokermappingmanagemen" +
       "t.GetMappingsResponse.MappingsEntry\022\026\n\016d" +
       "ataAccessRole\030\003 \001(\t\022\024\n\014baselineRole\030\004 \001(" +
-      "\t\032/\n\rMappingsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value" +
-      "\030\002 \001(\t:\0028\001\"\363\001\n\022SetMappingsRequest\022\021\n\tacc" +
-      "ountId\030\001 \001(\t\022\034\n\024environmentNameOrCrn\030\002 \001" +
-      "(\t\022M\n\010mappings\030\003 \003(\0132;.idbrokermappingma" +
-      "nagement.SetMappingsRequest.MappingsEntr" +
-      "y\022\026\n\016dataAccessRole\030\004 \001(\t\022\024\n\014baselineRol" +
-      "e\030\005 \001(\t\032/\n\rMappingsEntry\022\013\n\003key\030\001 \001(\t\022\r\n" +
-      "\005value\030\002 \001(\t:\0028\001\"\335\001\n\023SetMappingsResponse" +
-      "\022\027\n\017mappingsVersion\030\001 \001(\003\022N\n\010mappings\030\002 " +
-      "\003(\0132<.idbrokermappingmanagement.SetMappi" +
-      "ngsResponse.MappingsEntry\022\026\n\016dataAccessR" +
-      "ole\030\003 \001(\t\022\024\n\014baselineRole\030\004 \001(\t\032/\n\rMappi" +
-      "ngsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001" +
-      "\"5\n\025DeleteMappingsRequest\022\026\n\016environment" +
-      "Crn\030\002 \001(\tJ\004\010\001\020\002\"\030\n\026DeleteMappingsRespons" +
-      "e\"F\n\023SyncMappingsRequest\022\021\n\taccountId\030\001 " +
-      "\001(\t\022\034\n\024environmentNameOrCrn\030\002 \001(\t\"\026\n\024Syn" +
-      "cMappingsResponse\"O\n\034GetMappingsSyncStat" +
-      "usRequest\022\021\n\taccountId\030\001 \001(\t\022\034\n\024environm" +
-      "entNameOrCrn\030\002 \001(\t\"\265\002\n\035GetMappingsSyncSt" +
-      "atusResponse\022\022\n\nsyncNeeded\030\002 \001(\010\022A\n\014glob" +
-      "alStatus\030\003 \001(\0162+.idbrokermappingmanageme" +
-      "nt.SyncStatus.Value\022X\n\010statuses\030\004 \003(\0132F." +
-      "idbrokermappingmanagement.GetMappingsSyn" +
-      "cStatusResponse.StatusesEntry\032]\n\rStatuse" +
-      "sEntry\022\013\n\003key\030\001 \001(\t\022;\n\005value\030\002 \001(\0132,.idb" +
-      "rokermappingmanagement.SyncStatusDetails" +
-      ":\0028\001J\004\010\001\020\002\"\215\001\n\021SyncStatusDetails\022;\n\006stat" +
-      "us\030\001 \001(\0162+.idbrokermappingmanagement.Syn" +
-      "cStatus.Value\022\023\n\013startDateMs\030\002 \001(\004\022\021\n\ten" +
-      "dDateMs\030\003 \001(\004\022\023\n\013errorDetail\030\004 \001(\t\"W\n\nSy" +
-      "ncStatus\"I\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tNEVER_RU" +
-      "N\020\001\022\013\n\007RUNNING\020\002\022\r\n\tCOMPLETED\020\003\022\n\n\006FAILE" +
-      "D\020\004\"2\n\030GetMappingsConfigRequest\022\026\n\016envir" +
-      "onmentCrn\030\001 \001(\t\"\340\002\n\031GetMappingsConfigRes" +
-      "ponse\022\027\n\017mappingsVersion\030\001 \001(\003\022^\n\ractorM" +
-      "appings\030\002 \003(\0132G.idbrokermappingmanagemen" +
-      "t.GetMappingsConfigResponse.ActorMapping" +
-      "sEntry\022^\n\rgroupMappings\030\003 \003(\0132G.idbroker" +
-      "mappingmanagement.GetMappingsConfigRespo" +
-      "nse.GroupMappingsEntry\0324\n\022ActorMappingsE" +
-      "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0324\n\022" +
-      "GroupMappingsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value" +
-      "\030\002 \001(\t:\0028\0012\274\006\n\031IdBrokerMappingManagement" +
-      "\022A\n\nGetVersion\022\027.version.VersionRequest\032" +
-      "\030.version.VersionResponse\"\000\022n\n\013GetMappin" +
-      "gs\022-.idbrokermappingmanagement.GetMappin" +
-      "gsRequest\032..idbrokermappingmanagement.Ge" +
-      "tMappingsResponse\"\000\022n\n\013SetMappings\022-.idb" +
-      "rokermappingmanagement.SetMappingsReques" +
-      "t\032..idbrokermappingmanagement.SetMapping" +
-      "sResponse\"\000\022w\n\016DeleteMappings\0220.idbroker" +
-      "mappingmanagement.DeleteMappingsRequest\032" +
-      "1.idbrokermappingmanagement.DeleteMappin" +
-      "gsResponse\"\000\022q\n\014SyncMappings\022..idbrokerm" +
-      "appingmanagement.SyncMappingsRequest\032/.i" +
-      "dbrokermappingmanagement.SyncMappingsRes" +
-      "ponse\"\000\022\214\001\n\025GetMappingsSyncStatus\0227.idbr" +
-      "okermappingmanagement.GetMappingsSyncSta" +
-      "tusRequest\0328.idbrokermappingmanagement.G" +
-      "etMappingsSyncStatusResponse\"\000\022\200\001\n\021GetMa" +
-      "ppingsConfig\0223.idbrokermappingmanagement" +
-      ".GetMappingsConfigRequest\0324.idbrokermapp" +
-      "ingmanagement.GetMappingsConfigResponse\"" +
-      "\000B\\\n:com.cloudera.thunderhead.service.id" +
-      "brokermappingmanagementB\036IdBrokerMapping" +
-      "ManagementProtob\006proto3"
+      "\t\022\'\n\037rangerCloudAccessAuthorizerRole\030\005 \001" +
+      "(\t\032/\n\rMappingsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005valu" +
+      "e\030\002 \001(\t:\0028\001\"\234\002\n\022SetMappingsRequest\022\021\n\tac" +
+      "countId\030\001 \001(\t\022\034\n\024environmentNameOrCrn\030\002 " +
+      "\001(\t\022M\n\010mappings\030\003 \003(\0132;.idbrokermappingm" +
+      "anagement.SetMappingsRequest.MappingsEnt" +
+      "ry\022\026\n\016dataAccessRole\030\004 \001(\t\022\024\n\014baselineRo" +
+      "le\030\005 \001(\t\022\'\n\037rangerCloudAccessAuthorizerR" +
+      "ole\030\006 \001(\t\032/\n\rMappingsEntry\022\013\n\003key\030\001 \001(\t\022" +
+      "\r\n\005value\030\002 \001(\t:\0028\001\"\206\002\n\023SetMappingsRespon" +
+      "se\022\027\n\017mappingsVersion\030\001 \001(\003\022N\n\010mappings\030" +
+      "\002 \003(\0132<.idbrokermappingmanagement.SetMap" +
+      "pingsResponse.MappingsEntry\022\026\n\016dataAcces" +
+      "sRole\030\003 \001(\t\022\024\n\014baselineRole\030\004 \001(\t\022\'\n\037ran" +
+      "gerCloudAccessAuthorizerRole\030\005 \001(\t\032/\n\rMa" +
+      "ppingsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:" +
+      "\0028\001\"5\n\025DeleteMappingsRequest\022\026\n\016environm" +
+      "entCrn\030\002 \001(\tJ\004\010\001\020\002\"\030\n\026DeleteMappingsResp" +
+      "onse\"F\n\023SyncMappingsRequest\022\021\n\taccountId" +
+      "\030\001 \001(\t\022\034\n\024environmentNameOrCrn\030\002 \001(\t\"\026\n\024" +
+      "SyncMappingsResponse\"O\n\034GetMappingsSyncS" +
+      "tatusRequest\022\021\n\taccountId\030\001 \001(\t\022\034\n\024envir" +
+      "onmentNameOrCrn\030\002 \001(\t\"\265\002\n\035GetMappingsSyn" +
+      "cStatusResponse\022\022\n\nsyncNeeded\030\002 \001(\010\022A\n\014g" +
+      "lobalStatus\030\003 \001(\0162+.idbrokermappingmanag" +
+      "ement.SyncStatus.Value\022X\n\010statuses\030\004 \003(\013" +
+      "2F.idbrokermappingmanagement.GetMappings" +
+      "SyncStatusResponse.StatusesEntry\032]\n\rStat" +
+      "usesEntry\022\013\n\003key\030\001 \001(\t\022;\n\005value\030\002 \001(\0132,." +
+      "idbrokermappingmanagement.SyncStatusDeta" +
+      "ils:\0028\001J\004\010\001\020\002\"\215\001\n\021SyncStatusDetails\022;\n\006s" +
+      "tatus\030\001 \001(\0162+.idbrokermappingmanagement." +
+      "SyncStatus.Value\022\023\n\013startDateMs\030\002 \001(\004\022\021\n" +
+      "\tendDateMs\030\003 \001(\004\022\023\n\013errorDetail\030\004 \001(\t\"W\n" +
+      "\nSyncStatus\"I\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tNEVER" +
+      "_RUN\020\001\022\013\n\007RUNNING\020\002\022\r\n\tCOMPLETED\020\003\022\n\n\006FA" +
+      "ILED\020\004\"2\n\030GetMappingsConfigRequest\022\026\n\016en" +
+      "vironmentCrn\030\001 \001(\t\"\340\002\n\031GetMappingsConfig" +
+      "Response\022\027\n\017mappingsVersion\030\001 \001(\003\022^\n\ract" +
+      "orMappings\030\002 \003(\0132G.idbrokermappingmanage" +
+      "ment.GetMappingsConfigResponse.ActorMapp" +
+      "ingsEntry\022^\n\rgroupMappings\030\003 \003(\0132G.idbro" +
+      "kermappingmanagement.GetMappingsConfigRe" +
+      "sponse.GroupMappingsEntry\0324\n\022ActorMappin" +
+      "gsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\032" +
+      "4\n\022GroupMappingsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005va" +
+      "lue\030\002 \001(\t:\0028\0012\274\006\n\031IdBrokerMappingManagem" +
+      "ent\022A\n\nGetVersion\022\027.version.VersionReque" +
+      "st\032\030.version.VersionResponse\"\000\022n\n\013GetMap" +
+      "pings\022-.idbrokermappingmanagement.GetMap" +
+      "pingsRequest\032..idbrokermappingmanagement" +
+      ".GetMappingsResponse\"\000\022n\n\013SetMappings\022-." +
+      "idbrokermappingmanagement.SetMappingsReq" +
+      "uest\032..idbrokermappingmanagement.SetMapp" +
+      "ingsResponse\"\000\022w\n\016DeleteMappings\0220.idbro" +
+      "kermappingmanagement.DeleteMappingsReque" +
+      "st\0321.idbrokermappingmanagement.DeleteMap" +
+      "pingsResponse\"\000\022q\n\014SyncMappings\022..idbrok" +
+      "ermappingmanagement.SyncMappingsRequest\032" +
+      "/.idbrokermappingmanagement.SyncMappings" +
+      "Response\"\000\022\214\001\n\025GetMappingsSyncStatus\0227.i" +
+      "dbrokermappingmanagement.GetMappingsSync" +
+      "StatusRequest\0328.idbrokermappingmanagemen" +
+      "t.GetMappingsSyncStatusResponse\"\000\022\200\001\n\021Ge" +
+      "tMappingsConfig\0223.idbrokermappingmanagem" +
+      "ent.GetMappingsConfigRequest\0324.idbrokerm" +
+      "appingmanagement.GetMappingsConfigRespon" +
+      "se\"\000Bw\n:com.cloudera.thunderhead.service" +
+      ".idbrokermappingmanagementB\036IdBrokerMapp" +
+      "ingManagementProtoZ\031com/cloudera/cdp/pro" +
+      "tobufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -12404,7 +12990,7 @@ java.lang.String defaultValue);
     internal_static_idbrokermappingmanagement_GetMappingsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_idbrokermappingmanagement_GetMappingsResponse_descriptor,
-        new java.lang.String[] { "MappingsVersion", "Mappings", "DataAccessRole", "BaselineRole", });
+        new java.lang.String[] { "MappingsVersion", "Mappings", "DataAccessRole", "BaselineRole", "RangerCloudAccessAuthorizerRole", });
     internal_static_idbrokermappingmanagement_GetMappingsResponse_MappingsEntry_descriptor =
       internal_static_idbrokermappingmanagement_GetMappingsResponse_descriptor.getNestedTypes().get(0);
     internal_static_idbrokermappingmanagement_GetMappingsResponse_MappingsEntry_fieldAccessorTable = new
@@ -12416,7 +13002,7 @@ java.lang.String defaultValue);
     internal_static_idbrokermappingmanagement_SetMappingsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_idbrokermappingmanagement_SetMappingsRequest_descriptor,
-        new java.lang.String[] { "AccountId", "EnvironmentNameOrCrn", "Mappings", "DataAccessRole", "BaselineRole", });
+        new java.lang.String[] { "AccountId", "EnvironmentNameOrCrn", "Mappings", "DataAccessRole", "BaselineRole", "RangerCloudAccessAuthorizerRole", });
     internal_static_idbrokermappingmanagement_SetMappingsRequest_MappingsEntry_descriptor =
       internal_static_idbrokermappingmanagement_SetMappingsRequest_descriptor.getNestedTypes().get(0);
     internal_static_idbrokermappingmanagement_SetMappingsRequest_MappingsEntry_fieldAccessorTable = new
@@ -12428,7 +13014,7 @@ java.lang.String defaultValue);
     internal_static_idbrokermappingmanagement_SetMappingsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_idbrokermappingmanagement_SetMappingsResponse_descriptor,
-        new java.lang.String[] { "MappingsVersion", "Mappings", "DataAccessRole", "BaselineRole", });
+        new java.lang.String[] { "MappingsVersion", "Mappings", "DataAccessRole", "BaselineRole", "RangerCloudAccessAuthorizerRole", });
     internal_static_idbrokermappingmanagement_SetMappingsResponse_MappingsEntry_descriptor =
       internal_static_idbrokermappingmanagement_SetMappingsResponse_descriptor.getNestedTypes().get(0);
     internal_static_idbrokermappingmanagement_SetMappingsResponse_MappingsEntry_fieldAccessorTable = new

@@ -319,7 +319,8 @@ public final class IdBrokerMappingManagementGrpc {
     /**
      * <pre>
      * Set all ID Broker mappings for an environment. WARNING: overwrites all
-     * existing mapping state, including the dataAccessRole and the baselineRole.
+     * existing mapping state, including the dataAccessRole, the baselineRole,
+     * and the rangerCloudAccessAuthorizerRole.
      * </pre>
      */
     public void setMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest request,
@@ -470,7 +471,8 @@ public final class IdBrokerMappingManagementGrpc {
     /**
      * <pre>
      * Set all ID Broker mappings for an environment. WARNING: overwrites all
-     * existing mapping state, including the dataAccessRole and the baselineRole.
+     * existing mapping state, including the dataAccessRole, the baselineRole,
+     * and the rangerCloudAccessAuthorizerRole.
      * </pre>
      */
     public void setMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest request,
@@ -570,7 +572,8 @@ public final class IdBrokerMappingManagementGrpc {
     /**
      * <pre>
      * Set all ID Broker mappings for an environment. WARNING: overwrites all
-     * existing mapping state, including the dataAccessRole and the baselineRole.
+     * existing mapping state, including the dataAccessRole, the baselineRole,
+     * and the rangerCloudAccessAuthorizerRole.
      * </pre>
      */
     public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse setMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest request) {
@@ -667,7 +670,8 @@ public final class IdBrokerMappingManagementGrpc {
     /**
      * <pre>
      * Set all ID Broker mappings for an environment. WARNING: overwrites all
-     * existing mapping state, including the dataAccessRole and the baselineRole.
+     * existing mapping state, including the dataAccessRole, the baselineRole,
+     * and the rangerCloudAccessAuthorizerRole.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse> setMappings(
