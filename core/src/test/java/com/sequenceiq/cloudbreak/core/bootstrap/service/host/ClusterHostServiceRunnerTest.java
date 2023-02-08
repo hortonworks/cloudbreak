@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.model.ServiceLocation;
@@ -346,6 +347,7 @@ class ClusterHostServiceRunnerTest {
         List<InstanceMetadataView> gwNodes = Lists.newArrayList(createInstanceMetadata("gateway1"), createInstanceMetadata("gateway2"),
                 createInstanceMetadata("1.1.3.1"), createInstanceMetadata("1.1.3.2"));
         when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(gwNodes);
+        when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
         KerberosConfig kerberosConfig = new KerberosConfig();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
@@ -379,6 +381,7 @@ class ClusterHostServiceRunnerTest {
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
+        when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
 
         underTest.runClusterServices(stack, Map.of(), true);
 
@@ -408,6 +411,7 @@ class ClusterHostServiceRunnerTest {
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
+        when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
 
         underTest.runClusterServices(stack, Map.of(), false);
 
@@ -433,6 +437,7 @@ class ClusterHostServiceRunnerTest {
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
         List<GatewayConfig> gwConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
+        when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
 
         setupMocksForRunClusterServices();
         underTest.redeployGatewayCertificate(stack);
@@ -481,6 +486,7 @@ class ClusterHostServiceRunnerTest {
     void testAddJavaPillarToSaltConfig() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
         when(stackView.getJavaVersion()).thenReturn(11);
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
