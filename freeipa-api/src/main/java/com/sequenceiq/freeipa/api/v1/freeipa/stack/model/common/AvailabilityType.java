@@ -4,6 +4,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public enum AvailabilityType {
@@ -30,6 +31,7 @@ public enum AvailabilityType {
     }
 
     public static AvailabilityType getByInstanceCount(Integer instanceCount) {
-        return AVAILABILITY_TYPE_MAP_BY_INSTANCE_COUNT.get(instanceCount);
+        return Optional.ofNullable(AVAILABILITY_TYPE_MAP_BY_INSTANCE_COUNT.get(instanceCount))
+                .orElseGet(() -> instanceCount > HA.getInstanceCount() ? HA : NON_HA);
     }
 }
