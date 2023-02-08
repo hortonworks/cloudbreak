@@ -403,4 +403,15 @@ public class DatabaseServerSslCertificateConfig {
         return new HashSet<>(CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIERS_BY_CLOUD_PLATFORM.keySet());
     }
 
+    public void modifyMockProviderCertCache(String mockZone, Set<SslCertificateEntry> certs) {
+        String key = "mock." + mockZone;
+        Integer maxVersion = certs.stream().map(c -> c.getVersion()).max(Integer::compare).orElse(0);
+        Integer minVersion = certs.stream().map(c -> c.getVersion()).min(Integer::compare).orElse(0);
+
+        certsByCloudPlatformCache.put(key, certs);
+        certMaxVersionsByCloudPlatformCache.put(key, maxVersion);
+        certMinVersionsByCloudPlatformCache.put(key, minVersion);
+        certsByCloudPlatformByVersionCache.put(key, buildCertsByVersionMap(certs));
+        certsByCloudPlatformByCloudProviderIdentifierCache.put(key,  buildCertsByCloudProviderIdentifierMap(certs));
+    }
 }

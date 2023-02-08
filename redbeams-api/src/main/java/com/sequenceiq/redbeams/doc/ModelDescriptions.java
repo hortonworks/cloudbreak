@@ -26,6 +26,9 @@ public final class ModelDescriptions {
     public static final String DATABASE_SERVER_TEST_RESPONSE = "Response for testing connectivity to a database server";
     public static final String DATABASE_TEST_REQUEST = "Request for testing connectivity to a database";
     public static final String DATABASE_TEST_RESPONSE = "Response for testing connectivity to a database";
+    public static final String SUPPORT_CERTIFICATE_REQUEST = "Request for testing database certificate ";
+    public static final String SUPPORT_CERTIFICATE_RESPONSE = "Response for testing database certificate";
+
 
     public static final String FLOW_IDENTIFIER = "The id of the flow or flow chain that was triggered as part of the process.";
 
@@ -168,6 +171,12 @@ public final class ModelDescriptions {
         public static final String MAJOR_VERSION = "The major version to which the database server should be upgraded";
         public static final String CURRENT_VERSION = "The current version of the database server";
         public static final String UPGRADE_REASON = "The status reason if upgrade flow is not started due to some validation";
+    }
+
+    public static class SupportModelDescriptions {
+        public static final String FIRST_CERTIFICATE = "The first certificate should be included";
+        public static final String SECOND_CERTIFICATE = "The second certificate should be included";
+        public static final String CERTIFICATES = "List of selected certificates";
     }
 
 }

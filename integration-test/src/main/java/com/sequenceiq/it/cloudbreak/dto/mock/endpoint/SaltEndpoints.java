@@ -34,6 +34,10 @@ public final class SaltEndpoints<T extends CloudbreakTestDto> {
         return (SaltActionDistribute<T>) EndpointProxyFactory.create(SaltActionDistribute.class, testDto, mockedTestContext);
     }
 
+    public SaltPillar<T> saltPillarDistribute() {
+        return (SaltPillar<T>) EndpointProxyFactory.create(SaltPillar.class, testDto, mockedTestContext);
+    }
+
     public Run<T> run() {
         return (Run<T>) EndpointProxyFactory.create(Run.class, testDto, mockedTestContext);
     }

@@ -11,6 +11,7 @@ import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.CertificateSwapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
@@ -61,6 +62,7 @@ public class RedbeamsClient extends MicroserviceClient<com.sequenceiq.redbeams.c
     public Set<String> supportedTestDtos() {
         return Set.of(
                 RedbeamsDatabaseServerTestDto.class.getSimpleName(),
-                RedbeamsDatabaseTestDto.class.getSimpleName());
+                RedbeamsDatabaseTestDto.class.getSimpleName(),
+                CertificateSwapTestDto.class.getSimpleName());
     }
 }

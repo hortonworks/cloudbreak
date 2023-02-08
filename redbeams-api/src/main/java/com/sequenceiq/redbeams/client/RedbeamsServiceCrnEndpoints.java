@@ -8,6 +8,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.progress.ProgressV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
 
 public class RedbeamsServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint implements RedbeamsClient {
 
@@ -38,5 +39,10 @@ public class RedbeamsServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint 
     @Override
     public FlowEndpoint flowEndpoint() {
         return getEndpoint(FlowEndpoint.class);
+    }
+
+    @Override
+    public SupportV4Endpoint supportV4Endpoint() {
+        return getEndpoint(SupportV4Endpoint.class);
     }
 }

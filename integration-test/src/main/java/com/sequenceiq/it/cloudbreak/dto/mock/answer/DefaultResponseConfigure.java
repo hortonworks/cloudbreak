@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Entity;
@@ -21,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.dto.mock.CheckCount;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
 import com.sequenceiq.it.cloudbreak.dto.mock.Verification;
 import com.sequenceiq.it.cloudbreak.dto.mock.verification.TextBodyContainsVerification;
+import com.sequenceiq.it.cloudbreak.dto.mock.verification.TextBodyLambdaVerification;
 import com.sequenceiq.it.cloudbreak.dto.mock.verification.VerificationContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
@@ -133,6 +135,11 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto, R> {
         return this;
     }
 
+    public DefaultResponseConfigure<T, R> bodyCheck(Predicate<String> check) {
+        verifications.add(new TextBodyLambdaVerification(check));
+        return this;
+    }
+
     protected void pathVariableInternal(String name, String value) {
         pathVariables.put(name, value);
     }
@@ -163,7 +170,8 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto, R> {
         }
         Set<String> requestMatchers = null;
         if (!verifications.isEmpty()) {
-            requestMatchers = verifications.stream().filter(v -> v instanceof TextBodyContainsVerification).map(v -> v.getValue()).collect(Collectors.toSet());
+            requestMatchers = verifications.stream().filter(v -> v instanceof TextBodyContainsVerification).map(
+                    v -> ((TextBodyContainsVerification) v).getValue()).collect(Collectors.toSet());
         }
         MockResponse body = new MockResponse(retValue, message, getMethod().getHttpMethod().name(), getPath(), times, statusCode, retType, requestMatchers);
         executeQuery.executeConfigure(pathVariables(), body);
