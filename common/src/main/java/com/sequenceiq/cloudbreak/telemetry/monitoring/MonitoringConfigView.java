@@ -80,7 +80,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final String username;
 
-    private final char[] password;
+    private final String password;
 
     private final char[] token;
 
@@ -202,7 +202,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return username;
     }
 
-    public char[] getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -271,7 +271,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("maxBackoff", defaultIfNull(this.maxBackoff, MAX_BACKOFF));
         map.put("walTruncateFrequency", defaultIfNull(this.walTruncateFrequency, WAL_TRUNCATE_FREQUENCY));
         map.put("username", defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
-        map.put("password", this.password != null ? new String(this.password) : EMPTY_CONFIG_DEFAULT);
+        map.put("password", this.password != null ? this.password : EMPTY_CONFIG_DEFAULT);
         map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
         map.put("monitoringAccessKeyId", defaultIfNull(this.accessKeyId, EMPTY_CONFIG_DEFAULT));
         map.put("monitoringPrivateKey", this.privateKey != null ? new String(this.privateKey) : EMPTY_CONFIG_DEFAULT);
@@ -297,7 +297,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         private String username;
 
-        private char[] password;
+        private String password;
 
         private char[] token;
 
@@ -382,7 +382,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withPassword(char[] password) {
+        public Builder withPassword(String password) {
             this.password = password;
             return this;
         }

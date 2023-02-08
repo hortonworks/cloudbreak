@@ -59,7 +59,7 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         if (monitoringGlobalAuthConfig.isEnabled()) {
             builder.withUsername(monitoringGlobalAuthConfig.getUsername());
             if (StringUtils.isNotBlank(monitoringGlobalAuthConfig.getPassword())) {
-                builder.withPassword(monitoringGlobalAuthConfig.getPassword().toCharArray());
+                builder.withPassword(monitoringGlobalAuthConfig.getPassword());
             }
             if (StringUtils.isNotBlank(monitoringGlobalAuthConfig.getToken())) {
                 builder.withToken(monitoringGlobalAuthConfig.getToken().toCharArray());
@@ -127,6 +127,6 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
 
     private boolean areAuthConfigsValid(MonitoringAuthConfig authConfig) {
         return authConfig != null && authConfig.getPassword() != null
-                && StringUtils.isNoneBlank(authConfig.getUsername(), new String(authConfig.getPassword()));
+                && StringUtils.isNoneBlank(authConfig.getUsername(), authConfig.getPassword());
     }
 }
