@@ -163,6 +163,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.database.dr.retry:300}")
     private int maxDatabaseDrRetry;
 
+    @Value("${cb.max.salt.database.dr.retry.long:600}")
+    private int maxDatabaseDrRetryLong;
+
     @Value("${cb.max.salt.database.dr.retry.onerror:5}")
     private int maxDatabaseDrRetryOnError;
 
@@ -1315,15 +1318,15 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void backupDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+    public void backupDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel, Boolean isLongTimeBackupEnabled)
             throws CloudbreakOrchestratorFailedException {
-        callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_BACKUP);
+        callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_BACKUP, isLongTimeBackupEnabled);
     }
 
     @Override
-    public void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+    public void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel, Boolean isLongTimeBackupEnabled)
             throws CloudbreakOrchestratorFailedException {
-        callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_RESTORE);
+        callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_RESTORE, isLongTimeBackupEnabled);
     }
 
     @Override
@@ -1391,7 +1394,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private void callBackupRestore(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig,
-            ExitCriteriaModel exitModel, String state) throws CloudbreakOrchestratorFailedException {
+            ExitCriteriaModel exitModel, String state, Boolean isLongTimeBackupEnabled) throws CloudbreakOrchestratorFailedException {
+        int maxDatabaseRetryCount = isLongTimeBackupEnabled ? maxDatabaseDrRetryLong : maxDatabaseDrRetry;
+        LOGGER.info("The maximum database retry count is set to be {}", maxDatabaseRetryCount);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave =
@@ -1403,7 +1408,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             StateRunner stateRunner = new StateRunner(saltStateService, target, state);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
             Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel,
-                    maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
+                    maxDatabaseRetryCount, maxDatabaseDrRetryOnError);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.error("Error occurred during database backup/restore", e);

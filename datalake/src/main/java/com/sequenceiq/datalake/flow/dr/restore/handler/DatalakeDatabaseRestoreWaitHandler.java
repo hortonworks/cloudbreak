@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
@@ -35,8 +37,14 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
     @Value("${sdx.stack.restore.status.duration_min:90}")
     private int durationInMinutes;
 
+    @Value("${sdx.stack.restore.status.long_duration_min:180}")
+    private int longDurationInMinutes;
+
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public String selector() {
@@ -54,9 +62,12 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         Selectable response;
+        int finalDuration = entitlementService.isLongTimeBackupEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                ? longDurationInMinutes : durationInMinutes;
         try {
             LOGGER.info("Start polling datalake database restore for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
+            LOGGER.info("The duration of database restore is set to be: {}", finalDuration);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, finalDuration, TimeUnit.MINUTES);
             sdxBackupRestoreService.waitCloudbreakFlow(sdxId, pollingConfig, "Database restore");
             response = new DatalakeFullRestoreInProgressEvent(sdxId, userId, request.getOperationId());
         } catch (UserBreakException userBreakException) {
@@ -69,7 +80,7 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
             sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),
                     SdxOperationStatus.FAILED, pollerStoppedException.getLocalizedMessage());
             response = new DatalakeDatabaseRestoreFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Database restore timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Database restore timed out after " + finalDuration + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Database restore polling failed for cluster: {}", sdxId);
             sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),

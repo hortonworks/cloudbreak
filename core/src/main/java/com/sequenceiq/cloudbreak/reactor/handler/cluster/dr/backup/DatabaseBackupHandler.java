@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -51,6 +53,9 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
     @Inject
     private RangerVirtualGroupService rangerVirtualGroupService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DatabaseBackupRequest.class);
@@ -78,7 +83,8 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             String rangerAdminGroup = rangerVirtualGroupService.getRangerVirtualGroup(stack);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup,
                     request.isCloseConnections(), request.getSkipDatabaseNames(), stack);
-            hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel);
+            Boolean isLongTimeBackupEnabled = entitlementService.isLongTimeBackupEnabled(Crn.fromString(stack.getResourceCrn()).getAccountId()) ? true : false;
+            hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, isLongTimeBackupEnabled);
 
             result = new DatabaseBackupSuccess(stackId);
         } catch (Exception e) {
