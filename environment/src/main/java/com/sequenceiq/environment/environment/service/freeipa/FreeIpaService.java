@@ -77,6 +77,10 @@ public class FreeIpaService {
         try {
             return freeIpaV1Endpoint.create(createFreeIpaRequest);
         } catch (WebApplicationException e) {
+            Optional<DescribeFreeIpaResponse> describe = describe(createFreeIpaRequest.getEnvironmentCrn());
+            if (describe.isPresent()) {
+                return describe.get();
+            }
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to create FreeIpa cluster for environment '%s' due to: '%s'",
                     createFreeIpaRequest.getEnvironmentCrn(), errorMessage), e);
