@@ -53,12 +53,18 @@ public class ConcurrentMethodExecutionAspect {
         String lockPrefix = getLockedMethodLockPrefix(joinPoint);
         String lockKey = createLockKey(lockPrefix, stackId);
         Lock lock = locks.get(lockKey);
-        if (!lock.tryLock()) {
-            logWaitingOperation(lockPrefix, stackId);
-            lock.lock();
-            try {
-                logContinueOperation(lockPrefix, stackId);
-            } finally {
+        try {
+            if (lock != null && !lock.tryLock()) {
+                logWaitingOperation(lockPrefix, stackId);
+                try {
+                    lock.lock();
+                    logContinueOperation(lockPrefix, stackId);
+                } finally {
+                    lock.unlock();
+                }
+            }
+        } finally {
+            if (lock != null) {
                 lock.unlock();
             }
         }
