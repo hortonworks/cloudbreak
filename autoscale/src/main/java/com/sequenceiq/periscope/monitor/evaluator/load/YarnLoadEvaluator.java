@@ -133,7 +133,7 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
         } catch (Exception ex) {
             LOGGER.info("Failed to process load alert for Cluster '{}', userCrn: {}, exception: ", stackCrn, pollingUserCrn, ex);
             eventPublisher.publishEvent(new UpdateFailedEvent(clusterId, ex, Instant.now().toEpochMilli(),
-                    pollingUserCrn != null && pollingUserCrn.equals(cluster.getMachineUserCrn())));
+                    pollingUserCrn != null && pollingUserCrn.equals(cluster.getMachineUserCrn()), pollingUserCrn));
         } finally {
             LOGGER.debug("Finished loadEvaluator for cluster '{}' in '{}' ms", stackCrn, System.currentTimeMillis() - start);
         }
