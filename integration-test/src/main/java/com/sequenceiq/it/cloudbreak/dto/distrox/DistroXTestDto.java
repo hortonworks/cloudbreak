@@ -310,6 +310,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return this;
     }
 
+    public DistroXTestDto withJavaVersion(Integer javaVersion) {
+        getRequest().setJavaVersion(javaVersion);
+        return this;
+    }
+
     public String getInitiatorUserCrn() {
         return initiatorUserCrn;
     }
