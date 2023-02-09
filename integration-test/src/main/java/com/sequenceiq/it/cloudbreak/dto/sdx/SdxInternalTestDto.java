@@ -625,4 +625,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             LOGGER.info("SDX Internal resource not found, thus cleanup not needed.");
         }
     }
+
+    public SdxInternalTestDto withJavaVersion(Integer javaVersion) {
+        getRequest().setJavaVersion(javaVersion);
+        return this;
+    }
 }
