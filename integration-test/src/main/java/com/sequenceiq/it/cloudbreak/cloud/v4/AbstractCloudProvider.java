@@ -395,7 +395,8 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     protected String[] getTestLabels() {
-        return StringUtils.split(StringUtils.lowerCase(MDC.get("testlabel")), ".");
+        String testLabel = StringUtils.isBlank(MDC.get("testlabel")) ? testParameter.get("testlabel") : MDC.get("testlabel");
+        return StringUtils.split(StringUtils.lowerCase(testLabel), ".");
     }
 
     protected String trimObjectName(String name) {
