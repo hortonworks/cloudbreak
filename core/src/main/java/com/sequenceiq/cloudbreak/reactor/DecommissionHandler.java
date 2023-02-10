@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -239,20 +240,25 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
     }
 
     private void stopClusterManagerAgent(StackDto stackDto, Set<String> decommissionedHostNames, boolean forced) throws CloudbreakOrchestratorFailedException {
-        StackView stack = stackDto.getStack();
-        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        Set<Node> decommissionedNodes = stackUtil.collectNodes(stackDto, decommissionedHostNames);
-        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
-        Set<Node> allNodes = stackUtil.collectNodes(stackDto);
-        hostOrchestrator.stopClusterManagerAgent(
-                stackDto,
-                gatewayConfig,
-                allNodes,
-                decommissionedNodes,
-                clusterDeletionBasedModel(stack.getId(), stackDto.getCluster().getId()),
-                new CmAgentStopFlags(kerberosDetailService.isAdJoinable(kerberosConfig),
-                        kerberosDetailService.isIpaJoinable(kerberosConfig),
-                        forced));
+        if (CollectionUtils.isNotEmpty(decommissionedHostNames)) {
+            LOGGER.info("Stopping CM agent on hosts {}", decommissionedHostNames);
+            StackView stack = stackDto.getStack();
+            KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
+            Set<Node> decommissionedNodes = stackUtil.collectNodes(stackDto, decommissionedHostNames);
+            GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+            Set<Node> allNodes = stackUtil.collectNodes(stackDto);
+            hostOrchestrator.stopClusterManagerAgent(
+                    stackDto,
+                    gatewayConfig,
+                    allNodes,
+                    decommissionedNodes,
+                    clusterDeletionBasedModel(stack.getId(), stackDto.getCluster().getId()),
+                    new CmAgentStopFlags(kerberosDetailService.isAdJoinable(kerberosConfig),
+                            kerberosDetailService.isIpaJoinable(kerberosConfig),
+                            forced));
+        } else {
+            LOGGER.info("Not found hosts to stop CM agent on.");
+        }
     }
 
     private void cleanUpFreeIpa(StackView stack, Map<String, InstanceMetadataView> hostsToRemove) {
