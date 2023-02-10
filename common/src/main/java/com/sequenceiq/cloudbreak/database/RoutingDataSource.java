@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.conf;
+package com.sequenceiq.cloudbreak.database;
 
 import java.util.Map;
 

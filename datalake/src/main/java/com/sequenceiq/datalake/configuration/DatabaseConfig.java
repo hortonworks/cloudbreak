@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +25,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.sequenceiq.cloudbreak.common.database.BatchProperties;
 import com.sequenceiq.cloudbreak.common.database.JpaPropertiesFacory;
 import com.sequenceiq.cloudbreak.common.tx.CircuitBreakerType;
+import com.sequenceiq.cloudbreak.database.MultiDataSourceConfig;
 import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.zaxxer.hikari.HikariConfig;
@@ -33,7 +33,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @EnableTransactionManagement
-public class DatabaseConfig {
+public class DatabaseConfig extends MultiDataSourceConfig {
 
     @Value("${datalake.db.env.user:}")
     private String dbUser;
@@ -87,10 +87,10 @@ public class DatabaseConfig {
     @Inject
     private Environment environment;
 
-    @Bean
-    public DataSource dataSource() throws SQLException {
+    protected HikariDataSource getDataSource(String poolName) throws SQLException {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
         HikariConfig config = new HikariConfig();
+        config.setPoolName(poolName);
         if (ssl) {
             config.addDataSourceProperty("ssl", "true");
             config.addDataSourceProperty("sslfactory", "org.postgresql.ssl.DefaultJavaSSLFactory");
