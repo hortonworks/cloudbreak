@@ -143,7 +143,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @Schema(description = StackModelDescription.ENABLE_LOAD_BALANCER)
     private boolean enableLoadBalancer;
 
-    @ApiModelProperty(StackModelDescription.JAVA_VERSION)
+    @Schema(description = StackModelDescription.JAVA_VERSION)
     private Integer javaVersion;
 
     public Long getId() {

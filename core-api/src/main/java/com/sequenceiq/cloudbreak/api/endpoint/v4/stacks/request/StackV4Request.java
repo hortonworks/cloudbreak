@@ -105,7 +105,7 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     private String variant;
 
-    @ApiModelProperty(value = StackModelDescription.JAVA_VERSION)
+    @Schema(description = StackModelDescription.JAVA_VERSION)
     private Integer javaVersion;
 
     public String getEnvironmentCrn() {

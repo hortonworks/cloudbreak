@@ -9,14 +9,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.SUPPORT_CERTIFICATE_RESPONSE)
+@Schema(description = ModelDescriptions.SUPPORT_CERTIFICATE_RESPONSE)
 @JsonInclude(Include.NON_NULL)
 public class CertificateSwapV4Response {
 
-    @ApiModelProperty(CERTIFICATES)
+    @Schema(description = CERTIFICATES)
     private Set<X509Certificate> certificates;
 
     public Set<X509Certificate> getCertificates() {

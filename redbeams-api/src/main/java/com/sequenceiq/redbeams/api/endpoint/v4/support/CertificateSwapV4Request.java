@@ -2,25 +2,25 @@ package com.sequenceiq.redbeams.api.endpoint.v4.support;
 
 import static com.sequenceiq.redbeams.doc.ModelDescriptions.SupportModelDescriptions.FIRST_CERTIFICATE;
 import static com.sequenceiq.redbeams.doc.ModelDescriptions.SupportModelDescriptions.SECOND_CERTIFICATE;
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = ModelDescriptions.SUPPORT_CERTIFICATE_REQUEST)
+@Schema(description = ModelDescriptions.SUPPORT_CERTIFICATE_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CertificateSwapV4Request {
 
     @NotNull
-    @ApiModelProperty(value = FIRST_CERTIFICATE, required = true)
+    @Schema(description = FIRST_CERTIFICATE, requiredMode = REQUIRED)
     private Boolean firstCert;
 
     @NotNull
-    @ApiModelProperty(value = SECOND_CERTIFICATE, required = true)
+    @Schema(description = SECOND_CERTIFICATE, requiredMode = REQUIRED)
     private Boolean secondCert;
 
     public Boolean getFirstCert() {

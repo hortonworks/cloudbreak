@@ -586,8 +586,8 @@ public interface DistroXV1Endpoint {
 
     @PUT
     @Path("crn/{crn}/modify_proxy")
-    @ApiOperation(value = MODIFY_PROXY_CONFIG_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.MODIFY_PROXY_CONFIG_NOTES,
-            nickname = "modifyProxyConfigDistroXInternalV1ByCrn")
+    @Operation(summary = MODIFY_PROXY_CONFIG_INTERNAL, description = Notes.MODIFY_PROXY_CONFIG_NOTES,
+            operationId = "modifyProxyConfigDistroXInternalV1ByCrn")
     FlowIdentifier modifyProxyInternal(@ValidCrn(resource = {CrnResourceDescriptor.DATAHUB}) @PathParam("crn") String crn,
             @ValidCrn(resource = {CrnResourceDescriptor.PROXY}) @QueryParam("previousProxyConfigCrn") String previousProxyConfigCrn,
             String initiatorUserCrn);

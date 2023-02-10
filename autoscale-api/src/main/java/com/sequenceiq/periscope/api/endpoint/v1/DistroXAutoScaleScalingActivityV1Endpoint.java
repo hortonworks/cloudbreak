@@ -18,12 +18,12 @@ import org.springframework.validation.annotation.Validated;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleScalingActivityResponse;
 import com.sequenceiq.periscope.doc.ApiDescription;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
 @Path("/v1/scaling_activities")
-@Api(value = "/v1/scaling_activities", description = SCALING_ACTIVITY_DESCRIPTION, protocols = "http,https")
+@Tag(name = "/v1/scaling_activities", description = SCALING_ACTIVITY_DESCRIPTION)
 public interface DistroXAutoScaleScalingActivityV1Endpoint {
 
     /**
@@ -35,8 +35,8 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @GET
     @Path("cluster_name/{clusterName}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
-            produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
+    @Operation(summary = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
+            description = ApiDescription.DistroXClusterNotes.NOTES)
     List<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInDurationByClusterName(
             @PathParam("clusterName") @NotNull String clusterName,
             @QueryParam("durationInMinutes") @DefaultValue("60") long durationInMinutes,
@@ -52,8 +52,8 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @GET
     @Path("cluster_crn/{clusterCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
-            produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
+    @Operation(summary = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
+            description = ApiDescription.DistroXClusterNotes.NOTES)
     List<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInDurationByClusterCrn(
             @PathParam("clusterCrn") @NotNull String clusterCrn,
             @QueryParam("durationInMinutes") @DefaultValue("60") long durationInMinutes,
@@ -69,8 +69,8 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @GET
     @Path("cluster_crn/{clusterCrn}/operation_id/{operationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_OPERATION_ID,
-            produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
+    @Operation(summary = ApiDescription.ClusterOpDescription.SCALING_OPERATION_ID,
+            description = ApiDescription.DistroXClusterNotes.NOTES)
     DistroXAutoscaleScalingActivityResponse getScalingActivityUsingOperationId(
             @PathParam("clusterCrn") @NotNull String clusterCrn,
             @PathParam("operationId") @NotNull String operationId);
@@ -84,8 +84,8 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @GET
     @Path("cluster_name/{clusterName}/failed_activities")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.FAILED_SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
-            produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
+    @Operation(summary = ApiDescription.ClusterOpDescription.FAILED_SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
+            description = ApiDescription.DistroXClusterNotes.NOTES)
     List<DistroXAutoscaleScalingActivityResponse> getFailedScalingActivitiesInGivenDurationByClusterName(
             @PathParam("clusterName") @NotNull String clusterName,
             @QueryParam("durationInMinutes") @DefaultValue("60") long durationInMinutes,
@@ -101,8 +101,8 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @GET
     @Path("cluster_crn/{clusterCrn}/failed_activities")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.FAILED_SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
-            produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
+    @Operation(summary = ApiDescription.ClusterOpDescription.FAILED_SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
+            description = ApiDescription.DistroXClusterNotes.NOTES)
     List<DistroXAutoscaleScalingActivityResponse> getFailedScalingActivitiesInGivenDurationByClusterCrn(
             @PathParam("clusterCrn") @NotNull String clusterCrn,
             @QueryParam("durationInMinutes") @DefaultValue("60") long durationInMinutes,
@@ -119,8 +119,8 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @GET
     @Path("cluster_name/{clusterName}/time_interval")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL,
-            produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
+    @Operation(summary = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL,
+            description = ApiDescription.DistroXClusterNotes.NOTES)
     List<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesBetweenIntervalByClusterName(
             @PathParam("clusterName") @NotNull String clusterName,
             @QueryParam("startTimeFromInEpochMilliSec")  long startTimeFromInEpochMilliSec,
@@ -138,8 +138,8 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @GET
     @Path("cluster_crn/{clusterCrn}/time_interval")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL,
-            produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
+    @Operation(summary = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL,
+            description = ApiDescription.DistroXClusterNotes.NOTES)
     List<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesBetweenIntervalByClusterCrn(
             @PathParam("clusterCrn") @NotNull String clusterCrn,
             @QueryParam("startTimeFromInEpochMilliSec") long startTimeFromInEpochMilliSec,

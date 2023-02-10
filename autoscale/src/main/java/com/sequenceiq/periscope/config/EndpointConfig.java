@@ -40,8 +40,6 @@ import com.sequenceiq.periscope.controller.mapper.UnsupportedOperationFailedExce
 import com.sequenceiq.periscope.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.periscope.utils.FileReaderUtils;
 
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
-import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import io.swagger.v3.oas.models.OpenAPI;
 
