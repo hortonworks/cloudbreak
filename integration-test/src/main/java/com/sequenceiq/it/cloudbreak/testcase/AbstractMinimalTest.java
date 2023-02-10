@@ -28,6 +28,7 @@ import org.testng.annotations.DataProvider;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -81,6 +82,9 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
+    @Inject
+    private TestParameter testParameter;
+
     @Value("${integrationtest.cleanup.purge:false}")
     private boolean purge;
 
@@ -100,8 +104,25 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
         }
     }
 
+    /**
+     * It is invoked before the execution of each test case, where defining all the required test parameters and contexts.
+     *
+     * Note:
+     * Test Label has been defined also as Test Parameter (as a backup solution for local test runs), because of the MDC
+     * is beeing lost in case of local run in IDEA.
+     * This is a special case and only occur when we are running one of the E2E test in IDEA with the IDEA Play option.
+     * When the request processed by multiple threads. This means that setting the MDC context at the beginning of the
+     * request is not anymore an option.
+     *
+     * @param method the name of the test case
+     * @param params all the available test parameters
+     */
     @BeforeMethod
     public void beforeTest(Method method, Object[] params) {
+        LOGGER.info("Creating Test Label at Mapped Diagnostic Context and Test Parameter. " +
+                "This label is used for the Cloud Storage path of the E2E tests', based on " +
+                "suite and case names...");
+        testParameter.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
         MDC.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
         TestContext testContext = (TestContext) params[0];
         testContext.setTestMethodName(method.getName());
