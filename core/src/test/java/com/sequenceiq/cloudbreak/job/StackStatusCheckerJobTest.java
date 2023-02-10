@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.job;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -14,6 +14,9 @@ import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.TemporalAmount;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +28,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -33,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -48,6 +53,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
@@ -74,6 +80,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowLog;
 
 @ExtendWith(MockitoExtension.class)
 public class StackStatusCheckerJobTest {
@@ -173,6 +180,9 @@ public class StackStatusCheckerJobTest {
     @Mock
     private ServiceStatusCheckerLogLocationDecorator serviceStatusCheckerLogLocationDecorator;
 
+    @Mock
+    private Clock clock;
+
     @BeforeEach
     public void init() {
         underTest = new StackStatusCheckerJob();
@@ -206,6 +216,54 @@ public class StackStatusCheckerJobTest {
     @AfterEach
     public void tearDown() {
         validateMockitoUsage();
+    }
+
+    @Test
+    public void testNotRunningIfFlowEndedIn2Minutes() throws JobExecutionException {
+        FlowLog lastFlowLog = new FlowLog();
+        lastFlowLog.setEndTime(1676030290000L);
+        when(flowLogService.getLastFlowLogWithEndTime(anyLong())).thenReturn(Optional.of(lastFlowLog));
+        ArgumentCaptor<TemporalAmount> temporalAmountArgumentCaptor = ArgumentCaptor.forClass(TemporalAmount.class);
+        Instant nowMinus2Minutes = Instant.ofEpochMilli(1676030245000L);
+        when(clock.nowMinus(temporalAmountArgumentCaptor.capture())).thenReturn(nowMinus2Minutes);
+        ReflectionTestUtils.setField(underTest, "skipWindow", 2);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        assertEquals(120, ((Duration) temporalAmountArgumentCaptor.getValue()).getSeconds());
+        verify(stackDtoService, times(0)).getById(anyLong());
+    }
+
+    @Test
+    public void testNotRunningIfFlowEndedAtTheSameTime() throws JobExecutionException {
+        FlowLog lastFlowLog = new FlowLog();
+        lastFlowLog.setEndTime(1676030290000L);
+        when(flowLogService.getLastFlowLogWithEndTime(anyLong())).thenReturn(Optional.of(lastFlowLog));
+        ArgumentCaptor<TemporalAmount> temporalAmountArgumentCaptor = ArgumentCaptor.forClass(TemporalAmount.class);
+        Instant nowMinus2Minutes = Instant.ofEpochMilli(1676030290000L);
+        when(clock.nowMinus(temporalAmountArgumentCaptor.capture())).thenReturn(nowMinus2Minutes);
+        ReflectionTestUtils.setField(underTest, "skipWindow", 2);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        assertEquals(120, ((Duration) temporalAmountArgumentCaptor.getValue()).getSeconds());
+        verify(stackDtoService, times(1)).getById(anyLong());
+    }
+
+    @Test
+    public void testNotRunningIfFlowEndedInTime() throws JobExecutionException {
+        FlowLog lastFlowLog = new FlowLog();
+        lastFlowLog.setEndTime(1676030290000L);
+        when(flowLogService.getLastFlowLogWithEndTime(anyLong())).thenReturn(Optional.of(lastFlowLog));
+        ArgumentCaptor<TemporalAmount> temporalAmountArgumentCaptor = ArgumentCaptor.forClass(TemporalAmount.class);
+        Instant nowMinus2Minutes = Instant.ofEpochMilli(1676030005000L);
+        when(clock.nowMinus(temporalAmountArgumentCaptor.capture())).thenReturn(nowMinus2Minutes);
+        ReflectionTestUtils.setField(underTest, "skipWindow", 2);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        assertEquals(120, ((Duration) temporalAmountArgumentCaptor.getValue()).getSeconds());
+        verify(stackDtoService, times(0)).getById(anyLong());
     }
 
     @Test

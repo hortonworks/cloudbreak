@@ -302,6 +302,11 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
+    public Optional<FlowLog> getLastFlowLogWithEndTime(Long resourceId) {
+        return flowLogRepository.findFirstByResourceIdAndEndTimeNotNullOrderByCreatedDesc(resourceId);
+    }
+
+    @Override
     public List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id) {
         return flowLogRepository.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(id);
     }

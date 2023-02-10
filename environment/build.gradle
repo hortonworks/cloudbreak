@@ -49,7 +49,7 @@ sonarqube {
 }
 
 dependencies {
-    implementation project(':audit-connector')
+    implementation     project(':audit-connector')
     implementation     project(":authorization-common")
     implementation     project(":common")
     implementation     project(':core-common')
