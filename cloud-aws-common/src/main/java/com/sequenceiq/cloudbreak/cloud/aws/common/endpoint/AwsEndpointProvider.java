@@ -13,7 +13,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 public class AwsEndpointProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsEndpointProvider.class);
 
-    @Value("${aws.fips.use.endpoint:false}")
+    @Value("${aws.use.fips.endpoint:false}")
     private boolean fipsEnabled;
 
     @Inject

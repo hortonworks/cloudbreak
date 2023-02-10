@@ -21,7 +21,7 @@ public class DataBusEndpointProvider {
 
     private static final String GOV_REGION_INDICATOR = "gov";
 
-    @Value("${aws.fips.use.endpoint:false}")
+    @Value("${aws.use.fips.endpoint:false}")
     private boolean fipsEnabled;
 
     private final AltusDatabusConfiguration altusDatabusConfiguration;
