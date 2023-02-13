@@ -24,6 +24,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.retry.annotation.Backoff;
@@ -128,14 +129,14 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
         scalingActivityRepository.saveAll(activities);
     }
 
-    public List<ScalingActivity> findAllInGivenDurationForCluster(NameOrCrn clusterNameOrCrn, long durationInMinutes, Pageable pageable) {
+    public Page<ScalingActivity> findAllInGivenDurationForCluster(NameOrCrn clusterNameOrCrn, long durationInMinutes, Pageable pageable) {
         Date startTimeAfter = Date.from(now().minus(durationInMinutes, MINUTES));
         return clusterNameOrCrn.hasName() ?
                 scalingActivityRepository.findAllByClusterNameWithStartTimeAfter(clusterNameOrCrn.getName(), startTimeAfter, pageable) :
                 scalingActivityRepository.findAllByClusterCrnWithStartTimeAfter(clusterNameOrCrn.getCrn(), startTimeAfter, pageable);
     }
 
-    public List<ScalingActivity> findAllByFailedStatusesInGivenDuration(NameOrCrn clusterNameOrCrn, long durationInMinutes, Pageable pageable) {
+    public Page<ScalingActivity> findAllByFailedStatusesInGivenDuration(NameOrCrn clusterNameOrCrn, long durationInMinutes, Pageable pageable) {
         Date startTimeAfter = Date.from(now().minus(durationInMinutes, MINUTES));
         return clusterNameOrCrn.hasName() ?
                 scalingActivityRepository.findAllByClusterNameAndInStatusesWithTimeAfter(clusterNameOrCrn.getName(),
@@ -146,7 +147,7 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
                                 ActivityStatus.SCALING_FLOW_FAILED), startTimeAfter, pageable);
     }
 
-    public List<ScalingActivity> findAllInTimeRangeForCluster(NameOrCrn clusterNameOrCrn, long timestampFrom, long timestampUntil, Pageable pageable) {
+    public Page<ScalingActivity> findAllInTimeRangeForCluster(NameOrCrn clusterNameOrCrn, long timestampFrom, long timestampUntil, Pageable pageable) {
         Date startTimeUntil = Date.from(Instant.ofEpochMilli(timestampUntil));
         Date startTimeFrom = Date.from(Instant.ofEpochMilli(timestampFrom));
         return clusterNameOrCrn.hasName() ?

@@ -2,8 +2,6 @@ package com.sequenceiq.periscope.api.endpoint.v1;
 
 import static com.sequenceiq.periscope.doc.ApiDescription.SCALING_ACTIVITY_DESCRIPTION;
 
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -13,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleScalingActivityResponse;
@@ -30,14 +29,14 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
      * Returns Scaling activities in a particular duration.
      * @param clusterName Name of cluster for which we require the scaling activities.
      * @param durationInMinutes the duration in which we want to get all the scaling activities.
-     * @return List of scaling Activities in the duration.
+     * @return Page of scaling Activities in the duration.
      */
     @GET
     @Path("cluster_name/{clusterName}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
             produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
-    List<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInDurationByClusterName(
+    Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInDurationByClusterName(
             @PathParam("clusterName") @NotNull String clusterName,
             @QueryParam("durationInMinutes") @DefaultValue("60") long durationInMinutes,
             @QueryParam("page") @DefaultValue("0") Integer page,
@@ -47,14 +46,14 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
      * Returns Scaling activities in a particular duration.
      * @param clusterCrn Crn of cluster for which we require the scaling activities.
      * @param durationInMinutes the duration in which we want to get all the scaling activities.
-     * @return List of scaling activities after the input time stamp value.
+     * @return Page of scaling activities after the input time stamp value.
      */
     @GET
     @Path("cluster_crn/{clusterCrn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
             produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
-    List<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInDurationByClusterCrn(
+    Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInDurationByClusterCrn(
             @PathParam("clusterCrn") @NotNull String clusterCrn,
             @QueryParam("durationInMinutes") @DefaultValue("60") long durationInMinutes,
             @QueryParam("page") @DefaultValue("0") Integer page,
@@ -86,7 +85,7 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.FAILED_SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
             produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
-    List<DistroXAutoscaleScalingActivityResponse> getFailedScalingActivitiesInGivenDurationByClusterName(
+    Page<DistroXAutoscaleScalingActivityResponse> getFailedScalingActivitiesInGivenDurationByClusterName(
             @PathParam("clusterName") @NotNull String clusterName,
             @QueryParam("durationInMinutes") @DefaultValue("60") long durationInMinutes,
             @QueryParam("page") @DefaultValue("0") Integer page,
@@ -103,7 +102,7 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.FAILED_SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
             produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
-    List<DistroXAutoscaleScalingActivityResponse> getFailedScalingActivitiesInGivenDurationByClusterCrn(
+    Page<DistroXAutoscaleScalingActivityResponse> getFailedScalingActivitiesInGivenDurationByClusterCrn(
             @PathParam("clusterCrn") @NotNull String clusterCrn,
             @QueryParam("durationInMinutes") @DefaultValue("60") long durationInMinutes,
             @QueryParam("page") @DefaultValue("0") Integer page,
@@ -121,7 +120,7 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL,
             produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
-    List<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesBetweenIntervalByClusterName(
+    Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesBetweenIntervalByClusterName(
             @PathParam("clusterName") @NotNull String clusterName,
             @QueryParam("startTimeFromInEpochMilliSec")  long startTimeFromInEpochMilliSec,
             @QueryParam("startTimeUntilInEpochMilliSec") long startTimeUntilInEpochMilliSec,
@@ -140,7 +139,7 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL,
             produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
-    List<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesBetweenIntervalByClusterCrn(
+    Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesBetweenIntervalByClusterCrn(
             @PathParam("clusterCrn") @NotNull String clusterCrn,
             @QueryParam("startTimeFromInEpochMilliSec") long startTimeFromInEpochMilliSec,
             @QueryParam("startTimeUntilInEpochMilliSec") long startTimeUntilInEpochMilliSec,
