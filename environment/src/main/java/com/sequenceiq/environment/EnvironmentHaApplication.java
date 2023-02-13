@@ -9,7 +9,6 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.RDBMS_DEL
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.service.ha.HaApplication;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -48,15 +46,13 @@ public class EnvironmentHaApplication implements HaApplication {
 
     @Override
     public Set<Long> getDeletingResources(Set<Long> resourceIds) {
-        List<EnvironmentDto> environments = environmentService.findAllByIdInAndStatusIn(resourceIds, DELETION_STATUSES);
-        return environments.stream().map(EnvironmentDto::getId).collect(Collectors.toSet());
+        return environmentService.findAllIdByIdInAndStatusIn(resourceIds, DELETION_STATUSES);
     }
 
     @Override
     public Set<Long> getAllDeletingResources() {
         Set<Long> envIds = EnvironmentInMemoryStateStore.getAll();
-        List<EnvironmentDto> environments = environmentService.findAllByIdInAndStatusIn(envIds, DELETION_STATUSES);
-        return environments.stream().map(EnvironmentDto::getId).collect(Collectors.toSet());
+        return environmentService.findAllIdByIdInAndStatusIn(envIds, DELETION_STATUSES);
     }
 
     @Override
@@ -66,10 +62,8 @@ public class EnvironmentHaApplication implements HaApplication {
 
     @Override
     public void cancelRunningFlow(Long resourceId) {
-        environmentService.findById(resourceId).ifPresentOrElse(environmentDto -> {
-            EnvironmentInMemoryStateStore.put(resourceId, PollGroup.CANCELLED);
-            flowCancelService.cancelRunningFlows(resourceId);
-        }, () -> LOGGER.error("Cannot cancel the flow, because the environment does not exist: {}", resourceId));
+        EnvironmentInMemoryStateStore.put(resourceId, PollGroup.CANCELLED);
+        flowCancelService.cancelRunningFlows(resourceId);
     }
 
     @Override

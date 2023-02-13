@@ -304,16 +304,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         return environmentRepository.existsWithNameAndAccountAndArchivedIsFalse(name, accountId);
     }
 
-    public List<EnvironmentDto> findAllByIdInAndStatusIn(Collection<Long> resourceIds, Collection<EnvironmentStatus> environmentStatuses) {
-        List<Environment> environments = environmentRepository
-                .findAllByIdInAndStatusInAndArchivedIsFalse(resourceIds, environmentStatuses);
-        return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
-    }
-
-    public List<EnvironmentDto> findAllByStatusIn(Collection<EnvironmentStatus> environmentStatuses) {
-        List<Environment> environments = environmentRepository
-                .findAllByStatusInAndArchivedIsFalse(environmentStatuses);
-        return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
+    public Set<Long> findAllIdByIdInAndStatusIn(Collection<Long> resourceIds, Collection<EnvironmentStatus> environmentStatuses) {
+        return environmentRepository.findAllIdByIdInAndStatusInAndArchivedIsFalse(resourceIds, environmentStatuses);
     }
 
     Optional<Environment> findByNameAndAccountIdAndArchivedIsFalse(String name, String accountId) {
