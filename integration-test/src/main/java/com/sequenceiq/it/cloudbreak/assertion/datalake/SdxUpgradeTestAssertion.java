@@ -4,9 +4,9 @@ import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertEquals;
 import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertTrue;
 import static org.junit.Assert.assertNotNull;
 
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 

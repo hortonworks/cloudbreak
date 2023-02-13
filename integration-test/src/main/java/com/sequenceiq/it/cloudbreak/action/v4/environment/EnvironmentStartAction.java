@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 public class EnvironmentStartAction extends AbstractEnvironmentAction {
 

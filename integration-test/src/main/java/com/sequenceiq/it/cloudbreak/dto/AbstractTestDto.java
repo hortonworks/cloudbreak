@@ -19,9 +19,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.Entity;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -40,9 +37,11 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
+import com.sequenceiq.it.util.TestParameter;
 
-public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> extends Entity implements CloudbreakTestDto {
+public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> implements CloudbreakTestDto {
 
     @Inject
     private TestParameter testParameter;
@@ -72,10 +71,6 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     private String lastKnownFlowId;
 
     private CloudPlatform cloudPlatform;
-
-    protected AbstractTestDto(String newId) {
-        super(newId);
-    }
 
     protected AbstractTestDto(R request, TestContext testContext) {
         this.request = request;

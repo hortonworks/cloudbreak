@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 public class FreeIpaUserSyncDoneWithNoFailures implements Assertion<FreeIpaUserSyncTestDto, FreeIpaClient> {
 

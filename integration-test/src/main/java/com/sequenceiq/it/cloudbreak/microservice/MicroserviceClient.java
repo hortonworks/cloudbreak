@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.microservice;
 
 import java.util.List;
 import java.util.Map;
@@ -14,15 +14,11 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 
-public abstract class MicroserviceClient<C, I, E extends Enum<E>, W extends WaitObject> extends Entity {
+public abstract class MicroserviceClient<C, I, E extends Enum<E>, W extends WaitObject> {
 
     protected static final int TIMEOUT = 60 * 1000;
 
     private CloudbreakUser acting;
-
-    protected MicroserviceClient(String newId) {
-        super(newId);
-    }
 
     @Override
     public String toString() {

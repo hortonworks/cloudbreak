@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.util;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class AuditUtil {
 

@@ -4,8 +4,8 @@ import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.altus.service.UmsResourceRole;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.UmsClient;
 
 public class UmsClientUtils {
 

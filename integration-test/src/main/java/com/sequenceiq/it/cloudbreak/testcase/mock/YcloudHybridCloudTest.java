@@ -29,8 +29,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
@@ -48,6 +46,8 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 

@@ -11,9 +11,9 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 public class EnvironmentNetworkTestAssertion {
 

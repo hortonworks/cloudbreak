@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -25,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 public class EnvironmentChildTest extends AbstractMockTest {
 

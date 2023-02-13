@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 
 @Component

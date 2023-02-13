@@ -1,4 +1,4 @@
-package com.sequenceiq.it;
+package com.sequenceiq.it.util;
 
 import java.util.HashMap;
 import java.util.Map;

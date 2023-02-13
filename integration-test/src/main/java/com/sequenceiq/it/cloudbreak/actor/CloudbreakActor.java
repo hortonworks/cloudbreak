@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
+import com.sequenceiq.it.util.TestParameter;
 
 @Component
 public class CloudbreakActor extends CloudbreakUserCache implements Actor {

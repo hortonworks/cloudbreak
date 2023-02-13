@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.dto.freeipa;
 
 import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.diagnostics.BaseDiagnosticsTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 @Prototype
 public class FreeIpaDiagnosticsTestDto extends BaseDiagnosticsTestDto<DiagnosticsCollectionRequest, FreeIpaDiagnosticsTestDto, FreeIpaClient> {

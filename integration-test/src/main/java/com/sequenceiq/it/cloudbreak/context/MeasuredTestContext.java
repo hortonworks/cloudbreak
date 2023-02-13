@@ -9,9 +9,6 @@ import org.springframework.context.ApplicationContext;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -19,11 +16,14 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
+import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.performance.Measure;
 import com.sequenceiq.it.cloudbreak.performance.MeasureAll;
 import com.sequenceiq.it.cloudbreak.performance.PerformanceIndicator;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ResourceAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceAwait;
+import com.sequenceiq.it.util.TestParameter;
 
 public class MeasuredTestContext extends MockedTestContext {
     private TestContext wrappedTestContext;

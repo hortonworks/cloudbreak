@@ -7,12 +7,12 @@ import javax.inject.Inject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class StackMatrixTest extends AbstractMockTest {
 

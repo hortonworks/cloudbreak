@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -25,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;

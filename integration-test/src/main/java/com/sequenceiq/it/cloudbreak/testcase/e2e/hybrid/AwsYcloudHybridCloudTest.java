@@ -28,7 +28,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -52,6 +51,7 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;

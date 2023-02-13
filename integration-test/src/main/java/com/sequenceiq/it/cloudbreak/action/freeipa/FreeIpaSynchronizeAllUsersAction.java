@@ -11,11 +11,11 @@ import org.springframework.http.HttpStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 public class FreeIpaSynchronizeAllUsersAction implements Action<FreeIpaUserSyncTestDto, FreeIpaClient> {
 

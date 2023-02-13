@@ -3,10 +3,10 @@ package com.sequenceiq.it.cloudbreak.action.v4.environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 public abstract class AbstractEnvironmentAction implements Action<EnvironmentTestDto, EnvironmentClient> {

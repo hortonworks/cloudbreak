@@ -21,7 +21,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.YarnIn
 import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -47,6 +46,7 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
 @Component

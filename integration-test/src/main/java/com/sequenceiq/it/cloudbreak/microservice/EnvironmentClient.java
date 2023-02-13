@@ -1,8 +1,7 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.microservice;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
@@ -13,8 +12,7 @@ import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.client.EnvironmentServiceUserCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceUserCrnClientBuilder;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.cloudbreak.EnvironmentTest;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -22,27 +20,14 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
+import com.sequenceiq.it.util.TestParameter;
 
 public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environment.client.EnvironmentClient, EnvironmentServiceCrnEndpoints,
         EnvironmentStatus, EnvironmentWaitObject> {
 
-    public static final String ENVIRONMENT_CLIENT = "ENVIRONMENT_CLIENT";
-
     private com.sequenceiq.environment.client.EnvironmentClient environmentClient;
 
     private EnvironmentInternalCrnClient environmentInternalCrnClient;
-
-    EnvironmentClient(String newId) {
-        super(newId);
-    }
-
-    EnvironmentClient() {
-        this(ENVIRONMENT_CLIENT);
-    }
-
-    public static Function<IntegrationTestContext, EnvironmentClient> getTestContextEnvironmentClient(String key) {
-        return testContext -> testContext.getContextParam(key, EnvironmentClient.class);
-    }
 
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
@@ -55,7 +40,7 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
         return new EnvironmentWaitObject(this, entity.getName(), entity.getCrn(), desiredStatuses.get("status"), ignoredFailedStatuses);
     }
 
-    public static synchronized EnvironmentClient createProxyEnvironmentClient(TestParameter testParameter, CloudbreakUser cloudbreakUser,
+    public static synchronized EnvironmentClient createEnvironmentClient(TestParameter testParameter, CloudbreakUser cloudbreakUser,
         RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         EnvironmentClient clientEntity = new EnvironmentClient();
         clientEntity.setActing(cloudbreakUser);

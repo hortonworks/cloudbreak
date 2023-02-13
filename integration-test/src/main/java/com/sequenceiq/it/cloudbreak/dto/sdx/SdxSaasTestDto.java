@@ -10,11 +10,11 @@ import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.SdxSaasItClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.SdxSaasItClient;
 
 @Prototype
 public class SdxSaasTestDto extends AbstractTestDto<SDXSvcAdminProto.CreateInstanceRequest, SDXSvcCommonProto.Instance, SdxSaasTestDto, SdxSaasItClient> {
@@ -24,20 +24,12 @@ public class SdxSaasTestDto extends AbstractTestDto<SDXSvcAdminProto.CreateInsta
 
     private String crn;
 
-    public SdxSaasTestDto(String newId) {
-        super(newId);
-    }
-
     public SdxSaasTestDto(SDXSvcAdminProto.CreateInstanceRequest request, TestContext testContext) {
         super(request, testContext);
     }
 
     public SdxSaasTestDto(TestContext testContext) {
         super(SDXSvcAdminProto.CreateInstanceRequest.newBuilder().build(), testContext);
-    }
-
-    public SdxSaasTestDto() {
-        super(SdxSaasTestDto.class.getSimpleName().toUpperCase());
     }
 
     @Override

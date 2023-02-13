@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackAttachRecipeAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackBlueprintRequestAction;
@@ -17,6 +16,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.stack.StackStartAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackStopAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackSyncAction;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 @Service
 public class StackTestClient {

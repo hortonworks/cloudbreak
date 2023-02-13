@@ -8,10 +8,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 
 public class DistroxScaleThresholdAssertions implements Assertion<DistroXTestDto, CloudbreakClient> {

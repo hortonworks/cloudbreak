@@ -4,13 +4,13 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class ShowStackCliRequestTest extends AbstractMockTest {
 

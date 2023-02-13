@@ -8,11 +8,11 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.EventAssertionCommon;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 @Component
 public class CredentialTestAssertion {

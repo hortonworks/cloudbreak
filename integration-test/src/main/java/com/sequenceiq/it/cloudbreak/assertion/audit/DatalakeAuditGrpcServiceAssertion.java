@@ -8,9 +8,9 @@ import com.cloudera.thunderhead.service.audit.AuditProto;
 import com.sequenceiq.cloudbreak.audit.model.ActorCrn;
 import com.sequenceiq.cloudbreak.audit.model.ListAuditEvent;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 
 @Component
 public class DatalakeAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<SdxTestDto, SdxClient> {

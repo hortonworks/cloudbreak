@@ -1,10 +1,10 @@
 package com.sequenceiq.it.cloudbreak.assertion.environment;
 
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 public class EnvironmentTestAssertion implements Assertion<EnvironmentTestDto, EnvironmentClient> {
     private String expectedCredentialName;

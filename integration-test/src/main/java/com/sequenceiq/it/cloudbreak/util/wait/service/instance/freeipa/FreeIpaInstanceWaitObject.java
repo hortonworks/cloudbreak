@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 
 public class FreeIpaInstanceWaitObject implements InstanceWaitObject {

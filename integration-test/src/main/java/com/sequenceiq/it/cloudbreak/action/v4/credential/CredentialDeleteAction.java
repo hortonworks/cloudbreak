@@ -3,11 +3,11 @@ package com.sequenceiq.it.cloudbreak.action.v4.credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 public class CredentialDeleteAction implements Action<CredentialTestDto, EnvironmentClient> {
 

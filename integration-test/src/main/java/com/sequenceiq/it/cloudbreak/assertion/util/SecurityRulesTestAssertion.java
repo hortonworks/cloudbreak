@@ -3,9 +3,9 @@ package com.sequenceiq.it.cloudbreak.assertion.util;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class SecurityRulesTestAssertion {
 

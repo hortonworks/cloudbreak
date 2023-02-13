@@ -2,10 +2,10 @@ package com.sequenceiq.it.cloudbreak.dto.sdx;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.diagnostics.BaseCMDiagnosticsTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 
 @Prototype
 public class SdxCMDiagnosticsTestDto extends BaseCMDiagnosticsTestDto<CmDiagnosticsCollectionRequest, SdxCMDiagnosticsTestDto, SdxClient> {

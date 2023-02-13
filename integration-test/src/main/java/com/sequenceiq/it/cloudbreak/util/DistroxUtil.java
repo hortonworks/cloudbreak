@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 @Component
 public class DistroxUtil {

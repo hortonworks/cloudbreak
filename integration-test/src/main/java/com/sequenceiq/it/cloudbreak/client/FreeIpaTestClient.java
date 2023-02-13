@@ -6,7 +6,6 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaAttachChildEnvironmentAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaAttachRecipeAction;
@@ -42,6 +41,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaUsedImagesTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 @Service
 public class FreeIpaTestClient {

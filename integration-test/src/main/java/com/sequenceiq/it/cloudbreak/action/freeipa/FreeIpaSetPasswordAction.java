@@ -9,11 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 public class FreeIpaSetPasswordAction implements Action<FreeIpaUserSyncTestDto, FreeIpaClient> {
 

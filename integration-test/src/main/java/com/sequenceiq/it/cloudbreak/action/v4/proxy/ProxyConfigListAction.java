@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 public class ProxyConfigListAction implements Action<ProxyTestDto, EnvironmentClient> {
 

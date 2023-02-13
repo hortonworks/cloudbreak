@@ -15,11 +15,11 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.UmsClient;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;

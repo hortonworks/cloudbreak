@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -25,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;

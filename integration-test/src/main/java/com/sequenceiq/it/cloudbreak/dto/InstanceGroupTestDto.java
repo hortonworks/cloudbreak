@@ -34,10 +34,6 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
         super(new InstanceGroupV4Request(), testContext);
     }
 
-    public InstanceGroupTestDto() {
-        super(InstanceGroupTestDto.class.getSimpleName().toUpperCase());
-    }
-
     public InstanceGroupTestDto valid() {
         return withHostGroup(MASTER);
     }

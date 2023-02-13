@@ -2,17 +2,11 @@ package com.sequenceiq.it.cloudbreak.dto;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
 import com.sequenceiq.it.cloudbreak.PlatformResourceParameters;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 public class VmTypeTestDto extends AbstractCloudbreakTestDto<PlatformResourceParameters, PlatformVmtypesV4Response, VmTypeTestDto> {
-    public static final String VMTYPE = "VMTYPE";
-
-    VmTypeTestDto(String newId) {
-        super(newId);
-        setRequest(new PlatformResourceParameters());
-    }
-
-    VmTypeTestDto() {
-        this(VMTYPE);
+    protected VmTypeTestDto(PlatformResourceParameters request, TestContext testContext) {
+        super(request, testContext);
     }
 
     public VmTypeTestDto withCredentialName(String credentialName) {

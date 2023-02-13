@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.assertion;
 
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 
 public class BaseMicroserviceClientDependentAssertion {
 

@@ -18,10 +18,6 @@ public class SdxUpgradeDatabaseServerTestDto extends AbstractSdxTestDto<SdxUpgra
         super(new SdxUpgradeDatabaseServerRequest(), testContext);
     }
 
-    public SdxUpgradeDatabaseServerTestDto() {
-        super(SdxUpgradeDatabaseServerTestDto.class.getSimpleName().toUpperCase());
-    }
-
     @Override
     public SdxUpgradeDatabaseServerTestDto valid() {
         return this;

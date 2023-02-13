@@ -11,13 +11,13 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys;
 import com.sequenceiq.it.cloudbreak.util.ResourceCreator;

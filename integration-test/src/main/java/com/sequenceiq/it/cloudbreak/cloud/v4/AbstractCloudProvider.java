@@ -23,8 +23,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
@@ -47,6 +45,8 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
+import com.sequenceiq.it.util.TestParameter;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 public abstract class AbstractCloudProvider implements CloudProvider {

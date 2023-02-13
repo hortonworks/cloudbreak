@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintCreateInternalAction;
@@ -11,6 +10,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintGetInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintListAction;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 @Service
 public class BlueprintTestClient {

@@ -12,7 +12,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 @Prototype
 public class NetworkV4TestDto extends AbstractCloudbreakTestDto<NetworkV4Request, NetworkV4Response, NetworkV4TestDto> {
-    public static final String NETWORK = "NETWORK";
 
     public NetworkV4TestDto(NetworkV4Request request, TestContext testContext) {
         super(request, testContext);
@@ -20,10 +19,6 @@ public class NetworkV4TestDto extends AbstractCloudbreakTestDto<NetworkV4Request
 
     public NetworkV4TestDto(TestContext testContext) {
         super(new NetworkV4Request(), testContext);
-    }
-
-    public NetworkV4TestDto() {
-        super(NetworkV4TestDto.class.getSimpleName().toUpperCase());
     }
 
     public NetworkV4TestDto valid() {

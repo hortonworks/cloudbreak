@@ -13,8 +13,6 @@ import org.testng.annotations.Test;
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.it.cloudbreak.AuthDistributorClient;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -25,6 +23,8 @@ import com.sequenceiq.it.cloudbreak.dto.authdistributor.FetchAuthViewTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.AuthDistributorClient;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 public class FreeIpaCdpSaasSyncTest extends AbstractMockTest {
 

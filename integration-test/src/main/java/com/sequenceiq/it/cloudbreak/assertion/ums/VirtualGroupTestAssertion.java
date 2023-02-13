@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 public class VirtualGroupTestAssertion {
 

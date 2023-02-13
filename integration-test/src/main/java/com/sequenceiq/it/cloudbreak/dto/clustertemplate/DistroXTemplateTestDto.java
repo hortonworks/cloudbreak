@@ -16,7 +16,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.repository.Clouder
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.RootVolumeV1Request;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -26,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 @Prototype
 public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, ClusterTemplateV4Response,
@@ -33,10 +33,6 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
 
     public DistroXTemplateTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
-    }
-
-    public DistroXTemplateTestDto() {
-        super(DistroXTemplateTestDto.class.getSimpleName().toUpperCase());
     }
 
     public DistroXTemplateTestDto valid() {

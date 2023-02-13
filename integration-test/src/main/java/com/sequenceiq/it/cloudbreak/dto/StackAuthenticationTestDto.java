@@ -17,10 +17,6 @@ public class StackAuthenticationTestDto extends AbstractCloudbreakTestDto<
         super(new StackAuthenticationV4Request(), testContext);
     }
 
-    public StackAuthenticationTestDto() {
-        super(StackAuthenticationTestDto.class.getSimpleName().toUpperCase());
-    }
-
     public StackAuthenticationTestDto valid() {
         return getCloudProvider().stackAuthentication(this);
     }

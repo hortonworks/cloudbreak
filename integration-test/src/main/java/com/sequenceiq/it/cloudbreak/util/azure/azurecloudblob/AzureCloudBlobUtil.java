@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.storage.StorageException;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.action.AzureCloudBlobClientActions;
 
 @Component

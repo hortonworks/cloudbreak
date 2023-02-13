@@ -20,10 +20,6 @@ public class SdxResizeTestDto extends AbstractSdxTestDto<SdxClusterResizeRequest
         super(new SdxClusterResizeRequest(), testContext);
     }
 
-    public SdxResizeTestDto() {
-        super(SdxResizeTestDto.class.getSimpleName().toUpperCase());
-    }
-
     @Override
     public SdxResizeTestDto valid() {
         if (CloudPlatform.MOCK.equals(getCloudPlatform())) {

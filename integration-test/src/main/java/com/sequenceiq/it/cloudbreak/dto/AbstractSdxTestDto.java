@@ -10,21 +10,17 @@ import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, SdxClient> {
 
     @Inject
     private FlowUtil flowUtil;
-
-    protected AbstractSdxTestDto(String newId) {
-        super(newId);
-    }
 
     protected AbstractSdxTestDto(R request, TestContext testContext) {
         super(request, testContext);

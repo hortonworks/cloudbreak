@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak;
 
-public class PrivateEndpointTest extends GherkinTest {
+public class PrivateEndpointTest {
 
     public static final String PRIVATE_ENDPOINT_USAGE = "PRIVATE_ENDPOINT_USAGE";
 

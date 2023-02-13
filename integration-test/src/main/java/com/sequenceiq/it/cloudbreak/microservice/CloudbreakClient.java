@@ -1,9 +1,8 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.microservice;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -21,8 +20,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -49,10 +47,10 @@ import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.cloudbreak.CloudbreakInstanceWaitObject;
+import com.sequenceiq.it.util.TestParameter;
 
 public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbreak.client.CloudbreakClient, CloudbreakServiceCrnEndpoints, Status,
         CloudbreakWaitObject> {
-    public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
 
     private static com.sequenceiq.cloudbreak.client.CloudbreakClient singletonCloudbreakClient;
 
@@ -65,14 +63,6 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
     private WebTarget rawClient;
 
     private Long workspaceId;
-
-    CloudbreakClient(String newId) {
-        super(newId);
-    }
-
-    CloudbreakClient() {
-        this(CLOUDBREAK_CLIENT);
-    }
 
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
@@ -90,40 +80,6 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
         return cloudbreakClient;
     }
 
-    public static synchronized com.sequenceiq.cloudbreak.client.CloudbreakClient getSingletonCloudbreakClient() {
-        return singletonCloudbreakClient;
-    }
-
-    public static Function<IntegrationTestContext, CloudbreakClient> getTestContextCloudbreakClient(String key) {
-        return testContext -> testContext.getContextParam(key, CloudbreakClient.class);
-    }
-
-    public static CloudbreakClient created(RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
-        CloudbreakClient client = new CloudbreakClient();
-        client.setCreationStrategy((c, e) -> CloudbreakClient.createProxyCloudbreakClient(c, e, regionAwareInternalCrnGenerator));
-        return client;
-    }
-
-    private static synchronized void createProxyCloudbreakClient(IntegrationTestContext integrationTestContext,
-        Entity entity, RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
-        CloudbreakClient clientEntity = (CloudbreakClient) entity;
-        ConfigKey configKey = new ConfigKey(false, true, true, TIMEOUT);
-        String accessKey = integrationTestContext.getContextParam(CloudbreakTest.ACCESS_KEY);
-        String secretKey = integrationTestContext.getContextParam(CloudbreakTest.SECRET_KEY);
-        String serviceAddress = null;
-        if (singletonCloudbreakClient == null) {
-            serviceAddress = integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT);
-            singletonCloudbreakClient = new CloudbreakApiKeyClient(serviceAddress, configKey).withKeys(accessKey, secretKey);
-        }
-        if (singletonCloudbreakClient == null) {
-            serviceAddress = integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT);
-            singletonCloudbreakInternalCrnClient = createCloudbreakInternalCrnClient(serviceAddress, regionAwareInternalCrnGenerator);
-        }
-        clientEntity.cloudbreakClient = singletonCloudbreakClient;
-        clientEntity.cloudbreakInternalCrnClient = singletonCloudbreakInternalCrnClient;
-        clientEntity.rawClient = createRawWebTarget(configKey, serviceAddress, CoreApi.API_ROOT_CONTEXT, accessKey, secretKey);
-    }
-
     private static synchronized WebTarget createRawWebTarget(ConfigKey configKey, String serviceAddress, String apiRoot,
             String accessKey, String secretKey) {
         Client client = RestClientUtil.get(configKey);
@@ -132,7 +88,7 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
         return webTarget;
     }
 
-    public static synchronized CloudbreakClient createProxyCloudbreakClient(TestParameter testParameter,
+    public static synchronized CloudbreakClient createCloudbreakClient(TestParameter testParameter,
         CloudbreakUser cloudbreakUser, RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         CloudbreakClient clientEntity = new CloudbreakClient();
         clientEntity.setActing(cloudbreakUser);

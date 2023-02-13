@@ -3,8 +3,8 @@ package com.sequenceiq.it.cloudbreak.assertion.audit;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 @Component
 public class FreeIpaAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<FreeIpaTestDto, FreeIpaClient> {

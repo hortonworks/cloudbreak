@@ -34,7 +34,7 @@ import org.apache.commons.collections4.ListUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 
 public class CloudbreakWaitObject implements WaitObject {

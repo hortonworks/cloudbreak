@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerDeleteAction;
@@ -10,6 +9,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerSta
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerStopAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerUpgradeAction;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
 
 @Service
 public class RedbeamsDatabaseServerTestClient {

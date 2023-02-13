@@ -7,7 +7,7 @@ import java.util.Set;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 public class FreeIpaUserSyncWaitObject extends FreeIpaWaitObject {
 

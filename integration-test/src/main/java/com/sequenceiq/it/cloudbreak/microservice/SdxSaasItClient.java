@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.microservice;
 
 import java.lang.reflect.Field;
 import java.util.Set;
@@ -18,14 +18,6 @@ public class SdxSaasItClient<E extends Enum<E>, W extends WaitObject> extends Mi
 
     private GrpcSdxSaasClient sdxSaasClient;
 
-    SdxSaasItClient(String newId) {
-        super(newId);
-    }
-
-    SdxSaasItClient() {
-        this("SDX_SAAS_CLIENT");
-    }
-
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
         throw new TestFailException("Flow checking is not supported by sdx saas client.");
@@ -41,7 +33,7 @@ public class SdxSaasItClient<E extends Enum<E>, W extends WaitObject> extends Mi
         return sdxSaasClient;
     }
 
-    public static synchronized SdxSaasItClient createProxySdxSaasClient(String host,
+    public static synchronized SdxSaasItClient createSdxSaasClient(String host,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         SdxSaasItClient clientEntity = new SdxSaasItClient();
         SdxSaasChannelConfig sdxSaasChannelConfig = new SdxSaasChannelConfig();

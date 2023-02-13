@@ -21,10 +21,6 @@ public class SdxCloudStorageTestDto extends AbstractSdxTestDto<SdxCloudStorageRe
         super(new SdxCloudStorageRequest(), testContext);
     }
 
-    public SdxCloudStorageTestDto() {
-        super(SdxCloudStorageTestDto.class.getSimpleName().toUpperCase());
-    }
-
     public SdxCloudStorageTestDto valid() {
         return getCloudProvider().cloudStorage(this);
     }

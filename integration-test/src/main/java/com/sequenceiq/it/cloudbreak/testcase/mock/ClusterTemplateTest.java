@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.audit.ClusterTemplateAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.clustertemplate.ClusterTemplateTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.ClusterTemplateTestClient;
@@ -39,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class ClusterTemplateTest extends AbstractMockTest {
 

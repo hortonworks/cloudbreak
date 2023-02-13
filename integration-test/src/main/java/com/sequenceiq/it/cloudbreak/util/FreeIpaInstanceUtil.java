@@ -11,8 +11,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 @Component
 public class FreeIpaInstanceUtil {

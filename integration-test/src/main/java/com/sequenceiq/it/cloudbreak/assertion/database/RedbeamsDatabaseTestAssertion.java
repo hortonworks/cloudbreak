@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.assertion.database;
 
-import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
 
 public class RedbeamsDatabaseTestAssertion {
 

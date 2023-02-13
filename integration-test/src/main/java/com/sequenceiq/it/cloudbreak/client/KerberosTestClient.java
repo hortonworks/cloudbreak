@@ -2,12 +2,12 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.kerberos.KerberosCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.kerberos.KerberosDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.kerberos.KerberosGetAction;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 @Service
 public class KerberosTestClient {

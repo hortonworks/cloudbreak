@@ -11,10 +11,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Respo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype

@@ -18,10 +18,6 @@ public class EnvironmentSecurityAccessTestDto extends AbstractCloudbreakTestDto<
         super(new SecurityAccessRequest(), testContext);
     }
 
-    public EnvironmentSecurityAccessTestDto() {
-        super(EnvironmentSecurityAccessTestDto.class.getSimpleName().toUpperCase());
-    }
-
     public EnvironmentSecurityAccessTestDto valid() {
         return getCloudProvider().environmentSecurityAccess(this);
     }

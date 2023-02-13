@@ -32,17 +32,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.AuthDistributorClient;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
-import com.sequenceiq.it.cloudbreak.RedbeamsClient;
-import com.sequenceiq.it.cloudbreak.SdxClient;
-import com.sequenceiq.it.cloudbreak.SdxSaasItClient;
-import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
@@ -57,11 +47,21 @@ import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.AuthDistributorClient;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
+import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
+import com.sequenceiq.it.cloudbreak.microservice.SdxSaasItClient;
+import com.sequenceiq.it.cloudbreak.microservice.UmsClient;
 import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ResourceAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceAwait;
+import com.sequenceiq.it.util.TestParameter;
 
 public abstract class TestContext implements ApplicationContextAware {
 
@@ -190,20 +190,20 @@ public abstract class TestContext implements ApplicationContextAware {
      * We need to explicitly define the usage of real UMS users (automated via
      * 'useRealUmsUser' at 'AbstractIntegrationTest'). So on this way we can avoid
      * accidental usage:
-     *  - The initialization of the real UMS user store is happening automatically.
-     *  - If the 'api-credentials.json' is mistakenly present at 'ums-users' folder.
-     *    When a microservice client or an action is intended to use admin user then
-     *    a real UMS admin is going to be provided from the initialized user store.
+     * - The initialization of the real UMS user store is happening automatically.
+     * - If the 'api-credentials.json' is mistakenly present at 'ums-users' folder.
+     * When a microservice client or an action is intended to use admin user then
+     * a real UMS admin is going to be provided from the initialized user store.
      * By setting 'useUmsUserCache' to 'true' we can define the usage of real UMS user
      * store. Then and only then tests are running with 'useRealUmsUser' the real UMS
      * users are going to be provided from the initialized user store.
-     *
+     * <p>
      * So we can rest assured MOCK or E2E Cloudbreak tests are going to be run with
      * mock and default test users even the 'ums-users/api-credentials.json' is present
      * and real UMS user store is initialized.
      *
-     * @param useUmsUserCache   'true' if user store has been selected for providing
-     *                          users for tests
+     * @param useUmsUserCache 'true' if user store has been selected for providing
+     *                        users for tests
      */
     public void useUmsUserCache(boolean useUmsUserCache) {
         this.useUmsUserCache = useUmsUserCache;
@@ -212,7 +212,7 @@ public abstract class TestContext implements ApplicationContextAware {
     /**
      * Returning 'true' if tests are running with real UMS users.
      *
-     * @return                  'true' if real UMS users are used for tests.
+     * @return 'true' if real UMS users are used for tests.
      */
     public boolean umsUserCacheInUse() {
         return useUmsUserCache;
@@ -220,11 +220,11 @@ public abstract class TestContext implements ApplicationContextAware {
 
     /**
      * Returning 'true' if real UMS users can be used for testing:
-     *  - user store has been initialized successfully
-     *  - user store has been selected for providing users by 'useUmsUserCache=true'
+     * - user store has been initialized successfully
+     * - user store has been selected for providing users by 'useUmsUserCache=true'
      *
-     * @return                  'true' if real UMS user store has been initialized and
-     *                          selected for use.
+     * @return 'true' if real UMS user store has been initialized and
+     * selected for use.
      */
     public boolean realUmsUserCacheReadyToUse() {
         return cloudbreakActor.isInitialized() && umsUserCacheInUse();
@@ -451,18 +451,18 @@ public abstract class TestContext implements ApplicationContextAware {
         Log.as(LOGGER, cloudbreakUser.toString());
         setActingUser(cloudbreakUser);
         if (clients.get(cloudbreakUser.getAccessKey()) == null) {
-            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(getTestParameter(), cloudbreakUser,
+            CloudbreakClient cloudbreakClient = CloudbreakClient.createCloudbreakClient(getTestParameter(), cloudbreakUser,
                     regionAwareInternalCrnGeneratorFactory.iam());
             FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(getTestParameter(), cloudbreakUser,
                     regionAwareInternalCrnGeneratorFactory.iam());
-            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(getTestParameter(), cloudbreakUser,
+            EnvironmentClient environmentClient = EnvironmentClient.createEnvironmentClient(getTestParameter(), cloudbreakUser,
                     regionAwareInternalCrnGeneratorFactory.iam());
-            SdxClient sdxClient = SdxClient.createProxySdxClient(getTestParameter(), cloudbreakUser);
-            UmsClient umsClient = UmsClient.createProxyUmsClient(umsHost, umsPort);
-            SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(umsHost, regionAwareInternalCrnGeneratorFactory);
+            SdxClient sdxClient = SdxClient.createSdxClient(getTestParameter(), cloudbreakUser);
+            UmsClient umsClient = UmsClient.createUmsClient(umsHost, umsPort);
+            SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createSdxSaasClient(umsHost, regionAwareInternalCrnGeneratorFactory);
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
-            RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(getTestParameter(), cloudbreakUser);
+            RedbeamsClient redbeamsClient = RedbeamsClient.createRedbeamsClient(getTestParameter(), cloudbreakUser);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
                     CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient,
@@ -480,18 +480,18 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private void initMicroserviceClientsForUMSAccountAdmin(CloudbreakUser accountAdmin) {
         if (clients.get(accountAdmin.getAccessKey()) == null) {
-            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(getTestParameter(), accountAdmin,
+            CloudbreakClient cloudbreakClient = CloudbreakClient.createCloudbreakClient(getTestParameter(), accountAdmin,
                     regionAwareInternalCrnGeneratorFactory.iam());
             FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(getTestParameter(), accountAdmin,
                     regionAwareInternalCrnGeneratorFactory.iam());
-            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(getTestParameter(), accountAdmin,
+            EnvironmentClient environmentClient = EnvironmentClient.createEnvironmentClient(getTestParameter(), accountAdmin,
                     regionAwareInternalCrnGeneratorFactory.iam());
-            SdxClient sdxClient = SdxClient.createProxySdxClient(getTestParameter(), accountAdmin);
-            UmsClient umsClient = UmsClient.createProxyUmsClient(umsHost, umsPort);
-            SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(umsHost, regionAwareInternalCrnGeneratorFactory);
+            SdxClient sdxClient = SdxClient.createSdxClient(getTestParameter(), accountAdmin);
+            UmsClient umsClient = UmsClient.createUmsClient(umsHost, umsPort);
+            SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createSdxSaasClient(umsHost, regionAwareInternalCrnGeneratorFactory);
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
-            RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(getTestParameter(), accountAdmin);
+            RedbeamsClient redbeamsClient = RedbeamsClient.createRedbeamsClient(getTestParameter(), accountAdmin);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
                     CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient,
@@ -504,7 +504,7 @@ public abstract class TestContext implements ApplicationContextAware {
             clients.put(accountAdmin.getAccessKey(), clientMap);
         }
         LOGGER.info(" Microservice clients have been initialized successfully for UMS account admin:: \nDisplay name: {} \nAccess key: {} \nSecret key: {} " +
-                        "\nCrn: {} ", accountAdmin.getDisplayName(), accountAdmin.getAccessKey(), accountAdmin.getSecretKey(), accountAdmin.getCrn());
+                "\nCrn: {} ", accountAdmin.getDisplayName(), accountAdmin.getAccessKey(), accountAdmin.getSecretKey(), accountAdmin.getCrn());
     }
 
     public TestContext addDescription(TestCaseDescription testCaseDesription) {
@@ -546,7 +546,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     /**
      * Returning the default Mock user's Customer Reference Number (CRN).
-     *
+     * <p>
      * Default Mock user details can be defined at:
      * - application parameter: integrationtest.user.crn
      * - in ~/.dp/config as "localhost" profile
@@ -562,7 +562,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     /**
      * Returning the acting (actually used as actor) UMS user's Customer Reference Number (CRN).
-     *
+     * <p>
      * Default UMS user details are defined at ums-users/api-credentials.json and can be accessed
      * by `useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN)`
      */
@@ -575,7 +575,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     /**
      * Returning the default Cloudbreak user's Customer Reference Number (CRN).
-     *
+     * <p>
      * Default Cloudbreak user details can be defined as:
      * - application parameter: integrationtest.user.crn
      * - environment variable: INTEGRATIONTEST_USER_CRN
@@ -596,7 +596,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     /**
      * Returning the default Mock user's name.
-     *
+     * <p>
      * Default Mock user details can be defined at:
      * - application parameter: integrationtest.user.crn
      * - in ~/.dp/config as "localhost" profile
@@ -612,7 +612,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     /**
      * Returning the acting (actually used as actor) UMS user's name.
-     *
+     * <p>
      * Default UMS user details are defined at ums-users/api-credentials.json and can be accessed
      * by `useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN)`
      */
@@ -625,7 +625,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     /**
      * Returning the default Cloudbreak user's name.
-     *
+     * <p>
      * Default Cloudbreak user details can be defined as:
      * - application parameter: integrationtest.user.name
      * - environment variable: INTEGRATIONTEST_USER_NAME
@@ -640,7 +640,7 @@ public abstract class TestContext implements ApplicationContextAware {
     /**
      * Updates the acting user with the provided one.
      *
-     * @param actingUser         Provided acting user (CloudbreakUser)
+     * @param actingUser Provided acting user (CloudbreakUser)
      */
     public void setActingUser(CloudbreakUser actingUser) {
         LOGGER.info(" Acting user has been set:: \nDisplay Name: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {} \nDescription: {} ",
@@ -652,9 +652,9 @@ public abstract class TestContext implements ApplicationContextAware {
     /**
      * If requested user is present, sets it as acting user then returns with it, otherwise returns the actual acting user.
      *
-     * @param runningParameter   Running parameter with acting user. Sample: RunningParameter.who(cloudbreakActor
-     *                           .getRealUmsUser(AuthUserKeys.ENV_CREATOR_A))
-     * @return                   Returns with the acting user (CloudbreakUser)
+     * @param runningParameter Running parameter with acting user. Sample: RunningParameter.who(cloudbreakActor
+     *                         .getRealUmsUser(AuthUserKeys.ENV_CREATOR_A))
+     * @return Returns with the acting user (CloudbreakUser)
      */
     public CloudbreakUser setActingUser(RunningParameter runningParameter) {
         CloudbreakUser cloudbreakUser = runningParameter.getWho();
@@ -677,12 +677,12 @@ public abstract class TestContext implements ApplicationContextAware {
 
     /**
      * If acting user is present, returns the user, otherwise returns the Default user.
-     *
+     * <p>
      * Default Cloudbreak user details can be defined as:
      * - application parameter: integrationtest.user.accesskey and integrationtest.user.secretkey
      * - environment variable: INTEGRATIONTEST_USER_ACCESSKEY and INTEGRATIONTEST_USER_SECRETKEYOR
      *
-     * @return                   Returns with the acting user (CloudbreakUser)
+     * @return Returns with the acting user (CloudbreakUser)
      */
     public CloudbreakUser getActingUser() {
         if (actingUser == null) {
@@ -700,8 +700,8 @@ public abstract class TestContext implements ApplicationContextAware {
     /**
      * Request a real UMS user by AuthUserKeys from the fetched ums-users/api-credentials.json
      *
-     * @param userKey            Key with UMS user's display name. Sample: AuthUserKeys.ACCOUNT_ADMIN
-     * @return                   Returns with the UMS user (CloudbreakUser)
+     * @param userKey Key with UMS user's display name. Sample: AuthUserKeys.ACCOUNT_ADMIN
+     * @return Returns with the UMS user (CloudbreakUser)
      */
     public CloudbreakUser getRealUmsUserByKey(String userKey) {
         CloudbreakUser requestedRealUmsUser;
@@ -723,7 +723,7 @@ public abstract class TestContext implements ApplicationContextAware {
     /**
      * Request the real UMS admin from the fetched ums-users json
      *
-     * @return                   Returns with the UMS admin user (CloudbreakUser)
+     * @return Returns with the UMS admin user (CloudbreakUser)
      */
     public CloudbreakUser getRealUmsAdmin() {
         String accountId = Objects.requireNonNull(Crn.fromString(actingUser.getCrn())).getAccountId();

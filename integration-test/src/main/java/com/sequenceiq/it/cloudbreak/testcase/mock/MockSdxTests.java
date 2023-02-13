@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -30,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;

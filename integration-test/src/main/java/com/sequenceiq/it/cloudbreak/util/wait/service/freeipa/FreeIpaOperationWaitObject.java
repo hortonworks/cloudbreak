@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 public class FreeIpaOperationWaitObject extends FreeIpaWaitObject {
 

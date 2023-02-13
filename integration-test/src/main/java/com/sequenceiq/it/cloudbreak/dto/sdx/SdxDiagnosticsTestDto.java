@@ -5,10 +5,10 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.diagnostics.BaseDiagnosticsTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 
 @Prototype
 public class SdxDiagnosticsTestDto extends BaseDiagnosticsTestDto<DiagnosticsCollectionRequest, SdxDiagnosticsTestDto, SdxClient> {

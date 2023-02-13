@@ -15,14 +15,8 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 @Prototype
 public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest, TelemetryResponse, TelemetryTestDto> {
 
-    private static final String TELEMETRY = "TELEMETRY";
-
     public TelemetryTestDto(TestContext testContext) {
         super(new TelemetryRequest(), testContext);
-    }
-
-    public TelemetryTestDto() {
-        super(TELEMETRY);
     }
 
     public TelemetryTestDto valid() {

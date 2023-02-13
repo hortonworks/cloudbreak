@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.util.CheckResourceRightAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.CheckRightAction;
@@ -24,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.dto.util.RepoConfigValidationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.UsedImagesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 @Service
 public class UtilTestClient {

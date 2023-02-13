@@ -10,26 +10,19 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnPa
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
 public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialRequest, CredentialResponse, CredentialTestDto, CredentialResponse> {
 
-    public static final String CREDENTIAL = "CREDENTIAL";
-
     private static final String CREDENTIAL_RESOURCE_NAME = "credentialName";
 
     public CredentialTestDto(TestContext testContext) {
         super(new CredentialRequest(), testContext);
-    }
-
-    public CredentialTestDto() {
-        super(CREDENTIAL);
-        setRequest(new CredentialRequest());
     }
 
     public CredentialTestDto valid() {

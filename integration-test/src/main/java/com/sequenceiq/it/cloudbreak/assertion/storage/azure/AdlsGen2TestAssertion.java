@@ -6,9 +6,9 @@ import java.util.Objects;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class AdlsGen2TestAssertion {
 

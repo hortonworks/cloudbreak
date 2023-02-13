@@ -7,11 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.testng.TestException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class ImageCatalogCreateRetryAction implements Action<ImageCatalogTestDto, CloudbreakClient> {
 

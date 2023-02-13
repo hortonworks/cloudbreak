@@ -6,11 +6,11 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
 
 public class RedbeamsDatabaseListAction implements Action<RedbeamsDatabaseTestDto, RedbeamsClient> {

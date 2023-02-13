@@ -18,10 +18,6 @@ public class EnvironmentAuthenticationTestDto extends AbstractCloudbreakTestDto<
         super(new EnvironmentAuthenticationRequest(), testContext);
     }
 
-    public EnvironmentAuthenticationTestDto() {
-        super(EnvironmentAuthenticationTestDto.class.getSimpleName().toUpperCase());
-    }
-
     public EnvironmentAuthenticationTestDto valid() {
         return getCloudProvider().environmentAuthentication(this);
     }

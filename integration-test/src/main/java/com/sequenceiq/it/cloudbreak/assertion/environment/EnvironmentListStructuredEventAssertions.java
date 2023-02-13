@@ -41,10 +41,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.assertion.EventAssertionCommon;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 @Component
 public class EnvironmentListStructuredEventAssertions {

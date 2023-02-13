@@ -1,10 +1,10 @@
 package com.sequenceiq.it.cloudbreak.action.v4.environment;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 public class EnvironmentDeleteByNameAction extends AbstractEnvironmentAction {
 
