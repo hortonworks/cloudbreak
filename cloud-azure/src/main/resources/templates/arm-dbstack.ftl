@@ -315,7 +315,7 @@
         {
           "type": "Microsoft.Resources/deployments",
           "apiVersion": "2019-05-01",
-          "name": "addAccessPolicy",
+          "name": "[concat(parameters('dbServerName'), '-', 'addAccessPolicy')]",
           "resourceGroup": "[parameters('keyVaultResourceGroupName')]",
           "dependsOn": [
             "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('dbServerName'))]"
@@ -355,7 +355,7 @@
           "type": "Microsoft.DBforPostgreSQL/servers/keys",
           "apiVersion": "2020-01-01-preview",
           "dependsOn": [
-            "addAccessPolicy",
+            "[concat(parameters('dbServerName'), '-', 'addAccessPolicy')]",
             "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('dbServerName'))]"
           ],
           "properties": {
