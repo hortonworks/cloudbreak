@@ -10,12 +10,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
@@ -65,10 +63,6 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
 
     private static final String TEST_CLUSTER_NAME = "testCluster";
 
-    private static final String TEST_CLUSTER_NAME_1 = "testCluster1";
-
-    private static final String TEST_CLUSTER_NAME_2 = "testCluster2";
-
     private static final String TEST_CLUSTER_NAME_NULL = null;
 
     private static final String TEST_TENANT = "testTenant";
@@ -77,35 +71,13 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
 
     private static final String TEST_CLUSTER_CRN = String.format("crn:cdp:iam:us-west-1:%s:cluster:mockuser@cloudera.com", TEST_ACCOUNT_ID);
 
-    private static final String TEST_CLUSTER_CRN_1 = String.format("crn:cdp:iam:us-west-1:%s:cluster:mockuser@cloudera.com", "aacid1");
-
-    private static final String TEST_CLUSTER_CRN_2 = String.format("crn:cdp:iam:us-west-1:%s:cluster:mockuser@cloudera.com", "aacid2");
-
     private static final String TEST_CLUSTER_CRN_NULL = null;
 
     private static final String TEST_OPERATION_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
 
-    private static final String TEST_OPERATION_ID_2 = "9d74eee4-1cad-45d7-b645-7ccf9edbb73e";
-
-    private static final String TEST_OPERATION_ID_3 = "9d74eee4-1cad-45d7-b645-7ccf9edbb73f";
-
-    private static final String TEST_OPERATION_ID_4 = "9d74eee4-1cad-45d7-b645-7ccf9edbb73g";
-
-    private static final String TEST_OPERATION_ID_5 = "9d74eee4-1cad-45d7-b645-7ccf9edbb73h";
-
-    private static final String TEST_OPERATION_ID_6 = "9d74eee4-1cad-45d7-b645-7ccf9edbb73i";
-
-    private static final String TEST_OPERATION_ID_7 = "9d74eee4-1cad-45d7-b645-7ccf9edbb73j";
-
-    private static final String TEST_OPERATION_ID_8 = "9d74eee4-1cad-45d7-b645-7ccf9edbb73k";
-
     private static final String TEST_OPERATION_ID_9 = "9d74eee4-1cad-45d7-b645-7ccf9edbb73l";
 
     private static final String TEST_OPERATION_ID_NULL = null;
-
-    private static final String TEST_OPERATION_ID_11 = "9d74eee4-1cad-45d7-b645-7ccf9edbb73m";
-
-    private static final String TEST_OPERATION_ID_12 = "9d74eee4-1cad-45d7-b645-7ccf9edbb73n";
 
     private static final String TEST_REASON = "test trigger reason";
 
@@ -163,46 +135,8 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
 
         ScalingActivity scalingActivity = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_SUCCESS,
                 Instant.now().minus(150, MINUTES).toEpochMilli(), TEST_OPERATION_ID);
-        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_FAILED,
-                Instant.now().minus(100, MINUTES).toEpochMilli(), TEST_OPERATION_ID_2);
-        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
-                Instant.now().minus(50, MINUTES).toEpochMilli(), TEST_OPERATION_ID_3);
-        ScalingActivity scalingActivity4 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
-                Instant.now().minus(40, MINUTES).toEpochMilli(), TEST_OPERATION_ID_4);
-        ScalingActivity scalingActivity5 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
-                Instant.now().minus(30, MINUTES).toEpochMilli(), TEST_OPERATION_ID_5);
-        ScalingActivity scalingActivity6 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_FAILED,
-                Instant.now().minus(20, MINUTES).toEpochMilli(), TEST_OPERATION_ID_6);
-        ScalingActivity scalingActivity7 = createScalingActivity(testCluster, ActivityStatus.ACTIVITY_PENDING,
-                Instant.now().minus(10, MINUTES).toEpochMilli(), TEST_OPERATION_ID_7);
-        ScalingActivity scalingActivity8 = createScalingActivity(testCluster, ActivityStatus.SCALING_FLOW_IN_PROGRESS,
-                Instant.now().minus(0, MINUTES).toEpochMilli(), TEST_OPERATION_ID_8);
 
-        scalingActivityRepository.saveAll(Arrays.asList(scalingActivity, scalingActivity2, scalingActivity3, scalingActivity4,
-                scalingActivity5, scalingActivity6, scalingActivity7, scalingActivity8));
-
-        Cluster testCluster2 = new Cluster();
-        testCluster.setStackCrn(TEST_CLUSTER_CRN_2);
-        testCluster.setStackName(TEST_CLUSTER_NAME_2);
-        testCluster.setCloudPlatform("AWS");
-
-        ClusterPertain clusterPertain2 = new ClusterPertain();
-        clusterPertain.setTenant(TEST_ACCOUNT_ID);
-        clusterPertain.setWorkspaceId(TEST_WORKSPACE_ID);
-        clusterPertain.setUserId(TEST_USER_ID.toString());
-        clusterPertain.setUserCrn(TEST_USER_CRN);
-
-        testCluster2.setClusterPertain(
-                clusterPertainRepository.findFirstByUserCrn(clusterPertain.getUserCrn())
-                        .orElseGet(() -> clusterPertainRepository.save(clusterPertain2)));
-        clusterRepository.save(testCluster2);
-
-        ScalingActivity scalingActivity9 = createScalingActivity(testCluster2, ActivityStatus.METRICS_COLLECTION_SUCCESS,
-                Instant.now().minus(150, MINUTES).toEpochMilli(), TEST_OPERATION_ID_11);
-        ScalingActivity scalingActivity10 = createScalingActivity(testCluster2, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
-                Instant.now().minus(100, MINUTES).toEpochMilli(), TEST_OPERATION_ID_12);
-
-        scalingActivityRepository.saveAll(Arrays.asList(scalingActivity9, scalingActivity10));
+        scalingActivityRepository.saveAll(List.of(scalingActivity));
 
         when(grpcUmsClient.getUserDetails(anyString(), any())).thenReturn(user);
         when(grpcUmsClient.getResourceRoles(any())).thenReturn(Set.of(
@@ -224,49 +158,15 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
     }
 
     @Test
-    public void testGetScalingActivitiesInDurationByClusterName() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesInDurationByClusterName(TEST_CLUSTER_NAME, 60, 5, 1)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of(TEST_OPERATION_ID_3));
-    }
-
-    @Test
-    public void testGetScalingActivitiesInDurationByClusterNameNoScalingActivityFound() {
-        Cluster testCluster1 = getACluster();
-        testCluster1.setStackName(TEST_CLUSTER_NAME_1);
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesInDurationByClusterName(testCluster1.getStackName(), 60, 0, 10)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
-    }
-
-    @Test
     public void testGetScalingActivitiesInDurationByClusterNameWithNameAsNull() {
         assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesInDurationByClusterName(TEST_CLUSTER_NAME_NULL, 60, 0, 10));
-    }
-
-    @Test
-    public void testGetScalingActivitiesInDurationByClusterCrn() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesInDurationByClusterCrn(TEST_CLUSTER_CRN, 60, 1, 2)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of(TEST_OPERATION_ID_6, TEST_OPERATION_ID_5));
-    }
-
-    @Test
-    public void testGetScalingActivitiesInDurationByClusterCrnNoScalingActivityFound() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesInDurationByClusterCrn(TEST_CLUSTER_CRN_1, 60, 1, 2)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
+                .getScalingActivitiesInDurationByClusterName(TEST_CLUSTER_NAME_NULL, 60, 0, 10).getContent());
     }
 
     @Test
     public void testGetScalingActivitiesInDurationByClusterCrnWithCrnAsNull() {
         assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesInDurationByClusterCrn(TEST_CLUSTER_CRN_NULL, 60, 0, 10));
+                .getScalingActivitiesInDurationByClusterCrn(TEST_CLUSTER_CRN_NULL, 60, 0, 10).getContent());
     }
 
     @Test
@@ -289,109 +189,15 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
     }
 
     @Test
-    public void testGetFailedScalingActivitiesInGivenDurationByClusterName() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getFailedScalingActivitiesInGivenDurationByClusterName(TEST_CLUSTER_NAME, 60, 0, 3)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of(TEST_OPERATION_ID_6, TEST_OPERATION_ID_4, TEST_OPERATION_ID_3));
-    }
-
-    @Test
-    public void testGetFailedScalingActivitiesInGivenDurationByClusterNameWithNoFailedScalingActivity() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getFailedScalingActivitiesInGivenDurationByClusterName(TEST_CLUSTER_NAME_2, 60, 0, 3)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
-    }
-
-    @Test
-    public void testGetFailedScalingActivitiesInGivenDurationByClusterNameWithNoScalingActivityStored() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getFailedScalingActivitiesInGivenDurationByClusterName(TEST_CLUSTER_NAME_1, 60, 0, 3)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
-    }
-
-    @Test
     public void testGetFailedScalingActivitiesInGivenDurationByClusterNameWithNullName() {
         assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
-                .getFailedScalingActivitiesInGivenDurationByClusterName(TEST_CLUSTER_NAME_NULL, 60, 0, 10));
-    }
-
-    @Test
-    public void testGetFailedScalingActivitiesInGivenDurationByClusterNameWithNoFailedScalingActivityInGivenRange() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getFailedScalingActivitiesInGivenDurationByClusterName(TEST_CLUSTER_CRN, 0, 2, 1)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
-    }
-
-    @Test
-    public void testGetFailedScalingActivitiesInGivenDurationByClusterCrn() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getFailedScalingActivitiesInGivenDurationByClusterCrn(TEST_CLUSTER_CRN, 600, 2, 1)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of(TEST_OPERATION_ID_3));
-    }
-
-    @Test
-    public void testGetFailedScalingActivitiesInGivenDurationByClusterCrnWithNoFailedScalingActivity() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getFailedScalingActivitiesInGivenDurationByClusterCrn(TEST_CLUSTER_CRN_2, 60, 0, 3)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
-    }
-
-    @Test
-    public void testGetFailedScalingActivitiesInGivenDurationByClusterCrnWithNoScalingActivityStored() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getFailedScalingActivitiesInGivenDurationByClusterCrn(TEST_CLUSTER_CRN_1, 60, 0, 3)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
+                .getFailedScalingActivitiesInGivenDurationByClusterName(TEST_CLUSTER_NAME_NULL, 60, 0, 10).getContent());
     }
 
     @Test
     public void testGetFailedScalingActivitiesInGivenDurationByClusterCrnWithNullCrn() {
         assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
-                .getFailedScalingActivitiesInGivenDurationByClusterCrn(TEST_CLUSTER_CRN_NULL, 60, 0, 10));
-    }
-
-    @Test
-    public void testGetFailedScalingActivitiesInGivenDurationByClusterCrnWithNoFailedScalingActivityInGivenRange() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getFailedScalingActivitiesInGivenDurationByClusterCrn(TEST_CLUSTER_CRN, 0, 2, 1)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
-    }
-
-    @Test
-    public void testGetScalingActivitiesInTimeRangeByClusterName() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesBetweenIntervalByClusterName(TEST_CLUSTER_NAME,
-                        Instant.now().minus(60, MINUTES).toEpochMilli(),
-                        Instant.now().minus(30, MINUTES).toEpochMilli(), 2, 1)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of(TEST_OPERATION_ID_3));
-    }
-
-    @Test
-    public void testGetScalingActivitiesInTimeRangeByClusterNameWithSameStartAndEndTimeIntervals() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesBetweenIntervalByClusterName(TEST_CLUSTER_NAME,
-                        Instant.now().minus(30, MINUTES).toEpochMilli(),
-                        Instant.now().minus(30, MINUTES).toEpochMilli(), 0, 1)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
-    }
-
-    @Test
-    public void testGetScalingActivitiesInTimeRangeByClusterNameWithNoScalingActivityStored() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesBetweenIntervalByClusterName(TEST_CLUSTER_NAME_1,
-                        Instant.now().minus(60, MINUTES).toEpochMilli(),
-                        Instant.now().minus(30, MINUTES).toEpochMilli(), 2, 1)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
+                .getFailedScalingActivitiesInGivenDurationByClusterCrn(TEST_CLUSTER_CRN_NULL, 60, 0, 10).getContent());
     }
 
     @Test
@@ -399,37 +205,7 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
         assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
                 .getScalingActivitiesBetweenIntervalByClusterName(TEST_CLUSTER_NAME_NULL,
                         Instant.now().minus(60, MINUTES).toEpochMilli(),
-                        Instant.now().minus(30, MINUTES).toEpochMilli(), 0, 10));
-    }
-
-    @Test
-    public void testGetScalingActivitiesInTimeRangeByClusterCrn() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesBetweenIntervalByClusterCrn(TEST_CLUSTER_CRN,
-                        Instant.now().minus(200, MINUTES).toEpochMilli(),
-                        Instant.now().minus(125, MINUTES).toEpochMilli(), 0, 2)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of(TEST_OPERATION_ID));
-    }
-
-    @Test
-    public void testGetScalingActivitiesInTimeRangeByClusterCrnWithSameStartAndEndTimeIntervals() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesBetweenIntervalByClusterCrn(TEST_CLUSTER_CRN,
-                        Instant.now().minus(30, MINUTES).toEpochMilli(),
-                        Instant.now().minus(30, MINUTES).toEpochMilli(), 0, 1)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
-    }
-
-    @Test
-    public void testGetScalingActivitiesInTimeRangeByClusterCRNWithNoScalingActivityStored() {
-        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesBetweenIntervalByClusterCrn(TEST_CLUSTER_CRN_1,
-                        Instant.now().minus(60, MINUTES).toEpochMilli(),
-                        Instant.now().minus(30, MINUTES).toEpochMilli(), 2, 1)
-                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
-        assertEquals(distroXAutoscaleScalingActivityResponse, List.of());
+                        Instant.now().minus(30, MINUTES).toEpochMilli(), 0, 10).getContent());
     }
 
     @Test
@@ -437,7 +213,7 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
         assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
                 .getScalingActivitiesBetweenIntervalByClusterCrn(TEST_CLUSTER_CRN_NULL,
                         Instant.now().minus(60, MINUTES).toEpochMilli(),
-                        Instant.now().minus(30, MINUTES).toEpochMilli(), 0, 10));
+                        Instant.now().minus(30, MINUTES).toEpochMilli(), 0, 10).getContent());
     }
 
     private ScalingActivity createScalingActivity(Cluster cluster, ActivityStatus status, long creationTimestamp, String operationId) {

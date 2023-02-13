@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -117,10 +118,10 @@ class ScalingActivityRepositoryTest {
         saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3);
 
         Pageable pageable = PageRequest.of(0, 10);
-        List<ScalingActivity> result = underTest.findAllByClusterCrnWithStartTimeAfter(testCluster.getStackCrn(),
+        Page<ScalingActivity> result = underTest.findAllByClusterCrnWithStartTimeAfter(testCluster.getStackCrn(),
                 new Date(now.minus(10, MINUTES).toEpochMilli()), pageable);
 
-        assertThat(result).hasSize(3).hasSameElementsAs(asList(testScalingActivity, scalingActivity1, scalingActivity2));
+        assertThat(result.getContent()).hasSize(3).hasSameElementsAs(asList(testScalingActivity, scalingActivity1, scalingActivity2));
     }
 
     @Test
@@ -136,10 +137,10 @@ class ScalingActivityRepositoryTest {
         saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3);
 
         Pageable pageable = PageRequest.of(0, 1);
-        List<ScalingActivity> result = underTest.findAllByClusterNameWithStartTimeAfter(testCluster.getStackName(),
+        Page<ScalingActivity> result = underTest.findAllByClusterNameWithStartTimeAfter(testCluster.getStackName(),
                 new Date(now.minus(10, MINUTES).toEpochMilli()), pageable);
 
-        assertThat(result).hasSize(1).hasSameElementsAs(asList(testScalingActivity));
+        assertThat(result.getContent()).hasSize(1).hasSameElementsAs(asList(testScalingActivity));
     }
 
     @Test
@@ -203,10 +204,10 @@ class ScalingActivityRepositoryTest {
         saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3, scalingActivity4);
 
         Pageable pageable = PageRequest.of(0, 10);
-        List<ScalingActivity> result = underTest.findAllByClusterCrnAndInStatusesWithTimeAfter(testCluster.getStackCrn(),
+        Page<ScalingActivity> result = underTest.findAllByClusterCrnAndInStatusesWithTimeAfter(testCluster.getStackCrn(),
                 statuses, start, pageable);
 
-        assertThat(result).hasSize(3).hasSameElementsAs(asList(scalingActivity2, scalingActivity3, scalingActivity4));
+        assertThat(result.getContent()).hasSize(3).hasSameElementsAs(asList(scalingActivity2, scalingActivity3, scalingActivity4));
     }
 
     @Test
@@ -228,10 +229,10 @@ class ScalingActivityRepositoryTest {
         saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3, scalingActivity4);
 
         Pageable pageable = PageRequest.of(0, 10);
-        List<ScalingActivity> result = underTest.findAllByClusterNameAndInStatusesWithTimeAfter(testCluster.getStackName(),
+        Page<ScalingActivity> result = underTest.findAllByClusterNameAndInStatusesWithTimeAfter(testCluster.getStackName(),
                 statuses, start, pageable);
 
-        assertThat(result).hasSize(0).hasSameElementsAs(List.of());
+        assertThat(result.getContent()).hasSize(0).hasSameElementsAs(List.of());
     }
 
     @Test
@@ -252,9 +253,9 @@ class ScalingActivityRepositoryTest {
         Date end = new Date(now.plus(10, MINUTES).toEpochMilli());
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<ScalingActivity> result = underTest.findAllByClusterCrnBetweenInterval(testCluster.getStackCrn(), start, end, pageable);
+        Page<ScalingActivity> result = underTest.findAllByClusterCrnBetweenInterval(testCluster.getStackCrn(), start, end, pageable);
 
-        assertThat(result).hasSize(2).hasSameElementsAs(asList(testScalingActivity, scalingActivity1));
+        assertThat(result.getContent()).hasSize(2).hasSameElementsAs(asList(testScalingActivity, scalingActivity1));
     }
 
     @Test
@@ -277,9 +278,9 @@ class ScalingActivityRepositoryTest {
         Date end = new Date(now.plus(10, MINUTES).toEpochMilli());
         Pageable pageable = PageRequest.of(1, 1);
 
-        List<ScalingActivity> result = underTest.findAllByClusterNameBetweenInterval(testCluster.getStackName(), start, end, pageable);
+        Page<ScalingActivity> result = underTest.findAllByClusterNameBetweenInterval(testCluster.getStackName(), start, end, pageable);
 
-        assertThat(result).hasSize(1).hasSameElementsAs(asList(scalingActivity1));
+        assertThat(result.getContent()).hasSize(1).hasSameElementsAs(asList(scalingActivity1));
     }
 
     @Test

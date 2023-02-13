@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import javax.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
@@ -33,12 +34,12 @@ public interface ScalingActivityRepository extends PagingAndSortingRepository<Sc
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackName = :clusterName" +
             " AND st.startTime >= :startTimeAfter ORDER BY st.startTime DESC")
-    List<ScalingActivity> findAllByClusterNameWithStartTimeAfter(@Param("clusterName") String clusterName,
+    Page<ScalingActivity> findAllByClusterNameWithStartTimeAfter(@Param("clusterName") String clusterName,
             @Param("startTimeAfter") Date startTimeAfter, Pageable pageable);
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackCrn = :clusterCrn" +
             " AND st.startTime >= :startTimeAfter ORDER BY st.startTime DESC")
-    List<ScalingActivity> findAllByClusterCrnWithStartTimeAfter(@Param("clusterCrn") String clusterCrn,
+    Page<ScalingActivity> findAllByClusterCrnWithStartTimeAfter(@Param("clusterCrn") String clusterCrn,
             @Param("startTimeAfter") Date startTimeAfter, Pageable pageable);
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.id = :clusterId AND st.activityStatus = :activityStatus AND st.startTime >= :startTimeFrom " +
@@ -48,12 +49,12 @@ public interface ScalingActivityRepository extends PagingAndSortingRepository<Sc
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackName = :clusterName" +
             " AND st.activityStatus IN :statuses AND st.startTime >= :startTimeAfter ORDER BY st.startTime DESC")
-    List<ScalingActivity> findAllByClusterNameAndInStatusesWithTimeAfter(@Param("clusterName") String clusterName,
+    Page<ScalingActivity> findAllByClusterNameAndInStatusesWithTimeAfter(@Param("clusterName") String clusterName,
             @Param("statuses") Collection<ActivityStatus> statuses, @Param("startTimeAfter") Date startTimeAfter, Pageable pageable);
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackCrn = :clusterCrn" +
             " AND st.activityStatus IN :statuses AND st.startTime >= :startTimeAfter ORDER BY st.startTime DESC")
-    List<ScalingActivity> findAllByClusterCrnAndInStatusesWithTimeAfter(@Param("clusterCrn") String clusterCrn,
+    Page<ScalingActivity> findAllByClusterCrnAndInStatusesWithTimeAfter(@Param("clusterCrn") String clusterCrn,
             @Param("statuses") Collection<ActivityStatus> statuses, @Param("startTimeAfter") Date startTimeAfter, Pageable pageable);
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.id = :clusterId AND st.activityStatus IN :statuses")
@@ -61,12 +62,12 @@ public interface ScalingActivityRepository extends PagingAndSortingRepository<Sc
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackName = :clusterName " +
             "AND st.startTime >= :startTimeFrom AND st.startTime < :startTimeUntil ORDER BY st.startTime DESC")
-    List<ScalingActivity> findAllByClusterNameBetweenInterval(@Param("clusterName") String clusterName, @Param("startTimeFrom") Date startTimeFrom,
+    Page<ScalingActivity> findAllByClusterNameBetweenInterval(@Param("clusterName") String clusterName, @Param("startTimeFrom") Date startTimeFrom,
             @Param("startTimeUntil") Date startTimeUntil, Pageable pageable);
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackCrn = :clusterCrn " +
             "AND st.startTime >= :startTimeFrom AND st.startTime < :startTimeUntil ORDER BY st.startTime DESC")
-    List<ScalingActivity> findAllByClusterCrnBetweenInterval(@Param("clusterCrn") String clusterCrn, @Param("startTimeFrom") Date startTimeFrom,
+    Page<ScalingActivity> findAllByClusterCrnBetweenInterval(@Param("clusterCrn") String clusterCrn, @Param("startTimeFrom") Date startTimeFrom,
             @Param("startTimeUntil") Date startTimeUntil, Pageable pageable);
 
     @Query("SELECT st.id FROM ScalingActivity st WHERE st.endTime <= :endTimeBefore")
