@@ -37,7 +37,7 @@ public class EnvironmentNetworkAzureParams {
     private Boolean noPublicIp;
 
     @ApiModelProperty(EnvironmentModelDescription.NO_OUTBOUND_LOAD_BALANCER)
-    private Boolean noOutboundLoadBalancer;
+    private boolean noOutboundLoadBalancer;
 
     public String getNetworkId() {
         return networkId;
@@ -79,11 +79,11 @@ public class EnvironmentNetworkAzureParams {
         this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     }
 
-    public Boolean getNoOutboundLoadBalancer() {
+    public boolean isNoOutboundLoadBalancer() {
         return noOutboundLoadBalancer;
     }
 
-    public void setNoOutboundLoadBalancer(Boolean noOutboundLoadBalancer) {
+    public void setNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
         this.noOutboundLoadBalancer = noOutboundLoadBalancer;
     }
 
@@ -110,7 +110,7 @@ public class EnvironmentNetworkAzureParams {
 
         private String aksPrivateDnsZoneId;
 
-        private Boolean noOutboundLoadBalancer;
+        private boolean noOutboundLoadBalancer;
 
         private EnvironmentNetworkAzureParamsBuilder() {
         }
@@ -144,7 +144,7 @@ public class EnvironmentNetworkAzureParams {
             return this;
         }
 
-        public EnvironmentNetworkAzureParamsBuilder withNoOutboundLoadBalancer(Boolean noOutboundLoadBalancer) {
+        public EnvironmentNetworkAzureParamsBuilder withNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
             this.noOutboundLoadBalancer = noOutboundLoadBalancer;
             return this;
         }

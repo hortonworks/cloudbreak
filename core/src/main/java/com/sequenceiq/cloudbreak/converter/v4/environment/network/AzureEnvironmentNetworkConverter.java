@@ -32,7 +32,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                 RESOURCE_GROUP_NAME, azure.getResourceGroupName(),
                 NO_PUBLIC_IP, azure.getNoPublicIp(),
                 DATABASE_PRIVATE_DNS_ZONE_ID, getDatabasePrivateDnsZoneId(azure),
-                NO_OUTBOUND_LOAD_BALANCER, azure.getNoOutboundLoadBalancer()
+                NO_OUTBOUND_LOAD_BALANCER, azure.isNoOutboundLoadBalancer()
         );
     }
 

@@ -62,7 +62,7 @@ public class NetworkDtoToResponseConverter {
                         .withNoPublicIp(p.isNoPublicIp())
                         .withDatabasePrivateDnsZoneId(p.getDatabasePrivateDnsZoneId())
                         .withAksPrivateDnsZoneId(p.getAksPrivateDnsZoneId())
-                        .withNoOutboundLoadBalancer(p.getNoOutboundLoadBalancer())
+                        .withNoOutboundLoadBalancer(p.isNoOutboundLoadBalancer())
                         .build()))
                 .withGcp(getIfNotNull(network.getGcp(), p -> EnvironmentNetworkGcpParams.EnvironmentNetworkGcpParamsBuilder
                         .anEnvironmentNetworkGcpParamsBuilder()

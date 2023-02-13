@@ -45,7 +45,7 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
     private String aksPrivateDnsZoneId;
 
     @ApiModelProperty
-    private Boolean noOutboundLoadBalancer;
+    private boolean noOutboundLoadBalancer;
 
     public Boolean getNoPublicIp() {
         return noPublicIp;
@@ -95,11 +95,11 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     }
 
-    public Boolean getNoOutboundLoadBalancer() {
+    public boolean isNoOutboundLoadBalancer() {
         return noOutboundLoadBalancer;
     }
 
-    public void setNoOutboundLoadBalancer(Boolean noOutboundLoadBalancer) {
+    public void setNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
         this.noOutboundLoadBalancer = noOutboundLoadBalancer;
     }
 
