@@ -33,6 +33,10 @@ public class LoadBalancerFqdnUtil {
                         .orElseGet(() -> findAnyLbNameOrNull(loadBalancers)));
     }
 
+    public Set<LoadBalancer> getLoadBalancersForStack(Long stackId) {
+        return loadBalancerPersistenceService.findByStackId(stackId);
+    }
+
     private Optional<String> findLbNameForType(Set<LoadBalancer> loadBalancers, LoadBalancerType loadBalancerType) {
         return loadBalancers.stream()
                 .filter(lb -> loadBalancerType.equals(lb.getType()))

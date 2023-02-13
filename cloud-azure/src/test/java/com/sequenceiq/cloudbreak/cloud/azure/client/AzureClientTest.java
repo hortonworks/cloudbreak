@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -12,19 +13,23 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.DiskInner;
 import com.azure.resourcemanager.compute.fluent.models.VirtualMachineInner;
 import com.azure.resourcemanager.compute.models.CachingTypes;
@@ -37,13 +42,31 @@ import com.azure.resourcemanager.keyvault.models.AccessPolicy;
 import com.azure.resourcemanager.keyvault.models.AccessPolicyEntry;
 import com.azure.resourcemanager.keyvault.models.KeyPermissions;
 import com.azure.resourcemanager.keyvault.models.Permissions;
+import com.azure.resourcemanager.network.fluent.models.FrontendIpConfigurationInner;
+import com.azure.resourcemanager.network.models.LoadBalancer;
+import com.azure.resourcemanager.network.models.LoadBalancerFrontend;
+import com.azure.resourcemanager.network.models.LoadBalancers;
 import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @ExtendWith(MockitoExtension.class)
 class AzureClientTest {
 
     private static final String DISK_ENCRYPTION_SET_ID = "diskEncryptionSetId";
+
+    private static final String RESOURCE_GROUP_NAME = "rg";
+
+    private static final String PRIVATE_LB_NAME = "privateLb";
+
+    private static final String PRIVATE_IP_ADDRESS1 = "10.11.12.13";
+
+    private static final String FRONTEND_1_NAME = "frontend1";
+
+    private static final String FRONTEND_2_NAME = "frontend2-gateway";
+
+    private static final String GATEWAY_PRIVATE_IP_ADDRESS1 = "110.111.112.113";
 
     @Mock
     private AzureClientFactory azureClientCredentials;
@@ -51,7 +74,15 @@ class AzureClientTest {
     @Mock
     private AzureExceptionHandler azureExceptionHandler;
 
-    @InjectMocks
+    @Mock
+    private AzureResourceManager azureResourceManager;
+
+    @Mock
+    private LoadBalancers loadBalancerResource;
+
+    @Mock
+    private LoadBalancer privateLoadBalancer;
+
     private AzureClient underTest;
 
     @Mock(extraInterfaces = Disk.DefinitionStages.WithCreate.class)
@@ -63,11 +94,19 @@ class AzureClientTest {
     @Captor
     private ArgumentCaptor<Encryption> encryptionCaptor;
 
+    @BeforeEach
+    void setUp() {
+        lenient().when(azureClientCredentials.getAzureResourceManager()).thenReturn(azureResourceManager);
+        lenient().when(azureExceptionHandler.handleException(any(Supplier.class))).thenCallRealMethod();
+
+        underTest = new AzureClient(azureClientCredentials, azureExceptionHandler);
+    }
+
     static Object[][] setupDiskEncryptionWithDesIfNeededTestWhenDesAbsentDataProvider() {
         return new Object[][] {
                 // testCaseName diskEncryptionSetId
-                {"diskEncryptionSetId=null", null},
-                {"diskEncryptionSetId=\"\"", ""},
+                { "diskEncryptionSetId=null", null },
+                { "diskEncryptionSetId=\"\"", "" },
         };
     }
 
@@ -211,7 +250,6 @@ class AzureClientTest {
                 .withObjectId("400")
                 .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY))));
 
-
         Assertions.assertTrue(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "100"));
         Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "200"));
         Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "300"));
@@ -229,6 +267,47 @@ class AzureClientTest {
     void getVaultNameFromEncryptionKeyUrlTestFails() {
         String vaultName = underTest.getVaultNameFromEncryptionKeyUrl("wrongKeyUrl");
         assertThat(vaultName).isNull();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = LoadBalancerType.class, names = { "PRIVATE", "GATEWAY_PRIVATE" })
+    void getPrivateLoadBalancerWith1Frontend(LoadBalancerType loadBalancerType) {
+        when(azureResourceManager.loadBalancers()).thenReturn(loadBalancerResource);
+        when(loadBalancerResource.getByResourceGroup(RESOURCE_GROUP_NAME, PRIVATE_LB_NAME)).thenReturn(privateLoadBalancer);
+        LoadBalancerFrontend frontend1 = mock(LoadBalancerFrontend.class);
+        FrontendIpConfigurationInner frontend1Inner = new FrontendIpConfigurationInner().withPrivateIpAddress(PRIVATE_IP_ADDRESS1);
+        when(frontend1.innerModel()).thenReturn(frontend1Inner);
+        Map<String, LoadBalancerFrontend> frontends = Map.of(FRONTEND_1_NAME, frontend1);
+        when(privateLoadBalancer.frontends()).thenReturn(frontends);
+        List<AzureLoadBalancerFrontend> result =
+                underTest.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, PRIVATE_LB_NAME, loadBalancerType);
+
+        assertThat(result).matches(r -> r.size() == 1)
+                .anyMatch(fe -> LoadBalancerType.PRIVATE == fe.getLoadBalancerType()
+                        && PRIVATE_IP_ADDRESS1.equals(fe.getIp()) && FRONTEND_1_NAME.equals(fe.getName()));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = LoadBalancerType.class, names = { "PRIVATE", "GATEWAY_PRIVATE" })
+    void getPrivateLoadBalancerWith2Frontends(LoadBalancerType loadBalancerType) {
+        when(azureResourceManager.loadBalancers()).thenReturn(loadBalancerResource);
+        when(loadBalancerResource.getByResourceGroup(RESOURCE_GROUP_NAME, PRIVATE_LB_NAME)).thenReturn(privateLoadBalancer);
+        LoadBalancerFrontend frontend1 = mock(LoadBalancerFrontend.class);
+        LoadBalancerFrontend frontend2 = mock(LoadBalancerFrontend.class);
+        FrontendIpConfigurationInner frontend1Inner = new FrontendIpConfigurationInner().withPrivateIpAddress(PRIVATE_IP_ADDRESS1);
+        FrontendIpConfigurationInner frontend2Inner = new FrontendIpConfigurationInner().withPrivateIpAddress(GATEWAY_PRIVATE_IP_ADDRESS1);
+        when(frontend1.innerModel()).thenReturn(frontend1Inner);
+        when(frontend2.innerModel()).thenReturn(frontend2Inner);
+        Map<String, LoadBalancerFrontend> frontends = Map.of(FRONTEND_1_NAME, frontend1, FRONTEND_2_NAME, frontend2);
+        when(privateLoadBalancer.frontends()).thenReturn(frontends);
+        List<AzureLoadBalancerFrontend> result =
+                underTest.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, PRIVATE_LB_NAME, loadBalancerType);
+
+        assertThat(result).matches(r -> r.size() == 2)
+                .anyMatch(fe -> LoadBalancerType.PRIVATE == fe.getLoadBalancerType()
+                        && PRIVATE_IP_ADDRESS1.equals(fe.getIp()) && FRONTEND_1_NAME.equals(fe.getName()))
+                .anyMatch(fe -> LoadBalancerType.GATEWAY_PRIVATE == fe.getLoadBalancerType()
+                && GATEWAY_PRIVATE_IP_ADDRESS1.equals(fe.getIp()) && FRONTEND_2_NAME.equals(fe.getName()));
     }
 
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -82,6 +83,14 @@ class AzureMetadataCollectorTest {
     private static final String SECOND_PUBLIC_IP = "10.32.13.1";
 
     private static final String GATEWAY_PRIVATE_IP = "10.132.113.101";
+
+    private static final String PUBLIC_FRONTEND = "PublicFrontend";
+
+    private static final String SECOND_PUBLIC_FRONTEND = "SecondPublicFrontend";
+
+    private static final String PRIVATE_FRONTEND = "PrivateFrontend";
+
+    private static final String GATEWAY_PRIVATE_FRONTEND = "GatewayPrivateFrontend";
 
     @InjectMocks
     private AzureMetadataCollector underTest;
@@ -203,8 +212,8 @@ class AzureMetadataCollectorTest {
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
         String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
-        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, loadBalancerName, LoadBalancerType.PUBLIC))
-                .thenReturn(List.of(PUBLIC_IP));
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, loadBalancerName, LoadBalancerType.PUBLIC))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend(PUBLIC_FRONTEND, PUBLIC_IP, LoadBalancerType.PUBLIC)));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
@@ -228,8 +237,9 @@ class AzureMetadataCollectorTest {
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
         String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
-        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, loadBalancerName, LoadBalancerType.PUBLIC))
-                .thenReturn(List.of(PUBLIC_IP, SECOND_PUBLIC_IP));
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, loadBalancerName, LoadBalancerType.PUBLIC))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend(PUBLIC_FRONTEND, PUBLIC_IP, LoadBalancerType.PUBLIC),
+                        new AzureLoadBalancerFrontend(SECOND_PUBLIC_FRONTEND, SECOND_PUBLIC_IP, LoadBalancerType.PUBLIC)));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
@@ -255,12 +265,12 @@ class AzureMetadataCollectorTest {
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
         String publicLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
-        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, publicLoadBalancerName, LoadBalancerType.PUBLIC))
-                .thenReturn(List.of(PUBLIC_IP));
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, publicLoadBalancerName, LoadBalancerType.PUBLIC))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend(PUBLIC_FRONTEND, PUBLIC_IP, LoadBalancerType.PUBLIC)));
 
         String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
-        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
-                .thenReturn(List.of(PRIVATE_IP));
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend(PRIVATE_FRONTEND, PRIVATE_IP, LoadBalancerType.PRIVATE)));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
@@ -294,8 +304,8 @@ class AzureMetadataCollectorTest {
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
         String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
-        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
-                .thenReturn(List.of(PRIVATE_IP));
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend(PRIVATE_FRONTEND, PRIVATE_IP, LoadBalancerType.PRIVATE)));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
@@ -318,18 +328,22 @@ class AzureMetadataCollectorTest {
         when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
-        String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.GATEWAY_PRIVATE, STACK_NAME);
-        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.GATEWAY_PRIVATE))
-                .thenReturn(List.of(GATEWAY_PRIVATE_IP));
+        String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend(PRIVATE_FRONTEND, PRIVATE_IP, LoadBalancerType.PRIVATE)));
+
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.GATEWAY_PRIVATE))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend(GATEWAY_PRIVATE_FRONTEND, GATEWAY_PRIVATE_IP, LoadBalancerType.GATEWAY_PRIVATE)));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
 
-        List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.GATEWAY_PRIVATE), resources);
+        List<CloudLoadBalancerMetadata> result =
+                underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.GATEWAY_PRIVATE, LoadBalancerType.PRIVATE), resources);
 
-        assertEquals(1, result.size());
-        assertEquals(LoadBalancerType.GATEWAY_PRIVATE, result.get(0).getType());
-        assertEquals(GATEWAY_PRIVATE_IP, result.get(0).getIp());
+        assertEquals(2, result.size());
+        assertThat(result).anyMatch(lbm -> LoadBalancerType.GATEWAY_PRIVATE == lbm.getType() && GATEWAY_PRIVATE_IP.equals(lbm.getIp()))
+                .anyMatch(lbm -> LoadBalancerType.PRIVATE == lbm.getType() && PRIVATE_IP.equals(lbm.getIp()));
     }
 
     @Test
@@ -344,8 +358,9 @@ class AzureMetadataCollectorTest {
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
         String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
-        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
-                .thenReturn(List.of(PRIVATE_IP, "10.23.12.1"));
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend(PRIVATE_FRONTEND, PRIVATE_IP, LoadBalancerType.PRIVATE),
+                        new AzureLoadBalancerFrontend(GATEWAY_PRIVATE_FRONTEND, "10.23.12.1", LoadBalancerType.GATEWAY_PRIVATE)));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
@@ -390,7 +405,7 @@ class AzureMetadataCollectorTest {
         when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
 
         String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
-        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
                 .thenThrow(new RuntimeException());
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);

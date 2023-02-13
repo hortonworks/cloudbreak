@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
+import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,6 +78,7 @@ import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -123,6 +126,7 @@ import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -710,7 +714,7 @@ public class ClusterHostServiceRunner {
         gateway.put("enable_ccmv2_jumpgate", stackDto.getTunnel().useCcmV2Jumpgate());
         gateway.put("activation_in_minutes", activationInMinutes);
 
-        gateway.putAll(createKnoxRelatedGatewayCofniguration(stackDto, virtualGroupRequest, connector));
+        gateway.putAll(createKnoxRelatedGatewayConfiguration(stackDto, virtualGroupRequest, connector));
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));
         gateway.put("kerberos", kerberosConfig != null);
 
@@ -725,10 +729,14 @@ public class ClusterHostServiceRunner {
         if (stackDto.getNetwork() != null) {
             gateway.put("cidrBlocks", stackDto.getNetwork().getNetworkCidrs());
         }
+        Map<String, Object> loadBalancerProperties = createLoadBalancerProperties(stackDto);
+        if (MapUtils.isNotEmpty(loadBalancerProperties)) {
+            gateway.putAll(loadBalancerProperties);
+        }
         return Map.of("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
 
-    private Map<String, Object> createKnoxRelatedGatewayCofniguration(StackDto stackDto, VirtualGroupRequest virtualGroupRequest,
+    private Map<String, Object> createKnoxRelatedGatewayConfiguration(StackDto stackDto, VirtualGroupRequest virtualGroupRequest,
             ClusterPreCreationApi connector) throws IOException {
         GatewayView clusterGateway = gatewayService.getByClusterId(stackDto.getCluster().getId()).orElse(null);
         Map<String, Object> gateway = new HashMap<>();
@@ -768,6 +776,29 @@ public class ClusterHostServiceRunner {
         return gateway;
     }
 
+    private Map<String, Object> createLoadBalancerProperties(StackDto stackDto) {
+        Map<String, Object> properties = new HashMap<>();
+        Set<LoadBalancer> loadBalancers = loadBalancerFqdnUtil.getLoadBalancersForStack(stackDto.getId());
+        List<Map<String, String>> lbDetails = getFrontendMap(loadBalancers);
+        if (!CollectionUtils.isEmpty(lbDetails)) {
+            properties.put("loadbalancers", Map.of("frontends", lbDetails,
+                    "floatingIpEnabled", isFloatingIpEnabled(loadBalancers)));
+        }
+        return properties;
+    }
+
+    private List<Map<String, String>> getFrontendMap(Set<LoadBalancer> loadBalancers) {
+        return loadBalancers.stream()
+            .filter(lb -> isNotEmpty(lb.getIp()))
+            .map(lb -> Map.of("type", lb.getType().name(), "ip", lb.getIp()))
+            .collect(Collectors.toList());
+    }
+
+    private boolean isFloatingIpEnabled(Set<LoadBalancer> loadBalancers) {
+        return loadBalancers.stream().anyMatch(lb -> LoadBalancerType.GATEWAY_PRIVATE == lb.getType())
+                && loadBalancers.stream().anyMatch(lb -> LoadBalancerType.PRIVATE == lb.getType());
+    }
+
     private boolean isRangerAuthorizerEnabled(ClouderaManagerRepo clouderaManagerRepo) {
         return isVersionNewerOrEqualThanLimited(
                 clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
@@ -804,9 +835,11 @@ public class ClusterHostServiceRunner {
 
         if (isNotEmpty(fqdn)) {
             gateway.put("userfacingfqdn", fqdn);
-            String[] fqdnParts = fqdn.split("\\.", 2);
-            if (fqdnParts.length == 2) {
-                gateway.put("userfacingdomain", Pattern.quote(fqdnParts[1]));
+            if (!InetAddressUtils.isIPv4Address(fqdn)) {
+                String[] fqdnParts = fqdn.split("\\.", 2);
+                if (fqdnParts.length == 2) {
+                    gateway.put("userfacingdomain", Pattern.quote(fqdnParts[1]));
+                }
             }
         }
         return gateway;

@@ -144,41 +144,72 @@ public class AzureMetadataCollector implements MetadataCollector {
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = new ArrayList<>();
         String resourceGroup = azureUtils.getTemplateResource(resources).getName();
-        final String stackName = azureUtils.getStackName(ac.getCloudContext());
+        String stackName = azureUtils.getStackName(ac.getCloudContext());
         AzureClient azureClient = ac.getParameter(AzureClient.class);
-
+        Optional<String> privateLoadBalancerName = Optional.empty();
+        Optional<String> gatewayPrivateLoadBalancerName = Optional.empty();
         for (LoadBalancerType type : loadBalancerTypes) {
             String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(type, stackName);
+            if (LoadBalancerType.GATEWAY_PRIVATE == type) {
+                gatewayPrivateLoadBalancerName = Optional.of(loadBalancerName);
+                continue;
+            }
             LOGGER.debug("Attempting to collect metadata for load balancer {}, type {}", loadBalancerName, type);
             try {
                 Optional<String> ip;
                 if (LoadBalancerType.PUBLIC.equals(type)) {
                     ip = lookupPublicIp(resourceGroup, azureClient, loadBalancerName);
-                } else if (LoadBalancerType.PRIVATE.equals(type) || LoadBalancerType.GATEWAY_PRIVATE.equals(type)) {
-                    ip = lookupPrivateIp(resourceGroup, azureClient, loadBalancerName, type);
+                } else if (LoadBalancerType.PRIVATE.equals(type)) {
+                    privateLoadBalancerName = Optional.of(loadBalancerName);
+                    ip = lookupPrivateIp(resourceGroup, azureClient, loadBalancerName, LoadBalancerType.PRIVATE);
                 } else {
                     ip = Optional.empty();
                 }
 
-                if (ip.isPresent()) {
-                    Map<String, Object> parameters = azureLbMetadataCollector.getParameters(ac, resourceGroup, loadBalancerName);
-                    CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
-                        .withType(type)
-                        .withIp(ip.get())
-                        .withName(loadBalancerName)
-                        .withParameters(parameters)
-                        .build();
-                    cloudLoadBalancerMetadata.add(loadBalancerMetadata);
-                    LOGGER.debug("Saved metadata for load balancer: {}", loadBalancerMetadata);
-                } else {
-                    LOGGER.warn("Unable to find metadata for load balancer {}.", loadBalancerName);
-                }
+                addCloudLoadBalancerMetadata(cloudLoadBalancerMetadata, ac, resourceGroup, loadBalancerName, loadBalancerName, type, ip);
             } catch (RuntimeException e) {
                 LOGGER.warn("Unable to find metadata for load balancer " + loadBalancerName, e);
             }
         }
 
+        if (gatewayPrivateLoadBalancerName.isPresent()) {
+            addGatewayPrivateLoadBalancer(cloudLoadBalancerMetadata, ac, resourceGroup, azureClient,
+                    privateLoadBalancerName, gatewayPrivateLoadBalancerName.get());
+        }
+
         return cloudLoadBalancerMetadata;
+    }
+
+    private void addCloudLoadBalancerMetadata(List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata,
+            AuthenticatedContext ac, String resourceGroup, String loadBalancerNameAlias, String loadBalancerName, LoadBalancerType type, Optional<String> ip) {
+        if (ip.isPresent()) {
+            Map<String, Object> parameters = azureLbMetadataCollector.getParameters(ac, resourceGroup, loadBalancerName);
+            CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+                .withType(type)
+                .withIp(ip.get())
+                .withName(loadBalancerNameAlias)
+                .withParameters(parameters)
+                .build();
+            cloudLoadBalancerMetadata.add(loadBalancerMetadata);
+            LOGGER.debug("Saved metadata for load balancer: {}", loadBalancerMetadata);
+        } else {
+            LOGGER.warn("Unable to find metadata for load balancer {}.", loadBalancerName);
+        }
+    }
+
+    private void addGatewayPrivateLoadBalancer(List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata, AuthenticatedContext ac, String resourceGroup,
+            AzureClient azureClient, Optional<String> privateLoadBalancerName, String gatewayPrivateLoadBalancerName) {
+        if (privateLoadBalancerName.isEmpty()) {
+            LOGGER.warn("Gateway Private Load Balancer was needed but did not find private loadbalancer for the frontend discovery.");
+        } else {
+            try {
+                Optional<String> ip = lookupPrivateIp(resourceGroup, azureClient, privateLoadBalancerName.get(), LoadBalancerType.GATEWAY_PRIVATE);
+                addCloudLoadBalancerMetadata(cloudLoadBalancerMetadata, ac, resourceGroup,
+                        gatewayPrivateLoadBalancerName, privateLoadBalancerName.get(), LoadBalancerType.GATEWAY_PRIVATE, ip);
+            } catch (RuntimeException e) {
+                LOGGER.warn("Unable to find metadata for load balancer " + privateLoadBalancerName, e);
+            }
+        }
     }
 
     @Override
@@ -187,36 +218,38 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     private Optional<String> lookupPrivateIp(String resourceGroup, AzureClient azureClient, String loadBalancerName, LoadBalancerType type) {
-        List<String> privateIps = azureClient.getLoadBalancerIps(resourceGroup, loadBalancerName, type);
-        if (privateIps.isEmpty()) {
+        List<AzureLoadBalancerFrontend> privateIpFrontends = azureClient.getLoadBalancerFrontends(resourceGroup, loadBalancerName, type).stream()
+                .filter(fe -> type == fe.getLoadBalancerType()).collect(Collectors.toList());
+        if (privateIpFrontends.isEmpty()) {
             LOGGER.warn("Unable to find private ip address for load balancer {}", loadBalancerName);
             return Optional.empty();
         } else {
-            String ip = privateIps.get(0);
-            if (privateIps.size() > 1) {
-                LOGGER.warn("Found multiple private IPs ({}) for load balancer {}. Only one, {}, will be used.",
-                        String.join(", ", privateIps),
+            AzureLoadBalancerFrontend frontend = privateIpFrontends.get(0);
+            if (privateIpFrontends.size() > 1) {
+                LOGGER.warn("Found multiple private IPs ({}) for {} load balancer {}. Only one, {}, will be used.",
+                        privateIpFrontends.stream().map(AzureLoadBalancerFrontend::getIp).collect(Collectors.joining(", ")),
+                        type,
                         loadBalancerName,
-                        ip);
+                        frontend.getIp());
             }
-            return Optional.ofNullable(ip);
+            return Optional.ofNullable(frontend.getIp());
         }
     }
 
     private Optional<String> lookupPublicIp(String resourceGroup, AzureClient azureClient, String loadBalancerName) {
-        List<String> publicIps = azureClient.getLoadBalancerIps(resourceGroup, loadBalancerName, LoadBalancerType.PUBLIC);
-        if (publicIps.isEmpty()) {
+        List<AzureLoadBalancerFrontend> publicIpFrontends = azureClient.getLoadBalancerFrontends(resourceGroup, loadBalancerName, LoadBalancerType.PUBLIC);
+        if (publicIpFrontends.isEmpty()) {
             LOGGER.warn("Unable to find public ip address for load balancer {}", loadBalancerName);
             return Optional.empty();
         } else {
-            String ip = publicIps.get(0);
-            if (publicIps.size() > 1) {
+            AzureLoadBalancerFrontend frontend = publicIpFrontends.get(0);
+            if (publicIpFrontends.size() > 1) {
                 LOGGER.warn("Found multiple public IPs ({}) for load balancer {}. Only one, {}, will be used.",
-                        String.join(", ", publicIps),
+                        publicIpFrontends.stream().map(AzureLoadBalancerFrontend::getIp).collect(Collectors.joining(", ")),
                         loadBalancerName,
-                        ip);
+                        frontend.getIp());
             }
-            return Optional.ofNullable(ip);
+            return Optional.ofNullable(frontend.getIp());
         }
     }
 }

@@ -497,7 +497,18 @@
                           }
                           </#if>
                         }
+                      }<#if gatewayPrivateLbNeeded!false>,
+                      {
+                        "name": "${loadBalancer.name}-frontend-gateway",
+                        "properties": {
+                          "privateIPAddressVersion": "IPv4",
+                          "privateIPAllocationMethod": "Dynamic",
+                          "subnet": {
+                            "id": "[concat(variables('vnetID'), '/subnets/', '${endpointGwSubnet}')]"
+                          }
+                        }
                       }
+                       </#if>
                       </#if>
                     ],
                     "inboundNatPools": [],
@@ -511,7 +522,7 @@
                                         "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', '${rule.groupName}-pool')]"
                                     },
                                     "backendPort": ${rule.backendPort},
-                                    "enableFloatingIP": false,
+                                    "enableFloatingIP": <#if loadBalancer.type == "PRIVATE" && gatewayPrivateLbNeeded!false>true<#else>false</#if>,
                                     "enableTcpReset": false,
                                     "frontendIPConfiguration": {
                                         "id": "[concat(resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}'), '/frontendIPConfigurations/${loadBalancer.name}-frontend')]"
@@ -524,8 +535,33 @@
                                     },
                                     "protocol": "Tcp"
                                 }
-                            }<#if (rule_index + 1) != loadBalancer.rules?size>,</#if>
+                            }<#sep>,</#sep>
                         </#list>
+                        <#if loadBalancer.type == "PRIVATE" && gatewayPrivateLbNeeded!false>,
+                            <#list loadBalancer.rules as rule>
+                            {
+                                "name": "${rule.name}-gateway",
+                                "properties": {
+                                "backendAddressPool": {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', '${rule.groupName}-pool')]"
+                                },
+                                "backendPort": ${rule.backendPort},
+                                "enableFloatingIP": true,
+                                "enableTcpReset": false,
+                                "frontendIPConfiguration": {
+                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}'), '/frontendIPConfigurations/${loadBalancer.name}-frontend-gateway')]"
+                                },
+                                "frontendPort": ${rule.frontendPort},
+                                "idleTimeoutInMinutes": 4,
+                                "loadDistribution": "Default",
+                                "probe": {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/probes', '${loadBalancer.name}', '${rule.probe.name}')]"
+                                },
+                                "protocol": "Tcp"
+                                }
+                            }<#sep>,</#sep>
+                            </#list>
+                        </#if>
                     ],
                     "outboundRules": [
                         <#list loadBalancer.outboundRules as outboundRule>
@@ -543,7 +579,7 @@
                                     "idleTimeoutInMinutes": 4,
                                     "protocol": "Tcp"
                                 }
-                            }<#if (outboundRule_index + 1) != loadBalancer.outboundRules?size>,</#if>
+                            }<#sep>,</#sep>
                         </#list>
                     ],
                     "probes": [

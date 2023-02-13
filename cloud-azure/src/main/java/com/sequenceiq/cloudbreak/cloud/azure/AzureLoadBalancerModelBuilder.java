@@ -39,15 +39,22 @@ public class AzureLoadBalancerModelBuilder {
     /**
      * Returns a map containing {@code loadBalancers} and {@code loadBalancerMapping} keys.
      * The values in the returned map are based on the Cloud Stack and stack name provided at construction.
+     * Gateway Private load balancer cannot be created in parallel to regular private load balancer, therefore
+     * we need to remove it from the list, but a special logic is implemented in the FTL template to create extra frontend IP and load balancing rule
      *
      * @return A map containing load balancers and load balancer mappings
      */
     public Map<String, Object> buildModel() {
         List<AzureLoadBalancer> azureLoadBalancers = buildAzureLoadBalancerModel(cloudStack, stackName);
-        Map<String, Collection<AzureLoadBalancer>> instanceGroupToLoadBalancers = createTargetInstanceGroupMapping(azureLoadBalancers);
+        boolean gatewayPrivateLbNeeded = azureLoadBalancers.stream().anyMatch(lb -> LoadBalancerType.GATEWAY_PRIVATE == lb.getType());
+        List<AzureLoadBalancer> filteredAzureLoadBalancers = azureLoadBalancers.stream()
+                .filter(lb -> LoadBalancerType.GATEWAY_PRIVATE != lb.getType()).collect(toList());
 
-        return Map.of("loadBalancers", azureLoadBalancers,
-                "loadBalancerMapping", instanceGroupToLoadBalancers);
+        Map<String, Collection<AzureLoadBalancer>> instanceGroupToLoadBalancers = createTargetInstanceGroupMapping(filteredAzureLoadBalancers);
+
+        return Map.of("loadBalancers", filteredAzureLoadBalancers,
+                "loadBalancerMapping", instanceGroupToLoadBalancers,
+                "gatewayPrivateLbNeeded", gatewayPrivateLbNeeded);
     }
 
     /**

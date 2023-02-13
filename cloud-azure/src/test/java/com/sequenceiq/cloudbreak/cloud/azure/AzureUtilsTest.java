@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.validation.constraints.NotNull;
 
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -54,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudExceptionConverter;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -639,5 +643,24 @@ public class AzureUtilsTest {
         assertEquals(RuntimeException.class, ex.getCause().getClass());
         assertEquals("java.lang.RuntimeException: error", ex.getMessage());
         verify(retryService, times(1)).testWith2SecDelayMax5Times(any(Supplier.class));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getCustomEndpointGatewaySubnetIdsScenarios")
+    void getCustomEndpointGatewaySubnetIds(String subnets, List<String> expectedItems) {
+        Network network = Mockito.mock(Network.class);
+        when(network.getStringParameter(ENDPOINT_GATEWAY_SUBNET_ID)).thenReturn(subnets);
+        List<String> result = underTest.getCustomEndpointGatewaySubnetIds(network);
+        assertThat(result).containsExactlyInAnyOrderElementsOf(expectedItems);
+    }
+
+    static Stream<Arguments> getCustomEndpointGatewaySubnetIdsScenarios() {
+        return Stream.of(
+                Arguments.of(null, List.of()),
+                Arguments.of("", List.of()),
+                Arguments.of("  ", List.of()),
+                Arguments.of("subnet1", List.of("subnet1")),
+                Arguments.of("subnet2,subnet1", List.of("subnet1", "subnet2"))
+        );
     }
 }

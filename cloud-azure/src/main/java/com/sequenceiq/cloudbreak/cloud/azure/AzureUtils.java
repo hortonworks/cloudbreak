@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE_DNS_ZONE_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
@@ -209,6 +210,14 @@ public class AzureUtils {
 
     public List<String> getCustomSubnetIds(Network network) {
         String subnetIds = network.getStringParameter(SUBNET_ID);
+        if (StringUtils.isBlank(subnetIds)) {
+            return new ArrayList<>();
+        }
+        return Arrays.asList(subnetIds.split(","));
+    }
+
+    public List<String> getCustomEndpointGatewaySubnetIds(Network network) {
+        String subnetIds = network.getStringParameter(ENDPOINT_GATEWAY_SUBNET_ID);
         if (StringUtils.isBlank(subnetIds)) {
             return new ArrayList<>();
         }
