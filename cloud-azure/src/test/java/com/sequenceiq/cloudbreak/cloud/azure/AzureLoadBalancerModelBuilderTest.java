@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -39,6 +40,8 @@ class AzureLoadBalancerModelBuilderTest {
 
     public static final String LOAD_BALANCER_MAPPING_KEY = "loadBalancerMapping";
 
+    private static final String GATEWAY_PRIVATE_LB_NEEDED_KEY = "gatewayPrivateLbNeeded";
+
     private AzureLoadBalancerModelBuilder underTest;
 
     @Test
@@ -64,6 +67,7 @@ class AzureLoadBalancerModelBuilderTest {
 
         Map<String, Object> result = underTest.buildModel();
 
+        assertThat(result).containsKey(GATEWAY_PRIVATE_LB_NEEDED_KEY).matches(r -> Boolean.FALSE.equals(r.get(GATEWAY_PRIVATE_LB_NEEDED_KEY)));
         assertTrue(result.containsKey(LOAD_BALANCERS_KEY));
         assertTrue(result.get(LOAD_BALANCERS_KEY) instanceof List);
         List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
@@ -90,6 +94,7 @@ class AzureLoadBalancerModelBuilderTest {
 
         Map<String, Object> result = underTest.buildModel();
 
+        assertThat(result).containsKey(GATEWAY_PRIVATE_LB_NEEDED_KEY).matches(r -> Boolean.FALSE.equals(r.get(GATEWAY_PRIVATE_LB_NEEDED_KEY)));
         assertTrue(result.containsKey(LOAD_BALANCERS_KEY));
         assertTrue(result.get(LOAD_BALANCERS_KEY) instanceof List);
         List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
@@ -108,6 +113,7 @@ class AzureLoadBalancerModelBuilderTest {
 
         Map<String, Object> result = underTest.buildModel();
 
+        assertThat(result).containsKey(GATEWAY_PRIVATE_LB_NEEDED_KEY).matches(r -> Boolean.FALSE.equals(r.get(GATEWAY_PRIVATE_LB_NEEDED_KEY)));
         assertTrue(result.containsKey(LOAD_BALANCERS_KEY));
         assertTrue(result.get(LOAD_BALANCERS_KEY) instanceof List);
         List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
@@ -126,6 +132,7 @@ class AzureLoadBalancerModelBuilderTest {
 
         Map<String, Object> result = underTest.buildModel();
 
+        assertThat(result).containsKey(GATEWAY_PRIVATE_LB_NEEDED_KEY).matches(r -> Boolean.FALSE.equals(r.get(GATEWAY_PRIVATE_LB_NEEDED_KEY)));
         assertTrue(result.containsKey(LOAD_BALANCERS_KEY));
         assertTrue(result.get(LOAD_BALANCERS_KEY) instanceof List);
         List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
@@ -145,6 +152,7 @@ class AzureLoadBalancerModelBuilderTest {
 
         Map<String, Object> result = underTest.buildModel();
 
+        assertThat(result).containsKey(GATEWAY_PRIVATE_LB_NEEDED_KEY).matches(r -> Boolean.FALSE.equals(r.get(GATEWAY_PRIVATE_LB_NEEDED_KEY)));
         assertTrue(result.containsKey(LOAD_BALANCERS_KEY));
         assertTrue(result.get(LOAD_BALANCERS_KEY) instanceof List);
         List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
@@ -152,6 +160,20 @@ class AzureLoadBalancerModelBuilderTest {
         assertTrue(loadBalancers.stream().allMatch(lb -> LoadBalancerSku.STANDARD.equals(lb.getSku())));
         assertTrue(loadBalancers.stream().anyMatch(lb -> LoadBalancerType.PRIVATE.equals(lb.getType())));
         assertTrue(loadBalancers.stream().anyMatch(lb -> LoadBalancerType.OUTBOUND.equals(lb.getType())));
+    }
+
+    @Test
+    void gatewayLoadBalancerIsRemoved() {
+        CloudStack mockCloudStack = mock(CloudStack.class);
+        CloudLoadBalancer privateLoadBalancer = createCloudLoadBalancer(LoadBalancerSku.STANDARD, LoadBalancerType.PRIVATE);
+        CloudLoadBalancer gatewayLoadBalancer = createCloudLoadBalancer(LoadBalancerSku.STANDARD, LoadBalancerType.GATEWAY_PRIVATE);
+        when(mockCloudStack.getLoadBalancers()).thenReturn(List.of(privateLoadBalancer, gatewayLoadBalancer));
+
+        underTest = new AzureLoadBalancerModelBuilder(mockCloudStack, STACK_NAME);
+        Map<String, Object> result = underTest.buildModel();
+        assertThat(result).containsKey(GATEWAY_PRIVATE_LB_NEEDED_KEY).matches(r -> Boolean.TRUE.equals(r.get(GATEWAY_PRIVATE_LB_NEEDED_KEY)));
+        List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
+        assertThat(loadBalancers).hasSize(1).matches(lb -> lb.get(0).getType() == LoadBalancerType.PRIVATE);
     }
 
     private GroupNetwork createGroupNetwork() {

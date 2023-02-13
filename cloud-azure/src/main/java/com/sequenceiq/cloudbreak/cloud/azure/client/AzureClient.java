@@ -60,7 +60,6 @@ import com.azure.resourcemanager.keyvault.models.Vault;
 import com.azure.resourcemanager.marketplaceordering.MarketplaceOrderingManager;
 import com.azure.resourcemanager.marketplaceordering.models.AgreementTerms;
 import com.azure.resourcemanager.msi.models.Identity;
-import com.azure.resourcemanager.network.fluent.models.FrontendIpConfigurationInner;
 import com.azure.resourcemanager.network.models.LoadBalancer;
 import com.azure.resourcemanager.network.models.LoadBalancerFrontend;
 import com.azure.resourcemanager.network.models.LoadBalancingRule;
@@ -101,6 +100,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
@@ -621,23 +621,23 @@ public class AzureClient {
     }
 
     /**
-     * Returns the IP addresses associated with a particular Load Balancer in a particular Azure Resource Group.
-     * <p>
-     * Load balancer type is used to determine whether to return private or public IP addresses, it's possible for a
+     * Returns the Frontends (frontend name + IP address) associated with a particular Load Balancer in a particular Azure Resource Group.
+     *
+     * Load balancer type is used to determine whether to return private or public IP addresses for the frontends, it's possible for a
      * load balancer to have both private and public IP addresses.
      *
      * @param resourceGroupName the name of the resource group containing the load balancer
-     * @param loadBalancerName  the name of the load balancer
-     * @param loadBalancerType  corresponds to load balancer IP address types to retrieve.
-     * @return IP addresses
+     * @param loadBalancerName the name of the load balancer
+     * @param loadBalancerType corresponds to load balancer IP address types to retrieve.
+     * @return Frontends (frontend name + IP addresses)
      */
-    public List<String> getLoadBalancerIps(String resourceGroupName, String loadBalancerName, LoadBalancerType loadBalancerType) {
+    public List<AzureLoadBalancerFrontend> getLoadBalancerFrontends(String resourceGroupName, String loadBalancerName, LoadBalancerType loadBalancerType) {
         switch (loadBalancerType) {
             case PRIVATE:
             case GATEWAY_PRIVATE:
-                return getLoadBalancerPrivateIps(resourceGroupName, loadBalancerName);
+                return getLoadBalancerPrivateFrontends(resourceGroupName, loadBalancerName);
             case PUBLIC:
-                return getLoadBalancerIps(resourceGroupName, loadBalancerName);
+                return getLoadBalancerFrontends(resourceGroupName, loadBalancerName);
             default:
                 LOGGER.warn("Cannot get IPs for load balancer {}, it has an unknown type {}. Using an empty list instead.", loadBalancerName, loadBalancerType);
                 return List.of();
@@ -645,34 +645,37 @@ public class AzureClient {
         }
     }
 
-    private List<String> getLoadBalancerIps(String resourceGroupName, String loadBalancerName) {
+    private List<AzureLoadBalancerFrontend> getLoadBalancerFrontends(String resourceGroupName, String loadBalancerName) {
         List<String> idsAssociatedWithLoadBalancerPublicIps = getLoadBalancer(resourceGroupName, loadBalancerName).publicIpAddressIds();
 
-        List<String> loadBalancerIps = getPublicIpAddresses(resourceGroupName)
+        List<AzureLoadBalancerFrontend> frontends = getPublicIpAddresses(resourceGroupName)
                 .getAll()
                 .stream()
                 .filter(ipAddress -> idsAssociatedWithLoadBalancerPublicIps.contains(ipAddress.id()))
-                .map(PublicIpAddress::ipAddress)
-                .sorted()
+                .map(ipAddress ->
+                        new AzureLoadBalancerFrontend(ipAddress.getAssignedLoadBalancerFrontend().name(), ipAddress.ipAddress(), LoadBalancerType.PUBLIC))
                 .collect(Collectors.toList());
 
-        LOGGER.info("IPs for load balancer {} retrieved: {}", loadBalancerName, loadBalancerIps);
-        return loadBalancerIps;
+        LOGGER.info("Frontends for public load balancer {} retrieved: {}", loadBalancerName, frontends);
+        return frontends;
     }
 
-    private List<String> getLoadBalancerPrivateIps(String resourceGroupName, String loadBalancerName) {
-        // The keys in this map are the names of the frontend load balancers. We don't use them however.
-        Map<String, LoadBalancerFrontend> frontends = getLoadBalancer(resourceGroupName, loadBalancerName).frontends();
+    private List<AzureLoadBalancerFrontend> getLoadBalancerPrivateFrontends(String resourceGroupName, String loadBalancerName) {
+        // The keys in this map are the names of the frontend load balancers.
+        Map<String, LoadBalancerFrontend> providerFrontends = getLoadBalancer(resourceGroupName, loadBalancerName).frontends();
 
-        List<String> loadbalancerPrivateIps = frontends.values().stream()
-                .map(LoadBalancerFrontend::innerModel)
-                .map(FrontendIpConfigurationInner::privateIpAddress)
-                .filter(Objects::nonNull)
-                .sorted()
+        List<AzureLoadBalancerFrontend> frontends = providerFrontends.entrySet().stream()
+                .filter(fe -> Objects.nonNull(fe.getValue().innerModel())
+                        && Objects.nonNull(fe.getValue().innerModel().privateIpAddress())
+                        && !fe.getValue().isPublic())
+                // The LoadBalancerType pseudo-type is matched based on the frontend name. It is unfortunate, I know.
+                .map(fe ->
+                        new AzureLoadBalancerFrontend(fe.getKey(), fe.getValue().innerModel().privateIpAddress(),
+                                fe.getKey().endsWith("gateway") ? LoadBalancerType.GATEWAY_PRIVATE : LoadBalancerType.PRIVATE))
                 .collect(Collectors.toList());
 
-        LOGGER.info("Private IPs for load balancer {} retrieved: {}", loadBalancerName, loadbalancerPrivateIps);
-        return loadbalancerPrivateIps;
+        LOGGER.info("Frontends for private load balancer {} retrieved: {}", loadBalancerName, frontends);
+        return frontends;
     }
 
     public Map<String, LoadBalancingRule> getLoadBalancerRules(String resourceGroupName, String loadBalancerName) {

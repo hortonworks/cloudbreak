@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -797,6 +798,68 @@ public class AzureTemplateBuilderTest {
         assertEquals(1, StringUtils.countMatches(templateString,
                 "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackPUBLIC-publicIp')]\""));
         assertFalse(StringUtils.contains(templateString, "\"name\": \"group-gateway-group-outbound-rule\","));
+    }
+
+    @Test
+    public void buildWithGatewayInstanceGroupTypePrivateAndGatewayLoadBalancers() {
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, LATEST_TEMPLATE_PATH);
+        //GIVEN
+        Network network = new Network(new Subnet(SUBNET_CIDR));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        when(azureUtils.getCustomEndpointGatewaySubnetIds(any())).thenReturn(Collections.singletonList("endpointGwSubnet"));
+
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
+
+        List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
+        CloudLoadBalancer gatewayLb = new CloudLoadBalancer(LoadBalancerType.GATEWAY_PRIVATE);
+        gatewayLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(gatewayLb);
+        CloudLoadBalancer privateLb = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
+        privateLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(privateLb);
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, null);
+        //THEN
+        String strippedTemplateString = templateString.replaceAll("\\s", "");
+        String twoFrontendIps = "\"frontendIPConfigurations\":[{\"name\":\"LoadBalancertestStackPRIVATE-frontend\",\"properties\":"
+                + "{\"privateIPAddressVersion\":\"IPv4\",\"privateIPAllocationMethod\":\"Dynamic\",\"subnet\":"
+                + "{\"id\":\"[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]\"}}},"
+                + "{\"name\":\"LoadBalancertestStackPRIVATE-frontend-gateway\",\"properties\":"
+                + "{\"privateIPAddressVersion\":\"IPv4\",\"privateIPAllocationMethod\":\"Dynamic\",\"subnet\":"
+                + "{\"id\":\"[concat(variables('vnetID'),'/subnets/','endpointGwSubnet')]\"}}}],";
+        assertThat(strippedTemplateString).contains(twoFrontendIps);
+
+        String twoLoadBalancingRules = "\"loadBalancingRules\":[{\"name\":\"port-443-rule\",\"properties\":"
+                + "{\"backendAddressPool\":{\"id\":\"[resourceId('Microsoft.Network/loadBalancers/backendAddressPools','LoadBalancertestStackPRIVATE',"
+                + "'gateway-group-pool')]\"},\"backendPort\":443,\"enableFloatingIP\":true,\"enableTcpReset\":false,\"frontendIPConfiguration\":"
+                + "{\"id\":\"[concat(resourceId('Microsoft.Network/loadBalancers','LoadBalancertestStackPRIVATE'),"
+                + "'/frontendIPConfigurations/LoadBalancertestStackPRIVATE-frontend')]\"},\"frontendPort\":443,\"idleTimeoutInMinutes\":4,"
+                + "\"loadDistribution\":\"Default\",\"probe\":{\"id\":\"[resourceId('Microsoft.Network/loadBalancers/probes','LoadBalancertestStackPRIVATE',"
+                + "'port-8443-probe')]\"},\"protocol\":\"Tcp\"}},{\"name\":\"port-443-rule-gateway\",\"properties\":{\"backendAddressPool\":"
+                + "{\"id\":\"[resourceId('Microsoft.Network/loadBalancers/backendAddressPools','LoadBalancertestStackPRIVATE','gateway-group-pool')]\"},"
+                + "\"backendPort\":443,\"enableFloatingIP\":true,\"enableTcpReset\":false,\"frontendIPConfiguration\":"
+                + "{\"id\":\"[concat(resourceId('Microsoft.Network/loadBalancers','LoadBalancertestStackPRIVATE'),"
+                + "'/frontendIPConfigurations/LoadBalancertestStackPRIVATE-frontend-gateway')]\"},\"frontendPort\":443,\"idleTimeoutInMinutes\":4,"
+                + "\"loadDistribution\":\"Default\",\"probe\":{\"id\":\"[resourceId('Microsoft.Network/loadBalancers/probes','LoadBalancertestStackPRIVATE',"
+                + "'port-8443-probe')]\"},\"protocol\":\"Tcp\"}}],";
+        assertThat(strippedTemplateString).contains(twoLoadBalancingRules);
     }
 
     @ParameterizedTest(name = "testNicDependenciesAreValidJson {0}")

@@ -3,12 +3,14 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,9 +44,13 @@ public class AzureLoadBalancerMetadataCollectorTest {
 
     private static final String GROUP_PATTERN = GROUP_NAME + "%s";
 
+    private static final String BACKEND_GROUP_PATTERN = GROUP_PATTERN + "%s";
+
     private static final String POOL_SUFFIX = "-pool";
 
     private static final String AS_SUFFIX = "-as";
+
+    private static final String GATEWAY_SUFFIX = "-gateway";
 
     private static final String STACK_NAME = "stackName";
 
@@ -160,15 +166,25 @@ public class AzureLoadBalancerMetadataCollectorTest {
     private Map<String, LoadBalancingRule> getLoadBalancingRules(int numPorts) {
         Map<String, LoadBalancingRule> rules = new HashMap<>();
         for (int i = 0; i < numPorts; i++) {
-            LoadBalancingRule rule = mock(LoadBalancingRule.class);
-            LoadBalancerBackend backend = mock(LoadBalancerBackend.class);
-            BackendAddressPoolInner inner = mock(BackendAddressPoolInner.class);
-            when(inner.name()).thenReturn(String.format(GROUP_PATTERN, i, POOL_SUFFIX));
-            when(backend.innerModel()).thenReturn(inner);
-            when(rule.backend()).thenReturn(backend);
-            when(rule.backendPort()).thenReturn(i);
+            LoadBalancingRule rule = getLoadBalancingRule(i, String.format(GROUP_PATTERN, i, POOL_SUFFIX));
             rules.put(String.valueOf(i), rule);
+            // creating duplicate rules for "-gateway" suffix to emulate data returned from Azure in case of multiple frontends
+            LoadBalancingRule rule2 = getLoadBalancingRule(i, String.format(BACKEND_GROUP_PATTERN, i, POOL_SUFFIX, GATEWAY_SUFFIX));
+            rules.put(String.valueOf(numPorts + i), rule2);
         }
         return rules;
+    }
+
+    @NotNull
+    private static LoadBalancingRule getLoadBalancingRule(int i, String name) {
+        LoadBalancingRule rule = mock(LoadBalancingRule.class);
+        LoadBalancerBackend backend = mock(LoadBalancerBackend.class);
+        BackendAddressPoolInner inner = mock(BackendAddressPoolInner.class);
+        when(rule.name()).thenReturn(name);
+        lenient().when(inner.name()).thenReturn(name);
+        lenient().when(backend.innerModel()).thenReturn(inner);
+        lenient().when(rule.backend()).thenReturn(backend);
+        lenient().when(rule.backendPort()).thenReturn(i);
+        return rule;
     }
 }

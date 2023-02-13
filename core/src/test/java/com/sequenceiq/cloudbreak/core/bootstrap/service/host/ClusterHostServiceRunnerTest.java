@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -112,6 +114,7 @@ import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.Tunnel;
 
 @ExtendWith(MockitoExtension.class)
@@ -122,6 +125,8 @@ class ClusterHostServiceRunnerTest {
     private static final String ENV_CRN = "envCrn";
 
     private static final String STACK_NAME = "stackName";
+
+    private static final Long STACK_ID = 123L;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -255,6 +260,7 @@ class ClusterHostServiceRunnerTest {
         lenient().when(stack.getStack()).thenReturn(stackView);
         lenient().when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         lenient().when(stack.getName()).thenReturn(STACK_NAME);
+        lenient().when(stack.getId()).thenReturn(STACK_ID);
         lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn(ENV_CRN);
     }
 
@@ -510,6 +516,34 @@ class ClusterHostServiceRunnerTest {
 
     private Map<String, Object> getJavaProperties(SaltConfig saltConfig) {
         return (Map<String, Object>) saltConfig.getServicePillarConfig().get("java").getProperties().get("java");
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testFloatinIpLoadBalancers() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices();
+        LoadBalancer lbGateway = new LoadBalancer();
+        lbGateway.setIp("ip1");
+        lbGateway.setType(LoadBalancerType.GATEWAY_PRIVATE);
+        LoadBalancer lbPrivate = new LoadBalancer();
+        lbPrivate.setIp("ip2");
+        lbPrivate.setType(LoadBalancerType.PRIVATE);
+        Set<LoadBalancer> loadBalancers = Set.of(lbGateway, lbPrivate);
+        when(loadBalancerFqdnUtil.getLoadBalancersForStack(STACK_ID)).thenReturn(loadBalancers);
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
+        SaltConfig saltConfig = saltConfigCaptor.getValue();
+        Map<String, Object> pillarMap = (Map<String, Object>) saltConfig.getServicePillarConfig().get("gateway").getProperties().get("gateway");
+        assertThat(pillarMap).containsKey("loadbalancers");
+        Map<String, Object> loadbalancerMap = (Map<String, Object>) pillarMap.get("loadbalancers");
+        assertThat(loadbalancerMap).hasSize(2)
+                .containsKey("frontends")
+                .containsEntry("floatingIpEnabled", true);
+        List<Map<String, Object>> frontends = (List<Map<String, Object>>) loadbalancerMap.get("frontends");
+        assertThat(frontends).hasSize(2);
+        assertThat(frontends).anyMatch(f -> "GATEWAY_PRIVATE".equals(f.get("type")) && "ip1".equals(f.get("ip")))
+                .anyMatch(f -> "PRIVATE".equals(f.get("type")) && "ip2".equals(f.get("ip")));
     }
 
     private void setupMocksForRunClusterServices() {

@@ -39,7 +39,10 @@ public class AzureLoadBalancerMetadataCollector {
         AzureClient azureClient = ac.getParameter(AzureClient.class);
         Map<String, LoadBalancingRule> rules = azureClient.getLoadBalancerRules(resourceGroup, loadBalancerName);
 
+        // rule name ending with special "gateway" suffix is happening _only_ in the case of requested GATEWAY_PRIVATE load balancer
+        // and in that case the second rule is basically the copy of the first one, only the name differs. See arm-v2.ftl
         Map<Integer, String> portToAsMapping = rules.values().stream()
+                .filter(r -> !r.name().endsWith("gateway"))
                 .collect(Collectors.toMap(LoadBalancingRule::backendPort, rule -> generateAvailabilitySetName(ac, rule.backend())));
         LOGGER.debug("Found port to availability set mapping [{}] for load balancer {}", portToAsMapping, loadBalancerName);
 

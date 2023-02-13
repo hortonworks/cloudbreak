@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.environment.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE_DNS_ZONE_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_OUTBOUND_LOAD_BALANCER;
@@ -8,9 +9,13 @@ import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_N
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
@@ -19,9 +24,15 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 @Component
 public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConverter {
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     protected void attachEndpointGatewaySubnet(EnvironmentNetworkResponse source, Map<String, Object> attributes, CloudSubnet cloudSubnet) {
-        // this is intentionally left as a no-op since Azure does not need to attach an endpoint gateway subnet.
+        if (entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            source.getEndpointGatewaySubnetIds().stream().findFirst().ifPresent(endpointGatewaySubnetId ->
+                    attributes.put(ENDPOINT_GATEWAY_SUBNET_ID, endpointGatewaySubnetId));
+        }
     }
 
     @Override

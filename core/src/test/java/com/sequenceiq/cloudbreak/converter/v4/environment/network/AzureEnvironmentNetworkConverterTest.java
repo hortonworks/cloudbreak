@@ -7,17 +7,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -45,11 +49,16 @@ class AzureEnvironmentNetworkConverterTest {
 
     private static final String NO_OUTBOUND_LOAD_BALANCER_KEY = "noOutboundLoadBalancer";
 
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
     @Mock
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Mock
     private SubnetSelector subnetSelector;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private AzureEnvironmentNetworkConverter converter;
@@ -69,7 +78,7 @@ class AzureEnvironmentNetworkConverterTest {
         when(azure.getResourceGroupName()).thenReturn(RESOURCE_GROUP_NAME);
         when(azure.getNoPublicIp()).thenReturn(true);
 
-        Network result = converter.convertToLegacyNetwork(environmentNetworkResponse, "my-az");
+        Network result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> converter.convertToLegacyNetwork(environmentNetworkResponse, "my-az"));
 
         assertEquals(CloudPlatform.AZURE.toString(), result.getAttributes().getMap().get(CLOUD_PLATFORM).toString());
         assertFalse(result.getAttributes().getMap().containsKey(ENDPOINT_GATEWAY_SUBNET_ID));
@@ -94,10 +103,32 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(true, result.get(NO_PUBLIC_IP_KEY));
         assertEquals(DATABASE_PRIVATE_DNS_ZONE_ID, result.get(DATABASE_PRIVATE_DNS_ZONE_ID_KEY));
         assertTrue((Boolean) result.get(NO_OUTBOUND_LOAD_BALANCER_KEY));
+        assertFalse(result.containsKey(ENDPOINT_GATEWAY_SUBNET_ID));
     }
 
     @Test
     void testGetCloudPlatform() {
         assertEquals(CloudPlatform.AZURE, converter.getCloudPlatform());
+    }
+
+    @Test
+    void testAttachEndpointGatewaySubnetIfTargeting() {
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
+        EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
+        when(environmentNetworkResponse.getPublicEndpointAccessGateway()).thenReturn(PublicEndpointAccessGateway.DISABLED);
+        when(environmentNetworkResponse.getEndpointGatewaySubnetIds()).thenReturn(Set.of("endpointGwSubnet"));
+        EnvironmentNetworkAzureParams azure = mock(EnvironmentNetworkAzureParams.class);
+        when(azure.getNetworkId()).thenReturn(NETWORK_ID);
+        when(azure.getResourceGroupName()).thenReturn(RESOURCE_GROUP_NAME);
+        when(azure.getNoPublicIp()).thenReturn(true);
+        when(azure.getDatabasePrivateDnsZoneId()).thenReturn(DATABASE_PRIVATE_DNS_ZONE_ID);
+        when(azure.isNoOutboundLoadBalancer()).thenReturn(true);
+        when(environmentNetworkResponse.getAzure()).thenReturn(azure);
+        CloudSubnet cloudSubnet = mock(CloudSubnet.class);
+        when(subnetSelector.chooseSubnet(any(), any(), any(), any())).thenReturn(Optional.of(cloudSubnet));
+
+        Network result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> converter.convertToLegacyNetwork(environmentNetworkResponse, "my-az"));
+        assertThat(result.getAttributes().getMap().containsKey(ENDPOINT_GATEWAY_SUBNET_ID)).isTrue();
+        assertThat(result.getAttributes().getMap().get(ENDPOINT_GATEWAY_SUBNET_ID)).isEqualTo("endpointGwSubnet");
     }
 }

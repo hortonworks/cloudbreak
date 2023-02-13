@@ -77,9 +77,12 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
     /**
      * Attach the subnet ID in which to place a public endpoint gateway.
      *
-     * The default implementation should be sufficient for GCP and AWS.
+     * The default implementation is sufficient for GCP.
      *
-     * For Azure, we do not need to attach the endpoint gateway to a public subnet, so this method must be overrridable.
+     * For Azure, as there are no Availability Zones, when targeting, we need to attach the endpoint gateway to the targeted private subnet.
+     * If there is no targeting then there is no need to attach to a public subnet.
+     * So this method must be overrridable.
+     *
      * @param source contains source information to retrieve subnets from
      * @param attributes a Map which we put the gateway subnet ID in
      */

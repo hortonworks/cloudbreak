@@ -69,6 +69,7 @@ base:
     - gateway.knox
     - ccm
     - nginx.init
+    - gateway.floating_ip_loadbalancer
 
   'G@roles:knox':
     - match: compound

@@ -97,7 +97,7 @@ public class AzureTemplateBuilder {
 
             // needed for pre 1.16.5 templates and Load balancer setup on Medium duty datalakes.
             model.put("existingSubnetName", azureUtils.getCustomSubnetIds(network).stream().findFirst().orElse(""));
-
+            model.put("endpointGwSubnet", azureUtils.getCustomEndpointGatewaySubnetIds(network).stream().findFirst().orElse(""));
             model.put("usePartnerCenter", Objects.nonNull(azureMarketplaceImage));
             model.put("marketplaceImageDetails", azureMarketplaceImage);
             model.put("customImageId", customImageId);

@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.service.loadbalancer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -31,6 +34,8 @@ class LoadBalancerFqdnUtilTest {
     private static final String PRIVATE_FQDN = "private.fqdn";
 
     private static final String PRIVATE_IP = "private.ip";
+
+    private static final long STACK_ID = 123L;
 
     @Mock
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
@@ -164,6 +169,17 @@ class LoadBalancerFqdnUtilTest {
 
         String fqdn = underTest.getLoadBalancerUserFacingFQDN(0L);
         assertNull(fqdn);
+    }
+
+    @Test
+    void testGetLoadBalancersForStack() {
+        LoadBalancer lb1 = mock(LoadBalancer.class);
+        LoadBalancer lb2 = mock(LoadBalancer.class);
+        Set<LoadBalancer> loadBalancers = Set.of(lb1, lb2);
+        when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(loadBalancers);
+        Set<LoadBalancer> result = underTest.getLoadBalancersForStack(STACK_ID);
+        verify(loadBalancerPersistenceService).findByStackId(STACK_ID);
+        assertThat(result).isEqualTo(loadBalancers);
     }
 
     private Set<LoadBalancer> createLoadBalancers(boolean createPrivate, boolean createPublic, boolean createOutbound) {
