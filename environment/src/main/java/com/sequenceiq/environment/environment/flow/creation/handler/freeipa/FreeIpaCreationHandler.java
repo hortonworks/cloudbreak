@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -184,9 +183,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             }
         } else {
             LOGGER.info("FreeIpa for environmentCrn '{}' already exists. Using this one.", environmentDto.getResourceCrn());
-            if (CREATE_IN_PROGRESS == freeIpa.get().getStatus()) {
-                awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
-            }
+            awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
         }
     }
 

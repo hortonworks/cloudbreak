@@ -17,7 +17,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -215,23 +214,12 @@ class EnvironmentServiceTest {
     void findAllByIdInAndStatusIn() {
         Set<Long> resourceIds = Set.of(1L, 2L);
         Set<EnvironmentStatus> statuses = Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED);
-        List<Environment> qresult = List.of(environment);
-        when(environmentDtoConverter.environmentToDto(eq(environment))).thenReturn(environmentDto);
+        Set<Long> expectedResourceIds = Set.of(1L);
         when(environmentRepository
-                .findAllByIdInAndStatusInAndArchivedIsFalse(eq(resourceIds), eq(statuses))).thenReturn(qresult);
-        assertEquals(List.of(environmentDto), environmentServiceUnderTest.findAllByIdInAndStatusIn(resourceIds,
+                .findAllIdByIdInAndStatusInAndArchivedIsFalse(eq(resourceIds), eq(statuses))).thenReturn(expectedResourceIds);
+
+        assertEquals(expectedResourceIds, environmentServiceUnderTest.findAllIdByIdInAndStatusIn(resourceIds,
                 statuses));
-    }
-
-    @Test
-    void findAllByStatusIn() {
-        when(environmentDtoConverter.environmentToDto(eq(environment))).thenReturn(environmentDto);
-        when(environmentRepository
-                .findAllByStatusInAndArchivedIsFalse(eq(Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED))))
-                .thenReturn(List.of(environment));
-        assertEquals(List.of(environmentDto), environmentServiceUnderTest
-                .findAllByStatusIn(Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED)));
-
     }
 
     @Test
