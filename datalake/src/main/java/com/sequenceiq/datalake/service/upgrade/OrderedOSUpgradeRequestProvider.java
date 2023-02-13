@@ -29,7 +29,7 @@ public class OrderedOSUpgradeRequestProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderedOSUpgradeRequestProvider.class);
 
-    public OrderedOSUpgradeSetRequest createMediumDutyOrderedOSUpgradeSetRequest(StackV4Response stackV4Response) {
+    public OrderedOSUpgradeSetRequest createMediumDutyOrderedOSUpgradeSetRequest(StackV4Response stackV4Response, String targetImageId) {
         LOGGER.debug("Creating OrderedOSUpgradeSetRequest for rolling OS upgrade");
         Map<String, List<InstanceMetaDataV4Response>> instanceMetaDataByInstanceGroup = getInstanceMetaDataByInstanceGroup(stackV4Response);
         Map<String, List<String>> instanceIdsByInstanceGroup = getInstanceIdsByInstanceGroup(instanceMetaDataByInstanceGroup);
@@ -55,6 +55,7 @@ public class OrderedOSUpgradeRequestProvider {
         validateThatEveryInstanceIsPresentInTheConfig(instanceIdsByInstanceGroup);
         OrderedOSUpgradeSetRequest request = new OrderedOSUpgradeSetRequest();
         request.setOrderedOsUpgradeSets(osUpgradeByUpgradeSets);
+        request.setImageId(targetImageId);
         LOGGER.debug("Request created for rolling OS upgrade: {}", request);
         return request;
     }

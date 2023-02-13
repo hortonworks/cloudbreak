@@ -181,9 +181,10 @@ public class DatalakeUpgradeActions {
                 if ((boolean) variables.get(REPLACE_VMS_AFTER_UPGRADE)) {
                     boolean rollingUpgradeEnabled = Boolean.TRUE.equals(variables.get(ROLLING_UPGRADE_ENABLED));
                     boolean keepVariant = Boolean.TRUE.equals(variables.get(KEEP_VARIANT));
-                    LOGGER.info("Start Datalake upgrade vm replacement for {} rolling upgrade enabled: {}, keepVariant: {}",
-                            payload.getResourceId(), rollingUpgradeEnabled, keepVariant);
-                    sdxUpgradeService.upgradeOs(payload.getResourceId(), rollingUpgradeEnabled, keepVariant);
+                    String imageId = (String) variables.get(TARGET_IMAGE);
+                    LOGGER.info("Start Datalake upgrade vm replacement for {} rolling upgrade enabled: {}, keepVariant: {}, targetImage: {}",
+                            payload.getResourceId(), rollingUpgradeEnabled, keepVariant, imageId);
+                    sdxUpgradeService.upgradeOs(payload.getResourceId(), imageId, rollingUpgradeEnabled, keepVariant);
                     sendEvent(context, new SdxEvent(DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT.event(), context));
                 } else {
                     LOGGER.info("Vm replacement is not required for {} ", payload.getResourceId());
