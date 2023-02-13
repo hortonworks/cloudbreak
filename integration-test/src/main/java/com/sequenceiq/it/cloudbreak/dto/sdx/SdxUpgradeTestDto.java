@@ -23,10 +23,6 @@ public class SdxUpgradeTestDto extends AbstractSdxTestDto<SdxUpgradeRequest, Sdx
         super(new SdxUpgradeRequest(), testContext);
     }
 
-    public SdxUpgradeTestDto() {
-        super(SdxUpgradeTestDto.class.getSimpleName().toUpperCase());
-    }
-
     @Override
     public SdxUpgradeTestDto valid() {
         return withRuntime(commonClusterManagerProperties.getUpgrade().getTargetRuntimeVersion())

@@ -2,13 +2,13 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.clustertemplate.ClusterTemplateCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.clustertemplate.ClusterTemplateDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.clustertemplate.ClusterTemplateGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.clustertemplate.ClusterTemplateListAction;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 @Service
 public class ClusterTemplateTestClient {

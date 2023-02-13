@@ -15,9 +15,6 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 
 @Prototype
 public class FreeIpaOperationStatusTestDto extends AbstractFreeIpaTestDto<String, OperationStatus, FreeIpaOperationStatusTestDto> {
-    protected FreeIpaOperationStatusTestDto(String newId) {
-        super(newId);
-    }
 
     protected FreeIpaOperationStatusTestDto(String request, TestContext testContext) {
         super(request, testContext);

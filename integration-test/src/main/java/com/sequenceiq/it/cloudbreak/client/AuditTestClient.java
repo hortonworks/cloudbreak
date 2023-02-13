@@ -2,12 +2,12 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.audit.AuditGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.audit.AuditListAction;
 import com.sequenceiq.it.cloudbreak.action.v4.audit.AuditListZipAction;
 import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 @Service
 public class AuditTestClient {

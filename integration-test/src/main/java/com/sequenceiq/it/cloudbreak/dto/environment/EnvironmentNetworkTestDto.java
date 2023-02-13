@@ -29,10 +29,6 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
         super(new EnvironmentNetworkRequest(), testContext);
     }
 
-    public EnvironmentNetworkTestDto() {
-        super(EnvironmentNetworkTestDto.class.getSimpleName().toUpperCase());
-    }
-
     public EnvironmentNetworkTestDto valid() {
         return getCloudProvider()
                 .network(this);

@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.client;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateIfNotExistsAction;
@@ -14,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogGetImages
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogGetImagesFromDefaultCatalogAction;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogSetAsDefaultAction;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 @Service
 public class ImageCatalogTestClient {

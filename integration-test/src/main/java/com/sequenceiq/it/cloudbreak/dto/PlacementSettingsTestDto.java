@@ -10,10 +10,6 @@ public class PlacementSettingsTestDto extends AbstractCloudbreakTestDto<Placemen
 
     private static final String PLACEMENT = "PLACEMENT";
 
-    public PlacementSettingsTestDto() {
-        super(PLACEMENT);
-    }
-
     protected PlacementSettingsTestDto(TestContext testContext) {
         super(new PlacementSettingsV4Request(), testContext);
     }

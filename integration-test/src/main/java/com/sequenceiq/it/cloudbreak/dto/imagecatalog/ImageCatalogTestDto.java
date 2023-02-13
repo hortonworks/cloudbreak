@@ -5,18 +5,16 @@ import java.util.Collection;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
 public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV4Request, ImageCatalogV4Response, ImageCatalogTestDto>
         implements Purgable<ImageCatalogV4Response, CloudbreakClient> {
-
-    public static final String IMAGE_CATALOG = "IMAGE_CATALOG";
 
     private static final String IMAGECATALOG_RESOURCE_NAME = "imagecatalogName";
 
@@ -30,11 +28,6 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
 
     public ImageCatalogTestDto(ImageCatalogV4Request imageCatalogV4Request, TestContext testContext) {
         super(imageCatalogV4Request, testContext);
-    }
-
-    public ImageCatalogTestDto() {
-        super(IMAGE_CATALOG);
-        setRequest(new ImageCatalogV4Request());
     }
 
     public ImageCatalogTestDto withName(String name) {

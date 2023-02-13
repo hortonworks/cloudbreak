@@ -4,10 +4,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.CommonAssert;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.RepoConfigValidationTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public enum RepoConfigValidationTestAssertion {
 

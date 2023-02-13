@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCascadingDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCcmUpgrade;
@@ -25,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStartAction
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStopAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentVerticalScaleAction;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 @Service
 public class EnvironmentTestClient {

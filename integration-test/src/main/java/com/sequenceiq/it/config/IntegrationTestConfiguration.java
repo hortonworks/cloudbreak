@@ -22,7 +22,7 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.util.StringUtils;
 import org.testng.TestNG;
 
-import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.util.TestParameter;
 
 @Configuration
 @ComponentScan(basePackages = { "com.sequenceiq.it", "com.sequenceiq.cloudbreak.cloud.gcp.util", "com.sequenceiq.cloudbreak.auth.crn" })

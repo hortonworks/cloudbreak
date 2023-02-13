@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.it.cloudbreak.RedbeamsClient;
+import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;

@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxAutotlsCertRotationAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupAction;
@@ -57,6 +56,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDatalakeCertificateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.SdxEventTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 
 @Service
 public class SdxTestClient {

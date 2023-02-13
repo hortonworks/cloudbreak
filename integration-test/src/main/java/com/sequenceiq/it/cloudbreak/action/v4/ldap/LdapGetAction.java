@@ -3,11 +3,11 @@ package com.sequenceiq.it.cloudbreak.action.v4.ldap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 public class LdapGetAction implements Action<LdapTestDto, FreeIpaClient> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LdapGetAction.class);

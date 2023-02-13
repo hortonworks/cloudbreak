@@ -24,10 +24,6 @@ public class DistroXUpgradeTestDto extends AbstractSdxTestDto<DistroXUpgradeV1Re
         super(new DistroXUpgradeV1Request(), testContext);
     }
 
-    public DistroXUpgradeTestDto() {
-        super(DistroXUpgradeTestDto.class.getSimpleName().toUpperCase());
-    }
-
     @Override
     public DistroXUpgradeTestDto valid() {
         return withRuntime(commonClusterManagerProperties.getUpgrade().getTargetRuntimeVersion())

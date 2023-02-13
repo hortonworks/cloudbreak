@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.assertion.audit;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class AuditTestAssertion {
 

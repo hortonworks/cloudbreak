@@ -7,10 +7,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.requests.CustomConfigurationsV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.CustomConfigurationsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.CustomConfigurationsV4Responses;
 import com.sequenceiq.cloudbreak.api.model.CustomConfigurationPropertyParameters;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype

@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXVerticalScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class DistroXVerticalScaleAction implements Action<DistroXTestDto, CloudbreakClient> {
 

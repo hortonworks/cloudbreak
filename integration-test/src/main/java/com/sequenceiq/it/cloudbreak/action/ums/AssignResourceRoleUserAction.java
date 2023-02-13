@@ -7,11 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.UmsClient;
 
 public class AssignResourceRoleUserAction extends AbstractUmsAction<UmsTestDto> {
 

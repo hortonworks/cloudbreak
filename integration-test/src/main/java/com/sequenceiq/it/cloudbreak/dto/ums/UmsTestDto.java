@@ -5,13 +5,13 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.service.UmsResourceRole;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.UmsClient;
 import com.sequenceiq.it.cloudbreak.request.ums.AssignResourceRequest;
 
 @Prototype
@@ -19,11 +19,6 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManag
 
     public UmsTestDto(TestContext testContext) {
         super(new AssignResourceRequest(), testContext);
-    }
-
-    public UmsTestDto() {
-        super(UmsTestDto.class.getSimpleName().toUpperCase());
-        setRequest(new AssignResourceRequest());
     }
 
     public UmsTestDto withDatahubCreator() {
@@ -93,7 +88,7 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManag
     }
 
     public UmsTestDto valid() {
-        return new UmsTestDto();
+        return this;
     }
 
     @Override

@@ -15,8 +15,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXC
 @Prototype
 public class DistroXClusterTestDto extends AbstractCloudbreakTestDto<DistroXClusterV1Request, ClusterV4Response, DistroXClusterTestDto> {
 
-    private static final String CLUSTER_REQUEST = "CLUSTER_REQUEST";
-
     public DistroXClusterTestDto(DistroXClusterV1Request request, TestContext testContex) {
         super(request, testContex);
     }

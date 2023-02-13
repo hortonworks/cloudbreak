@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox.diagnostics;
 
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.diagnostics.BaseDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class DistroXDiagnosticsTestDto extends BaseDiagnosticsTestDto<DiagnosticsCollectionV1Request, DistroXDiagnosticsTestDto, CloudbreakClient> {
 

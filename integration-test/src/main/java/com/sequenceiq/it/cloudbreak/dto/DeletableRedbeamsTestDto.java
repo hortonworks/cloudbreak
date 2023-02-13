@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto;
 
-import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
 
 public abstract class DeletableRedbeamsTestDto<R, S, T extends CloudbreakTestDto, Z> extends AbstractRedbeamsTestDto<R, S, T>
         implements Purgable<Z, RedbeamsClient> {

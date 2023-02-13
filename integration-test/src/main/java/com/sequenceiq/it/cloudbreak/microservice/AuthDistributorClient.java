@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.microservice;
 
 import java.util.Set;
 
@@ -13,17 +13,7 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 
 public class AuthDistributorClient<E extends Enum<E>, W extends WaitObject> extends MicroserviceClient<GrpcAuthDistributorClient, Void, E, W> {
 
-    public static final String AUTH_DISTRIBUTOR_CLIENT = "AUTH_DISTRIBUTOR_CLIENT";
-
     private GrpcAuthDistributorClient grpcAuthDistributorClient;
-
-    AuthDistributorClient(String newId) {
-        super(newId);
-    }
-
-    AuthDistributorClient() {
-        this(AUTH_DISTRIBUTOR_CLIENT);
-    }
 
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {

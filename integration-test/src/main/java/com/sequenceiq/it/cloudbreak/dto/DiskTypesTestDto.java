@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.dto;
 import java.util.Collection;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformDisksV4Response;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 public class DiskTypesTestDto extends AbstractCloudbreakTestDto<Integer, PlatformDisksV4Response, DiskTypesTestDto> {
     public static final String DISKTYPES = "DISKTYPES";
@@ -11,15 +12,10 @@ public class DiskTypesTestDto extends AbstractCloudbreakTestDto<Integer, Platfor
 
     private Collection<String> responses;
 
-    private final Integer request;
+    private final Integer request = 1;
 
-    private DiskTypesTestDto(String newId) {
-        super(newId);
-        request = 1;
-    }
-
-    DiskTypesTestDto() {
-        this(DISKTYPES);
+    protected DiskTypesTestDto(Integer request, TestContext testContext) {
+        super(request, testContext);
     }
 
     public Collection<String> getByFilterResponses() {

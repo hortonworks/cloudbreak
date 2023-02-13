@@ -10,7 +10,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 @Prototype
 public class GatewayTestDto extends AbstractCloudbreakTestDto<GatewayV4Request, GatewayV4Response, GatewayTestDto> {
-    public static final String NETWORK = "NETWORK";
 
     public GatewayTestDto(TestContext testContext) {
         super(new GatewayV4Request(), testContext);

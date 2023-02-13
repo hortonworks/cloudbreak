@@ -6,13 +6,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.ClusterTemplateUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
@@ -22,10 +22,6 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
 
     public ClusterTemplateTestDto(TestContext testContext) {
         super(new ClusterTemplateV4Request(), testContext);
-    }
-
-    public ClusterTemplateTestDto() {
-        super(ClusterTemplateTestDto.class.getSimpleName().toUpperCase());
     }
 
     public ClusterTemplateTestDto valid() {

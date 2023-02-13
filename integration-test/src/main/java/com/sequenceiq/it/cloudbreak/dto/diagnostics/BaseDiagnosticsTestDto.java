@@ -14,13 +14,13 @@ import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 
 public abstract class BaseDiagnosticsTestDto<
         R extends BaseDiagnosticsCollectionRequest,
@@ -28,11 +28,6 @@ public abstract class BaseDiagnosticsTestDto<
         C extends MicroserviceClient> extends AbstractTestDto<R, FlowIdentifier, D, C> {
 
     private final Class<C> clientTypeClass;
-
-    public BaseDiagnosticsTestDto(String newId, Class<C> clientTypeClass) {
-        super(newId);
-        this.clientTypeClass = clientTypeClass;
-    }
 
     public BaseDiagnosticsTestDto(R request, TestContext testContext, Class<C> clientTypeClass) {
         super(request, testContext);

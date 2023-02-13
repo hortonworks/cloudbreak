@@ -3,11 +3,11 @@ package com.sequenceiq.it.cloudbreak.assertion.util;
 import java.util.Optional;
 
 import com.sequenceiq.authorization.info.model.CheckResourceRightV4SingleResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.CheckResourceRightTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class CheckResourceRightFalseAssertion implements Assertion<CheckResourceRightTestDto, CloudbreakClient> {
 

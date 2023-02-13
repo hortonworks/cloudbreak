@@ -1,10 +1,10 @@
 package com.sequenceiq.it.cloudbreak.action.ums;
 
-import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.UmsClient;
 
 public abstract class AbstractUmsAction<U extends UmsTestDto> implements Action<U, UmsClient> {
 

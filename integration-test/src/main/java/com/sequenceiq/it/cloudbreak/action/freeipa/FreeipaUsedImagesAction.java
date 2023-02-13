@@ -1,10 +1,10 @@
 package com.sequenceiq.it.cloudbreak.action.freeipa;
 
 import com.sequenceiq.freeipa.api.v1.util.model.UsedImagesListV1Response;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaUsedImagesTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 public class FreeipaUsedImagesAction implements Action<FreeipaUsedImagesTestDto, FreeIpaClient> {
 

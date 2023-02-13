@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.context;
 
 import java.util.Collection;
 
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
+import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 
 public interface Purgable<T, U extends MicroserviceClient> extends Orderable {
 

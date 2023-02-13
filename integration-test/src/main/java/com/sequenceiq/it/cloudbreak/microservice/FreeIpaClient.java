@@ -1,9 +1,8 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.microservice;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
@@ -17,8 +16,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.cloudbreak.FreeIpaTest;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -41,22 +39,13 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaUserSyncWai
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.freeipa.FreeIpaInstanceWaitObject;
+import com.sequenceiq.it.util.TestParameter;
 
 public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.sequenceiq.freeipa.api.client.FreeIpaClient, FreeIpaApiUserCrnEndpoint, E,
         WaitObject> {
-    public static final String FREEIPA_CLIENT = "FREEIPA_CLIENT";
-
     private com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient;
 
     private FreeipaInternalCrnClient freeipaInternalCrnClient;
-
-    FreeIpaClient(String newId) {
-        super(newId);
-    }
-
-    FreeIpaClient() {
-        this(FREEIPA_CLIENT);
-    }
 
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
@@ -90,10 +79,6 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
     @Override
     public com.sequenceiq.freeipa.api.client.FreeIpaClient getDefaultClient() {
         return freeIpaClient;
-    }
-
-    public static Function<IntegrationTestContext, FreeIpaClient> getTestContextFreeIpaClient(String key) {
-        return testContext -> testContext.getContextParam(key, FreeIpaClient.class);
     }
 
     public static synchronized FreeIpaClient createProxyFreeIpaClient(TestParameter testParameter, CloudbreakUser cloudbreakUser,

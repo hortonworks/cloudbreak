@@ -11,12 +11,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 @Prototype
 public class ClouderaManagerTestDto extends AbstractCloudbreakTestDto<ClouderaManagerV4Request, Response, ClouderaManagerTestDto> {
 
-    public ClouderaManagerTestDto(TestContext testContex) {
-        super(new ClouderaManagerV4Request(), testContex);
-    }
-
-    public ClouderaManagerTestDto() {
-        super(ClouderaManagerTestDto.class.getSimpleName().toUpperCase());
+    public ClouderaManagerTestDto(TestContext testContext) {
+        super(new ClouderaManagerV4Request(), testContext);
     }
 
     public ClouderaManagerTestDto valid() {

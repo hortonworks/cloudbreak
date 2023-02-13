@@ -16,10 +16,6 @@ public class DistroXClouderaManagerTestDto extends AbstractCloudbreakTestDto<Clo
         super(new ClouderaManagerV1Request(), testContex);
     }
 
-    public DistroXClouderaManagerTestDto() {
-        super(DistroXClouderaManagerTestDto.class.getSimpleName().toUpperCase());
-    }
-
     public DistroXClouderaManagerTestDto valid() {
         withAutoTls(false);
         return this;

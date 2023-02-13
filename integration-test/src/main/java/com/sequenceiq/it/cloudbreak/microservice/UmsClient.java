@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.microservice;
 
 import java.lang.reflect.Field;
 import java.util.Set;
@@ -17,17 +17,7 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 
 public class UmsClient<E extends Enum<E>, W extends WaitObject> extends MicroserviceClient<GrpcUmsClient, Void, E, W> {
 
-    public static final String UMS_CLIENT = "UMS_CLIENT";
-
     private GrpcUmsClient umsClient;
-
-    UmsClient(String newId) {
-        super(newId);
-    }
-
-    UmsClient() {
-        this(UMS_CLIENT);
-    }
 
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
@@ -44,7 +34,7 @@ public class UmsClient<E extends Enum<E>, W extends WaitObject> extends Microser
         return umsClient;
     }
 
-    public static synchronized UmsClient createProxyUmsClient(String umsHost, int umsPort) {
+    public static synchronized UmsClient createUmsClient(String umsHost, int umsPort) {
         UmsClient clientEntity = new UmsClient();
         UmsClientConfig clientConfig = new UmsClientConfig();
         Field callingServiceName = ReflectionUtils.findField(UmsClientConfig.class, "callingServiceName");

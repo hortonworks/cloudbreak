@@ -1,10 +1,10 @@
 package com.sequenceiq.it.cloudbreak.action.v4.util;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.UsedImagesListV4Response;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.UsedImagesTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class UsedImagesAction implements Action<UsedImagesTestDto, CloudbreakClient> {
 

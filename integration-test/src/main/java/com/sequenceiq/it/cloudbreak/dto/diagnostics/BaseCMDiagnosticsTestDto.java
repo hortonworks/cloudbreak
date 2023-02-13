@@ -5,30 +5,23 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.diagnostics.BaseCmDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 
 public abstract class BaseCMDiagnosticsTestDto<R extends BaseCmDiagnosticsCollectionRequest,
         D extends BaseCMDiagnosticsTestDto,
         C extends MicroserviceClient> extends AbstractTestDto<R, FlowIdentifier, D, C> {
 
     private final Class<C> clientTypeClass;
-
-    public BaseCMDiagnosticsTestDto(String newId, Class<C> clientTypeClass) {
-        super(newId);
-        this.clientTypeClass = clientTypeClass;
-    }
 
     public BaseCMDiagnosticsTestDto(R request, TestContext testContext, Class<C> clientTypeClass) {
         super(request, testContext);
@@ -110,10 +103,5 @@ public abstract class BaseCMDiagnosticsTestDto<R extends BaseCmDiagnosticsCollec
     public <T extends CloudbreakTestDto> T deleteGiven(Class<T> clazz, Action<T, C> action, RunningParameter runningParameter) {
         getTestContext().when((T) getTestContext().given(clazz), clientTypeClass, action, runningParameter);
         return getTestContext().expect((T) getTestContext().given(clazz), BadRequestException.class, runningParameter);
-    }
-
-    @Override
-    public void validate() {
-        throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }
 }

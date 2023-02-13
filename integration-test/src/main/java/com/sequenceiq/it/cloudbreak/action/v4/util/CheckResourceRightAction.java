@@ -7,11 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.authorization.info.model.CheckResourceRightsV4Request;
 import com.sequenceiq.authorization.info.model.ResourceRightsV4;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.CheckResourceRightTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class CheckResourceRightAction implements Action<CheckResourceRightTestDto, CloudbreakClient> {
 

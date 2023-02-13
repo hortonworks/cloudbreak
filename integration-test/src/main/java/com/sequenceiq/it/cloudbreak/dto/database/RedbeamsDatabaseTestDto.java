@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableRedbeamsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
@@ -17,8 +17,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Resp
 @Prototype
 public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4Request, DatabaseV4Response, RedbeamsDatabaseTestDto, DatabaseV4Response>
         implements Searchable {
-
-    public static final String DATABASE = "DATABASE";
 
     private static final String REDBEAMS_RESOURCE_NAME = "redbeamsName";
 

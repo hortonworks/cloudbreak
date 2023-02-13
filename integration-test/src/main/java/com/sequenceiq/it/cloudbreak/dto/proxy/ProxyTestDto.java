@@ -9,17 +9,7 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractEnvironmentTestDto;
 @Prototype
 public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, ProxyResponse, ProxyTestDto> {
 
-    public static final String PROXY_CONFIG = "PROXY_CONFIG";
-
     private static final String PROXYCONFIG_RESOURCE_NAME = "proxyName";
-
-    ProxyTestDto(String newId) {
-        super(newId);
-    }
-
-    ProxyTestDto() {
-        this(PROXY_CONFIG);
-    }
 
     public ProxyTestDto(TestContext testContext) {
         super(new ProxyRequest(), testContext);

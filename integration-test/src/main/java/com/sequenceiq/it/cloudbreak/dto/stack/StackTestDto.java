@@ -18,13 +18,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
@@ -35,14 +33,13 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
 public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Searchable, Investigable, Assignable {
-
-    public static final String STACK = "STACK";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTestDto.class);
 
@@ -52,19 +49,6 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Inject
     private StackTestClient stackTestClient;
-
-    StackTestDto(String newId) {
-        super(newId);
-    }
-
-    public StackTestDto() {
-        this(STACK);
-    }
-
-    public StackTestDto(StackV4Request request) {
-        this();
-        setRequest(request);
-    }
 
     public StackTestDto(TestContext testContext) {
         super(testContext);

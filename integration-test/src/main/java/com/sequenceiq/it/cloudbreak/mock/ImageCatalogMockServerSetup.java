@@ -17,8 +17,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
+import com.sequenceiq.it.util.TestParameter;
 
 @Component
 @DependsOn("cloudbreakServer")

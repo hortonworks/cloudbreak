@@ -1,10 +1,9 @@
 package com.sequenceiq.it.cloudbreak.dto;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 public class RecommendationTestDto extends AbstractCloudbreakTestDto<Object, RecommendationV4Response, RecommendationTestDto> {
-
-    static final String RECOMMENDATION = "RECOMMENDATION";
 
     private String credentialName;
 
@@ -14,12 +13,8 @@ public class RecommendationTestDto extends AbstractCloudbreakTestDto<Object, Rec
 
     private String blueprintName;
 
-    private RecommendationTestDto(String newId) {
-        super(newId);
-    }
-
-    RecommendationTestDto() {
-        this(RECOMMENDATION);
+    protected RecommendationTestDto(Object request, TestContext testContext) {
+        super(request, testContext);
     }
 
     public RecommendationTestDto withBlueprintName(String name) {

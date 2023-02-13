@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.client;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.ums.AddUserToGroupAction;
 import com.sequenceiq.it.cloudbreak.action.ums.AssignResourceRoleGroupAction;
@@ -17,6 +16,7 @@ import com.sequenceiq.it.cloudbreak.action.ums.SetWorkloadPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.ums.UnassignResourceRoleAction;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.UmsClient;
 
 @Service
 public class UmsTestClient {

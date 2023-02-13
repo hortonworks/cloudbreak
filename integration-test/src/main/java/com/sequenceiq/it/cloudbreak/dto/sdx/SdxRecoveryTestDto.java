@@ -18,10 +18,6 @@ public class SdxRecoveryTestDto extends AbstractSdxTestDto<SdxRecoveryRequest, S
         super(new SdxRecoveryRequest(), testContext);
     }
 
-    public SdxRecoveryTestDto() {
-        super(SdxRecoveryTestDto.class.getSimpleName().toUpperCase());
-    }
-
     @Override
     public SdxRecoveryTestDto valid() {
         return withRecoveryType(SdxRecoveryType.RECOVER_WITHOUT_DATA);

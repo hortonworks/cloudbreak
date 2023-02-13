@@ -42,7 +42,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
@@ -55,6 +54,7 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 
@@ -62,8 +62,6 @@ import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 public class EnvironmentTestDto
         extends DeletableEnvironmentTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse>
         implements Searchable, Assignable, Investigable {
-
-    public static final String ENVIRONMENT = "ENVIRONMENT";
 
     private static final String ENVIRONMENT_RESOURCE_NAME = "environmentName";
 
@@ -82,14 +80,6 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto(TestContext testContext) {
         super(new EnvironmentRequest(), testContext);
-    }
-
-    public EnvironmentTestDto() {
-        super(ENVIRONMENT);
-    }
-
-    public EnvironmentTestDto(EnvironmentRequest environmentV4Request, TestContext testContext) {
-        super(environmentV4Request, testContext);
     }
 
     public String getParentEnvironmentName() {

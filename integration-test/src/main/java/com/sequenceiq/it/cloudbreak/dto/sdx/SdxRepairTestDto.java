@@ -19,10 +19,6 @@ public class SdxRepairTestDto extends AbstractSdxTestDto<SdxRepairRequest, SdxCl
         super(new SdxRepairRequest(), testContext);
     }
 
-    public SdxRepairTestDto() {
-        super(SdxRepairTestDto.class.getSimpleName().toUpperCase());
-    }
-
     public SdxRepairTestDto valid() {
         return getCloudProvider().sdxRepair(this);
     }

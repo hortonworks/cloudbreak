@@ -21,8 +21,6 @@ public class RedbeamsDatabaseServerTestDto
         extends AbstractRedbeamsTestDto<AllocateDatabaseServerV4Request, DatabaseServerStatusV4Response, RedbeamsDatabaseServerTestDto>
         implements Searchable {
 
-    public static final String DATABASE = "DATABASE";
-
     public RedbeamsDatabaseServerTestDto(TestContext testContext) {
         super(new AllocateDatabaseServerV4Request(), testContext);
     }

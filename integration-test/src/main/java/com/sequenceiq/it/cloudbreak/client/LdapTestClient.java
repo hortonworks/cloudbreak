@@ -2,13 +2,13 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.ldap.LdapCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.ldap.LdapCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.ldap.LdapDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.ldap.LdapGetAction;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 @Service
 public class LdapTestClient {

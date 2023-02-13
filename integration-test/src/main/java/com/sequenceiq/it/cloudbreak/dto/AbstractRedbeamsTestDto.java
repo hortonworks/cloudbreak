@@ -7,11 +7,11 @@ import java.util.List;
 
 import javax.ws.rs.BadRequestException;
 
-import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
 
 public abstract class AbstractRedbeamsTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, RedbeamsClient> {
 

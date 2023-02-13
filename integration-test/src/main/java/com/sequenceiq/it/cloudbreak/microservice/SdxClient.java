@@ -1,15 +1,13 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.microservice;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.cloudbreak.SdxTest;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -22,18 +20,14 @@ import com.sequenceiq.it.cloudbreak.dto.util.SdxEventTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.cloudbreak.CloudbreakInstanceWaitObject;
+import com.sequenceiq.it.util.TestParameter;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.client.SdxServiceApiKeyClient;
 import com.sequenceiq.sdx.client.SdxServiceApiKeyEndpoints;
 
 public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Void, SdxClusterStatusResponse, DatalakeWaitObject> {
-    public static final String SDX_CLIENT = "SDX_CLIENT";
 
     private SdxServiceApiKeyEndpoints sdxClient;
-
-    SdxClient() {
-        super(SDX_CLIENT);
-    }
 
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
@@ -51,11 +45,7 @@ public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Voi
         return sdxClient;
     }
 
-    public static Function<IntegrationTestContext, SdxClient> getTestContextSdxClient(String key) {
-        return testContext -> testContext.getContextParam(key, SdxClient.class);
-    }
-
-    public static synchronized SdxClient createProxySdxClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
+    public static synchronized SdxClient createSdxClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
         SdxClient clientEntity = new SdxClient();
         clientEntity.setActing(cloudbreakUser);
         clientEntity.sdxClient = new SdxServiceApiKeyClient(

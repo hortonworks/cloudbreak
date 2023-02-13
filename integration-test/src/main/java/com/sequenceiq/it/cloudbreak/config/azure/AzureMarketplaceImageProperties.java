@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.util.TestParameter;
 
 @Configuration
 public class AzureMarketplaceImageProperties {

@@ -4,18 +4,16 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.UmsClient;
 import com.sequenceiq.it.cloudbreak.request.ums.CreateUserGroupRequest;
 
 @Prototype
 public class UmsGroupTestDto extends AbstractTestDto<CreateUserGroupRequest, UserManagementProto.Group, UmsGroupTestDto, UmsClient> {
-
-    public static final String UMS_GROUP = "UMS_GROUP";
 
     private static final String UMS_GROUP_NAME = "umsGroupName";
 
@@ -25,11 +23,6 @@ public class UmsGroupTestDto extends AbstractTestDto<CreateUserGroupRequest, Use
 
     public UmsGroupTestDto(CreateUserGroupRequest createUserGroupRequest, TestContext testContext) {
         super(createUserGroupRequest, testContext);
-    }
-
-    public UmsGroupTestDto() {
-        super(UMS_GROUP);
-        setRequest(new CreateUserGroupRequest());
     }
 
     @Override

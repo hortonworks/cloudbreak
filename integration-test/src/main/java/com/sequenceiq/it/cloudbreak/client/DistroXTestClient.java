@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.common.api.type.AdjustmentType;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.CheckVariant;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXBlueprintRequestAction;
@@ -35,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDistroXCertificateTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 @Service
 public class DistroXTestClient {

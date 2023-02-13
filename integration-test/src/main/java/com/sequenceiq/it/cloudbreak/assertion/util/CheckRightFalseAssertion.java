@@ -5,11 +5,11 @@ import java.util.Optional;
 
 import com.sequenceiq.authorization.info.model.CheckRightV4SingleResponse;
 import com.sequenceiq.authorization.info.model.RightV4;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.CheckRightTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class CheckRightFalseAssertion implements Assertion<CheckRightTestDto, CloudbreakClient> {
 

@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.securitygroup.SecurityGroupV4Response;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.SecurityRulesEntity;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 @Prototype
@@ -22,10 +21,6 @@ public class SecurityGroupTestDto extends AbstractCloudbreakTestDto<SecurityGrou
 
     protected SecurityGroupTestDto(TestContext testContext) {
         super(new SecurityGroupV4Request(), testContext);
-    }
-
-    public SecurityGroupTestDto() {
-        super(SecurityGroupTestDto.class.getSimpleName().toUpperCase());
     }
 
     public SecurityGroupTestDto valid() {

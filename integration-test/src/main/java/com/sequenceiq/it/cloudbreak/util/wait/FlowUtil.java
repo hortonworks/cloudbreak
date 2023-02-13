@@ -14,13 +14,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
-import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
+import com.sequenceiq.it.util.TestParameter;
 
 @Component
 public class FlowUtil {

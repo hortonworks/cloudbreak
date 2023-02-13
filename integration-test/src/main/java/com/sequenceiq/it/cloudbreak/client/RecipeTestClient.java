@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeCreateInternalAction;
@@ -11,6 +10,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeGetInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeListAction;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 @Service
 public class RecipeTestClient {

@@ -8,11 +8,11 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 public abstract class AbstractFreeIpaTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, FreeIpaClient> {
@@ -21,10 +21,6 @@ public abstract class AbstractFreeIpaTestDto<R, S, T extends CloudbreakTestDto> 
 
     @Inject
     private FlowUtil flowUtil;
-
-    protected AbstractFreeIpaTestDto(String newId) {
-        super(newId);
-    }
 
     protected AbstractFreeIpaTestDto(R request, TestContext testContext) {
         super(request, testContext);

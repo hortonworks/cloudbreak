@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud;
 
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.util.TestParameter;
 
 public enum HostGroupType {
     MASTER("master", InstanceGroupType.GATEWAY, InstanceCountParameter.MASTER_INSTANCE_COUNT.getName()),

@@ -9,17 +9,13 @@ import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public abstract class AbstractCloudbreakTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, CloudbreakClient> {
-
-    protected AbstractCloudbreakTestDto(String newId) {
-        super(newId);
-    }
 
     protected AbstractCloudbreakTestDto(R request, TestContext testContext) {
         super(request, testContext);
