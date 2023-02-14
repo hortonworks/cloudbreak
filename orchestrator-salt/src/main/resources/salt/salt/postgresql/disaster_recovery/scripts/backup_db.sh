@@ -27,16 +27,20 @@ doLog() {
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
 }
 
-if [[ $# -lt 6 || $# -gt 10 || "$1" == "None" ]]; then
-  doLog "Invalid inputs provided"
+if [[ $# -lt 6 || $# -gt 10 || "$1" == "None" || -z "$1" ]]; then
+  doLog "ERROR: Invalid inputs provided"
+  doLog "Here are $# inputs in this run."
   doLog "Script accepts at least 6 and at most 7 inputs:"
   doLog "  1. Object Storage Service url to place backups."
-  doLog "  2. PostgreSQL host name."
-  doLog "  3. PostgreSQL port."
-  doLog "  4. PostgreSQL user name."
+  doLog "  2. PostgresSQL host name."
+  doLog "  3. PostgresSQL port."
+  doLog "  4. PostgresSQL user name."
   doLog "  5. Ranger admin group."
   doLog "  6. Whether or not to close connections for the database while it is being backed up."
   doLog "  7-10. (optional) Names of the databases to backup. If not given, will backup ranger and hive databases."
+  doLog "This is because there are missing values in /srv/pillar/postgresql/disaster_recovery.sls or PostgresSQL,
+  which might be caused by salt command is not running on the master Gateway node or there has never had a backup/restore
+  from the CDP CLI run."
   exit 1
 fi
 
