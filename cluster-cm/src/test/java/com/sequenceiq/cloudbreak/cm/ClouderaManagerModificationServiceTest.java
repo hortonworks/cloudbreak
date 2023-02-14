@@ -72,6 +72,7 @@ import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
+import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
@@ -1261,6 +1262,38 @@ class ClouderaManagerModificationServiceTest {
 
         ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.stopCluster(true));
         assertEquals("api exception", exception.getMessage());
+    }
+
+    @Test
+    void testHostsStartRoles() throws ApiException {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.9.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        ApiCommand apiCommand = new ApiCommand();
+        apiCommand.setId(new BigDecimal(1));
+        when(clouderaManagerResourceApi.hostsStartRolesCommand(any())).thenReturn(apiCommand);
+
+        when(clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, apiClientMock, apiCommand.getId())).thenReturn(success);
+        underTest.hostsStartRoles(List.of("fqdn1", "fqdn2"));
+        ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
+        verify(clouderaManagerResourceApi, times(1)).hostsStartRolesCommand(apiHostNameListArgumentCaptor.capture());
+        ApiHostNameList apiHostNameList = apiHostNameListArgumentCaptor.getValue();
+        assertThat(apiHostNameList.getItems()).containsOnly("fqdn1", "fqdn2");
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingStartRolesCommand(stack, apiClientMock, apiCommand.getId());
+    }
+
+    @Test
+    void testHostsStartRolesButVersionIsLowerThan790() throws ApiException {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.5.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        ApiCommand apiCommand = new ApiCommand();
+        apiCommand.setId(new BigDecimal(1));
+
+        underTest.hostsStartRoles(List.of("fqdn1", "fqdn2"));
+        verify(clouderaManagerResourceApi, times(0)).hostsStartRolesCommand(any());
+        verify(clouderaManagerPollingServiceProvider, times(0)).startPollingStartRolesCommand(any(), any(), any());
     }
 
     @ParameterizedTest

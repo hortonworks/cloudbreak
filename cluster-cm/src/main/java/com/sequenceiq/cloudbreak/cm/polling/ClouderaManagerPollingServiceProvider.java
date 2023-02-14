@@ -192,6 +192,10 @@ public class ClouderaManagerPollingServiceProvider {
         return startDefaultPolling(stack, apiClient, commandId, "Stop services on nodes");
     }
 
+    public ExtendedPollingResult startPollingStartRolesCommand(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
+        return startDefaultPolling(stack, apiClient, commandId, "Start services on nodes");
+    }
+
     public ExtendedPollingResult startPollingCmHostsRecommission(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to re-commission host with commandId: {}. [Server address: {}]", commandId, stack.getClusterManagerIp());
         long timeout = POLL_FOR_10_MINUTES;

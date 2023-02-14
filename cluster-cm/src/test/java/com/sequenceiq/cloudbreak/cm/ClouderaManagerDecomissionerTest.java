@@ -229,6 +229,28 @@ class ClouderaManagerDecomissionerTest {
     }
 
     @Test
+    public void testStopRolesOnHostsBadNodeFilteredOut() throws CloudbreakException, ApiException {
+        StackDtoDelegate stack = getStack();
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        ApiHostList apiHostList = new ApiHostList();
+        apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
+        apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
+        when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
+        ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
+        BigDecimal apiCommandId = BigDecimal.ONE;
+        when(clouderaManagerResourceApi.hostsStopRolesCommand(apiHostNameListArgumentCaptor.capture())).thenReturn(getApiCommand(apiCommandId));
+        ExtendedPollingResult extendedPollingResult = mock(ExtendedPollingResult.class);
+        when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(client), eq(apiCommandId))).thenReturn(extendedPollingResult);
+
+        underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com"));
+        verify(clouderaManagerResourceApi, times(1)).hostsStopRolesCommand(any());
+        assertThat(apiHostNameListArgumentCaptor.getValue().getItems()).containsOnly("host1.example.com");
+    }
+
+    @Test
     public void testStopRolesOnHostsOneNodeFilteredOut() throws CloudbreakException, ApiException {
         StackDtoDelegate stack = getStack();
         when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
@@ -256,6 +278,19 @@ class ClouderaManagerDecomissionerTest {
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
+        when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
+
+        underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com", "host2.example.com"));
+        verify(clouderaManagerResourceApi, times(0)).hostsStopRolesCommand(any());
+    }
+
+    @Test
+    public void testStopRolesOnHostsAllNodeFilteredOutBecauseOfBadState() throws CloudbreakException, ApiException {
+        StackDtoDelegate stack = getStack();
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        ApiHostList apiHostList = new ApiHostList();
+        apiHostList.addItemsItem(createApiHostRef("host1.example.com", ApiHealthSummary.BAD));
+        apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
         when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
 
         underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com", "host2.example.com"));
