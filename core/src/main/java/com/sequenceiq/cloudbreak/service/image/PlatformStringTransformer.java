@@ -7,18 +7,17 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @Service
 public class PlatformStringTransformer {
 
-    private static final String GOV = "_gov";
-
     public ImageCatalogPlatform getPlatformStringForImageCatalog(String cloudPlatform, String variant) {
         String lowerCasePlatform = cloudPlatform.toLowerCase();
         if (StringUtils.isBlank(variant)) {
             return imageCatalogPlatform(lowerCasePlatform);
-        } else if (variant.toLowerCase().endsWith(GOV)) {
+        } else if (variant.toLowerCase().endsWith(CommonGovService.GOV)) {
             return getPlatformStringForImageCatalog(lowerCasePlatform, true);
         } else {
             return imageCatalogPlatform(lowerCasePlatform);
@@ -30,7 +29,8 @@ public class PlatformStringTransformer {
     }
 
     public ImageCatalogPlatform getPlatformStringForImageCatalog(String cloudPlatform, boolean govCloud) {
-        return imageCatalogPlatform(govCloudSegmentRequired(cloudPlatform) && govCloud ? cloudPlatform.concat(GOV).toUpperCase() : cloudPlatform.toUpperCase());
+        return imageCatalogPlatform(govCloudSegmentRequired(cloudPlatform) && govCloud ?
+                cloudPlatform.concat(CommonGovService.GOV).toUpperCase() : cloudPlatform.toUpperCase());
     }
 
     public ImageCatalogPlatform getPlatformStringForImageCatalog(ImageCatalogPlatform imageCatalogPlatform, boolean govCloud) {
@@ -39,7 +39,8 @@ public class PlatformStringTransformer {
 
     public ImageCatalogPlatform getPlatformStringForImageCatalogByRegion(String cloudPlatform, String region) {
         if (StringUtils.isNotBlank(region) && region.toLowerCase().contains("-gov-")) {
-            return imageCatalogPlatform(govCloudSegmentRequired(cloudPlatform) ? cloudPlatform.concat(GOV).toUpperCase() : cloudPlatform.toUpperCase());
+            return imageCatalogPlatform(govCloudSegmentRequired(cloudPlatform) ?
+                    cloudPlatform.concat(CommonGovService.GOV).toUpperCase() : cloudPlatform.toUpperCase());
         }
         return imageCatalogPlatform(cloudPlatform);
     }
@@ -49,6 +50,6 @@ public class PlatformStringTransformer {
     }
 
     private boolean govCloudSegmentRequired(String cloudPlatform) {
-        return !cloudPlatform.toLowerCase().endsWith(GOV);
+        return !cloudPlatform.toLowerCase().endsWith(CommonGovService.GOV);
     }
 }

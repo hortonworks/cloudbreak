@@ -149,6 +149,7 @@ cb:
     enabled: false
   runtimes:
     latest: "7.2.17"
+    gov: "7.2.17"
 
   host.discovery.custom.hostname.enabled: false
 
@@ -330,6 +331,8 @@ cb:
 
   blueprint:
     cm:
+      gov:
+        exclusionList: "flow-management,flow-management-small,flink-heavy,flink-light"
       defaults:
         7.1.0: >
           7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;

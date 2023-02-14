@@ -1,12 +1,11 @@
-package com.sequenceiq.cloudbreak.service.account;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+package com.sequenceiq.cloudbreak.common.provider;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +25,7 @@ public class SimpleEnabledCloudPlatformServiceTest {
     public static final String AWS = "AWS";
 
     @InjectMocks
-    private final PreferencesService underTest = new PreferencesService();
+    private final ProviderPreferencesService underTest = new ProviderPreferencesService();
 
     @Spy
     private final List<CloudConstant> cloudConstants = new ArrayList<>();
@@ -42,18 +41,18 @@ public class SimpleEnabledCloudPlatformServiceTest {
 
     @Test
     public void testEnabledPlatformsWhenEnabledPlatformsIsEmpty() {
-        ReflectionTestUtils.setField(underTest, PreferencesService.class, "enabledPlatforms", "", null);
+        ReflectionTestUtils.setField(underTest, ProviderPreferencesService.class, "enabledPlatforms", "", null);
         Set<String> actual = underTest.enabledPlatforms();
 
-        assertThat(actual, containsInAnyOrder(AWS));
+        MatcherAssert.assertThat(actual, Matchers.containsInAnyOrder(AWS));
     }
 
     @Test
     public void testEnabledPlatformsWhenEnabledPlatformsIsNotEmpty() {
-        ReflectionTestUtils.setField(underTest, PreferencesService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
+        ReflectionTestUtils.setField(underTest, ProviderPreferencesService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
         Set<String> actual = underTest.enabledPlatforms();
 
-        assertThat(actual, containsInAnyOrder(AWS, "PL1", "PL2"));
+        MatcherAssert.assertThat(actual, Matchers.containsInAnyOrder(AWS, "PL1", "PL2"));
     }
 
     private static class TestCloudConstant implements CloudConstant {

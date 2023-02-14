@@ -108,6 +108,8 @@ vault:
       login.role: "cloudbreak.default"
 
 cb:
+  enabledplatforms: AWS,AZURE,YARN,GCP,MOCK
+  enabledgovplatforms: AWS
   cert:
     dir: /certs/
 

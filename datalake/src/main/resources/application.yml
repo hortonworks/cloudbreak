@@ -156,6 +156,8 @@ vault:
 cb:
   authentication:
     disabled: false
+  enabledplatforms: AWS,AZURE,YARN,GCP,MOCK
+  enabledgovplatforms: AWS
   cm:
     client:
       cluster.proxy.timeout: 120000
