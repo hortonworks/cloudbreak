@@ -25,13 +25,25 @@ doLog() {
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
 }
 
-if [[ $# -lt 5 || $# -gt 6 || "$1" == "None" ]]; then
-  doLog "Invalid inputs provided"
+if [[ $# -lt 5 || $# -gt 6 || "$1" == "None" || -z "$1" ]]; then
+  doLog "ERROR: Invalid inputs provided"
+  doLog "A total of $# inputs were provided."
+  if [[ $# -gt 0 ]]; then
+    doLog "Below are the inputs passed in. If some of them are empty, it could be incorrect:"
+    COUNTER=1
+    for input in "$@"
+    do
+      echo "  $COUNTER. $input"
+      let COUNTER++
+    done
+  fi
+  doLog "There might be missing values in /srv/pillar/postgresql/disaster_recovery.sls or /srv/pillar/postgresql/postgre.sls."
+  doLog "This might be caused by the command not being run on the Primary Gateway node or due to never having run a backup/restore via the CDP CLI before."
   doLog "Script accepts at least 5 and at most 6 inputs:"
   doLog "  1. Object Storage Service url to retrieve backups."
-  doLog "  2. PostgreSQL host name."
-  doLog "  3. PostgreSQL port."
-  doLog "  4. PostgreSQL user name."
+  doLog "  2. PostgresSQL host name."
+  doLog "  3. PostgresSQL port."
+  doLog "  4. PostgresSQL user name."
   doLog "  5. Ranger admin group."
   doLog "  6. (optional) Name of the database to restore. If not given, will restore ranger and hive databases."
   exit 1
