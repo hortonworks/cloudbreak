@@ -39,6 +39,7 @@ import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentOperation;
 import com.azure.resourcemanager.resources.models.DeploymentOperations;
+import com.azure.resourcemanager.resources.models.GenericResource;
 import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
@@ -568,27 +569,29 @@ public class AzureUtils {
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Optional<String> deleteDatabaseServer(AzureClient azureClient, String databaseServerId, boolean cancelException) {
-        return handleDeleteErrors(azureClient::deleteGenericResourceById, "DatabaseServer", databaseServerId, cancelException);
-    }
-
-    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public Optional<String> deletePrivateEndpoint(AzureClient azureClient, String id, boolean cancelException) {
-        return handleDeleteErrors(azureClient::deleteGenericResourceById, "PrivateEndpoint", id, cancelException);
-    }
-
-    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public Optional<String> deletePrivateDnsZoneGroup(AzureClient azureClient, String id, boolean cancelException) {
-        return handleDeleteErrors(azureClient::deleteGenericResourceById, "PrivateDnsZoneGroup", id, cancelException);
+        String resourceType = "DatabaseServer";
+        Optional<String> deleteErrors = handleDeleteErrors(azureClient::deleteGenericResourceById, resourceType, databaseServerId, cancelException);
+        checkResourceIsDeleted(azureClient, databaseServerId, resourceType);
+        return deleteErrors;
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Optional<String> deleteGenericResourceById(AzureClient azureClient, String id, AzureResourceType resourceType) {
-        return handleDeleteErrors(azureClient::deleteGenericResourceById, resourceType.getAzureType(), id, false);
+        Optional<String> deleteErrors = handleDeleteErrors(azureClient::deleteGenericResourceById, resourceType.getAzureType(), id, false);
+        checkResourceIsDeleted(azureClient, id, resourceType.getAzureType());
+        return deleteErrors;
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Optional<String> deleteResourceGroup(AzureClient azureClient, String resourceGroupId, boolean cancelException) {
         return handleDeleteErrors(azureClient::deleteResourceGroup, "ResourceGroup", resourceGroupId, cancelException);
+    }
+
+    private void checkResourceIsDeleted(AzureClient azureClient, String resourceId, String resourceType) {
+        GenericResource resource = azureClient.getGenericResourceById(resourceId);
+        if (resource != null) {
+            LOGGER.error("{} {} resource is still present after delete operation.", resourceType, resourceId);
+        }
     }
 
     private Optional<String> handleDeleteErrors(Consumer<String> deleteConsumer, String resourceType, String resourceId, boolean cancelException) {

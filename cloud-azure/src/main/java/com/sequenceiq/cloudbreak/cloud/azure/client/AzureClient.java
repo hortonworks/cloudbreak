@@ -80,6 +80,7 @@ import com.azure.resourcemanager.resources.fluentcore.model.implementation.Index
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentMode;
 import com.azure.resourcemanager.resources.models.DeploymentOperations;
+import com.azure.resourcemanager.resources.models.GenericResource;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.azure.resourcemanager.resources.models.ResourceGroups;
 import com.azure.resourcemanager.resources.models.Subscription;
@@ -737,6 +738,10 @@ public class AzureClient {
 
     public void deleteGenericResourceById(String id) {
         handleException(() -> azure.genericResources().deleteById(id));
+    }
+
+    public GenericResource getGenericResourceById(String id) {
+        return handleException(() -> azure.genericResources().getById(id));
     }
 
     public String getServicePrincipalForResourceById(String referenceId) {
