@@ -1,1 +1,4 @@
-{"name":"cluster-template-azure"}
+{
+  "name":"cluster-template-azure",
+  "cloudPlatform": "AZURE"
+}

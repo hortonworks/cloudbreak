@@ -73,6 +73,8 @@ periscope:
     cleanup-event-age.hours: 24
 
 cb:
+  enabledplatforms: AWS,AZURE,YARN,GCP,MOCK
+  enabledgovplatforms: AWS
   server:
     contextPath: "/cb"
   cm:

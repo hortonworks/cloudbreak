@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.conf;
+package com.sequenceiq.cloudbreak.common.cache;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

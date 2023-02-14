@@ -1,1 +1,4 @@
-{"name":"cluster-template-aws-ranger"}
+{
+  "name":"cluster-template-aws-ranger",
+  "cloudPlatform": "AWS"
+}

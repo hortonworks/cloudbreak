@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.UsedImagesListV4Response;
+import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.SupportedExternalDatabaseServiceEntryToSupportedExternalDatabaseServiceEntryResponseConverter;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -53,6 +54,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Inject
     private RepositoryConfigValidationService validationService;
+
+    @Inject
+    private ProviderPreferencesService providerPreferencesService;
 
     @Inject
     private PreferencesService preferencesService;
@@ -122,9 +126,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
                 .map(s -> supportedExternalDatabaseServiceEntryResponseConverter.convert(s))
                 .collect(Collectors.toSet());
         response.setSupportedExternalDatabases(supportedExternalDatabases);
-        response.setPlatformSelectionDisabled(preferencesService.isPlatformSelectionDisabled());
-        response.setPlatformEnablement(preferencesService.platformEnablement());
-        response.setGovPlatformEnablement(preferencesService.govPlatformEnablement());
+        response.setPlatformSelectionDisabled(providerPreferencesService.isPlatformSelectionDisabled());
+        response.setPlatformEnablement(providerPreferencesService.platformEnablement());
+        response.setGovPlatformEnablement(providerPreferencesService.govPlatformEnablement());
         return response;
     }
 

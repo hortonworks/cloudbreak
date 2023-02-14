@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +20,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
@@ -36,6 +40,12 @@ public class DefaulBlueprintCacheTest {
 
     @Mock
     private BlueprintEntities blueprintEntities;
+
+    @Mock
+    private ProviderPreferencesService providerPreferencesService;
+
+    @Mock
+    private CommonGovService commonGovService;
 
     @InjectMocks
     private DefaultBlueprintCache underTest;
@@ -57,13 +67,14 @@ public class DefaulBlueprintCacheTest {
 
     @Test
     public void testOnlyReleasedBps() throws IOException {
+
         // GIVEN
         Blueprint bp1 = new Blueprint();
         bp1.setName("bp1");
         bp1.setBlueprintText("txt");
         bp1.setStackName("stckn");
         bp1.setStackType("stckt");
-        bp1.setStackVersion("stckv");
+        bp1.setStackVersion("7.0.2");
         String bp1JsonString = "{\"inputs\":[],\"blueprint\":{\"Blueprints\":{\"blueprint_name\":\"bp1\"}}}";
         JsonNode bpText1 = JsonUtil.readTree(bp1JsonString);
         when(blueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText1);
@@ -73,13 +84,15 @@ public class DefaulBlueprintCacheTest {
         bp2.setBlueprintText("txt");
         bp2.setStackName("stckn");
         bp2.setStackType("stckt");
-        bp2.setStackVersion("stckv");
+        bp2.setStackVersion("7.0.2");
         String bp2JsonString = "{\"inputs\":[],\"blueprint\":{\"Blueprints\":{\"blueprint_name\":\"bp2\"}}}";
         JsonNode bpText2 = JsonUtil.readTree(bp2JsonString);
         when(blueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText2);
 
         when(blueprintUtils.isBlueprintNamePreConfigured(anyString(), any())).thenReturn(true);
-        when(blueprintEntities.getDefaults()).thenReturn(Map.of("7.0.2", "Description2=bp2;Description1=bp1"));
+        when(blueprintEntities.getDefaults()).thenReturn(Map.of("7.11.0", "Description2=bp2;Description1=bp1"));
+        when(providerPreferencesService.enabledGovPlatforms()).thenReturn(Set.of(CloudPlatform.AWS.name()));
+        when(providerPreferencesService.enabledPlatforms()).thenReturn(Set.of(CloudPlatform.AWS.name()));
 
         when(converter.convert(any(BlueprintV4Request.class))).thenAnswer(invocation -> {
             BlueprintV4Request request = invocation.getArgument(0);
@@ -101,13 +114,14 @@ public class DefaulBlueprintCacheTest {
 
     @Test
     public void testLoadBlueprintsFromFileWithUpgradeOptions() throws IOException {
+
         // GIVEN
         Blueprint bp1 = new Blueprint();
         bp1.setName("bp1");
         bp1.setBlueprintText("txt");
         bp1.setStackName("stckn");
         bp1.setStackType("stckt");
-        bp1.setStackVersion("stckv");
+        bp1.setStackVersion("7.2.10");
         String bp1JsonString = "{\"description\":\"7.2.10 - Data Engineering\",\"blueprint\":{\"cdhVersion\":\"7.2.10\",\"displayName\":\"dataengineering\","
                 + "\"blueprintUpgradeOption\":\"DISABLED\"}}";
         JsonNode bpText1 = JsonUtil.readTree(bp1JsonString);

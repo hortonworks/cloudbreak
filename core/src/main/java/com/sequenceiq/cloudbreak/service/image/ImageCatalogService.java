@@ -54,6 +54,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
+import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -64,7 +66,6 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
-import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -113,7 +114,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     private UserProfileHandler userProfileHandler;
 
     @Inject
-    private PreferencesService preferencesService;
+    private ProviderPreferencesService preferencesService;
 
     @Inject
     private StackImageFilterService stackImageFilterService;
@@ -583,7 +584,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 .collect(Collectors.toSet())
                 .stream()
                 .filter(requestedPlatform -> preferencesService.enabledGovPlatforms().stream()
-                        .filter(enabledPlatform -> enabledPlatform.equalsIgnoreCase(requestedPlatform.nameToLowerCase().replace("_gov", "")))
+                        .filter(enabledPlatform -> enabledPlatform
+                                .equalsIgnoreCase(requestedPlatform.nameToLowerCase()
+                                .replace(CommonGovService.GOV, "")))
                         .collect(Collectors.toSet()).isEmpty())
                 .collect(Collectors.toSet())
                 .stream()

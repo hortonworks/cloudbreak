@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.account;
+package com.sequenceiq.cloudbreak.common.provider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -41,7 +41,7 @@ class PreferencesServiceTest {
     private CloudConstant cloudConstantAzure;
 
     @InjectMocks
-    private PreferencesService victim;
+    private ProviderPreferencesService victim;
 
     @BeforeEach
     void initTest() {
@@ -64,7 +64,7 @@ class PreferencesServiceTest {
 
     @Test
     void enabledPlatformsShouldBeEmpty() {
-        Field enabledGovPlatformsField = ReflectionUtils.findField(PreferencesService.class, "enabledGovPlatforms");
+        Field enabledGovPlatformsField = ReflectionUtils.findField(ProviderPreferencesService.class, "enabledGovPlatforms");
         ReflectionUtils.makeAccessible(enabledGovPlatformsField);
         ReflectionUtils.setField(enabledGovPlatformsField, victim, PLATFORM_AWS);
 
@@ -76,7 +76,7 @@ class PreferencesServiceTest {
 
     @Test
     void enabledPlatformsShouldComeFromProperty() {
-        Field enabledGovPlatformsField = ReflectionUtils.findField(PreferencesService.class, "enabledPlatforms");
+        Field enabledGovPlatformsField = ReflectionUtils.findField(ProviderPreferencesService.class, "enabledPlatforms");
         ReflectionUtils.makeAccessible(enabledGovPlatformsField);
         ReflectionUtils.setField(enabledGovPlatformsField, victim, PLATFORM_AWS + "," + PLATFORM_GCP);
 

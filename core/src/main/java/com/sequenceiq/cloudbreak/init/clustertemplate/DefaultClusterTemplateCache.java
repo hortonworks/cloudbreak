@@ -28,8 +28,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -71,6 +74,12 @@ public class DefaultClusterTemplateCache {
     @Inject
     private DefaultClusterTemplateV4RequestToClusterTemplateConverter defaultClusterTemplateV4RequestToClusterTemplateConverter;
 
+    @Inject
+    private ProviderPreferencesService preferencesService;
+
+    @Inject
+    private CommonGovService commonGovService;
+
     @PostConstruct
     public void loadClusterTemplatesFromFile() {
         if (clusterTemplates.stream().anyMatch(StringUtils::isNotEmpty)) {
@@ -105,12 +114,18 @@ public class DefaultClusterTemplateCache {
     }
 
     private void loadByClasspathPath(Collection<String> names) {
+        Set<String> enabledPlatforms = preferencesService.enabledPlatforms();
+        Set<String> enabledGovPlatforms = preferencesService.enabledGovPlatforms();
         names.stream()
                 .filter(StringUtils::isNotBlank)
                 .forEach(clusterTemplateName -> {
                     try {
                         String templateAsString = readFileFromClasspath(clusterTemplateName);
-                        convertToClusterTemplate(templateAsString);
+                        addClusterTemplateToDefaultClusterTemplates(
+                                clusterTemplateName,
+                                templateAsString,
+                                enabledPlatforms,
+                                enabledGovPlatforms);
                         LOGGER.debug("Default clustertemplate is loaded into cache by resource file: {}", clusterTemplateName);
                     } catch (IOException e) {
                         String msg = "Could not load cluster template: " + clusterTemplateName;
@@ -122,12 +137,65 @@ public class DefaultClusterTemplateCache {
                 });
     }
 
-    private void convertToClusterTemplate(String templateAsString) throws IOException {
+    private void addClusterTemplateToDefaultClusterTemplates(String clusterTemplateName, String templateAsString,
+        Set<String> enabledPlatforms, Set<String> enabledGovPlatforms) throws IOException {
         DefaultClusterTemplateV4Request clusterTemplateRequest = new Json(templateAsString).get(DefaultClusterTemplateV4Request.class);
-        if (defaultClusterTemplates.get(clusterTemplateRequest.getName()) != null) {
-            LOGGER.warn("Default cluster template exists and it will be override: {}", clusterTemplateRequest.getName());
+        boolean useIt = doUseIt(clusterTemplateName, clusterTemplateRequest, enabledPlatforms, enabledGovPlatforms);
+        if (useIt) {
+            if (defaultClusterTemplates.get(clusterTemplateRequest.getName()) != null) {
+                LOGGER.warn("Default cluster template exists and it will be override: {}", clusterTemplateRequest.getName());
+            }
+            defaultClusterTemplates.put(
+                    clusterTemplateRequest.getName(),
+                    Base64.getEncoder().encodeToString(templateAsString.getBytes()));
         }
-        defaultClusterTemplates.put(clusterTemplateRequest.getName(), Base64.getEncoder().encodeToString(templateAsString.getBytes()));
+    }
+
+    private boolean doUseIt(String clusterTemplateName, DefaultClusterTemplateV4Request clusterTemplateRequest,
+        Set<String> enabledPlatforms, Set<String> enabledGovPlatforms) {
+        boolean useIt = true;
+        String aws = CloudPlatform.AWS.name();
+        boolean awsGovTemplate = clusterTemplateName.contains(CommonGovService.GOV);
+        boolean awsGovEnabledOnDeployment = enabledGovPlatforms.contains(aws);
+        boolean awsCommercialEnabledOnDeployment = enabledPlatforms.contains(aws);
+        boolean localDeployment = awsGovEnabledOnDeployment && awsCommercialEnabledOnDeployment;
+        boolean govCloudDeployment = commonGovService.govCloudDeployment(enabledGovPlatforms, enabledPlatforms);
+        if (isAwsTemplate(clusterTemplateRequest, aws)) {
+            // the template version is AWS
+            if (isLocalDeploymentAndGovTemplate(awsGovTemplate, localDeployment)) {
+                // in case of local deployment we dont need to load gov templates
+                useIt = false;
+            } else if (!localDeployment) {
+                if (isCommercialDeploymentAndGovAWSTemplate(awsGovTemplate, awsCommercialEnabledOnDeployment)) {
+                    // NOT a Gov deployment we dont need to load gov templates
+                    useIt = false;
+                }
+                if (isGovDeploymentAndCommercialAWSTemplate(awsGovTemplate, awsGovEnabledOnDeployment)) {
+                    // Gov deployment so no need to load commercial aws templates
+                    useIt = false;
+                }
+            }
+        } else if (govCloudDeployment) {
+            // this is a gov deployment no need to load any other template just gov templates
+            useIt = false;
+        }
+        return useIt;
+    }
+
+    private static boolean isAwsTemplate(DefaultClusterTemplateV4Request clusterTemplateRequest, String aws) {
+        return clusterTemplateRequest.getCloudPlatform().equals(aws);
+    }
+
+    private static boolean isLocalDeploymentAndGovTemplate(boolean awsGovTemplate, boolean localDeployment) {
+        return localDeployment && awsGovTemplate;
+    }
+
+    private static boolean isCommercialDeploymentAndGovAWSTemplate(boolean awsGovTemplate, boolean awsEnabled) {
+        return awsGovTemplate && awsEnabled;
+    }
+
+    private static boolean isGovDeploymentAndCommercialAWSTemplate(boolean awsGovTemplate, boolean awsGovEnabled) {
+        return !awsGovTemplate && awsGovEnabled;
     }
 
     public Map<String, String> defaultClusterTemplateRequests() {

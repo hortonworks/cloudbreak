@@ -25,10 +25,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageProvider;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
@@ -58,7 +58,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     private ImageCatalogRepository imageCatalogRepository;
 
     @Mock
-    private PreferencesService preferencesService;
+    private ProviderPreferencesService preferencesService;
 
     @Mock
     private User user;

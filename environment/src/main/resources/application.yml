@@ -141,6 +141,8 @@ environment:
       enabled: false
 
 cb:
+  enabledplatforms: AWS,AZURE,YARN,GCP,MOCK
+  enabledgovplatforms: AWS
   authentication:
     disabled: false
   intermediate.threadpool:

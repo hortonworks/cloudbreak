@@ -107,6 +107,7 @@ vault:
       login.role: "cloudbreak.default"
 
 cb:
+  enabledgovplatforms: AWS
   enabledplatforms: AZURE,AWS,GCP
   platform.default.rootVolumeSize:
     AWS: 100

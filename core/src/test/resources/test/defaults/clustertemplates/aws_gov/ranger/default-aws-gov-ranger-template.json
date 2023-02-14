@@ -1,0 +1,4 @@
+{
+  "name":"cluster-template-aws-gov-ranger",
+  "cloudPlatform": "AWS"
+}
