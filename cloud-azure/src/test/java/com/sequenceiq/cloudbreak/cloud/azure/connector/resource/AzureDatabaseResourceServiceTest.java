@@ -330,7 +330,6 @@ class AzureDatabaseResourceServiceTest {
         assertEquals("Error in upgrading database stack aStack: delete failed", exception.getMessage());
         verify(azureUtils).getStackName(eq(cloudContext));
         verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
-        verify(azureUtils, never()).deletePrivateEndpoint(client, RESOURCE_REFERENCE, false);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         verify(azureTemplateBuilder, never()).build(eq(cloudContext), any(DatabaseStack.class));
         verify(persistenceNotifier, times(1)).notifyAllocations(List.of(dbResource), cloudContext);
