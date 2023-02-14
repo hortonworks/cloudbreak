@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -142,6 +143,22 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(awsNetwork.getNetworkCidr(), actual.getNetworkCidr());
         assertEquals(awsNetwork.getResourceCrn(), actual.getResourceCrn());
         assertEquals(awsNetwork.getVpcId(), actual.getAws().getVpcId());
+    }
+
+    @Test
+    void testConvertToDtoShouldLeaveExistingDeploymetRestrictionsIntact() {
+        AwsNetwork awsNetwork = createAwsNetwork();
+        Set<DeploymentRestriction> liftie = Set.of(DeploymentRestriction.LIFTIE);
+        awsNetwork.setSubnetMetas(awsNetwork.getSubnetMetas().entrySet().stream()
+                .peek(e -> e.getValue().setDeploymentRestrictions(liftie))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+        NetworkDto actual = underTest.convertToDto(awsNetwork);
+
+        assertTrue(actual.getSubnetMetas().containsKey(SUBNET_1));
+        assertTrue(actual.getSubnetMetas().containsKey(SUBNET_2));
+        assertTrue(actual.getSubnetMetas().containsKey(SUBNET_3));
+        assertThat(actual.getSubnetMetas().values()).allMatch(subnet -> liftie.equals(subnet.getDeploymentRestrictions()));
     }
 
     @Test

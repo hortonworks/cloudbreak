@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -69,17 +70,23 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
                 .withNetworkId(source.getNetworkId())
                 .withPublicEndpointAccessGateway(source.getPublicEndpointAccessGateway())
                 .withLoadBalancerCreation(source.getLoadBalancerCreation())
-                .withEndpointGatewaySubnetMetas(source.getEndpointGatewaySubnetMetas());
+                .withEndpointGatewaySubnetMetas(setDefaultDeploymentRestrictionsForEndpointAccessGateway(source.getEndpointGatewaySubnetMetas()));
 
         convertSubnets(source, builder);
 
         return setProviderSpecificFields(builder, source);
     }
 
+    /**
+     * Provides on the fly deployment restrictions categorization for environments created earlier, where the DeploymentRestrictions is not set
+     * @param subnetMetas subnet metadata of the environment
+     * @return updated subnet metadata with deployment restrictions
+     */
     private Map<String, CloudSubnet> setDefaultDeploymentRestrictions(Map<String, CloudSubnet> subnetMetas) {
-        subnetMetas.forEach((name, cloudSubnet) ->
-                cloudSubnet.setDeploymentRestrictions(cloudSubnet.isPrivateSubnet()
-                        ? getDeploymentRestrictionForPrivateSubnet(cloudSubnet.getType())
+        subnetMetas.entrySet().stream()
+                .filter(m -> CollectionUtils.isEmpty(m.getValue().getDeploymentRestrictions()))
+                .forEach(m -> m.getValue().setDeploymentRestrictions(m.getValue().isPrivateSubnet()
+                        ? getDeploymentRestrictionForPrivateSubnet(m.getValue().getType())
                         : DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS));
         return subnetMetas;
     }
@@ -88,6 +95,13 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())
                 ? DeploymentRestriction.ALL
                 : DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS;
+    }
+
+    private Map<String, CloudSubnet> setDefaultDeploymentRestrictionsForEndpointAccessGateway(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
+        endpointGatewaySubnetMetas.entrySet().stream()
+                .filter(m -> CollectionUtils.isEmpty(m.getValue().getDeploymentRestrictions()))
+                .forEach(m -> m.getValue().setDeploymentRestrictions(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS));
+        return endpointGatewaySubnetMetas;
     }
 
     Set<String> getNetworkCidrs(BaseNetwork source) {
