@@ -30,6 +30,8 @@ import com.sequenceiq.common.api.type.InstanceGroupName;
 @ExtendWith(MockitoExtension.class)
 class OrderedOSUpgradeRequestProviderTest {
 
+    private static final String TARGET_IMAGE_ID = "target-image-id";
+
     @InjectMocks
     private OrderedOSUpgradeRequestProvider underTest;
 
@@ -55,8 +57,9 @@ class OrderedOSUpgradeRequestProviderTest {
         )));
         instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(AUXILIARY, 0))));
 
-        OrderedOSUpgradeSetRequest actual = underTest.createMediumDutyOrderedOSUpgradeSetRequest(createStackV4Response(instanceGroups));
+        OrderedOSUpgradeSetRequest actual = underTest.createMediumDutyOrderedOSUpgradeSetRequest(createStackV4Response(instanceGroups), TARGET_IMAGE_ID);
 
+        assertEquals(TARGET_IMAGE_ID, actual.getImageId());
         assertEquals(0, actual.getOrderedOsUpgradeSets().get(0).getOrder());
         assertEquals(1, actual.getOrderedOsUpgradeSets().get(1).getOrder());
         assertEquals(2, actual.getOrderedOsUpgradeSets().get(2).getOrder());
@@ -92,7 +95,7 @@ class OrderedOSUpgradeRequestProviderTest {
         instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(AUXILIARY, 0))));
 
         Exception exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.createMediumDutyOrderedOSUpgradeSetRequest(createStackV4Response(instanceGroups)));
+                () -> underTest.createMediumDutyOrderedOSUpgradeSetRequest(createStackV4Response(instanceGroups), TARGET_IMAGE_ID));
 
         assertEquals("The following instances are missing from the ordered OS upgrade request: [i-gateway2]", exception.getMessage());
     }
@@ -118,7 +121,8 @@ class OrderedOSUpgradeRequestProviderTest {
         )));
         instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(AUXILIARY, 0))));
 
-        assertThrows(CloudbreakServiceException.class, () -> underTest.createMediumDutyOrderedOSUpgradeSetRequest(createStackV4Response(instanceGroups)));
+        assertThrows(CloudbreakServiceException.class,
+                () -> underTest.createMediumDutyOrderedOSUpgradeSetRequest(createStackV4Response(instanceGroups), TARGET_IMAGE_ID));
     }
 
     private InstanceGroupV4Response createInstanceGroup(Set<InstanceMetaDataV4Response> instanceMetaDataV4Responses) {
