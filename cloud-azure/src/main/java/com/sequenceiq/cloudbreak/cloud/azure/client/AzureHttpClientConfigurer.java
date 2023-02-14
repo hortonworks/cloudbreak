@@ -16,12 +16,16 @@ import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.resourcemanager.marketplaceordering.MarketplaceOrderingManager;
 import com.azure.resourcemanager.resources.fluentcore.arm.AzureConfigurable;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.okhttp3.OkHttpMetricsEventListener;
 import okhttp3.Dispatcher;
 import okhttp3.JavaNetAuthenticator;
 import okhttp3.OkHttpClient;
 
 @Component
 public class AzureHttpClientConfigurer {
+
+    private static final String AZURE_METRIC_NAME_PREFIX = "azure";
 
     private final HttpLogDetailLevel logLevel;
 
@@ -32,12 +36,14 @@ public class AzureHttpClientConfigurer {
     @Inject
     public AzureHttpClientConfigurer(
             @Value("${cb.azure.loglevel:BASIC}") HttpLogDetailLevel logLevel,
-            @Qualifier("azureClientThreadPool") ExecutorService mdcCopyingThreadPoolExecutor) {
+            @Qualifier("azureClientThreadPool") ExecutorService mdcCopyingThreadPoolExecutor,
+            MeterRegistry meterRegistry) {
         this.logLevel = logLevel;
         this.mdcCopyingThreadPoolExecutor = mdcCopyingThreadPoolExecutor;
         okHttpClient = new OkHttpClient.Builder()
                 .proxyAuthenticator(new JavaNetAuthenticator())
                 .dispatcher(new Dispatcher(mdcCopyingThreadPoolExecutor))
+                .eventListener(OkHttpMetricsEventListener.builder(meterRegistry, AZURE_METRIC_NAME_PREFIX).uriMapper(new AzureUrlMetricTagMapper()).build())
                 .build();
     }
 
