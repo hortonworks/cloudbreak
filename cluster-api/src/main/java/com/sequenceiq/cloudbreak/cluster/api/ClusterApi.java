@@ -149,6 +149,10 @@ public interface ClusterApi {
         clusterSecurityService().rotateHostCertificates(sshUser, sshKeyPair, subAltName);
     }
 
+    default void hostsStartRoles(List<String> hosts) {
+        clusterModificationService().hostsStartRoles(hosts);
+    }
+
     default ClusterStatus getStatus(boolean blueprintPresent) {
         return clusterStatusService().getStatus(blueprintPresent).getClusterStatus();
     }
