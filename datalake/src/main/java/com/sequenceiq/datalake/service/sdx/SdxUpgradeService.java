@@ -138,14 +138,14 @@ public class SdxUpgradeService {
         }
     }
 
-    public void upgradeOs(Long id, boolean rollingUpgradeEnabled, boolean keepVariant) {
+    public void upgradeOs(Long id, String targetImageId, boolean rollingUpgradeEnabled, boolean keepVariant) {
         SdxCluster cluster = sdxService.getById(id);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", cluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> callOsUpgrade(cluster, initiatorUserCrn, rollingUpgradeEnabled, keepVariant));
+                    () -> callOsUpgrade(cluster, initiatorUserCrn, targetImageId, rollingUpgradeEnabled, keepVariant));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
@@ -154,18 +154,18 @@ public class SdxUpgradeService {
         }
     }
 
-    private FlowIdentifier callOsUpgrade(SdxCluster cluster, String initiatorUserCrn, boolean rollingUpgradeEnabled, boolean keepVariant) {
+    private FlowIdentifier callOsUpgrade(SdxCluster cluster, String initiatorUserCrn, String targetImageId, boolean rollingUpgradeEnabled, boolean keepVariant) {
         if (rollingUpgradeEnabled && SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape())) {
-            OrderedOSUpgradeSetRequest request = createOrderedOSUpgradeSetRequest(cluster);
+            OrderedOSUpgradeSetRequest request = createOrderedOSUpgradeSetRequest(cluster, targetImageId);
             return stackV4Endpoint.upgradeOsByUpgradeSetsInternal(0L, cluster.getCrn(), request);
         } else {
             return stackV4Endpoint.upgradeOsInternal(0L, cluster.getClusterName(), initiatorUserCrn, keepVariant);
         }
     }
 
-    private OrderedOSUpgradeSetRequest createOrderedOSUpgradeSetRequest(SdxCluster cluster) {
+    private OrderedOSUpgradeSetRequest createOrderedOSUpgradeSetRequest(SdxCluster cluster, String targetImageId) {
         StackV4Response stackV4Response = retrieveStack(cluster);
-        return orderedOSUpgradeRequestProvider.createMediumDutyOrderedOSUpgradeSetRequest(stackV4Response);
+        return orderedOSUpgradeRequestProvider.createMediumDutyOrderedOSUpgradeSetRequest(stackV4Response, targetImageId);
     }
 
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {

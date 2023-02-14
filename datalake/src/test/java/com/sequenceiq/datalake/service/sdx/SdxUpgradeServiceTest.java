@@ -49,6 +49,8 @@ public class SdxUpgradeServiceTest {
 
     private static final String INTERNAL_USER_CRN = "crn:cdp:datahub:us-west-1:altus:user:__internal__actor__";
 
+    private static final String TARGET_IMAGE_ID = "target-image-id";
+
     @InjectMocks
     private SdxUpgradeService underTest;
 
@@ -184,7 +186,7 @@ public class SdxUpgradeServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.upgradeOsInternal(any(), any(), any(), any())).thenReturn(flowIdentifier);
 
-        underTest.upgradeOs(STACK_ID, false, true);
+        underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, false, true);
 
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", sdxCluster);
         verify(stackV4Endpoint).upgradeOsInternal(any(), any(), any(), any());
@@ -201,10 +203,11 @@ public class SdxUpgradeServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
-        when(orderedOSUpgradeRequestProvider.createMediumDutyOrderedOSUpgradeSetRequest(stackV4Response)).thenReturn(orderedOSUpgradeSetRequest);
+        when(orderedOSUpgradeRequestProvider.createMediumDutyOrderedOSUpgradeSetRequest(stackV4Response, TARGET_IMAGE_ID))
+                .thenReturn(orderedOSUpgradeSetRequest);
         when(stackV4Endpoint.upgradeOsByUpgradeSetsInternal(0L, sdxCluster.getCrn(), orderedOSUpgradeSetRequest)).thenReturn(flowIdentifier);
 
-        underTest.upgradeOs(STACK_ID, true, true);
+        underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, true, true);
 
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", sdxCluster);
         verify(stackV4Endpoint).get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString());
@@ -221,7 +224,7 @@ public class SdxUpgradeServiceTest {
         when(stackV4Endpoint.upgradeOsInternal(any(), any(), any(), any())).thenThrow(exception);
         when(exceptionMessageExtractor.getErrorMessage(exception)).thenReturn(exception.getMessage());
 
-        assertThrows(CloudbreakApiException.class, () -> underTest.upgradeOs(STACK_ID, false, true));
+        assertThrows(CloudbreakApiException.class, () -> underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, false, true));
 
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", sdxCluster);
         verify(stackV4Endpoint).upgradeOsInternal(any(), any(), any(), any());
