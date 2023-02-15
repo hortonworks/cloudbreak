@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
@@ -141,9 +140,6 @@ class StackStatusIntegrationTest {
 
     @MockBean
     private StackViewService stackViewService;
-
-    @MockBean
-    private Clock clock;
 
     @Mock
     private ClusterStatusService clusterStatusService;
