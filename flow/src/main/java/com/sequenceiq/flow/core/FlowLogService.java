@@ -64,8 +64,6 @@ public interface FlowLogService {
 
     Optional<FlowLog> getLastFlowLog(Long resourceId);
 
-    Optional<FlowLog> getLastFlowLogWithEndTime(Long resourceId);
-
     boolean isFlowConfigAlreadyRunning(Long id, Class<? extends FlowConfiguration<?>> flowConfiguration);
 
     List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id);
