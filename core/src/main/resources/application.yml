@@ -48,10 +48,9 @@ spring:
   datasource:
     maxActive: 30
   jpa:
-    show-sql: false
     properties:
       hibernate:
-        format_sql: false
+        generate_statistics: true
         jdbc:
           batch_size: 400
         order_inserts: true

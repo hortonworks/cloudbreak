@@ -70,9 +70,6 @@ cert:
   ignorePreValidation: false
 
 spring:
-  cloud:
-    consul:
-      host: consul.service.consul
   freemarker:
     template-loader-path: classpath:/
     prefer-file-system-access: false
