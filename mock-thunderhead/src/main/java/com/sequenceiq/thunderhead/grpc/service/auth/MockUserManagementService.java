@@ -3,6 +3,7 @@ package com.sequenceiq.thunderhead.grpc.service.auth;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.AWS_GP3_ROOT_VOLUME_AS_DEFAULT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
@@ -592,6 +593,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.cost.calculation.enable}")
     private boolean costCalculationEnabled;
 
+    @Value("${auth.mock.aws.gp3.enable}")
+    private boolean awsGp3DiskSupportEnabled;
+
     @Value("${auth.mock.enforce.aws.native.single.az.enabled}")
     private boolean enforceAwsNativeForSingleAzEnabled;
 
@@ -1076,6 +1080,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (costCalculationEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_COST_CALCULATION));
+        }
+        if (awsGp3DiskSupportEnabled) {
+            builder.addEntitlements(createEntitlement(AWS_GP3_ROOT_VOLUME_AS_DEFAULT));
         }
         if (enforceAwsNativeForSingleAzEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA));

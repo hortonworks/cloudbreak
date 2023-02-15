@@ -120,10 +120,9 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<DiskType, DisplayName> diskDisplayName() {
         Map<DiskType, DisplayName> map = new HashMap<>();
-        map.put(diskType(AwsDiskType.Standard.value()), displayName(AwsDiskType.Standard.displayName()));
-        map.put(diskType(AwsDiskType.Gp2.value()), displayName(AwsDiskType.Gp2.displayName()));
-        map.put(diskType(AwsDiskType.Ephemeral.value()), displayName(AwsDiskType.Ephemeral.displayName()));
-        map.put(diskType(AwsDiskType.St1.value()), displayName(AwsDiskType.St1.displayName()));
+        for (AwsDiskType awsDiskType : AwsDiskType.values()) {
+            map.put(diskType(awsDiskType.value()), displayName(awsDiskType.displayName()));
+        }
         return map;
     }
 
@@ -131,6 +130,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         Map<String, VolumeParameterType> map = new HashMap<>();
         map.put(AwsDiskType.Standard.value(), VolumeParameterType.MAGNETIC);
         map.put(AwsDiskType.Gp2.value(), VolumeParameterType.SSD);
+        map.put(AwsDiskType.Gp3.value(), VolumeParameterType.SSD);
         map.put(AwsDiskType.Ephemeral.value(), VolumeParameterType.EPHEMERAL);
         map.put(AwsDiskType.St1.value(), VolumeParameterType.ST1);
         return map;

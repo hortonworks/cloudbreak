@@ -169,6 +169,12 @@ class AwsVolumeResourceBuilderTest {
     @Mock
     private VolumeResourceCollector volumeResourceCollector;
 
+    @Mock
+    private AwsVolumeIopsCalculator awsVolumeIopsCalculator;
+
+    @Mock
+    private AwsVolumeThroughputCalculator awsVolumeThroughputCalculator;
+
     @Spy
     private AwsMethodExecutor awsMethodExecutor;
 
