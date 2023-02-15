@@ -12,10 +12,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeThroughputCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -48,9 +52,19 @@ public class VolumeBuilderUtilTest {
     @Mock
     private Image image;
 
+    @Mock
+    private AwsVolumeIopsCalculator awsVolumeIopsCalculator;
+
+    @Mock
+    private AwsVolumeThroughputCalculator awsVolumeThroughputCalculator;
+
+    @Mock
+    private EntitlementService entitlementService;
+
     @Test
     public void testGetRootVolume() {
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
+        when(ac.getCloudCredential()).thenReturn(new CloudCredential());
         software.amazon.awssdk.services.ec2.model.Image ecImage = software.amazon.awssdk.services.ec2.model.Image.builder().build();
         when(amazonEc2Client.describeImages(any())).thenReturn(DescribeImagesResponse.builder().images(ecImage).build());
         when(cloudStack.getImage()).thenReturn(image);
@@ -125,7 +139,7 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.isKmsCustom()).thenReturn(true);
         when(awsInstanceView.getKmsKey()).thenReturn("kmsKey");
 
-        EbsBlockDevice actual = underTest.getEbs(awsInstanceView, group);
+        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group, null);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertTrue(actual.encrypted());
         Assertions.assertEquals("gp2", actual.volumeType().toString());
@@ -139,7 +153,7 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.isEncryptedVolumes()).thenReturn(false);
         when(awsInstanceView.isKmsCustom()).thenReturn(false);
 
-        EbsBlockDevice actual = underTest.getEbs(awsInstanceView, group);
+        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group, null);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertNull(actual.encrypted());
         Assertions.assertEquals("gp2", actual.volumeType().toString());

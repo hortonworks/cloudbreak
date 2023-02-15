@@ -102,4 +102,10 @@ public class AwsInstanceView {
         return HUNDRED_PERCENT - Objects.requireNonNullElse(getSpotPercentage(), 0);
     }
 
+    @Override
+    public String toString() {
+        return "AwsInstanceView{" +
+                "instanceTemplate=" + instanceTemplate +
+                '}';
+    }
 }
