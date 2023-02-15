@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto;
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.MinaSshdService;
+import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.PublicKey;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmException;
 import com.sequenceiq.cloudbreak.ccmimpl.altus.config.MinaSshdManagementClientConfig;
@@ -166,6 +167,34 @@ public class GrpcMinaSshdManagementClient {
     }
 
     /**
+     * Wraps call to getSshTunnelingKey, with retries to tolerate transient failures.
+     *
+     * @param requestId         the request ID for the request
+     * @param actorCrn          the actor CRN
+     * @param minaSshdServiceId the minasshd service ID
+     * @param keyId             the key ID
+     * @return the response containing the key pair
+     * @throws CcmException         if an exception occurs
+     * @throws InterruptedException if the action is interrupted
+     */
+    public PublicKey getSshTunnelingKey(
+            String requestId, String actorCrn, String minaSshdServiceId, String keyId) throws CcmException, InterruptedException {
+        MinaSshdManagementClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+
+        ZonedDateTime waitUntilTime = ZonedDateTime.now(clock).plus(minaSshdManagementClientConfig.getTimeoutMs(), ChronoUnit.MILLIS);
+        int pollingIntervalMillis = minaSshdManagementClientConfig.getPollingIntervalMs();
+
+        String actionDescription = "get tunneling key with ID " + keyId;
+        Supplier<CcmException> timeoutExceptionSupplier = () -> new CcmException(String.format("Timed out while trying to %s", actionDescription), true);
+
+        return RetryUtil.performWithRetries(
+                () -> client.getSshTunnelingKey(requestId, minaSshdServiceId, keyId), actionDescription,
+                waitUntilTime, pollingIntervalMillis,
+                CcmException.class, timeoutExceptionSupplier,
+                LOGGER);
+    }
+
+    /**
      * Wraps call to generateAndRegisterSshTunnelingKeyPair, with retries to tolerate transient failures.
      *
      * @param requestId         the request ID for the request
@@ -189,6 +218,35 @@ public class GrpcMinaSshdManagementClient {
 
         return RetryUtil.performWithRetries(
                 () -> client.generateAndRegisterSshTunnelingKeyPair(requestId, accountId, minaSshdServiceId, keyId), actionDescription,
+                waitUntilTime, pollingIntervalMillis,
+                CcmException.class, timeoutExceptionSupplier,
+                LOGGER);
+    }
+
+    /**
+     * Wraps call to RegisterSshTunnelingKey, with retries to tolerate transient failures.
+     *
+     * @param requestId         the request ID for the request
+     * @param actorCrn          the actor CRN
+     * @param accountId         the account ID
+     * @param minaSshdServiceId the minasshd service ID
+     * @param keyId             the key ID
+     * @param publicKey         the public key
+     * @throws CcmException         if an exception occurs
+     * @throws InterruptedException if the action is interrupted
+     */
+    public MinaSshdManagementProto.RegisterSshTunnelingKeyResponse registerSshTunnelingKey(String requestId, String actorCrn, String accountId,
+            String minaSshdServiceId, String keyId, PublicKey publicKey) throws CcmException, InterruptedException {
+        MinaSshdManagementClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+
+        ZonedDateTime waitUntilTime = ZonedDateTime.now(clock).plus(minaSshdManagementClientConfig.getTimeoutMs(), ChronoUnit.MILLIS);
+        int pollingIntervalMillis = minaSshdManagementClientConfig.getPollingIntervalMs();
+
+        String actionDescription = "register tunneling key pair for accountId " + accountId;
+        Supplier<CcmException> timeoutExceptionSupplier = () -> new CcmException(String.format("Timed out while trying to %s", actionDescription), true);
+
+        return RetryUtil.performWithRetries(
+                () -> client.registerSshTunnelingKey(requestId, accountId, minaSshdServiceId, keyId, publicKey), actionDescription,
                 waitUntilTime, pollingIntervalMillis,
                 CcmException.class, timeoutExceptionSupplier,
                 LOGGER);

@@ -1,21 +1,33 @@
 package com.sequenceiq.datalake.service.sdx.attach;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
+import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 
 @Component
 public class SdxAttachDetachUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxAttachDetachUtils.class);
+
+    @Value("${sdx.stack.re_register_cluster_proxy_config.sleeptime_sec:2}")
+    private int reRegisterClusterProxyConfigSleepTimeInSec;
+
+    @Value("${sdx.stack.re_register_cluster_proxy_config.duration_min:10}")
+    private int reRegisterClusterProxyConfigDurationTimeInMin;
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
@@ -25,6 +37,9 @@ public class SdxAttachDetachUtils {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private CloudbreakPoller cloudbreakPoller;
 
     public void updateClusterNameAndCrn(SdxCluster sdxCluster, String newName, String newCrn) {
         sdxCluster.setClusterName(newName);
@@ -65,5 +80,22 @@ public class SdxAttachDetachUtils {
                     }
                 }
         );
+    }
+
+    public void reRegisterClusterProxyConfig(SdxCluster cluster, String originalCrn) {
+        LOGGER.info("Attempting to re-register the cluster proxy config for SDX cluster with ID: {}", cluster.getId());
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        FlowIdentifier flowId = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> stackV4Endpoint.reRegisterClusterProxyConfig(0L, cluster.getCrn(), originalCrn, initiatorUserCrn)
+        );
+        PollingConfig pollingConfig = new PollingConfig(
+                reRegisterClusterProxyConfigSleepTimeInSec, TimeUnit.SECONDS,
+                reRegisterClusterProxyConfigDurationTimeInMin, TimeUnit.MINUTES
+        ).withStopPollingIfExceptionOccurred(Boolean.TRUE);
+        cloudbreakPoller.pollFlowStateByFlowIdUntilComplete(
+                "re-register cluster proxy config", flowId.getPollableId(), cluster.getId(), pollingConfig
+        );
+        LOGGER.info("Finished re-register of cluster proxy config for SDX cluster with ID: {}", cluster.getId());
     }
 }

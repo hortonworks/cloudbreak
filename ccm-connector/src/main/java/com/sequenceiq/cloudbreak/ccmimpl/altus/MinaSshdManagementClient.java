@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,12 @@ import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementPro
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairResponse;
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesRequest;
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesResponse;
+import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysRequest;
+import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysResponse;
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.MinaSshdService;
+import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.PublicKey;
+import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyRequest;
+import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyResponse;
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyRequest;
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyResponse;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmException;
@@ -143,6 +149,53 @@ public class MinaSshdManagementClient {
     }
 
     /**
+     * Wraps call to listSshTunnelingKeys and returns the key for the given keyId.
+     *
+     * @param requestId         the request ID for the request
+     * @param minaSshdServiceId the minasshd service ID
+     * @param keyId             the key ID
+     * @throws CcmException if an exception occurs
+     */
+    public PublicKey getSshTunnelingKey(String requestId, String minaSshdServiceId, String keyId) throws CcmException {
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(minaSshdServiceId);
+        checkNotNull(keyId);
+
+        MinaSshdManagementBlockingStub blockingStub = newStub(requestId);
+        ListSshTunnelingKeysRequest.Builder requestBuilder = ListSshTunnelingKeysRequest.newBuilder()
+                .setMinaSshdServiceId(minaSshdServiceId)
+                .setPageSize(minaSshdManagementClientConfig.getListMinaSshdServicesPageSize());
+
+        ListSshTunnelingKeysResponse response;
+        LOGGER.debug("Beginning search for SSH tunneling key with ID: {}", keyId);
+        do {
+            try {
+                LOGGER.debug("Calling listSshTunnelingKeys with requestId: {}", requestId);
+                response = blockingStub.listSshTunnelingKeys(requestBuilder.build());
+                if (response == null || response.getPublicKeyList().isEmpty()) {
+                    throw new CcmException("Got null response from MinaSshdManagementService listSshTunnelingKeys gRPC call", false);
+                } else {
+                    List<PublicKey> presentPublicKeys = response.getPublicKeyList();
+                    Optional<PublicKey> targetKey = presentPublicKeys.stream().filter(key -> key.getKeyId().equals(keyId)).findFirst();
+                    if (targetKey.isPresent()) {
+                        return targetKey.get();
+                    }
+                }
+            } catch (StatusRuntimeException e) {
+                String message = "MinaSshdManagementService listSshTunnelingKeys gRPC call failed: " + e.getMessage();
+                Status status = e.getStatus();
+                Status.Code code = status.getCode();
+                boolean retryable = GrpcUtil.isRetryable(code);
+                LOGGER.debug("Got status code: {}, retryable: {}", code, retryable);
+                throw new CcmException(message, e, retryable);
+            }
+            requestBuilder.setPageToken(response.getNextPageToken());
+        } while (response.hasNextPageToken());
+
+        throw new CcmException("Could not find desired key from MinaSshdManagementService listMinaSshdServices gRPC command", false);
+    }
+
+    /**
      * Wraps call to generateAndRegisterSshTunnelingKeyPair.
      *
      * @param requestId         the request ID for the request
@@ -176,6 +229,50 @@ public class MinaSshdManagementClient {
             }
         } catch (StatusRuntimeException e) {
             String message = "MinaSshdManagementService generateAndRegisterSshTunnelingKeyPair gRPC call failed: " + e.getMessage();
+            Status status = e.getStatus();
+            Status.Code code = status.getCode();
+            boolean retryable = GrpcUtil.isRetryable(code);
+            LOGGER.debug("Got status code: {}, retryable: {}", code, retryable);
+            throw new CcmException(message, e, retryable);
+        }
+    }
+
+    /**
+     * Wraps call to registerSshTunnelingKey.
+     *
+     * @param requestId         the request ID for the request
+     * @param accountId         the account ID
+     * @param minaSshdServiceId the minasshd service ID
+     * @param keyId             the key ID
+     * @param publicKey         the public key
+     * @throws CcmException if an exception occurs
+     */
+    public RegisterSshTunnelingKeyResponse registerSshTunnelingKey(String requestId, String accountId, String minaSshdServiceId,
+            String keyId, PublicKey publicKey) throws CcmException {
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(accountId, "accountId should not be null.");
+        checkNotNull(minaSshdServiceId);
+        checkNotNull(keyId);
+        checkNotNull(publicKey);
+
+        MinaSshdManagementBlockingStub blockingStub = newStub(requestId);
+        RegisterSshTunnelingKeyRequest.Builder requestBuilder = RegisterSshTunnelingKeyRequest.newBuilder()
+                .setMinaSshdServiceId(minaSshdServiceId)
+                .setKeyId(keyId)
+                .setAccountId(accountId)
+                .setPublicKey(publicKey.getPublicKey())
+                .setPublicKeyAlgorithm(publicKey.getPublicKeyAlgorithm());
+
+        try {
+            LOGGER.debug("Calling registerSshTunnelingKey with requestId: {}, accountId: {}, minaSshdServiceId: {}",
+                    requestId, accountId, minaSshdServiceId);
+            RegisterSshTunnelingKeyResponse response = blockingStub.registerSshTunnelingKey(requestBuilder.build());
+            if (response == null) {
+                throw new CcmException("Got null response from MinaSshdManagementService registerSshTunnelingKey gRPC call", false);
+            }
+            return response;
+        } catch (StatusRuntimeException e) {
+            String message = "MinaSshdManagementService registerSshTunnelingKey gRPC call failed: " + e.getMessage();
             Status status = e.getStatus();
             Status.Code code = status.getCode();
             boolean retryable = GrpcUtil.isRetryable(code);
