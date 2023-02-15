@@ -59,39 +59,46 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-        if (entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
-            && source.getStackType().equals(StackType.DATALAKE)) {
-            return List.of(config(HADOOP_RPC_PROTECTION, "privacy"));
-        }
         return List.of();
     }
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> apiClusterTemplateConfigs = new ArrayList<>();
-        Optional<ApiClusterTemplateConfig> roleConfig = templateProcessor.getRoleConfig(CORE_SETTINGS, STORAGEOPERATIONS, CORE_DEFAULTFS);
-        if (roleConfig.isEmpty()) {
-            ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS)
-                    .ifPresent(location -> apiClusterTemplateConfigs.add(config(CORE_DEFAULTFS, location.getValue())));
+        if (isCoreSettingsNeededForHdfsNameNode(templateProcessor, source)) {
+            Optional<ApiClusterTemplateConfig> roleConfig = templateProcessor.getRoleConfig(CORE_SETTINGS, STORAGEOPERATIONS, CORE_DEFAULTFS);
+            if (roleConfig.isEmpty()) {
+                ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS)
+                        .ifPresent(location -> apiClusterTemplateConfigs.add(config(CORE_DEFAULTFS, location.getValue())));
+            }
+
+            StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
+            s3ConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);
+            adlsConfigProvider.populateServiceConfigs(source, hdfsCoreSiteSafetyValveValue, templateProcessor.getStackVersion());
+
+            hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD, "true"));
+
+            if (!hdfsCoreSiteSafetyValveValue.toString().isEmpty()) {
+                LOGGER.info("Adding '{}' to the cluster template config.", CORE_SITE_SAFETY_VALVE);
+                apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
+            }
         }
-
-        StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
-        s3ConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);
-        adlsConfigProvider.populateServiceConfigs(source, hdfsCoreSiteSafetyValveValue, templateProcessor.getStackVersion());
-
-        hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD, "true"));
-
-        if (!hdfsCoreSiteSafetyValveValue.toString().isEmpty()) {
-            LOGGER.info("Adding '{}' to the cluster template config.", CORE_SITE_SAFETY_VALVE);
-            apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
+        if (isSDXOptimizationNeeded(source)) {
+            apiClusterTemplateConfigs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
         }
 
         return apiClusterTemplateConfigs;
     }
 
+    private boolean isSDXOptimizationNeeded(TemplatePreparationObject source) {
+        return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && source.getStackType() != null
+                && source.getStackType().equals(StackType.DATALAKE);
+    }
+
     @Override
     public Map<String, ApiClusterTemplateService> getAdditionalServices(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        if (isConfigurationNeeded(cmTemplateProcessor, source)
+        if (isCoreSettingsNeededForHdfsNameNode(cmTemplateProcessor, source)
                 && cmTemplateProcessor.getServiceByType(CORE_SETTINGS).isEmpty()) {
             LOGGER.info("Adding '{}' as additional service.", CORE_SETTINGS);
             ApiClusterTemplateService coreSettings = createBaseCoreSettingsService(cmTemplateProcessor);
@@ -137,6 +144,10 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return isCoreSettingsNeededForHdfsNameNode(cmTemplateProcessor, source) || isSDXOptimizationNeeded(source);
+    }
+
+    private boolean isCoreSettingsNeededForHdfsNameNode(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return !cmTemplateProcessor.isRoleTypePresentInService(HDFS, Lists.newArrayList(NAMENODE))
                 && source.getFileSystemConfigurationView().isPresent()
                 && ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS).isPresent();

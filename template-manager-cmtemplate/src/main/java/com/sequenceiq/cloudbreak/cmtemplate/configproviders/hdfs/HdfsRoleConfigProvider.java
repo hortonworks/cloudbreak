@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_RPC_PROTECTION;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -32,10 +34,24 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String DFS_ENCRYPT_DATA_TRANSFER = "dfs_encrypt_data_transfer";
 
+    private static final String DFS_DATA_TRANSFER_PROTECTION = "dfs_data_transfer_protection";
+
     private final EntitlementService entitlementService;
 
     public HdfsRoleConfigProvider(EntitlementService entitlementService) {
         this.entitlementService = entitlementService;
+    }
+
+    public static boolean isNamenodeHA(TemplatePreparationObject source) {
+        return source.getHostGroupsWithComponent(HdfsRoles.NAMENODE)
+                .mapToInt(HostgroupView::getNodeCount)
+                .sum() > 1;
+    }
+
+    public static Set<String> nameNodeFQDNs(TemplatePreparationObject source) {
+        return source.getHostGroupsWithComponent(HdfsRoles.NAMENODE)
+                .flatMap(hostGroup -> hostGroup.getHosts().stream())
+                .collect(toSet());
     }
 
     @Override
@@ -46,16 +62,6 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 configs.add(
                         config(FAILED_VOLUMES_TOLERATED, NUM_FAILED_VOLUMES_TOLERATED.toString())
                 );
-                if (isSDXOptimizationEnabled(source) && isNamenodeHA(source)) {
-                    configs.add(
-                            config(DFS_REPLICATION, DFS_REPLICATION_VALUE.toString())
-                    );
-                }
-                if (isSDXOptimizationEnabled(source)) {
-                    configs.add(
-                            config(DFS_ENCRYPT_DATA_TRANSFER, "true")
-                    );
-                }
                 return configs;
             case HdfsRoles.NAMENODE:
                 if (isNamenodeHA(source)) {
@@ -81,9 +87,23 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
         }
     }
 
+    @Override
+    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
+        List<ApiClusterTemplateConfig> configs = new ArrayList<>();
+        if (isSDXOptimizationEnabled(source)) {
+            if (isNamenodeHA(source)) {
+                configs.add(config(DFS_REPLICATION, DFS_REPLICATION_VALUE.toString()));
+            }
+            configs.add(config(DFS_ENCRYPT_DATA_TRANSFER, "true"));
+            configs.add(config(DFS_DATA_TRANSFER_PROTECTION, "privacy"));
+            configs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
+        }
+        return configs;
+    }
+
     private boolean isSDXOptimizationEnabled(TemplatePreparationObject source) {
         return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                && null != source.getStackType()
+                && source.getStackType() != null
                 && source.getStackType().equals(StackType.DATALAKE);
     }
 
@@ -95,18 +115,6 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public List<String> getRoleTypes() {
         return List.of(HdfsRoles.NAMENODE, HdfsRoles.DATANODE, HdfsRoles.GATEWAY);
-    }
-
-    public static boolean isNamenodeHA(TemplatePreparationObject source) {
-        return source.getHostGroupsWithComponent(HdfsRoles.NAMENODE)
-                .mapToInt(HostgroupView::getNodeCount)
-                .sum() > 1;
-    }
-
-    public static Set<String> nameNodeFQDNs(TemplatePreparationObject source) {
-        return source.getHostGroupsWithComponent(HdfsRoles.NAMENODE)
-                .flatMap(hostGroup -> hostGroup.getHosts().stream())
-                .collect(toSet());
     }
 
 }

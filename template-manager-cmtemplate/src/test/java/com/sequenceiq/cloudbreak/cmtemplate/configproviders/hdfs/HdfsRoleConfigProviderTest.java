@@ -102,12 +102,42 @@ class HdfsRoleConfigProviderTest {
             Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(namenodeConfigs);
             assertEquals(NN_HA_PROPERTIES, configMap.keySet());
             assertEquals("true", configMap.get("autofailover_enabled").getValue());
-            assertEquals(List.of(
-                            config("dfs_datanode_failed_volumes_tolerated", "0"),
-                            config("dfs_replication", "2"),
-                            config("dfs_encrypt_data_transfer", "true")),
+            assertEquals(
+                    List.of(config("dfs_datanode_failed_volumes_tolerated", "0")),
                     roleConfigs.get("hdfs-DATANODE-BASE"));
 
+        });
+    }
+
+    @Test
+    void optimizedHDFSReplicaHAServiceConfig() {
+        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
+        HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
+        HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
+        String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/namenode-ha.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
+                .withStackType(StackType.DATALAKE)
+                .withHostgroupViews(Set.of(gateway, master, quorum, worker))
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .build();
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+
+            List<ApiClusterTemplateConfig> serviceConfigs = subject.getServiceConfigs(cmTemplateProcessor, preparationObject);
+
+            Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(serviceConfigs);
+            assertEquals(4, serviceConfigs.size());
+            assertEquals("dfs_replication", serviceConfigs.get(0).getName());
+            assertEquals("2", serviceConfigs.get(0).getValue());
+            assertEquals("dfs_encrypt_data_transfer", serviceConfigs.get(1).getName());
+            assertEquals("true", serviceConfigs.get(1).getValue());
+            assertEquals("dfs_data_transfer_protection", serviceConfigs.get(2).getName());
+            assertEquals("privacy", serviceConfigs.get(2).getValue());
+            assertEquals("hadoop_rpc_protection", serviceConfigs.get(3).getName());
+            assertEquals("privacy", serviceConfigs.get(3).getValue());
         });
     }
 
@@ -134,10 +164,7 @@ class HdfsRoleConfigProviderTest {
             Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(namenodeConfigs);
             assertEquals(NN_HA_PROPERTIES, configMap.keySet());
             assertEquals("true", configMap.get("autofailover_enabled").getValue());
-            assertEquals(List.of(
-                            config("dfs_datanode_failed_volumes_tolerated", "0"),
-                            config("dfs_replication", "2"),
-                            config("dfs_encrypt_data_transfer", "true")),
+            assertEquals(List.of(config("dfs_datanode_failed_volumes_tolerated", "0")),
                     roleConfigs.get("hdfs-DATANODE-BASE"));
 
         });
