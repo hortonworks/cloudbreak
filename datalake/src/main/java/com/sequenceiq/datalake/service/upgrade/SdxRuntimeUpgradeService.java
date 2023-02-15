@@ -174,7 +174,7 @@ public class SdxRuntimeUpgradeService {
     }
 
     private void validateRollingUpgrade(SdxUpgradeRequest request, SdxCluster cluster) {
-        if (Boolean.TRUE.equals(request.getRollingUpgradeEnabled()) && !SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape())) {
+        if (Boolean.TRUE.equals(request.getRollingUpgradeEnabled()) && !cluster.getClusterShape().isHA()) {
             String message = String.format("The rolling upgrade is not allowed for %s cluster shape. "
                     + "If you want to use rolling upgrade you need to launch a Data Lake with %s cluster shape.",
                     cluster.getClusterShape().name(), SdxClusterShape.MEDIUM_DUTY_HA.name());
