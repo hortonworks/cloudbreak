@@ -215,6 +215,14 @@ spring:
     prefer-file-system-access: false
   datasource:
     maxActive: 30
+  jpa:
+    properties:
+      hibernate:
+        generate_statistics: true
+        jdbc:
+          batch_size: 400
+        order_inserts: true
+        order_updates: true
   lifecycle:
     timeout-per-shutdown-phase: 60s
 

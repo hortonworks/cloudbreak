@@ -79,6 +79,14 @@ spring:
   freemarker:
     template-loader-path: file:/etc/redbeams,classpath:/
     prefer-file-system-access: false
+  jpa:
+    properties:
+      hibernate:
+        generate_statistics: true
+        jdbc:
+          batch_size: 400
+        order_inserts: true
+        order_updates: true
   lifecycle:
     timeout-per-shutdown-phase: 60s
 
