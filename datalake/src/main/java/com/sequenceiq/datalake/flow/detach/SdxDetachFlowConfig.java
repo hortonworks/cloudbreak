@@ -2,6 +2,9 @@ package com.sequenceiq.datalake.flow.detach;
 
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_ATTACH_NEW_CLUSTER_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_ATTACH_NEW_CLUSTER_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_FAILED_EVENT;
+import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_SUCCESS_WITH_EXTERNAL_DB_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_CLUSTER_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EXTERNAL_DB_FAILED_EVENT;
@@ -10,11 +13,14 @@ import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_FAIL
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_STACK_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_STACK_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_STACK_SUCCESS_WITH_CCMV1_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_STACK_SUCCESS_WITH_EXTERNAL_DB_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachState.SDX_ATTACH_NEW_CLUSTER_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachState.SDX_ATTACH_NEW_CLUSTER_STATE;
+import static com.sequenceiq.datalake.flow.detach.SdxDetachState.SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_FAILED_STATE;
+import static com.sequenceiq.datalake.flow.detach.SdxDetachState.SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_STATE;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachState.SDX_DETACH_CLUSTER_STATE;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachState.SDX_DETACH_EXTERNAL_DB_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachState.SDX_DETACH_EXTERNAL_DB_STATE;
@@ -42,6 +48,11 @@ public class SdxDetachFlowConfig extends AbstractFlowConfiguration<SdxDetachStat
             .from(SDX_DETACH_CLUSTER_STATE).to(SDX_DETACH_STACK_STATE)
             .event(SDX_DETACH_CLUSTER_SUCCESS_EVENT).defaultFailureEvent()
 
+            .from(SDX_DETACH_STACK_STATE).to(SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_STATE)
+            .event(SDX_DETACH_STACK_SUCCESS_WITH_CCMV1_EVENT)
+            .failureState(SDX_DETACH_STACK_FAILED_STATE)
+            .failureEvent(SDX_DETACH_STACK_FAILED_EVENT)
+
             .from(SDX_DETACH_STACK_STATE).to(SDX_DETACH_EXTERNAL_DB_STATE)
             .event(SDX_DETACH_STACK_SUCCESS_WITH_EXTERNAL_DB_EVENT)
             .failureState(SDX_DETACH_STACK_FAILED_STATE)
@@ -53,6 +64,19 @@ public class SdxDetachFlowConfig extends AbstractFlowConfiguration<SdxDetachStat
             .failureEvent(SDX_DETACH_STACK_FAILED_EVENT)
 
             .from(SDX_DETACH_STACK_FAILED_STATE).to(SDX_DETACH_FAILED_STATE)
+            .event(SDX_DETACH_FAILED_EVENT).defaultFailureEvent()
+
+            .from(SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_STATE).to(SDX_DETACH_EXTERNAL_DB_STATE)
+            .event(SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_SUCCESS_WITH_EXTERNAL_DB_EVENT)
+            .failureState(SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_FAILED_STATE)
+            .failureEvent(SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_FAILED_EVENT)
+
+            .from(SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_STATE).to(SDX_ATTACH_NEW_CLUSTER_STATE)
+            .event(SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_SUCCESS_EVENT)
+            .failureState(SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_FAILED_STATE)
+            .failureEvent(SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_FAILED_EVENT)
+
+            .from(SDX_DETACH_CCMV1_CLUSTER_PROXY_MAPPING_FAILED_STATE).to(SDX_DETACH_FAILED_STATE)
             .event(SDX_DETACH_FAILED_EVENT).defaultFailureEvent()
 
             .from(SDX_DETACH_EXTERNAL_DB_STATE).to(SDX_ATTACH_NEW_CLUSTER_STATE)

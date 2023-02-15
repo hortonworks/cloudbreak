@@ -81,6 +81,12 @@ public class SdxDetachService {
         LOGGER.info("Finished detaching stack of SDX cluster with ID: {}.", cluster.getId());
     }
 
+    public void detachCCMv1ClusterProxyMapping(SdxCluster cluster) {
+            LOGGER.info("Started detaching CCMv1 cluster proxy mapping of SDX cluster with ID: {}.", cluster.getId());
+            sdxAttachDetachUtils.reRegisterClusterProxyConfig(cluster, cluster.getOriginalCrn());
+            LOGGER.info("Finished detaching CCMv1 cluster proxy mapping of SDX cluster with ID: {}.", cluster.getId());
+    }
+
     /**
      * Can throw the following exceptions:
      *      - NotFoundException : If the database is not found for the cluster CRN and environment CRN.
