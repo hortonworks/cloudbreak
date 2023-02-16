@@ -20,16 +20,14 @@ validate-ums-users() {
 
 prepare-cb-profile() {
     echo "Replacing UMS_HOST in profile file"
-    sed '/export UMS_HOST/d' ./integcb/Profile > ./integcb/Profile.tmp1
-    sed '/export UMS_PORT/d' ./integcb/Profile > ./integcb/Profile.tmp1
-    sed '/export CB_JAVA_OPTS/d' ./integcb/Profile.tmp1 > ./integcb/Profile.tmp
-    mv ./integcb/Profile.tmp ./integcb/Profile
+    sed -i '/export UMS_HOST/d' ./integcb/Profile
+    sed -i '/export UMS_PORT/d' ./integcb/Profile
 }
 
 update-cb-profile() {
     echo "export UMS_HOST=$INTEGRATIONTEST_UMS_HOST" >> integcb/Profile
     echo "export UMS_PORT=$INTEGRATIONTEST_UMS_PORT" >> integcb/Profile
-    echo 'export CB_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5 -Drest.debug=true -Dmock.spi.endpoint=https://test:9443"' >> integcb/Profile
+    sed -i '/^export CB_JAVA_OPTS/ s/.$/ -Daltus.ums.rights.cache.seconds.ttl=5 -Drest.debug=true -Dmock.spi.endpoint=https\:\/\/test\:9443\/"/' integcb/Profile
     echo 'export REDBEAMS_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"' >> integcb/Profile
     echo 'export DATALAKE_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"' >> integcb/Profile
     echo 'export FREEIPA_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"' >> integcb/Profile

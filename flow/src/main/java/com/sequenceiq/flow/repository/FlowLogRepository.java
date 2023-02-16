@@ -90,6 +90,8 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
 
     Optional<FlowLog> findFirstByResourceIdOrderByCreatedDesc(@Param("resourceId") Long resourceId);
 
+    Optional<FlowLog> findFirstByResourceIdAndEndTimeNotNullOrderByCreatedDesc(@Param("resourceId") Long resourceId);
+
     List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long resourceId);
 
     List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId);
