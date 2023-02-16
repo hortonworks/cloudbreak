@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouder
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -188,7 +189,8 @@ public class SdxUpgradeServiceTest {
 
         underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, false, true);
 
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", sdxCluster);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS,
+                ResourceEvent.DATALAKE_OS_UPGRADE_STARTED, "OS upgrade started", sdxCluster);
         verify(stackV4Endpoint).upgradeOsInternal(any(), any(), any(), any());
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
     }
@@ -209,7 +211,8 @@ public class SdxUpgradeServiceTest {
 
         underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, true, true);
 
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", sdxCluster);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS,
+                ResourceEvent.DATALAKE_ROLLING_OS_UPGRADE_STARTED, "Rolling OS upgrade started", sdxCluster);
         verify(stackV4Endpoint).get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString());
         verify(stackV4Endpoint).upgradeOsByUpgradeSetsInternal(0L, sdxCluster.getCrn(), orderedOSUpgradeSetRequest);
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
@@ -226,7 +229,8 @@ public class SdxUpgradeServiceTest {
 
         assertThrows(CloudbreakApiException.class, () -> underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, false, true));
 
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", sdxCluster);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS,
+                ResourceEvent.DATALAKE_OS_UPGRADE_STARTED, "OS upgrade started", sdxCluster);
         verify(stackV4Endpoint).upgradeOsInternal(any(), any(), any(), any());
         verify(exceptionMessageExtractor).getErrorMessage(exception);
     }
