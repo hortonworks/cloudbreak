@@ -471,7 +471,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void callUpgradeCdhCommand(ClouderaManagerProduct cdhProduct, ClustersResourceApi clustersResourceApi, boolean rollingUpgradeEnabled)
             throws ApiException, CloudbreakException {
-        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_UPGRADE);
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
+                rollingUpgradeEnabled ? ResourceEvent.CLUSTER_UPGRADE_START_ROLLING_UPGRADE : ResourceEvent.CLUSTER_UPGRADE_START_UPGRADE);
         clouderaManagerUpgradeService.callUpgradeCdhCommand(cdhProduct.getVersion(), clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
     }
 

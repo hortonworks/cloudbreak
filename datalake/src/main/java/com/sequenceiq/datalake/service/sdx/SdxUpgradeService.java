@@ -1,5 +1,12 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_OS_UPGRADE_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ROLLING_OS_UPGRADE_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ROLLING_UPGRADE_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE_STARTED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -21,7 +28,6 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
-import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -68,13 +74,13 @@ public class SdxUpgradeService {
         StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();
         stackImageChangeRequest.setImageId(targetImageId);
         stackImageChangeRequest.setImageCatalogName(upgradeOption.getUpgrade().getImageCatalogName());
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS, "Changing image", cluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(CHANGE_IMAGE_IN_PROGRESS, "Changing image", cluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->
-                    stackV4Endpoint.changeImageInternal(0L, cluster.getClusterName(), stackImageChangeRequest, initiatorUserCrn));
+                            stackV4Endpoint.changeImageInternal(0L, cluster.getClusterName(), stackImageChangeRequest, initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
@@ -85,13 +91,14 @@ public class SdxUpgradeService {
 
     public void upgradeRuntime(Long id, String imageId, boolean rollingUpgradeEnabled) {
         SdxCluster sdxCluster = sdxService.getById(id);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "Upgrading datalake stack", sdxCluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_IN_PROGRESS,
+                rollingUpgradeEnabled ? DATALAKE_ROLLING_UPGRADE_STARTED : DATALAKE_UPGRADE_STARTED, "Upgrading datalake runtime", sdxCluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->
-                    stackV4Endpoint.upgradeClusterByNameInternal(0L, sdxCluster.getClusterName(), imageId, initiatorUserCrn, rollingUpgradeEnabled));
+                            stackV4Endpoint.upgradeClusterByNameInternal(0L, sdxCluster.getClusterName(), imageId, initiatorUserCrn, rollingUpgradeEnabled));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
@@ -140,7 +147,7 @@ public class SdxUpgradeService {
 
     public void upgradeOs(Long id, String targetImageId, boolean rollingUpgradeEnabled, boolean keepVariant) {
         SdxCluster cluster = sdxService.getById(id);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", cluster);
+        sendOsUpgradeNotification(rollingUpgradeEnabled, cluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -166,6 +173,15 @@ public class SdxUpgradeService {
     private OrderedOSUpgradeSetRequest createOrderedOSUpgradeSetRequest(SdxCluster cluster, String targetImageId) {
         StackV4Response stackV4Response = retrieveStack(cluster);
         return orderedOSUpgradeRequestProvider.createMediumDutyOrderedOSUpgradeSetRequest(stackV4Response, targetImageId);
+    }
+
+    private void sendOsUpgradeNotification(boolean rollingUpgradeEnabled, SdxCluster cluster) {
+        if (rollingUpgradeEnabled) {
+            sdxStatusService.setStatusForDatalakeAndNotify(
+                    DATALAKE_UPGRADE_IN_PROGRESS, DATALAKE_ROLLING_OS_UPGRADE_STARTED, "Rolling OS upgrade started", cluster);
+        } else {
+            sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_IN_PROGRESS, DATALAKE_OS_UPGRADE_STARTED, "OS upgrade started", cluster);
+        }
     }
 
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {

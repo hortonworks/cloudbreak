@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FAIL
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FINISHED_NOVERSION;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_NOT_NEEDED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ROLLING_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE;
 
 import java.util.Optional;
@@ -44,8 +45,10 @@ public class ClusterUpgradeService {
     @Inject
     private StackUpdater stackUpdater;
 
-    public void initUpgradeCluster(long stackId, StatedImage targetImage) {
-        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_UPGRADE, targetImage.getImage().getUuid());
+    public void initUpgradeCluster(long stackId, StatedImage targetImage, boolean rollingUpgradeEnabled) {
+        String targetRuntime = targetImage.getImage().getStackDetails().getVersion();
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), rollingUpgradeEnabled ? DATALAKE_ROLLING_UPGRADE : DATALAKE_UPGRADE,
+                targetRuntime, targetImage.getImage().getUuid());
         clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_UPGRADE_STARTED, "Cluster upgrade has been started.");
     }
 

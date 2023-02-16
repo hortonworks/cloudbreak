@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.upgrade;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -148,18 +147,30 @@ public class SdxRuntimeUpgradeService {
     private SdxUpgradeResponse initSdxUpgrade(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request, SdxCluster cluster) {
         verifyPaywallAccess(userCrn, request);
         validateRollingUpgrade(request, cluster);
-        String imageId = determineImageId(request, upgradeCandidates);
+        String targetImageId = determineImageId(request, upgradeCandidates);
+        String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, targetImageId);
+        FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(request, cluster, targetImageId);
+        String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), List.of(targetCdhVersion, targetImageId));
+        return new SdxUpgradeResponse(message, flowIdentifier);
+    }
+
+    private static String getTargetCdhVersion(List<ImageInfoV4Response> upgradeCandidates, String targetImageId) {
+        return upgradeCandidates.stream().filter(image -> image.getImageId().equals(targetImageId)).findFirst()
+                .orElseThrow(() -> new BadRequestException(String.format("The %s image id is not present among the candidates", targetImageId)))
+                .getComponentVersions().getCdp();
+    }
+
+    private FlowIdentifier triggerDatalakeUpgradeFlow(SdxUpgradeRequest request, SdxCluster cluster, String imageId) {
         boolean skipBackup = request != null && Boolean.TRUE.equals(request.getSkipBackup());
         boolean skipValidation = request != null && Boolean.TRUE.equals(request.isSkipValidation());
         boolean skipAtlasMetadata = request != null && Boolean.TRUE.equals(request.isSkipAtlasMetadata());
         boolean skipRangerAudits = request != null && Boolean.TRUE.equals(request.isSkipRangerAudits());
         boolean skipRangerMetadata = request != null && Boolean.TRUE.equals(request.isSkipRangerMetadata());
         boolean rollingUpgradeEnabled = request != null && Boolean.TRUE.equals(request.getRollingUpgradeEnabled());
+        boolean keepVariant = request != null && Boolean.TRUE.equals(request.isKeepVariant());
         DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata);
-        FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster, shouldReplaceVmsAfterUpgrade(request), skipBackup, skipOptions,
-                rollingUpgradeEnabled, request.isKeepVariant());
-        String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), Collections.singletonList(imageId));
-        return new SdxUpgradeResponse(message, flowIdentifier);
+        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster, imageId, shouldReplaceVmsAfterUpgrade(request), skipBackup, skipOptions,
+                rollingUpgradeEnabled, keepVariant);
     }
 
     private void validateRollingUpgrade(SdxUpgradeRequest request, SdxCluster cluster) {
@@ -180,7 +191,8 @@ public class SdxRuntimeUpgradeService {
         verifyPaywallAccess(userCrn, request);
         String imageId = determineImageId(request, upgradeCandidates);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRuntimeUpgradePreparationFlow(cluster, imageId, skipBackup);
-        String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE_PREPARATION.getMessage(), Collections.singletonList(imageId));
+        String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, imageId);
+        String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE_PREPARATION.getMessage(), List.of(targetCdhVersion, imageId));
         return new SdxUpgradeResponse(message, flowIdentifier);
     }
 
@@ -198,12 +210,6 @@ public class SdxRuntimeUpgradeService {
         LOGGER.info("Verify if the CM license is valid to authenticate to {}", paywallUrl);
         JsonCMLicense license = clouderaManagerLicenseProvider.getLicense(userCrn);
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
-    }
-
-    private FlowIdentifier triggerDatalakeUpgradeFlow(String imageId, SdxCluster cluster, SdxUpgradeReplaceVms replaceVms,
-            boolean skipBackup, DatalakeDrSkipOptions skipOptions, boolean rollingUpgradeEnabled, boolean keepVariant) {
-        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster, imageId, replaceVms, skipBackup, skipOptions, rollingUpgradeEnabled,
-                keepVariant);
     }
 
     private String determineImageId(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates) {
