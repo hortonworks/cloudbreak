@@ -9,6 +9,9 @@ import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.stream.Collectors.toSet;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -24,6 +27,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -41,6 +45,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
@@ -67,6 +72,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowLog;
 
 @DisallowConcurrentExecution
 @Component
@@ -125,6 +131,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private ServiceStatusCheckerLogLocationDecorator serviceStatusCheckerLogLocationDecorator;
 
+    @Inject
+    private Clock clock;
+
+    @Value("${cb.statuschecker.skip.window.minutes:2}")
+    private Integer skipWindow;
+
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
         return Optional.ofNullable(stackDtoService.getStackViewById(getStackId()));
@@ -132,8 +144,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
-        if (flowLogService.isOtherFlowRunning(getStackId())) {
-            LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for stack: {}", getStackId());
+        if (shouldSkipStatusCheck()) {
+            LOGGER.info("Status check skipped for stack {}", getStackId());
             return;
         }
         try {
@@ -164,6 +176,26 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         } catch (Exception e) {
             LOGGER.info("Exception during cluster state check.", e);
         }
+    }
+
+    private boolean shouldSkipStatusCheck() {
+        if (flowLogService.isOtherFlowRunning(getStackId())) {
+            LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for stack: {}", getStackId());
+            return true;
+        }
+        Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLogWithEndTime(getStackId());
+        if (lastFlowLog.isPresent()) {
+            FlowLog flowLog = lastFlowLog.get();
+            Instant skipTimeInstant = clock.nowMinus(Duration.ofMinutes(skipWindow));
+            Instant lastFlowLogEndTimeInstant = Instant.ofEpochMilli(flowLog.getEndTime());
+            if (lastFlowLogEndTimeInstant.isAfter(skipTimeInstant)) {
+                LOGGER.debug("StackStatusCheckerJob skipped, because the last flow log was finished for stack {}. Skip window is {} minutes. " +
+                                "Last flow log endtime in UTC: {}. Skip time in UTC: {}.", getStackId(), skipWindow,
+                        lastFlowLogEndTimeInstant.atZone(ZoneOffset.UTC), skipTimeInstant.atZone(ZoneOffset.UTC));
+                return true;
+            }
+        }
+        return false;
     }
 
     private void switchToShortSyncIfNecessary(JobExecutionContext context, StackDto stackDto) {
