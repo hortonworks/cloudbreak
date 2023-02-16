@@ -101,6 +101,7 @@ public class StructuredSynchronizerJobService implements JobSchedulerService {
     protected Trigger buildJobTrigger(JobDetail jobDetail) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Checking datalake status Trigger")
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
@@ -113,6 +114,7 @@ public class StructuredSynchronizerJobService implements JobSchedulerService {
     protected Trigger buildJobTriggerWithDelay(JobDetail jobDetail) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Checking datalake status Trigger")
                 .startAt(delayedStart())

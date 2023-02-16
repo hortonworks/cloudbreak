@@ -94,6 +94,7 @@ public class ExistingStackPatcherJobService implements JobSchedulerService {
     private Trigger buildJobTrigger(JobDetail jobDetail, ExistingStackPatchService existingStackPatchService) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Trigger for existing stack patch " + existingStackPatchService.getStackPatchType().name())
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()

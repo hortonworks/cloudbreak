@@ -103,6 +103,7 @@ public class NodeStatusJobService implements JobSchedulerService {
     private Trigger buildJobTrigger(JobDetail jobDetail, int delayedInSeconds) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Checking nodestatus Trigger")
                 .startAt(delayedStart(delayedInSeconds))

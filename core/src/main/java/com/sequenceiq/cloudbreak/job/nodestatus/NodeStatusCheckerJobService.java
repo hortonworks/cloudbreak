@@ -112,6 +112,7 @@ public class NodeStatusCheckerJobService implements JobSchedulerService {
     private Trigger buildJobTrigger(JobDetail jobDetail, int delayInSeconds) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Checking nodestatus Trigger")
                 .startAt(delayedStart(delayInSeconds))

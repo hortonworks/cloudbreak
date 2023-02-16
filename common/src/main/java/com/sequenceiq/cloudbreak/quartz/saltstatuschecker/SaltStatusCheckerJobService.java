@@ -78,6 +78,7 @@ public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?
     private Trigger buildJobTrigger(JobDetail jobDetail) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Trigger for stack salt status checker job")
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()

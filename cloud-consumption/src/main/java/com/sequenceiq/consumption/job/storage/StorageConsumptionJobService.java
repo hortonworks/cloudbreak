@@ -190,6 +190,7 @@ public class StorageConsumptionJobService implements JobSchedulerService {
     private Trigger buildJobTrigger(JobDetail jobDetail) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Trigger for getting storage usage")
                 .startAt(delayedFirstStart())

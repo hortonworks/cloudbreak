@@ -105,6 +105,7 @@ public class ArchiveInstanceMetaDataJobService implements JobSchedulerService {
     private Trigger buildJobTrigger(JobDetail jobDetail) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Trigger archiving InstanceMetaData for existing stack")
                 .startAt(delayedFirstStart())

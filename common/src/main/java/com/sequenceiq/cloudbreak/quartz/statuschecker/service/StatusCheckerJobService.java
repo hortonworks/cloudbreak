@@ -158,6 +158,7 @@ public class StatusCheckerJobService implements JobSchedulerService {
     private Trigger buildJobTrigger(JobDetail jobDetail, JobResource jobResource, int delayInSeconds, int intervalInSeconds) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription(String.format("Checking %s status trigger", getResourceTypeFromCrnIfAvailable(jobResource)))
                 .startAt(delayedStart(delayInSeconds))
