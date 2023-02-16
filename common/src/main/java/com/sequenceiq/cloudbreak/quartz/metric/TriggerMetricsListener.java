@@ -61,6 +61,6 @@ public class TriggerMetricsListener extends TriggerListenerSupport {
                 triggerKey.getGroup(), triggerKey.getName(), triggerInstructionCode);
         metricServices.forEach(metricService -> metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_COMPLETED,
                 TRIGGER_GROUP.name(), triggerKey.getGroup(),
-                PROVIDER.name(), QuartzMetricUtil.getProvider(trigger.getJobDataMap())));
+                PROVIDER.name(), QuartzMetricUtil.getProvider(context.getJobDetail().getJobDataMap())));
     }
 }
