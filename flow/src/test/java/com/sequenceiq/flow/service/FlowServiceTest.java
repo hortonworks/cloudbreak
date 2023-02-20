@@ -35,9 +35,11 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.converter.ClassValueConverter;
 import com.sequenceiq.flow.converter.FlowLogConverter;
 import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
@@ -226,6 +228,95 @@ public class FlowServiceTest {
     }
 
     @Test
+    void testGetLatestKnownFlowCheckResponseWithAllFieldsFilledByFlowChain() {
+        FlowLogWithoutPayload latestFlowLog = mock(FlowLogWithoutPayload.class);
+        lenient().when(latestFlowLog.getCurrentState()).thenReturn("CURRENT_STATE_FIRST");
+        lenient().when(latestFlowLog.getNextEvent()).thenReturn("NEXT_EVENT_FIRST");
+        ClassValueConverter classValueConverter = new ClassValueConverter();
+        ClassValue classValue = classValueConverter.convertToEntityAttribute("FLOW_TYPE_FIRST");
+        lenient().when(latestFlowLog.getFlowType()).thenReturn(classValue);
+
+        FlowLogWithoutPayload secondToLatestFlowLog = mock(FlowLogWithoutPayload.class);
+        lenient().when(secondToLatestFlowLog.getCurrentState()).thenReturn("CURRENT_STATE_SECOND");
+        lenient().when(secondToLatestFlowLog.getNextEvent()).thenReturn("NEXT_EVENT_SECOND");
+        ClassValueConverter classValueConverterSecond = new ClassValueConverter();
+        ClassValue classValueSecond = classValueConverterSecond.convertToEntityAttribute("FLOW_TYPE_SECOND");
+        lenient().when(secondToLatestFlowLog.getFlowType()).thenReturn(classValueSecond);
+
+        setUpFlowChain(flowChainLog(), false, List.of(latestFlowLog, secondToLatestFlowLog));
+        FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
+
+        Assertions.assertEquals("CURRENT_STATE_FIRST", flowCheckResponse.getCurrentState());
+        Assertions.assertEquals("NEXT_EVENT_FIRST", flowCheckResponse.getNextEvent());
+        Assertions.assertEquals("FLOW_TYPE_FIRST", flowCheckResponse.getFlowType());
+    }
+
+    @Test
+    void testGetLatestKnownFlowCheckResponseWithAllFieldsFilledByFlow() {
+        FlowLogWithoutPayload latestFlowLog = mock(FlowLogWithoutPayload.class);
+        lenient().when(latestFlowLog.getCurrentState()).thenReturn("CURRENT_STATE_FIRST");
+        lenient().when(latestFlowLog.getNextEvent()).thenReturn("NEXT_EVENT_FIRST");
+        ClassValueConverter classValueConverter = new ClassValueConverter();
+        ClassValue classValue = classValueConverter.convertToEntityAttribute("FLOW_TYPE_FIRST");
+        lenient().when(latestFlowLog.getFlowType()).thenReturn(classValue);
+
+        FlowLogWithoutPayload secondToLatestFlowLog = mock(FlowLogWithoutPayload.class);
+        lenient().when(secondToLatestFlowLog.getCurrentState()).thenReturn("CURRENT_STATE_SECOND");
+        lenient().when(secondToLatestFlowLog.getNextEvent()).thenReturn("NEXT_EVENT_SECOND");
+        ClassValueConverter classValueConverterSecond = new ClassValueConverter();
+        ClassValue classValueSecond = classValueConverterSecond.convertToEntityAttribute("FLOW_TYPE_SECOND");
+        lenient().when(secondToLatestFlowLog.getFlowType()).thenReturn(classValueSecond);
+
+        setUpFlow(FLOW_ID, List.of(latestFlowLog, secondToLatestFlowLog));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+
+        Assertions.assertEquals("CURRENT_STATE_FIRST", flowCheckResponse.getCurrentState());
+        Assertions.assertEquals("NEXT_EVENT_FIRST", flowCheckResponse.getNextEvent());
+        Assertions.assertEquals("FLOW_TYPE_FIRST", flowCheckResponse.getFlowType());
+    }
+
+    @Test
+    void testGetLatestKnownFlowCheckResponseWithFlowTypeNullByFlow() {
+        setUpFlow(FLOW_ID, List.of(
+                pendingFlowLog(INTERMEDIATE_STATE, NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")
+        ));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+        Assertions.assertEquals(INTERMEDIATE_STATE, flowCheckResponse.getCurrentState());
+        Assertions.assertEquals(NEXT_EVENT, flowCheckResponse.getNextEvent());
+        Assertions.assertNull(flowCheckResponse.getFlowType());
+    }
+
+    @Test
+    void testGetLatestKnownFlowCheckResponseWithNextEventAndFlowTypeNullByFlow() {
+        setUpFlow(FLOW_ID, List.of(
+                pendingFlowLog(INTERMEDIATE_STATE, NO_NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")
+        ));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+        Assertions.assertEquals(INTERMEDIATE_STATE, flowCheckResponse.getCurrentState());
+        Assertions.assertEquals(NO_NEXT_EVENT, flowCheckResponse.getNextEvent());
+        Assertions.assertNull(flowCheckResponse.getNextEvent());
+        Assertions.assertNull(flowCheckResponse.getFlowType());
+    }
+
+    @Test
+    void testGetLatestKnownFlowCheckResponseWithNoFlowRunningByFlow() {
+        setUpFlow(FLOW_ID, List.of(
+                flowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")
+        ));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+        Assertions.assertNull(flowCheckResponse.getCurrentState());
+        Assertions.assertNull(flowCheckResponse.getNextEvent());
+        Assertions.assertNull(flowCheckResponse.getFlowType());
+    }
+
+    @Test
     void testCompletedFlowChain() {
         setUpFlowChain(flowChainLog(), false, List.of(
                 flowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 3, "123"),
@@ -330,6 +421,30 @@ public class FlowServiceTest {
         Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
     }
 
+    @Test
+    void testGetLatestKnownFlowCheckResponseWithNextEventValueWByFlowChain() {
+        setUpFlowChain(flowChainLog(), false, List.of(
+                pendingFlowLog(INTERMEDIATE_STATE, FAIL_HANDLED_NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
+        Assertions.assertEquals(INTERMEDIATE_STATE, flowCheckResponse.getCurrentState());
+        Assertions.assertEquals(FAIL_HANDLED_NEXT_EVENT, flowCheckResponse.getNextEvent());
+    }
+
+    @Test
+    void testGetLatestKnownFlowCheckResponseWithNextEventNullByFlowChain() {
+        setUpFlowChain(flowChainLog(), false, List.of(
+                pendingFlowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 3, "123"),
+                flowLog(INTERMEDIATE_STATE, FAIL_HANDLED_NEXT_EVENT, 2, "123"),
+                flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123")));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
+        Assertions.assertEquals(FlowConstants.FINISHED_STATE, flowCheckResponse.getCurrentState());
+        Assertions.assertEquals(NO_NEXT_EVENT, flowCheckResponse.getNextEvent());
+        Assertions.assertNull(flowCheckResponse.getNextEvent());
+    }
+
     private void setUpFlow(String flowId, List<FlowLogWithoutPayload> flowLogs) {
         when(flowLogDBService.findAllWithoutPayloadByFlowIdOrderByCreatedDesc(flowId)).thenReturn(flowLogs);
         lenient().when(flowChainLogService.hasEventInFlowChainQueue(List.of())).thenReturn(false);
@@ -400,7 +515,7 @@ public class FlowServiceTest {
 
     @Test
     void testCompletedFlowChainEndTime() {
-        List<FlowLogWithoutPayload> relatedFlowLogs =  List.of(
+        List<FlowLogWithoutPayload> relatedFlowLogs = List.of(
                 flowLog(FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 3, "123"),
                 flowLog(INTERMEDIATE_STATE, NEXT_EVENT, 2, "123", 3L),
                 flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1, "123", 2L));

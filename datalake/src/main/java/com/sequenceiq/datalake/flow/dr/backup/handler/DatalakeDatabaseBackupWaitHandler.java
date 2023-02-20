@@ -55,7 +55,7 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
         String userId = request.getUserId();
         Selectable response;
         try {
-            LOGGER.info("Start polling datalake database backup  for id: {}", sdxId);
+            LOGGER.info("Start polling datalake database backup for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             sdxBackupRestoreService.waitCloudbreakFlow(sdxId, pollingConfig, "Database backup");
             response = new DatalakeFullBackupInProgressEvent(sdxId, userId, request.getOperationId());
@@ -68,8 +68,9 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
             LOGGER.info("Database backup poller stopped for cluster: {}", sdxId);
             sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),
                     SdxOperationStatus.FAILED, pollerStoppedException.getLocalizedMessage());
+            String errorStage = sdxBackupRestoreService.createDatabaseBackupRestoreErrorStage(sdxId);
             response = new DatalakeDatabaseBackupFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Database backup timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Database backup timed out after " + durationInMinutes + " minutes" + errorStage));
         } catch (PollerException exception) {
             LOGGER.info("Database backup polling failed for cluster: {}", sdxId);
             sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),

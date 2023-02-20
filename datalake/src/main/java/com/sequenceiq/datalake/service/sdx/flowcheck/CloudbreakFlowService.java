@@ -68,8 +68,37 @@ public class CloudbreakFlowService {
             LOGGER.error("Flow chain id or resource {} not found in CB: {}, so there is no active flow!", sdxCluster.getClusterName(), e.getMessage());
             return FlowState.UNKNOWN;
         } catch (Exception e) {
-            LOGGER.error("Exception occured during checking if there is a flow for cluster {} in CB: {}", sdxCluster.getClusterName(), e.getMessage());
+            LOGGER.error("Exception occurred during checking if there is a flow for cluster {} in CB: {}", sdxCluster.getClusterName(), e.getMessage());
             return FlowState.UNKNOWN;
+        }
+    }
+
+    public FlowCheckResponse getLastKnownFlowCheckResponse(SdxCluster sdxCluster) {
+        LOGGER.info("Starting to get the last known flow check response.");
+        try {
+            if (sdxCluster.getLastCbFlowChainId() != null) {
+                LOGGER.info("Checking cloudbreak {} {} to get flow check response", FlowType.FLOW_CHAIN, sdxCluster.getLastCbFlowChainId());
+                FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()));
+                return flowCheckResponse;
+            } else if (sdxCluster.getLastCbFlowId() != null) {
+                String flowId = sdxCluster.getLastCbFlowId();
+                LOGGER.info("Checking cloudbreak {} {} to get flow check response", FlowType.FLOW, flowId);
+                FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> flowEndpoint.hasFlowRunningByFlowId(flowId)
+                );
+                return flowCheckResponse;
+            }
+            LOGGER.info("No flow chain ID or flow ID has been found.");
+            return null;
+        } catch (NotFoundException e) {
+            LOGGER.error("Flow chain id or resource {} not found in CB: {}, so there is no active flow!", sdxCluster.getClusterName(), e.getMessage());
+            return null;
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred during checking if there is a flow for cluster {} in CB: {}", sdxCluster.getClusterName(), e.getMessage());
+            return null;
         }
     }
 
