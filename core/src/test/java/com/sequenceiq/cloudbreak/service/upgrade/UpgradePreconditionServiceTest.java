@@ -51,7 +51,7 @@ public class UpgradePreconditionServiceTest {
         StackDtoDelegate dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-2", BlueprintUpgradeOption.GA, ResourceStatus.DEFAULT);
         List<StackDtoDelegate> datahubs = List.of(dataHubStack1, dataHubStack2, dataHubStack3);
 
-        String actualRunning = underTest.checkForRunningAttachedClusters(datahubs, null, ACCOUNT_ID);
+        String actualRunning = underTest.checkForRunningAttachedClusters(datahubs, null, false, ACCOUNT_ID);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
 
         assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.",
@@ -71,13 +71,49 @@ public class UpgradePreconditionServiceTest {
         StackDtoDelegate dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-2", BlueprintUpgradeOption.GA, ResourceStatus.DEFAULT);
         List<StackDtoDelegate> datahubs = List.of(dataHubStack1, dataHubStack2, dataHubStack3);
 
-        String actual = underTest.checkForRunningAttachedClusters(datahubs, null, ACCOUNT_ID);
+        String actual = underTest.checkForRunningAttachedClusters(datahubs, null, false, ACCOUNT_ID);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
 
         assertEquals("", actual);
         assertEquals("", actualNonUpgradeable);
 
         verify(spotInstanceUsageCondition).isStackRunsOnSpotInstances(dataHubStack1);
+    }
+
+    @Test
+    public void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenSkipDataHubValidationParameterIsTrue() {
+        StackDtoDelegate dataHubStack1 = createStackDtoDelegate(Status.AVAILABLE, "stack-1", "stack-crn-1", BlueprintUpgradeOption.GA, ResourceStatus.DEFAULT);
+        StackDtoDelegate dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2",
+                BlueprintUpgradeOption.GA, ResourceStatus.DEFAULT);
+        StackDtoDelegate dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-2", BlueprintUpgradeOption.GA, ResourceStatus.DEFAULT);
+        List<StackDtoDelegate> datahubs = List.of(dataHubStack1, dataHubStack2, dataHubStack3);
+
+        String actual = underTest.checkForRunningAttachedClusters(datahubs, Boolean.TRUE, false, ACCOUNT_ID);
+        String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
+
+        assertEquals("", actual);
+        assertEquals("", actualNonUpgradeable);
+
+        verify(spotInstanceUsageCondition).isStackRunsOnSpotInstances(dataHubStack1);
+        verifyNoInteractions(entitlementService);
+    }
+
+    @Test
+    public void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenRollingUpgradeIsEnabled() {
+        StackDtoDelegate dataHubStack1 = createStackDtoDelegate(Status.AVAILABLE, "stack-1", "stack-crn-1", BlueprintUpgradeOption.GA, ResourceStatus.DEFAULT);
+        StackDtoDelegate dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2",
+                BlueprintUpgradeOption.GA, ResourceStatus.DEFAULT);
+        StackDtoDelegate dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-2", BlueprintUpgradeOption.GA, ResourceStatus.DEFAULT);
+        List<StackDtoDelegate> datahubs = List.of(dataHubStack1, dataHubStack2, dataHubStack3);
+
+        String actual = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, true, ACCOUNT_ID);
+        String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
+
+        assertEquals("", actual);
+        assertEquals("", actualNonUpgradeable);
+
+        verify(spotInstanceUsageCondition).isStackRunsOnSpotInstances(dataHubStack1);
+        verifyNoInteractions(entitlementService);
     }
 
     @Test
@@ -90,7 +126,7 @@ public class UpgradePreconditionServiceTest {
         List<StackDtoDelegate> datahubs = List.of(dataHubStack1, dataHubStack2, dataHubStack3);
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.EPHEMERAL_VOLUMES);
 
-        String actual = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, ACCOUNT_ID);
+        String actual = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, false, ACCOUNT_ID);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
 
         assertEquals("", actual);
@@ -109,7 +145,7 @@ public class UpgradePreconditionServiceTest {
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(dataHubStack1)).thenReturn(true);
 
-        String actualRunning = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, ACCOUNT_ID);
+        String actualRunning = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, false, ACCOUNT_ID);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
 
         assertEquals("", actualRunning);
@@ -125,7 +161,7 @@ public class UpgradePreconditionServiceTest {
                 "stack-crn-2", BlueprintUpgradeOption.DISABLED, ResourceStatus.DEFAULT);
         List<StackDtoDelegate> datahubs = List.of(dataHubStack1, dataHubStack2);
 
-        String actualRunning = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, ACCOUNT_ID);
+        String actualRunning = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, false, ACCOUNT_ID);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
 
         assertEquals("There are attached Data Hub clusters that are non-upgradeable: stack-2. Please delete those to be able to perform the upgrade.",
@@ -141,7 +177,7 @@ public class UpgradePreconditionServiceTest {
         StackDtoDelegate dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-3", BlueprintUpgradeOption.GA, ResourceStatus.DEFAULT);
         List<StackDtoDelegate> datahubs = List.of(dataHubStack1, dataHubStack2, dataHubStack3);
 
-        String actual = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, ACCOUNT_ID);
+        String actual = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, false, ACCOUNT_ID);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
 
         assertEquals("", actual);
@@ -158,7 +194,7 @@ public class UpgradePreconditionServiceTest {
         StackDtoDelegate dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-3", BlueprintUpgradeOption.GA, ResourceStatus.DEFAULT);
         List<StackDtoDelegate> datahubs = List.of(dataHubStack1, dataHubStack2, dataHubStack3);
 
-        String actualRunning = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, ACCOUNT_ID);
+        String actualRunning = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, false, ACCOUNT_ID);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
 
         assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.",
@@ -177,7 +213,7 @@ public class UpgradePreconditionServiceTest {
         StackDtoDelegate dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-3", null, ResourceStatus.USER_MANAGED);
         List<StackDtoDelegate> datahubs = List.of(dataHubStack1, dataHubStack2, dataHubStack3);
 
-        String actualRunning = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, ACCOUNT_ID);
+        String actualRunning = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, false, ACCOUNT_ID);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
 
         assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.",
@@ -191,7 +227,7 @@ public class UpgradePreconditionServiceTest {
     public void testDataHubsNotAttached() {
         List<StackDtoDelegate> datahubs = List.of();
 
-        String actual = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, ACCOUNT_ID);
+        String actual = underTest.checkForRunningAttachedClusters(datahubs, Boolean.FALSE, false, ACCOUNT_ID);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(datahubs);
 
         assertEquals("", actual);

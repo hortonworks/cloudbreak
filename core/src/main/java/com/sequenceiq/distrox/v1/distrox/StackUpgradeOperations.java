@@ -170,9 +170,14 @@ public class StackUpgradeOperations {
             if (!entitlementService.datahubRuntimeUpgradeEnabled(accountId)) {
                 upgradeResponse.appendReason(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(datahubsInEnvironment));
             }
+            boolean rollingUpgradeEnabled = isRollingUpgradeEnabled(request);
             upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(datahubsInEnvironment, request.
-                    isSkipDataHubValidation(), accountId));
+                    isSkipDataHubValidation(), rollingUpgradeEnabled, accountId));
         }
+    }
+
+    private boolean isRollingUpgradeEnabled(UpgradeV4Request request) {
+        return Optional.ofNullable(request.getInternalUpgradeSettings()).map(InternalUpgradeSettings::isRollingUpgradeEnabled).orElse(false);
     }
 
     private boolean determineReplaceVmsParameter(Stack stack, Boolean replaceVms) {
