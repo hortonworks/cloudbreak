@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -34,15 +35,19 @@ public class UpgradePreconditionService {
     @Inject
     private EntitlementService entitlementService;
 
-    public String checkForRunningAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment, Boolean skipDataHubValidation, String accountId) {
+    public String checkForRunningAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment, Boolean skipDataHubValidation,
+            boolean rollingUpgradeEnabled, String accountId) {
         String notStoppedAttachedClusters = getNotStoppedAttachedClusters(datahubsInEnvironment);
-        if (!Boolean.TRUE.equals(skipDataHubValidation)
-                && !entitlementService.isUpgradeAttachedDatahubsCheckSkipped(accountId)
-                && !notStoppedAttachedClusters.isEmpty()) {
+        if (!skipValidation(skipDataHubValidation, rollingUpgradeEnabled, accountId)
+                && StringUtils.hasText(notStoppedAttachedClusters)) {
             return String.format("There are attached Data Hub clusters in incorrect state: %s. "
                     + "Please stop those to be able to perform the upgrade.", notStoppedAttachedClusters);
         }
         return "";
+    }
+
+    private boolean skipValidation(Boolean skipDataHubValidation, boolean rollingUpgradeEnabled, String accountId) {
+        return rollingUpgradeEnabled || Boolean.TRUE.equals(skipDataHubValidation) || entitlementService.isUpgradeAttachedDatahubsCheckSkipped(accountId);
     }
 
     public String checkForNonUpgradeableAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment) {

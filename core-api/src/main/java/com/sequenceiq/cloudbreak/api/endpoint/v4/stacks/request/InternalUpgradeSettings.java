@@ -33,7 +33,7 @@ public class InternalUpgradeSettings {
         this.dataHubRuntimeUpgradeEntitled = dataHubRuntimeUpgradeEntitled;
         this.dataHubOsUpgradeEntitled = dataHubOsUpgradeEntitled;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
-        upgradePreparation = false;
+        this.upgradePreparation = false;
     }
 
     @JsonCreator
