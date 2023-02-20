@@ -69,9 +69,11 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.FlowState;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
@@ -126,6 +128,9 @@ public class SdxBackupRestoreService {
 
     @Inject
     private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private SdxService sdxService;
 
     public SdxDatabaseBackupResponse triggerDatabaseBackup(SdxCluster sdxCluster, SdxDatabaseBackupRequest backupRequest) {
         MDCBuilder.buildMdcContext(sdxCluster);
@@ -329,6 +334,30 @@ public class SdxBackupRestoreService {
             LOGGER.info("Flow is unknown state");
             return sdxDrFailed(sdxCluster, "Flow is unknown state", pollingMessage);
         }
+    }
+
+    /**
+     * Get which step the program is at when the backup/restore operation fails.
+     *
+     * @param sdxId The ID of the cluster.
+     * @return A string of the information about where the operation fails.
+     */
+    public String createDatabaseBackupRestoreErrorStage(Long sdxId) {
+        SdxCluster sdxCluster = sdxService.getById(sdxId);
+        FlowCheckResponse lastKnownFlowCheckResponse = cloudbreakFlowService.getLastKnownFlowCheckResponse(sdxCluster);
+        String errorStageInfo = "";
+        if (lastKnownFlowCheckResponse != null && lastKnownFlowCheckResponse.getCurrentState() != null) {
+            String state = String.format(" during the transition from %s to its next state", lastKnownFlowCheckResponse.getCurrentState());
+            String flowType = "";
+            if (lastKnownFlowCheckResponse.getFlowType() != null) {
+                String[] flowTypeList = lastKnownFlowCheckResponse.getFlowType().split("\\.");
+                flowType = String.format(", set up in %s", flowTypeList[flowTypeList.length - 1]);
+            }
+            String triggeredEvent = lastKnownFlowCheckResponse.getNextEvent() != null ?
+                    String.format(", triggered by %s", lastKnownFlowCheckResponse.getNextEvent()) : "";
+            errorStageInfo = String.format("%s%s%s", state, flowType, triggeredEvent);
+        }
+        return errorStageInfo;
     }
 
     /**

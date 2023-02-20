@@ -136,9 +136,10 @@ public class FlowService {
             List<FlowChainLog> relatedChains = flowChainLogService.getRelatedFlowChainLogs(flowChains);
             Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
             List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(relatedChainIds);
-            flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
+            flowCheckResponse.setHasActiveFlow(!completed(FlowConstants.FLOW_CHAIN, chainId, relatedChains, relatedFlowLogs));
             flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(relatedFlowLogs, failHandledEvents));
             setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
+            setStateEventFlowTypeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs, FlowConstants.FLOW_CHAIN, chainId);
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
         }
@@ -171,7 +172,7 @@ public class FlowService {
             Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
             List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(relatedChainIds);
             validateResourceId(relatedFlowLogs, resourceIdList);
-            flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
+            flowCheckResponse.setHasActiveFlow(!completed(FlowConstants.FLOW_CHAIN, chainId, relatedChains, relatedFlowLogs));
             flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(relatedFlowLogs, failHandledEvents));
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
@@ -193,9 +194,23 @@ public class FlowService {
         }
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowId(flowId);
-        flowCheckResponse.setHasActiveFlow(!completed("Flow", flowId, List.of(), allByFlowIdOrderByCreatedDesc));
+        flowCheckResponse.setHasActiveFlow(!completed(FlowConstants.FLOW, flowId, List.of(), allByFlowIdOrderByCreatedDesc));
         flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(allByFlowIdOrderByCreatedDesc, failHandledEvents));
+        setStateEventFlowTypeOnFlowCheckResponse(flowCheckResponse, allByFlowIdOrderByCreatedDesc, FlowConstants.FLOW, flowId);
         return flowCheckResponse;
+    }
+
+    private void setStateEventFlowTypeOnFlowCheckResponse(FlowCheckResponse flowCheckResponse, List<FlowLogWithoutPayload> relatedFlowLogs,
+            String marker, String id) {
+        if (flowCheckResponse.getHasActiveFlow() && !relatedFlowLogs.isEmpty()) {
+            LOGGER.info("Setting current state, next event, and flow type into flow check response using {} {}", marker, id);
+            FlowLogWithoutPayload latestFlowLog = relatedFlowLogs.get(0);
+            flowCheckResponse.setCurrentState(latestFlowLog.getCurrentState());
+            flowCheckResponse.setNextEvent(latestFlowLog.getNextEvent());
+            if (latestFlowLog.getFlowType() != null) {
+                flowCheckResponse.setFlowType(latestFlowLog.getFlowType().getName());
+            }
+        }
     }
 
     private boolean completed(String marker, String flowChainId, List<FlowChainLog> flowChainLogs, List<FlowLogWithoutPayload> flowLogs) {
@@ -295,7 +310,7 @@ public class FlowService {
     private FlowCheckResponse convertFlowChainToFlowCheckResponse(FlowChainLog chainLog, List<FlowLogWithoutPayload> relatedFlowLogs) {
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowChainId(chainLog.getFlowChainId());
-        flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainLog.getFlowChainId(), List.of(chainLog),
+        flowCheckResponse.setHasActiveFlow(!completed(FlowConstants.FLOW_CHAIN, chainLog.getFlowChainId(), List.of(chainLog),
                 relatedFlowLogs));
         flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(relatedFlowLogs, failHandledEvents));
         setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);

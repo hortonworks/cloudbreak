@@ -46,7 +46,10 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStar
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -92,6 +95,12 @@ public class SdxBackupRestoreServiceTest {
 
     @Mock
     private DatalakeDrConfig datalakeDrConfig;
+
+    @Mock
+    private CloudbreakFlowService cloudbreakFlowService;
+
+    @Mock
+    private SdxService sdxService;
 
     @InjectMocks
     private SdxBackupRestoreService sdxBackupRestoreService;
@@ -330,6 +339,47 @@ public class SdxBackupRestoreServiceTest {
         when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.empty()))
                 .thenReturn(null);
         assertThrows(BadRequestException.class, () -> sdxBackupRestoreService.checkExistingBackup(sdxCluster, USER_CRN));
+    }
+
+    @Test
+    public void testCreateDatabaseBackupRestoreErrorStage() {
+        Long testId = 1L;
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getById(testId)).thenReturn(sdxCluster);
+        FlowCheckResponse testFlowCheckResponseWithAllInfo = new FlowCheckResponse();
+        testFlowCheckResponseWithAllInfo.setCurrentState("test-current-state");
+        testFlowCheckResponseWithAllInfo.setNextEvent("test-next-event");
+        testFlowCheckResponseWithAllInfo.setFlowType("test1.test2.test-flow-type");
+        when(cloudbreakFlowService.getLastKnownFlowCheckResponse(sdxCluster)).thenReturn(testFlowCheckResponseWithAllInfo);
+        String errorStageWithAllInfo = sdxBackupRestoreService.createDatabaseBackupRestoreErrorStage(testId);
+        assertEquals(" during the transition from test-current-state to its next state, " +
+                "set up in test-flow-type, triggered by test-next-event", errorStageWithAllInfo);
+
+        FlowCheckResponse testFlowCheckResponseMissingCurrentState = new FlowCheckResponse();
+        testFlowCheckResponseMissingCurrentState.setCurrentState(null);
+        testFlowCheckResponseMissingCurrentState.setNextEvent("test-next-event");
+        testFlowCheckResponseMissingCurrentState.setFlowType("test1.test2.test-flow-type");
+        when(cloudbreakFlowService.getLastKnownFlowCheckResponse(sdxCluster)).thenReturn(testFlowCheckResponseMissingCurrentState);
+        String errorStageMissingCurrentState = sdxBackupRestoreService.createDatabaseBackupRestoreErrorStage(testId);
+        assertEquals("", errorStageMissingCurrentState);
+
+        FlowCheckResponse testFlowCheckResponseMissingNextEvent = new FlowCheckResponse();
+        testFlowCheckResponseMissingNextEvent.setCurrentState("test-current-state");
+        testFlowCheckResponseMissingNextEvent.setNextEvent(null);
+        testFlowCheckResponseMissingNextEvent.setFlowType("test1.test2.test-flow-type");
+        when(cloudbreakFlowService.getLastKnownFlowCheckResponse(sdxCluster)).thenReturn(testFlowCheckResponseMissingNextEvent);
+        String errorStageMissingNextEvent = sdxBackupRestoreService.createDatabaseBackupRestoreErrorStage(testId);
+        assertEquals(" during the transition from test-current-state to its next state, " +
+                "set up in test-flow-type", errorStageMissingNextEvent);
+
+        FlowCheckResponse testFlowCheckResponseMissingFlowType = new FlowCheckResponse();
+        testFlowCheckResponseMissingFlowType.setCurrentState("test-current-state");
+        testFlowCheckResponseMissingFlowType.setNextEvent("test-next-event");
+        testFlowCheckResponseMissingFlowType.setFlowType(null);
+        when(cloudbreakFlowService.getLastKnownFlowCheckResponse(sdxCluster)).thenReturn(testFlowCheckResponseMissingFlowType);
+        String errorStageMissingFlowType = sdxBackupRestoreService.createDatabaseBackupRestoreErrorStage(testId);
+        assertEquals(" during the transition from test-current-state to its next state, " +
+                "triggered by test-next-event", errorStageMissingFlowType);
     }
 
     private SdxCluster getValidSdxCluster() {

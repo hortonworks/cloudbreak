@@ -208,7 +208,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> allTargets = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             uploadSignKey(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
             OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, targets, params);
-            Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
+            Callable<Boolean> saltBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt bootstrap", e);

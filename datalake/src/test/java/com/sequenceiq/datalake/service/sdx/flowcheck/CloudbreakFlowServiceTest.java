@@ -278,6 +278,74 @@ public class CloudbreakFlowServiceTest {
         assertNull(clusterCaptor.getValue().getLastCbFlowChainId());
     }
 
+    @Test
+    public void testGetLastKnownFlowCheckResponseWithoutException() {
+        // Test using a flow chain ID
+        SdxCluster cluster = new SdxCluster();
+        cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
+        cluster.setClusterName(CLUSTER_NAME);
+
+        FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
+
+        when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(flowCheckResponse);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        // All field values are null if there's no value set.
+        FlowCheckResponse lastKnownFlowCheckResponse = underTest.getLastKnownFlowCheckResponse(cluster);
+        assertEquals(null, lastKnownFlowCheckResponse.getCurrentState());
+        assertEquals(null, lastKnownFlowCheckResponse.getNextEvent());
+        assertEquals(null, lastKnownFlowCheckResponse.getFlowType());
+
+        // Set up values and rerun.
+        flowCheckResponse.setCurrentState("TEST_STATE");
+        flowCheckResponse.setNextEvent("TEST_EVENT");
+        flowCheckResponse.setFlowType("TEST_TYPE");
+        when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(flowCheckResponse);
+        lastKnownFlowCheckResponse = underTest.getLastKnownFlowCheckResponse(cluster);
+        assertEquals("TEST_STATE", lastKnownFlowCheckResponse.getCurrentState());
+        assertEquals("TEST_EVENT", lastKnownFlowCheckResponse.getNextEvent());
+        assertEquals("TEST_TYPE", lastKnownFlowCheckResponse.getFlowType());
+
+        // Values can be updated.
+        flowCheckResponse.setCurrentState("TEST_STATE1");
+        flowCheckResponse.setNextEvent("TEST_EVENT1");
+        flowCheckResponse.setFlowType("TEST_TYPE1");
+        when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(flowCheckResponse);
+        lastKnownFlowCheckResponse = underTest.getLastKnownFlowCheckResponse(cluster);
+        assertEquals("TEST_STATE1", lastKnownFlowCheckResponse.getCurrentState());
+        assertEquals("TEST_EVENT1", lastKnownFlowCheckResponse.getNextEvent());
+        assertEquals("TEST_TYPE1", lastKnownFlowCheckResponse.getFlowType());
+
+        verify(flowEndpoint, times(3)).hasFlowRunningByChainId(eq(FLOW_CHAIN_ID));
+
+        // Test using a flow ID
+        SdxCluster clusterWithFlowID = new SdxCluster();
+        clusterWithFlowID.setLastCbFlowChainId(FLOW_ID);
+        clusterWithFlowID.setClusterName(CLUSTER_NAME);
+
+        FlowCheckResponse flowCheckResponseWithFlowID = new FlowCheckResponse();
+
+        when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_ID))).thenReturn(flowCheckResponseWithFlowID);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        flowCheckResponseWithFlowID.setCurrentState("TEST_WITH_FLOW_ID");
+        flowCheckResponseWithFlowID.setNextEvent("TEST_WITH_FLOW_ID");
+        flowCheckResponseWithFlowID.setFlowType("TEST_WITH_FLOW_ID");
+        FlowCheckResponse lastKnownFlowCheckResponseWithFlowID = underTest.getLastKnownFlowCheckResponse(clusterWithFlowID);
+        assertEquals("TEST_WITH_FLOW_ID", lastKnownFlowCheckResponseWithFlowID.getCurrentState());
+        assertEquals("TEST_WITH_FLOW_ID", lastKnownFlowCheckResponseWithFlowID.getNextEvent());
+        assertEquals("TEST_WITH_FLOW_ID", lastKnownFlowCheckResponseWithFlowID.getFlowType());
+
+        // Test without any flow ID or flow chain ID
+        SdxCluster clusterWithoutID = new SdxCluster();
+        clusterWithoutID.setClusterName(CLUSTER_NAME);
+
+        FlowCheckResponse lastKnownFlowCheckResponseWithoutID = underTest.getLastKnownFlowCheckResponse(clusterWithoutID);
+        assertEquals(null, lastKnownFlowCheckResponseWithoutID);
+    }
+
     private FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow) {
         return createFlowCheckResponse(hasActiveFlow, null);
     }
