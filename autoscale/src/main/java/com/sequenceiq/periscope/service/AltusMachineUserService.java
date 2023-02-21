@@ -16,6 +16,7 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnEncoder;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
@@ -26,8 +27,6 @@ import com.sequenceiq.periscope.monitor.handler.FreeIpaCommunicator;
 public class AltusMachineUserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AltusMachineUserService.class);
-
-    private static final String AUTOSCALE_MACHINE_USER_NAME_PATTERN = "datahub-autoscale-metrics-%s";
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
@@ -66,6 +65,7 @@ public class AltusMachineUserService {
         } catch (Exception ex) {
             LOGGER.warn("Error initializing machineUserCrn for cluster '{}' yarn polling", cluster.getStackCrn(), ex);
         }
+
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 10000))
@@ -81,7 +81,7 @@ public class AltusMachineUserService {
 
     private MachineUser getOrCreateAutoscaleMachineUser(String environmentCrn, String accountId) {
         //Idempotent api retrieves machine user or creates if missing.
-        String autoscaleMachineUserName = String.format(AUTOSCALE_MACHINE_USER_NAME_PATTERN, Crn.fromString(environmentCrn).getResource());
+        String autoscaleMachineUserName = CrnEncoder.generateMd5EncodedAutoscaleMachineUser(environmentCrn, false);
         MachineUser machineUser = grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(autoscaleMachineUserName, accountId);
         LOGGER.info("Retrieved machineUser '{}' for machineUserName '{}' ", machineUser, autoscaleMachineUserName);
         return machineUser;

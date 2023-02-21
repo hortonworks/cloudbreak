@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnEncoder;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -759,6 +760,7 @@ public class ClusterHostServiceRunner {
             gateway.put("tokencert", clusterGateway.getTokenCert());
             gateway.put("mastersecret", clusterGateway.getKnoxMaster());
             gateway.put("envAccessGroup", virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS));
+            gateway.put("autoscaleMachineUser", CrnEncoder.generateMd5EncodedAutoscaleMachineUser(stackDto.getEnvironmentCrn(), true));
             List<Map<String, Object>> topologies = getTopologies(clusterGateway, stackDto.getBlueprint().getStackVersion());
             gateway.put("topologies", topologies);
             if (stackDto.getBlueprint() != null) {

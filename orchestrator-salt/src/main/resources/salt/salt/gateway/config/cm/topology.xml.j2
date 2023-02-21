@@ -182,8 +182,12 @@
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
              </param>
              <param>
+                 <name>{{ aclsauthz_prefix ~ "resourcemanager.acl.mode" }}</name>
+                 <value>OR</value>
+             </param>
+             <param>
                  <name>{{ aclsauthz_prefix ~ "resourcemanager.acl" }}</name>
-                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+                 <value>{{ salt['pillar.get']('gateway:autoscaleMachineUser') }};{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
              </param>
              <param>
                  <name>{{ aclsauthz_prefix ~ "zeppelinui.acl" }}</name>
