@@ -27,26 +27,71 @@ doLog() {
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
 }
 
-if [[ $# -lt 6 || $# -gt 10 || "$1" == "None" ]]; then
-  doLog "Invalid inputs provided"
-  doLog "Script accepts at least 6 and at most 7 inputs:"
-  doLog "  1. Object Storage Service url to place backups."
-  doLog "  2. PostgreSQL host name."
-  doLog "  3. PostgreSQL port."
-  doLog "  4. PostgreSQL user name."
-  doLog "  5. Ranger admin group."
-  doLog "  6. Whether or not to close connections for the database while it is being backed up."
-  doLog "  7-10. (optional) Names of the databases to backup. If not given, will backup ranger and hive databases."
-  exit 1
-fi
+log_invalid_input_reason() {
+  doLog "This might be caused by the command not being run on the Primary Gateway node or due to never having run a backup/restore via the CDP CLI before."
+}
 
-BACKUP_LOCATION="$1"
-HOST="$2"
-PORT="$3"
-USERNAME="$4"
-RANGERGROUP="$5"
-CLOSECONNECTIONS="$6"
-DATABASENAMES="${@: 7}"
+# Print out all required inputs if they are passed in.
+while getopts ":s:h:p:u:g:c:n:" OPTION; do
+    case $OPTION in
+    s  )
+        STORAGE_URL="$OPTARG"
+        doLog "Object Storage Service url to place backups: $STORAGE_URL"
+        ;;
+    h  )
+        HOST="$OPTARG"
+        doLog "PostgreSQL host name: $HOST"
+        ;;
+    p  )
+        PORT="$OPTARG"
+        doLog "PostgreSQL port: $PORT"
+        ;;
+    u  )
+        USERNAME="$OPTARG"
+        doLog "PostgreSQL user name: $USERNAME"
+        ;;
+    g  )
+        GROUP="$OPTARG"
+        doLog "Ranger admin group: $GROUP"
+        ;;
+    c  )
+        CLOSE_CONNECT="$OPTARG"
+        doLog "Whether or not to close connections for the database while it is being backed up: $CLOSE_CONNECT"
+        ;;
+    n  )
+        DB_NAME+=("$OPTARG")
+        DB_NAME_ITEM="$OPTARG"
+        doLog "Names of the databases to backup."
+        ;;
+    \? ) doLog "Unknown option: -$OPTARG"
+        exit 1;;
+    :  ) doLog "Missing option argument for -$OPTARG"
+        log_invalid_input_reason
+        exit 1;;
+    esac
+done
+
+# If any of the required inputs are missing or the provided values are NULL, the script can not run successfully.
+[ -z ${STORAGE_URL+x} ] || [ -z ${GROUP+x} ] || [ -z ${CLOSE_CONNECT+x} ]||
+[ -z "$STORAGE_URL" ] || [ -z "$GROUP" ] || [ -z "$CLOSE_CONNECT" ] &&
+doLog "At least one mandatory parameter is not set in disaster_recovery.sls: Object Storage Service URL; Ranger admin group; close connections or not during backup." && log_invalid_input_reason && exit 1
+[ -z ${HOST+x} ] || [ -z ${PORT+x}  ] || [ -z ${USERNAME+x} ] ||
+[ -z "$HOST" ] || [ -z "$PORT" ] || [ -z "$USERNAME" ] &&
+doLog "At least one mandatory parameter is not set in postgres: PostgresSQL host name, PostgresSQL port, PostgresSQL user name." && log_invalid_input_reason && exit 1
+
+BACKUP_LOCATION="$STORAGE_URL"
+HOST="$HOST"
+PORT="$PORT"
+USERNAME="$USERNAME"
+RANGERGROUP="$GROUP"
+CLOSECONNECTIONS="$CLOSE_CONNECT"
+# Assign values to db name based on if var DB_NAME has been set and if the value set to the var is null.
+if [ -z ${DB_NAME+x} ] || [ -z "$DB_NAME" ]; then
+  doLog "No database names are provided in disaster_recovery.sls. Will backup ranger and hive by default."
+  DATABASENAMES=""
+else
+  DATABASENAMES="${DB_NAME[@]}"
+fi
 
 # Root directory for local postgres dump.
 BACKUPS_DIR="/var/tmp/"

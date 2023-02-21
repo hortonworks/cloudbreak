@@ -25,24 +25,65 @@ doLog() {
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
 }
 
-if [[ $# -lt 5 || $# -gt 6 || "$1" == "None" ]]; then
-  doLog "Invalid inputs provided"
-  doLog "Script accepts at least 5 and at most 6 inputs:"
-  doLog "  1. Object Storage Service url to retrieve backups."
-  doLog "  2. PostgreSQL host name."
-  doLog "  3. PostgreSQL port."
-  doLog "  4. PostgreSQL user name."
-  doLog "  5. Ranger admin group."
-  doLog "  6. (optional) Name of the database to restore. If not given, will restore ranger and hive databases."
-  exit 1
-fi
+log_invalid_input_reason() {
+  doLog "This might be caused by the command not being run on the Primary Gateway node or due to never having run a backup/restore via the CDP CLI before."
+}
 
-BACKUP_LOCATION="$1/*" # Trailing slash and glob so we copy the _items_ in the directory not the directory itself.
-HOST="$2"
-PORT="$3"
-USERNAME="$4"
-RANGERGROUP="$5"
-DATABASENAME="${6-}"
+# Print out all required inputs if they are passed in.
+while getopts ":s:h:p:u:g:n:" OPTION; do
+    case $OPTION in
+    s  )
+        STORAGE_URL="$OPTARG"
+        doLog "Object Storage Service url to retrieve backups: $STORAGE_URL"
+        ;;
+    h  )
+        HOST="$OPTARG"
+        doLog "PostgreSQL host name: $HOST"
+        ;;
+    p  )
+        PORT="$OPTARG"
+        doLog "PostgreSQL port: $PORT"
+        ;;
+    u  )
+        USERNAME="$OPTARG"
+        doLog "PostgreSQL user name: $USERNAME"
+        ;;
+    g  )
+        GROUP="$OPTARG"
+        doLog "Ranger admin group: $GROUP"
+        ;;
+    n  )
+        DB_NAME+=("$OPTARG")
+        DB_NAME_ITEM="$OPTARG"
+        doLog "Names of the databases to restore."
+        ;;
+    \? ) doLog "Unknown option: -$OPTARG"
+        exit 1;;
+    :  ) doLog "Missing option argument for -$OPTARG"
+        log_invalid_input_reason
+        exit 1;;
+    esac
+done
+
+# If any of the required inputs are missing or the provided values are NULL, the script can not run successfully.
+[ -z ${STORAGE_URL+x} ] || [ -z ${GROUP+x} ] || [ -z "$STORAGE_URL" ] || [ -z "$GROUP" ] &&
+doLog "At least one mandatory parameter is not set in disaster_recovery.sls: Object Storage Service URL; Ranger admin group." && log_invalid_input_reason && exit 1
+[ -z ${HOST+x} ] || [ -z ${PORT+x}  ] || [ -z ${USERNAME+x} ] ||
+[ -z "$HOST" ] || [ -z "$PORT" ] || [ -z "$USERNAME" ] &&
+doLog "At least one mandatory parameter is not set in postgres: PostgresSQL host name, PostgresSQL port, PostgresSQL user name." && log_invalid_input_reason && exit 1
+
+BACKUP_LOCATION="$STORAGE_URL/*" # Trailing slash and glob so we copy the _items_ in the directory not the directory itself.
+HOST="$HOST"
+PORT="$PORT"
+USERNAME="$USERNAME"
+RANGERGROUP="$GROUP"
+# Assign values to db name based on if var DB_NAME has been set and if the value set to the var is null.
+if [ -z ${DB_NAME+x} ] || [ -z "$DB_NAME" ]; then
+  doLog "No database names are provided in disaster_recovery.sls. Will restore ranger and hive by default."
+  DATABASENAME=""
+else
+  DATABASENAME="${DB_NAME[@]}"
+fi
 
 BACKUPS_DIR="/var/tmp/postgres_restore_staging"
 

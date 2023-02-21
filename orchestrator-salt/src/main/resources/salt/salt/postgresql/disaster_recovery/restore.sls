@@ -3,10 +3,20 @@
 include:
   - postgresql.disaster_recovery
 
+{% set storage = salt['pillar.get']('disaster_recovery:object_storage_url') %}
+{% set host = salt['pillar.get']('postgres:clouderamanager:remote_db_url') %}
+{% set port = salt['pillar.get']('postgres:clouderamanager:remote_db_port') %}
+{% set username = salt['pillar.get']('postgres:clouderamanager:remote_admin') %}
+{% set group = salt['pillar.get']('disaster_recovery:ranger_admin_group') %}
+{% set dbname = salt['pillar.get']('disaster_recovery:database_name') %}
+{% if dbname %}
+{% set dbname_list = dbname.split(' ') %}
+{% endif %}
+
 {% if 'None' != configure_remote_db %}
 restore_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/restore_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} {{salt['pillar.get']('postgres:clouderamanager:remote_db_url')}} {{salt['pillar.get']('postgres:clouderamanager:remote_db_port')}} {{salt['pillar.get']('postgres:clouderamanager:remote_admin')}} {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} {{salt['pillar.get']('disaster_recovery:database_name') or ''}}
+    - name: /opt/salt/scripts/restore_db.sh{% if storage %} -s {{storage}}{% endif %}{% if host %} -h {{host}}{% endif %}{% if port %} -p {{port}}{% endif %}{% if username %} -u {{username}}{% endif %}{% if group %} -g {{group}}{% endif %}{% if dbname %}{% for item in dbname_list %} -n {{item}}{% endfor %}{% endif %}
     - require:
         - sls: postgresql.disaster_recovery
 
@@ -23,7 +33,7 @@ add_root_role_to_database:
 
 restore_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/restore_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} "" "" "" {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} {{salt['pillar.get']('disaster_recovery:database_name') or ''}}
+    - name: /opt/salt/scripts/restore_db.sh{% if storage %} -s {{storage}}{% endif %} -h "" -p "" -u ""{% if group %} -g {{group}}{% endif %}{% if dbname %}{% for item in dbname_list %} -n {{item}}{% endfor %}{% endif %}
     - require:
         - cmd: add_root_role_to_database
 {% endif %}
