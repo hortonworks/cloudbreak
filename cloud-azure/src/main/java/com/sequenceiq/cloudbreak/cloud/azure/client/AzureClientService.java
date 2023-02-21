@@ -25,6 +25,9 @@ public class AzureClientService {
     private AzureHttpClientConfigurer azureHttpClientConfigurer;
 
     @Inject
+    private AzureListResultFactory azureListResultFactory;
+
+    @Inject
     @Qualifier("azureClientThreadPool")
     private ExecutorService mdcCopyingThreadPoolExecutor;
 
@@ -49,7 +52,7 @@ public class AzureClientService {
     private AzureClient getClient(CloudContext cloudContext, AzureCredentialView credentialView) {
         AzureClientFactory azureClientFactory = new AzureClientFactory(cloudContext, credentialView, mdcCopyingThreadPoolExecutor,
                 azureHttpClientConfigurer);
-        return new AzureClient(azureClientFactory, azureExceptionHandler);
+        return new AzureClient(azureClientFactory, azureExceptionHandler, azureListResultFactory);
     }
 
     private boolean credentialIsInKeyGeneratedStatus(AzureCredentialView credentialView) {

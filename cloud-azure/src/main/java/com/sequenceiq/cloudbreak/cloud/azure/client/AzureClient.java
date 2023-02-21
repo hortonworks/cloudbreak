@@ -133,15 +133,18 @@ public class AzureClient {
 
     private final AzureExceptionHandler azureExceptionHandler;
 
+    private final AzureListResultFactory azureListResultFactory;
+
     private final ComputeManager computeManager;
 
-    public AzureClient(AzureClientFactory azureClientCredentials, AzureExceptionHandler azureExceptionHandler) {
+    public AzureClient(AzureClientFactory azureClientCredentials, AzureExceptionHandler azureExceptionHandler, AzureListResultFactory azureListResultFactory) {
         this.azureClientFactory = azureClientCredentials;
         azure = azureClientCredentials.getAzureResourceManager();
         privateDnsZoneManager = azureClientCredentials.getPrivateDnsManager();
         marketplaceOrderingManager = azureClientCredentials.getMarketplaceOrderingManager();
         computeManager = azureClientCredentials.getComputeManager();
         this.azureExceptionHandler = azureExceptionHandler;
+        this.azureListResultFactory = azureListResultFactory;
     }
 
     public AzureResourceManager getAzure() {
@@ -157,7 +160,7 @@ public class AzureClient {
     }
 
     public AzureListResult<Network> getNetworks() {
-        return handleException(() -> new AzureListResult<>(azure.networks().list()));
+        return handleException(() -> azureListResultFactory.create(azure.networks().list()));
     }
 
     public boolean resourceGroupExists(String name) {
@@ -322,7 +325,7 @@ public class AzureClient {
     }
 
     public AzureListResult<Disk> listDisksByResourceGroup(String resourceGroupName) {
-        return AzureListResult.listByResourceGroup(azure.disks(), resourceGroupName);
+        return azureListResultFactory.listByResourceGroup(azure.disks(), resourceGroupName);
     }
 
     public Disk getDiskById(String id) {
@@ -431,7 +434,7 @@ public class AzureClient {
 
     public List<BlobItem> listBlobInStorage(String resourceGroup, String storageName, String containerName) {
         try {
-            return new AzureListResult<>(getBlobContainerClient(resourceGroup, storageName, containerName).listBlobs()).getAll();
+            return azureListResultFactory.create(getBlobContainerClient(resourceGroup, storageName, containerName).listBlobs()).getAll();
         } catch (Exception e) {
             LOGGER.warn("Failed to list blobs in storage: {}.", storageName);
             throw new CloudConnectorException(e);
@@ -468,7 +471,7 @@ public class AzureClient {
     }
 
     public AzureListResult<VirtualMachine> getVirtualMachines(String resourceGroup) {
-        return handleException(() -> AzureListResult.listByResourceGroup(azure.virtualMachines(), resourceGroup));
+        return handleException(() -> azureListResultFactory.listByResourceGroup(azure.virtualMachines(), resourceGroup));
     }
 
     public VirtualMachine getVirtualMachineByResourceGroup(String resourceGroup, String vmName) {
@@ -531,7 +534,7 @@ public class AzureClient {
     }
 
     public AzureListResult<PublicIpAddress> getPublicIpAddresses(String resourceGroup) {
-        return handleException(() -> AzureListResult.listByResourceGroup(azure.publicIpAddresses(), resourceGroup));
+        return handleException(() -> azureListResultFactory.listByResourceGroup(azure.publicIpAddresses(), resourceGroup));
     }
 
     public Mono<Void> deleteNetworkInterfaceAsync(String resourceGroup, String networkInterfaceName) {
@@ -539,7 +542,7 @@ public class AzureClient {
     }
 
     public AzureListResult<NetworkInterface> getNetworkInterfaces(String resourceGroup) {
-        return handleException(() -> AzureListResult.listByResourceGroup(azure.networkInterfaces(), resourceGroup));
+        return handleException(() -> azureListResultFactory.listByResourceGroup(azure.networkInterfaces(), resourceGroup));
     }
 
     public List<NetworkInterface> getNetworkInterfaceListByNames(String resourceGroup, Collection<String> attachedNetworkInterfaces) {
@@ -597,10 +600,10 @@ public class AzureClient {
             Set<VirtualMachineSize> resultList = new HashSet<>();
             if (region == null) {
                 for (Region tmpRegion : Region.values()) {
-                    resultList.addAll(AzureListResult.listByRegion(azure.virtualMachines().sizes(), tmpRegion.label()).getAll());
+                    resultList.addAll(azureListResultFactory.listByRegion(azure.virtualMachines().sizes(), tmpRegion.label()).getAll());
                 }
             } else {
-                resultList.addAll(AzureListResult.listByRegion(azure.virtualMachines().sizes(), region).getAll());
+                resultList.addAll(azureListResultFactory.listByRegion(azure.virtualMachines().sizes(), region).getAll());
             }
             return resultList;
         });
@@ -684,7 +687,7 @@ public class AzureClient {
     }
 
     public AzureListResult<Identity> listIdentities() {
-        return handleException(() -> AzureListResult.list(azure.identities()));
+        return handleException(() -> azureListResultFactory.list(azure.identities()));
     }
 
     public List<Identity> listIdentitiesByRegion(String region) {
@@ -709,7 +712,7 @@ public class AzureClient {
     }
 
     public AzureListResult<RoleAssignment> listRoleAssignmentsByScope(String scope) {
-        return handleException(() -> new AzureListResult<>(getRoleAssignments().listByScope(scope)));
+        return handleException(() -> azureListResultFactory.create(getRoleAssignments().listByScope(scope)));
     }
 
     public List<RoleAssignmentInner> listRoleAssignmentsByScopeInner(String scope) {
@@ -720,7 +723,7 @@ public class AzureClient {
     }
 
     public AzureListResult<RoleAssignmentInner> listRoleAssignments() {
-        return new AzureListResult<>(listRoleAssignmentsBySubscription(getCurrentSubscription().subscriptionId()));
+        return azureListResultFactory.create(listRoleAssignmentsBySubscription(getCurrentSubscription().subscriptionId()));
     }
 
     public PagedIterable<RoleAssignmentInner> listRoleAssignmentsBySubscription(String subscriptionId) {
@@ -736,7 +739,7 @@ public class AzureClient {
     }
 
     public AzureListResult<Subscription> listSubscriptions() {
-        return AzureListResult.list(azure.subscriptions());
+        return azureListResultFactory.list(azure.subscriptions());
     }
 
     public void deleteGenericResourceById(String id) {
@@ -752,11 +755,11 @@ public class AzureClient {
     }
 
     public AzureListResult<PrivateDnsZone> getPrivateDnsZoneList() {
-        return AzureListResult.list(privateDnsZoneManager.privateZones());
+        return azureListResultFactory.list(privateDnsZoneManager.privateZones());
     }
 
     public AzureListResult<PrivateDnsZone> getPrivateDnsZonesByResourceGroup(String subscriptionId, String resourceGroupName) {
-        return AzureListResult.listByResourceGroup(
+        return azureListResultFactory.listByResourceGroup(
                 azureClientFactory.getPrivateDnsManagerWithAnotherSubscription(subscriptionId).privateZones(),
                 resourceGroupName);
     }
@@ -771,19 +774,19 @@ public class AzureClient {
     }
 
     private AzureListResult<PrivateDnsZone> getPrivateDnsZones(String subscriptionId) {
-        return AzureListResult.list(azureClientFactory.getPrivateDnsManagerWithAnotherSubscription(subscriptionId).privateZones());
+        return azureListResultFactory.list(azureClientFactory.getPrivateDnsManagerWithAnotherSubscription(subscriptionId).privateZones());
     }
 
     public AzureListResult<PrivateDnsZone> listPrivateDnsZonesByResourceGroup(String resourceGroupName) {
-        return AzureListResult.listByResourceGroup(privateDnsZoneManager.privateZones(), resourceGroupName);
+        return azureListResultFactory.listByResourceGroup(privateDnsZoneManager.privateZones(), resourceGroupName);
     }
 
     public AzureListResult<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String resourceGroupName, String dnsZoneName) {
-        return new AzureListResult<>(privateDnsZoneManager.serviceClient().getVirtualNetworkLinks().list(resourceGroupName, dnsZoneName));
+        return azureListResultFactory.create(privateDnsZoneManager.serviceClient().getVirtualNetworkLinks().list(resourceGroupName, dnsZoneName));
     }
 
     public AzureListResult<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String subscriptionId, String resourceGroupName, String dnsZoneName) {
-        return new AzureListResult<>(azureClientFactory.getPrivateDnsManagerWithAnotherSubscription(subscriptionId)
+        return azureListResultFactory.create(azureClientFactory.getPrivateDnsManagerWithAnotherSubscription(subscriptionId)
                 .serviceClient()
                 .getVirtualNetworkLinks()
                 .list(resourceGroupName, dnsZoneName));

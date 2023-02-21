@@ -89,6 +89,9 @@ class AzureClientTest {
     private IndexableRefreshableWrapperImpl withCreateIndexableRefreshableWrapperImpl;
 
     @Mock
+    private AzureListResultFactory azureListResultFactory;
+
+    @Mock
     private DiskInner diskInner;
 
     @Captor
@@ -99,7 +102,7 @@ class AzureClientTest {
         lenient().when(azureClientCredentials.getAzureResourceManager()).thenReturn(azureResourceManager);
         lenient().when(azureExceptionHandler.handleException(any(Supplier.class))).thenCallRealMethod();
 
-        underTest = new AzureClient(azureClientCredentials, azureExceptionHandler);
+        underTest = new AzureClient(azureClientCredentials, azureExceptionHandler, azureListResultFactory);
     }
 
     static Object[][] setupDiskEncryptionWithDesIfNeededTestWhenDesAbsentDataProvider() {
