@@ -28,7 +28,6 @@ import org.testng.annotations.DataProvider;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -45,6 +44,7 @@ import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
 import com.sequenceiq.it.config.AuditBeanConfig;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
+import com.sequenceiq.it.util.TestParameter;
 
 @ContextConfiguration(classes = {IntegrationTestConfiguration.class, AuditBeanConfig.class},
         initializers = ConfigFileApplicationContextInitializer.class)
