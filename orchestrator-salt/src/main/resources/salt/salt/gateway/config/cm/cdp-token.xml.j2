@@ -34,12 +34,12 @@
          <name>AclsAuthz</name>
          <enabled>true</enabled>
          <param>
-            <name>knox.acl.mode</name>
-            <value>AND</value>
+            <name>knoxtoken.acl.mode</name>
+            <value>OR</value>
          </param>
          <param>
             <name>knoxtoken.acl</name>
-            <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            <value>{{ salt['pillar.get']('gateway:autoscaleMachineUser') }};{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
          </param>
       </provider>
 {% endif %}
