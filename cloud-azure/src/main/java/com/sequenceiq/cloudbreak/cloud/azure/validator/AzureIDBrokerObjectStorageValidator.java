@@ -38,7 +38,7 @@ import com.gs.collections.impl.factory.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResultFactory;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
@@ -65,6 +65,9 @@ public class AzureIDBrokerObjectStorageValidator {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private AzureListResultFactory azureListResultFactory;
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public ValidationResult validateObjectStorage(AzureClient client, String accountId,
@@ -233,7 +236,7 @@ public class AzureIDBrokerObjectStorageValidator {
             return roleAssignmentsOfCurrentSubscription;
         }
 
-        return new AzureListResult<>(client.listRoleAssignmentsBySubscription(targetSubscriptionId)).getAll();
+        return azureListResultFactory.create(client.listRoleAssignmentsBySubscription(targetSubscriptionId)).getAll();
     }
 
     private Set<Identity> validateAllMappedIdentities(AzureClient client, CloudFileSystemView cloudFileSystemView,

@@ -9,26 +9,30 @@ import java.util.stream.Stream;
 
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.http.rest.PagedResponse;
-import com.azure.core.management.Region;
-import com.azure.resourcemanager.resources.fluentcore.arm.collection.SupportsListingByResourceGroup;
-import com.azure.resourcemanager.resources.fluentcore.collection.SupportsListing;
-import com.azure.resourcemanager.resources.fluentcore.collection.SupportsListingByRegion;
-import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandlerParameters;
 
 public class AzureListResult<T> {
 
     private final PagedIterable<T> pagedIterable;
 
-    public AzureListResult(PagedIterable<T> pagedIterable) {
+    private final AzureExceptionHandler azureExceptionHandler;
+
+    AzureListResult(PagedIterable<T> pagedIterable, AzureExceptionHandler azureExceptionHandler) {
         this.pagedIterable = Objects.requireNonNull(pagedIterable);
+        this.azureExceptionHandler = azureExceptionHandler;
     }
 
     public Stream<T> getStream() {
-        return pagedIterable.stream();
+        return azureExceptionHandler.handleException(pagedIterable::stream, Stream.of());
+    }
+
+    public Stream<T> getStream(AzureExceptionHandlerParameters azureExceptionHandlerParameters) {
+        return azureExceptionHandler.handleException(pagedIterable::stream, Stream.of(), azureExceptionHandlerParameters);
     }
 
     public List<T> getAll() {
-        return pagedIterable.stream().collect(Collectors.toList());
+        return getStream().collect(Collectors.toList());
     }
 
     public List<T> getWhile(Predicate<List<T>> predicate) {
@@ -42,19 +46,4 @@ public class AzureListResult<T> {
         return result;
     }
 
-    public static <T> AzureListResult<T> list(SupportsListing<T> supportsListing) {
-        return new AzureListResult<>(supportsListing.list());
-    }
-
-    public static <T> AzureListResult<T> listByRegion(SupportsListingByRegion<T> supportsListingByRegion, Region region) {
-        return new AzureListResult<>(supportsListingByRegion.listByRegion(region));
-    }
-
-    public static <T> AzureListResult<T> listByRegion(SupportsListingByRegion<T> supportsListingByRegion, String region) {
-        return new AzureListResult<>(supportsListingByRegion.listByRegion(RegionUtil.findByLabelOrName(region)));
-    }
-
-    public static <T> AzureListResult<T> listByResourceGroup(SupportsListingByResourceGroup<T> supportsListingByResourceGroup, String resourceGroup) {
-        return new AzureListResult<>(supportsListingByResourceGroup.listByResourceGroup(resourceGroup));
-    }
 }

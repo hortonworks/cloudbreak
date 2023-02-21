@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
+import java.util.Optional;
 import java.util.function.Supplier;
-
-import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +15,30 @@ import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 public class AzureExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureExceptionHandler.class);
 
+    private static final AzureExceptionHandlerParameters DEFAULT_EXCEPTION_HANDLER_PARAMETERS = AzureExceptionHandlerParameters.builder()
+            .withHandleNotFound(true)
+            .build();
+
     private static final int NOT_FOUND = 404;
 
     private static final int FORBIDDEN = 403;
 
     private static final int UNAUTHORIZED_CODE = 401;
 
-    @Inject
-    private AzureExceptionExtractor azureExceptionExtractor;
-
     public <T> T handleException(Supplier<T> function) {
+        return handleException(function, DEFAULT_EXCEPTION_HANDLER_PARAMETERS);
+    }
+
+    public <T> T handleException(Supplier<T> function, T defaultValue) {
+        return handleException(function, defaultValue, DEFAULT_EXCEPTION_HANDLER_PARAMETERS);
+    }
+
+    public <T> T handleException(Supplier<T> function, T defaultValue, AzureExceptionHandlerParameters azureExceptionHandlerParameters) {
+        return Optional.ofNullable(handleException(function, azureExceptionHandlerParameters))
+                .orElse(defaultValue);
+    }
+
+    private <T> T handleException(Supplier<T> function, AzureExceptionHandlerParameters azureExceptionHandlerParameters) {
         try {
             return function.get();
         } catch (MsalServiceException e) {
@@ -37,7 +50,12 @@ public class AzureExceptionHandler {
             }
         } catch (ManagementException me) {
             LOGGER.warn("ManagementException has been thrown during azure operation", me);
-            if (isNotFound(me)) {
+            if (azureExceptionHandlerParameters.isHandleAllExceptions()) {
+                LOGGER.debug("Handle all exceptions is turned on");
+                return null;
+            }
+            if (azureExceptionHandlerParameters.isHandleNotFound() && isNotFound(me)) {
+                LOGGER.debug("Handle not found exception is turned on");
                 return null;
             }
             throw me;
@@ -77,4 +95,5 @@ public class AzureExceptionHandler {
     private boolean hasStatusCode(ManagementException exception, int statusCode) {
         return exception.getResponse() != null && statusCode == exception.getResponse().getStatusCode();
     }
+
 }

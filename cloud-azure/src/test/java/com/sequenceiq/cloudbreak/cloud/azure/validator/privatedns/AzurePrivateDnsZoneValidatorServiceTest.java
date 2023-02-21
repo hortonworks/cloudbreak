@@ -39,11 +39,16 @@ import com.azure.resourcemanager.resources.fluentcore.arm.ResourceId;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandlerParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.ValidationTestUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
 public class AzurePrivateDnsZoneValidatorServiceTest {
+
+    private static final AzureExceptionHandlerParameters AZURE_HANDLE_ALL_EXCEPTIONS = AzureExceptionHandlerParameters.builder()
+            .withHandleAllExceptions(true)
+            .build();
 
     private static final String UNKNOWN_SERVICE_ZONE_NAME = "unknown.service.zone.name";
 
@@ -89,7 +94,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         List<PrivateDnsZone> privateZones = new ArrayList<>();
         privateZones.add(getPrivateDnsZone(null, ZONE_NAME_POSTGRES, null));
         AzureListResult<PrivateDnsZone> azureListResult = mock(AzureListResult.class);
-        when(azureListResult.getStream()).thenReturn(privateZones.stream());
+        when(azureListResult.getStream(AZURE_HANDLE_ALL_EXCEPTIONS)).thenReturn(privateZones.stream());
         when(azureClient.getPrivateDnsZonesByResourceGroup(SUBSCRIPTION_ID, SINGLE_RESOURCE_GROUP_NAME))
                 .thenReturn(azureListResult);
 
@@ -103,15 +108,15 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     void testPrivateDnsZoneExistsWhenZoneDoesNotExist() {
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
         AzureListResult<PrivateDnsZone> azureListResult = mock(AzureListResult.class);
-        when(azureListResult.getStream()).thenReturn(Stream.empty());
+        when(azureListResult.getStream(AZURE_HANDLE_ALL_EXCEPTIONS)).thenReturn(Stream.empty());
         when(azureClient.getPrivateDnsZonesByResourceGroup(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME)).thenReturn(azureListResult);
 
         resultBuilder = underTest.privateDnsZoneExists(azureClient, getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
 
         ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of(
                 "The provided private DNS zone /subscriptions/subscriptionId/resourceGroups/a-resource-group-name/providers/Microsoft.Network/privateDnsZones" +
-                        "/privatelink.postgres.database.azure.com does not exist. Please make sure the specified private DNS zone exists and try environment " +
-                        "creation again."));
+                        "/privatelink.postgres.database.azure.com does not exist or you have no permission to access it. Please make sure the specified " +
+                        "private DNS zone exists and try environment creation again."));
     }
 
     @Test
@@ -121,7 +126,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         when(azureClient.getNetworkByResourceGroup(NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME)).thenReturn(network);
         List<VirtualNetworkLinkInner> virtualNetworkLinks = getNetworkLinks(List.of(NETWORK_RESOURCE_ID));
         AzureListResult<VirtualNetworkLinkInner> azureListResult = mock(AzureListResult.class);
-        when(azureListResult.getStream()).thenReturn(virtualNetworkLinks.stream());
+        when(azureListResult.getStream(AZURE_HANDLE_ALL_EXCEPTIONS)).thenReturn(virtualNetworkLinks.stream());
         when(azureClient.listNetworkLinksByPrivateDnsZoneName(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES))
                 .thenReturn(azureListResult);
 
@@ -138,7 +143,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         when(azureClient.getNetworkByResourceGroup(NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME)).thenReturn(network);
         List<VirtualNetworkLinkInner> virtualNetworkLinks = getNetworkLinks(List.of("anotherNetwork"));
         AzureListResult<VirtualNetworkLinkInner> azureListResult = mock(AzureListResult.class);
-        when(azureListResult.getStream()).thenReturn(virtualNetworkLinks.stream());
+        when(azureListResult.getStream(AZURE_HANDLE_ALL_EXCEPTIONS)).thenReturn(virtualNetworkLinks.stream());
         when(azureClient.listNetworkLinksByPrivateDnsZoneName(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES))
                 .thenReturn(azureListResult);
 
