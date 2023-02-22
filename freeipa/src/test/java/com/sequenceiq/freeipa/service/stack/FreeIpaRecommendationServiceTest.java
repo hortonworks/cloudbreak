@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -57,9 +56,6 @@ class FreeIpaRecommendationServiceTest {
     @Spy
     private VmTypeToVmTypeResponseConverter vmTypeConverter;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     @InjectMocks
     private FreeIpaRecommendationService underTest;
 
@@ -77,19 +73,8 @@ class FreeIpaRecommendationServiceTest {
     }
 
     @Test
-    public void testValidateCustomInstanceTypeWhenEntitlementIsNotEnabled() {
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"))).thenReturn("medium");
-        when(entitlementService.isFreeIpaSelectInstanceTypeEnabled(anyString())).thenReturn(Boolean.FALSE);
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.validateCustomInstanceType(createStack("large"), new Credential("AWS", "Cred", null, "crn", "account")));
-        assertEquals("Custom instance type for FreeIPA is not enabled!", badRequestException.getMessage());
-    }
-
-    @Test
     public void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsSmaller() {
         when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"))).thenReturn("medium");
-        when(entitlementService.isFreeIpaSelectInstanceTypeEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -100,7 +85,6 @@ class FreeIpaRecommendationServiceTest {
     @Test
     public void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsLarger() {
         when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"))).thenReturn("medium");
-        when(entitlementService.isFreeIpaSelectInstanceTypeEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
 
         assertDoesNotThrow(() -> underTest.validateCustomInstanceType(createStack("large"), new Credential("AWS", "Cred", null, "crn", "account")));
