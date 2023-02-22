@@ -78,7 +78,7 @@ public class DatalakeDataInfoJsonToObjectConverterTest {
         assertEquals(out.getSolrFulltextIndexCollectionSizeInBytes(), FULLTEXT_SIZE);
         assertEquals(out.getSolrRangerAuditsCollectionSizeInBytes(), RANGER_AUDITS_SIZE);
         assertEquals(out.getSolrVertexIndexCollectionSizeInBytes(), VERTEX_SIZE);
-        assertEquals(out.getDatabaseBackupNodeFreeSpaceInBytes(), AVAILABLE_BACKUP_SIZE);
+        assertEquals(out.getDatabaseBackupNodeFreeSpaceInBytes(), AVAILABLE_BACKUP_SIZE * 1024);
     }
 
     @Test

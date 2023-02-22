@@ -170,6 +170,9 @@ backup_database_for_service() {
     replace_ranger_group_before_export $RANGERGROUP $LOCAL_BACKUP
   fi
 
+  BACKUP_SIZE=$(du -h $LOCAL_BACKUP | cut -f 1)
+  doLog "INFO ${SERVICE} backup size is ${BACKUP_SIZE}"
+
   move_backup_to_cloud "$LOCAL_BACKUP"
 
   doLog "INFO Completed upload to ${BACKUP_LOCATION}"
