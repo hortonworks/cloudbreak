@@ -22,7 +22,7 @@ public class FreeIpaInstanceUtil {
                 .getFreeIpaV1Endpoint().describe(freeIpaTestDto.getRequest().getEnvironmentCrn());
         List<InstanceGroupResponse> instanceGroupResponses = describeFreeIpaResponse.getInstanceGroups();
         InstanceGroupResponse instanceGroupResponse = instanceGroupResponses.stream().filter(instanceGroup ->
-                instanceGroup.getName().equals(hostGroupName)).findFirst().orElse(null);
+                instanceGroup.getName().contains(hostGroupName)).findFirst().orElse(null);
         return Objects.requireNonNull(instanceGroupResponse).getMetaData()
                 .stream().map(InstanceMetaDataResponse::getInstanceId).collect(Collectors.toList());
     }
