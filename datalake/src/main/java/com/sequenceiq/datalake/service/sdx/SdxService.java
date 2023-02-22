@@ -696,7 +696,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         // this, we will set the raz enablement here. See CB-7474 for more details
         stackV4Request.getCluster().setRangerRazEnabled(razEnabled);
 
-        stackV4Request.setJavaVersion(javaVersion);
+        if (javaVersion != null) {
+            stackV4Request.setJavaVersion(javaVersion);
+        }
 
         return stackV4Request;
     }

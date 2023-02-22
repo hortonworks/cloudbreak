@@ -520,6 +520,26 @@ class SdxServiceTest {
     }
 
     @Test
+    void testNullJavaVersionShouldNotOverrideTheVersionInTheInternalStackRequest() throws IOException, TransactionExecutionException {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.1", CUSTOM);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
+        StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setJavaVersion(8);
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        stackV4Request.setCluster(clusterV4Request);
+
+        ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
+        when(sdxClusterRepository.save(sdxClusterArgumentCaptor.capture())).thenReturn(mock(SdxCluster.class));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
+
+        StackV4Request savedStackV4Request = JsonUtil.readValue(sdxClusterArgumentCaptor.getValue().getStackRequest(), StackV4Request.class);
+        assertEquals(8, savedStackV4Request.getJavaVersion());
+    }
+
+    @Test
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateShouldTriggerSdxCreationFlow() throws IOException, TransactionExecutionException {
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
