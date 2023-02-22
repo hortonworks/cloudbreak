@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -50,9 +49,6 @@ public class FreeIpaRecommendationService {
 
     @Inject
     private VmTypeToVmTypeResponseConverter vmTypeConverter;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     public FreeIpaRecommendationResponse getRecommendation(String credentialCrn, String region, String availabilityZone) {
         Credential credential = credentialService.getCredentialByCredCrn(credentialCrn);
@@ -99,9 +95,6 @@ public class FreeIpaRecommendationService {
         String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(stack.getCloudPlatform());
         Map<String, String> customInstanceTypes = getCustomInstanceTypes(stack, defaultInstanceType);
         if (!customInstanceTypes.isEmpty()) {
-            if (!entitlementService.isFreeIpaSelectInstanceTypeEnabled(credential.getAccountId())) {
-                throw new BadRequestException("Custom instance type for FreeIPA is not enabled!");
-            }
             Set<String> availableVmTypes = getAvailableVmTypes(stack.getRegion(), stack.getAvailabilityZone(), credential, defaultInstanceType).stream()
                     .map(VmTypeResponse::getValue)
                     .collect(Collectors.toSet());

@@ -19,11 +19,9 @@ auth:
       ha:
         repair.enable: true
       rebuild.enable: true
-      select.instance.type.enable: true
       batch.call.enable: true
       usersync.thread.timeout.enable: true
       delayedstopstart.enable: true
-      recipes.enable: true
       privileged.user.enable: true
     cloudstoragevalidation.enable:
       global: true
