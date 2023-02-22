@@ -411,21 +411,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getRangerAuditRole() {
-        return azureProperties.getCloudStorage().getRangerAuditRole();
-    }
-
-    @Override
-    public String getDataAccessRole() {
-        return azureProperties.getCloudStorage().getDataAccessRole();
-    }
-
-    @Override
-    public String rangerAccessAuthorizerRole() {
-        return azureProperties.getCloudStorage().getRangerAccessAuthorizerRole();
-    }
-
-    @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings
                 .withImageId(azureProperties.getBaseimage().getImageId())

@@ -178,11 +178,6 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .then(this::verifyEnvironmentResponseDiskEncryptionKey)
                 .given(FreeIpaTestDto.class)
                 .then(this::verifyFreeIpaVolumeEncryptionKey)
-                .validate();
-
-        createIDBrokerMappings(testContext);
-
-        testContext
                 .given(SdxTestDto.class)
                     .withCloudStorage()
                     .withEnableMultiAz()
@@ -261,11 +256,6 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .then(this::verifyEnvironmentResponseDiskEncryptionKey)
                 .given(FreeIpaTestDto.class)
                 .then(this::verifyFreeIpaVolumeEncryptionKey)
-                .validate();
-
-        createIDBrokerMappings(testContext);
-
-        testContext
                 .given(SdxTestDto.class)
                     .withCloudStorage()
                 .when(sdxTestClient.create())

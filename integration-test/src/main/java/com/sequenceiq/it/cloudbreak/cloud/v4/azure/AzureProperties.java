@@ -242,12 +242,6 @@ public class AzureProperties {
 
         private Integer zeroBlobLengthToleration = 5;
 
-        private String dataAccessRole;
-
-        private String rangerAuditRole;
-
-        private String rangerAccessAuthorizerRole;
-
         public String getAccountKey() {
             return accountKey;
         }
@@ -298,30 +292,6 @@ public class AzureProperties {
 
         public void setZeroBlobLengthToleration(Integer zeroBlobLengthToleration) {
             this.zeroBlobLengthToleration = zeroBlobLengthToleration;
-        }
-
-        public String getDataAccessRole() {
-            return dataAccessRole;
-        }
-
-        public void setDataAccessRole(String dataAccessRole) {
-            this.dataAccessRole = dataAccessRole;
-        }
-
-        public String getRangerAuditRole() {
-            return rangerAuditRole;
-        }
-
-        public void setRangerAuditRole(String rangerAuditRole) {
-            this.rangerAuditRole = rangerAuditRole;
-        }
-
-        public String getRangerAccessAuthorizerRole() {
-            return rangerAccessAuthorizerRole;
-        }
-
-        public void setRangerAccessAuthorizerRole(String rangerAccessAuthorizerRole) {
-            this.rangerAccessAuthorizerRole = rangerAccessAuthorizerRole;
         }
 
         public static class AdlsGen2 {

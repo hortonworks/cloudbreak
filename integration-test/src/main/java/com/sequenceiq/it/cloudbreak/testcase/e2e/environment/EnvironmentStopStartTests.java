@@ -155,11 +155,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .addTags(ENV_TAGS)
                 .when(environmentTestClient.create())
                 .then(this::getTelemetryStorageLocation)
-                .validate();
-
-        createIDBrokerMappings(testContext);
-
-        testContext
                 .given(SdxInternalTestDto.class)
                     .withTelemetry("telemetry")
                 .addTags(SDX_TAGS)

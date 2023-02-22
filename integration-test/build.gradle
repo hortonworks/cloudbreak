@@ -113,9 +113,6 @@ dependencies {
   implementation (project(':auth-distributor-connector')) {
     transitive = false;
   }
-  implementation (project(':idbmms-connector')) {
-    transitive = false;
-  }
 
   implementation project(':common')
   implementation project(':cloud-gcp')

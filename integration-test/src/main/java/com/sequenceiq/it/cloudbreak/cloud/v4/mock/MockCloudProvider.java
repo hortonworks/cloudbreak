@@ -440,21 +440,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return mockProperties.getCloudStorage().getS3().getInstanceProfile();
     }
 
-    @Override
-    public String getRangerAuditRole() {
-        return mockProperties.getCloudStorage().getRangerAuditRole();
-    }
-
-    @Override
-    public String getDataAccessRole() {
-        return mockProperties.getCloudStorage().getDataAccessRole();
-    }
-
-    @Override
-    public String rangerAccessAuthorizerRole() {
-        return mockProperties.getCloudStorage().getRangerAccessAuthorizerRole();
-    }
-
     private MockNetworkV1Parameters distroXNetworkParameters() {
         MockNetworkV1Parameters params = new MockNetworkV1Parameters();
         params.setSubnetId(getSubnetId());

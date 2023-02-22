@@ -367,12 +367,6 @@ public class GcpProperties {
 
         private String fileSystemType;
 
-        private String dataAccessRole;
-
-        private String rangerAuditRole;
-
-        private String rangerAccessAuthorizerRole;
-
         public Gcs getGcs() {
             return gcs;
         }
@@ -391,30 +385,6 @@ public class GcpProperties {
 
         public void setFileSystemType(String fileSystemType) {
             this.fileSystemType = fileSystemType;
-        }
-
-        public String getDataAccessRole() {
-            return dataAccessRole;
-        }
-
-        public void setDataAccessRole(String dataAccessRole) {
-            this.dataAccessRole = dataAccessRole;
-        }
-
-        public String getRangerAuditRole() {
-            return rangerAuditRole;
-        }
-
-        public void setRangerAuditRole(String rangerAuditRole) {
-            this.rangerAuditRole = rangerAuditRole;
-        }
-
-        public String getRangerAccessAuthorizerRole() {
-            return rangerAccessAuthorizerRole;
-        }
-
-        public void setRangerAccessAuthorizerRole(String rangerAccessAuthorizerRole) {
-            this.rangerAccessAuthorizerRole = rangerAccessAuthorizerRole;
         }
 
         public static class Gcs {

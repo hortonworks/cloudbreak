@@ -184,21 +184,6 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getRangerAuditRole() {
-        return delegate.getRangerAuditRole();
-    }
-
-    @Override
-    public String getDataAccessRole() {
-        return delegate.getDataAccessRole();
-    }
-
-    @Override
-    public String rangerAccessAuthorizerRole() {
-        return delegate.rangerAccessAuthorizerRole();
-    }
-
-    @Override
     public FileSystemType getFileSystemType() {
         return delegate.getFileSystemType();
     }
