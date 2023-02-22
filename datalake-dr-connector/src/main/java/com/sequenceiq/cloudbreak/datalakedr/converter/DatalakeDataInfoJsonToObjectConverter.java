@@ -9,6 +9,9 @@ import com.google.gson.JsonParser;
 
 @Service
 public class DatalakeDataInfoJsonToObjectConverter {
+
+    public static final int BYTES_IN_FILESYSTEM_BLOCK = 1024;
+
     public DatalakeDataInfoObject convert(String operationId, String inputJSON) {
         try {
             JsonObject json = JsonParser.parseString(inputJSON).getAsJsonObject();
@@ -20,7 +23,7 @@ public class DatalakeDataInfoJsonToObjectConverter {
             return DatalakeDataInfoObject.newBuilder()
                     .setOperationId(operationId)
                     .setDatabaseSizeInBytes(getTotalDatabaseSize(databaseJSON))
-                    .setDatabaseBackupNodeFreeSpaceInBytes(backupSpaceJSON.getAsLong())
+                    .setDatabaseBackupNodeFreeSpaceInBytes(backupSpaceJSON.getAsLong() * BYTES_IN_FILESYSTEM_BLOCK)
                     .setHbaseAtlasEntityAuditEventsTableSizeInBytes(hbaseJSON.get("atlas_entity_audit_events").getAsLong())
                     .setHbaseAtlasJanusTableSizeInBytes(hbaseJSON.get("atlas_janus").getAsLong())
                     .setSolrVertexIndexCollectionSizeInBytes(solrJSON.get("vertex_index").getAsLong())
