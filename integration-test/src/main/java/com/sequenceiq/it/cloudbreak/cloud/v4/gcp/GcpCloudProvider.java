@@ -445,21 +445,6 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getRangerAuditRole() {
-        return gcpProperties.getCloudStorage().getRangerAuditRole();
-    }
-
-    @Override
-    public String getDataAccessRole() {
-        return gcpProperties.getCloudStorage().getDataAccessRole();
-    }
-
-    @Override
-    public String rangerAccessAuthorizerRole() {
-        return gcpProperties.getCloudStorage().getRangerAccessAuthorizerRole();
-    }
-
-    @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings
                 .withImageId(gcpProperties.getBaseimage().getImageId())
