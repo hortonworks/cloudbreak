@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.aws.amazons3.client.S3Client;
 import com.sequenceiq.it.util.ResourceUtil;
 
 @Component
@@ -35,6 +36,9 @@ public class RecipeUtil {
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private S3Client s3Client;
 
     public String generatePreDeploymentRecipeContent(ApplicationContext applicationContext) {
         try {
@@ -89,7 +93,7 @@ public class RecipeUtil {
         String cloudStorageCopy;
 
         if (StringUtils.equalsIgnoreCase(cloudProvider, CloudPlatform.AWS.name())) {
-            cloudStorageCopy = format("aws s3 cp /e2e-pre-termination s3://cloudbreak-test/pre-termination/%s/", preTerminationRecipeName);
+            cloudStorageCopy = format("aws s3 cp /e2e-pre-termination s3://%s/pre-termination/%s/", s3Client.getDefaultBucketName(), preTerminationRecipeName);
         } else if (StringUtils.equalsIgnoreCase(cloudProvider, CloudPlatform.GCP.name())) {
             cloudStorageCopy = format("gsutil cp /e2e-pre-termination gs://cloudbreak-dev/pre-termination/%s/", preTerminationRecipeName);
         } else {
