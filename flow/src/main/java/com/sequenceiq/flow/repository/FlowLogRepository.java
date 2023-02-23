@@ -65,8 +65,10 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     @Query("SELECT fl FROM FlowLog fl WHERE fl.flowType = :flowType AND fl.resourceId = :resourceId ORDER BY fl.created DESC")
     List<FlowLog> findAllFlowByType(@Param("resourceId") Long resourceId, @Param("flowType") ClassValue classValue);
 
-    @Query("SELECT fl FROM FlowLog fl WHERE fl.created IN " +
-            "( SELECT max(fls.created) from FlowLog fls WHERE fls.flowType = :flowType and fls.resourceId = :resourceId " +
+    @Query("SELECT fl FROM FlowLog fl " +
+            "WHERE fl.resourceId = :resourceId " +
+            "AND fl.created IN " +
+            "( SELECT max(fls.created) FROM FlowLog fls WHERE fls.flowType = :flowType AND fls.resourceId = :resourceId " +
             "AND fls.currentState <> 'FINISHED' " +
             "GROUP BY (fls.flowId, fls.resourceId)) " +
             "ORDER BY fl.created DESC ")
