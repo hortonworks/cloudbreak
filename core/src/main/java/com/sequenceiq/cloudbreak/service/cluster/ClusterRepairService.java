@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -200,7 +201,7 @@ public class ClusterRepairService {
                 } else {
                     // TODO: it should not be here... we should move it to the repair flow.
                     setStackStatusAndMarkDeletableVolumes(repairMode, deleteVolumes, stack.getStack(), repairableNodes.values().stream()
-                            .flatMap(Collection::stream).map(InstanceMetaData::getInstanceId).collect(Collectors.toSet()));
+                            .flatMap(Collection::stream).map(instanceMetaData -> (InstanceMetadataView) instanceMetaData).collect(Collectors.toList()));
                     repairStartResult = Result.success(repairableNodes);
                 }
             }
@@ -403,10 +404,10 @@ public class ClusterRepairService {
         }
     }
 
-    private void updateVolumesDeleteFlag(StackView stack, Predicate<Resource> resourceFilter, boolean deleteVolumes) {
+    private void updateVolumesDeleteFlag(StackView stack, Set<String> instanceIds, Set<String> instanceFQDNs, boolean deleteVolumes) {
         List<Resource> volumes = resourceService.findByStackIdAndType(stack.getId(), stack.getDiskResourceType());
         volumes = volumes.stream()
-                .filter(resourceFilter)
+                .filter(volume -> instanceIds.contains(volume.getInstanceId()) || volumeFQDNIsInInstanceFQDNSet(volume, instanceFQDNs))
                 .map(volumeSet -> updateDeleteVolumesFlag(deleteVolumes, volumeSet))
                 .collect(toList());
         List<String> volumeNames = volumes.stream().map(Resource::getResourceName).collect(toList());
@@ -414,14 +415,18 @@ public class ClusterRepairService {
         resourceService.saveAll(volumes);
     }
 
-    private Predicate<Resource> inInstances(Set<String> instanceIds) {
-        return resource -> {
-            if (resource.getInstanceId() != null) {
-                return instanceIds.contains(resource.getInstanceId());
-            } else {
-                return false;
+    private boolean volumeFQDNIsInInstanceFQDNSet(Resource volume, Set<String> instanceFQDNs) {
+        try {
+            Optional<VolumeSetAttributes> attributes = resourceAttributeUtil.getTypedAttributes(volume, VolumeSetAttributes.class);
+            if (attributes.isPresent()) {
+                if (instanceFQDNs.contains(attributes.get().getDiscoveryFQDN())) {
+                    return true;
+                }
             }
-        };
+        } catch (CloudbreakServiceException cloudbreakServiceException) {
+            LOGGER.warn("Can't parse resource attribute into VolumeSetAttributes class", cloudbreakServiceException);
+        }
+        return false;
     }
 
     private Resource updateDeleteVolumesFlag(boolean deleteVolumes, Resource volumeSet) {
@@ -433,20 +438,24 @@ public class ClusterRepairService {
         return volumeSet;
     }
 
-    public void markVolumesToNonDeletable(StackView stack, Set<String> instanceIdsToRepair) {
-        Predicate<Resource> updateVolumesPredicate = inInstances(instanceIdsToRepair);
-        updateVolumesDeleteFlag(stack, updateVolumesPredicate, false);
+    public void markVolumesToNonDeletable(StackView stack, List<InstanceMetadataView> instanceMetadataViews) {
+        updateVolumesDeleteFlag(stack, instanceMetadataViews, false);
     }
 
     public void setStackStatusAndMarkDeletableVolumes(ManualClusterRepairMode repairMode, boolean deleteVolumes, StackView stack,
-            Set<String> instanceIdsToRepair) {
-        if (!ManualClusterRepairMode.DRY_RUN.equals(repairMode) && !instanceIdsToRepair.isEmpty()) {
+            List<InstanceMetadataView> instances) {
+        if (!ManualClusterRepairMode.DRY_RUN.equals(repairMode) && !instances.isEmpty()) {
             LOGGER.info("Repair mode is not a dry run, {}", repairMode);
-            Predicate<Resource> updateVolumesPredicate = inInstances(instanceIdsToRepair);
-            updateVolumesDeleteFlag(stack, updateVolumesPredicate, deleteVolumes);
+            updateVolumesDeleteFlag(stack, instances, deleteVolumes);
             LOGGER.info("Update stack status to REPAIR_IN_PROGRESS");
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS);
         }
+    }
+
+    private void updateVolumesDeleteFlag(StackView stack, List<InstanceMetadataView> instanceMetadataViews, boolean deleteVolumes) {
+        Set<String> instanceIds = instanceMetadataViews.stream().map(InstanceMetadataView::getInstanceId).collect(toSet());
+        Set<String> instanceFQDNs = instanceMetadataViews.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(toSet());
+        updateVolumesDeleteFlag(stack, instanceIds, instanceFQDNs, deleteVolumes);
     }
 
     private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>,
