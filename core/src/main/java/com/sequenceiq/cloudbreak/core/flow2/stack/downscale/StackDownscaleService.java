@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.api.type.CommonStatus;
 
 @Service
 public class StackDownscaleService {
@@ -114,19 +115,26 @@ public class StackDownscaleService {
 
     private void fillDiscoveryFQDNForRepair(StackView stack, List<InstanceMetadataView> removableInstances) {
         List<Resource> diskResources = resourceService.findByStackIdAndType(stack.getId(), stack.getDiskResourceType());
-        List<String> removeableInstanceIds = removableInstances
+        List<String> removableInstanceIds = removableInstances
                 .stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList());
+        List<String> removableFQDNs = removableInstances.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(toList());
         for (Resource volumeSet : diskResources) {
             Optional<VolumeSetAttributes> attributes = resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class);
-            attributes.ifPresent(volumeSetAttributes ->
-                    fillDiscoveryFQDNInVolumeSetIfEmpty(removableInstances, removeableInstanceIds, volumeSet, volumeSetAttributes));
+            attributes.ifPresent(volumeSetAttributes -> {
+                fillDiscoveryFQDNInVolumeSetIfEmpty(removableInstances, removableInstanceIds, volumeSet, volumeSetAttributes);
+                if (removableFQDNs.contains(volumeSetAttributes.getDiscoveryFQDN()) && CommonStatus.CREATED.equals(volumeSet.getResourceStatus())) {
+                    LOGGER.warn("Volume for {} is in CREATED state, but we are repairing the related node, so we set the status to DETACHED. VolumeSet: {}",
+                            volumeSetAttributes.getDiscoveryFQDN(), volumeSet);
+                    volumeSet.setResourceStatus(CommonStatus.DETACHED);
+                }
+            });
         }
         resourceService.saveAll(diskResources);
     }
 
-    private void fillDiscoveryFQDNInVolumeSetIfEmpty(List<InstanceMetadataView> removableInstances, List<String> removeableInstanceIds, Resource volumeSet,
+    private void fillDiscoveryFQDNInVolumeSetIfEmpty(List<InstanceMetadataView> removableInstances, List<String> removableInstanceIds, Resource volumeSet,
         VolumeSetAttributes volumeSetAttributes) {
-        if (removeableInstanceIds.contains(volumeSet.getInstanceId())
+        if (removableInstanceIds.contains(volumeSet.getInstanceId())
                 && StringUtils.isNullOrEmpty(volumeSetAttributes.getDiscoveryFQDN())) {
             Optional<InstanceMetadataView> metaData = removableInstances.stream()
                     .filter(instanceMetaData -> volumeSet.getInstanceId().equals(instanceMetaData.getInstanceId()))
