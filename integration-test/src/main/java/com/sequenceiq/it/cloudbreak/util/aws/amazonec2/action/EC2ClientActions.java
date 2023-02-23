@@ -99,6 +99,13 @@ public class EC2ClientActions extends EC2Client {
                 .collect(Collectors.toList());
     }
 
+    public List<String> listInstanceTypes(List<String> instanceIds) {
+        AmazonEC2 ec2Client = buildEC2Client();
+        DescribeInstancesResult describeInstancesResult = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
+        return describeInstancesResult.getReservations().stream().flatMap(
+                instances -> instances.getInstances().stream().map(instance -> instance.getInstanceType())).collect(Collectors.toList());
+    }
+
     public void deleteHostGroupInstances(List<String> instanceIds) {
         AmazonEC2 ec2Client = buildEC2Client();
 

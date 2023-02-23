@@ -62,6 +62,16 @@ public class AzureClientActions {
         return diskIds;
     }
 
+    public List<String> listInstanceTypes(String clusterName, List<String> instanceIds) {
+        return instanceIds.stream().map(
+                id ->  {
+                    String resourceGroup = getResourceGroupName(clusterName, id);
+                    return Optional.ofNullable(azure.virtualMachines()).orElseThrow()
+                            .getByResourceGroup(resourceGroup, id).size().toString().toLowerCase();
+                }
+        ).collect(Collectors.toList());
+    }
+
     public void deleteInstances(String clusterName, List<String> instanceIds) {
         AzureInstanceActionExecutor.builder()
                 .onInstances(instanceIds)
