@@ -22,6 +22,10 @@ public class AmazonEC2Util {
         return ec2ClientActions.getInstanceVolumeIds(instanceIds, false);
     }
 
+    public List<String> listInstanceTypes(List<String> instanceIds) {
+        return ec2ClientActions.listInstanceTypes(instanceIds);
+    }
+
     public List<String> listVolumeKmsKeyIds(List<String> instanceIds) {
         return ec2ClientActions.getRootVolumesKmsKeys(instanceIds);
     }

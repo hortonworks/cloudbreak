@@ -131,7 +131,7 @@ integrationtest:
         instanceType: m5.4xlarge
       freeipa:
         group: master
-        instanceType: m5.xlarge
+        instanceType: m5.2xlarge
     vpcId: vpc-0fc0a422f82ea8eec
     subnetIds:
       - subnet-025e39ebeb6efeca8
@@ -182,7 +182,7 @@ integrationtest:
     region: West US 2
     location: West US 2
     verticalScale:
-      supported: false
+      supported: true
       datalake:
         group: master
         instanceType: Standard_D8s_v3
@@ -257,7 +257,7 @@ integrationtest:
     region: europe-west2
     location: europe-west2
     verticalScale:
-      supported: false
+      supported: true
       datalake:
         group: master
         instanceType: n1-standard-16

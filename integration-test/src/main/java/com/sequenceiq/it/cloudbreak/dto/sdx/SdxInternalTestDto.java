@@ -129,8 +129,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public String getCrn() {
         if (getResponse() == null) {
-            throw new IllegalStateException("You have tried to assign to SdxInternalTestDto," +
-                    " that hasn't been created and therefore has no Response object yet.");
+            return null;
         }
         return getResponse().getCrn();
     }

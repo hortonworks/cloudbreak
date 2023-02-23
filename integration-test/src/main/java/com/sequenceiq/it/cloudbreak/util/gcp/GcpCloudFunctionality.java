@@ -37,6 +37,11 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
+    public List<String> listInstanceTypes(String clusterName, List<String> instanceIds) {
+        return gcpUtil.listInstanceTypes(instanceIds);
+    }
+
+    @Override
     public List<String> listVolumeEncryptionKeyIds(String clusterName, String resourceGroupName, List<String> instanceIds) {
         return gcpUtil.listVolumeEncryptionKey(instanceIds);
     }
