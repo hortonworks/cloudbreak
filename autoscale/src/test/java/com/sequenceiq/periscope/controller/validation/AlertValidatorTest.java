@@ -144,7 +144,7 @@ public class AlertValidatorTest {
         expectedException.expectMessage("account.not.entitled");
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateStopStartEntitlementAndDisableIfNotEntitled(aCluster));
-        verify(asClusterCommonService, times(1)).setStopStartScalingState(aCluster.getId(), false);
+        verify(asClusterCommonService, times(1)).setStopStartScalingState(aCluster.getId(), false, false);
     }
 
     @Test
@@ -154,7 +154,7 @@ public class AlertValidatorTest {
         when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateStopStartEntitlementAndDisableIfNotEntitled(aCluster));
-        verify(asClusterCommonService, never()).setStopStartScalingState(aCluster.getId(), false);
+        verify(asClusterCommonService, never()).setStopStartScalingState(aCluster.getId(), false, false);
     }
 
     @Test

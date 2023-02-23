@@ -6,12 +6,14 @@ import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_DISABLED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENABLED;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
@@ -37,6 +40,7 @@ import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.NodeDeletionService;
 import com.sequenceiq.periscope.service.NotFoundException;
@@ -73,6 +77,9 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
     @Inject
     private AlertService alertService;
 
+    @Inject
+    private EntitlementValidationService entitlementValidationService;
+
     public List<Cluster> getDistroXClusters() {
         return clusterService.findDistroXByTenant(restRequestThreadLocalService.getCloudbreakTenant());
     }
@@ -103,23 +110,36 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
 
     public Cluster setAutoscaleState(Long clusterId, AutoscaleClusterState autoscaleState) {
         Cluster cluster = setAutoscaleState(clusterId, autoscaleState.isEnableAutoscaling());
-        return setStopStartScalingState(cluster.getId(), autoscaleState.getUseStopStartMechanism());
+        return setStopStartScalingState(cluster.getId(), autoscaleState.getUseStopStartMechanism(),
+                !ObjectUtils.isEmpty(cluster.getTimeAlerts()));
     }
 
     public Cluster setAutoscaleState(Long clusterId, Boolean enableAutoScaling) {
         Cluster cluster = clusterService.findById(clusterId);
-        if (enableAutoScaling != null && !cluster.isAutoscalingEnabled().equals(enableAutoScaling)) {
+        if (enableAutoScaling != null && !Objects.equals(enableAutoScaling, cluster.isAutoscalingEnabled())) {
             cluster = clusterService.setAutoscaleState(clusterId, enableAutoScaling);
         }
         return cluster;
     }
 
-    public Cluster setStopStartScalingState(Long clusterId, Boolean enableStopStartScaling) {
+    public Cluster setStopStartScalingState(Long clusterId, Boolean requestedState, boolean hasTimeAlerts) {
         Cluster cluster = clusterService.findById(clusterId);
-        if (enableStopStartScaling != null && !cluster.isStopStartScalingEnabled().equals(enableStopStartScaling)) {
-            cluster = clusterService.setStopStartScalingState(cluster, enableStopStartScaling);
+        boolean allowedPerEntitlement = canEnableStopStartBasedOnEntitlement(cluster);
+
+        boolean targetState = false;
+        if (allowedPerEntitlement && !hasTimeAlerts) {
+            if (requestedState == null || requestedState) {
+                targetState = true;
+            }
+        }
+        if (!Boolean.valueOf(targetState).equals(cluster.isStopStartScalingEnabled())) {
+            return clusterService.setStopStartScalingState(cluster, targetState);
         }
         return cluster;
+    }
+
+    private boolean canEnableStopStartBasedOnEntitlement(Cluster cluster) {
+        return entitlementValidationService.stopStartAutoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), cluster.getCloudPlatform());
     }
 
     public void deleteAlertsForClusterCrn(String stackCrn) {

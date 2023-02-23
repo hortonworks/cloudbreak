@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -153,7 +154,8 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
                 asClusterCommonService.createTimeAlerts(cluster.getId(),
                         timeAlertRequestConverter.convertAllFromJson(autoscaleClusterRequest.getTimeAlertRequests()));
                 asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleClusterRequest.getEnableAutoscaling());
-                asClusterCommonService.setStopStartScalingState(cluster.getId(), autoscaleClusterRequest.getUseStopStartMechanism());
+                asClusterCommonService.setStopStartScalingState(cluster.getId(), autoscaleClusterRequest.getUseStopStartMechanism(),
+                        !ObjectUtils.isEmpty(autoscaleClusterRequest.getTimeAlertRequests()));
             });
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();
