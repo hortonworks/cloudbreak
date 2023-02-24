@@ -3,7 +3,9 @@ package com.sequenceiq.datalake.repository;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -17,7 +19,10 @@ public interface SdxStatusRepository extends CrudRepository<SdxStatusEntity, Lon
 
     SdxStatusEntity findFirstByDatalakeIdIsOrderByIdDesc(Long id);
 
-    List<SdxStatusEntity> findDistinctFirstByStatusInAndDatalakeIdInOrderByIdDesc(Collection<DatalakeStatusEnum> datalakeStatusEnums,
-            Collection<Long> datalakeId);
+    @Query("SELECT sse FROM SdxStatusEntity sse WHERE sse.id IN " +
+            "( SELECT max(isse.id) FROM SdxStatusEntity isse WHERE isse.status IN :statuses and isse.datalake.id IN :datalakeIds " +
+            "GROUP BY (isse.datalake.id))")
+    List<SdxStatusEntity> findLatestSdxStatusesFilteredByStatusesAndDatalakeIds(@Param("statuses") Collection<DatalakeStatusEnum> statuses,
+            @Param("datalakeIds") Collection<Long> datalakeIds);
 
 }
