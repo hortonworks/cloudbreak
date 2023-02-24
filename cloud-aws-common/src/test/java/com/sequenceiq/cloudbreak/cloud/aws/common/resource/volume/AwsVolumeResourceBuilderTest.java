@@ -11,12 +11,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,6 +77,7 @@ import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ec2.model.CreateVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.CreateVolumeResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
@@ -460,6 +463,60 @@ class AwsVolumeResourceBuilderTest {
 
     @Test()
     @MockitoSettings(strictness = Strictness.LENIENT)
+    void deleteTurnOffDeleteOnterminationAndCreateMissingVolumes() throws PreserveResourceException {
+        setUpTaskExecutors();
+        CloudResource cloudResource = mock(CloudResource.class);
+        VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
+        when(volumeSetAttributes.getVolumes()).thenReturn(createVolumesWithIdForVolumeSet(List.of("vol1", "vol2"), TYPE_GP2));
+        when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
+                .thenReturn(Pair.of(List.of("vol1", "vol2"), List.of(createVolumeSet(createVolumesWithIdForVolumeSet(List.of("vol1", "vol2"), TYPE_GP2)))));
+        AwsServiceException deleted = Ec2Exception.builder().message("")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("InvalidVolume.NotFound").build())
+                .build();
+        when(amazonEC2Client.describeVolumes(DescribeVolumesRequest.builder().volumeIds("vol1", "vol2").build())).thenThrow(deleted);
+        when(amazonEC2Client.describeVolumes(DescribeVolumesRequest.builder().volumeIds("vol1").build()))
+                .thenReturn(describeVolumesResultWithId("vol1", VolumeState.IN_USE));
+        when(amazonEC2Client.describeVolumes(DescribeVolumesRequest.builder().volumeIds("vol2").build()))
+                .thenReturn(describeVolumesResult(VolumeState.DELETED));
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
+        when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.FALSE);
+        when(amazonEC2Client.createVolume(any())).thenReturn(createCreateVolumeResult());
+
+        assertThrows(PreserveResourceException.class, () -> underTest.delete(awsContext, authenticatedContext, cloudResource));
+
+        verify(amazonEC2Client, atLeast(1)).createVolume(any());
+        verify(amazonEC2Client, atLeast(1)).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
+        ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
+        assertTrue(!modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
+    }
+
+    @Test()
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void deleteTurnOffDeleteOnterminationThrowsExceptionIfAllVolumesMissing() throws PreserveResourceException {
+        CloudResource cloudResource = mock(CloudResource.class);
+        VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
+        when(volumeSetAttributes.getVolumes()).thenReturn(createVolumesWithIdForVolumeSet(List.of("vol1", "vol2"), TYPE_GP2));
+        when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
+                .thenReturn(Pair.of(List.of("vol1", "vol2"), List.of(createVolumeSet(createVolumesWithIdForVolumeSet(List.of("vol1", "vol2"), TYPE_GP2)))));
+        AwsServiceException deleted = Ec2Exception.builder().message("")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("InvalidVolume.NotFound").build())
+                .build();
+        when(amazonEC2Client.describeVolumes(DescribeVolumesRequest.builder().volumeIds("vol1", "vol2").build())).thenThrow(deleted);
+        when(amazonEC2Client.describeVolumes(DescribeVolumesRequest.builder().volumeIds("vol1").build())).thenThrow(deleted);
+        when(amazonEC2Client.describeVolumes(DescribeVolumesRequest.builder().volumeIds("vol2").build())).thenThrow(deleted);
+
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
+        when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.FALSE);
+
+        assertThrows(AwsResourceException.class, () -> underTest.delete(awsContext, authenticatedContext, cloudResource));
+        verify(amazonEC2Client, never()).createVolume(any());
+        verify(amazonEC2Client, never()).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
+    }
+
+    @Test()
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void skipModifyInstanceAttributeDuringDeleteWhenNoAttachedResourcesFound() throws PreserveResourceException {
         CloudResource cloudResource = mock(CloudResource.class);
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
@@ -517,6 +574,14 @@ class AwsVolumeResourceBuilderTest {
         return new VolumeSetAttributes.Volume(null, null, VOLUME_SIZE, type, CloudVolumeUsageType.GENERAL);
     }
 
+    private List<VolumeSetAttributes.Volume> createVolumesWithIdForVolumeSet(List<String> ids, String type) {
+        List<VolumeSetAttributes.Volume> result = new ArrayList<>();
+        for (String volumeId : ids) {
+            result.add(new VolumeSetAttributes.Volume(volumeId, null, VOLUME_SIZE, type, CloudVolumeUsageType.GENERAL));
+        }
+        return result;
+    }
+
     private CloudResource createVolumeSet(List<VolumeSetAttributes.Volume> volumes) {
         return CloudResource.builder()
                 .withType(ResourceType.AWS_VOLUMESET)
@@ -547,6 +612,16 @@ class AwsVolumeResourceBuilderTest {
                 .state(state)
                 .build();
         return DescribeVolumesResponse.builder().volumes(List.of(volume)).build();
+    }
+
+    private DescribeVolumesResponse describeVolumesResultWithId(String volumeId, VolumeState state) {
+        software.amazon.awssdk.services.ec2.model.Volume volume = software.amazon.awssdk.services.ec2.model.Volume.builder()
+                .volumeId(volumeId)
+                .state(state)
+                .encrypted(true)
+                .kmsKeyId("kmskeyid")
+                .build();
+        return DescribeVolumesResponse.builder().volumes(volume).build();
     }
 
     private List<VolumeSetAttributes.Volume> verifyResultAndGetVolumes(List<CloudResource> result) {

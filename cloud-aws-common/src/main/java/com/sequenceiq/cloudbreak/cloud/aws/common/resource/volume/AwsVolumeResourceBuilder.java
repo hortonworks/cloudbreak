@@ -10,16 +10,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -55,6 +58,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -367,19 +371,126 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
         boolean anyDeleted = cloudResourceStatuses.stream().map(CloudResourceStatus::getStatus).anyMatch(DELETED::equals);
         AmazonEc2Client client = getAmazonEC2Client(auth);
-        if (!volumeSetAttributes.getDeleteOnTermination() && !anyDeleted) {
-            LOGGER.debug("Volumes will be preserved.");
-            resource.setStatus(CommonStatus.DETACHED);
-            volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
-            turnOffDeleteOnterminationOnAttachedVolumes(resource, cloudResourceStatuses, client);
-            resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
-            resourceNotifier.notifyUpdate(resource, auth.getCloudContext());
-            throw new PreserveResourceException("Resource will be preserved for later reattachment.");
+        if (!volumeSetAttributes.getDeleteOnTermination()) {
+            if (anyDeleted) {
+                LOGGER.debug(String.format("Volumes should be preserved for instance (%s), but some of them are already terminated. " +
+                        "Trying to recover/recreate them.", resource.getInstanceId()));
+                List<Volume> volumes = tryRecoverVolumeSet(context, auth, resource, volumeSetAttributes);
+                LOGGER.debug(String.format("Recovered and preserved volumes: %s", volumes));
+                if (volumes != null && !volumes.isEmpty()) {
+                    volumeSetAttributes.setVolumes(volumes);
+                }
+            }
+            setVolumeDetachParameters(auth, resource, volumeSetAttributes, cloudResourceStatuses, client);
         }
         deleteOrphanedVolumes(cloudResourceStatuses, client);
         turnOnDeleteOnterminationOnAttachedVolumes(resource, cloudResourceStatuses, client);
 
         return null;
+    }
+
+    private void setVolumeDetachParameters(AuthenticatedContext auth, CloudResource resource, VolumeSetAttributes volumeSetAttributes,
+            List<CloudResourceStatus> cloudResourceStatuses, AmazonEc2Client client) throws PreserveResourceException {
+        LOGGER.debug("Volumes will be preserved.");
+        resource.setStatus(CommonStatus.DETACHED);
+        volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
+        turnOffDeleteOnterminationOnAttachedVolumes(resource, cloudResourceStatuses, client);
+        resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
+        resourceNotifier.notifyUpdate(resource, auth.getCloudContext());
+        throw new PreserveResourceException("Resource will be preserved for later reattachment.");
+    }
+
+    private List<Volume> tryRecoverVolumeSet(AwsContext context, AuthenticatedContext auth, CloudResource resource, VolumeSetAttributes volumeSetAttributes) {
+        AmazonEc2Client client = getAmazonEC2Client(auth);
+        Pair<List<String>, List<CloudResource>> volumes = volumeResourceCollector.getVolumeIdsByVolumeResources(List.of(resource), resourceType(),
+                volumeSetAttributes());
+        LOGGER.debug("Going to describe volume(s) attached to instance: [{}]", resource.getInstanceId());
+        try {
+            Set<String> allVolumesInVolumeSet = new HashSet<>(volumes.getFirst());
+            DeletedVolumeInfo deletedVolumeInfo = getDeletedVolumeInfo(client, allVolumesInVolumeSet, resource);
+            LOGGER.debug(String.format("Volumes already deleted from the volume set: %s", deletedVolumeInfo.getDeletedVolumeIds()));
+            List<Volume> deletedVolumes = volumeSetAttributes.getVolumes().stream()
+                    .filter(volume -> deletedVolumeInfo.getDeletedVolumeIds().contains(volume.getId()))
+                    .collect(Collectors.toList());
+            List<Volume> allVolumes = rebuildVolumes(auth, volumeSetAttributes, deletedVolumes, deletedVolumeInfo.getTemplateVolume());
+            volumeSetAttributes.getVolumes().stream()
+                    .filter(volume -> !deletedVolumeInfo.getDeletedVolumeIds().contains(volume.getId()))
+                    .forEach(allVolumes::add);
+            return allVolumes;
+        } catch (Ec2Exception e) {
+            throw e;
+        } catch (ExecutionException | InterruptedException e) {
+            throw new CloudbreakRuntimeException("Cannot recover volumes.", e);
+        }
+    }
+
+    private DeletedVolumeInfo getDeletedVolumeInfo(AmazonEc2Client client, Set<String> allVolumesInVolumeSet, CloudResource resource) {
+        Set<String> deletedVolumeIds = new HashSet<>();
+        software.amazon.awssdk.services.ec2.model.Volume templateVolume = null;
+        for (String volumeId : allVolumesInVolumeSet) {
+            DescribeVolumesRequest describeVolumesRequest = DescribeVolumesRequest.builder()
+                    .volumeIds(volumeId)
+                    .build();
+            LOGGER.debug("Going to describe volume with id: [{}]", String.join(",", describeVolumesRequest.volumeIds()));
+            boolean deleted = false;
+            try {
+                DescribeVolumesResponse result = client.describeVolumes(describeVolumesRequest);
+                ResourceStatus volumeResourceStatus = getResourceStatus(result);
+                deleted = ResourceStatus.DELETED == volumeResourceStatus;
+                if (templateVolume == null && EnumSet.of(ResourceStatus.ATTACHED, ResourceStatus.CREATED).contains(volumeResourceStatus)) {
+                    templateVolume = result.volumes().stream().findFirst().orElse(null);
+                }
+            } catch (Ec2Exception e) {
+                if (!"InvalidVolume.NotFound".equals(e.awsErrorDetails().errorCode())) {
+                    throw e;
+                }
+                LOGGER.info("The volume doesn't need to be deleted as it does not exist on the provider side. Reason: {}", e.getMessage());
+                deleted = true;
+            }
+            if (deleted) {
+                deletedVolumeIds.add(volumeId);
+            }
+        }
+        if (templateVolume == null) {
+            throw new AwsResourceException(String.format("All of the volumes from the set attached to the instance (%s)" +
+                    " are already deleted, cannot recover. " +
+                    "Please try to repair the node with the 'Delete volumes' option.", resource.getInstanceId()),
+                    ResourceType.AWS_VOLUMESET, resource.getName());
+        }
+        return new DeletedVolumeInfo(templateVolume, deletedVolumeIds);
+    }
+
+    private List<Volume> rebuildVolumes(AuthenticatedContext auth, VolumeSetAttributes volumeSetAttributes,
+            List<Volume> deletedVolumes, software.amazon.awssdk.services.ec2.model.Volume template) throws ExecutionException, InterruptedException {
+        LOGGER.debug("Recreate deleted volumes on provider: {}", deletedVolumes.stream().map(Volume::getId).collect(Collectors.toList()));
+        AmazonEc2Client client = getAmazonEC2Client(auth);
+        List<Volume> volumeSet = Collections.synchronizedList(new ArrayList<>());
+        List<Future<?>> futures = new ArrayList<>();
+        boolean encryptedVolume = template.encrypted();
+        String volumeEncryptionKey = template.kmsKeyId();
+        TagSpecification tagSpecification = TagSpecification.builder()
+                .resourceType(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME)
+                .tags(template.tags())
+                .build();
+
+        for (Volume volume : deletedVolumes) {
+            futures.addAll(Stream.of(volume)
+                    .map(createVolumeRequest(encryptedVolume, volumeEncryptionKey, tagSpecification, volumeSetAttributes))
+                    .map(requestWithUsage -> intermediateBuilderExecutor.submit(() -> {
+                        CreateVolumeRequest request = requestWithUsage.getFirst();
+                        CreateVolumeResponse result = client.createVolume(request);
+                        String volumeId = result.volumeId();
+                        Volume newVolume = new Volume(volumeId, volume.getDevice(), request.size(), request.volumeTypeAsString(), requestWithUsage.getSecond());
+                        volumeSet.add(newVolume);
+                    }))
+                    .collect(Collectors.toList()));
+        }
+
+        LOGGER.debug("Waiting for volumes creation requests.");
+        for (Future<?> future : futures) {
+            future.get();
+        }
+        return volumeSet;
     }
 
     private void turnOnDeleteOnterminationOnAttachedVolumes(CloudResource resource, List<CloudResourceStatus> cloudResourceStatuses,
@@ -405,7 +516,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             }
             List<InstanceBlockDeviceMappingSpecification> deletedAndDetachedDeviceMappingSpecifications =
                     getDeviceMappingSpecifications(cloudResourceStatuses, deleteOnTermination, EnumSet.of(DELETED, CREATED));
-            if (!deletedAndDetachedDeviceMappingSpecifications.isEmpty() && deleteOnTermination) {
+            if (!deletedAndDetachedDeviceMappingSpecifications.isEmpty()) {
                 for (InstanceBlockDeviceMappingSpecification specification : deletedAndDetachedDeviceMappingSpecifications) {
                     try {
                         changeDeleteOnTermination(deleteOnTermination, client, instanceId, List.of(specification));
@@ -427,9 +538,9 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .build();
         ModifyInstanceAttributeResponse modifyIdentityIdFormatResponse = awsMethodExecutor.execute(
                 () -> client.modifyInstanceAttribute(modifyInstanceAttributeRequest), null);
-                String result = instanceId + " not found on the provider.";
-                if (modifyIdentityIdFormatResponse != null) {
-                    result = modifyIdentityIdFormatResponse.toString();
+        String result = instanceId + " not found on the provider.";
+        if (modifyIdentityIdFormatResponse != null) {
+            result = modifyIdentityIdFormatResponse.toString();
         }
         LOGGER.info("Delete on termination set to '{}' on instance '{}'. {}", deleteOnTermination, instanceId, result);
     }
@@ -539,6 +650,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     return CREATED;
                 case "in-use":
                     return ATTACHED;
+                case "deleted":
                 case "deleting":
                     return DELETED;
                 case "creating":
@@ -561,6 +673,26 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public int order() {
         return 1;
+    }
+
+    private class DeletedVolumeInfo {
+
+        private Set<String> deletedVolumeIds;
+
+        private software.amazon.awssdk.services.ec2.model.Volume templateVolume;
+
+        DeletedVolumeInfo(software.amazon.awssdk.services.ec2.model.Volume templateVolume, Set<String> deletedVolumeIds) {
+            this.templateVolume = templateVolume;
+            this.deletedVolumeIds = deletedVolumeIds;
+        }
+
+        public Set<String> getDeletedVolumeIds() {
+            return deletedVolumeIds;
+        }
+
+        public software.amazon.awssdk.services.ec2.model.Volume getTemplateVolume() {
+            return templateVolume;
+        }
     }
 
 }
