@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -47,8 +48,6 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
 
     private static final int ORDER = 4;
 
-    private static final int MAX_LABEL_LENGTH = 63;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpForwardingRuleResourceBuilder.class);
 
     @Inject
@@ -90,15 +89,21 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
                 Integer trafficPort = buildableResource.getParameter(TRAFFICPORT, Integer.class);
                 forwardingRule.setPorts(List.of(String.valueOf(trafficPort)));
             }
-            if (scheme.equals(GcpLoadBalancerScheme.INTERNAL)) {
+            if (scheme.equals(GcpLoadBalancerScheme.INTERNAL) || scheme.equals(GcpLoadBalancerScheme.GATEWAY_INTERNAL)) {
                 String sharedProjectId = gcpStackUtil.getSharedProjectId(network);
+                String networkUrl;
+                String subnetUrl;
                 if (StringUtils.isEmpty(sharedProjectId)) {
-                    forwardingRule.setNetwork(gcpStackUtil.getNetworkUrl(projectId, gcpStackUtil.getCustomNetworkId(network)));
-                    forwardingRule.setSubnetwork(gcpStackUtil.getSubnetUrl(projectId, regionName, gcpStackUtil.getSubnetId(network)));
+                    networkUrl = gcpStackUtil.getNetworkUrl(projectId, gcpStackUtil.getCustomNetworkId(network));
+                    subnetUrl = gcpStackUtil.getSubnetUrl(projectId, regionName, getForwardinRuleSubnet(network, scheme));
                 } else {
-                    forwardingRule.setNetwork(gcpStackUtil.getNetworkUrl(sharedProjectId, gcpStackUtil.getCustomNetworkId(network)));
-                    forwardingRule.setSubnetwork(gcpStackUtil.getSubnetUrl(sharedProjectId, regionName, gcpStackUtil.getSubnetId(network)));
+                    networkUrl = gcpStackUtil.getNetworkUrl(sharedProjectId, gcpStackUtil.getCustomNetworkId(network));
+                    subnetUrl = gcpStackUtil.getSubnetUrl(sharedProjectId, regionName, getForwardinRuleSubnet(network, scheme));
                 }
+                forwardingRule.setNetwork(networkUrl);
+                forwardingRule.setSubnetwork(subnetUrl);
+                LOGGER.debug("Set network to '{}' and subnet to '{}' for {} load balancer", networkUrl, subnetUrl, scheme);
+
             }
 
             Integer hcPort = buildableResource.getParameter(HCPORT, Integer.class);
@@ -125,6 +130,16 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
 
         }
         return results;
+    }
+
+    private String getForwardinRuleSubnet(Network network, GcpLoadBalancerScheme scheme) {
+        if (scheme == GcpLoadBalancerScheme.GATEWAY_INTERNAL) {
+            String endpointGwSubnetId = Objects.requireNonNullElse(gcpStackUtil.getEndpointGatewaySubnetId(network), gcpStackUtil.getSubnetId(network));
+            LOGGER.debug("Setting {} as subnet for {} load balancer.", endpointGwSubnetId, scheme);
+            return endpointGwSubnetId;
+        }
+        LOGGER.debug("Setting {} as subnet for {} load balancer.", gcpStackUtil.getSubnetId(network), scheme);
+        return gcpStackUtil.getSubnetId(network);
     }
 
     @Override

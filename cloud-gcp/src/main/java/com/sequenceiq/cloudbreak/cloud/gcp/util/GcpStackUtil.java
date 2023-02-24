@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.util;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 import static org.apache.commons.lang3.StringUtils.isAnyEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -44,8 +46,6 @@ public class GcpStackUtil {
     public static final String NETWORK_IP_RANGE = "networkRange";
 
     public static final String SHARED_PROJECT_ID = "sharedProjectId";
-
-    public static final String SUBNET_ID = "subnetId";
 
     public static final String SERVICE_ACCOUNT = "serviceAccountId";
 
@@ -280,6 +280,10 @@ public class GcpStackUtil {
 
     public String getSubnetId(Network network) {
         return network.getStringParameter(SUBNET_ID);
+    }
+
+    public String getEndpointGatewaySubnetId(Network network) {
+        return network.getStringParameter(ENDPOINT_GATEWAY_SUBNET_ID);
     }
 
     public String getSubnetIds(Network network) {
