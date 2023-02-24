@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
@@ -387,7 +388,7 @@ public class StackCreatorService {
         return Optional.ofNullable(stack.getNetwork())
                 .map(Network::getAttributes)
                 .map(Json::getMap)
-                .map(attr -> attr.get("subnetId"))
+                .map(attr -> attr.get(SUBNET_ID))
                 .map(Object::toString)
                 .orElse(null);
     }

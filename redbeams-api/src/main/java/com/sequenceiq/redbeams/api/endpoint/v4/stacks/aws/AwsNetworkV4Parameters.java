@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,7 +34,7 @@ public class AwsNetworkV4Parameters extends MappableBase {
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map, "subnetId", subnetId);
+        putIfValueNotNull(map, SUBNET_ID, subnetId);
         return map;
     }
 
@@ -45,7 +47,7 @@ public class AwsNetworkV4Parameters extends MappableBase {
 
     @Override
     public void parse(Map<String, Object> parameters) {
-        subnetId = getParameterOrNull(parameters, "subnetId");
+        subnetId = getParameterOrNull(parameters, SUBNET_ID);
     }
 
     @Override

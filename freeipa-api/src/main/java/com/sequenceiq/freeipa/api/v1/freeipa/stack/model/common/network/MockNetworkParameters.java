@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -55,7 +57,7 @@ public class MockNetworkParameters extends MappableBase {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "vpcId", vpcId);
         putIfValueNotNull(map, "internetGatewayId", internetGatewayId);
-        putIfValueNotNull(map, "subnetId", subnetId);
+        putIfValueNotNull(map, SUBNET_ID, subnetId);
         return map;
     }
 
@@ -70,7 +72,7 @@ public class MockNetworkParameters extends MappableBase {
     public void parse(Map<String, Object> parameters) {
         vpcId = getParameterOrNull(parameters, "vpcId");
         internetGatewayId = getParameterOrNull(parameters, "internetGatewayId");
-        subnetId = getParameterOrNull(parameters, "subnetId");
+        subnetId = getParameterOrNull(parameters, SUBNET_ID);
     }
 
     @Override

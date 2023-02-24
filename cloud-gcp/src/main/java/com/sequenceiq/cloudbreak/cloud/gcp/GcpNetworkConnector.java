@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_NETWORK;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_SUBNET;
 
@@ -146,7 +147,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
 
     @Override
     public NetworkCidr getNetworkCidr(Network network, CloudCredential credential) {
-        String subnetId = network.getStringParameter(GcpStackUtil.SUBNET_ID);
+        String subnetId = network.getStringParameter(SUBNET_ID);
         String region = network.getStringParameter(GcpStackUtil.REGION);
         String sharedProjectId = network.getStringParameter(GcpStackUtil.SHARED_PROJECT_ID);
         LOGGER.debug("Getting network cidrs for subnet {} in region {}", subnetId, region);
