@@ -243,8 +243,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
-        LOGGER.info("Searching for SDX cluster by ids and statuses.");
-        List<SdxStatusEntity> sdxStatusEntities = sdxStatusService.findDistinctFirstByStatusInAndDatalakeIdOrderByIdDesc(statuses, resourceIds);
+        LOGGER.info("Searching for SDX cluster by ids: {} and statuses: {}", resourceIds, statuses);
+        List<SdxStatusEntity> sdxStatusEntities = sdxStatusService.findLatestSdxStatusesFilteredByStatusesAndDatalakeIds(statuses, resourceIds);
         return sdxStatusEntities.stream().map(sdxStatusEntity -> sdxStatusEntity.getDatalake().getId()).collect(Collectors.toSet());
     }
 
