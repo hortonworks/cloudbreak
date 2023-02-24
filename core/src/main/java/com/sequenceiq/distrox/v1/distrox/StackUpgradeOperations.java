@@ -144,18 +144,22 @@ public class StackUpgradeOperations {
         boolean getAllImages = request.getImageId() != null;
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
                 request.getInternalUpgradeSettings(), getAllImages);
+        if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
+            clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
+            populateCandidatesWithPreparedFlag(stack, upgradeResponse);
+        }
+        validateAttachedDataHubsForDataLake(accountId, stack, upgradeResponse, request);
+        LOGGER.debug("Upgrade response after validations: {}", upgradeResponse);
+        return upgradeResponse;
+    }
+
+    private void populateCandidatesWithPreparedFlag(Stack stack, UpgradeV4Response upgradeResponse) {
         List<String> preparedImages = getPreparedImagesList(stack.getId());
         upgradeResponse.getUpgradeCandidates().forEach(imageInfoV4Response -> {
             if (!ObjectUtils.isEmpty(preparedImages) && preparedImages.contains(imageInfoV4Response.getImageId())) {
                 imageInfoV4Response.setPrepared(true);
             }
         });
-        if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
-            clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
-        }
-        validateAttachedDataHubsForDataLake(accountId, stack, upgradeResponse, request);
-        LOGGER.debug("Upgrade response after validations: {}", upgradeResponse);
-        return upgradeResponse;
     }
 
     private void validateAttachedDataHubsForDataLake(String accountId, Stack stack, UpgradeV4Response upgradeResponse,
