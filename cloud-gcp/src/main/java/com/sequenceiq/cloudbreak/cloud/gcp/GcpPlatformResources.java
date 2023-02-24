@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -227,7 +228,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     public List<String> getSubnetIds(Map<String, String> filters) {
         List<String> subnetIds = new ArrayList<>();
-        String subnetId = filters.getOrDefault("subnetId", null);
+        String subnetId = filters.getOrDefault(SUBNET_ID, null);
         if (!Strings.isNullOrEmpty(subnetId)) {
             subnetIds.add(subnetId);
         } else {

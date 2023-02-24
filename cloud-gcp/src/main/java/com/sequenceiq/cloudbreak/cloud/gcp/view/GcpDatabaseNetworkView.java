@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.view;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 public class GcpDatabaseNetworkView {
@@ -11,7 +13,7 @@ public class GcpDatabaseNetworkView {
     }
 
     public String getSubnetId() {
-        return network.getStringParameter("subnetId");
+        return network.getStringParameter(SUBNET_ID);
     }
 
     public String getAvailabilityZone() {

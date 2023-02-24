@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -76,7 +78,7 @@ public class GcpNetworkParameters extends MappableBase {
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "networkId", networkId);
-        putIfValueNotNull(map, "subnetId", subnetId);
+        putIfValueNotNull(map, SUBNET_ID, subnetId);
         putIfValueNotNull(map, "sharedProjectId", sharedProjectId);
         putIfValueNotNull(map, "noFirewallRules", noFirewallRules);
         putIfValueNotNull(map, "noPublicIp", noPublicIp);
@@ -93,7 +95,7 @@ public class GcpNetworkParameters extends MappableBase {
     @Override
     public void parse(Map<String, Object> parameters) {
         networkId = getParameterOrNull(parameters, "networkId");
-        subnetId = getParameterOrNull(parameters, "subnetId");
+        subnetId = getParameterOrNull(parameters, SUBNET_ID);
         sharedProjectId = getParameterOrNull(parameters, "sharedProjectId");
         noFirewallRules = getBoolean(parameters, "noFirewallRules");
         noPublicIp = getBoolean(parameters, "noPublicIp");

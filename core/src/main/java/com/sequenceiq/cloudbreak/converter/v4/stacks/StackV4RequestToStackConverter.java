@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static java.lang.String.format;
@@ -521,7 +522,7 @@ public class StackV4RequestToStackConverter {
         return Optional.ofNullable(stack.getNetwork())
                 .map(Network::getAttributes)
                 .map(Json::getMap)
-                .map(attr -> attr.get("subnetId"))
+                .map(attr -> attr.get(SUBNET_ID))
                 .map(Object::toString)
                 .orElse(null);
     }

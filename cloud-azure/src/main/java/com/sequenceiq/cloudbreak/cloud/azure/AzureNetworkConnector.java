@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
 
 import java.util.Collection;
@@ -55,8 +56,6 @@ public class AzureNetworkConnector implements NetworkConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureNetworkConnector.class);
 
     private static final String NETWORK_ID_KEY = "networkId";
-
-    private static final String SUBNET_ID_KEY = "subnetId";
 
     @Inject
     private AzureClientService azureClientService;
@@ -259,9 +258,9 @@ public class AzureNetworkConnector implements NetworkConnector {
     private Set<CreatedSubnet> createSubnets(List<SubnetRequest> subnetRequests, Map<String, Map> outputMap, String region) {
         Set<CreatedSubnet> createdSubnets = new HashSet<>();
         for (SubnetRequest subnetRequest : subnetRequests) {
-            if (outputMap.containsKey(SUBNET_ID_KEY + subnetRequest.getIndex())) {
+            if (outputMap.containsKey(SUBNET_ID + subnetRequest.getIndex())) {
                 CreatedSubnet createdSubnet = new CreatedSubnet();
-                createdSubnet.setSubnetId(cropId((String) outputMap.get(SUBNET_ID_KEY + subnetRequest.getIndex()).get("value")));
+                createdSubnet.setSubnetId(cropId((String) outputMap.get(SUBNET_ID + subnetRequest.getIndex()).get("value")));
                 if (!Strings.isNullOrEmpty(subnetRequest.getPrivateSubnetCidr())) {
                     createdSubnet.setCidr(subnetRequest.getPrivateSubnetCidr());
                 } else {

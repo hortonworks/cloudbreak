@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -17,30 +17,30 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-public class GcpStackUtilTest {
+class GcpStackUtilTest {
 
     private GcpStackUtil gcpStackUtil = new GcpStackUtil();
 
     @Test
-    public void projectIdConverterWithNewNameRestrictions() {
+    void projectIdConverterWithNewNameRestrictions() {
         String projectId = gcpStackUtil.getProjectId(cloudCredential("siq-haas"));
-        Assert.assertEquals("siq-haas", projectId);
+        assertEquals("siq-haas", projectId);
         projectId = gcpStackUtil.getProjectId(cloudCredential("siq-haas123"));
-        Assert.assertEquals("siq-haas123", projectId);
+        assertEquals("siq-haas123", projectId);
         projectId = gcpStackUtil.getProjectId(cloudCredential("Siq-haas123"));
-        Assert.assertEquals("siq-haas123", projectId);
+        assertEquals("siq-haas123", projectId);
     }
 
     @Test
-    public void projectIdConverterWithOldNameRestrictions() {
+    void projectIdConverterWithOldNameRestrictions() {
         String projectId = gcpStackUtil.getProjectId(cloudCredential("echo:siq-haas"));
-        Assert.assertEquals("echo-siq-haas", projectId);
+        assertEquals("echo-siq-haas", projectId);
         projectId = gcpStackUtil.getProjectId(cloudCredential("echo:>siq>-haas"));
-        Assert.assertEquals("echo--siq--haas", projectId);
+        assertEquals("echo--siq--haas", projectId);
         projectId = gcpStackUtil.getProjectId(cloudCredential("e?cho:siq-haas123"));
-        Assert.assertEquals("e-cho-siq-haas123", projectId);
+        assertEquals("e-cho-siq-haas123", projectId);
         projectId = gcpStackUtil.getProjectId(cloudCredential("echo:siq-hasfdsf12?as"));
-        Assert.assertEquals("echo-siq-hasfdsf12-as", projectId);
+        assertEquals("echo-siq-hasfdsf12-as", projectId);
     }
 
     private CloudCredential cloudCredential(String projectId) {
@@ -50,13 +50,13 @@ public class GcpStackUtilTest {
     }
 
     @Test
-    public void testNewSubnetInExistingNetworkNoNetwork() {
+    void testNewSubnetInExistingNetworkNoNetwork() {
         Network network = new Network(new Subnet(""));
         assertFalse(gcpStackUtil.isNewSubnetInExistingNetwork(network));
     }
 
     @Test
-    public void testNewSubnetInExistingNetworkWithNetwork() {
+    void testNewSubnetInExistingNetworkWithNetwork() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpStackUtil.NETWORK_ID, "asdf");
         Network network = new Network(new Subnet(""), parameters);
@@ -64,16 +64,16 @@ public class GcpStackUtilTest {
     }
 
     @Test
-    public void testNewSubnetInExistingNetworkWithNetworkWithSubnet() {
+    void testNewSubnetInExistingNetworkWithNetworkWithSubnet() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpStackUtil.NETWORK_ID, "asdf");
-        parameters.put(GcpStackUtil.SUBNET_ID, "asdf");
+        parameters.put(SUBNET_ID, "asdf");
         Network network = new Network(new Subnet(""), parameters);
         assertFalse(gcpStackUtil.isNewSubnetInExistingNetwork(network));
     }
 
     @Test
-    public void testGetGroupTypeTag() {
+    void testGetGroupTypeTag() {
         assertEquals("gateway", gcpStackUtil.getGroupTypeTag(InstanceGroupType.GATEWAY));
         assertEquals("core", gcpStackUtil.getGroupTypeTag(InstanceGroupType.CORE));
         assertThrows(CloudbreakServiceException.class, () -> gcpStackUtil.getGroupTypeTag(null));

@@ -71,7 +71,6 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
@@ -224,15 +223,6 @@ public class StackToCloudStackConverter {
                 instanceMetaData == null ? null : instanceMetaData.getSubnetId(),
                 instanceMetaData == null ? null : instanceMetaData.getAvailabilityZone(),
                 parameters);
-    }
-
-    private String getStackSubnetIdIfExists(Stack stack) {
-        return Optional.ofNullable(stack.getNetwork())
-                .map(com.sequenceiq.cloudbreak.domain.Network::getAttributes)
-                .map(Json::getMap)
-                .map(attr -> attr.get("subnetId"))
-                .map(Object::toString)
-                .orElse(null);
     }
 
     InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status, String instanceImageId) {

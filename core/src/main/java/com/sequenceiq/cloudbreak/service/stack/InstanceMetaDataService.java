@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.ATTRIBUTES;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.ArrayList;
@@ -224,7 +225,7 @@ public class InstanceMetaDataService {
         return Optional.ofNullable(stack.getNetwork())
                 .map(Network::getAttributes)
                 .map(Json::getMap)
-                .map(attr -> attr.get("subnetId"))
+                .map(attr -> attr.get(SUBNET_ID))
                 .map(Object::toString)
                 .orElse(null);
     }

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -78,7 +80,7 @@ public class OpenStackNetworkParameters extends MappableBase {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "networkId", networkId);
         putIfValueNotNull(map, "routerId", routerId);
-        putIfValueNotNull(map, "subnetId", subnetId);
+        putIfValueNotNull(map, SUBNET_ID, subnetId);
         putIfValueNotNull(map, "publicNetId", publicNetId);
         putIfValueNotNull(map, "networkingOption", networkingOption);
         return map;
@@ -95,7 +97,7 @@ public class OpenStackNetworkParameters extends MappableBase {
     public void parse(Map<String, Object> parameters) {
         networkId = getParameterOrNull(parameters, "networkId");
         routerId = getParameterOrNull(parameters, "routerId");
-        subnetId = getParameterOrNull(parameters, "subnetId");
+        subnetId = getParameterOrNull(parameters, SUBNET_ID);
         publicNetId = getParameterOrNull(parameters, "publicNetId");
         networkingOption = getParameterOrNull(parameters, "networkingOption");
     }
