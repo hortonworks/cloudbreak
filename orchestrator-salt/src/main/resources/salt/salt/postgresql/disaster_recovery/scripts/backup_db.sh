@@ -8,7 +8,6 @@ set -o nounset
 set -o pipefail
 
 LOGFILE=/var/log/dl_postgres_backup.log
-COMPRESS_FLAG="-Z 9"
 
 echo "Logs at ${LOGFILE}"
 
@@ -159,7 +158,7 @@ backup_database_for_service() {
 
   doLog "INFO Dumping ${SERVICE}"
   LOCAL_BACKUP=${DATE_DIR}/${SERVICE}_backup
-  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" $COMPRESS_FLAG --format=plain --file="$LOCAL_BACKUP" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
+  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain --file="$LOCAL_BACKUP" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
   if [[ "$CLOSECONNECTIONS" == "true" ]]; then
     limit_incomming_connection $SERVICE -1
   fi
