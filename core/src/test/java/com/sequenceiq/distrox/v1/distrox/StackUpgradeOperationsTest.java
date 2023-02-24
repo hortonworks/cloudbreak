@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -495,6 +496,34 @@ class StackUpgradeOperationsTest {
         FlowIdentifier result = underTest.prepareClusterUpgrade(nameOrCrn, ACCOUNT_ID, IMAGE_ID);
 
         assertEquals(flowIdentifier, result);
+    }
+
+    @Test
+    void testCheckForClusterUpgradeShouldReturnReturnErrorMessageWhenFailedToGetAvailableCandidates() {
+        Stack stack = createStack(StackType.WORKLOAD);
+        UpgradeV4Request request = createUpgradeRequest(null, null);
+        UpgradeV4Response upgradeResponse = new UpgradeV4Response(new ImageInfoV4Response(), null, "Failed to collect upgrade candidates.");
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
+        when(upgradeService.isOsUpgrade(request)).thenReturn(false);
+        when(upgradePreconditionService.notUsingEphemeralVolume(stack)).thenReturn(false);
+        when(clusterUpgradeAvailabilityService
+                .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), false))
+                .thenReturn(upgradeResponse);
+        when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
+
+        assertEquals(upgradeResponse, actual);
+        verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
+        verify(upgradeService).isOsUpgrade(request);
+        verify(upgradePreconditionService).notUsingEphemeralVolume(stack);
+        verify(clusterUpgradeAvailabilityService)
+                .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), false);
+        verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
+        verify(clusterUpgradeAvailabilityService, never()).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, false);
+        verifyNoInteractions(clusterService, clusterComponentConfigProvider);
+
+
     }
 
     private UpgradeV4Response createUpgradeResponse() {
