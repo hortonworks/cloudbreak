@@ -10,7 +10,6 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -117,6 +116,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -226,6 +226,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
+
+    @Inject
+    private SdxBackupRestoreService sdxBackupRestoreService;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -1059,6 +1062,16 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 .ifPresent(existedSdx -> {
                     throw new BadRequestException("SDX which is detached already exists for the environment. SDX name: " + existedSdx.getClusterName());
                 });
+        Boolean datalakeIsInBackupProgress = sdxBackupRestoreService.isDatalakeInBackupProgress(sdxCluster.getClusterName(),
+                ThreadBasedUserCrnProvider.getUserCrn());
+        if (datalakeIsInBackupProgress) {
+            throw new BadRequestException("SDX cluster is in the process of backup. Resize can not get started.");
+        }
+        Boolean datalakeIsInRestoreProgress = sdxBackupRestoreService.isDatalakeInRestoreProgress(sdxCluster.getClusterName(),
+                ThreadBasedUserCrnProvider.getUserCrn());
+        if (datalakeIsInRestoreProgress) {
+            throw new BadRequestException("SDX cluster is in the process of restore. Resize can not get started.");
+        }
     }
 
     private void validateRuntimeAndImage(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment,

@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus.State;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -695,4 +696,62 @@ public class SdxBackupRestoreService {
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(cluster::getRuntime, () -> baseVersion) == 0;
     }
+
+    public boolean isDatalakeInBackupProgress(String sdxClusterName, String actorCrn) {
+        if (sdxClusterName == null || actorCrn == null) {
+            LOGGER.error("Didn't find datalake name or actor CRN. Can not validate if the datalake is in backup. Continue to next step.");
+            return false;
+        }
+        try {
+            DatalakeBackupStatusResponse backupStatus = datalakeDrClient.getBackupStatus(sdxClusterName, actorCrn);
+            if (backupStatus != null && isRunningState(backupStatus.getState())) {
+                LOGGER.error("Found a backup in progress on {} with status {}", sdxClusterName, backupStatus.getState());
+                return true;
+            }
+            LOGGER.info("No backup in progress found on {}. Good to continue.", sdxClusterName);
+            return false;
+        } catch (RuntimeException exception) {
+            if (exception.getMessage().contains("Status information for backup operation on datalake")
+                    && exception.getMessage().contains("not found")) {
+                // If the RuntimeException's error message matches the message that was thrown when no backup/restore status found, the program continues because
+                // it means this datalake has never run a backup or restore.
+                LOGGER.info("No backup ever happened on {}. Good to continue.", sdxClusterName);
+            } else {
+                // Checking the backup/restore status should not prevent the resize flow. Continue the process.
+                LOGGER.error("Failed to check backup status: {}. Continue to next step.", exception.getMessage());
+            }
+            return false;
+        }
+    }
+
+    public boolean isDatalakeInRestoreProgress(String sdxClusterName, String actorCrn) {
+        if (sdxClusterName == null || actorCrn == null) {
+            LOGGER.error("Didn't find datalake name or actor CRN. Can not validate if the datalake is in restore. Continue to next step.");
+            return false;
+        }
+        try {
+            DatalakeRestoreStatusResponse restoreStatus = datalakeDrClient.getRestoreStatus(sdxClusterName, actorCrn);
+            if (restoreStatus != null && isRunningState(restoreStatus.getState())) {
+                LOGGER.error("Found a restore in progress on {} with status {}", sdxClusterName, restoreStatus.getState());
+                return true;
+            }
+            LOGGER.info("No restore in progress found on {}. Good to continue.", sdxClusterName);
+            return false;
+        } catch (RuntimeException exception) {
+            if (exception.getMessage().contains("Status information for restore operation on datalake")
+                    && exception.getMessage().contains("not found")) {
+                LOGGER.info("No restore ever happened on {}. Good to continue.", sdxClusterName);
+            } else {
+                LOGGER.error("Failed to check restore status: {}. Continue to next step.", exception.getMessage());
+            }
+            return false;
+        }
+    }
+
+    private boolean isRunningState(DatalakeOperationStatus.State state) {
+        return state != null
+                && (state == DatalakeOperationStatus.State.STARTED
+                || state == DatalakeOperationStatus.State.IN_PROGRESS);
+    }
+
 }

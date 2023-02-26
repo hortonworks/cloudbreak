@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx.dr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -380,6 +383,65 @@ public class SdxBackupRestoreServiceTest {
         String errorStageMissingFlowType = sdxBackupRestoreService.createDatabaseBackupRestoreErrorStage(testId);
         assertEquals(" during the transition from test-current-state to its next state, " +
                 "triggered by test-next-event", errorStageMissingFlowType);
+    }
+
+    @Test
+    public void testIsDatalakeInBackupOrRestoreWithoutExceptions() {
+        DatalakeBackupStatusResponse backupStatusInProgress = new DatalakeBackupStatusResponse("",
+                DatalakeOperationStatus.State.IN_PROGRESS, Collections.emptyList(), "", "");
+        DatalakeBackupStatusResponse backupStatusCompleted = new DatalakeBackupStatusResponse("",
+                DatalakeOperationStatus.State.SUCCESSFUL, Collections.emptyList(), "", "");
+        DatalakeRestoreStatusResponse restoreStatusInProgress = new DatalakeRestoreStatusResponse("", "",
+                DatalakeOperationStatus.State.STARTED, "");
+        DatalakeRestoreStatusResponse restoreStatusCompleted = new DatalakeRestoreStatusResponse("", "",
+                DatalakeOperationStatus.State.FAILED, "");
+
+        // Missing actorCrn.
+        SdxCluster sdxCluster = getValidSdxCluster();
+        assertFalse(sdxBackupRestoreService.isDatalakeInBackupProgress(sdxCluster.getClusterName(), null));
+        assertFalse(sdxBackupRestoreService.isDatalakeInRestoreProgress(sdxCluster.getClusterName(), null));
+
+        // Backup is in progress.
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenReturn(backupStatusInProgress);
+        assertTrue(sdxBackupRestoreService.isDatalakeInBackupProgress(sdxCluster.getClusterName(), USER_CRN));
+
+        // Restore is in progress.
+        when(datalakeDrClient.getRestoreStatus(anyString(), anyString())).thenReturn(restoreStatusInProgress);
+        assertTrue(sdxBackupRestoreService.isDatalakeInRestoreProgress(sdxCluster.getClusterName(), USER_CRN));
+
+        // Backup is completed
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenReturn(backupStatusCompleted);
+        assertFalse(sdxBackupRestoreService.isDatalakeInBackupProgress(sdxCluster.getClusterName(), USER_CRN));
+
+        // Restore is completed
+        when(datalakeDrClient.getRestoreStatus(anyString(), anyString())).thenReturn(restoreStatusCompleted);
+        assertFalse(sdxBackupRestoreService.isDatalakeInRestoreProgress(sdxCluster.getClusterName(), USER_CRN));
+    }
+
+    @Test
+    public void testIsDatalakeInBackupWithNeverHaveBackup() {
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenThrow(new RuntimeException("Status information for backup operation on " +
+                "datalake: sdxcluster not found"));
+        assertFalse(sdxBackupRestoreService.isDatalakeInBackupProgress(sdxCluster.getClusterName(), USER_CRN));
+    }
+
+    @Test
+    public void testIsDatalakeInRestoreWithNeverHaveRestore() {
+        when(datalakeDrClient.getRestoreStatus(anyString(), anyString())).thenThrow(new RuntimeException("Status information for restore operation on " +
+                "datalake: sdxcluster not found"));
+        assertFalse(sdxBackupRestoreService.isDatalakeInRestoreProgress(sdxCluster.getClusterName(), USER_CRN));
+    }
+
+    @Test
+    public void testIsDatalakeInBackupWithOtherRuntimeExceptions() {
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenThrow(new RuntimeException("Other run time exception"));
+        assertFalse(sdxBackupRestoreService.isDatalakeInBackupProgress(sdxCluster.getClusterName(), USER_CRN));
+    }
+
+    @Test
+    public void testIsDatalakeInRestoreWithOtherRuntimeExceptions() {
+        when(datalakeDrClient.getRestoreStatus(anyString(), anyString())).thenThrow(new RuntimeException("Other run time exception"));
+        assertFalse(sdxBackupRestoreService.isDatalakeInRestoreProgress(sdxCluster.getClusterName(), USER_CRN));
     }
 
     private SdxCluster getValidSdxCluster() {
