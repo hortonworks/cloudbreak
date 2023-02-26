@@ -15,6 +15,7 @@ import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -118,6 +119,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
@@ -247,6 +249,9 @@ class SdxServiceTest {
 
     @Mock
     private ImageCatalogPlatform imageCatalogPlatform;
+
+    @Mock
+    private SdxBackupRestoreService sdxBackupRestoreService;
 
     @InjectMocks
     private SdxService underTest;
@@ -1285,6 +1290,8 @@ class SdxServiceTest {
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
 
         mockEnvironmentCall(sdxClusterResizeRequest, GCP);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
@@ -1327,6 +1334,87 @@ class SdxServiceTest {
         assertEquals("SDX which is detached already exists for the environment. SDX name: " + sdxCluster.getClusterName(), badRequestException.getMessage());
     }
 
+    @Test
+    void testSdxResizeByAccountIdAndNameWhenDatalakeIsInProcessOfBackup() {
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment("environment");
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.setDetached(true);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(true);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
+                "BadRequestException should thrown");
+        assertEquals("SDX cluster is in the process of backup. Resize can not get started.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxResizeByAccountIdAndNameWhenDatalakeIsInProcessOfRestore() {
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment("environment");
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.setDetached(true);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(true);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
+                "BadRequestException should thrown");
+        assertEquals("SDX cluster is in the process of restore. Resize can not get started.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxResizeByAccountIdAndNameWhenDatalakeIsNotInProgressOfBackupOrRestore() throws Exception {
+        final String runtime = "7.2.10";
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment("environment");
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(1L);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.setRuntime(runtime);
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+
+        mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        assertDoesNotThrow(
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
+    }
+
     @ParameterizedTest
     @MethodSource("deleteInProgressParamProvider")
     void testSdxResizeButEnvInDeleteInProgressPhase(EnvironmentStatus environmentStatus) {
@@ -1342,6 +1430,8 @@ class SdxServiceTest {
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
@@ -1371,6 +1461,8 @@ class SdxServiceTest {
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
@@ -1400,6 +1492,8 @@ class SdxServiceTest {
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
@@ -1430,6 +1524,8 @@ class SdxServiceTest {
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         mockEnvironmentCall(sdxClusterResizeRequest, AWS);
@@ -1454,6 +1550,8 @@ class SdxServiceTest {
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         mockEnvironmentCall(sdxClusterResizeRequest, AWS);
@@ -1476,6 +1574,8 @@ class SdxServiceTest {
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         mockEnvironmentCall(sdxClusterResizeRequest, AWS);
@@ -1502,6 +1602,8 @@ class SdxServiceTest {
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
 
         mockEnvironmentCall(sdxClusterResizeRequest, AWS);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
