@@ -1,5 +1,9 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
+import static com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus.State;
 import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_JUMPGATE_REQUIRED_VERSION;
@@ -12,6 +16,7 @@ import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -96,7 +101,10 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
@@ -231,6 +239,9 @@ class SdxServiceTest {
 
     @Mock
     private VirtualMachineConfiguration virtualMachineConfiguration;
+
+    @Mock
+    private DatalakeDrClient datalakeDrClient;
 
     @InjectMocks
     private SdxService underTest;
@@ -1259,6 +1270,152 @@ class SdxServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.resizeSdx(USER_CRN, "sdxcluster",
                 sdxClusterResizeRequest));
         assertEquals("SDX which is detached already exists for the environment. SDX name: " + sdxCluster.getClusterName(), badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxResizeByAccountIdAndNameWhenDatalakeIsInBackupProcess() {
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment("environment");
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.setDetached(true);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+
+        DatalakeBackupStatusResponse backupStatusInProgress = new DatalakeBackupStatusResponse("", State.IN_PROGRESS, Collections.emptyList(), "", "");
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenReturn(backupStatusInProgress);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
+                "BadRequestException should thrown");
+        assertEquals("SDX cluster is in the process of datalake backup. Resize can not get started.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxResizeByAccountIdAndNameWhenDatalakeIsInRestoreProcess() {
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment("environment");
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.setDetached(true);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        DatalakeBackupStatusResponse backupStatusCompleted = new DatalakeBackupStatusResponse("", State.SUCCESSFUL, Collections.emptyList(), "", "");
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenReturn(backupStatusCompleted);
+        DatalakeRestoreStatusResponse restoreStatusInProgress = new DatalakeRestoreStatusResponse("", "", State.VALIDATION_SUCCESSFUL, "");
+        when(datalakeDrClient.getRestoreStatus(anyString(), anyString())).thenReturn(restoreStatusInProgress);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
+                "BadRequestException should thrown");
+        assertEquals("SDX cluster is in the process of datalake restore. Resize can not get started.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxResizeByAccountIdAndNameWhenDatalakeIsBackupRestoreCompleted() throws Exception {
+        final String runtime = "7.2.10";
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment("environment");
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(1L);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.setRuntime(runtime);
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+
+        mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        DatalakeBackupStatusResponse backupStatusCompleted = new DatalakeBackupStatusResponse("", State.SUCCESSFUL, Collections.emptyList(), "", "");
+        DatalakeRestoreStatusResponse restoreStatusCompleted = new DatalakeRestoreStatusResponse("", "", State.FAILED, "");
+
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenReturn(backupStatusCompleted);
+        when(datalakeDrClient.getRestoreStatus(anyString(), anyString())).thenReturn(restoreStatusCompleted);
+        assertDoesNotThrow(
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
+    }
+
+    @Test
+    void testSdxResizeByAccountIdAndNameWhenDatalakeNeverHasBackupAndRestore() throws Exception {
+        final String runtime = "7.2.10";
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment("environment");
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(1L);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.setRuntime(runtime);
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+
+        mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenThrow
+                (new RuntimeException("Status information for backup operation on datalake: sdxcluster not found"));
+        when(datalakeDrClient.getRestoreStatus(anyString(), anyString())).thenThrow
+                (new RuntimeException("Status information for restore operation on datalake: sdxcluster not found"));
+        // If no backup/restore ever has been done on the datalake, resize will continue.
+        assertDoesNotThrow(
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
+    }
+
+    @Test
+    void testSdxResizeByAccountIdAndNameWhenDatalakeValidateRequestThrowsOtherRuntimeException() {
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment("environment");
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.setDetached(true);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenThrow(new RuntimeException("Other run time exception"));
+        RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
+                "");
+        assertEquals("Other run time exception", runtimeException.getMessage());
     }
 
     @ParameterizedTest

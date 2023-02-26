@@ -93,7 +93,11 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -206,6 +210,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private VirtualMachineConfiguration virtualMachineConfiguration;
+
+    @Inject
+    private DatalakeDrClient datalakeDrClient;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -554,6 +561,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         MDCBuilder.buildMdcContext(sdxCluster);
 
         validateSdxResizeRequest(sdxCluster, accountIdFromCrn, shape);
+        validateDatalakeNotInBackupOrRestore(sdxCluster);
         StackV4Response stackV4Response = getDetail(clusterName,
                 Set.of(StackResponseEntries.HARDWARE_INFO.getEntryName(), StackResponseEntries.EVENTS.getEntryName()), accountIdFromCrn);
 
@@ -1032,6 +1040,44 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 .ifPresent(existedSdx -> {
                     throw new BadRequestException("SDX which is detached already exists for the environment. SDX name: " + existedSdx.getClusterName());
                 });
+    }
+
+    private void validateDatalakeNotInBackupOrRestore(SdxCluster sdxCluster) {
+        if (sdxCluster.getClusterName() != null && ThreadBasedUserCrnProvider.getUserCrn() != null) {
+            try {
+                DatalakeBackupStatusResponse backupStatus = datalakeDrClient.getBackupStatus(sdxCluster.getClusterName(),
+                        ThreadBasedUserCrnProvider.getUserCrn());
+                if (backupStatus != null && isRunningState(backupStatus.getState())) {
+                    LOGGER.error("Found a backup in progress on {} with status {}", sdxCluster.getClusterName(), backupStatus.getState());
+                    throw new BadRequestException("SDX cluster is in the process of datalake backup. Resize can not get started.");
+                }
+                DatalakeRestoreStatusResponse restoreStatus = datalakeDrClient.getRestoreStatus(sdxCluster.getClusterName(),
+                        ThreadBasedUserCrnProvider.getUserCrn());
+                if (restoreStatus != null && isRunningState(restoreStatus.getState())) {
+                    LOGGER.error("Found a restore in progress on {} with status {}", sdxCluster.getClusterName(), restoreStatus.getState());
+                    throw new BadRequestException("SDX cluster is in the process of datalake restore. Resize can not get started.");
+                }
+                LOGGER.info("No backup/restore in progress found on {}. Good to continue.", sdxCluster.getClusterName());
+            } catch (RuntimeException exception) {
+                if ((exception.getMessage().contains("Status information for backup operation on datalake")
+                        || exception.getMessage().contains("Status information for restore operation on datalake"))
+                        && exception.getMessage().contains("not found")) {
+                    LOGGER.info("No backup or no restore ever happened on {}. Good to continue.", sdxCluster.getClusterName());
+                } else {
+                    throw exception;
+                }
+            }
+        } else {
+            LOGGER.error("Didn't find datalake name or actor CRN. Can not validate if the datalake is in backup/restore.");
+        }
+    }
+
+    private boolean isRunningState(DatalakeOperationStatus.State state) {
+        return state != null
+                && (state == DatalakeOperationStatus.State.STARTED
+                || state == DatalakeOperationStatus.State.IN_PROGRESS
+                || state == DatalakeOperationStatus.State.VALIDATION_FAILED
+                || state == DatalakeOperationStatus.State.VALIDATION_SUCCESSFUL);
     }
 
     private void validateRuntimeAndImage(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment,
