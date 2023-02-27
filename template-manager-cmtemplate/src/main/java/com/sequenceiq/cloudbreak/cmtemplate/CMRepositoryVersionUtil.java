@@ -179,10 +179,15 @@ public class CMRepositoryVersionUtil {
         return RAZ_ENABLED_CLOUD_PLATFORMS.getOrDefault(cloudPlatform, Collections.emptyList()).contains(stackType);
     }
 
-    public static boolean isRazTokenConfigurationSupported(String cdhVersion, CloudPlatform cloudPlatform, StackType stackType) {
-        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger token support in Data Hub and Data Lake");
+    public static boolean isRazConfigurationForServiceTypeSupported(String cdhVersion, CloudPlatform cloudPlatform, StackType stackType) {
+        LOGGER.info("Cloud Platform {} is checked for Raz Service type configuration in {} for cdhVersion {}", cloudPlatform, stackType, cdhVersion);
         return isVersionNewerOrEqualThanLimited(() -> cdhVersion, CLOUDERA_STACK_VERSION_7_2_10)
                 && isRazSupportedForCloudAndStack(cloudPlatform, stackType);
+    }
+
+    public static boolean isRazConfigurationForRazRoleNeeded(String cmVersion, CloudPlatform cloudPlatform, StackType stackType) {
+        LOGGER.info("Cloud Platform {} is checked for Raz role configuration in {} for cmVersion {}", cloudPlatform, stackType, cmVersion);
+        return cloudPlatform == GCP && isRazConfigurationSupported(cmVersion, cloudPlatform, stackType);
     }
 
     public static boolean isSudoAccessNeededForHostCertRotation(ClouderaManagerRepo clouderaManagerRepoDetails) {

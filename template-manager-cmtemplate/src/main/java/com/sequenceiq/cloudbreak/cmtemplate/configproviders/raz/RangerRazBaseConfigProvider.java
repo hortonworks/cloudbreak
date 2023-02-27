@@ -1,12 +1,15 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazTokenConfigurationSupported;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazConfigurationForRazRoleNeeded;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazConfigurationForServiceTypeSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz.RangerRazRoles.RANGER_RAZ;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz.RangerRazRoles.RANGER_RAZ_SERVER;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
@@ -15,13 +18,17 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 
 public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String RANGER_RAZ_SITE_XML_ROLE_SAFETY_VALVE = "ranger-raz-conf/ranger-raz-site.xml_role_safety_valve";
 
     private static final String RANGER_RAZ_BOOTSTRAP_SERVICETYPES = "ranger.raz.bootstrap.servicetypes";
+
+    private static final String RANGER_RAZ_GCP_SERVICE_ACCOUNT = "ranger.raz.gs.service.account";
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
@@ -40,13 +47,20 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+        List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
         String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
         CloudPlatform cloudPlatform = source.getCloudPlatform();
-        if (!Strings.isNullOrEmpty(cdhVersion) && isRazTokenConfigurationSupported(cdhVersion, cloudPlatform, source.getStackType())) {
+        if (!Strings.isNullOrEmpty(cdhVersion) && isRazConfigurationForServiceTypeSupported(cdhVersion, cloudPlatform, source.getStackType())) {
             String safetyValveValue = getSafetyValveProperty(RANGER_RAZ_BOOTSTRAP_SERVICETYPES, getServiceType(cloudPlatform));
-            return List.of(config(RANGER_RAZ_SITE_XML_ROLE_SAFETY_VALVE, safetyValveValue));
+            roleConfigs.add(config(RANGER_RAZ_SITE_XML_ROLE_SAFETY_VALVE, safetyValveValue));
         }
-        return List.of();
+        if (isRazConfigurationForRazRoleNeeded(source.getProductDetailsView().getCm().getVersion(), cloudPlatform, source.getStackType())) {
+            String rangerCloudAccessAuthorizerServiceAccount = getRangerCloudAccessAuthorizerServiceAccount(source);
+            if (rangerCloudAccessAuthorizerServiceAccount != null) {
+                roleConfigs.add(config(RANGER_RAZ_GCP_SERVICE_ACCOUNT, rangerCloudAccessAuthorizerServiceAccount));
+            }
+        }
+        return roleConfigs;
     }
 
     private String getServiceType(CloudPlatform cloudPlatform) {
@@ -60,6 +74,13 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
             default:
                 return null;
         }
+    }
+
+    private String getRangerCloudAccessAuthorizerServiceAccount(TemplatePreparationObject source) {
+        AccountMappingView accountMappingView = source.getAccountMappingView() == null
+                ? AccountMappingView.EMPTY_MAPPING : source.getAccountMappingView();
+        Map<String, String> userMappings = accountMappingView.getUserMappings();
+        return userMappings == null ? null : userMappings.get(AccountMappingSubject.RANGER_RAZ_USER);
     }
 
     protected ApiClusterTemplateService createTemplate() {
