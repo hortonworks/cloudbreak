@@ -66,13 +66,8 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactory implements FlowEventCha
     public FlowTriggerEventQueue createFlowTriggerEventQueue(OSUpgradeByUpgradeSetsTriggerEvent event) {
         List<OrderedOSUpgradeSet> upgradeSets = event.getUpgradeSets();
         LOGGER.info("Create flow trigger event queue for upgrade set: {}", upgradeSets);
-
-        StackView stackView = stackDtoService.getStackViewById(event.getResourceId());
         Set<String> instanceIdsToRepair = upgradeSets.stream().flatMap(upgradeSet -> upgradeSet.getInstanceIds().stream()).collect(Collectors.toSet());
-
         LOGGER.info("Instance ids to repair: {}", instanceIdsToRepair);
-        clusterRepairService.markVolumesToNonDeletable(stackView, instanceIdsToRepair);
-
         Queue<Selectable> flowTriggers = createFlowTriggerList(event, upgradeSets);
 
         return new FlowTriggerEventQueue(getName(), event, flowTriggers);
@@ -80,6 +75,7 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactory implements FlowEventCha
 
     private Queue<Selectable> createFlowTriggerList(OSUpgradeByUpgradeSetsTriggerEvent event, List<OrderedOSUpgradeSet> upgradeSets) {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        StackView stackView = stackDtoService.getStackViewById(event.getResourceId());
         LOGGER.info("Add stack image update trigger event with image DTO: {}", event.getImageChangeDto());
         flowTriggers.add(new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), event.getResourceId(), event.accepted(),
                 event.getImageChangeDto().getImageId(), event.getImageChangeDto().getImageCatalogName(), event.getImageChangeDto().getImageCatalogUrl()));
@@ -95,6 +91,7 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactory implements FlowEventCha
             Map<String, Integer> groupsWithAdjustment = instancesToUpgradeAtOnce.stream().collect(Collectors.toMap(InstanceMetadataView::getInstanceGroupName,
                     instanceMetadataView -> groupsWithHostNames.get(instanceMetadataView.getInstanceGroupName()).size(), (key1, key2) -> key2));
             boolean repairingPrimaryGW = isRepairingPrimaryGW(event.getResourceId(), instanceIdsToUpgradeAtOnce);
+            clusterRepairService.markVolumesToNonDeletable(stackView, instancesToUpgradeAtOnce);
             addDownscaleFlowTrigger(event, flowTriggers, repairingPrimaryGW, groupsWithHostNames, groupsWithPrivateIds, groupsWithAdjustment);
             // maybe AWS migration should be implemented here later
             addUpscaleFlowTrigger(event, flowTriggers, upgradeSets, repairingPrimaryGW, groupsWithHostNames, groupsWithAdjustment);

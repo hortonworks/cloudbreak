@@ -5,14 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -153,8 +157,10 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactoryTest {
         assertThat(hostGroupsWithHostNames.get("worker")).containsExactlyInAnyOrder("host6");
         assertEquals("FULL_UPSCALE_TRIGGER_EVENT", seventhFlow.getSelector());
 
-        ArgumentCaptor<Set<String>> instanceIdsToRepair = ArgumentCaptor.forClass(Set.class);
-        verify(clusterRepairService).markVolumesToNonDeletable(eq(stackView), instanceIdsToRepair.capture());
-
+        ArgumentCaptor<List<InstanceMetadataView>> instanceIdsToRepair = ArgumentCaptor.forClass(List.class);
+        verify(clusterRepairService, times(3)).markVolumesToNonDeletable(eq(stackView), instanceIdsToRepair.capture());
+        List<List<InstanceMetadataView>> instanceIdsToRepairAllValues = instanceIdsToRepair.getAllValues();
+        List<InstanceMetadataView> instanceMetadataViews = instanceIdsToRepairAllValues.stream().flatMap(Collection::stream).collect(Collectors.toList());
+        assertThat(instanceMetadataViews).extracting("instanceId").containsExactlyInAnyOrder("i-1", "i-2", "i-3", "i-4", "i-5", "i-6");
     }
 }
