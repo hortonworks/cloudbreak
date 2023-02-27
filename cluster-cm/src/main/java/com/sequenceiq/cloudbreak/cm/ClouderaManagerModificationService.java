@@ -698,14 +698,18 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void applyHostGroupRolesOnUpscaledHosts(ApiHostRefList body, String hostGroupName) throws ApiException, CloudbreakException {
-        LOGGER.debug("Applying host template on upscaled hosts. Host group: [{}]", hostGroupName);
-        HostTemplatesResourceApi templatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(apiClient);
-        ApiCommand applyHostTemplateCommand = templatesResourceApi.applyHostTemplate(stack.getName(), hostGroupName, START_ROLES_ON_UPSCALED_NODES, body);
-        ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
-                stack, apiClient, applyHostTemplateCommand.getId());
-        handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for host template to apply",
-                "Timeout while Cloudera Manager was applying host template.");
-        LOGGER.debug("Applied host template on upscaled hosts. Host group: [{}]", hostGroupName);
+        if (body.getItems() != null && !body.getItems().isEmpty()) {
+            LOGGER.debug("Applying host template on upscaled hosts. Host group: [{}]", hostGroupName);
+            HostTemplatesResourceApi templatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(apiClient);
+            ApiCommand applyHostTemplateCommand = templatesResourceApi.applyHostTemplate(stack.getName(), hostGroupName, START_ROLES_ON_UPSCALED_NODES, body);
+            ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
+                    stack, apiClient, applyHostTemplateCommand.getId());
+            handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for host template to apply",
+                    "Timeout while Cloudera Manager was applying host template.");
+            LOGGER.debug("Applied host template on upscaled hosts. Host group: [{}]", hostGroupName);
+        } else {
+            LOGGER.debug("Skip applying host template, empty host list for host group: {}", hostGroupName);
+        }
     }
 
     private void activateParcels(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
