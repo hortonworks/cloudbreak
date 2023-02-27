@@ -28,10 +28,6 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final Integer NUM_FAILED_VOLUMES_TOLERATED = 0;
 
-    private static final String DFS_REPLICATION = "dfs_replication";
-
-    private static final Integer DFS_REPLICATION_VALUE = 2;
-
     private static final String DFS_ENCRYPT_DATA_TRANSFER = "dfs_encrypt_data_transfer";
 
     private static final String DFS_DATA_TRANSFER_PROTECTION = "dfs_data_transfer_protection";
@@ -62,6 +58,11 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 configs.add(
                         config(FAILED_VOLUMES_TOLERATED, NUM_FAILED_VOLUMES_TOLERATED.toString())
                 );
+                if (isSDXOptimizationEnabled(source)) {
+                    configs.add(
+                            config(DFS_ENCRYPT_DATA_TRANSFER, "true")
+                    );
+                }
                 return configs;
             case HdfsRoles.NAMENODE:
                 if (isNamenodeHA(source)) {
@@ -91,9 +92,6 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         if (isSDXOptimizationEnabled(source)) {
-            if (isNamenodeHA(source)) {
-                configs.add(config(DFS_REPLICATION, DFS_REPLICATION_VALUE.toString()));
-            }
             configs.add(config(DFS_ENCRYPT_DATA_TRANSFER, "true"));
             configs.add(config(DFS_DATA_TRANSFER_PROTECTION, "privacy"));
             configs.add(config(HADOOP_RPC_PROTECTION, "privacy"));

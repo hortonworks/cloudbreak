@@ -30,7 +30,7 @@ class HdfsRoleConfigProviderTest {
 
     private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com";
 
-    private EntitlementService entitlementService = mock(EntitlementService.class);
+    private final EntitlementService entitlementService = mock(EntitlementService.class);
 
     private final HdfsRoleConfigProvider subject = new HdfsRoleConfigProvider(entitlementService);
 
@@ -102,8 +102,9 @@ class HdfsRoleConfigProviderTest {
             Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(namenodeConfigs);
             assertEquals(NN_HA_PROPERTIES, configMap.keySet());
             assertEquals("true", configMap.get("autofailover_enabled").getValue());
-            assertEquals(
-                    List.of(config("dfs_datanode_failed_volumes_tolerated", "0")),
+            assertEquals(List.of(
+                            config("dfs_datanode_failed_volumes_tolerated", "0"),
+                            config("dfs_encrypt_data_transfer", "true")),
                     roleConfigs.get("hdfs-DATANODE-BASE"));
 
         });
@@ -129,15 +130,10 @@ class HdfsRoleConfigProviderTest {
             List<ApiClusterTemplateConfig> serviceConfigs = subject.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
             Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(serviceConfigs);
-            assertEquals(4, serviceConfigs.size());
-            assertEquals("dfs_replication", serviceConfigs.get(0).getName());
-            assertEquals("2", serviceConfigs.get(0).getValue());
-            assertEquals("dfs_encrypt_data_transfer", serviceConfigs.get(1).getName());
-            assertEquals("true", serviceConfigs.get(1).getValue());
-            assertEquals("dfs_data_transfer_protection", serviceConfigs.get(2).getName());
-            assertEquals("privacy", serviceConfigs.get(2).getValue());
-            assertEquals("hadoop_rpc_protection", serviceConfigs.get(3).getName());
-            assertEquals("privacy", serviceConfigs.get(3).getValue());
+            assertEquals(3, serviceConfigs.size());
+            assertEquals("true", configMap.get("dfs_encrypt_data_transfer").getValue());
+            assertEquals("privacy", configMap.get("dfs_data_transfer_protection").getValue());
+            assertEquals("privacy", configMap.get("hadoop_rpc_protection").getValue());
         });
     }
 
@@ -164,7 +160,9 @@ class HdfsRoleConfigProviderTest {
             Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(namenodeConfigs);
             assertEquals(NN_HA_PROPERTIES, configMap.keySet());
             assertEquals("true", configMap.get("autofailover_enabled").getValue());
-            assertEquals(List.of(config("dfs_datanode_failed_volumes_tolerated", "0")),
+            assertEquals(List.of(
+                            config("dfs_datanode_failed_volumes_tolerated", "0"),
+                            config("dfs_encrypt_data_transfer", "true")),
                     roleConfigs.get("hdfs-DATANODE-BASE"));
 
         });
