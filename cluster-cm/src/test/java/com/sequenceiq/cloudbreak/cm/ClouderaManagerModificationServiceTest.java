@@ -454,6 +454,28 @@ class ClouderaManagerModificationServiceTest {
         verifyRackIdBatch(batchRequestCaptor.getValue(), "upscaledId", "/upscaledRack");
     }
 
+    @Test
+    void upscaleClusterSkipApplyingHostTemplatesIfHostListIsEmpy() throws Exception {
+        setUpListClusterHosts();
+        setUpReadHosts(false);
+        setUpDeployClientConfigPolling(success);
+
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName(HOST_GROUP_NAME);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("upscaled");
+        instanceMetaData.setRackId("/upscaledRack");
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        List<String> result = underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(instanceMetaDataList)));
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+
+        verify(hostTemplatesResourceApi, never())
+                .applyHostTemplate(anyString(), anyString(), anyBoolean(), any());
+    }
+
     private void setUpBatchWithResponseAnswer(Answer<ApiBatchResponse> batchResponseAnswer) throws ApiException {
         when(clouderaManagerApiFactory.getBatchResourceApi(apiClientMock)).thenReturn(batchResourceApi);
         when(batchResourceApi.execute(any(ApiBatchRequest.class))).thenAnswer(batchResponseAnswer);
