@@ -143,7 +143,6 @@ freeipa:
       TWO_NODE_BASED:
         - HA
       HA:
-        - HA
         - TWO_NODE_BASED
   sudo:
     ruleName: cb-sudo-rule

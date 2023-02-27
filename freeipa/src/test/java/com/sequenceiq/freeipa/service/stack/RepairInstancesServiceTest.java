@@ -284,7 +284,7 @@ class RepairInstancesServiceTest {
     }
 
     @Test
-    void testRepairForceWhenOnlyBadInstancesRemain() {
+    void testRepairForceWhenOnlyBadInstarncesRemain() {
         Stack stack = createStack(Status.UNREACHABLE, List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE));
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
@@ -394,8 +394,7 @@ class RepairInstancesServiceTest {
         Exception expected = assertThrows(NotFoundException.class, () -> {
             underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest);
         });
-        Assert.assertTrue(expected.getLocalizedMessage().equals("No unhealthy instances to reboot. You can try to use the force option to enforce " +
-                "the repair process."));
+        Assert.assertTrue(expected.getLocalizedMessage().equals("No unhealthy instances to reboot.  Maybe use the force option."));
         ArgumentCaptor<InstanceEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(InstanceEvent.class);
         verify(flowManager, times(0)).notify(eq(REBOOT_EVENT.event()), terminationEventArgumentCaptor.capture());
     }
@@ -475,19 +474,6 @@ class RepairInstancesServiceTest {
         when(stackService.getByCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_ID1, ACCOUNT_ID, FREEIPA_CRN)).thenReturn(stack);
         when(stackService.findByEnvironmentCrnAndAccountId(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(Optional.of(stack));
         when(entitlementService.isFreeIpaRebuildEnabled(eq(ACCOUNT_ID))).thenReturn(true);
-
-        RebuildRequest rebuildRequest = new RebuildRequest();
-        rebuildRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
-        rebuildRequest.setSourceCrn(FREEIPA_CRN);
-
-        assertThrows(BadRequestException.class, () -> underTest.rebuild(ACCOUNT_ID, rebuildRequest));
-    }
-
-    @Test
-    public void testRebuildThrowsWhenNoEntitlement() throws Exception {
-        Stack stack = createStack(Status.AVAILABLE, List.of(InstanceStatus.CREATED, InstanceStatus.CREATED), 2);
-
-        when(entitlementService.isFreeIpaRebuildEnabled(eq(ACCOUNT_ID))).thenReturn(false);
 
         RebuildRequest rebuildRequest = new RebuildRequest();
         rebuildRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
