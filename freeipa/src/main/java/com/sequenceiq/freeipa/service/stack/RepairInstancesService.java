@@ -98,20 +98,21 @@ public class RepairInstancesService {
         LOGGER.debug("Validating repair for account {} and stack ID {}. Remaining good instances [{}]. Remaining bad instances [{}]. Instances to repair [{}].",
                 accountId, stack.getId(), remainingGoodInstances, remainingBadInstances, instancesToRepair);
         if (!entitlementService.freeIpaHaRepairEnabled(accountId)) {
-            throwBadRequest("The FreeIPA HA Repair capability is disabled.");
+            throw new BadRequestException("The FreeIPA HA Repair capability is disabled.");
         }
         if (instancesToRepair.isEmpty()) {
-            throwNotFoundException("No unhealthy instances to repair. You can try to use the force option to enforce the repair process.");
+            throw new NotFoundException("No unhealthy instances to repair.  Maybe use the force option.");
         }
         if (remainingGoodInstances.isEmpty()) {
-            throwBadRequest("At least one instance must remain running with a good status during a repair.");
+            throw new BadRequestException("At least one instance must remain running with a good status during a repair.");
         }
         if (!remainingBadInstances.isEmpty()) {
-            throwBadRequest(String.format("At least one remaining non-repaired instance(s) have a bad status: [%s]. " +
-                    "All remaining instances must have a good status during a repair.", remainingBadInstances));
+            String errorMsg = "At least one remaining non-repaired instance has a bad status. All remaining instances must have a good status during a repair.";
+            LOGGER.error("{}. The following instances have a bad status: [{}]", errorMsg, remainingBadInstances);
+            throw new BadRequestException(errorMsg);
         }
         if (stack.getInstanceGroups().isEmpty()) {
-            throwBadRequest("At least one instance group must be present for a repair.");
+            throw new BadRequestException("At least one instace group must be present for a repair.");
         }
     }
 
@@ -131,7 +132,9 @@ public class RepairInstancesService {
             if (validInstanceIds.size() != instanceIds.size()) {
                 String badIds = instanceIds.stream()
                         .filter(not(allInstances::contains)).collect(Collectors.joining(","));
-                throwBadRequest(MessageFormat.format("Invalid instanceIds in request {0}.", badIds));
+                String msg = MessageFormat.format("Invalid instanceIds in request {0}.", badIds);
+                LOGGER.error(msg);
+                throw new BadRequestException(msg);
             }
             return validInstanceIds;
         }
@@ -179,29 +182,23 @@ public class RepairInstancesService {
      */
     public OperationStatus repairInstances(String accountId, RepairInstancesRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
-        LOGGER.debug("Repairing freeipa instances, request: {}", request);
+
         if (request.isForceRepair() && CollectionUtils.isEmpty(request.getInstanceIds())) {
-            String message = "Force repair requires the instance IDs to be provided.";
-            LOGGER.error(message);
-            throw new UnsupportedOperationException(message);
+            throw new UnsupportedOperationException("Force repair requires the instance IDs to be provided.");
         }
 
         Map<String, InstanceStatus> healthMap = request.isForceRepair() ? Collections.emptyMap() : getInstanceHealthMap(accountId, request.getEnvironmentCrn());
         Map<String, InstanceMetaData> allInstancesByInstanceId = getAllInstancesFromStack(stack);
         Map<String, InstanceMetaData> instancesToRepair =
                 getInstancesToRepair(healthMap, allInstancesByInstanceId, request.getInstanceIds(), request.isForceRepair(), false);
-        LOGGER.debug("Freeipa repair, instances: healthmap: {}, all instances by instance id: {}, instances to repair: {}",
-                healthMap, allInstancesByInstanceId, instancesToRepair);
 
         Set<InstanceMetaData> remainingGoodInstances =
                 getRemainingGoodInstances(allInstancesByInstanceId, instancesToRepair, healthMap, request.isForceRepair());
         Set<InstanceMetaData> remainingBadInstances = getRemainingBadInstances(allInstancesByInstanceId, instancesToRepair, healthMap, request.isForceRepair());
-        LOGGER.debug("Freeipa repair, remaining good instances: {}, remaining bad instances: {}", remainingGoodInstances, remainingBadInstances);
         validate(accountId, stack, remainingGoodInstances, remainingBadInstances, instancesToRepair.values());
         int nodeCount = stack.getInstanceGroups().stream().findFirst().get().getNodeCount();
 
         List<String> additionalTerminatedInstanceIds = getAdditionalTerminatedInstanceIds(allInstancesByInstanceId.values(), request.getInstanceIds());
-        LOGGER.debug("Freeipa repair, terminated instances: {}, node count: {}", additionalTerminatedInstanceIds, nodeCount);
 
         Operation operation = operationService.startOperation(accountId, OperationType.REPAIR, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         if (operation.getStatus() == OperationState.RUNNING) {
@@ -262,27 +259,29 @@ public class RepairInstancesService {
                 getInstancesToRepair(healthMap, allInstancesByInstanceId, request.getInstanceIds(), request.isForceReboot(), true);
 
         if (instancesToReboot.keySet().isEmpty()) {
-            throwNotFoundException("No unhealthy instances to reboot. You can try to use the force option to enforce the repair process.");
+            throw new NotFoundException("No unhealthy instances to reboot.  Maybe use the force option.");
         }
+
 
         Operation operation = operationService.startOperation(accountId, OperationType.REBOOT, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         if (operation.getStatus() == OperationState.RUNNING) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_REQUESTED, "Reboot requested");
             flowManager.notify(REBOOT_EVENT.event(), new RebootInstanceEvent(REBOOT_EVENT.event(), stack.getId(),
-                    new ArrayList<>(instancesToReboot.keySet()), operation.getOperationId()));
+                    instancesToReboot.keySet().stream().collect(Collectors.toList()), operation.getOperationId()));
         }
         return operationToOperationStatusConverter.convert(operation);
     }
 
     public DescribeFreeIpaResponse rebuild(String accountId, RebuildRequest rebuildRequest) {
         if (!entitlementService.isFreeIpaRebuildEnabled(accountId)) {
-            throwBadRequest("The FreeIPA rebuild capability is disabled.");
+            throw new BadRequestException("The FreeIPA rebuild capability is disabled.");
         }
         Stack stack = stackService.getByCrnAndAccountIdEvenIfTerminated(rebuildRequest.getEnvironmentCrn(), accountId, rebuildRequest.getSourceCrn());
-        LOGGER.debug("Freeipa rebuild request: {}", rebuildRequest);
         Optional<Stack> nonTerminatedStack = stackService.findByEnvironmentCrnAndAccountId(rebuildRequest.getEnvironmentCrn(), accountId);
         if (nonTerminatedStack.isPresent()) {
-            throwBadRequest("There is a stack which hasn't been terminated.");
+            String error = "There is a stack which hasn't been terminated.";
+            LOGGER.error(error);
+            throw new BadRequestException(error);
         }
         renameStackIfNeeded(stack);
         CreateFreeIpaRequest createFreeIpaRequest = stackToCreateFreeIpaRequestConverter.convert(stack);
@@ -292,7 +291,7 @@ public class RepairInstancesService {
 
     void renameStackIfNeeded(Stack stack) {
         if (!stack.isDeleteCompleted()) {
-            throwBadRequest(String.format("The stack %s has not been terminated", stack.getResourceCrn()));
+            throw new BadRequestException(String.format("The stack %s has not been terminated", stack.getResourceCrn()));
         }
         Long terminated = stack.getTerminated();
         String originalName = stack.getName();
@@ -302,15 +301,4 @@ public class RepairInstancesService {
             terminationService.finalizeTermination(stack.getId());
         }
     }
-
-    private void throwBadRequest(String error) {
-        LOGGER.error(error);
-        throw new BadRequestException(error);
-    }
-
-    private void throwNotFoundException(String message) {
-        LOGGER.error(message);
-        throw new NotFoundException(message);
-    }
-
 }

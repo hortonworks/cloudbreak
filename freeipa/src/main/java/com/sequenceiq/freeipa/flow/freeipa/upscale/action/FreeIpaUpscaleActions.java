@@ -177,7 +177,6 @@ public class FreeIpaUpscaleActions {
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Adding instances");
 
                 List<CloudInstance> newInstances = buildNewInstances(context.getStack(), getInstanceCountByGroup(variables));
-                LOGGER.debug("Freeipa upscale new instances: {}", newInstances);
                 if (newInstances.isEmpty()) {
                     skipAddingNewInstances(context, stack);
                 } else {
