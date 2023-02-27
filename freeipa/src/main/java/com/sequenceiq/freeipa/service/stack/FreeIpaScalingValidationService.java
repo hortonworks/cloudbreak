@@ -34,7 +34,10 @@ public class FreeIpaScalingValidationService {
     private VerticalScalingValidatorService verticalScalingValidatorService;
 
     public void validateStackForUpscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {
-        validateScalingIsUpscale(scalingPath);
+        if (allInstances.size() >= AvailabilityType.HA.getInstanceCount()) {
+            LOGGER.warn("FreeIPA instance count is bigger then allowed. Size: [{}]", allInstances.size());
+            throw new BadRequestException("Upscaling currently only available for FreeIPA installation with 1 or 2 instances");
+        }
         executeCommonValidations(allInstances, stack, scalingPath, OperationType.UPSCALE);
     }
 
@@ -43,24 +46,11 @@ public class FreeIpaScalingValidationService {
     }
 
     public void validateStackForDownscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {
-        validateScalingIsDownscale(scalingPath);
+        if (allInstances.size() < AvailabilityType.HA.getInstanceCount()) {
+            LOGGER.warn("FreeIPA instance count is not allowed. Size: [{}]", allInstances.size());
+            throw new BadRequestException("Downscaling currently only available for FreeIPA installation with 3 instances");
+        }
         executeCommonValidations(allInstances, stack, scalingPath, OperationType.DOWNSCALE);
-    }
-
-    private void validateScalingIsUpscale(ScalingPath scalingPath) {
-        if (scalingPath.getOriginalAvailabilityType().getInstanceCount() > scalingPath.getTargetAvailabilityType().getInstanceCount()) {
-            throw new BadRequestException(String.format("Refusing %s as target node count is smaller than current. Current node count: %d, " +
-                            "target node count: %d.", OperationType.UPSCALE.getLowerCaseName(), scalingPath.getOriginalAvailabilityType().getInstanceCount(),
-                    scalingPath.getTargetAvailabilityType().getInstanceCount()));
-        }
-    }
-
-    private void validateScalingIsDownscale(ScalingPath scalingPath) {
-        if (scalingPath.getOriginalAvailabilityType().getInstanceCount() < scalingPath.getTargetAvailabilityType().getInstanceCount()) {
-            throw new BadRequestException(String.format("Refusing %s as target node count is higher than current. Current node count: %d, " +
-                            "target node count: %d.", OperationType.DOWNSCALE.getLowerCaseName(), scalingPath.getOriginalAvailabilityType().getInstanceCount(),
-                    scalingPath.getTargetAvailabilityType().getInstanceCount()));
-        }
     }
 
     private void executeCommonValidations(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath, OperationType operationType) {
@@ -73,9 +63,6 @@ public class FreeIpaScalingValidationService {
         if (!stack.isAvailable()) {
             throwErrorForUnavailableStack(stack, operationType);
         }
-        if (nodeCountAlreadyMatchesTarget(allInstances, scalingPath)) {
-            throwErrorForNoChangeInNodeCountRequested(operationType, allInstances, scalingPath);
-        }
         if (scalingPathDisabled(scalingPath)) {
             throwErrorForUnsupportedScalingPath(scalingPath, operationType);
         }
@@ -84,10 +71,6 @@ public class FreeIpaScalingValidationService {
     private boolean scalingPathDisabled(ScalingPath scalingPath) {
         List<AvailabilityType> targetAvailabilityTypes = allowedScalingPaths.getPaths().get(scalingPath.getOriginalAvailabilityType());
         return Objects.isNull(targetAvailabilityTypes) || !targetAvailabilityTypes.contains(scalingPath.getTargetAvailabilityType());
-    }
-
-    private boolean nodeCountAlreadyMatchesTarget(Set<InstanceMetaData> allInstances, ScalingPath scalingPath) {
-        return allInstances.size() == scalingPath.getTargetAvailabilityType().getInstanceCount();
     }
 
     private void throwErrorForNoInstance() {
@@ -112,24 +95,16 @@ public class FreeIpaScalingValidationService {
         LOGGER.warn("Refusing {} as stack is not available. Current state: [{}]",
                 scaleType.name(),
                 stack.getStackStatus());
-        throw new BadRequestException("Stack is not in available state, refusing to " + scaleType.getLowerCaseName() +
+        throw new BadRequestException("Stack is not in available state, refusing to " + scaleType.name().toLowerCase() +
                 ". Current state: " + stack.getStackStatus().getStatus());
-    }
-
-    private void throwErrorForNoChangeInNodeCountRequested(OperationType scaleType, Set<InstanceMetaData> allInstances, ScalingPath scalingPath) {
-        String message = String.format("Refusing %s as the current node count already matches the node count of the requested availability type. Current " +
-                        "node count: %d, target availability type: %s and node count: %d.", scaleType.name(), allInstances.size(),
-                scalingPath.getTargetAvailabilityType(), scalingPath.getTargetAvailabilityType().getInstanceCount());
-        LOGGER.warn(message);
-        throw new BadRequestException(message);
     }
 
     private void throwErrorForUnsupportedScalingPath(ScalingPath scalingPath, OperationType scaleType) {
         String message = String.format("Refusing %s as scaling from %s node to %s is not supported.%s",
-                scaleType.getLowerCaseName(),
+                scaleType.name().toLowerCase(),
                 scalingPath.getOriginalAvailabilityType().getInstanceCount(),
                 scalingPath.getTargetAvailabilityType().getInstanceCount(),
-                generateAlternativeTargetString(scaleType.getLowerCaseName(), allowedScalingPaths.getPaths().get(scalingPath.getOriginalAvailabilityType())));
+                generateAlternativeTargetString(scaleType.name().toLowerCase(), allowedScalingPaths.getPaths().get(scalingPath.getOriginalAvailabilityType())));
         LOGGER.warn(message);
         throw new BadRequestException(message);
     }
