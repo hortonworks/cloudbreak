@@ -20,6 +20,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
@@ -511,6 +512,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.postgres.upgrade.skip.service.stop.enable}")
     private boolean skipPostgresUpgradeServicesAndCmStop;
 
+    @Value("${auth.mock.verticalscale.enable}")
+    private boolean enableVerticalScale;
+
     private String cbLicense;
 
     private AltusCredential telemetryPublisherCredential;
@@ -831,6 +835,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         mockCrnService.ensureProperAccountIdUsage(accountId);
         LOGGER.info("Get account: {}", accountId);
         Account.Builder builder = Account.newBuilder();
+        if (enableVerticalScale) {
+            builder.addEntitlements(createEntitlement(CDP_CB_AWS_VERTICAL_SCALE));
+        }
         if (enableBaseImages) {
             builder.addEntitlements(createEntitlement(CDP_BASE_IMAGE));
         }

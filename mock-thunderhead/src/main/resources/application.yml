@@ -11,6 +11,7 @@ auth:
         file: databus_credentials
   mock:
     baseimage.enable: true
+    verticalscale.enable: true
     event-generation:
       expiration-minutes: 10
     freeipa:
@@ -57,7 +58,7 @@ auth:
     datahub:
       runtime.upgrade.enable: true
       os.upgrade.enable: true
-      instancetypes.enable: false
+      instancetypes.enable: true
     ccmv2.enable: false
     ccmv2jumpgate.enable: false
     ccmv2.useOneWayTls: false

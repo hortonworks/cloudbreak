@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstaceStorageInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -92,6 +93,11 @@ class ResourceConnectorTest {
 
         @Override
         public String getDBStackTemplate() {
+            return null;
+        }
+
+        @Override
+        public List<AwsInstaceStorageInfo> getInstanceTypeEphemeralInfo(AuthenticatedContext authenticatedContext, List<String> instanceTypes) {
             return null;
         }
 

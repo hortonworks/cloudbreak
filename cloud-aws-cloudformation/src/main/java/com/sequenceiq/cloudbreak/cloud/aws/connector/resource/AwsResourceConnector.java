@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstaceStorageInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -109,6 +110,9 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Inject
     private AwsLoadBalancerLaunchService awsLoadBalancerLaunchService;
+
+    @Inject
+    private AwsResourceService awsResourceService;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
@@ -243,5 +247,10 @@ public class AwsResourceConnector implements ResourceConnector {
         } catch (IOException e) {
             throw new CloudConnectorException("can't get freemarker template", e);
         }
+    }
+
+    @Override
+    public List<AwsInstaceStorageInfo> getInstanceTypeEphemeralInfo(AuthenticatedContext authenticatedContext, List<String> instanceTypes) {
+        return awsResourceService.getInstanceTypeEphemeralInfo(authenticatedContext, instanceTypes);
     }
 }

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstaceStorageInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -74,6 +75,11 @@ public class AbstractResourceConnectorTest {
 
             @Override
             public String getDBStackTemplate() throws TemplatingNotSupportedException {
+                return null;
+            }
+
+            @Override
+            public List<AwsInstaceStorageInfo> getInstanceTypeEphemeralInfo(AuthenticatedContext authenticatedContext, List<String> instanceTypes) {
                 return null;
             }
 

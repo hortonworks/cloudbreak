@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -16,6 +17,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstaceStorageInfo;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -55,7 +58,8 @@ public class CoreVerticalScaleService {
                 payload.getTemplate().getInstanceType());
     }
 
-    public void updateTemplateWithVerticalScaleInformation(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+    public void updateTemplateWithVerticalScaleInformation(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request,
+            List<AwsInstaceStorageInfo> instanceStoreInfo) {
         Optional<InstanceGroupView> optionalGroup = instanceGroupService
                 .findInstanceGroupViewByStackIdAndGroupName(stackId, stackVerticalScaleV4Request.getGroup());
         if (optionalGroup.isPresent() && stackVerticalScaleV4Request.getTemplate() != null) {
@@ -70,6 +74,7 @@ public class CoreVerticalScaleService {
                 Integer rootVolumeSize = requestedTemplate.getRootVolume().getSize();
                 template.setRootVolumeSize(rootVolumeSize);
             }
+            setTemporaryStorageOnTemplate(template, instanceStoreInfo);
             Set<VolumeV4Request> requestedAttachedVolumes = requestedTemplate.getAttachedVolumes();
             if (requestedAttachedVolumes != null) {
                 for (VolumeTemplate volumeTemplateInTheDatabase : template.getVolumeTemplates()) {
@@ -82,6 +87,18 @@ public class CoreVerticalScaleService {
                 }
             }
             templateService.savePure(template);
+        }
+    }
+
+    private void setTemporaryStorageOnTemplate(Template template, List<AwsInstaceStorageInfo> instanceStoreInfo) {
+        if (instanceStoreInfo != null && !instanceStoreInfo.isEmpty()) {
+            template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
+            template.setInstanceStorageCount(instanceStoreInfo.get(0).getInstanceStorageCount());
+            template.setInstanceStorageSize(instanceStoreInfo.get(0).getInstanceStorageSize());
+        } else {
+            template.setTemporaryStorage(TemporaryStorage.ATTACHED_VOLUMES);
+            template.setInstanceStorageCount(0);
+            template.setInstanceStorageSize(0);
         }
     }
 }

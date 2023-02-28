@@ -74,6 +74,18 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
 
     private static final String MOCK_UMS_PASSWORD = "Password123!";
 
+    private static final String TARGET_INSTANCE_GROUP_TYPE = "master";
+
+    private static final String UPGRADED_FREEIPA_INSTANCE_TYPE = "m5.2xlarge";
+
+    private static final String DEFAULT_DATALAKE_INSTANCE_TYPE = "m5.2xlarge";
+
+    private static final String DEFAULT_DATAHUB_INSTANCE_TYPE = "m5.2xlarge";
+
+    private static final String UPGRADED_DATALAKE_INSTANCE_TYPE = "m5.4xlarge";
+
+    private static final String UPGRADED_DATAHUB_INSTANCE_TYPE = "m5.4xlarge";
+
     private static final String FREEIPA_VERTICAL_SCALE_KEY = "freeipaVerticalScaleKey";
 
     private static final String SDX_VERTICAL_SCALE_KEY = "sdxVerticalScaleKey";
@@ -215,6 +227,84 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         LOGGER.info("Environment stop-start test execution has been finished....");
     }
 
+    @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "create an attached SDX and Datahubs (in case of AWS, create one of the Datahub with external database)",
+            then = "should be stopped first and started after it, fails to upgrade the datahub cluster " +
+                    "and required services should be in running state in CM")
+    public void testVerticallyScaleDatahubClusterFail(TestContext testContext) {
+        LOGGER.info("Environment stop-start test execution has been started....");
+        DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
+        distroXDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+        String recipeName = resourcePropertyProvider().getName();
+        String filePath = "/pre-service-deployment";
+        String fileName = "pre-service-deployment";
+
+        testContext
+                .given(RecipeTestDto.class)
+                .withName(recipeName)
+                .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
+                .withRecipeType(PRE_SERVICE_DEPLOYMENT)
+                .when(recipeTestClient.createV4())
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs()
+                .given(EnvironmentTestDto.class)
+                .withNetwork()
+                .withTelemetry("telemetry")
+                .withCreateFreeIpa(Boolean.TRUE)
+                .withOneFreeIpaNode()
+                .withFreeIpaRecipe(Set.of(recipeName))
+                .addTags(ENV_TAGS)
+                .when(environmentTestClient.create())
+                .then(this::getTelemetryStorageLocation)
+                .given(SdxInternalTestDto.class)
+                .withTelemetry("telemetry")
+                .addTags(SDX_TAGS)
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .when(sdxTestClient.createInternal())
+                .given(EnvironmentTestDto.class)
+                .await(EnvironmentStatus.AVAILABLE)
+                .then(cloudProviderSideTagAssertion.verifyEnvironmentTags(ENV_TAGS))
+                .init(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .then(validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
+                .given(SdxInternalTestDto.class)
+                .withTelemetry("telemetry")
+                .await(SdxClusterStatusResponse.RUNNING)
+                .then(cloudProviderSideTagAssertion.verifyInternalSdxTags(SDX_TAGS))
+                .given("dx1", DistroXTestDto.class)
+                .withExternalDatabaseOnAws(distroXDatabaseRequest)
+                .addTags(DX1_TAGS)
+                .when(distroXTestClient.create(), RunningParameter.key("dx1"))
+                .given("dx1", DistroXTestDto.class)
+                .await(STACK_AVAILABLE, RunningParameter.key("dx1"))
+                .then(cloudProviderSideTagAssertion.verifyDistroxTags(DX1_TAGS))
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.stop())
+                .await(EnvironmentStatus.ENV_STOPPED)
+
+                .when(this::executeDatahubVerticalScaleIfSupported)
+
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.start())
+                .await(EnvironmentStatus.AVAILABLE)
+                .then(this::validateClusterLogsArePresent)
+                .then(this::validateClusterBackupsArePresent)
+                .given("dx1", DistroXTestDto.class)
+                .await(STACK_AVAILABLE, RunningParameter.key("dx1"))
+                .awaitForHealthyInstances()
+                .then(this::verifyCmServicesStartedSuccessfully)
+
+                .then(this::verifyFailedVerticalScaleOutputsIfSupported)
+                .validate();
+
+        LOGGER.info("Environment stop-start test execution has been finished....");
+    }
+
     private <O extends CloudbreakTestDto, C extends MicroserviceClient<?, ?, ?, ?>> O executeVerticalScaleIfSupported(TestContext testContext, O testDto,
             C client) {
         if (testContext.getCloudProvider().verticalScalingSupported()) {
@@ -246,6 +336,24 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
             datahubRequestedInstanceType = datahubVerticalScalingTestDto.getInstanceType();
             datahubRequestedGroupName = datahubVerticalScalingTestDto.getGroupName();
             datahubVerticalScalingTestDto.withDistroXVerticalScale()
+                    .given("dx1", DistroXTestDto.class)
+                    .when(distroXTestClient.verticalScale(DISTROX_VERTICAL_SCALE_KEY))
+                    .await(STACK_STOPPED, RunningParameter.key("dx1"));
+        } else {
+            LOGGER.debug("No vertical scale will happen this case because at this point Cloudbreak does not support vertical scale in case of the following " +
+                    "cloud platform: {}", testContext.getCloudPlatform());
+        }
+        return testDto;
+    }
+
+    private <O extends CloudbreakTestDto, C extends MicroserviceClient<?, ?, ?, ?>> O executeDatahubVerticalScaleIfSupported(TestContext testContext,
+        O testDto, C client) {
+        if (testContext.getCloudProvider().verticalScalingSupported()) {
+            testContext
+                    .given(DISTROX_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class)
+                    .withDistroXVerticalScale()
+                    .withInstanceType("m5ad.2xlarge")
+                    .withGroup(TARGET_INSTANCE_GROUP_TYPE)
                     .given("dx1", DistroXTestDto.class)
                     .when(distroXTestClient.verticalScale(DISTROX_VERTICAL_SCALE_KEY))
                     .await(STACK_STOPPED, RunningParameter.key("dx1"));
@@ -342,6 +450,24 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         return datalake;
     }
 
+    private DistroXTestDto verifyFailedVerticalScaleOutputsIfSupported(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
+        if (testContext.getCloudProvider().verticalScalingSupported()) {
+            LOGGER.debug("Vertical scaling verification result initiated since the cloud platform '{}' suppots such operation.",
+                    testContext.getCloudPlatform());
+            testContext
+                    .given("telemetry", TelemetryTestDto.class)
+                    .withLogging()
+                    .withReportClusterLogs()
+                    .given("dx1", DistroXTestDto.class)
+                    .when(distroXTestClient.get())
+                    .then(this::validateDataHubInstanceTypeNotChanged);
+        } else {
+            LOGGER.debug("Since Cloudbreak right now does not support vertical scaling for cloud platform {}, hence no need for verification.",
+                    testContext.getCloudPlatform());
+        }
+        return testDto;
+    }
+
     private DistroXTestDto verifyCmServicesStartedSuccessfully(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
         String username = testContext.getActingUserCrn().getResource();
         String sanitizedUserName = SanitizerUtil.sanitizeWorkloadUsername(username);
@@ -392,6 +518,12 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
 
     private EnvironmentTestDto validateClusterBackupsArePresent(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageListContainer(telemetryStorageLocation, "cluster-backups", true);
+        return testDto;
+    }
+
+    private DistroXTestDto validateDataHubInstanceTypeNotChanged(TestContext testContext1, DistroXTestDto testDto, CloudbreakClient client) {
+        validateInstanceType(testDto.findInstanceGroupByName(TARGET_INSTANCE_GROUP_TYPE).getTemplate().getInstanceType(), DEFAULT_DATAHUB_INSTANCE_TYPE,
+                "Data Hub");
         return testDto;
     }
 }

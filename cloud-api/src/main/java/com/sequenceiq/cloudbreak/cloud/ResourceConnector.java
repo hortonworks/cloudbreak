@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstaceStorageInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -323,4 +324,13 @@ public interface ResourceConnector {
      * @throws TemplatingNotSupportedException if templating is not supported by provider
      */
     String getDBStackTemplate() throws TemplatingNotSupportedException;
+
+    /**
+     * Gets the cloud platform related instance storage information.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param instanceTypes List of instance types
+     * @return list of platform related instance storage information.
+     */
+    List<AwsInstaceStorageInfo> getInstanceTypeEphemeralInfo(AuthenticatedContext authenticatedContext, List<String> instanceTypes);
 }

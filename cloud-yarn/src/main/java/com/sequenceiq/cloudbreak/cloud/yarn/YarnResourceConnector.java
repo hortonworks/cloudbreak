@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstaceStorageInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnClientUtil;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.YarnClient;
@@ -295,5 +296,10 @@ public class YarnResourceConnector implements ResourceConnector {
     @Override
     public String getDBStackTemplate() throws TemplatingNotSupportedException {
         throw new TemplatingNotSupportedException();
+    }
+
+    @Override
+    public List<AwsInstaceStorageInfo> getInstanceTypeEphemeralInfo(AuthenticatedContext authenticatedContext, List<String> instanceTypes) {
+        return null;
     }
 }

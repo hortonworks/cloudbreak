@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstaceStorageInfo;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
@@ -48,16 +49,20 @@ public class CoreVerticalScaleHandler implements CloudPlatformEventHandler<CoreV
         CoreVerticalScaleRequest<CoreVerticalScaleResult> request = stackVerticalScaleRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         StackVerticalScaleV4Request stackVerticalScaleV4Request = request.getStackVerticalScaleV4Request();
+        String datahubCrn = cloudContext.getCrn();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
+            List<AwsInstaceStorageInfo> awsInstanceStorageInfo = connector.resources().getInstanceTypeEphemeralInfo(ac,
+                    List.of(request.getStackVerticalScaleV4Request().getTemplate().getInstanceType()));
             List<CloudResourceStatus> resourceStatus = stackUpscaleService.verticalScale(ac, request, connector);
             LOGGER.info("Vertical scaling resource statuses: {}", resourceStatus);
             CoreVerticalScaleResult result = new CoreVerticalScaleResult(
                     request.getResourceId(),
                     ResourceStatus.UPDATED,
                     resourceStatus,
-                    stackVerticalScaleV4Request);
+                    stackVerticalScaleV4Request,
+                    awsInstanceStorageInfo);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(stackVerticalScaleRequestEvent.getHeaders(), result));
             LOGGER.debug("Vertical scaling successfully finished for {}, and the result is: {}", cloudContext, result);

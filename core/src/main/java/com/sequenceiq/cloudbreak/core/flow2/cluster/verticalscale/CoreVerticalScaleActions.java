@@ -107,7 +107,8 @@ public class CoreVerticalScaleActions {
         return new AbstractClusterAction<>(CoreVerticalScaleResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, CoreVerticalScaleResult payload, Map<Object, Object> variables) {
-                coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStackId(), payload.getStackVerticalScaleV4Request());
+                coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStackId(), payload.getStackVerticalScaleV4Request(),
+                        payload.getInstanceStoreInfo());
                 coreVerticalScaleService.finishVerticalScale(context.getStackId(), payload.getStackVerticalScaleV4Request());
                 sendEvent(context);
             }
