@@ -23,6 +23,8 @@ public class ParcelFilterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParcelFilterService.class);
 
+    private static final String CDH = "CDH";
+
     @Inject
     private CmTemplateGeneratorService clusterTemplateGeneratorService;
 
@@ -64,7 +66,7 @@ public class ParcelFilterService {
             if (manifestAvailable(manifest)) {
                 Set<String> servicesInParcel = getAllServiceNameInParcel(manifest.right);
                 LOGGER.debug("The {} parcel contains the following services: {}", parcel.getName(), servicesInParcel);
-                if (servicesArePresentInTheBlueprint(requiredServicesInBlueprint, servicesInParcel, parcel)) {
+                if (servicesArePresentInTheBlueprint(requiredServicesInBlueprint, servicesInParcel, parcel) || CDH.equals(parcel.getName())) {
                     requiredParcels.add(parcel);
                     LOGGER.debug("Removing {} from the remaining required services because these services are found in {} parcel.", servicesInParcel, parcel);
                     requiredServicesInBlueprint.removeAll(servicesInParcel);
