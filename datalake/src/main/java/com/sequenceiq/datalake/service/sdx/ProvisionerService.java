@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -204,13 +203,14 @@ public class ProvisionerService {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.postInternal(0L, stackV4Request, initiatorUserCrn));
-        } catch (BadRequestException e) {
+        } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             if (errorMessage != null && errorMessage.contains(String.format(CONSTRAINT_VIOLATION_ERROR_MESSAGE_TEMPLATE, sdxCluster.getName()))) {
                 LOGGER.warn("The stack already exists despite pre-checks, probably due to a retried POST request. Fetching stack and proceed.");
                 return getStackByCrn(sdxCluster);
             } else {
-                throw e;
+                LOGGER.info("Cannot start provisioning: {}", errorMessage, e);
+                throw new RuntimeException("Cannot start provisioning, error happened during the operation: " + errorMessage);
             }
         }
     }
