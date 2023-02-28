@@ -24,7 +24,6 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
-import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
@@ -32,13 +31,11 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -84,9 +81,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
-
-    @Inject
-    private ProxyTestClient proxyTestClient;
 
     @BeforeMethod
     public final void minimalSetupForClusterCreation(Object[] data, ITestResult testResult) {
@@ -281,20 +275,12 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         initiateEnvironmentCreation(testContext);
         waitForEnvironmentCreation(testContext);
         waitForUserSync(testContext);
-        setFreeIpaResponse(testContext);
     }
 
     protected void waitForUserSync(TestContext testContext) {
         testContext.given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
-                .validate();
-    }
-
-    private void setFreeIpaResponse(TestContext testContext) {
-        testContext
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
                 .validate();
     }
 
@@ -372,52 +358,5 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         } else {
             return 1;
         }
-    }
-
-    protected void createProxyConfig(TestContext testContext) {
-        testContext
-                .given(ProxyTestDto.class)
-                .when(proxyTestClient.createIfNotExist())
-                .validate();
-    }
-
-    /**
-     * Helper method to speed up local testing. Could be invoked to re-use an already existing environment with the given name
-     */
-    protected void useExistingEnvironment(TestContext testContext, String environmentName) {
-        testContext
-                .given(EnvironmentTestDto.class)
-                    .withName(environmentName)
-                .when(environmentTestClient.describe())
-                .validate();
-    }
-
-    /**
-     * Helper method to speed up local testing. Could be invoked to re-use an already existing environment and FreeIpa with the given name
-     */
-    protected void useExistingEnvironmentWithFreeipa(TestContext testContext, String environmentName) {
-        useExistingEnvironment(testContext, environmentName);
-        setFreeIpaResponse(testContext);
-    }
-
-    /**
-     * Helper method to speed up local testing. Could be invoked to re-use an already existing datalake with the given name
-     */
-    protected void useExistingDatalake(TestContext testContext, String datalakeName) {
-        testContext
-                .given(SdxInternalTestDto.class)
-                    .withName(datalakeName)
-                .when(sdxTestClient.describeInternal());
-    }
-
-    /**
-     * Helper method to speed up local testing. Could be invoked to re-use an already existing datahub with the given name
-     */
-    protected void useExistingDatahub(TestContext testContext, String datahubName) {
-        testContext
-                .given(DistroXTestDto.class)
-                    .withName(datahubName)
-                .when(distroXTestClient.get())
-                .validate();
     }
 }

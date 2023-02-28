@@ -1,12 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto.proxy;
 
-import javax.inject.Inject;
-
-import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.config.ProxyConfigProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractEnvironmentTestDto;
 
@@ -14,9 +10,6 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractEnvironmentTestDto;
 public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, ProxyResponse, ProxyTestDto> {
 
     private static final String PROXYCONFIG_RESOURCE_NAME = "proxyName";
-
-    @Inject
-    private ProxyConfigProperties proxyConfigProperties;
 
     public ProxyTestDto(TestContext testContext) {
         super(new ProxyRequest(), testContext);
@@ -30,12 +23,12 @@ public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, Proxy
     public ProxyTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withDescription(getResourcePropertyProvider().getDescription("proxy"))
-                .withProtocol(proxyConfigProperties.getProxyProtocol())
-                .withServerHost(proxyConfigProperties.getProxyHost())
-                .withServerPort(proxyConfigProperties.getProxyPort())
-                .withServerUser(proxyConfigProperties.getProxyUser())
-                .withPassword(proxyConfigProperties.getProxyPassword())
-                .withNoProxyHosts(proxyConfigProperties.getProxyNoProxyHosts());
+                .withServerHost("1.2.3.4")
+                .withServerUser("mock")
+                .withPassword("akarmi")
+                .withServerPort(9)
+                .withProtocol("http")
+                .withNoProxyHosts("noproxy.com");
     }
 
     public ProxyTestDto withName(String name) {
@@ -99,11 +92,5 @@ public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, Proxy
     @Override
     public int order() {
         return 500;
-    }
-
-    @Override
-    public void deleteForCleanup() {
-        ProxyEndpoint proxyEndpoint = getClientForCleanup().getDefaultClient().proxyV1Endpoint();
-        proxyEndpoint.deleteByCrn(getCrn());
     }
 }

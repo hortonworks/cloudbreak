@@ -4,8 +4,6 @@ import static java.lang.String.format;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.RoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -41,46 +38,6 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     @Value("${integrationtest.cloudProvider:}")
     private String cloudProvider;
-
-    public SdxInternalTestDto checkConfig(SdxInternalTestDto testDto, String user, String password, Map<String, String> expectedConfig) {
-        String serverIp = testDto.getResponse().getStackV4Response().getCluster().getServerIp();
-        checkConfig(serverIp, testDto.getName(), user, password, expectedConfig);
-        return testDto;
-    }
-
-    public DistroXTestDto checkConfig(DistroXTestDto testDto, String user, String password, Map<String, String> expectedConfig) {
-        String serverIp = testDto.getResponse().getCluster().getServerIp();
-        checkConfig(serverIp, testDto.getName(), user, password, expectedConfig);
-        return testDto;
-    }
-
-    private void checkConfig(String serverIp, String name, String user, String password, Map<String, String> expectedConfig) {
-        ApiClient apiClient = getCmApiClient(serverIp, name, V_43, user, password);
-        // CHECKSTYLE:OFF
-        ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(apiClient);
-        // CHECKSTYLE:ON
-        try {
-            ApiConfigList configList = clouderaManagerResourceApi.getConfig("full");
-            expectedConfig.forEach((configKey, expectedConfigValue) -> {
-                String actualConfigValue = configList.getItems().stream()
-                        .filter(apiConfig -> apiConfig.getName().equalsIgnoreCase(configKey))
-                        .findFirst()
-                        .orElseThrow(() -> new TestFailException("Config not found with key " + configKey))
-                        .getValue();
-                if (!Objects.equals(expectedConfigValue, actualConfigValue)) {
-                    String message = configKey.toLowerCase().contains("password")
-                            ? String.format("Expected '%s' config value does not match found password", configKey)
-                            : String.format("Expected '%s' config value to be '%s' but found '%s'", configKey, expectedConfigValue, actualConfigValue);
-                    throw new TestFailException(message);
-                }
-            });
-        } catch (ApiException e) {
-            String message = format("Exception when calling ClouderaManagerResourceApi#getConfig at %s. Response: %s",
-                    apiClient.getBasePath(), e.getResponseBody());
-            LOGGER.error(message, e);
-            throw new TestFailException(message, e);
-        }
-    }
 
     public SdxInternalTestDto checkCmKnoxIDBrokerRoleConfigGroups(SdxInternalTestDto testDto, String user, String password) {
         String serverFqdn = testDto.getResponse().getStackV4Response().getCluster().getServerFqdn();

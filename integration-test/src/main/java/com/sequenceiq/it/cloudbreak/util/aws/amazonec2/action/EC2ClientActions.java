@@ -34,8 +34,6 @@ import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
 import com.amazonaws.services.ec2.model.InstanceState;
-import com.amazonaws.services.ec2.model.LaunchTemplate;
-import com.amazonaws.services.ec2.model.LaunchTemplateVersion;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
@@ -225,22 +223,23 @@ public class EC2ClientActions extends EC2Client {
     }
 
     public Map<String, String> listLaunchTemplatesUserData(String stack) {
-        List<StackResourceSummary> launchTemplateList = cfClientActions.getLaunchTemplatesToStack(stack);
+        List<StackResourceSummary> launchTemplateList;
+        try {
+            launchTemplateList = cfClientActions.getLaunchTemplatesToStack(stack);
+        } catch (Exception e) {
+            launchTemplateList = List.of();
+        }
         AmazonEC2 client = buildEC2Client();
-        List<String> launchTemplateIds = launchTemplateList.stream()
-                .map(StackResourceSummary::getPhysicalResourceId)
-                .collect(Collectors.toList());
-        DescribeLaunchTemplatesResult launchTemplates = client.describeLaunchTemplates(
-                new DescribeLaunchTemplatesRequest().withLaunchTemplateIds(launchTemplateIds));
 
         Map<String, String> result = new HashMap<>();
-        for (LaunchTemplate launchTemplate : launchTemplates.getLaunchTemplates()) {
+        DescribeLaunchTemplatesResult launchTemplates = client.describeLaunchTemplates(new DescribeLaunchTemplatesRequest()
+                .withLaunchTemplateIds(launchTemplateList.stream().map(lt -> lt.getPhysicalResourceId()).collect(Collectors.toList())));
+        for (int i = 0; i < launchTemplateList.size(); i++) {
             DescribeLaunchTemplateVersionsResult ver = client.describeLaunchTemplateVersions(new DescribeLaunchTemplateVersionsRequest()
-                    .withLaunchTemplateId(launchTemplate.getLaunchTemplateId())
-                    .withVersions(String.valueOf(launchTemplate.getLatestVersionNumber())));
-            LaunchTemplateVersion launchTemplateVersion = ver.getLaunchTemplateVersions().get(0);
-            String userData = new String(Base64.getDecoder().decode(launchTemplateVersion.getLaunchTemplateData().getUserData()));
-            result.put(launchTemplate.getLaunchTemplateId(), userData);
+                    .withLaunchTemplateId(launchTemplates.getLaunchTemplates().get(i).getLaunchTemplateId())
+                    .withVersions(String.valueOf(launchTemplates.getLaunchTemplates().get(i).getLatestVersionNumber())));
+            String userData = new String(Base64.getDecoder().decode(ver.getLaunchTemplateVersions().get(0).getLaunchTemplateData().getUserData()));
+            result.put(launchTemplates.getLaunchTemplates().get(i).getLaunchTemplateId(), userData);
         }
 
         return result;
