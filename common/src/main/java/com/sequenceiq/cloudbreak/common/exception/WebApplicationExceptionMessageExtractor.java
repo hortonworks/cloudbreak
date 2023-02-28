@@ -27,21 +27,26 @@ public class WebApplicationExceptionMessageExtractor {
 
     public String getErrorMessage(WebApplicationException exception) {
         try (Response response = exception.getResponse()) {
-            String errorResponse = response.readEntity(String.class);
-            LOGGER.info("Client error response is " + errorResponse);
-            try {
-                JsonNode jsonNode = JsonUtil.readTree(errorResponse);
-                if (jsonNode.has("validationErrors")) {
-                    return "Validation error: " + jsonNode.get("validationErrors");
+            if (response.hasEntity()) {
+                String errorResponse = response.readEntity(String.class);
+                LOGGER.info("Client error response is " + errorResponse);
+                try {
+                    JsonNode jsonNode = JsonUtil.readTree(errorResponse);
+                    if (jsonNode.has("validationErrors")) {
+                        return "Validation error: " + jsonNode.get("validationErrors");
+                    }
+                    if (jsonNode.has("message")) {
+                        return "Error message: " + jsonNode.get("message");
+                    }
+                    return errorResponse;
+                } catch (IOException e) {
+                    LOGGER.error("Can not parse response to json node", e);
+                    return errorResponse;
                 }
-                if (jsonNode.has("message")) {
-                    return "Error message: " + jsonNode.get("message");
-                }
-                return errorResponse;
-            } catch (IOException e) {
-                LOGGER.error("Can not parse response to json node", e);
-                return errorResponse;
             }
+        } catch (Exception e) {
+            LOGGER.warn("Cannot extract error response", e);
         }
+        return exception.getMessage();
     }
 }

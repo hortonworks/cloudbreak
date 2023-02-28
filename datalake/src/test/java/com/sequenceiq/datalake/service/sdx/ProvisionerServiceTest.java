@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -24,7 +26,6 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -147,6 +148,32 @@ class ProvisionerServiceTest {
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
         verify(sdxClusterRepository, times(1)).save(any(SdxCluster.class));
         verify(stackV4Endpoint, times(2)).getByCrn(eq(0L), eq(sdxCluster.getCrn()), any());
+        verify(webApplicationExceptionMessageExtractor, times(1)).getErrorMessage(any(WebApplicationException.class));
+    }
+
+    @Test
+    void startProvisioningPostInternalFailed() {
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setId(1L);
+        when(stackV4Endpoint.getByCrn(anyLong(), nullable(String.class), nullable(Set.class)))
+                .thenThrow(new NotFoundException())
+                .thenReturn(stackV4Response);
+        BadRequestException badRequestException = new BadRequestException("Something went wrong.");
+        when(stackV4Endpoint.postInternal(anyLong(), any(StackV4Request.class), nullable(String.class)))
+                .thenThrow(badRequestException);
+        when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(eq(badRequestException))).thenReturn("Something went wrong.");
+        RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startStackProvisioning(clusterId, getEnvironmentResponse())));
+
+        assertEquals("Cannot start provisioning, error happened during the operation: Something went wrong.", runtimeException.getMessage());
+        verify(stackV4Endpoint, times(1)).getByCrn(eq(0L), eq(sdxCluster.getCrn()), any());
+        verify(stackV4Endpoint, times(1)).postInternal(eq(0L), any(), any());
+        verify(webApplicationExceptionMessageExtractor, times(1)).getErrorMessage(any(WebApplicationException.class));
     }
 
     @Test
@@ -154,7 +181,7 @@ class ProvisionerServiceTest {
         long clusterId = CLUSTER_ID.incrementAndGet();
         when(sdxService.getById(clusterId)).thenThrow(new com.sequenceiq.cloudbreak.common.exception.NotFoundException("not found"));
 
-        Assertions.assertThrows(com.sequenceiq.cloudbreak.common.exception.NotFoundException.class,
+        assertThrows(com.sequenceiq.cloudbreak.common.exception.NotFoundException.class,
                 () -> underTest.startStackProvisioning(clusterId, getEnvironmentResponse()));
 
         verifyNoInteractions(cloudbreakFlowService);
@@ -175,7 +202,7 @@ class ProvisionerServiceTest {
         doThrow(new PollerStoppedException("Stopped."))
                 .when(cloudbreakPoller).pollCreateUntilAvailable(sdxCluster, pollingConfig);
 
-        Assertions.assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterCreation(clusterId, pollingConfig));
+        assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterCreation(clusterId, pollingConfig));
 
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
@@ -190,7 +217,7 @@ class ProvisionerServiceTest {
                 .when(cloudbreakPoller).pollCreateUntilAvailable(sdxCluster, pollingConfig);
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
 
-        Assertions.assertThrows(UserBreakException.class, () -> underTest
+        assertThrows(UserBreakException.class, () -> underTest
                 .waitCloudbreakClusterCreation(clusterId, pollingConfig), "Stack creation failed");
 
         verify(sdxStatusService, times(1))
@@ -263,8 +290,8 @@ class ProvisionerServiceTest {
         when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("web-error");
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        RuntimeException actual = Assertions.assertThrows(RuntimeException.class, () -> underTest.startStackDeletion(clusterId, false));
-        Assertions.assertEquals("Cannot delete cluster, error happened during the operation: web-error", actual.getMessage());
+        RuntimeException actual = assertThrows(RuntimeException.class, () -> underTest.startStackDeletion(clusterId, false));
+        assertEquals("Cannot delete cluster, error happened during the operation: web-error", actual.getMessage());
 
         verify(stackV4Endpoint).deleteInternal(eq(0L), eq(null), eq(false), nullable(String.class));
     }
@@ -281,7 +308,7 @@ class ProvisionerServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
 
-        Assertions.assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig));
+        assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig));
     }
 
     @Test
@@ -299,7 +326,7 @@ class ProvisionerServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
 
-        Assertions.assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig));
+        assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig));
     }
 
     @Test
@@ -353,7 +380,7 @@ class ProvisionerServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
 
-        Assertions.assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig),
+        assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig),
                 "Data lake deletion failed 'sdxcluster1', delete failed");
         verify(stackV4Endpoint, times(5)).get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString());
     }
