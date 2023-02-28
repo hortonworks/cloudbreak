@@ -5,16 +5,19 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
 public class UpgradeImageInfo {
 
-    private final Image currentImage;
+    private Image currentImage;
 
-    private final StatedImage currentStatedImage;
+    private StatedImage currentStatedImage;
 
-    private final StatedImage targetStatedImage;
+    private StatedImage targetStatedImage;
 
     public UpgradeImageInfo(Image currentImage, StatedImage currentStatedImage, StatedImage targetStatedImage) {
         this.currentImage = currentImage;
         this.currentStatedImage = currentStatedImage;
         this.targetStatedImage = targetStatedImage;
+    }
+
+    public UpgradeImageInfo() {
     }
 
     public Image getCurrentImage() {

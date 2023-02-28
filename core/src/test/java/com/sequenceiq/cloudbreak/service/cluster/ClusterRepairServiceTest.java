@@ -649,6 +649,77 @@ public class ClusterRepairServiceTest {
         });
     }
 
+    @Test
+    public void markVolumesToNonDeletableBasedOnInstanceIdTest() {
+        InstanceMetaData instanceMetaData1 = createInstanceMetaData("i-1", InstanceStatus.CREATED, "worker-1");
+        InstanceMetaData instanceMetaData2 = createInstanceMetaData("i-2", InstanceStatus.CREATED, "worker-2");
+
+        ArrayList<InstanceMetadataView> instances = new ArrayList<>();
+        instances.add(instanceMetaData1);
+        instances.add(instanceMetaData2);
+
+        Resource volumeSet = new Resource();
+        VolumeSetAttributes attributes = new VolumeSetAttributes("eu-west-1", Boolean.TRUE, "", List.of(), 100, "standard");
+        volumeSet.setAttributes(new Json(attributes));
+        volumeSet.setInstanceId("i-1");
+        volumeSet.setResourceType(ResourceType.AWS_VOLUMESET);
+
+        when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));
+        underTest.markVolumesToNonDeletable(stack, instances);
+
+        ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
+        verify(resourceService).saveAll(saveCaptor.capture());
+        assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
+    }
+
+    @Test
+    public void markVolumesToNonDeletableBasedOnFqdnTest() {
+        InstanceMetaData instanceMetaData1 = createInstanceMetaData("i-1", InstanceStatus.CREATED, "worker-1");
+        InstanceMetaData instanceMetaData2 = createInstanceMetaData("i-2", InstanceStatus.CREATED, "worker-2");
+
+        ArrayList<InstanceMetadataView> instances = new ArrayList<>();
+        instances.add(instanceMetaData1);
+        instances.add(instanceMetaData2);
+
+        Resource volumeSet = new Resource();
+        VolumeSetAttributes attributes = new VolumeSetAttributes("eu-west-1", Boolean.TRUE, "", List.of(), 100, "standard");
+        attributes.setDiscoveryFQDN("worker-2");
+        volumeSet.setAttributes(new Json(attributes));
+        volumeSet.setInstanceId("i-4");
+        volumeSet.setResourceType(ResourceType.AWS_VOLUMESET);
+
+        when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));
+        underTest.markVolumesToNonDeletable(stack, instances);
+
+        ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
+        verify(resourceService).saveAll(saveCaptor.capture());
+        assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
+    }
+
+    @Test
+    public void doNotNarkVolumesToNonDeletableTest() {
+        InstanceMetaData instanceMetaData1 = createInstanceMetaData("i-1", InstanceStatus.CREATED, "worker-1");
+        InstanceMetaData instanceMetaData2 = createInstanceMetaData("i-2", InstanceStatus.CREATED, "worker-2");
+
+        ArrayList<InstanceMetadataView> instances = new ArrayList<>();
+        instances.add(instanceMetaData1);
+        instances.add(instanceMetaData2);
+
+        Resource volumeSet = new Resource();
+        VolumeSetAttributes attributes = new VolumeSetAttributes("eu-west-1", Boolean.TRUE, "", List.of(), 100, "standard");
+        attributes.setDiscoveryFQDN("worker-4");
+        volumeSet.setAttributes(new Json(attributes));
+        volumeSet.setInstanceId("i-4");
+        volumeSet.setResourceType(ResourceType.AWS_VOLUMESET);
+
+        when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));
+        underTest.markVolumesToNonDeletable(stack, instances);
+
+        ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
+        verify(resourceService).saveAll(saveCaptor.capture());
+        assertTrue(saveCaptor.getValue().isEmpty());
+    }
+
     private InstanceGroup createUnhealthyInstanceGroup(String groupName, Set<VolumeTemplate> volumeTemplates) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(groupName);
@@ -670,6 +741,12 @@ public class ClusterRepairServiceTest {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId(instanceId);
         instanceMetaData.setInstanceStatus(instanceStatus);
+        return instanceMetaData;
+    }
+
+    private InstanceMetaData createInstanceMetaData(String instanceId, InstanceStatus instanceStatus, String fqdn) {
+        InstanceMetaData instanceMetaData = createInstanceMetaData(instanceId, instanceStatus);
+        instanceMetaData.setDiscoveryFQDN(fqdn);
         return instanceMetaData;
     }
 
