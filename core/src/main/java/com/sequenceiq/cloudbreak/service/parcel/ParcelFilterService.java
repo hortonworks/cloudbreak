@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -22,6 +23,8 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderServi
 public class ParcelFilterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParcelFilterService.class);
+
+    private static final String CDH = "CDH";
 
     @Inject
     private CmTemplateGeneratorService clusterTemplateGeneratorService;
@@ -58,13 +61,14 @@ public class ParcelFilterService {
         Set<ClouderaManagerProduct> notAccessibleParcels = new HashSet<>();
         Iterator<ClouderaManagerProduct> parcelIterator = parcels.iterator();
         requiredParcels.addAll(collectCustomParcelsIfPresent(availableParcelNamesFromImage, parcels));
+        requiredParcels.addAll(collectCdhParcel(availableParcelNamesFromImage, parcels));
         while (!requiredServicesInBlueprint.isEmpty() && parcelIterator.hasNext()) {
             ClouderaManagerProduct parcel = parcelIterator.next();
             ImmutablePair<ManifestStatus, Manifest> manifest = manifestRetrieverService.readRepoManifest(parcel.getParcel());
             if (manifestAvailable(manifest)) {
                 Set<String> servicesInParcel = getAllServiceNameInParcel(manifest.right);
                 LOGGER.debug("The {} parcel contains the following services: {}", parcel.getName(), servicesInParcel);
-                if (servicesArePresentInTheBlueprint(requiredServicesInBlueprint, servicesInParcel, parcel)) {
+                if (servicesArePresentInTheBlueprint(requiredServicesInBlueprint, servicesInParcel, parcel) || CDH.equals(parcel.getName())) {
                     requiredParcels.add(parcel);
                     LOGGER.debug("Removing {} from the remaining required services because these services are found in {} parcel.", servicesInParcel, parcel);
                     requiredServicesInBlueprint.removeAll(servicesInParcel);
@@ -108,6 +112,12 @@ public class ParcelFilterService {
             LOGGER.debug("The following custom parcels are required: {}", customParcels);
         }
         return customParcels;
+    }
+
+    private Collection<ClouderaManagerProduct> collectCdhParcel(Set<String> availableParcelNamesFromImage, Set<ClouderaManagerProduct> parcels) {
+        return parcels.stream()
+                .filter(p -> CDH.equals(p.getName()))
+                .collect(Collectors.toSet());
     }
 
     private Set<String> getServiceNamesInBlueprint(Blueprint blueprint) {
