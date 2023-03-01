@@ -1,5 +1,0 @@
-name: "ccm upgrade test"
-tests:
-  - name: "ccm_upgrade_test"
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.DatalakeCcmUpgradeTest
