@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.das;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getCmVersion;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -19,13 +23,24 @@ public class DasConfigProvider extends AbstractRdsRoleConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         RdsView dasView = getRdsView(source);
-        return List.of(
-                config("data_analytics_studio_database_host", dasView.getHost()),
-                config("data_analytics_studio_database_port", dasView.getPort()),
-                config("data_analytics_studio_database_name", dasView.getDatabaseName()),
-                config("data_analytics_studio_database_username", dasView.getConnectionUserName()),
-                config("data_analytics_studio_database_password", dasView.getConnectionPassword())
-        );
+        List<ApiClusterTemplateConfig> configList = new ArrayList<>();
+        addDbConfigs(dasView, configList);
+        addDbSslConfigsIfNeeded(dasView, configList, getCmVersion(source));
+        return configList;
+    }
+
+    private void addDbConfigs(RdsView dasView, List<ApiClusterTemplateConfig> configList) {
+        configList.add(config("data_analytics_studio_database_host", dasView.getHost()));
+        configList.add(config("data_analytics_studio_database_port", dasView.getPort()));
+        configList.add(config("data_analytics_studio_database_name", dasView.getDatabaseName()));
+        configList.add(config("data_analytics_studio_database_username", dasView.getConnectionUserName()));
+        configList.add(config("data_analytics_studio_database_password", dasView.getConnectionPassword()));
+    }
+
+    private void addDbSslConfigsIfNeeded(RdsView dasView, List<ApiClusterTemplateConfig> configList, String cmVersion) {
+        if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_9_2) && dasView.isUseSsl()) {
+            configList.add(config("data_analytics_studio_database_url_query_params", dasView.getConnectionURLOptions()));
+        }
     }
 
     @Override
@@ -52,4 +67,5 @@ public class DasConfigProvider extends AbstractRdsRoleConfigProvider {
                 return List.of();
         }
     }
+
 }
