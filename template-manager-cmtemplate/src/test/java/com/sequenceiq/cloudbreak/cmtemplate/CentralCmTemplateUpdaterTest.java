@@ -386,10 +386,12 @@ public class CentralCmTemplateUpdaterTest {
         when(templatePreparationObject.getGatewayView()).thenReturn(new GatewayView(new Gateway(), "signkey", new HashSet<>()));
 
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/kafka-without-hdfs-cm-771.bp"));
-        String generated = generator.getBlueprintText(templatePreparationObject);
-        String expected = new CmTemplateProcessor(getBlueprintText("output/kafka-without-hdfs-cm-771.bp")).getTemplate().toString();
-        String output = new CmTemplateProcessor(generated).getTemplate().toString();
-        assertEquals(expected, output);
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+            String generated = generator.getBlueprintText(templatePreparationObject);
+            String expected = new CmTemplateProcessor(getBlueprintText("output/kafka-without-hdfs-cm-771.bp")).getTemplate().toString();
+            String output = new CmTemplateProcessor(generated).getTemplate().toString();
+            assertEquals(expected, output);
+        });
     }
 
     @Test

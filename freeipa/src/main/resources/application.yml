@@ -143,6 +143,7 @@ freeipa:
       TWO_NODE_BASED:
         - HA
       HA:
+        - HA
         - TWO_NODE_BASED
   sudo:
     ruleName: cb-sudo-rule
@@ -173,6 +174,14 @@ spring:
     prefer-file-system-access: false
   datasource:
     maxActive: 30
+  jpa:
+    properties:
+      hibernate:
+        generate_statistics: true
+        jdbc:
+          batch_size: 400
+        order_inserts: true
+        order_updates: true
   lifecycle:
     timeout-per-shutdown-phase: 60s
 
@@ -201,6 +210,7 @@ vault:
       login.role: "cloudbreak.default"
 
 cb:
+  enabledgovplatforms: AWS
   enabledplatforms: AZURE,AWS,GCP
   platform.default.rootVolumeSize:
     AWS: 100

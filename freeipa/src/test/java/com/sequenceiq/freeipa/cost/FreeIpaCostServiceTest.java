@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ public class FreeIpaCostServiceTest {
         when(stackService.getByEnvironmentCrnsAndCloudPlatforms(any(), any())).thenReturn(List.of(getStack()));
         when(usdCalculatorService.calculateProviderCost(any())).thenReturn(0.5);
         when(usdCalculatorService.calculateClouderaCost(any(), eq("FREEIPA"))).thenReturn(0.5);
-        when(instanceTypeCollectorService.getAllInstanceTypes(any())).thenReturn(new ClusterCostDto());
+        when(instanceTypeCollectorService.getAllInstanceTypes(any())).thenReturn(Optional.of(new ClusterCostDto()));
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             Map<String, RealTimeCost> costs = underTest.getCosts(List.of("ENVIRONMENT_CRN"));

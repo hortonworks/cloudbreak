@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
@@ -54,6 +55,7 @@ import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiHost;
+import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiService;
@@ -78,6 +80,8 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -471,7 +475,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void callUpgradeCdhCommand(ClouderaManagerProduct cdhProduct, ClustersResourceApi clustersResourceApi, boolean rollingUpgradeEnabled)
             throws ApiException, CloudbreakException {
-        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_UPGRADE);
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
+                rollingUpgradeEnabled ? ResourceEvent.CLUSTER_UPGRADE_START_ROLLING_UPGRADE : ResourceEvent.CLUSTER_UPGRADE_START_UPGRADE);
         clouderaManagerUpgradeService.callUpgradeCdhCommand(cdhProduct.getVersion(), clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
     }
 
@@ -697,14 +702,18 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void applyHostGroupRolesOnUpscaledHosts(ApiHostRefList body, String hostGroupName) throws ApiException, CloudbreakException {
-        LOGGER.debug("Applying host template on upscaled hosts. Host group: [{}]", hostGroupName);
-        HostTemplatesResourceApi templatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(apiClient);
-        ApiCommand applyHostTemplateCommand = templatesResourceApi.applyHostTemplate(stack.getName(), hostGroupName, START_ROLES_ON_UPSCALED_NODES, body);
-        ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
-                stack, apiClient, applyHostTemplateCommand.getId());
-        handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for host template to apply",
-                "Timeout while Cloudera Manager was applying host template.");
-        LOGGER.debug("Applied host template on upscaled hosts. Host group: [{}]", hostGroupName);
+        if (body.getItems() != null && !body.getItems().isEmpty()) {
+            LOGGER.debug("Applying host template on upscaled hosts. Host group: [{}]", hostGroupName);
+            HostTemplatesResourceApi templatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(apiClient);
+            ApiCommand applyHostTemplateCommand = templatesResourceApi.applyHostTemplate(stack.getName(), hostGroupName, START_ROLES_ON_UPSCALED_NODES, body);
+            ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
+                    stack, apiClient, applyHostTemplateCommand.getId());
+            handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for host template to apply",
+                    "Timeout while Cloudera Manager was applying host template.");
+            LOGGER.debug("Applied host template on upscaled hosts. Host group: [{}]", hostGroupName);
+        } else {
+            LOGGER.debug("Skip applying host template, empty host list for host group: {}", hostGroupName);
+        }
     }
 
     private void activateParcels(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
@@ -1044,5 +1053,36 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.debug("Failed to determine if {} service is present in cluster {}.", serviceType, stack.getCluster().getId());
         }
         return servicePresent;
+    }
+
+    @Override
+    public void hostsStartRoles(List<String> hosts) {
+        if (!hosts.isEmpty()) {
+            ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
+            LOGGER.info("CM version is: {}", clouderaManagerRepoDetails.getVersion());
+            if (CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails.getVersion(), CLOUDERAMANAGER_VERSION_7_9_0)) {
+                LOGGER.info("Current action is repair and CM version is newer than 7.9.0, start services on hosts because services were stopped");
+                try {
+                    LOGGER.info("Start roles on hosts: {}", hosts);
+                    if (!hosts.isEmpty()) {
+                        ApiHostNameList items = new ApiHostNameList().items(hosts);
+                        ApiCommand apiCommand = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient).hostsStartRolesCommand(items);
+                        ExtendedPollingResult extendedPollingResult =
+                                clouderaManagerPollingServiceProvider.startPollingStartRolesCommand(stack, apiClient, apiCommand.getId());
+                        if (extendedPollingResult.isExited()) {
+                            throw new CancellationException("Cluster was terminated while waiting for start roles on hosts");
+                        } else if (extendedPollingResult.isTimeout()) {
+                            throw new CloudbreakServiceException(
+                                    String.format("Cloudera Manager start roles command {} timed out. CM command Id: %s", apiCommand.getId()));
+                        }
+                    }
+                } catch (ApiException e) {
+                    LOGGER.error("Failed to start roles on nodes: {}", hosts, e);
+                    throw new CloudbreakServiceException("Failed to start roles on nodes: " + hosts, e);
+                }
+            }
+        } else {
+            LOGGER.warn("Don't run start roles command because hosts are empty");
+        }
     }
 }

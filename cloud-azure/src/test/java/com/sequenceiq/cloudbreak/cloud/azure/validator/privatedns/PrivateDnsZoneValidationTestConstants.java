@@ -12,7 +12,7 @@ public class PrivateDnsZoneValidationTestConstants {
 
     static final String ZONE_NAME_POSTGRES = "privatelink.postgres.database.azure.com";
 
-    static final String PRIVATE_DNS_ZONE_ID = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/privateDnsZones/%s";
+    static final String PRIVATE_DNS_ZONE_ID_TEMPLATE = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/privateDnsZones/%s";
 
     static final String NETWORK_SUBSCRIPTION_ID = "networkSubscriptionId";
 
@@ -32,7 +32,7 @@ public class PrivateDnsZoneValidationTestConstants {
     }
 
     static ResourceId getPrivateDnsZoneResourceId(String resourceGroupName) {
-        String privateDnsZoneId = String.format(PRIVATE_DNS_ZONE_ID, SUBSCRIPTION_ID, resourceGroupName, ZONE_NAME_POSTGRES);
+        String privateDnsZoneId = String.format(PRIVATE_DNS_ZONE_ID_TEMPLATE, SUBSCRIPTION_ID, resourceGroupName, ZONE_NAME_POSTGRES);
         return ResourceId.fromString(privateDnsZoneId);
     }
 
@@ -41,6 +41,6 @@ public class PrivateDnsZoneValidationTestConstants {
     }
 
     private static String getPrivateDnsZoneId(String resourceGroupName, String zoneName) {
-        return String.format(PRIVATE_DNS_ZONE_ID, SUBSCRIPTION_ID, resourceGroupName, zoneName);
+        return String.format(PRIVATE_DNS_ZONE_ID_TEMPLATE, SUBSCRIPTION_ID, resourceGroupName, zoneName);
     }
 }

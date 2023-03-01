@@ -22,11 +22,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
 import com.sequenceiq.cloudbreak.init.clustertemplate.DefaultClusterTemplateCache;
+import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -103,6 +106,9 @@ public class AllowedInstanceTypeTest {
         private UserService userService;
 
         @MockBean
+        private PreferencesService preferencesService;
+
+        @MockBean
         private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
 
         @MockBean
@@ -110,6 +116,12 @@ public class AllowedInstanceTypeTest {
 
         @MockBean
         private EntitlementService entitlementService;
+
+        @MockBean
+        private ProviderPreferencesService providerPreferencesService;
+
+        @MockBean
+        private CommonGovService commonGovService;
 
         @MockBean
         private InternalClusterTemplateValidator internalClusterTemplateValidator;

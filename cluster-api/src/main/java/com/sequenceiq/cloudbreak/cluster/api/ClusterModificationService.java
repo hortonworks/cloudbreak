@@ -84,6 +84,8 @@ public interface ClusterModificationService {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
+    void hostsStartRoles(List<String> hostNames);
+
     default void restartAll(boolean withMgmtServices) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }

@@ -1,17 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.util.Optional;
+
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 public interface PricingCache {
 
-    double getPriceForInstanceType(String region, String instanceType);
+    Optional<Double> getPriceForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential);
 
-    int getCpuCountForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential);
+    Optional<Integer> getCpuCountForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential);
 
-    int getMemoryForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential);
+    Optional<Integer> getMemoryForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential);
 
-    double getStoragePricePerGBHour(String region, String storageType, int volumeSize);
+    Optional<Double> getStoragePricePerGBHour(String region, String storageType, int volumeSize);
 
     CloudPlatform getCloudPlatform();
 }

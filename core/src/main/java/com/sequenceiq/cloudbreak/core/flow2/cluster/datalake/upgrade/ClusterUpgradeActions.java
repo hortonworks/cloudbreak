@@ -75,7 +75,7 @@ public class ClusterUpgradeActions {
                     variables.put(TARGET_IMAGE, images.getTargetStatedImage());
                     variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
                     clusterUpgradeTargetImageService.saveImage(context.getStackId(), images.getTargetStatedImage());
-                    clusterUpgradeService.initUpgradeCluster(context.getStackId(), getTargetImage(variables));
+                    clusterUpgradeService.initUpgradeCluster(context.getStackId(), getTargetImage(variables), payload.isRollingUpgradeEnabled());
                     Selectable event = new ClusterUpgradeInitRequest(context.getStackId(), isPatchUpgrade(images.getCurrentStatedImage().getImage(),
                             images.getTargetStatedImage().getImage()));
                     sendEvent(context, event.selector(), event);

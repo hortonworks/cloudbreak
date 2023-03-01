@@ -171,7 +171,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         if (!unknownInstancesForGroup.isEmpty()) {
             LOGGER.info("Unknown instances from AWS for group {}: {}", groupName,
                     unknownInstancesForGroup.stream().map(Instance::getInstanceId).collect(joining(",")));
-            Instance selectedInstance = findInstanceByFQDNIfFQDNDefinedInCloudInstance(cloudInstance, resources, unknownInstancesForGroup);
+            Instance selectedInstance = findInstanceByFQDNIfFQDNDefinedInCloudInstance(cloudInstance, groupName, resources, unknownInstancesForGroup);
             CloudInstance newCloudInstance = new CloudInstance(selectedInstance.getInstanceId(),
                     cloudInstance.getTemplate(),
                     cloudInstance.getAuthentication(),
@@ -192,21 +192,19 @@ public class AwsMetadataCollector implements MetadataCollector {
         }
     }
 
-    private Instance findInstanceByFQDNIfFQDNDefinedInCloudInstance(CloudInstance cloudInstance, List<CloudResource> resources,
+    private Instance findInstanceByFQDNIfFQDNDefinedInCloudInstance(CloudInstance cloudInstance, String groupName, List<CloudResource> resources,
             Collection<Instance> unknownInstancesForGroup) {
         List<CloudResource> volumeResources =
                 resources.stream().filter(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType())).collect(toList());
         List<String> allKnownVolumes = listVolumes(volumeResources);
         LOGGER.info("All known volumes: {}", allKnownVolumes);
-        List<String> volumesWithoutFQDN = listVolumesWithoutFQDN(volumeResources);
-        LOGGER.info("Volumes without FQDN: {}", volumesWithoutFQDN);
         String instanceFQDN = cloudInstance.getStringParameter(FQDN);
         Long privateId = cloudInstance.getTemplate().getPrivateId();
-        Optional<Instance> selectedInstance;
+        List<String> volumeCandidates;
         if (instanceFQDN == null) {
             LOGGER.info("Instance (private id: {}) does not have FQDN parameter, lets find an instance from AWS which has an attached volume, but the volume " +
                     "does not have FQDN", privateId);
-            selectedInstance = findInstanceByVolumes(unknownInstancesForGroup, volumesWithoutFQDN);
+            volumeCandidates = listVolumesWithoutFQDN(volumeResources);
         } else {
             LOGGER.info("Instance (private id: {}) has FQDN ({}), lets find an instance from AWS which has attached volume with the same FQDN",
                     privateId, instanceFQDN);
@@ -214,20 +212,30 @@ public class AwsMetadataCollector implements MetadataCollector {
             LOGGER.info("Volumes for FQDN ({}), {}", instanceFQDN, volumesForFqdn);
             if (!volumesForFqdn.isEmpty()) {
                 LOGGER.info("We found volume with the given FQDN, so lets find the instance with this volume");
-                selectedInstance = findInstanceByVolumes(unknownInstancesForGroup, volumesForFqdn);
+                volumeCandidates = volumesForFqdn;
             } else {
                 LOGGER.info("We can't found any volume with the given FQDN, this means disk was deleted, we can chose any machine with FQDN less volumes");
-                selectedInstance = findInstanceByVolumes(unknownInstancesForGroup, volumesWithoutFQDN);
+                volumeCandidates = listVolumesWithoutFQDN(volumeResources);
             }
         }
-        return selectedInstance.or(() -> {
-            List<Instance> instancesWithoutKnownVolumes = getInstancesWithoutKnownVolumes(unknownInstancesForGroup, allKnownVolumes);
-            if (!instancesWithoutKnownVolumes.isEmpty()) {
-                return Optional.of(instancesWithoutKnownVolumes.get(0));
-            } else {
-                return Optional.empty();
-            }
-        }).orElseThrow(() -> new IllegalStateException("Can't find any instance"));
+        return findInstanceByVolumes(unknownInstancesForGroup, volumeCandidates)
+                .or(() -> getInstancesWithoutKnownVolumes(unknownInstancesForGroup, allKnownVolumes))
+                .orElseThrow(() -> {
+                    if (instanceFQDN == null) {
+                        return new IllegalStateException(String.format(
+                                "Error occured while tried to identify new instance in %s group from AWS. New instances on AWS are %s.",
+                                groupName,
+                                unknownInstancesForGroup.stream().map(Instance::getInstanceId).collect(joining(", "))));
+                    } else {
+                        return new IllegalStateException(String.format(
+                                "Error occured while tried to identify instance from AWS for %s host. "
+                                        + "Couldn't find the instance based on existing volumes or couldn't pick a new one based on unknown volumes. "
+                                        + "New instances on AWS are %s.",
+                                instanceFQDN,
+                                unknownInstancesForGroup.stream().map(Instance::getInstanceId).collect(joining(", "))
+                        ));
+                    }
+                });
     }
 
     private Optional<Instance> findInstanceByVolumes(Collection<Instance> unknownInstancesForGroup, List<String> volumes) {
@@ -236,10 +244,10 @@ public class AwsMetadataCollector implements MetadataCollector {
                 .findFirst();
     }
 
-    private List<Instance> getInstancesWithoutKnownVolumes(Collection<Instance> unknownInstancesForGroup, List<String> allKnownVolumes) {
+    private Optional<Instance> getInstancesWithoutKnownVolumes(Collection<Instance> unknownInstancesForGroup, List<String> allKnownVolumes) {
         return unknownInstancesForGroup.stream().filter(instance -> instance.getBlockDeviceMappings().stream()
                 .noneMatch(instanceBlockDeviceMapping -> allKnownVolumes.contains(instanceBlockDeviceMapping.getEbs().getVolumeId())))
-                .collect(toList());
+                .findFirst();
     }
 
     private List<String> listVolumes(List<CloudResource> volumeResources) {
@@ -251,18 +259,19 @@ public class AwsMetadataCollector implements MetadataCollector {
     }
 
     private List<String> listVolumesWithoutFQDN(List<CloudResource> volumeResources) {
-        return volumeResources.stream().map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES,
-                VolumeSetAttributes.class))
+        List<String> volumesWithoutFQDN = volumeResources.stream()
+                .map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class))
                 .filter(volumeSetAttributes -> volumeSetAttributes.getDiscoveryFQDN() == null)
                 .map(VolumeSetAttributes::getVolumes)
                 .flatMap(Collection::stream)
                 .map(VolumeSetAttributes.Volume::getId)
                 .collect(toList());
+        LOGGER.info("Volumes without FQDN: {}", volumesWithoutFQDN);
+        return volumesWithoutFQDN;
     }
 
     private List<String> listVolumesForFQDN(List<CloudResource> volumeResources, String fqdn) {
-        return volumeResources.stream().map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES,
-                VolumeSetAttributes.class))
+        return volumeResources.stream().map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class))
                 .filter(volumeSetAttributes -> volumeSetAttributes.getDiscoveryFQDN() != null)
                 .filter(volumeSetAttributes -> volumeSetAttributes.getDiscoveryFQDN().equals(fqdn))
                 .map(VolumeSetAttributes::getVolumes)

@@ -568,27 +568,37 @@ public class ClouderaManagerDecomissioner {
             HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
             ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, FULL_REQUEST_VIEW);
             LOGGER.info("Hosts from CM: {}", hostRefList);
-            List<String> stillAvailableHostsForStopRolesCommand = hostRefList.getItems().stream()
-                    .map(ApiHost::getHostname)
-                    .filter(hosts::contains)
+            List<ApiHost> stillAvailableHostsForStopRolesCommand = hostRefList.getItems().stream()
+                    .filter(apiHost -> hosts.contains(apiHost.getHostname()))
                     .collect(Collectors.toList());
             if (!stillAvailableHostsForStopRolesCommand.isEmpty()) {
-                ApiHostNameList items = new ApiHostNameList().items(stillAvailableHostsForStopRolesCommand);
-                ApiCommand apiCommand = clouderaManagerApiFactory.getClouderaManagerResourceApi(client).hostsStopRolesCommand(items);
-                ExtendedPollingResult extendedPollingResult =
-                        clouderaManagerPollingServiceProvider.startPollingStopRolesCommand(stack, client, apiCommand.getId());
-                if (extendedPollingResult.isExited()) {
-                    throw new CancellationException("Cluster was terminated while waiting for stop roles on hosts");
-                } else if (extendedPollingResult.isTimeout()) {
-                    throw new CloudbreakServiceException(
-                            String.format("Cloudera Manager stop roles command {} timed out. CM command Id: %s", apiCommand.getId()));
+                List<String> hostsInGoodHealthForStopRolesCommand = stillAvailableHostsForStopRolesCommand.stream()
+                        .filter(apiHost -> ApiHealthSummary.GOOD.equals(apiHost.getHealthSummary()))
+                        .map(ApiHost::getHostname).collect(Collectors.toList());
+                if (!hostsInGoodHealthForStopRolesCommand.isEmpty()) {
+                    stopRolesOnHosts(stack, client, hostsInGoodHealthForStopRolesCommand);
+                } else {
+                    LOGGER.info("Don't run stop roles command because instances are filtered out based on host health result");
                 }
             } else {
-                LOGGER.info("Don't run stop roles command because instances are filtered out");
+                LOGGER.info("Don't run stop roles command because instances are filtered out based on host list result");
             }
         } catch (ApiException e) {
             LOGGER.error("Failed to stop roles on nodes: {}", hosts, e);
-            throw new CloudbreakServiceException("Failed to stop roles on nodes: " + hosts, e);
+            throw new CloudbreakException("Failed to stop roles on nodes: " + hosts, e);
+        }
+    }
+
+    private void stopRolesOnHosts(StackDtoDelegate stack, ApiClient client, List<String> hostsInGoodHealthForStopRolesCommand) throws ApiException {
+        ApiHostNameList items = new ApiHostNameList().items(hostsInGoodHealthForStopRolesCommand);
+        ApiCommand apiCommand = clouderaManagerApiFactory.getClouderaManagerResourceApi(client).hostsStopRolesCommand(items);
+        ExtendedPollingResult extendedPollingResult =
+                clouderaManagerPollingServiceProvider.startPollingStopRolesCommand(stack, client, apiCommand.getId());
+        if (extendedPollingResult.isExited()) {
+            throw new CancellationException("Cluster was terminated while waiting for stop roles on hosts");
+        } else if (extendedPollingResult.isTimeout()) {
+            throw new CloudbreakServiceException(
+                    String.format("Cloudera Manager stop roles command {} timed out. CM command Id: %s", apiCommand.getId()));
         }
     }
 

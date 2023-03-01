@@ -69,4 +69,15 @@ public class OfferTerm {
     public void setTermAttributes(Map<String, Object> termAttributes) {
         this.termAttributes = termAttributes;
     }
+
+    @Override
+    public String toString() {
+        return "OfferTerm{" +
+                "priceDimensions=" + priceDimensions +
+                ", sku='" + sku + '\'' +
+                ", effectiveDate=" + effectiveDate +
+                ", offerTermCode='" + offerTermCode + '\'' +
+                ", termAttributes=" + termAttributes +
+                '}';
+    }
 }

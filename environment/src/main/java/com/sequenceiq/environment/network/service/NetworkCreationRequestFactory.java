@@ -101,7 +101,7 @@ public class NetworkCreationRequestFactory {
                 .withCloudContext(getCloudContext(environment))
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withPrivateEndpointsEnabled(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT == networkDto.getServiceEndpointCreation())
-                .withServicesWithExistingPrivateDnsZones(azureExistingPrivateDnsZonesService.getServiceNamesWithExistingZones(networkDto))
+                .withServicesWithExistingPrivateDnsZones(azureExistingPrivateDnsZonesService.getServiceNamesWithExistingManagedZones(networkDto))
                 .withTags(environmentTagProvider.getTags(environment, environment.getNetwork().getResourceCrn()));
         getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
         return builder.build();

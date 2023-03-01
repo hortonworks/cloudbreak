@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static com.sequenceiq.cloudbreak.common.gov.CommonGovService.GOV;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,8 +38,6 @@ public class ImageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
 
     private static final String DEFAULT_REGION = "default";
-
-    private static final String GOV = "_gov";
 
     @Inject
     private ImageToImageEntityConverter imageConverter;

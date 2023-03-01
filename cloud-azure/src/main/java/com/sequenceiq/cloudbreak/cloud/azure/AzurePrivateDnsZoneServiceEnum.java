@@ -3,14 +3,24 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
+import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public enum AzurePrivateDnsZoneServiceEnum {
+/*
+Azure private DNS zones that can be registered and used by cloudbreak are listed below.
+ */
+public enum AzurePrivateDnsZoneServiceEnum implements AzurePrivateDnsZoneDescriptor {
 
-    POSTGRES("Microsoft.DBforPostgreSQL/servers", "postgresqlServer", "privatelink.postgres.database.azure.com", "postgres.database.azure.com"),
-    STORAGE("Microsoft.Storage/storageAccounts", "Blob", "privatelink.blob.core.windows.net", "blob.core.windows.net");
+    POSTGRES("Microsoft.DBforPostgreSQL/servers", "postgresqlServer", "privatelink.postgres.database.azure.com",
+            "postgres.database.azure.com", AzurePrivateDnsZoneServiceEnum.POSTGRES_DNS_ZONE_NAME_PATTERN),
+    STORAGE("Microsoft.Storage/storageAccounts", "Blob", "privatelink.blob.core.windows.net",
+            "blob.core.windows.net", AzurePrivateDnsZoneServiceEnum.STORAGE_DNS_ZONE_NAME_PATTERN);
+
+    private static final String POSTGRES_DNS_ZONE_NAME_PATTERN = "privatelink\\.postgres\\.database\\.azure\\.com";
+
+    private static final String STORAGE_DNS_ZONE_NAME_PATTERN = "privatelink\\.blob\\.core\\.windows\\.net";
 
     private static final Map<String, AzurePrivateDnsZoneServiceEnum> SERVICE_MAP_BY_RESOURCE;
 
@@ -20,25 +30,36 @@ public enum AzurePrivateDnsZoneServiceEnum {
 
     private final String dnsZoneName;
 
+    private final Pattern dnsZoneNamePattern;
+
     private final String dnsZoneForwarder;
 
-    AzurePrivateDnsZoneServiceEnum(String resourceType, String subResource, String dnsZoneName, String dnsZoneForwarder) {
+    AzurePrivateDnsZoneServiceEnum(String resourceType, String subResource, String dnsZoneName, String dnsZoneForwarder, String dnsZoneNamePattern) {
         this.resourceType = resourceType;
         this.subResource = subResource;
         this.dnsZoneName = dnsZoneName;
+        this.dnsZoneNamePattern = Pattern.compile(dnsZoneNamePattern);
         this.dnsZoneForwarder = dnsZoneForwarder;
     }
 
+    @Override
     public String getResourceType() {
         return resourceType;
     }
 
+    @Override
     public String getSubResource() {
         return subResource;
     }
 
+    @Override
     public String getDnsZoneName() {
         return dnsZoneName;
+    }
+
+    @Override
+    public List<Pattern> getDnsZoneNamePatterns() {
+        return List.of(dnsZoneNamePattern);
     }
 
     public String getDnsZoneForwarder() {
@@ -55,11 +76,13 @@ public enum AzurePrivateDnsZoneServiceEnum {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", AzurePrivateDnsZoneServiceEnum.class.getSimpleName() + "[", "]")
-                .add("resourceType='" + resourceType + "'")
-                .add("subResource='" + subResource + "'")
-                .add("dnsZoneName='" + dnsZoneName + "'")
-                .add("dnsZoneForwarder='" + dnsZoneForwarder + "'")
-                .toString();
+        return "AzurePrivateDnsZoneServiceEnum{" +
+                "resourceType='" + resourceType + '\'' +
+                ", subResource='" + subResource + '\'' +
+                ", dnsZoneName='" + dnsZoneName + '\'' +
+                ", dnsZoneNamePattern=" + dnsZoneNamePattern +
+                ", dnsZoneForwarder='" + dnsZoneForwarder + '\'' +
+                "} " + super.toString();
     }
+
 }

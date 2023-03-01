@@ -92,4 +92,17 @@ public class PriceDimension {
     public void setPricePerUnit(PricePerUnit pricePerUnit) {
         this.pricePerUnit = pricePerUnit;
     }
+
+    @Override
+    public String toString() {
+        return "PriceDimension{" +
+                "unit='" + unit + '\'' +
+                ", endRange='" + endRange + '\'' +
+                ", description='" + description + '\'' +
+                ", appliesTo=" + appliesTo +
+                ", rateCode='" + rateCode + '\'' +
+                ", beginRange='" + beginRange + '\'' +
+                ", pricePerUnit=" + pricePerUnit +
+                '}';
+    }
 }

@@ -42,7 +42,7 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
         CloudPlatform cloudPlatform = source.getCloudPlatform();
-        if (!Strings.isNullOrEmpty(cdhVersion) && isRazTokenConfigurationSupported(cdhVersion, cloudPlatform)) {
+        if (!Strings.isNullOrEmpty(cdhVersion) && isRazTokenConfigurationSupported(cdhVersion, cloudPlatform, source.getStackType())) {
             String safetyValveValue = getSafetyValveProperty(RANGER_RAZ_BOOTSTRAP_SERVICETYPES, getServiceType(cloudPlatform));
             return List.of(config(RANGER_RAZ_SITE_XML_ROLE_SAFETY_VALVE, safetyValveValue));
         }
@@ -55,6 +55,8 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
                 return "adls";
             case AWS:
                 return "s3";
+            case GCP:
+                return "gs";
             default:
                 return null;
         }

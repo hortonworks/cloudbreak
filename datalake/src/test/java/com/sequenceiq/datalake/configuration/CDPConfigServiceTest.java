@@ -31,7 +31,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
+import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.CDPConfigKey;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
@@ -67,6 +69,12 @@ class CDPConfigServiceTest {
 
     @Mock
     private ImageCatalogService imageCatalogService;
+
+    @Mock
+    private ProviderPreferencesService preferencesService;
+
+    @Mock
+    private CommonGovService commonGovService;
 
     @BeforeEach
     public void setupAll() {

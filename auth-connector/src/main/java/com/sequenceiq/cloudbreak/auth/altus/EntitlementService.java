@@ -69,6 +69,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
@@ -601,6 +602,10 @@ public class EntitlementService {
 
     public boolean isWiamUsersyncRoutingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, WORKLOAD_IAM_USERSYNC_ROUTING);
+    }
+
+    public boolean isRazForGcpEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_GCP_RAZ);
     }
 
     public List<String> getEntitlements(String accountId) {

@@ -9,6 +9,14 @@ server:
 spring:
   application:
     name: DatalakeService
+  jpa:
+    properties:
+      hibernate:
+        generate_statistics: true
+        jdbc:
+          batch_size: 400
+        order_inserts: true
+        order_updates: true
   lifecycle:
     timeout-per-shutdown-phase: 60s
 
@@ -131,7 +139,9 @@ datalake:
     default: "7.2.15"
     advertised: "7.1.0,7.2.0,7.2.1,7.2.2,7.2.6,7.2.7,7.2.8,7.2.9,7.2.10,7.2.11,7.2.12,7.2.14,7.2.15,7.2.16,7.2.17"
     supported: "7.1.0,7.2.0,7.2.1,7.2.2,7.2.6,7.2.7,7.2.8,7.2.9,7.2.10,7.2.11,7.2.12,7.2.14,7.2.15,7.2.16,7.2.17"
-
+  supported:
+    raz:
+      platform: AWS,AZURE,GCP
 secret:
   application: sdx/shared
   engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
@@ -156,6 +166,8 @@ vault:
 cb:
   authentication:
     disabled: false
+  enabledplatforms: AWS,AZURE,YARN,GCP,MOCK
+  enabledgovplatforms: AWS
   cm:
     client:
       cluster.proxy.timeout: 120000

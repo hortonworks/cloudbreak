@@ -100,6 +100,7 @@ public class ClusterUpscaleService {
             if (Boolean.TRUE.equals(repair)) {
                 recommissionHostsIfNeeded(connector, hostGroupsWithHostNames);
                 restartServicesIfNecessary(restartServices, stackDto, connector);
+                connector.hostsStartRoles(upscaledHosts);
             }
             clusterHostServiceRunner.createCronForUserHomeCreation(stackDto, candidateAddresses.keySet());
             setInstanceStatus(runningInstanceMetaDataSet, upscaledHosts);

@@ -1,32 +1,48 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.cost;
 
 import java.io.IOException;
+import java.util.Base64;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.pricing.AWSPricing;
-import com.amazonaws.services.pricing.AWSPricingClientBuilder;
+import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.auth.policy.Resource;
+import com.amazonaws.auth.policy.Statement;
+import com.amazonaws.auth.policy.internal.JsonPolicyWriter;
 import com.amazonaws.services.pricing.model.Filter;
 import com.amazonaws.services.pricing.model.FilterType;
 import com.amazonaws.services.pricing.model.GetProductsRequest;
 import com.amazonaws.services.pricing.model.GetProductsResult;
-import com.amazonaws.services.pricing.model.NotFoundException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.cloud.PricingCache;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsCredentialVerifier;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonPricingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.OfferTerm;
+import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.PriceDimension;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.PriceListElement;
+import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service("awsPricingCache")
 public class AwsPricingCache implements PricingCache {
@@ -37,18 +53,29 @@ public class AwsPricingCache implements PricingCache {
 
     private static final String AWS_STORAGE_PRICING_JSON_LOCATION = "cost/aws-storage-pricing.json";
 
+    private static final double AWS_DEFAULT_STORAGE_PRICE = 0.055;
+
     private static final int HOURS_IN_30_DAYS = 720;
 
+    private static final String GET_PRODUCTS_ENCODED_POLICY_STRING = getPolicyBase64String();
+
     @Inject
-    private AWSPricing awsPricing;
+    private CommonAwsClient awsClient;
+
+    @Inject
+    private CloudParameterService cloudParameterService;
+
+    @Inject
+    private AwsCredentialVerifier awsCredentialVerifier;
+
+    private final Map<String, Map<String, Double>> storagePriceList = loadStoragePriceList();
 
     private static Map<String, Map<String, Double>> loadStoragePriceList() {
         ClassPathResource classPathResource = new ClassPathResource(AWS_STORAGE_PRICING_JSON_LOCATION);
         if (classPathResource.exists()) {
             try {
                 String json = FileReaderUtils.readFileFromClasspath(AWS_STORAGE_PRICING_JSON_LOCATION);
-                return JsonUtil.readValue(json, new TypeReference<>() {
-                });
+                return JsonUtil.readValue(json, new TypeReference<>() { });
             } catch (IOException e) {
                 throw new RuntimeException("Failed to load AWS storage price json!", e);
             }
@@ -57,51 +84,64 @@ public class AwsPricingCache implements PricingCache {
     }
 
     @Cacheable(cacheNames = "awsCostCache", key = "{ #region, #instanceType }")
-    public double getPriceForInstanceType(String region, String instanceType) {
-        PriceListElement priceListElement = getPriceList(region, instanceType);
-        return priceListElement.getTerms().getOnDemand().values().stream().findFirst().orElseThrow(() ->
-                        new NotFoundException(String.format("Couldn't find the price for region [%s] and instance type [%s].", region, instanceType)))
-                .getPriceDimensions().values().stream().findFirst().orElseThrow(() ->
-                        new NotFoundException(String.format("Couldn't find the price for region [%s] and instance type [%s].", region, instanceType)))
-                .getPricePerUnit().getUsd();
+    public Optional<Double> getPriceForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
+        Optional<PriceListElement> priceListElement = getPriceList(region, instanceType, extendedCloudCredential.getCloudCredential());
+        if (priceListElement.isPresent()) {
+            Optional<OfferTerm> offerTerm = priceListElement.get().getTerms().getOnDemand().values().stream().findFirst();
+            if (offerTerm.isPresent()) {
+                Optional<PriceDimension> priceDimension = offerTerm.get().getPriceDimensions().values().stream().findFirst();
+                if (priceDimension.isPresent()) {
+                    return Optional.of(priceDimension.get().getPricePerUnit().getUsd());
+                }
+            }
+        }
+        LOGGER.info("Couldn't find the price for region {} and instance type {}.", region, instanceType);
+        return Optional.empty();
     }
 
-    @Cacheable(cacheNames = "awsCostCache", key = "{ #region, #instanceType }")
-    public int getCpuCountForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
-        PriceListElement priceListElement = getPriceList(region, instanceType);
-        return priceListElement.getProduct().getAttributes().getVcpu();
+    public Optional<Integer> getCpuCountForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
+        Optional<VmTypeMeta> instanceTypeMetadata = getVmMetadata(region, instanceType, extendedCloudCredential);
+        return instanceTypeMetadata.map(VmTypeMeta::getCPU);
     }
 
-    @Cacheable(cacheNames = "awsCostCache", key = "{ #region, #instanceType }")
-    public int getMemoryForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
-        PriceListElement priceListElement = getPriceList(region, instanceType);
-        String memory = priceListElement.getProduct().getAttributes().getMemory();
-        return Integer.parseInt(memory.replaceAll("\\D", ""));
+    public Optional<Integer> getMemoryForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
+        Optional<VmTypeMeta> instanceTypeMetadata = getVmMetadata(region, instanceType, extendedCloudCredential);
+        return instanceTypeMetadata.map(vmTypeMeta -> vmTypeMeta.getMemoryInGb().intValue());
     }
 
     @Cacheable(cacheNames = "awsCostCache", key = "{ #region, #storageType, #volumeSize }")
-    public double getStoragePricePerGBHour(String region, String storageType, int volumeSize) {
-        if (volumeSize == 0 || storageType == null) {
-            LOGGER.info("The provided volumeSize is 0 or the storageType is null, so returning 0.0 as storage price per GBHour.");
-            return 0.0;
+    public Optional<Double> getStoragePricePerGBHour(String region, String storageType, int volumeSize) {
+        if (volumeSize == 0 || "ephemeral".equalsIgnoreCase(storageType)) {
+            return Optional.empty();
         }
-        Map<String, Double> pricingForRegion = loadStoragePriceList().getOrDefault(region, Map.of());
-        double priceInGBMonth = pricingForRegion.getOrDefault(storageType, 0.0);
-        return priceInGBMonth / HOURS_IN_30_DAYS;
+        Map<String, Double> pricingForRegion = storagePriceList.getOrDefault(region, Map.of());
+        double priceInGBMonth = pricingForRegion.getOrDefault(storageType, AWS_DEFAULT_STORAGE_PRICE);
+        return Optional.of(priceInGBMonth / HOURS_IN_30_DAYS);
     }
 
-    private PriceListElement getPriceList(String region, String instanceType) {
+    private Optional<PriceListElement> getPriceList(String region, String instanceType, CloudCredential cloudCredential) {
         try {
-            GetProductsResult productsResult = getProducts(region, instanceType);
-            String priceListString = productsResult.getPriceList().stream().findFirst().orElseThrow(() ->
-                            new NotFoundException(String.format("Couldn't find the price list for the region %s and instance type %s!", region, instanceType)));
-            return JsonUtil.readValue(priceListString, PriceListElement.class);
+            GetProductsResult productsResult = getProducts(region, instanceType, cloudCredential);
+            Optional<String> priceListString = productsResult.getPriceList().stream().findFirst();
+            if (priceListString.isPresent()) {
+                PriceListElement priceListElement = JsonUtil.readValue(priceListString.get(), PriceListElement.class);
+                LOGGER.info("Found {} on demand terms in price list retrieved for region '{}' and instance type '{}': {}",
+                        priceListElement.getTerms().getOnDemand().size(), region, instanceType, priceListElement.getTerms().getOnDemand());
+                return Optional.of(priceListElement);
+            }
+            LOGGER.info("Couldn't find the price list for the region {} and instance type {}!", region, instanceType);
+            return Optional.empty();
         } catch (IOException e) {
-            throw new CloudbreakRuntimeException("Failed to get price list from provider!", e);
+            LOGGER.info("Failed to get price list from provider!", e);
+            return Optional.empty();
+        } catch (AwsPermissionMissingException e) {
+            LOGGER.info("There is a missing permission for retrieving AWS prices (probably pricing:GetProducts)", e);
+            return Optional.empty();
         }
     }
 
-    private GetProductsResult getProducts(String region, String instanceType) {
+    private GetProductsResult getProducts(String region, String instanceType, CloudCredential cloudCredential) throws AwsPermissionMissingException {
+        awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential), GET_PRODUCTS_ENCODED_POLICY_STRING);
         GetProductsRequest productsRequest = new GetProductsRequest()
                 .withServiceCode("AmazonEC2")
                 .withFormatVersion("aws_v1")
@@ -112,17 +152,38 @@ public class AwsPricingCache implements PricingCache {
                         new Filter().withType(FilterType.TERM_MATCH).withField("preInstalledSw").withValue("NA"),
                         new Filter().withType(FilterType.TERM_MATCH).withField("capacitystatus").withValue("Used"),
                         new Filter().withType(FilterType.TERM_MATCH).withField("tenancy").withValue("Shared"));
-        return awsPricing.getProducts(productsRequest);
+        AmazonPricingClient pricingClient = awsClient.createPricingClient(new AwsCredentialView(cloudCredential), PRICING_API_ENDPOINT_REGION);
+        return pricingClient.getProducts(productsRequest);
     }
 
-    @Bean
-    public AWSPricing getAwsPricing() {
-        return AWSPricingClientBuilder.standard().withRegion(PRICING_API_ENDPOINT_REGION).build();
+    private static String getPolicyBase64String() {
+        Policy policy = new Policy();
+        Statement statement = new Statement(Statement.Effect.Allow)
+                .withResources(new Resource("*"))
+                .withActions(() -> "pricing:GetProducts");
+        policy.setStatements(List.of(statement));
+        String policyString = new JsonPolicyWriter().writePolicyToString(policy);
+        return Base64.getEncoder().encodeToString(policyString.getBytes());
+    }
+
+    private Optional<VmTypeMeta> getVmMetadata(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
+        CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(extendedCloudCredential, region,
+                getCloudPlatform().name(), CdpResourceType.DEFAULT, Map.of());
+        Optional<Set<VmType>> vmTypesOptional = cloudVmTypes.getCloudVmResponses().entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(region))
+                .map(Map.Entry::getValue)
+                .findFirst();
+        if (vmTypesOptional.isPresent()) {
+            Optional<VmType> vmType = vmTypesOptional.get().stream().filter(x -> x.value().equals(instanceType)).findFirst();
+            if (vmType.isPresent()) {
+                return Optional.of(vmType.get().getMetaData());
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AWS;
-
     }
 }

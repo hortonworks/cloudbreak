@@ -36,8 +36,7 @@ public class HbaseRestKnoxServiceConfigProvider implements CmTemplateComponentCo
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(config(RESTSERVER_SECURITY_AUTHENTICATION, "kerberos"));
-        if (entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                && templatePreparationObject.getStackType().equals(StackType.DATALAKE)) {
+        if (isSDXOptimizationNeeded(templatePreparationObject)) {
             configs.add(config(HBASE_RPC_PROTECTION, "privacy"));
         }
         return configs;
@@ -58,6 +57,12 @@ public class HbaseRestKnoxServiceConfigProvider implements CmTemplateComponentCo
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
                 && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getHBaseRestService().getKnoxService());
+    }
+
+    private boolean isSDXOptimizationNeeded(TemplatePreparationObject source) {
+        return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && source.getStackType() != null
+                && source.getStackType().equals(StackType.DATALAKE);
     }
 
 }
