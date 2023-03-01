@@ -32,6 +32,9 @@ ccmv2_setup_jumpgate_proxy:
     - pattern: "^http_proxy.*"
     - repl: 'http_proxy = "{{ proxy.proxy_url }}"'
     - append_if_not_found: True
+{% if proxy.tunnel == 'CCMV2_JUMPGATE' %}
+    - ignore_if_missing: True # in case of CCMV2_JUMPGATE tunnel the file will only be present on FreeIPA nodes
+{% endif %}
 
 {% endif %} # tunnel
 
