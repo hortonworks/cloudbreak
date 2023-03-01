@@ -175,8 +175,8 @@ class GcpDiskResourceBuilderTest {
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default",
                 "default-id", new HashMap<>());
-        cloudStack = new CloudStack(emptyList(), null, image, emptyMap(), emptyMap(), null,
-                null, null, null, null);
+        cloudStack = new CloudStack(Collections.emptyList(), null, image, emptyMap(), emptyMap(), null,
+                null, null, null, null, null, null);
 
         Operation operation = new Operation();
         operation.setName("operation");
