@@ -123,7 +123,7 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(POST_INSTALL_FILEPATH, POST_INSTALL_FILENAME, 1, sshJUtil))
                 .when(freeIpaTestClient.detachRecipes(List.of(preRecipeName, postInstallRecipeName)))
                 .given(FreeIpaUpscaleTestDto.class)
-                    .withAvailabilityType(AvailabilityType.HA)
+                    .withAvailabilityType(AvailabilityType.TWO_NODE_BASED)
                 .when(freeIpaTestClient.upscale())
                 .await(Status.AVAILABLE)
                 .given(FreeIpaTestDto.class)
