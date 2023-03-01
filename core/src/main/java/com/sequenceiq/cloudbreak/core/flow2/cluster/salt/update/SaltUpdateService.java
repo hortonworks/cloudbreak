@@ -63,11 +63,17 @@ public class SaltUpdateService {
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SALT_UPDATE_FINISHED);
     }
 
-    public void handleClusterCreationFailure(StackView stackView, Exception exception) {
+    public void handleClusterCreationFailure(StackView stackView, Exception exception, Long stackId,
+        Boolean checkIfBackupDatalakeDatabaseFlowChain) {
         if (stackView.getClusterId() != null) {
-            String errorMessage = clusterCreationService.getErrorMessageFromException(exception);
-            stackUpdater.updateStackStatus(stackView.getId(), SALT_UPDATE_FAILED, errorMessage);
-            flowMessageService.fireEventAndLog(stackView.getId(), UPDATE_FAILED.name(), CLUSTER_SALT_UPDATE_FAILED, errorMessage);
+            if (checkIfBackupDatalakeDatabaseFlowChain) {
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Salt update finished.");
+                flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SALT_UPDATE_FINISHED);
+            } else {
+                String errorMessage = clusterCreationService.getErrorMessageFromException(exception);
+                stackUpdater.updateStackStatus(stackView.getId(), SALT_UPDATE_FAILED, errorMessage);
+                flowMessageService.fireEventAndLog(stackView.getId(), UPDATE_FAILED.name(), CLUSTER_SALT_UPDATE_FAILED, errorMessage);
+            }
         } else {
             LOGGER.info("Cluster was null. Flow action was not required.");
         }
