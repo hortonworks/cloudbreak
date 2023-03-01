@@ -98,7 +98,7 @@ public class LoadBalancerResourceServiceTest {
         context.addNetworkResources(networkResources);
         Network network = new Network(null);
         cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
-                null, null, null, null);
+                null, null, null, null, null, null);
     }
 
     @Test

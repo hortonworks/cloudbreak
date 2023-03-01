@@ -39,7 +39,7 @@ class CloudProviderUpdateCheckHandlerTest {
     @Test
     void doAcceptShouldCallPlatformConnectorsGet() {
         when(cloudPlatformConnectors.get(any(), any())).thenReturn(cloudConnector);
-        CloudStack cloudStack = new CloudStack(List.of(), null, null, Map.of(), Map.of(), "", null, "", "", null);
+        CloudStack cloudStack = new CloudStack(List.of(), null, null, Map.of(), Map.of(), "", null, "", "", null, null, null);
         CloudContext cloudContext = CloudContext.Builder.builder().withId(0L).build();
         ClusterUpgradeUpdateCheckRequest checkRequest = new ClusterUpgradeUpdateCheckRequest(0L, cloudStack, new CloudCredential(), cloudContext, List.of());
 

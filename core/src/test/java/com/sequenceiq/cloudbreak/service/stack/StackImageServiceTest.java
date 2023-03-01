@@ -38,12 +38,14 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.Userdata;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
@@ -77,6 +79,9 @@ public class StackImageServiceTest {
 
     @Mock
     private ImageService imageService;
+
+    @Mock
+    private UserDataService userDataService;
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -156,6 +161,7 @@ public class StackImageServiceTest {
                 stack.getRegion(), targetStatedImage.getImage())).thenReturn(IMAGE_NAME);
         when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
                 .thenReturn(imageCatalogPlatform);
+        when(userDataService.updateUserData(anyLong(), any())).thenReturn(new Userdata());
 
         victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG);
 

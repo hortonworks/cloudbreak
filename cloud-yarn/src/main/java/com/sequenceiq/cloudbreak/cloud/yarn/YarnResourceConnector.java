@@ -138,7 +138,7 @@ public class YarnResourceConnector implements ResourceConnector {
         YarnComponent component = new YarnComponent();
         component.setName(group.getName());
         component.setNumberOfContainers(group.getInstancesSize());
-        String userData = stack.getImage().getUserDataByType(group.getType());
+        String userData = stack.getUserDataByType(group.getType());
         component.setLaunchCommand(String.format("/bootstrap/start-systemd '%s' '%s' '%s'", Base64.getEncoder().encodeToString(userData.getBytes()),
                 stack.getLoginUserName(), stack.getPublicKey()));
         component.setArtifact(artifact);
