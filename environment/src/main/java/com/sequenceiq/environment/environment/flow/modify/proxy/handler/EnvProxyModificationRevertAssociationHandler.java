@@ -41,7 +41,9 @@ public class EnvProxyModificationRevertAssociationHandler extends EventSenderAwa
         LOGGER.info("Reverting proxy config to {} for env {}", eventData.getPreviousProxyConfigCrn(), eventData.getResourceCrn());
 
         try {
-            ProxyConfig previousProxyConfig = proxyConfigService.getByCrn(eventData.getPreviousProxyConfigCrn());
+            ProxyConfig previousProxyConfig = eventData.getPreviousProxyConfigCrn() != null
+                ? proxyConfigService.getByCrn(eventData.getPreviousProxyConfigCrn())
+                : null;
             environmentService.updateProxyConfig(eventData.getResourceId(), previousProxyConfig);
         } catch (Exception e) {
             LOGGER.warn("Failed to revert proxy config", e);
