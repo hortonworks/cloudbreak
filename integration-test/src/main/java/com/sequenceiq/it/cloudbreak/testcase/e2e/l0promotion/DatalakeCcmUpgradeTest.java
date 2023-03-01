@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -21,12 +20,12 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -40,6 +39,9 @@ public class DatalakeCcmUpgradeTest extends AbstractE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private EnvironmentUtil environmentUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -75,7 +77,9 @@ public class DatalakeCcmUpgradeTest extends AbstractE2ETest {
 
     @Override
     protected void initiateEnvironmentCreation(TestContext testContext) {
-        givenCcmV1Environment(testContext)
+        environmentUtil.createCCMv1Environment(testContext)
+                .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
+                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .validate();
@@ -111,21 +115,5 @@ public class DatalakeCcmUpgradeTest extends AbstractE2ETest {
 
             return sdxInternalTestDto;
         };
-    }
-
-    private EnvironmentTestDto givenCcmV1Environment(TestContext testContext) {
-        return testContext
-                .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
-                .given(EnvironmentTestDto.class)
-                .withNetwork()
-                .withTelemetry("telemetry")
-                .withTunnel(Tunnel.CCM)
-                .withOverrideTunnel()
-                .withCreateFreeIpa(Boolean.TRUE)
-                .withOneFreeIpaNode()
-                .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
-                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid());
     }
 }

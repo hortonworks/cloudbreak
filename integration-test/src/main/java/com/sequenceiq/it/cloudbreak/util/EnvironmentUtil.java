@@ -15,8 +15,10 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.UmsClient;
@@ -60,5 +62,19 @@ public class EnvironmentUtil {
         }
 
         return virtualGroups;
+    }
+
+    public EnvironmentTestDto createCCMv1Environment(TestContext testContext) {
+        return testContext
+                .given("telemetry", TelemetryTestDto.class)
+                    .withLogging()
+                    .withReportClusterLogs()
+                .given(EnvironmentTestDto.class)
+                    .withNetwork()
+                    .withTelemetry("telemetry")
+                    .withTunnel(Tunnel.CCM)
+                    .withOverrideTunnel()
+                    .withCreateFreeIpa(Boolean.TRUE)
+                    .withOneFreeIpaNode();
     }
 }
