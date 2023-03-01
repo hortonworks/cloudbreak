@@ -1,22 +1,27 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.das;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -40,7 +45,7 @@ public class DasConfigProviderTest {
 
     private DasConfigProvider underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new DasConfigProvider();
     }
@@ -52,33 +57,108 @@ public class DasConfigProviderTest {
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        when(rdsConfig.getSslMode()).thenReturn(RdsSslMode.DISABLED);
 
-        TemplatePreparationObject tpo = new Builder().withRdsViews(Set.of(rdsConfig)
-                .stream()
-                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                .collect(Collectors.toSet()))
+        TemplatePreparationObject tpo = new Builder()
+                .withRdsViews(Set.of(rdsConfig)
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
+                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
-        Map<String, String> paramToVariable =
-                result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
-        assertThat(paramToVariable).containsOnly(
-                new SimpleEntry<>("data_analytics_studio_database_host", HOST),
-                new SimpleEntry<>("data_analytics_studio_database_port", PORT),
-                new SimpleEntry<>("data_analytics_studio_database_name", DB_NAME),
-                new SimpleEntry<>("data_analytics_studio_database_username", USER_NAME),
-                new SimpleEntry<>("data_analytics_studio_database_password", PASSWORD));
+
+        validateServiceConfigsNoDbSsl(result);
+    }
+
+    private ClouderaManagerRepo generateCmRepo(Versioned version) {
+        return new ClouderaManagerRepo()
+                .withBaseUrl("baseurl")
+                .withGpgKeyUrl("gpgurl")
+                .withPredefined(true)
+                .withVersion(version.getVersion());
+    }
+
+    private void validateServiceConfigsNoDbSsl(List<ApiClusterTemplateConfig> result) {
+        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
+        assertThat(configToValue).containsOnly(
+                entry("data_analytics_studio_database_host", HOST),
+                entry("data_analytics_studio_database_port", PORT),
+                entry("data_analytics_studio_database_name", DB_NAME),
+                entry("data_analytics_studio_database_username", USER_NAME),
+                entry("data_analytics_studio_database_password", PASSWORD));
+
+        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
+        assertThat(configToVariable).isEmpty();
+    }
+
+    @Test
+    public void getServiceConfigsWhenGoodCmVersionButDbSslIsNotRequested() {
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(HIVE_DAS);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        when(rdsConfig.getSslMode()).thenReturn(RdsSslMode.DISABLED);
+
+        TemplatePreparationObject tpo = new Builder()
+                .withRdsViews(Set.of(rdsConfig)
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
+                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2), null)
+                .build();
+
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+
+        validateServiceConfigsNoDbSsl(result);
+    }
+
+    @Test
+    public void getServiceConfigsWhenDbSsl() {
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(HIVE_DAS);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        when(rdsConfig.getSslMode()).thenReturn(RdsSslMode.ENABLED);
+
+        TemplatePreparationObject tpo = new Builder()
+                .withRdsViews(Set.of(rdsConfig)
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/cert.pem"))
+                        .collect(Collectors.toSet()))
+                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2), null)
+                .build();
+
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+
+        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
+        assertThat(configToValue).containsOnly(
+                entry("data_analytics_studio_database_host", HOST),
+                entry("data_analytics_studio_database_port", PORT),
+                entry("data_analytics_studio_database_name", DB_NAME),
+                entry("data_analytics_studio_database_username", USER_NAME),
+                entry("data_analytics_studio_database_password", PASSWORD),
+                entry("data_analytics_studio_database_url_query_params", "?sslmode=verify-full&sslrootcert=/foo/cert.pem"));
+
+        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
+        assertThat(configToVariable).isEmpty();
     }
 
     @Test
     public void getRoleConfigs() {
         TemplatePreparationObject tpo = new Builder().build();
+
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(DasRoles.WEBAPP, tpo);
-        Map<String, String> paramToVariable =
-                result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
-        assertThat(paramToVariable).containsOnly(
-                new SimpleEntry<>("data_analytics_studio_user_authentication", "KNOX_PROXY"));
+
+        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
+        assertThat(configToValue).containsOnly(
+                entry("data_analytics_studio_user_authentication", "KNOX_PROXY"));
+
         result = underTest.getRoleConfigs(DasRoles.EVENTPROCESSOR, tpo);
+
         assertThat(result.isEmpty()).isTrue();
     }
 
@@ -104,11 +184,12 @@ public class DasConfigProviderTest {
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        TemplatePreparationObject tpo = new Builder().withRdsViews(Set.of(rdsConfig)
-                .stream()
-                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                .collect(Collectors.toSet())
-        ).build();
+        TemplatePreparationObject tpo = new Builder()
+                .withRdsViews(Set.of(rdsConfig)
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet())
+                ).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
         assertThat(result).isTrue();
@@ -116,7 +197,7 @@ public class DasConfigProviderTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void isConfigurationNeededFalseWhenNoDasOnClusterr() {
+    public void isConfigurationNeededFalseWhenNoDasOnCluster() {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
@@ -126,11 +207,12 @@ public class DasConfigProviderTest {
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
-        TemplatePreparationObject tpo = new Builder().withRdsViews(Set.of(rdsConfig)
-                .stream()
-                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
-                .collect(Collectors.toSet())
-        ).build();
+        TemplatePreparationObject tpo = new Builder()
+                .withRdsViews(Set.of(rdsConfig)
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet())
+                ).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
         assertThat(result).isFalse();
@@ -147,4 +229,5 @@ public class DasConfigProviderTest {
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
         assertThat(result).isFalse();
     }
+
 }
