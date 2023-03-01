@@ -94,7 +94,7 @@ ext {
   mockitoVersion = '3.12.4'
   openPojoVersion = '0.8.12'
   testContainersVersion = '1.16.0'
-  testNgVersion = '7.3.0'
+  testNgVersion = '7.7.1'
 
   // Tracing
   micrometerVersion = '1.7.6'
