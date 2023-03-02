@@ -105,12 +105,12 @@ public class DatalakeCcmUpgradeTest extends AbstractE2ETest {
                 boolean result = m.find();
                 if (!result) {
                     Log.then(LOGGER,
-                            format("the {} launch template user data does not contain {} ", ud.getKey(), EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE));
+                            format("the %s launch template user data does not contain %s ", ud.getKey(), EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE));
                 }
                 return result;
             });
             if (!ccmV2Enabled) {
-                throw new TestFailException(format("user data is not updated by ", EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE));
+                throw new TestFailException(format("user data is not updated by %s", EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE));
             }
 
             return sdxInternalTestDto;

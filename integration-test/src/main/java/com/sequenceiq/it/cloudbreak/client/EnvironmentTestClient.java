@@ -19,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetByCrnAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentListAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentModifyProxyConfigAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStartAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStopAction;
@@ -103,5 +104,9 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> upgradeCcm() {
         return new EnvironmentCcmUpgrade();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> modifyProxyConfig(String proxyConfigName) {
+        return new EnvironmentModifyProxyConfigAction(proxyConfigName);
     }
 }
