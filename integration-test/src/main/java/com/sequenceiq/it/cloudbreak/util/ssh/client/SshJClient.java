@@ -112,6 +112,12 @@ public class SshJClient {
         }
     }
 
+    protected Map<String, Pair<Integer, String>> executeCommands(Set<String> ipAddresses, String command) {
+        Map<String, Pair<Integer, String>> results = new HashMap<>();
+        ipAddresses.forEach(ipAddress -> results.put(ipAddress, executeCommand(ipAddress, command)));
+        return results;
+    }
+
     protected Pair<Integer, String> executeCommand(String instanceIP, String command) {
         try (SSHClient sshClient = createSshClient(instanceIP, null, null, null)) {
             Pair<Integer, String> cmdOut = execute(sshClient, command);
@@ -121,12 +127,6 @@ public class SshJClient {
             LOGGER.error("SSH fail on [{}] while executing command [{}]. {}", instanceIP, command, e.getMessage());
             throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + command + "].", e);
         }
-    }
-
-    protected Map<String, Pair<Integer, String>> executeCommands(Set<String> ipAddresses, String command) {
-        Map<String, Pair<Integer, String>> results = new HashMap<>();
-        ipAddresses.forEach(ipAddress -> results.put(ipAddress, executeCommand(ipAddress, command)));
-        return results;
     }
 
     private Session startSshSession(SSHClient ssh) throws ConnectionException, TransportException {
