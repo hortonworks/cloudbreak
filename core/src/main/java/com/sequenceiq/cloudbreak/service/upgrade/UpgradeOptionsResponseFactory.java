@@ -13,11 +13,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Component
 public class UpgradeOptionsResponseFactory {

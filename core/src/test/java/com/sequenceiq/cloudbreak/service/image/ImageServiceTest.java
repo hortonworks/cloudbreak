@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.DEFAULT_REGI
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.INVALID_PLATFORM;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.PLATFORM;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.REGION;
-import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,13 +41,14 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 public class ImageServiceTest {
 

@@ -1,6 +1,6 @@
-package com.sequenceiq.cloudbreak.service.image;
+package com.sequenceiq.cloudbreak.common.service;
 
-import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 
 import java.util.Set;
 
@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Service
 public class PlatformStringTransformer {

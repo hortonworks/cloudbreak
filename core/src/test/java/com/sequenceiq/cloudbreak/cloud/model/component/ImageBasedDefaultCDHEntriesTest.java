@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model.component;
 
-import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 public class ImageBasedDefaultCDHEntriesTest {
 

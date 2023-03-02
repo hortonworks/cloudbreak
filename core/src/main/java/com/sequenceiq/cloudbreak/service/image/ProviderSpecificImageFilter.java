@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Component
 public class ProviderSpecificImageFilter {

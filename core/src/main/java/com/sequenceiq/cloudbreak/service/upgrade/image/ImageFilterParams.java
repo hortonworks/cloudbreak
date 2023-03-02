@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 public class ImageFilterParams {
 

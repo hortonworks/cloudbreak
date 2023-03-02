@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -97,6 +98,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
@@ -106,6 +108,7 @@ import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -239,6 +242,12 @@ class SdxServiceTest {
     @Mock
     private VirtualMachineConfiguration virtualMachineConfiguration;
 
+    @Mock
+    private PlatformStringTransformer platformStringTransformer;
+
+    @Mock
+    private ImageCatalogPlatform imageCatalogPlatform;
+
     @InjectMocks
     private SdxService underTest;
 
@@ -364,6 +373,7 @@ class SdxServiceTest {
                 .thenReturn(List.of(AWS, AZURE, GCP));
         lenient().when(entitlementService.isRazForGcpEnabled(anyString()))
                 .thenReturn(true);
+        lenient().when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
     }
 
     @Test

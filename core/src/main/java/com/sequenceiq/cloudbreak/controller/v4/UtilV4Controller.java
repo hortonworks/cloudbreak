@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Res
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.UsedImagesListV4Response;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.SupportedExternalDatabaseServiceEntryToSupportedExternalDatabaseServiceEntryResponseConverter;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -34,7 +35,6 @@ import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
-import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.image.UsedImagesProvider;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;

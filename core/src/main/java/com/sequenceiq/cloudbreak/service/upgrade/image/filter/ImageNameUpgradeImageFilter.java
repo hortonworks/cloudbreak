@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Service
 public class ImageNameUpgradeImageFilter implements UpgradeImageFilter {

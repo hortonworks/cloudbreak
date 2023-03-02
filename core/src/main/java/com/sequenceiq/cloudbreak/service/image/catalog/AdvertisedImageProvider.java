@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 import com.sequenceiq.cloudbreak.service.image.LatestDefaultImageUuidProvider;
 import com.sequenceiq.cloudbreak.service.image.ProviderSpecificImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Component
 public class AdvertisedImageProvider {

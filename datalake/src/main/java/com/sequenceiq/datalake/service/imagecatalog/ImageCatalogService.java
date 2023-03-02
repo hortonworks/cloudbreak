@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 
 @Service
@@ -44,7 +44,7 @@ public class ImageCatalogService implements AuthorizationResourceCrnProvider {
         return response.getCrn();
     }
 
-    public ImageV4Response getImageResponseFromImageRequest(ImageSettingsV4Request imageSettingsV4Request, CloudPlatform cloudPlatform) {
+    public ImageV4Response getImageResponseFromImageRequest(ImageSettingsV4Request imageSettingsV4Request, ImageCatalogPlatform imageCatalogPlatform) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
 
         if (imageSettingsV4Request == null) {
@@ -75,14 +75,14 @@ public class ImageCatalogService implements AuthorizationResourceCrnProvider {
             for (ImageV4Response imageV4Response : imagesV4Response.getCdhImages()) {
                 // find the image can be used on the cloud platform of the environment
                 if (imageV4Response.getImageSetsByProvider() != null) {
-                    if (imageV4Response.getImageSetsByProvider().containsKey(cloudPlatform.name().toLowerCase())) {
+                    if (imageV4Response.getImageSetsByProvider().containsKey(imageCatalogPlatform.nameToLowerCase())) {
                         return imageV4Response;
                     }
                 }
             }
 
             String errorMessage = String.format("SDX cluster is on the cloud platform %s, but the image requested with uuid %s:%s does not support it",
-                    cloudPlatform.name(), imageSettingsV4Request.getCatalog() != null ? imageSettingsV4Request.getCatalog() : "default",
+                    imageCatalogPlatform.nameToLowerCase(), imageSettingsV4Request.getCatalog() != null ? imageSettingsV4Request.getCatalog() : "default",
                     imageSettingsV4Request.getId());
             LOGGER.error(errorMessage);
 

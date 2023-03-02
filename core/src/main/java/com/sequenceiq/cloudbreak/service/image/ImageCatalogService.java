@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.service.image;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.service.image.StatedImage.statedImage;
 import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
-import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
+import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.partitioningBy;
@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -67,7 +68,6 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -75,6 +75,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.common.api.type.ImageType;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Component
 public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> implements CompositeAuthResourcePropertyProvider {

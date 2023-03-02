@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.service.image.PrefixMatchImages;
 import com.sequenceiq.cloudbreak.service.image.PrefixMatcherService;
 import com.sequenceiq.cloudbreak.service.image.ProviderSpecificImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Component
 public class VersionBasedImageProvider {
