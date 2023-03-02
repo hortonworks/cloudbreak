@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -89,7 +90,6 @@ import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageProvider;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogMetaData;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
@@ -102,6 +102,7 @@ import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.ImageType;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogServiceTest {

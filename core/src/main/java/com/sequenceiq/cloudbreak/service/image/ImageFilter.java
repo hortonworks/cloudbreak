@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.image;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 public class ImageFilter {
 

@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +39,8 @@ public class ImageCatalogServiceTest {
     private static final String IMAGE_ID = "image id";
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
+
+    private static final ImageCatalogPlatform IMAGE_CATALOG_PLATFORM_AWS = ImageCatalogPlatform.imageCatalogPlatform(CloudPlatform.AWS.toString());
 
     @Mock
     private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
@@ -88,7 +91,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), eq(IMAGE_CATALOG_NAME), eq(IMAGE_ID), any())).thenReturn(imagesV4Response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            ImageV4Response actual = victim.getImageResponseFromImageRequest(imageSettingsV4Request, CloudPlatform.AWS);
+            ImageV4Response actual = victim.getImageResponseFromImageRequest(imageSettingsV4Request, IMAGE_CATALOG_PLATFORM_AWS);
             assertEquals(imageResponse, actual);
         });
     }

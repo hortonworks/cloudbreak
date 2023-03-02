@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
-import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

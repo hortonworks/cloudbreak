@@ -92,6 +92,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -106,6 +107,7 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -221,6 +223,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private VirtualMachineConfiguration virtualMachineConfiguration;
+
+    @Inject
+    private PlatformStringTransformer platformStringTransformer;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -428,8 +433,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
         validateJavaVersion(sdxClusterRequest.getJavaVersion(), accountId);
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform);
+        ImageCatalogPlatform imageCatalogPlatform = platformStringTransformer
+                .getPlatformStringForImageCatalog(environment.getCloudPlatform(), isGovCloudEnvironment(environment));
+        ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, imageCatalogPlatform);
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
@@ -444,6 +450,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 environment);
         setTagsSafe(sdxClusterRequest, sdxCluster);
 
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         if (isCloudStorageConfigured(sdxClusterRequest)) {
             validateCloudStorageRequest(sdxClusterRequest.getCloudStorage(), environment);
             String trimmedBaseLocation = StringUtils.stripEnd(sdxClusterRequest.getCloudStorage().getBaseLocation(), "/");
@@ -1232,6 +1239,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(environmentName);
         validateEnv(environmentResponse);
         return environmentResponse;
+    }
+
+    private boolean isGovCloudEnvironment(DetailedEnvironmentResponse environmentResponse) {
+        return environmentResponse.getCredential() != null &&
+                environmentResponse.getCredential().getGovCloud() != null &&
+                environmentResponse.getCredential().getGovCloud().booleanValue();
     }
 
     @Override

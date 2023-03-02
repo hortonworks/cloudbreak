@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.image.catalog.model;
+package com.sequenceiq.common.model;
 
 import java.util.Objects;
 
