@@ -17,12 +17,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.wiam.client.GrpcWiamClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -32,6 +30,7 @@ import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.binduser.UserSyncBindUserService;
@@ -87,9 +86,6 @@ public class FreeIpaPostInstallService {
 
     @Inject
     private UserSyncBindUserService userSyncBindUserService;
-
-    @Inject
-    private GrpcWiamClient wiamClient;
 
     @Retryable(value = FreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
@@ -168,12 +164,7 @@ public class FreeIpaPostInstallService {
         if (entitlementService.isWorkloadIamSyncEnabled(stack.getAccountId())) {
             LOGGER.debug("WORKLOAD_IAM_SYNC entitled. Usersync will be triggered automatically by the Workload IAM service");
         } else if (entitlementService.isWiamUsersyncRoutingEnabled(stack.getAccountId())) {
-            LOGGER.debug("Initiating usersync via WIAM");
-            try {
-                wiamClient.syncUsersInEnvironment(stack.getAccountId(), stack.getEnvironmentCrn(), MDCBuilder.getOrGenerateRequestId());
-            } catch (Exception e) {
-                LOGGER.error("Initiating initial usersync via WIAM failed", e);
-            }
+            LOGGER.debug("Initiating usersync via WIAM will be started later in {}", FreeIpaProvisionState.FREEIPA_PROVISION_FINISHED_STATE);
         } else {
             LOGGER.debug("WORKLOAD_IAM_SYNC not entitled. Explicitly triggering initial usersync.");
             userSyncService.synchronizeUsers(
