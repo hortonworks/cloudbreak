@@ -170,11 +170,21 @@ public class CDPConfigService {
 
     public List<String> getDatalakeVersions(String cloudPlatform) {
         List<String> runtimeVersions = getRuntimeVersions(cloudPlatform);
+        boolean govCloudDeployment = commonGovService.govCloudDeployment(
+                preferencesService.enabledGovPlatforms(),
+                preferencesService.enabledPlatforms());
         if (Strings.isNullOrEmpty(defaultRuntime)) {
             List<String> defaultImageCatalogRuntimeVersions = imageCatalogService.getDefaultImageCatalogRuntimeVersions(DEFAULT_WORKSPACE_ID);
             LOGGER.debug("Generate runtime versions by checking available runtimes in the default image catalog ('{}').",
                     String.join(",", defaultImageCatalogRuntimeVersions));
-            runtimeVersions = runtimeVersions.stream().filter(defaultImageCatalogRuntimeVersions::contains).collect(Collectors.toList());
+            runtimeVersions = runtimeVersions.stream()
+                    .filter(defaultImageCatalogRuntimeVersions::contains)
+                    .collect(Collectors.toList());
+        }
+        if (govCloudDeployment) {
+            runtimeVersions = runtimeVersions.stream()
+                    .filter(e -> commonGovService.govCloudCompatibleVersion(e))
+                    .collect(Collectors.toList());
         }
 
         LOGGER.debug("Available runtime versions for datalake: {}", runtimeVersions);

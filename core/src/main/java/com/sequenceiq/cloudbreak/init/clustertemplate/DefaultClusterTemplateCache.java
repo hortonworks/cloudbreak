@@ -155,23 +155,29 @@ public class DefaultClusterTemplateCache {
         Set<String> enabledPlatforms, Set<String> enabledGovPlatforms) {
         boolean useIt = true;
         String aws = CloudPlatform.AWS.name();
+        LOGGER.info("Enabled commercial platforms: {}", enabledPlatforms);
+        LOGGER.info("Enabled gov platforms: {}", enabledGovPlatforms);
         boolean awsGovTemplate = clusterTemplateName.contains(CommonGovService.GOV);
         boolean awsGovEnabledOnDeployment = enabledGovPlatforms.contains(aws);
         boolean awsCommercialEnabledOnDeployment = enabledPlatforms.contains(aws);
         boolean localDeployment = awsGovEnabledOnDeployment && awsCommercialEnabledOnDeployment;
         boolean govCloudDeployment = commonGovService.govCloudDeployment(enabledGovPlatforms, enabledPlatforms);
         if (isAwsTemplate(clusterTemplateRequest, aws)) {
+            LOGGER.info("The current {} template is an aws template", clusterTemplateRequest.getName());
             // the template version is AWS
             if (isLocalDeploymentAndGovTemplate(awsGovTemplate, localDeployment)) {
                 // in case of local deployment we dont need to load gov templates
+                LOGGER.info("The deployment is a local deployment so skipping this {} template", clusterTemplateRequest.getName());
                 useIt = false;
             } else if (!localDeployment) {
                 if (isCommercialDeploymentAndGovAWSTemplate(awsGovTemplate, awsCommercialEnabledOnDeployment)) {
                     // NOT a Gov deployment we dont need to load gov templates
+                    LOGGER.info("The deployment is a commercial deployment so skipping this {} gov template", clusterTemplateRequest.getName());
                     useIt = false;
                 }
                 if (isGovDeploymentAndCommercialAWSTemplate(awsGovTemplate, awsGovEnabledOnDeployment)) {
                     // Gov deployment so no need to load commercial aws templates
+                    LOGGER.info("The deployment is a gov deployment so skipping this {} commercial template", clusterTemplateRequest.getName());
                     useIt = false;
                 }
             }

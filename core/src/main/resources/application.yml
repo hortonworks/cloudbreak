@@ -331,7 +331,7 @@ cb:
   blueprint:
     cm:
       gov:
-        exclusionList: "flow-management,flow-management-small,flink-heavy,flink-light"
+        exclusionList: "cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light"
       defaults:
         7.1.0: >
           7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
