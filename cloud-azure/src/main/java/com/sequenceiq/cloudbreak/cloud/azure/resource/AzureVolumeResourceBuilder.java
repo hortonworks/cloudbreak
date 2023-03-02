@@ -110,11 +110,12 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             CloudContext cloudContext = auth.getCloudContext();
             String stackName = cloudContext.getName();
             String availabilityZone = getAvailabilityZone(auth, vm);
+            String hashableString = stackCrn + System.currentTimeMillis();
 
             return new Builder()
                     .withPersistent(true)
                     .withType(resourceType())
-                    .withName(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, stackCrn))
+                    .withName(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, hashableString))
                     .withGroup(group.getName())
                     .withStatus(CommonStatus.REQUESTED)
                     .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
@@ -124,7 +125,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                                     template.getVolumes().stream()
                                             .map(volume -> new VolumeSetAttributes.Volume(
                                                     resourceNameService.resourceName(ResourceType.AZURE_DISK, stackName, groupName, privateId,
-                                                            template.getVolumes().indexOf(volume), stackCrn),
+                                                            template.getVolumes().indexOf(volume), hashableString),
                                                     null, volume.getSize(), volume.getType(), volume.getVolumeUsageType()))
                                             .collect(toList()))
                             .build()))
