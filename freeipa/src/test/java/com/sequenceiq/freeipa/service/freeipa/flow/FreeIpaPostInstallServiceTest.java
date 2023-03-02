@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.wiam.client.GrpcWiamClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -80,9 +79,6 @@ class FreeIpaPostInstallServiceTest {
     private UserSyncBindUserService userSyncBindUserService;
 
     @Mock
-    private GrpcWiamClient wiamClient;
-
-    @Mock
     private EntitlementService entitlementService;
 
     @Mock
@@ -115,7 +111,6 @@ class FreeIpaPostInstallServiceTest {
         verify(hostOrchestrator).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
         verify(userSyncBindUserService).doesBindUserAndConfigAlreadyExist(stack, ipaClient);
         verify(userSyncBindUserService).createUserAndLdapConfig(stack, ipaClient);
-        verifyNoInteractions(wiamClient, userSyncService);
     }
 
     @Test
@@ -131,7 +126,6 @@ class FreeIpaPostInstallServiceTest {
         underTest.postInstallFreeIpa(1L, true);
 
         verifyNoInteractions(userSyncService);
-        verify(wiamClient).syncUsersInEnvironment(eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN), anyString());
         verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
     }
 
@@ -153,7 +147,6 @@ class FreeIpaPostInstallServiceTest {
             }
         });
 
-        verifyNoInteractions(wiamClient);
         verify(userSyncService).synchronizeUsers(eq(ACCOUNT_ID), anyString(), eq(Set.of(ENVIRONMENT_CRN)), eq(Set.of()), eq(Set.of()),
                 eq(WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED));
         verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
@@ -177,7 +170,7 @@ class FreeIpaPostInstallServiceTest {
             }
         });
 
-        verifyNoInteractions(wiamClient, userSyncService);
+        verifyNoInteractions(userSyncService);
         verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
     }
 
@@ -203,7 +196,7 @@ class FreeIpaPostInstallServiceTest {
             }
         });
 
-        verifyNoInteractions(wiamClient, userSyncService);
+        verifyNoInteractions(userSyncService);
         verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
         verify(ipaClient, times(0)).setMaxHostNameLength(anyInt());
     }
@@ -233,7 +226,7 @@ class FreeIpaPostInstallServiceTest {
             }
         });
 
-        verifyNoInteractions(wiamClient, userSyncService);
+        verifyNoInteractions(userSyncService);
         verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
         verify(ipaClient).setMaxHostNameLength(100);
     }
@@ -264,7 +257,7 @@ class FreeIpaPostInstallServiceTest {
             }
         });
 
-        verifyNoInteractions(wiamClient, userSyncService);
+        verifyNoInteractions(userSyncService);
         verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
         verify(ipaClient).setMaxHostNameLength(255);
     }
@@ -313,7 +306,7 @@ class FreeIpaPostInstallServiceTest {
         verify(hostOrchestrator, times(0)).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
         verify(userSyncBindUserService, never()).createUserAndLdapConfig(stack, ipaClient);
         verify(userSyncBindUserService).addBindUserToAdminGroup(stack, ipaClient);
-        verifyNoInteractions(wiamClient, userSyncService);
+        verifyNoInteractions(userSyncService);
     }
 
 }

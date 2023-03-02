@@ -5,12 +5,18 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.wiam.client.GrpcWiamClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;
@@ -42,6 +48,8 @@ import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @Configuration
 public class FreeIpaProvisionActions {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaProvisionActions.class);
 
     @Inject
     private StackUpdater stackUpdater;
@@ -180,6 +188,12 @@ public class FreeIpaProvisionActions {
             @Inject
             private NodeStatusJobService nodeStatusJobService;
 
+            @Inject
+            private GrpcWiamClient wiamClient;
+
+            @Inject
+            private EntitlementService entitlementService;
+
             @Override
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
@@ -187,12 +201,27 @@ public class FreeIpaProvisionActions {
                 freeipaJobService.schedule(context.getStack().getId());
                 nodeStatusJobService.schedule(context.getStack().getId());
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
+                synchronizeUsersViaWiam(context.getStack());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackContext context) {
                 return new StackEvent(FreeIpaProvisionEvent.FREEIPA_PROVISION_FINISHED_EVENT.event(), context.getStack().getId());
+            }
+
+            private void synchronizeUsersViaWiam(Stack stack) {
+                if (!entitlementService.isWorkloadIamSyncEnabled(stack.getAccountId())
+                        && entitlementService.isWiamUsersyncRoutingEnabled(stack.getAccountId())) {
+                    LOGGER.debug("Initiating usersync via WIAM");
+                    try {
+                        wiamClient.syncUsersInEnvironment(stack.getAccountId(), stack.getEnvironmentCrn(), MDCBuilder.getOrGenerateRequestId());
+                    } catch (Exception e) {
+                        LOGGER.error("Initiating initial usersync via WIAM failed", e);
+                    }
+                } else {
+                    LOGGER.debug("Triggering usersync via WIAM is not required");
+                }
             }
         };
     }
