@@ -78,17 +78,11 @@ public class AzureClientActions {
                 .withInstanceAction(id -> {
                     String resourceGroup = getResourceGroupName(clusterName, id);
                     VirtualMachines virtualMachines = azure.virtualMachines();
-                    if (virtualMachines != null) {
-                        VirtualMachine vm = virtualMachines.getByResourceGroup(resourceGroup, id);
-                        LOGGER.info("Before deleting, vm {} power state is {}", id, vm.powerState());
-                        return virtualMachines.deleteByResourceGroupAsync(resourceGroup, id)
-                                .doOnError(throwable -> Log.error(LOGGER, "Error when deleting instance {}: {}", id, throwable))
-                                .subscribeOn(Schedulers.io());
-                    } else {
-                        String message = format("Azure instance list was null for clustername %s and instanceids %s.", clusterName, instanceIds);
-                        LOGGER.error(message);
-                        throw new TestFailException(message);
-                    }
+                    VirtualMachine vm = virtualMachines.getByResourceGroup(resourceGroup, id);
+                    LOGGER.info("Before deleting, vm {} power state is {}", id, getVmPowerState(vm));
+                    return virtualMachines.deleteByResourceGroupAsync(resourceGroup, id)
+                            .doOnError(throwable -> Log.error(LOGGER, "Error when deleting instance {}: {}", id, throwable))
+                            .subscribeOn(Schedulers.io());
                 })
                 .withInstanceStatusCheck(id -> {
                     String resourceGroup = getResourceGroupName(clusterName, id);
