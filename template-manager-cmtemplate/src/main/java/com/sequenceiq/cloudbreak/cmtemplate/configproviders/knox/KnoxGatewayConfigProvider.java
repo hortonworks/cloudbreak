@@ -53,7 +53,11 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implem
 
     private static final String SIGNING_JKS = "signing.jks";
 
+    private static final String SIGNING_BCFKS = "signing.bcfks";
+
     private static final String JKS = "JKS";
+
+    private static final String BCFKS = "BCFKS";
 
     private static final String SIGNING_IDENTITY = "signing-identity";
 
@@ -87,45 +91,51 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implem
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+        VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
+        String adminGroup = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.KNOX_ADMIN);
+
+        return switch (roleType) {
+            case KnoxRoles.KNOX_GATEWAY -> getKnoxGatewayConfigs(source, adminGroup);
+            case KnoxRoles.IDBROKER -> getIDBrokerConfigs(source, adminGroup);
+            default -> List.of();
+        };
+    }
+
+    private List<ApiClusterTemplateConfig> getKnoxGatewayConfigs(TemplatePreparationObject source, String adminGroup) {
         GatewayView gateway = source.getGatewayView();
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         String masterSecret = gateway != null ? gateway.getMasterSecret() : generalClusterConfigs.getPassword();
         String topologyName = gateway != null && gateway.getExposedServices() != null ? gateway.getTopologyName() : DEFAULT_TOPOLOGY;
-        VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
-        String adminGroup = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.KNOX_ADMIN);
 
-        switch (roleType) {
-            case KnoxRoles.KNOX_GATEWAY:
-                List<ApiClusterTemplateConfig> config = new ArrayList<>();
-                config.add(config(KNOX_MASTER_SECRET, masterSecret));
-                config.add(config(GATEWAY_DEFAULT_TOPOLOGY_NAME, topologyName));
-                config.add(config(GATEWAY_ADMIN_GROUPS, adminGroup));
-                config.add(config(GATEWAY_CM_AUTO_DISCOVERY_ENABLED, "false"));
-                if (gateway != null) {
-                    config.add(config(GATEWAY_PATH, gateway.getPath()));
-                    config.add(config(GATEWAY_SIGNING_KEYSTORE_NAME, SIGNING_JKS));
-                    config.add(config(GATEWAY_SIGNING_KEYSTORE_TYPE, JKS));
-                    config.add(config(GATEWAY_SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
-                    config.add(getGatewayWhitelistConfig(source));
-                    config.addAll(getDefaultsIfRequired(source));
-                }
-                if (source.getProductDetailsView() != null
-                        && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), getCdhProduct(source), getCdhPatchVersion(source))) {
-                    config.add(config(GATEWAY_SERVICE_TOKENSTATE_IMPL, "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"));
-                }
-                return config;
-            case KnoxRoles.IDBROKER:
-                return List.of(
-                    config(IDBROKER_MASTER_SECRET, source.getIdBroker().getMasterSecret()),
-                    config(IDBROKER_GATEWAY_ADMIN_GROUPS, adminGroup),
-                    config(IDBROKER_SIGNING_KEYSTORE_NAME, SIGNING_JKS),
-                    config(IDBROKER_SIGNING_KEYSTORE_TYPE, JKS),
-                    config(IDBROKER_SIGNING_KEY_ALIAS, SIGNING_IDENTITY)
-
-                );
-            default:
-                return List.of();
+        List<ApiClusterTemplateConfig> config = new ArrayList<>();
+        config.add(config(KNOX_MASTER_SECRET, masterSecret));
+        config.add(config(GATEWAY_DEFAULT_TOPOLOGY_NAME, topologyName));
+        config.add(config(GATEWAY_ADMIN_GROUPS, adminGroup));
+        config.add(config(GATEWAY_CM_AUTO_DISCOVERY_ENABLED, "false"));
+        if (gateway != null) {
+            config.add(config(GATEWAY_PATH, gateway.getPath()));
+            config.add(config(GATEWAY_SIGNING_KEYSTORE_NAME, generalClusterConfigs.isGovCloud() ? SIGNING_BCFKS : SIGNING_JKS));
+            config.add(config(GATEWAY_SIGNING_KEYSTORE_TYPE, generalClusterConfigs.isGovCloud() ? BCFKS : JKS));
+            config.add(config(GATEWAY_SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
+            config.add(getGatewayWhitelistConfig(source));
+            config.addAll(getDefaultsIfRequired(source));
         }
+        if (source.getProductDetailsView() != null
+                && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), getCdhProduct(source), getCdhPatchVersion(source))) {
+            config.add(config(GATEWAY_SERVICE_TOKENSTATE_IMPL, "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"));
+        }
+        return config;
+    }
+
+    private List<ApiClusterTemplateConfig> getIDBrokerConfigs(TemplatePreparationObject source, String adminGroup) {
+        GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
+        return List.of(
+                config(IDBROKER_MASTER_SECRET, source.getIdBroker().getMasterSecret()),
+                config(IDBROKER_GATEWAY_ADMIN_GROUPS, adminGroup),
+                config(IDBROKER_SIGNING_KEYSTORE_NAME, generalClusterConfigs.isGovCloud() ? SIGNING_BCFKS : SIGNING_JKS),
+                config(IDBROKER_SIGNING_KEYSTORE_TYPE, generalClusterConfigs.isGovCloud() ? BCFKS : JKS),
+                config(IDBROKER_SIGNING_KEY_ALIAS, SIGNING_IDENTITY)
+        );
     }
 
     @Override

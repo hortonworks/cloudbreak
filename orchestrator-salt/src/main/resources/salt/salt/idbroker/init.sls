@@ -27,13 +27,13 @@ idbroker-create-sign-pkcs12:
     - mode: 644
     - replace: False
 
-idbroker-create-sign-jks:
+idbroker-create-sign-{{ idbroker.keystore_type }}:
   cmd.run:
-    - name: cd {{ idbroker.knox_data_root }}/security/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('idbroker:mastersecret') }} -destkeypass {{ salt['pillar.get']('idbroker:mastersecret') }} -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('idbroker:mastersecret') }} -alias signing-identity
-    - creates: {{ idbroker.knox_data_root }}/security/keystores/signing.jks
+    - name: cd {{ idbroker.knox_data_root }}/security/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('idbroker:mastersecret') }} -destkeypass {{ salt['pillar.get']('idbroker:mastersecret') }} -destkeystore signing.{{ idbroker.keystore_type }} -deststoretype {{ idbroker.keystore_type | upper }} -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('idbroker:mastersecret') }} -alias signing-identity
+    - creates: {{ idbroker.knox_data_root }}/security/keystores/signing.{{ idbroker.keystore_type }}
     - output_loglevel: debug
 
-{{ idbroker.knox_data_root }}/security/keystores/signing.jks:
+{{ idbroker.knox_data_root }}/security/keystores/signing.{{ idbroker.keystore_type }}:
   file.managed:
     - mode: 644
     - replace: False
