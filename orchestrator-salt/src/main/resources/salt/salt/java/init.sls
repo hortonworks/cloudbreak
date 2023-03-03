@@ -60,4 +60,42 @@ install_safelogic_binaries:
         - file: /opt/salt/scripts/install_safelogic_binaries.sh
     - failhard: True
 
+{% set java_policy_file = java_home ~ '/jre/lib/security/java.policy' %}
+{% set java_security_file = java_home ~ '/jre/lib/security/java.security' %}
+
+set_java_policy:
+  file.managed:
+    - name: {{ java_policy_file }}
+    - source: salt://java/templates/java.policy
+    - user: root
+    - group: root
+    - mode: 644
+
+java_security_set_security_providers:
+  file.blockreplace:
+    - name: {{ java_security_file }}
+    - marker_start: "# List of providers and their preference orders (see above):"
+    - marker_end: "# Security providers used when FIPS mode support is active"
+    - template: jinja
+    - context:
+        provider_type: "security"
+    - source: salt://java/templates/java_security_providers.j2
+
+java_security_set_fips_providers:
+  file.blockreplace:
+    - name: {{ java_security_file }}
+    - marker_start: "# Security providers used when FIPS mode support is active"
+    - marker_end: "# Sun Provider SecureRandom seed source."
+    - template: jinja
+    - context:
+        provider_type: "fips"
+    - source: salt://java/templates/java_security_providers.j2
+
+java_security_set_keymanagerfactory_algorithm:
+  file.replace:
+    - name: {{ java_security_file }}
+    - pattern: "^ssl.KeyManagerFactory.algorithm=.*"
+    - repl: "ssl.KeyManagerFactory.algorithm=X.509"
+    - append_if_not_found: True
+
 {% endif %}
