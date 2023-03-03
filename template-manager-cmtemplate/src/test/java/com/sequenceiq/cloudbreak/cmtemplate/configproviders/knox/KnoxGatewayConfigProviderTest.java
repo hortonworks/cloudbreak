@@ -429,6 +429,66 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
+    public void roleConfigsWithGatewayOnGovCloud() {
+        Gateway gateway = new Gateway();
+        gateway.setKnoxMasterSecret("admin");
+        gateway.setPath("/a/b/c");
+        IdBroker idBroker = new IdBroker();
+        idBroker.setMasterSecret("supersecret");
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+
+        LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
+
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setGovCloud(true);
+        generalClusterConfigs.setAccountId(Optional.of("1234"));
+
+        TemplatePreparationObject source = Builder.builder()
+                .withGateway(gateway, "key", new HashSet<>())
+                .withLdapConfig(ldapConfig)
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withBlueprintView(blueprintView)
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
+                        .withVersion("7.2.10")
+                        .withName("CDH")))
+                .withIdBroker(idBroker)
+                .build();
+        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("knox_admins");
+        when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(false);
+
+        assertEquals(
+                List.of(
+                        config("idbroker_master_secret", "supersecret"),
+                        config("idbroker_gateway_knox_admin_groups", "knox_admins"),
+                        config("idbroker_gateway_signing_keystore_name", "signing.bcfks"),
+                        config("idbroker_gateway_signing_keystore_type", "BCFKS"),
+                        config("idbroker_gateway_signing_key_alias", "signing-identity")
+                ),
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+        );
+        assertEquals(
+                List.of(
+                        config("gateway_master_secret", gateway.getKnoxMaster()),
+                        config("gateway_default_topology_name", "cdp-proxy"),
+                        config("gateway_knox_admin_groups", "knox_admins"),
+                        config("gateway_auto_discovery_enabled", "false"),
+                        config("gateway_path", gateway.getPath()),
+                        config("gateway_signing_keystore_name", "signing.bcfks"),
+                        config("gateway_signing_keystore_type", "BCFKS"),
+                        config("gateway_signing_key_alias", "signing-identity"),
+                        config("gateway_dispatch_whitelist", "^*.*$"),
+                        config("gateway_token_generation_enable_lifespan_input", "true"),
+                        config("gateway_token_generation_knox_token_ttl", "86400000"),
+                        config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
+                ),
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+        );
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+    }
+
+    @Test
     public void testGatewayWhitelistConfig() {
         TemplatePreparationObject noKerberosTPO = Builder.builder()
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
