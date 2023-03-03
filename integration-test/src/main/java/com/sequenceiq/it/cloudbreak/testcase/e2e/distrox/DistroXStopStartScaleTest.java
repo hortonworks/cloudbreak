@@ -30,10 +30,9 @@ public class DistroXStopStartScaleTest extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        // Azure and GCP are not supported right now.
+        // GCP are not supported right now.
         // - GCP does not support stopping instances with ephemeral storage.
-        // - Azure starting/stopping nodes consume almost same time as adding/deleting nodes.
-        assertSupportedCloudPlatform(CloudPlatform.AWS);
+        assertNotSupportedCloudPlatform(CloudPlatform.GCP);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);

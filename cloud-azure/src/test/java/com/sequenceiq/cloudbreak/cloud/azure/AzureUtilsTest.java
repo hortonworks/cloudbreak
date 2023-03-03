@@ -176,12 +176,12 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString())).thenReturn(Mono.empty());
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString(), any())).thenReturn(Mono.empty());
 
         List<CloudVmInstanceStatus> statusesAfterDeallocate = underTest.deallocateInstances(ac,
                 List.of(createCloudInstance("instance1"), createCloudInstance("instance2")));
 
-        verify(azureClient, times(2)).deallocateVirtualMachineAsync(anyString(), anyString());
+        verify(azureClient, times(2)).deallocateVirtualMachineAsync(anyString(), anyString(), any());
         assertEquals(2, statusesAfterDeallocate.size());
         statusesAfterDeallocate.forEach(status -> assertEquals(InstanceStatus.STOPPED, status.getStatus()));
     }
@@ -197,12 +197,12 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString())).thenReturn(Mono.empty());
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString(), any())).thenReturn(Mono.empty());
 
         List<CloudVmInstanceStatus> statusesAfterDeallocate = underTest.deallocateInstances(ac,
                 List.of(createCloudInstance("instance1"), createCloudInstance("instance2")));
 
-        verify(azureClient, times(1)).deallocateVirtualMachineAsync(anyString(), anyString());
+        verify(azureClient, times(1)).deallocateVirtualMachineAsync(anyString(), anyString(), any());
         assertEquals(2, statusesAfterDeallocate.size());
         statusesAfterDeallocate.forEach(status -> assertEquals(InstanceStatus.STOPPED, status.getStatus()));
     }
@@ -219,9 +219,9 @@ public class AzureUtilsTest {
         AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance1"))).thenReturn(Mono.empty());
-        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
-        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance1"), any())).thenReturn(Mono.empty());
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance2"), any())).thenReturn(Mono.error(new RuntimeException("failed1")));
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance3"), any())).thenReturn(Mono.error(new RuntimeException("failed2")));
 
         assertThrows(
                 CloudbreakServiceException.class,
@@ -229,7 +229,7 @@ public class AzureUtilsTest {
                         List.of(createCloudInstance("instance1"), createCloudInstance("instance2"),
                                 createCloudInstance("instance3"))));
 
-        verify(azureClient, times(3)).deallocateVirtualMachineAsync(anyString(), anyString());
+        verify(azureClient, times(3)).deallocateVirtualMachineAsync(anyString(), anyString(), any());
     }
 
     @Test
