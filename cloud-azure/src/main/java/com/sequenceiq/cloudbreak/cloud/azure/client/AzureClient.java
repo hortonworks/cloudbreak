@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.Collections.emptyMap;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -509,16 +510,22 @@ public class AzureClient {
         return handleException(() -> azure.availabilitySets().deleteByResourceGroupAsync(resourceGroup, asName));
     }
 
-    public Mono<Void> deallocateVirtualMachineAsync(String resourceGroup, String vmName) {
-        return handleException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
+    public Mono<Void> deallocateVirtualMachineAsync(String resourceGroup, String vmName, Long timeboundInMs) {
+        if (timeboundInMs == null) {
+            return handleException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
+        }
+        return handleException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName).timeout(Duration.ofMillis(timeboundInMs)));
     }
 
     public Mono<Void> deleteVirtualMachine(String resourceGroup, String vmName) {
         return handleException(() -> azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, vmName));
     }
 
-    public Mono<Void> startVirtualMachineAsync(String resourceGroup, String vmName) {
-        return handleException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName));
+    public Mono<Void> startVirtualMachineAsync(String resourceGroup, String vmName, Long timeboundInMs) {
+        if (timeboundInMs == null) {
+            return handleException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName));
+        }
+        return handleException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName).timeout(Duration.ofMillis(timeboundInMs)));
     }
 
     public Mono<Void> stopVirtualMachineAsync(String resourceGroup, String vmName) {

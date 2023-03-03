@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -48,16 +49,36 @@ public class AzureInstanceConnector implements InstanceConnector {
 
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        LOGGER.info("Starting vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        return startWithLimitedRetry(ac, resources, vms, null);
+    }
+
+    @Override
+    public List<CloudVmInstanceStatus> startWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources,
+            List<CloudInstance> vms, Long timeboundInMs) {
+        if (timeboundInMs == null) {
+            LOGGER.info("Starting vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        } else {
+            LOGGER.info("Starting vms on Azure: {} in {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()), timeboundInMs);
+        }
         List<CloudVmInstanceStatus> statuses = new CopyOnWriteArrayList<>();
         List<Mono<Void>> startCompletables = new ArrayList<>();
         for (CloudInstance vm : vms) {
             String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
             AzureClient azureClient = ac.getParameter(AzureClient.class);
-            startCompletables.add(azureClient.startVirtualMachineAsync(resourceGroupName, vm.getInstanceId())
+            startCompletables.add(azureClient.startVirtualMachineAsync(resourceGroupName, vm.getInstanceId(), timeboundInMs)
                     .doOnError(throwable -> {
-                        LOGGER.error("Error happend on azure instance start: {}", vm, throwable);
-                        statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
+                        if (timeboundInMs != null) {
+                            if (throwable instanceof TimeoutException) {
+                                LOGGER.error("Timeout Error happened on azure instance start: {}", vm, throwable);
+                                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN, throwable.getMessage()));
+                            } else {
+                                LOGGER.error("Error happened on azure instance start: {}", vm, throwable);
+                                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
+                            }
+                        } else {
+                            LOGGER.error("Error happend on azure instance start: {}", vm, throwable);
+                            statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
+                        }
                     })
                     .doOnSuccess((i) -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STARTED)))
                     .subscribeOn(schedulerProvider.io()));
@@ -73,6 +94,13 @@ public class AzureInstanceConnector implements InstanceConnector {
     }
 
     @Override
+    public List<CloudVmInstanceStatus> stopWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources,
+            List<CloudInstance> vms, Long timeboundInMs) {
+        LOGGER.info("Stopping vms on Azure: {} in {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()), timeboundInMs);
+        return azureUtils.deallocateInstancesWithLimitedRetry(ac, vms, timeboundInMs);
+    }
+
+    @Override
     public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         LOGGER.info("Rebooting vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
         List<CloudVmInstanceStatus> statuses = new CopyOnWriteArrayList<>();
@@ -83,9 +111,9 @@ public class AzureInstanceConnector implements InstanceConnector {
             String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm.getCloudInstance());
             if (vm.getStatus() == InstanceStatus.STARTED) {
                 completables.add(doReboot(vm, statuses, azureClient.stopVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId())
-                        .then(azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId()))));
+                        .then(azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId(), null))));
             } else if (vm.getStatus() == InstanceStatus.STOPPED) {
-                completables.add(doReboot(vm, statuses, azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId())));
+                completables.add(doReboot(vm, statuses, azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId(), null)));
             } else {
                 LOGGER.error(String.format("Unable to reboot instance %s because of invalid status %s.",
                         vm.getCloudInstance().getInstanceId(), vm.getStatus().toString()));
