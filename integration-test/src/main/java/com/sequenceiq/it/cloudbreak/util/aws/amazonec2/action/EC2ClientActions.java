@@ -95,10 +95,14 @@ public class EC2ClientActions extends EC2Client {
     }
 
     public List<String> listInstanceTypes(List<String> instanceIds) {
-        AmazonEC2 ec2Client = buildEC2Client();
-        DescribeInstancesResult describeInstancesResult = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
-        return describeInstancesResult.getReservations().stream().flatMap(
-                instances -> instances.getInstances().stream().map(instance -> instance.getInstanceType())).collect(Collectors.toList());
+        try (Ec2Client ec2Client = buildEC2Client()) {
+            DescribeInstancesResponse describeInstanceResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder()
+                    .instanceIds(instanceIds)
+                    .build());
+            return describeInstanceResponse.reservations().stream()
+                    .flatMap(instances -> instances.instances().stream().map(instance -> instance.instanceType().name()))
+                    .collect(Collectors.toList());
+        }
     }
 
     public void deleteHostGroupInstances(List<String> instanceIds) {
