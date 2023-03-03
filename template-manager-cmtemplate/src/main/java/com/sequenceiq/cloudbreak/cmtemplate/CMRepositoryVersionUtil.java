@@ -83,6 +83,8 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CFM_VERSION_2_2_3_0 = () -> "2.2.3.0";
 
+    public static final Versioned FLINK_VERSION_1_15_1 = () -> "1.15.1";
+
     public static final Versioned CDPD_VERSION_7_2_11 = () -> "7.2.11";
 
     public static final Map<CloudPlatform, Versioned> MIN_CM_VERSION_FOR_RAZ = new HashMap<>() {
@@ -127,7 +129,7 @@ public class CMRepositoryVersionUtil {
     }
 
     public static boolean isIgnorePropertyValidationSupportedViaBlueprint(ClouderaManagerRepo clouderaManagerRepoDetails) {
-        LOGGER.info("ClouderaManagerRepo is compared for ignore porperty validation support");
+        LOGGER.info("ClouderaManagerRepo is compared for ignore property validation support");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0);
     }
 
