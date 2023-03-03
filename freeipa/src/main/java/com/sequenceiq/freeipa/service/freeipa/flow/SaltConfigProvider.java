@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -48,13 +49,23 @@ public class SaltConfigProvider {
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
         FreeIpaConfigView freeIpaConfigView = freeIpaConfigService.createFreeIpaConfigs(stack, hosts);
         servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", singletonMap("freeipa", freeIpaConfigView.toMap())));
-        servicePillarConfig.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
+        servicePillarConfig.put("discovery", new SaltPillarProperties("/discovery/init.sls", getPlatformMetadata(stack)));
         servicePillarConfig.putAll(telemetryConfigService.createTelemetryPillarConfig(stack));
         servicePillarConfig.putAll(proxyConfigService.createProxyPillarConfig(stack));
         servicePillarConfig.putAll(tagConfigService.createTagsPillarConfig(stack));
         servicePillarConfig.putAll(getCcmPillarProperties(stack));
         servicePillarConfig.putAll(ldapAgentConfigProvider.generateConfig(freeIpaConfigView.getDomain()));
         return saltConfig;
+    }
+
+    private static Map<String, Object> getPlatformMetadata(Stack stack) {
+        boolean govCloud = Boolean.FALSE;
+        if (AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value().equals(stack.getPlatformvariant())) {
+            govCloud = Boolean.TRUE;
+        }
+        return Map.of(
+                "platform", stack.getCloudPlatform(),
+                "gov_cloud", govCloud);
     }
 
     private Map<String, SaltPillarProperties> getCcmPillarProperties(Stack stack) {

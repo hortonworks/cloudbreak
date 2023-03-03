@@ -30,7 +30,7 @@ setup_missed_cm_heartbeat:
     - text: setsettings MISSED_HB_BAD {{ cloudera_manager.settings.missed_heartbeat_interval }}
     - unless: grep "MISSED_HB_BAD" /etc/cloudera-scm-server/cm.settings
 
-{% if salt['pillar.get']('cloudera-manager:settings:gov_cloud') == True %}
+{% if salt['pillar.get']('cluster:gov_cloud', False) == True %}
 
 setup_tls_chipher:
   file.append:
