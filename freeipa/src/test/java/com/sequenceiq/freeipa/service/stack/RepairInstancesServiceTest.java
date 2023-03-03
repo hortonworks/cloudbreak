@@ -278,7 +278,7 @@ class RepairInstancesServiceTest {
         RepairInstancesRequest request = new RepairInstancesRequest();
         request.setForceRepair(true);
         request.setEnvironmentCrn(ENVIRONMENT_ID1);
-        assertThrows(UnsupportedOperationException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             underTest.repairInstances(ACCOUNT_ID, request);
         });
     }
