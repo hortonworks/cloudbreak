@@ -337,7 +337,6 @@ class ClusterHostServiceRunnerTest {
         ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
         when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
         when(entitlementService.cmAutoBundleCollectionDisabled(anyString())).thenReturn(Boolean.TRUE);
-        when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         ReflectionTestUtils.setField(underTest, "cmHeartbeatInterval", "testString");
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "testString");
         Set<String> serviceLocations = new HashSet<String>();
@@ -362,7 +361,6 @@ class ClusterHostServiceRunnerTest {
         ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
         when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
         when(entitlementService.cmAutoBundleCollectionDisabled(anyString())).thenReturn(Boolean.TRUE);
-        when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         ReflectionTestUtils.setField(underTest, "cmHeartbeatInterval", "testString");
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "testString");
         Set<String> serviceLocations = new HashSet<String>();

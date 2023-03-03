@@ -450,8 +450,10 @@ public class ClusterHostServiceRunner {
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
         String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
         boolean deployedInChildEnvironment = !virtualGroupsEnvironmentCrn.equals(stack.getEnvironmentCrn());
-        Map<String, ? extends Serializable> clusterProperties = Map.of("name", stackDto.getCluster().getName(),
-                "deployedInChildEnvironment", deployedInChildEnvironment);
+        Map<String, ? extends Serializable> clusterProperties = Map.of(
+                "name", stackDto.getCluster().getName(),
+                "deployedInChildEnvironment", deployedInChildEnvironment,
+                "gov_cloud", govCluster(stackDto.getPlatformVariant()));
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);
@@ -661,7 +663,6 @@ public class ClusterHostServiceRunner {
                         "settings", Map.of(
                                 "heartbeat_interval", cmHeartbeatInterval,
                                 "missed_heartbeat_interval", cmMissedHeartbeatInterval,
-                                "gov_cloud", govCluster(stackDto.getPlatformVariant()),
                                 "disable_auto_bundle_collection", disableAutoBundleCollection,
                                 "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
                                 "cloud_provider_setup_supported", isCloudProviderSetupSupported(stackDto, cmVersion),
