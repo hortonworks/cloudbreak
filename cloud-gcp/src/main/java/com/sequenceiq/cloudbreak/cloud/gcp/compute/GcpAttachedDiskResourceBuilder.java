@@ -106,6 +106,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                 .withDeleteOnTermination(Boolean.TRUE)
                 .withVolumes(volumes).build()));
         return CloudResource.builder()
+                .withType(resourceType())
                 .withStatus(CommonStatus.REQUESTED)
                 .withName(resourceName)
                 .withGroup(groupName)
