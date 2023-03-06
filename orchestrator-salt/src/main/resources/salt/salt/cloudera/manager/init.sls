@@ -44,7 +44,10 @@ add_settings_file_to_cfm_server_args:
   file.replace:
     - name: /etc/default/cloudera-scm-server
     - pattern: "CMF_SERVER_ARGS=.*"
-{% if salt['pillar.get']('cloudera-manager:settings:set_cdp_env') == True %}
+{% if salt['pillar.get']('cloudera-manager:settings:cloud_provider_setup_supported') == True %}
+    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings -cp {{ salt['pillar.get']('platform') }} -env PUBLIC_CLOUD"
+    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings -cp {{ salt['pillar.get']('platform') }}\"" /etc/default/cloudera-scm-server
+{% elif salt['pillar.get']('cloudera-manager:settings:set_cdp_env') == True %}
     - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings -env PUBLIC_CLOUD"
     - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings -env PUBLIC_CLOUD\"" /etc/default/cloudera-scm-server
 {% else %}

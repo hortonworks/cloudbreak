@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -112,6 +113,7 @@ import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -324,6 +326,63 @@ class ClusterHostServiceRunnerTest {
         assertEquals("https://archive.cloudera.com/cm/7.2.0/", ((ClouderaManagerRepo) values.get("repo")).getBaseUrl());
         assertNull(values.get("paywall_username"));
         assertNull(values.get("paywall_password"));
+    }
+
+    @Test
+    void testCreateCloudManagerSettingsWhenCloudProviderTypeSupported() {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        clouderaManagerRepo.setVersion("7.6.2");
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+        ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
+        when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
+        when(entitlementService.cmAutoBundleCollectionDisabled(anyString())).thenReturn(Boolean.TRUE);
+        when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
+        ReflectionTestUtils.setField(underTest, "cmHeartbeatInterval", "testString");
+        ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "testString");
+        Set<String> serviceLocations = new HashSet<String>();
+        ClusterView cluster = mock(ClusterView.class);
+        when(stack.getCluster()).thenReturn(cluster);
+        ServiceLocationMap serviceLocationMap = mock(ServiceLocationMap.class);
+        when(clusterApiConnectors.getConnector(cluster)).thenReturn(clusterPreCreationApi);
+        when(clusterPreCreationApi.getServiceLocations()).thenReturn(serviceLocationMap);
+        when(serviceLocationMap.getAllVolumePath()).thenReturn(serviceLocations);
+        when(gatewayConfig.getPrivateAddress()).thenReturn("privateAddress");
+        Map<String, SaltPillarProperties> clouderaManagerSettings = underTest.createPillarWithClouderaManagerSettings(clouderaManagerRepo, stack, gatewayConfig);
+        boolean cloudProviderSetupSupported = extractCloudPlatformSupported(clouderaManagerSettings);
+        assertEquals(cloudProviderSetupSupported, Boolean.TRUE);
+    }
+
+    @Test
+    void testCreateCloudManagerSettingsWhenCloudProviderTypeSupportedForYARNCloud() {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        clouderaManagerRepo.setVersion("7.6.2");
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.YARN.name());
+        ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
+        when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
+        when(entitlementService.cmAutoBundleCollectionDisabled(anyString())).thenReturn(Boolean.TRUE);
+        when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
+        ReflectionTestUtils.setField(underTest, "cmHeartbeatInterval", "testString");
+        ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "testString");
+        Set<String> serviceLocations = new HashSet<String>();
+        ClusterView cluster = mock(ClusterView.class);
+        when(stack.getCluster()).thenReturn(cluster);
+        ServiceLocationMap serviceLocationMap = mock(ServiceLocationMap.class);
+        when(clusterApiConnectors.getConnector(cluster)).thenReturn(clusterPreCreationApi);
+        when(clusterPreCreationApi.getServiceLocations()).thenReturn(serviceLocationMap);
+        when(serviceLocationMap.getAllVolumePath()).thenReturn(serviceLocations);
+        when(gatewayConfig.getPrivateAddress()).thenReturn("privateAddress");
+        Map<String, SaltPillarProperties> clouderaManagerSettings = underTest.createPillarWithClouderaManagerSettings(clouderaManagerRepo, stack, gatewayConfig);
+        boolean cloudProviderSetupSupported = extractCloudPlatformSupported(clouderaManagerSettings);
+        assertEquals(cloudProviderSetupSupported, Boolean.FALSE);
+    }
+
+    private boolean extractCloudPlatformSupported(Map<String, SaltPillarProperties> clouderaManagerSettings) {
+        SaltPillarProperties saltPillarProperties = clouderaManagerSettings.get("cloudera-manager-settings");
+        Map<String, Object> clouderaManager = (Map<String, Object>) saltPillarProperties.getProperties().get("cloudera-manager");
+        Map<Object, Object> settings = (Map<Object, Object>) clouderaManager.get("settings");
+        return (boolean) settings.get("cloud_provider_setup_supported");
     }
 
     @Test

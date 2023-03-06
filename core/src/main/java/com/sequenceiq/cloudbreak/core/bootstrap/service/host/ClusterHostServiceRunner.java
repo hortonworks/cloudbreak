@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
@@ -67,6 +68,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
@@ -662,10 +664,16 @@ public class ClusterHostServiceRunner {
                                 "gov_cloud", govCluster(stackDto.getPlatformVariant()),
                                 "disable_auto_bundle_collection", disableAutoBundleCollection,
                                 "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
+                                "cloud_provider_setup_supported", isCloudProviderSetupSupported(stackDto, cmVersion),
                                 "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1),
                                 "cloudera_scm_sudo_access", CMRepositoryVersionUtil.isSudoAccessNeededForHostCertRotation(clouderaManagerRepo)),
                         "mgmt_service_directories", serviceLocations.getAllVolumePath(),
                         "address", primaryGatewayConfig.getPrivateAddress()))));
+    }
+
+    private boolean isCloudProviderSetupSupported(StackDto stackDto, String cmVersion) {
+        List<String> supportedCloudProviders = List.of(CloudPlatform.AWS.name(), CloudPlatform.GCP.name(), CloudPlatform.AZURE.name());
+        return supportedCloudProviders.contains(stackDto.getCloudPlatform()) && isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_6_2);
     }
 
     private boolean govCluster(String platformVariant) {
