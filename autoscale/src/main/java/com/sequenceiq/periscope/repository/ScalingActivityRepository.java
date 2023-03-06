@@ -26,6 +26,9 @@ public interface ScalingActivityRepository extends PagingAndSortingRepository<Sc
     @Query("SELECT st FROM ScalingActivity st WHERE st.operationId = :operationId AND st.cluster.stackCrn = :clusterCrn")
     Optional<ScalingActivity> findByOperationIdAndClusterCrn(@Param("operationId") String operationId, @Param("clusterCrn") String clusterCrn);
 
+    @Query("SELECT st FROM ScalingActivity st WHERE st.operationId = :operationId AND st.cluster.stackName = :clusterName")
+    Optional<ScalingActivity> findByOperationIdAndClusterName(@Param("operationId") String operationId, @Param("clusterName") String clusterName);
+
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackName = :clusterName")
     List<ScalingActivity> findAllByCluster(@Param("clusterName") String clusterName);
 

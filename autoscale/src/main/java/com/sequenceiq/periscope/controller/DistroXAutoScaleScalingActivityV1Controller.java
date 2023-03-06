@@ -38,8 +38,16 @@ public class DistroXAutoScaleScalingActivityV1Controller implements DistroXAutoS
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public DistroXAutoscaleScalingActivityResponse getScalingActivityUsingOperationId(@ResourceCrn @TenantAwareParam String clusterCrn, String operationId) {
+    public DistroXAutoscaleScalingActivityResponse getScalingActivityUsingOperationIdAndClusterCrn(@ResourceCrn @TenantAwareParam String clusterCrn,
+            String operationId) {
         return distroXAutoscaleScalingActivityResponseConverter.convert(scalingActivityService.findByOperationIdAndClusterCrn(operationId, clusterCrn));
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    public DistroXAutoscaleScalingActivityResponse getScalingActivityUsingOperationIdAndClusterName(@ResourceName String clusterName,
+            String operationId) {
+        return distroXAutoscaleScalingActivityResponseConverter.convert(scalingActivityService.findByOperationIdAndClusterName(operationId, clusterName));
     }
 
     @Override
