@@ -50,15 +50,18 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
         List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
         String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
         CloudPlatform cloudPlatform = source.getCloudPlatform();
+        StringBuffer safetyValveValue = new StringBuffer();
         if (!Strings.isNullOrEmpty(cdhVersion) && isRazConfigurationForServiceTypeSupported(cdhVersion, cloudPlatform, source.getStackType())) {
-            String safetyValveValue = getSafetyValveProperty(RANGER_RAZ_BOOTSTRAP_SERVICETYPES, getServiceType(cloudPlatform));
-            roleConfigs.add(config(RANGER_RAZ_SITE_XML_ROLE_SAFETY_VALVE, safetyValveValue));
+            safetyValveValue.append(getSafetyValveProperty(RANGER_RAZ_BOOTSTRAP_SERVICETYPES, getServiceType(cloudPlatform)));
         }
         if (isRazConfigurationForRazRoleNeeded(source.getProductDetailsView().getCm().getVersion(), cloudPlatform, source.getStackType())) {
             String rangerCloudAccessAuthorizerServiceAccount = getRangerCloudAccessAuthorizerServiceAccount(source);
             if (rangerCloudAccessAuthorizerServiceAccount != null) {
-                roleConfigs.add(config(RANGER_RAZ_GCP_SERVICE_ACCOUNT, rangerCloudAccessAuthorizerServiceAccount));
+                safetyValveValue.append(getSafetyValveProperty(RANGER_RAZ_GCP_SERVICE_ACCOUNT, rangerCloudAccessAuthorizerServiceAccount));
             }
+        }
+        if (!Strings.isNullOrEmpty(safetyValveValue.toString())) {
+            roleConfigs.add(config(RANGER_RAZ_SITE_XML_ROLE_SAFETY_VALVE, safetyValveValue.toString()));
         }
         return roleConfigs;
     }

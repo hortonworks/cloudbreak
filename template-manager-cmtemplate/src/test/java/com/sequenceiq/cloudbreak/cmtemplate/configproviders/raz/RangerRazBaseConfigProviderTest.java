@@ -95,11 +95,11 @@ public class RangerRazBaseConfigProviderTest {
                 .build();
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
 
-        assertEquals(2, roleConfigs.size());
+        assertEquals(1, roleConfigs.size());
         assertEquals("ranger-raz-conf/ranger-raz-site.xml_role_safety_valve", roleConfigs.get(0).getName());
-        assertEquals("<property><name>ranger.raz.bootstrap.servicetypes</name><value>gs</value></property>", roleConfigs.get(0).getValue());
-        assertEquals("ranger.raz.gs.service.account", roleConfigs.get(1).getName());
-        assertEquals("rangerrazauthorizer@gcp-dev-cloudbreak.iam.gserviceaccount.com", roleConfigs.get(1).getValue());
+        assertEquals("<property><name>ranger.raz.bootstrap.servicetypes</name><value>gs</value></property>" +
+                "<property><name>ranger.raz.gs.service.account</name>" +
+                "<value>rangerrazauthorizer@gcp-dev-cloudbreak.iam.gserviceaccount.com</value></property>", roleConfigs.get(0).getValue());
     }
 
     @Test
