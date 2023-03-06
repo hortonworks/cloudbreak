@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CFM_V
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionOlderThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cfm.CfmUtil.getCfmProduct;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +37,6 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String NIFI_UI_KNOX_URL = "nifi.ui.knox.url";
 
-    private static final String CFM = "CFM";
-
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
@@ -58,7 +57,7 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
             configs.add(config(PROXY_CONTEXT_PATH, proxyContextPath));
         }
 
-        Optional<ClouderaManagerProduct> cfm = getClouderaManagerProduct(source);
+        Optional<ClouderaManagerProduct> cfm = getCfmProduct(source);
         Optional<ClusterExposedServiceView> nifi = getNifi(source);
 
         if (cfm.isPresent() && isVersionNewerOrEqualThanLimited(cfm.get().getVersion(), CFM_VERSION_2_0_0_0) && nifi.isPresent()) {
@@ -84,21 +83,6 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
         return Optional.empty();
     }
 
-    private Optional<ClouderaManagerProduct> getClouderaManagerProduct(TemplatePreparationObject source) {
-        if (source.getProductDetailsView() != null) {
-            Optional<ClouderaManagerProduct> cfm = source.getProductDetailsView().getProducts()
-                    .stream()
-                    .filter(e -> e.getName().equalsIgnoreCase(CFM))
-                    .findFirst();
-            if (cfm.isEmpty()) {
-                LOGGER.info("CFM is not presented as a Production");
-            }
-            return cfm;
-        }
-        LOGGER.info("Product null for NifiKnoxRoleConfigProvider");
-        return Optional.empty();
-    }
-
     @Override
     public String getServiceType() {
         return "NIFI";
@@ -111,7 +95,7 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        Optional<ClouderaManagerProduct> cfm = getClouderaManagerProduct(source);
+        Optional<ClouderaManagerProduct> cfm = getCfmProduct(source);
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
                 && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getNiFiService().getKnoxService())
