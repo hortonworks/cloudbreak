@@ -1412,7 +1412,7 @@ class SdxServiceTest {
     }
 
     @Test
-    void testSdxResizeByAccountIdAndNameWhenDatalakeNeverHasBackupAndRestore() throws Exception {
+    void testSdxResizeByAccountIdAndNameWhenDatalakeNeverHasBackup() throws Exception {
         final String runtime = "7.2.10";
         SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
         sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
@@ -1441,11 +1441,46 @@ class SdxServiceTest {
         stackV4Response.setStatus(Status.STOPPED);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
-        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenThrow
-                (new RuntimeException("Status information for backup operation on datalake: sdxcluster not found"));
-        when(datalakeDrClient.getRestoreStatus(anyString(), anyString())).thenThrow
-                (new RuntimeException("Status information for restore operation on datalake: sdxcluster not found"));
-        // If no backup/restore ever has been done on the datalake, resize will continue.
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenThrow(new RuntimeException("Status information for backup operation on " +
+                "datalake: sdxcluster not found"));
+        assertDoesNotThrow(
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
+    }
+
+    @Test
+    void testSdxResizeByAccountIdAndNameWhenDatalakeNeverHasRestore() throws Exception {
+        final String runtime = "7.2.10";
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment("environment");
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(1L);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.setRuntime(runtime);
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+
+        mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        DatalakeBackupStatusResponse backupStatusCompleted = new DatalakeBackupStatusResponse("", State.SUCCESSFUL, Collections.emptyList(), "", "");
+        when(datalakeDrClient.getBackupStatus(anyString(), anyString())).thenReturn(backupStatusCompleted);
+        when(datalakeDrClient.getRestoreStatus(anyString(), anyString())).thenThrow(new RuntimeException("Status information for restore operation on " +
+                "datalake: sdxcluster not found"));
         assertDoesNotThrow(
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
     }

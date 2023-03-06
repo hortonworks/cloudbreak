@@ -576,7 +576,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         MDCBuilder.buildMdcContext(sdxCluster);
 
         validateSdxResizeRequest(sdxCluster, accountIdFromCrn, shape);
-        validateDatalakeNotInBackupOrRestore(sdxCluster);
+        validateDatalakeNotInBackupOrRestore(sdxCluster.getClusterName(), ThreadBasedUserCrnProvider.getUserCrn());
         StackV4Response stackV4Response = getDetail(clusterName,
                 Set.of(StackResponseEntries.HARDWARE_INFO.getEntryName(), StackResponseEntries.EVENTS.getEntryName()), accountIdFromCrn);
 
@@ -1062,33 +1062,31 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 });
     }
 
-    private void validateDatalakeNotInBackupOrRestore(SdxCluster sdxCluster) {
-        if (sdxCluster.getClusterName() != null && ThreadBasedUserCrnProvider.getUserCrn() != null) {
-            try {
-                DatalakeBackupStatusResponse backupStatus = datalakeDrClient.getBackupStatus(sdxCluster.getClusterName(),
-                        ThreadBasedUserCrnProvider.getUserCrn());
-                if (backupStatus != null && isRunningState(backupStatus.getState())) {
-                    LOGGER.error("Found a backup in progress on {} with status {}", sdxCluster.getClusterName(), backupStatus.getState());
-                    throw new BadRequestException("SDX cluster is in the process of datalake backup. Resize can not get started.");
-                }
-                DatalakeRestoreStatusResponse restoreStatus = datalakeDrClient.getRestoreStatus(sdxCluster.getClusterName(),
-                        ThreadBasedUserCrnProvider.getUserCrn());
-                if (restoreStatus != null && isRunningState(restoreStatus.getState())) {
-                    LOGGER.error("Found a restore in progress on {} with status {}", sdxCluster.getClusterName(), restoreStatus.getState());
-                    throw new BadRequestException("SDX cluster is in the process of datalake restore. Resize can not get started.");
-                }
-                LOGGER.info("No backup/restore in progress found on {}. Good to continue.", sdxCluster.getClusterName());
-            } catch (RuntimeException exception) {
-                if ((exception.getMessage().contains("Status information for backup operation on datalake")
-                        || exception.getMessage().contains("Status information for restore operation on datalake"))
-                        && exception.getMessage().contains("not found")) {
-                    LOGGER.info("No backup or no restore ever happened on {}. Good to continue.", sdxCluster.getClusterName());
-                } else {
-                    throw exception;
-                }
+    private void validateDatalakeNotInBackupOrRestore(String sdxClusterName, String actorCrn) {
+        if (sdxClusterName == null || actorCrn == null) {
+            LOGGER.error("Didn't find datalake name or actor CRN. Can not validate if the datalake is in backup/restore. Continue to next step.");
+            return;
+        }
+        try {
+            DatalakeBackupStatusResponse backupStatus = datalakeDrClient.getBackupStatus(sdxClusterName, actorCrn);
+            if (backupStatus != null && isRunningState(backupStatus.getState())) {
+                LOGGER.error("Found a backup in progress on {} with status {}", sdxClusterName, backupStatus.getState());
+                throw new BadRequestException("SDX cluster is in the process of datalake backup. Resize can not get started.");
             }
-        } else {
-            LOGGER.error("Didn't find datalake name or actor CRN. Can not validate if the datalake is in backup/restore.");
+            DatalakeRestoreStatusResponse restoreStatus = datalakeDrClient.getRestoreStatus(sdxClusterName, actorCrn);
+            if (restoreStatus != null && isRunningState(restoreStatus.getState())) {
+                LOGGER.error("Found a restore in progress on {} with status {}", sdxClusterName, restoreStatus.getState());
+                throw new BadRequestException("SDX cluster is in the process of datalake restore. Resize can not get started.");
+            }
+            LOGGER.info("No backup/restore in progress found on {}. Good to continue.", sdxClusterName);
+        } catch (RuntimeException exception) {
+            Pattern pattern = Pattern.compile("Status information for backup|restore operation on datalake.*not found");
+            Matcher matcher = pattern.matcher(exception.getMessage());
+            if (matcher.find()) {
+                LOGGER.info("No backup or no restore ever happened on {}. Good to continue.", sdxClusterName);
+            } else {
+                throw exception;
+            }
         }
     }
 
@@ -1096,7 +1094,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return state != null
                 && (state == DatalakeOperationStatus.State.STARTED
                 || state == DatalakeOperationStatus.State.IN_PROGRESS
-                || state == DatalakeOperationStatus.State.VALIDATION_FAILED
                 || state == DatalakeOperationStatus.State.VALIDATION_SUCCESSFUL);
     }
 
