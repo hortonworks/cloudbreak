@@ -40,7 +40,9 @@ class ScalingActivityRepositoryTest {
 
     private static final String TEST_REASON = "test trigger reason";
 
-    private static final String CLOUDBREAK_STACK_CRN_1 = "crn:cdp:datahub:us-west-1:tenant:cluster:878605d9-f9e9-44c6-9da6-e4bce9570ef5";
+    private static final String CLOUDBREAK_STACK_CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:878605d9-f9e9-44c6-9da6-e4bce9570ef5";
+
+    private static final String CLOUDBREAK_STACK_NAME = "testCluster2";
 
     private static final String TEST_TENANT = "testTenant";
 
@@ -66,8 +68,15 @@ class ScalingActivityRepositoryTest {
     }
 
     @Test
-    void testFindByOperationId() {
-        ScalingActivity result = underTest.findByOperationIdAndClusterCrn(TEST_OPERATION_ID, CLOUDBREAK_STACK_CRN_1).orElse(null);
+    void testFindByOperationIdAndClusterCrn() {
+        ScalingActivity result = underTest.findByOperationIdAndClusterCrn(TEST_OPERATION_ID, CLOUDBREAK_STACK_CRN).orElse(null);
+
+        assertThat(result).isNotNull().isEqualTo(testScalingActivity);
+    }
+
+    @Test
+    void testFindByOperationIdAndClusterName() {
+        ScalingActivity result = underTest.findByOperationIdAndClusterName(TEST_OPERATION_ID, CLOUDBREAK_STACK_NAME).orElse(null);
 
         assertThat(result).isNotNull().isEqualTo(testScalingActivity);
     }
@@ -353,7 +362,7 @@ class ScalingActivityRepositoryTest {
 
     private Cluster getACluster() {
         Cluster cluster = new Cluster();
-        cluster.setStackCrn(CLOUDBREAK_STACK_CRN_1);
+        cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
         cluster.setState(ClusterState.RUNNING);
         cluster.setAutoscalingEnabled(Boolean.TRUE);
         cluster.setStackType(StackType.WORKLOAD);

@@ -51,6 +51,8 @@ class ScalingActivityServiceTest {
 
     private static final String CLOUDBREAK_STACK_CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:878605d9-f9e9-44c6-9da6-e4bce9570ef5";
 
+    private static final String CLOUDBREAK_STACK_NAME = "testCluster";
+
     @InjectMocks
     private ScalingActivityService underTest;
 
@@ -98,7 +100,7 @@ class ScalingActivityServiceTest {
     }
 
     @Test
-    void testFindByOperationId() {
+    void testFindByOperationIdAndClusterCrn() {
         ScalingActivity scalingActivity = createScalingActivity(TEST_ACTIVITY_ID, getCluster(), SCALING_FLOW_SUCCESS, TEST_ACTIVITY_REASON, TEST_FLOW_ID);
         doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByOperationIdAndClusterCrn(anyString(), anyString());
 
@@ -109,13 +111,29 @@ class ScalingActivityServiceTest {
     }
 
     @Test
-    void testNotFoundUsingOperationId() {
+    void testFindByOperationIdAndClusterName() {
+        ScalingActivity scalingActivity = createScalingActivity(TEST_ACTIVITY_ID, getCluster(), SCALING_FLOW_SUCCESS, TEST_ACTIVITY_REASON, TEST_FLOW_ID);
+        doReturn(Optional.of(scalingActivity)).when(scalingActivityRepository).findByOperationIdAndClusterName(anyString(), anyString());
+
+        ScalingActivity result = underTest.findByOperationIdAndClusterName(TEST_OPERATION_ID, CLOUDBREAK_STACK_NAME);
+
+        verify(scalingActivityRepository).findByOperationIdAndClusterName(TEST_OPERATION_ID, CLOUDBREAK_STACK_NAME);
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    void testNotFoundUsingOperationIdAndClusterCrn() {
         assertThatThrownBy(() -> underTest.findByOperationIdAndClusterCrn(TEST_OPERATION_ID, CLOUDBREAK_STACK_CRN)).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void testNotFoundUsingOperationIdAndClusterName() {
+        assertThatThrownBy(() -> underTest.findByOperationIdAndClusterName(TEST_OPERATION_ID, CLOUDBREAK_STACK_NAME)).isInstanceOf(NotFoundException.class);
     }
 
     private Cluster getCluster() {
         Cluster cluster =  new Cluster();
-
+        cluster.setStackName(CLOUDBREAK_STACK_NAME);
         ClusterPertain clusterPertain =  new ClusterPertain();
         clusterPertain.setUserCrn(TEST_USER_CRN);
 

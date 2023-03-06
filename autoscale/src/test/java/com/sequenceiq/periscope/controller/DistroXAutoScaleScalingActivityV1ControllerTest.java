@@ -139,7 +139,14 @@ public class DistroXAutoScaleScalingActivityV1ControllerTest {
         doReturn(convert(scalingActivity)).when(distroXAutoscaleScalingActivityResponseConverter).convert(scalingActivity);
 
         DistroXAutoscaleScalingActivityResponse distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Controller
-                .getScalingActivityUsingOperationId(TEST_CLUSTER_CRN, TEST_OPERATION_ID);
+                .getScalingActivityUsingOperationIdAndClusterCrn(TEST_CLUSTER_CRN, TEST_OPERATION_ID);
+        assertEquals(TEST_OPERATION_ID, distroXAutoscaleScalingActivityResponse.getOperationId());
+
+        doReturn(scalingActivity).when(scalingActivityService).findByOperationIdAndClusterName(TEST_OPERATION_ID, TEST_CLUSTER_NAME);
+        doReturn(convert(scalingActivity)).when(distroXAutoscaleScalingActivityResponseConverter).convert(scalingActivity);
+
+        distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Controller
+                .getScalingActivityUsingOperationIdAndClusterName(TEST_CLUSTER_NAME, TEST_OPERATION_ID);
         assertEquals(TEST_OPERATION_ID, distroXAutoscaleScalingActivityResponse.getOperationId());
     }
 
