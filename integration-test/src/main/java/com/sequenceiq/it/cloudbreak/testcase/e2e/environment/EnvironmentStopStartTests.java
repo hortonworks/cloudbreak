@@ -295,7 +295,10 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .listInstanceTypes(freeipa.getName(), listOfInstanceIdsInIG);
 
         Assertions.assertThat(instanceTypesOnProvider).hasSize(1);
-        Assertions.assertThat(instanceTypesOnProvider.get(0)).withFailMessage("Stack cloud formation ")
+        String actualInstanceType = instanceTypesOnProvider.get(0).toLowerCase();
+        Assertions.assertThat(actualInstanceType).withFailMessage(
+                        "freeipa's instance type does not match with the requested instance type (freeipa: %s, actual: %s, requested: %s)",
+                        freeipa.getName(), actualInstanceType, freeipaRequestedInstanceType.toLowerCase())
                 .isEqualTo(freeipaRequestedInstanceType.toLowerCase());
 
         return freeipa;
@@ -311,7 +314,10 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .listInstanceTypes(datahub.getName(), listOfInstanceIdsInIG);
 
         Assertions.assertThat(instanceTypesOnProvider).hasSize(1);
-        Assertions.assertThat(instanceTypesOnProvider.get(0)).withFailMessage("Stack cloud formation ")
+        String actualInstanceType = instanceTypesOnProvider.get(0).toLowerCase();
+        Assertions.assertThat(actualInstanceType).withFailMessage(
+                "datahub's instance type does not match with the requested instance type (datahub: %s, actual: %s, requested: %s)",
+                        datahub.getName(), actualInstanceType, datahubRequestedInstanceType.toLowerCase())
                 .isEqualTo(datahubRequestedInstanceType.toLowerCase());
 
         return datahub;
@@ -327,7 +333,10 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .listInstanceTypes(datalake.getName(), listOfInstanceIdsInIG);
 
         Assertions.assertThat(instanceTypesOnProvider).hasSize(1);
-        Assertions.assertThat(instanceTypesOnProvider.get(0)).withFailMessage("Stack cloud formation ")
+        String actualInstanceType = instanceTypesOnProvider.get(0).toLowerCase();
+        Assertions.assertThat(actualInstanceType).withFailMessage(
+                        "datahub's instance type does not match with the requested instance type (datahub: %s, actual: %s, requested: %s)",
+                        datalake.getName(), actualInstanceType, datalakeRequestedInstanceType.toLowerCase())
                 .isEqualTo(datalakeRequestedInstanceType.toLowerCase());
 
         return datalake;

@@ -100,7 +100,7 @@ public class EC2ClientActions extends EC2Client {
                     .instanceIds(instanceIds)
                     .build());
             return describeInstanceResponse.reservations().stream()
-                    .flatMap(instances -> instances.instances().stream().map(instance -> instance.instanceType().name()))
+                    .flatMap(instances -> instances.instances().stream().map(instance -> instance.instanceType().toString()))
                     .collect(Collectors.toList());
         }
     }
