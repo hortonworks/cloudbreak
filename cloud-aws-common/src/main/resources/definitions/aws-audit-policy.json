@@ -7,7 +7,7 @@
         "s3:ListBucket"
       ],
       "Resource": [
-        "arn:aws:s3:::<your-bucket-name-for-audit-archiving>"
+        "arn:aws:s3:::${AUDIT_ARCHIVE_BUCKET}"
       ]
     },
     {
@@ -18,7 +18,7 @@
         "s3:PutObject"
       ],
       "Resource": [
-        "arn:aws:s3:::<your-bucket-name-for-audit-archiving>/*"
+        "arn:aws:s3:::${AUDIT_ARCHIVE_BUCKET}/*"
       ]
     }
   ]
