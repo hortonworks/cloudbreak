@@ -29,6 +29,7 @@
           "atlas-ATLAS_SERVER-BASE",
           "ranger-RANGER_ADMIN-BASE",
           "zookeeper-SERVER-BASE",
+          "ranger-RANGER_USERSYNC-BASE",
           "knox-KNOX_GATEWAY-BASE",
           "solr-GATEWAY-BASE",
           "hdfs-GATEWAY-BASE",
@@ -58,7 +59,6 @@
         "cardinality": 1,
         "refName": "auxiliary",
         "roleConfigGroupsRefNames": [
-          "ranger-RANGER_USERSYNC-BASE",
           "ranger-RANGER_TAGSYNC-BASE",
           "zookeeper-SERVER-BASE"
         ]
