@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -75,6 +74,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExit
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.JavaPillarDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.NameserverPillarDecorator;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
@@ -255,6 +255,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private RdsViewProvider rdsViewProvider;
+
+    @Inject
+    private JavaPillarDecorator javaPillarDecorator;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
@@ -453,7 +456,7 @@ public class ClusterHostServiceRunner {
         Map<String, ? extends Serializable> clusterProperties = Map.of(
                 "name", stackDto.getCluster().getName(),
                 "deployedInChildEnvironment", deployedInChildEnvironment,
-                "gov_cloud", govCluster(stackDto.getPlatformVariant()));
+                "gov_cloud", stackDto.isOnGovPlatformVariant());
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);
@@ -463,7 +466,7 @@ public class ClusterHostServiceRunner {
                 clouderaManagerRepo));
         saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto);
-        servicePillar.putAll(createJavaPillar(stack.getJavaVersion()));
+        javaPillarDecorator.decorateWithJavaProperties(stackDto, servicePillar);
 
         addClouderaManagerConfig(stackDto, servicePillar, clouderaManagerRepo, primaryGatewayConfig);
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
@@ -508,7 +511,7 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar =
                 new HashMap<>(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
                         clouderaManagerRepo));
-        servicePillar.putAll(createJavaPillar(stack.getJavaVersion()));
+        javaPillarDecorator.decorateWithJavaProperties(stackDto, servicePillar);
 
         return new SaltConfig(servicePillar, grainsProperties);
     }
@@ -675,13 +678,6 @@ public class ClusterHostServiceRunner {
     private boolean isCloudProviderSetupSupported(StackDto stackDto, String cmVersion) {
         List<String> supportedCloudProviders = List.of(CloudPlatform.AWS.name(), CloudPlatform.GCP.name(), CloudPlatform.AZURE.name());
         return supportedCloudProviders.contains(stackDto.getCloudPlatform()) && isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_6_2);
-    }
-
-    private boolean govCluster(String platformVariant) {
-        if (platformVariant.equals(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value())) {
-            return true;
-        }
-        return false;
     }
 
     private void decoratePillarWithTags(StackView stack, Map<String, SaltPillarProperties> servicePillarConfig) {
@@ -992,19 +988,6 @@ public class ClusterHostServiceRunner {
         grainRunnerParams.setValue("startup_mount");
         grainRunnerParams.setGrainOperation(grainOperation);
         return grainRunnerParams;
-    }
-
-    private Map<String, SaltPillarProperties> createJavaPillar(Integer javaVersion) {
-        if (javaVersion != null) {
-            LOGGER.debug("Creating java pillar with version {}", javaVersion);
-            Map<String, Object> config = new HashMap<>();
-            config.put("version", javaVersion);
-
-            return Map.of("java", new SaltPillarProperties("/java/init.sls", singletonMap("java", config)));
-        } else {
-            LOGGER.debug("Skip java pillar as the version is not specified");
-        }
-        return Collections.emptyMap();
     }
 
     public void createCronForUserHomeCreation(StackDto stackDto, Set<String> candidateHostNames) throws CloudbreakException {

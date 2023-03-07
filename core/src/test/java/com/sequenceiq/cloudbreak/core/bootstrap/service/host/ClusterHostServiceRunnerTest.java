@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.JavaPillarDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.NameserverPillarDecorator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -255,6 +256,9 @@ class ClusterHostServiceRunnerTest {
 
     @Mock
     private RdsViewProvider rdsViewProvider;
+
+    @Mock
+    private JavaPillarDecorator javaPillarDecorator;
 
     @BeforeEach
     void setUp() {
@@ -548,31 +552,23 @@ class ClusterHostServiceRunnerTest {
     @Test
     void testAddJavaPillarToSaltConfig() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
-        when(stackView.getJavaVersion()).thenReturn(11);
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
-        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
-        verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
 
-        assertEquals(getJavaProperties(saltConfig.getValue()).get("version"), 11);
+        verify(hostOrchestrator).runService(any(), any(), any(), any());
+        verify(javaPillarDecorator).decorateWithJavaProperties(eq(stack), any());
     }
 
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     void testAddJavaPillarToRedeployGateway() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
-        when(stackView.getJavaVersion()).thenReturn(11);
 
         underTest.redeployGatewayPillarOnly(stack);
-        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
-        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
 
-        assertEquals(getJavaProperties(saltConfig.getValue()).get("version"), 11);
-    }
-
-    private Map<String, Object> getJavaProperties(SaltConfig saltConfig) {
-        return (Map<String, Object>) saltConfig.getServicePillarConfig().get("java").getProperties().get("java");
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), any());
+        verify(javaPillarDecorator).decorateWithJavaProperties(eq(stack), any());
     }
 
     @Test

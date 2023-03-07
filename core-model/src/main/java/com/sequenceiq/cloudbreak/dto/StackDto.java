@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -423,6 +424,10 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     public boolean isStackInStopPhase() {
         return STOP_IN_PROGRESS.equals(getStatus()) || STOPPED.equals(getStatus());
+    }
+
+    public boolean isOnGovPlatformVariant() {
+        return CloudConstants.AWS_NATIVE_GOV.equals(getPlatformVariant());
     }
 
 }
