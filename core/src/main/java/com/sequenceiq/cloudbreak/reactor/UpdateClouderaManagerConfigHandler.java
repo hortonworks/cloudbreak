@@ -9,12 +9,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpdateClouderaManagerConfigRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpdateClouderaManagerConfigResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
