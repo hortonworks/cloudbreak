@@ -30,7 +30,7 @@ public class AwsConstants implements CloudConstant {
     public enum AwsVariant {
         AWS_VARIANT(CloudConstants.AWS),
         AWS_NATIVE_GOV_VARIANT(CloudConstants.AWS_NATIVE_GOV),
-        AWS_NATIVE_VARIANT("AWS_NATIVE");
+        AWS_NATIVE_VARIANT(CloudConstants.AWS_NATIVE);
 
         private final Variant variant;
 
