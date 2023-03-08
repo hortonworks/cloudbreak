@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -52,12 +51,10 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
-import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
@@ -120,40 +117,51 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
-        LOGGER.debug("Create volume resources for {} in group: {}", instance.getInstanceId(), group.getName());
-
-        InstanceTemplate template = group.getReferenceInstanceTemplate();
-        if (CollectionUtils.isEmpty(template.getVolumes())) {
-            LOGGER.debug("No volume requested in group: {}", group.getName());
+        List<com.sequenceiq.cloudbreak.cloud.model.Volume> volumes = group.getReferenceInstanceTemplate().getVolumes();
+        LOGGER.debug("Create volume resources for {} in group: {} for volumes {}",
+                instance.getInstanceId(), group.getName(), volumes);
+        boolean allVolumeEphemeral = Optional.ofNullable(volumes).orElse(List.of()).stream()
+                .allMatch(this::isVolumeEphemeral);
+        if (CollectionUtils.isEmpty(volumes) || allVolumeEphemeral) {
+            LOGGER.debug("No volume requested in group: [{}] or all are ephemeral [{}]", group.getName(), allVolumeEphemeral);
             return List.of();
+        } else {
+            LOGGER.debug("Volumes have to be created");
+            Optional<CloudResource> reattachableVolumeSet = getReattachableVolumeSet(context, privateId, auth, group);
+            String subnetId = getSubnetId(context, instance);
+            Optional<String> availabilityZone = getAvailabilityZone(context, instance);
+            return List.of(reattachableVolumeSet.orElseGet(() -> createVolumeSet(privateId, auth, group, subnetId, availabilityZone)));
         }
+    }
 
+    private boolean isVolumeEphemeral(com.sequenceiq.cloudbreak.cloud.model.Volume volume) {
+        return AwsDiskType.Ephemeral.value().equalsIgnoreCase(volume.getType());
+    }
+
+    private Optional<CloudResource> getReattachableVolumeSet(AwsContext context, long privateId, AuthenticatedContext auth, Group group) {
         List<CloudResource> computeResources = context.getComputeResources(privateId);
         Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
                 .filter(resource -> ResourceType.AWS_VOLUMESET.equals(resource.getType()))
                 .findFirst();
-
         if (reattachableVolumeSet.isEmpty()) {
-            reattachableVolumeSet = fetchCloudResourceFromDBIfAvailable(privateId, auth, group, computeResources);
+            LOGGER.debug("Reattachable volumeset not found, try to fetch from db");
+            return fetchCloudResourceFromDBIfAvailable(privateId, auth, group, computeResources);
         } else {
             LOGGER.debug("Reattachable volumeset found: {}", reattachableVolumeSet.get());
+            return reattachableVolumeSet;
         }
-
-        String subnetId = getSubnetId(context, instance);
-        Optional<String> availabilityZone = getAvailabilityZone(context, instance);
-        return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, subnetId, availabilityZone)));
     }
 
     Optional<CloudResource> fetchCloudResourceFromDBIfAvailable(long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> computeResources) {
-        Optional<CloudResource> reattachableVolumeSet;
         CloudResource instanceResource = computeResources.stream()
                 .filter(cr -> cr.getType().equals(ResourceType.AWS_INSTANCE))
                 .findFirst()
                 .orElseThrow(NotFoundException.notFound("AWS_INSTANCE", privateId));
 
-        reattachableVolumeSet = findVolumeSet(auth, group, instanceResource, CommonStatus.CREATED);
+        Optional<CloudResource> reattachableVolumeSet = findVolumeSet(auth, group, instanceResource, CommonStatus.CREATED);
         if (reattachableVolumeSet.isEmpty()) {
+            LOGGER.debug("Couldn't find volumeset with created state in DB, trying with requested");
             reattachableVolumeSet = findVolumeSet(auth, group, instanceResource, CommonStatus.REQUESTED);
         }
         if (reattachableVolumeSet.isPresent()) {
@@ -181,35 +189,27 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         return Optional.ofNullable(cloudInstance.getAvailabilityZone());
     }
 
-    private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group,
-            String subnetId, Optional<String> availabilityZone) {
-        return () -> {
-            AwsResourceNameService resourceNameService = getResourceNameService();
-
-            InstanceTemplate template = group.getReferenceInstanceTemplate();
-            String groupName = group.getName();
-            CloudContext cloudContext = auth.getCloudContext();
-            String stackName = cloudContext.getName();
-
-            String targetAvailabilityZone = getAvailabilityZoneFromSubnet(auth, subnetId, availabilityZone);
-            LOGGER.info("Selected availability zone for volumeset: {}, group: {}", targetAvailabilityZone, groupName);
-            return new Builder()
-                    .withPersistent(true)
-                    .withType(resourceType())
-                    .withName(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId))
-                    .withAvailabilityZone(targetAvailabilityZone)
-                    .withGroup(group.getName())
-                    .withStatus(CommonStatus.REQUESTED)
-                    .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
-                            .withAvailabilityZone(targetAvailabilityZone)
-                            .withDeleteOnTermination(Boolean.TRUE)
-                            .withVolumes(template.getVolumes().stream()
-                                    .filter(vol -> !AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType()))
-                                    .map(vol -> new Volume(null, null, vol.getSize(), vol.getType(), vol.getVolumeUsageType()))
-                                    .collect(Collectors.toList()))
-                            .build()))
-                    .build();
-        };
+    private CloudResource createVolumeSet(long privateId, AuthenticatedContext auth, Group group, String subnetId, Optional<String> availabilityZone) {
+        String groupName = group.getName();
+        String stackName = auth.getCloudContext().getName();
+        String targetAvailabilityZone = getAvailabilityZoneFromSubnet(auth, subnetId, availabilityZone);
+        LOGGER.info("Selected availability zone for volumeset: {}, group: {}", targetAvailabilityZone, groupName);
+        return new Builder()
+                .withPersistent(true)
+                .withType(resourceType())
+                .withName(getResourceNameService().resourceName(resourceType(), stackName, groupName, privateId))
+                .withAvailabilityZone(targetAvailabilityZone)
+                .withGroup(group.getName())
+                .withStatus(CommonStatus.REQUESTED)
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                        .withAvailabilityZone(targetAvailabilityZone)
+                        .withDeleteOnTermination(Boolean.TRUE)
+                        .withVolumes(group.getReferenceInstanceTemplate().getVolumes().stream()
+                                .filter(vol -> !isVolumeEphemeral(vol))
+                                .map(vol -> new Volume(null, null, vol.getSize(), vol.getType(), vol.getVolumeUsageType()))
+                                .collect(Collectors.toList()))
+                        .build()))
+                .build();
     }
 
     private String getAvailabilityZoneFromSubnet(AuthenticatedContext auth, String subnetId, Optional<String> availabilityZone) {
@@ -304,7 +304,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     private Long getEphemeralCount(Group group) {
         Long ephemeralTemplateCount = group.getReferenceInstanceTemplate().getVolumes().stream()
-                .filter(vol -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType())).count();
+                .filter(vol -> isVolumeEphemeral(vol)).count();
         if (ephemeralTemplateCount.equals(0L)) {
             return Optional.ofNullable(group.getReferenceInstanceTemplate()).map(InstanceTemplate::getTemporaryStorageCount).orElse(0L);
         } else {
