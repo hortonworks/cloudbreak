@@ -88,6 +88,8 @@ class ExposedServiceCollectorTest {
         assertEquals("KUDU", underTest.getKuduService().getName());
         assertEquals("NAMENODE", underTest.getNameNodeService().getName());
         assertEquals("NIFI", underTest.getNiFiService().getName());
+        assertEquals("EFM-UI", underTest.getEfmUIService().getName());
+        assertEquals("EFM-API", underTest.getEfmRestService().getName());
         assertEquals("RANGER", underTest.getRangerService().getName());
         assertEquals("RESOURCEMANAGER_WEB", underTest.getResourceManagerWebService().getName());
     }
@@ -116,6 +118,7 @@ class ExposedServiceCollectorTest {
                 "MASTER",
                 "MATERIALIZED_VIEW_ENGINE",
                 "NAMENODE",
+                "EFM_SERVER",
                 "NIFI_NODE",
                 "NIFI_REGISTRY_SERVER",
                 "OPDB_AGENT",
@@ -174,6 +177,8 @@ class ExposedServiceCollectorTest {
                 "NIFI-REGISTRY",
                 "NIFI_REST",
                 "NIFI-REGISTRY-REST",
+                "EFM-API",
+                "EFM-UI",
                 "OPDB-AGENT",
                 "OOZIE",
                 "DATA-DISCOVERY-SERVICE-API",

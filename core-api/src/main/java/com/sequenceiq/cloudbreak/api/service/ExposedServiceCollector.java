@@ -98,6 +98,14 @@ public class ExposedServiceCollector {
         return getFirst("NIFI");
     }
 
+    public ExposedService getEfmUIService() {
+        return getFirst("EFM-UI");
+    }
+
+    public ExposedService getEfmRestService() {
+        return getFirst("EFM-API");
+    }
+
     public ExposedService getRangerService() {
         return getFirst("RANGER");
     }
