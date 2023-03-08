@@ -454,6 +454,18 @@
       "dependencies": ["ZOOKEEPER", "NIFI"]
     },
     {
+      "name": "EFM",
+      "displayName": "Edge Flow Manager",
+      "componentNameInParcel": "efm",
+      "components": [
+        {
+          "name": "EFM_SERVER",
+          "groups": ["efm"],
+          "base": true
+        }
+      ]
+    },
+    {
       "name": "SCHEMAREGISTRY",
       "displayName": "Schema Registry",
       "componentNameInParcel": "schemaregistry",

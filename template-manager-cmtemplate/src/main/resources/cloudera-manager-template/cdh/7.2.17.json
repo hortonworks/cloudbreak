@@ -93,6 +93,10 @@
       "version": "0.5.0"
     },
     {
+      "name": "EFM",
+      "version": "1.5.99"
+    },
+    {
       "name": "SCHEMAREGISTRY",
       "version": "0.10.0"
     },

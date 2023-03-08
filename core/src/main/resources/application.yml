@@ -565,7 +565,8 @@ cb:
           7.2.17 - Search Analytics=cdp-search-analytics;
           7.2.17 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
           7.2.17 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
-          7.2.17 - COD Edge Node=cdp-cod-edge-node
+          7.2.17 - COD Edge Node=cdp-cod-edge-node;
+          7.2.17 - Edge Flow Management Light Duty=cdp-edge-flow-management-small
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |
