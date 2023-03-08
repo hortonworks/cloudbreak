@@ -52,6 +52,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setExternalFQDN(cluster.getFqdn());
         generalClusterConfigs.setEnableRangerRaz(cluster.isRangerRazEnabled());
         generalClusterConfigs.setGovCloud(credential.isGovCloud());
+        generalClusterConfigs.setCreatorWorkloadUserCrn(stack.getCreator().getUserCrn());
         return generalClusterConfigs;
     }
 
