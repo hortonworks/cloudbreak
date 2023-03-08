@@ -8,6 +8,9 @@
     "cluster": {
       "blueprintName": "7.2.16 - Data Mart: Apache Impala, Hue"
     },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
     "instanceGroups": [
       {
         "name": "master",

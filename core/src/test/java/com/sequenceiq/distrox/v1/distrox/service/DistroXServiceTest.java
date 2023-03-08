@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -20,11 +22,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.verification.VerificationMode;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -36,15 +39,18 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
+import com.sequenceiq.distrox.v1.distrox.fedramp.FedRampModificationService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
+@ExtendWith(MockitoExtension.class)
 class DistroXServiceTest {
 
     private static final Long USER_ID = 123456L;
@@ -59,6 +65,9 @@ class DistroXServiceTest {
 
     @Mock
     private WorkspaceService workspaceService;
+
+    @Mock
+    private FedRampModificationService fedRampModificationService;
 
     @Mock
     private StackOperations stackOperations;
@@ -77,10 +86,12 @@ class DistroXServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
         Workspace workspace = new Workspace();
         workspace.setId(USER_ID);
-        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        Tenant tenant = new Tenant();
+        tenant.setName("test");
+        workspace.setTenant(tenant);
+        lenient().when(workspaceService.getForCurrentUser()).thenReturn(workspace);
     }
 
     @Test
@@ -89,7 +100,6 @@ class DistroXServiceTest {
         String invalidEnvNameValue = "somethingInvalidStuff";
         DistroXV1Request r = new DistroXV1Request();
         r.setEnvironmentName(invalidEnvNameValue);
-
         when(environmentClientService.getByName(invalidEnvNameValue)).thenReturn(null);
 
         BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r));
@@ -99,7 +109,6 @@ class DistroXServiceTest {
         verify(environmentClientService, calledOnce()).getByName(any());
         verify(environmentClientService, calledOnce()).getByName(invalidEnvNameValue);
         verify(stackOperations, never()).post(any(), any(), any(), anyBoolean());
-        verify(workspaceService, never()).getForCurrentUser();
         verify(stackRequestConverter, never()).convert(any(DistroXV1Request.class));
     }
 
@@ -114,6 +123,7 @@ class DistroXServiceTest {
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
+        doNothing().when(fedRampModificationService).prepare(any(), any());
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
@@ -153,7 +163,6 @@ class DistroXServiceTest {
             verify(environmentClientService, calledOnce()).getByName(any());
             verify(environmentClientService, calledOnce()).getByName(eq(envName));
             verify(stackOperations, never()).post(any(), any(), any(), anyBoolean());
-            verify(workspaceService, never()).getForCurrentUser();
             verify(stackRequestConverter, never()).convert(any(DistroXV1Request.class));
         }
     }
@@ -167,19 +176,20 @@ class DistroXServiceTest {
 
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(EnvironmentStatus.DELETE_INITIATED);
+        envResponse.setName(envName);
         envResponse.setCrn("crn");
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
 
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        lenient().when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
+        lenient().when(environmentClientService.getByName(envName)).thenReturn(envResponse);
 
         StackV4Request converted = new StackV4Request();
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
-        when(stackRequestConverter.convert(r)).thenReturn(converted);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
-        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        lenient().when(stackRequestConverter.convert(r)).thenReturn(converted);
+        lenient().when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
+        lenient().when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
         BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r));
 
@@ -200,7 +210,7 @@ class DistroXServiceTest {
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
-
+        doNothing().when(fedRampModificationService).prepare(any(), any());
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
 
@@ -276,6 +286,12 @@ class DistroXServiceTest {
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
+        Workspace workspace = new Workspace();
+        Tenant tenant = new Tenant();
+        tenant.setName("test");
+        workspace.setTenant(tenant);
+        doNothing().when(fedRampModificationService).prepare(any(), any());
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));

@@ -63,6 +63,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOIN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_EDIT_PROXY_CONFIG;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
@@ -611,6 +612,10 @@ public class EntitlementService {
 
     public boolean isRazForGcpEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_GCP_RAZ);
+    }
+
+    public boolean isFedRampExternalDatabaseForceDisabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED);
     }
 
     public List<String> getEntitlements(String accountId) {

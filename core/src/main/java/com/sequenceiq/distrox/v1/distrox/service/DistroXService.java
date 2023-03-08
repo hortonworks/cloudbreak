@@ -18,9 +18,11 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
+import com.sequenceiq.distrox.v1.distrox.fedramp.FedRampModificationService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -48,10 +50,15 @@ public class DistroXService {
     @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
+    @Inject
+    private FedRampModificationService fedRampModificationService;
+
     public StackV4Response post(DistroXV1Request request) {
+        Workspace workspace = workspaceService.getForCurrentUser();
         validate(request);
+        fedRampModificationService.prepare(request, workspace.getTenant().getName());
         return stackOperations.post(
-                workspaceService.getForCurrentUser().getId(),
+                workspace.getId(),
                 restRequestThreadLocalService.getCloudbreakUser(),
                 stackRequestConverter.convert(request),
                 true);

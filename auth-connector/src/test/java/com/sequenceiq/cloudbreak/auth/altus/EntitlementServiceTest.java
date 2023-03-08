@@ -232,6 +232,9 @@ class EntitlementServiceTest {
 
                 {"WORKLOAD_IAM_USERSYNC_ROUTING", (EntitlementCheckFunction) EntitlementService::isWiamUsersyncRoutingEnabled, false},
                 {"WORKLOAD_IAM_USERSYNC_ROUTING", (EntitlementCheckFunction) EntitlementService::isWiamUsersyncRoutingEnabled, true},
+
+                {"CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED", (EntitlementCheckFunction) EntitlementService::isFedRampExternalDatabaseForceDisabled, false},
+                {"CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED", (EntitlementCheckFunction) EntitlementService::isFedRampExternalDatabaseForceDisabled, true},
         };
     }
 
