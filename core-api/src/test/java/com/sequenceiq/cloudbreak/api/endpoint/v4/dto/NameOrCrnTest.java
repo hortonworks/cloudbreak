@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.dto;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.rules.ExpectedException.none;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,8 +15,10 @@ public class NameOrCrnTest {
 
     private static final String NAME = "my-name";
 
+    private static final String EXCEPTION_MSG_BOTH = "Only either the name or the CRN has to be given, neither both nor none of them.";
+
     @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = none();
 
     @Test
     public void testOfName() {
@@ -136,4 +139,55 @@ public class NameOrCrnTest {
 
         nameOrCrn.getCrn();
     }
+
+    @Test
+    public void testOfBothWhenNeitherOfTheArgumentsAreProvided() {
+        thrown.expectMessage(EXCEPTION_MSG_BOTH);
+        thrown.expect(IllegalArgumentException.class);
+        NameOrCrn.ofBoth(null, null);
+    }
+
+    @Test
+    public void testOfBothWhenOnlyNameProvided() {
+        thrown.expectMessage(EXCEPTION_MSG_BOTH);
+        thrown.expect(IllegalArgumentException.class);
+        NameOrCrn.ofBoth(NAME, null);
+    }
+
+    @Test
+    public void testOfBothWhenOnlyCRNProvided() {
+        thrown.expectMessage(EXCEPTION_MSG_BOTH);
+        thrown.expect(IllegalArgumentException.class);
+        NameOrCrn.ofBoth(null, CRN);
+    }
+
+    @Test
+    public void testOfBothWhenArgumentsAreProvidedButAsEmptyString() {
+        thrown.expectMessage(EXCEPTION_MSG_BOTH);
+        thrown.expect(IllegalArgumentException.class);
+        NameOrCrn.ofBoth("", "");
+    }
+
+    @Test
+    public void testOfBothWhenCRNIsEmptyStringAndNameProvided() {
+        thrown.expectMessage(EXCEPTION_MSG_BOTH);
+        thrown.expect(IllegalArgumentException.class);
+        NameOrCrn.ofBoth(NAME, "");
+    }
+
+    @Test
+    public void testOfBothWhenNameIsEmptyStringAndCRNProvided() {
+        thrown.expectMessage(EXCEPTION_MSG_BOTH);
+        thrown.expect(IllegalArgumentException.class);
+        NameOrCrn.ofBoth("", CRN);
+    }
+
+    @Test
+    public void testOfBothWhenBothOfTheArgumentsAreProvided() {
+        NameOrCrn result = NameOrCrn.ofBoth(NAME, CRN);
+
+        assertEquals(NAME, result.getName());
+        assertEquals(CRN, result.getCrn());
+    }
+
 }

@@ -1,5 +1,8 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.environment.network.dao.domain.RegistrationType.CREATE_NEW;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -8,11 +11,13 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
@@ -20,6 +25,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 
 @Service
 public class EnvironmentDeletionService {
@@ -36,7 +42,10 @@ public class EnvironmentDeletionService {
 
     private final EnvironmentJobService environmentJobService;
 
+    private final EnvironmentService environmentService;
+
     public EnvironmentDeletionService(EnvironmentViewService environmentViewService,
+            EnvironmentService environmentService,
             EnvironmentJobService environmentJobService,
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentReactorFlowManager reactorFlowManager,
@@ -46,6 +55,7 @@ public class EnvironmentDeletionService {
         this.environmentJobService = environmentJobService;
         this.environmentViewService = environmentViewService;
         this.reactorFlowManager = reactorFlowManager;
+        this.environmentService = environmentService;
     }
 
     public EnvironmentViewDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn,
@@ -67,9 +77,9 @@ public class EnvironmentDeletionService {
     }
 
     @VisibleForTesting
-    EnvironmentView delete(EnvironmentView environment, String userCrn,
-            boolean cascading, boolean forced) {
+    EnvironmentView delete(EnvironmentView environment, String userCrn, boolean cascading, boolean forced) {
         LOGGER.debug("Deleting environment [name: {}, cascading={}, forced={}]", environment.getName(), cascading, forced);
+        checkIfNetworkIsNotUsedByOtherEnv(environment, forced);
         MDCBuilder.buildMdcContext(environment);
         if (cascading) {
             prepareForDeletion(environment, forced);
@@ -81,6 +91,28 @@ public class EnvironmentDeletionService {
             reactorFlowManager.triggerDeleteFlow(environment, userCrn, forced);
         }
         return environment;
+    }
+
+    private void checkIfNetworkIsNotUsedByOtherEnv(EnvironmentView environment, boolean skipValidation) {
+        if (skipValidation) {
+            LOGGER.debug("Force deletion was requested (for environment: {}) therefore network usage verification is skipped.", environment.getResourceCrn());
+            return;
+        }
+        BaseNetwork network = environment.getNetwork();
+        if (network.getRegistrationType() == CREATE_NEW) {
+            LOGGER.debug("Environment (CRN: {}) was created alongside a new network, therefore its usage is about to be checked before proceeding deletion. " +
+                    "[networkName: {}, networkID: {}]", environment.getResourceCrn(), network.getName(), network.getId());
+            Set<NameOrCrn> envs = environmentService.getEnvironmentsUsingTheSameNetwork(network);
+            if (isNotEmpty(envs)) {
+                LOGGER.info("Environment deletion terminated! There are other environments deployed in same network which was created during the creation" +
+                                " of this (CRN: {}), therefore we cannot continue the environment deletion to prevent breaking these environments: {}",
+                        environment.getResourceCrn(), StringUtils.join(",", envs));
+                throw new IllegalStateException("Deletion not allowed because there are other environments that are using the same network that was created " +
+                        "during the creation of this environment. \nPlease remove those before initiating the deletion of this environment or use the force " +
+                        "option, but if you'd do the latter option, please keep in mind that the termination could break those environments since their " +
+                        "network related cloud resources will be terminated as well.");
+            }
+        }
     }
 
     private void prepareForDeletion(EnvironmentView environment, boolean forced) {
@@ -121,7 +153,7 @@ public class EnvironmentDeletionService {
         Set<String> distroXClusterNames = environmentResourceDeletionService.getAttachedDistroXClusterNames(env);
         if (!distroXClusterNames.isEmpty()) {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) are attached to the Environment: [%s]. " +
-                            getMustUseCascadingDeleteError("they"), String.join(", ", distroXClusterNames)));
+                    getMustUseCascadingDeleteError("they"), String.join(", ", distroXClusterNames)));
         }
 
         int amountOfConnectedExperiences;

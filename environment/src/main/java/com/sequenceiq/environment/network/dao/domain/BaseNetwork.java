@@ -298,4 +298,5 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
                 ", resourceCrn='" + resourceCrn + '\'' +
                 '}';
     }
+
 }

@@ -30,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
@@ -79,6 +80,26 @@ public class EnvironmentTest extends AbstractMockTest {
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListed)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "valid create environment request is sent",
+            then = "environment should be created")
+    public void testCreateEnvironmentVol2(MockedTestContext testContext) {
+        testContext
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
+                .given("network1", EnvironmentNetworkTestDto.class)
+                .given(EnvironmentTestDto.class)
+                .withNetwork("network1")
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.list())
+                .then(this::checkEnvIsListed)
+
                 .validate();
     }
 

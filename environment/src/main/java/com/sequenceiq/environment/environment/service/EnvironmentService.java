@@ -3,7 +3,10 @@ package com.sequenceiq.environment.environment.service;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 import static com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto.fromEnvironmentDto;
+import static java.util.Collections.emptySet;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collection;
 import java.util.EnumSet;
@@ -58,6 +61,12 @@ import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
+import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
+import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.GcpNetwork;
+import com.sequenceiq.environment.network.dao.domain.MockNetwork;
+import com.sequenceiq.environment.network.dao.domain.YarnNetwork;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
@@ -72,6 +81,9 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         PayloadContextProvider, CompositeAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
+
+    private static final String ENV_NETWORK_COLLECTION_LOG_MSG_FORMAT = "Collecting IDs of any %s environment that uses the network which isn't deleted and " +
+            "points to the '%s' %s.";
 
     @Value("${environment.admin.group.default.prefix:}")
     private String adminGroupNamePrefix;
@@ -430,6 +442,91 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     @Override
     protected void prepareCreation(Environment resource) {
 
+    }
+
+    public Set<NameOrCrn> getEnvironmentsUsingTheSameNetwork(BaseNetwork network) {
+        Set<NameOrCrn> result = new HashSet<>();
+        if (network == null) {
+            LOGGER.warn("Unable to verify if the environment's network is used by any other environment because the provided {} instance is null!",
+                    BaseNetwork.class.getSimpleName());
+        } else {
+            LOGGER.debug("About to collect environment IDs that uses the given network network [{}]", network);
+            Set<Long> ids = new HashSet<>();
+            ids.addAll(getEnvironmentIdsForAwsNetwork(network));
+            ids.addAll(getEnvironmentIdsForGcpNetwork(network));
+            ids.addAll(getEnvironmentIdsForMockNetwork(network));
+            ids.addAll(getEnvironmentIdsForAzureNetwork(network));
+            ids.addAll(getEnvironmentIdsForYarnNetwork(network));
+            if (isNotEmpty(ids)) {
+                result = ids.stream()
+                        .filter(environmentId -> !environmentId.equals(network.getEnvironment().getId()))
+                        .map(environmentRepository::findById)
+                        .filter(Optional::isPresent)
+                        .map(environment -> NameOrCrn.ofBoth(environment.get().getName(), environment.get().getResourceCrn()))
+                        .collect(Collectors.toSet());
+            }
+        }
+        return result;
+    }
+
+    private Set<Long> getEnvironmentIdsForAwsNetwork(BaseNetwork network) {
+        Set<Long> result = emptySet();
+        if (network instanceof AwsNetwork) {
+            String vpcId = ((AwsNetwork) network).getVpcId();
+            if (isNotEmpty(vpcId)) {
+                LOGGER.debug(String.format(ENV_NETWORK_COLLECTION_LOG_MSG_FORMAT, "AWS", vpcId, "vpcId"));
+                result = environmentRepository.getAwsOrMockNetwokUsages(vpcId);
+            }
+        }
+        return result;
+    }
+
+    private Set<Long> getEnvironmentIdsForMockNetwork(BaseNetwork network) {
+        Set<Long> result = emptySet();
+        if (network instanceof MockNetwork) {
+            String vpcId = ((MockNetwork) network).getVpcId();
+            if (isNotEmpty(vpcId)) {
+                LOGGER.debug(String.format(ENV_NETWORK_COLLECTION_LOG_MSG_FORMAT, "MOCK", vpcId, "vpcId"));
+                result = environmentRepository.getAwsOrMockNetwokUsages(vpcId);
+            }
+        }
+        return result;
+    }
+
+    private Set<Long> getEnvironmentIdsForAzureNetwork(BaseNetwork network) {
+        Set<Long> result = emptySet();
+        if (network instanceof AzureNetwork) {
+            String resourceGroupName = ((AzureNetwork) network).getResourceGroupName();
+            if (isNotEmpty(resourceGroupName)) {
+                LOGGER.debug(String.format(ENV_NETWORK_COLLECTION_LOG_MSG_FORMAT, "AZURE", resourceGroupName, "resourceGroupName"));
+                result = environmentRepository.getAzureNetwokUsages(resourceGroupName);
+            }
+        }
+        return result;
+    }
+
+    private Set<Long> getEnvironmentIdsForGcpNetwork(BaseNetwork network) {
+        Set<Long> result = emptySet();
+        if (network instanceof GcpNetwork) {
+            String networkId = ((GcpNetwork) network).getNetworkId();
+            if (isNotEmpty(networkId)) {
+                LOGGER.debug(String.format(ENV_NETWORK_COLLECTION_LOG_MSG_FORMAT, "GCP", networkId, "networkId"));
+                result = environmentRepository.getGcpNetwokUsages(networkId);
+            }
+        }
+        return result;
+    }
+
+    private Set<Long> getEnvironmentIdsForYarnNetwork(BaseNetwork network) {
+        Set<Long> result = emptySet();
+        if (network instanceof YarnNetwork) {
+            String queue = ((YarnNetwork) network).getQueue();
+            if (isNotEmpty(queue)) {
+                LOGGER.debug(String.format(ENV_NETWORK_COLLECTION_LOG_MSG_FORMAT, "YARN", queue, "queue"));
+                result = environmentRepository.getYarnNetwokUsages(queue);
+            }
+        }
+        return result;
     }
 
     @Override

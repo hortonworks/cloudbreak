@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.dto;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Objects;
@@ -55,6 +56,13 @@ public class NameOrCrn {
             throw new IllegalArgumentException("Request to get crn when name was provided on " + this);
         }
         return crn;
+    }
+
+    public static NameOrCrn ofBoth(String name, String crn) {
+        if ((isNotEmpty(name) ^ isNotEmpty(crn)) ^ (isEmpty(name) && isEmpty(crn))) {
+            throw new IllegalArgumentException("Only either the name or the CRN has to be given, neither both nor none of them.");
+        }
+        return new NameOrCrn(name, crn);
     }
 
     public boolean hasName() {

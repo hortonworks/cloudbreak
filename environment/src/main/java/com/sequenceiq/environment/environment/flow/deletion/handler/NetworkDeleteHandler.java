@@ -61,11 +61,16 @@ public class NetworkDeleteHandler extends EventSenderAwareHandler<EnvironmentDel
                 if (network != null) {
                     RegistrationType registrationType = network.getRegistrationType();
                     if (RegistrationType.CREATE_NEW == registrationType) {
+                        LOGGER.debug("Network was created during the creation of the environment (CRN: {}), therefore it is going to be removed now.",
+                                environment.getResourceCrn());
                         environmentNetworkService.deleteNetwork(environmentDtoConverter.environmentToDto(environment));
                     }
-                    network.setName(environment.getResourceCrn() + "_network_DELETED_@_" + System.currentTimeMillis());
+                    long deletionTimeStamp = System.currentTimeMillis();
+                    String newNetworkName = environment.getResourceCrn() + "_network_DELETED_@_" + deletionTimeStamp;
+                    LOGGER.debug("Updating environment network name from '{}' to '{}'", network.getName(), newNetworkName);
+                    network.setName(newNetworkName);
                     network.setArchived(true);
-                    network.setDeletionTimestamp(System.currentTimeMillis());
+                    network.setDeletionTimestamp(deletionTimeStamp);
                     environmentService.save(environment);
                 }
             });

@@ -155,4 +155,21 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             "WHERE e.name in (:names) " +
             "AND e.accountId = :accountId")
     List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
+
+    @Query(value = "SELECT environment_network.environment_id FROM environment_network WHERE environment_network.vpcid = :vpcid AND environment_network.name " +
+            "NOT LIKE '%DELETED_@_%'", nativeQuery = true)
+    Set<Long> getAwsOrMockNetwokUsages(@Param("vpcid") String vpcid);
+
+    @Query(value = "SELECT environment_network.environment_id FROM environment_network WHERE environment_network.networkid = :networkid " +
+            "AND environment_network.name NOT LIKE '%DELETED_@_%'", nativeQuery = true)
+    Set<Long> getGcpNetwokUsages(@Param("networkid") String networkid);
+
+    @Query(value = "SELECT environment_network.environment_id FROM environment_network WHERE environment_network.queue = :queue AND environment_network.name " +
+            "NOT LIKE '%DELETED_@_%'", nativeQuery = true)
+    Set<Long> getYarnNetwokUsages(@Param("queue") String queue);
+
+    @Query(value = "SELECT environment_network.environment_id FROM environment_network WHERE environment_network.resourcegroupname = :resourceGroupName " +
+            "AND environment_network.name NOT LIKE '%DELETED_@_%'", nativeQuery = true)
+    Set<Long> getAzureNetwokUsages(@Param("resourceGroupName") String resourceGroupName);
+
 }
