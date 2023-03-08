@@ -8,6 +8,9 @@
     "cluster": {
       "blueprintName": "7.2.16 - Data Engineering: Apache Spark3"
     },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
     "instanceGroups": [
       {
         "name": "master",

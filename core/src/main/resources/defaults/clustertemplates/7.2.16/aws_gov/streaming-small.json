@@ -8,7 +8,7 @@
       "blueprintName": "7.2.16 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
     },
     "externalDatabase": {
-      "availabilityType": "NON_HA"
+      "availabilityType": "HA"
     },
     "instanceGroups": [
       {
