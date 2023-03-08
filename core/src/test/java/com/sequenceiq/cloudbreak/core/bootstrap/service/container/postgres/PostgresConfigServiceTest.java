@@ -26,6 +26,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
@@ -51,6 +54,8 @@ class PostgresConfigServiceTest {
 
     private static final String DBVERSION = "dbversion";
 
+    private static final Long CLUSTER_ID = 123L;
+
     @Mock
     private RdsConfigProviderFactory rdsConfigProviderFactory;
 
@@ -65,6 +70,9 @@ class PostgresConfigServiceTest {
 
     @Mock
     private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentProvider;
 
     @InjectMocks
     private PostgresConfigService underTest;
@@ -180,13 +188,15 @@ class PostgresConfigServiceTest {
         Stack stackView = new Stack();
         stackView.setExternalDatabaseEngineVersion(DBVERSION);
         Cluster cluster = new Cluster();
-        cluster.setDbSslEnabled(sslEnabledForStack);
+        cluster.setDbSslRootCertBundle(null);
         cluster.setDatabaseServerCrn("crn");
+        cluster.setId(CLUSTER_ID);
         when(stack.getStack()).thenReturn(stackView);
         when(stack.getCluster()).thenReturn(cluster);
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, sslEnabledForStack));
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
 
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
@@ -204,12 +214,13 @@ class PostgresConfigServiceTest {
                 entry("ssl_certs", "cert1\ncert2"),
                 entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
                 entry("ssl_restart_required", "false"),
+                entry("ssl_for_cm_db_natively_supported", "false"),
                 entry("ssl_enabled", String.valueOf(sslEnabledForStack)));
 
         verify(databaseSslService, never()).isDbSslEnabledByClusterView(any(StackView.class), any(ClusterView.class));
     }
 
-    @ParameterizedTest(name = "sslEnabledForStackAndRestartRequired={0}")
+    @ParameterizedTest(name = "sslEnabledForStack={0}")
     @ValueSource(booleans = {false, true})
     void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabledAndRestartRequired(boolean sslEnabledForStack) {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
@@ -220,11 +231,13 @@ class PostgresConfigServiceTest {
         cluster.setDbSslEnabled(sslEnabledForStack);
         cluster.setDbSslRootCertBundle("cert1");
         cluster.setDatabaseServerCrn("crn");
+        cluster.setId(CLUSTER_ID);
         when(stack.getStack()).thenReturn(stackView);
         when(stack.getCluster()).thenReturn(cluster);
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.isDbSslEnabledByClusterView(stackView, cluster)).thenReturn(sslEnabledForStack);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
 
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
@@ -242,8 +255,120 @@ class PostgresConfigServiceTest {
                 entry("ssl_certs", "cert1"),
                 entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
                 entry("ssl_restart_required", "true"),
+                entry("ssl_for_cm_db_natively_supported", "false"),
                 entry("ssl_enabled", String.valueOf(sslEnabledForStack)));
 
         verify(databaseSslService, never()).getDbSslDetailsForCreationAndUpdateInCluster(any(StackDto.class));
     }
+
+    static Object[][] sslForCmDbNativeSupportDataProvider() {
+        return new Object[][]{
+                // cmRepoDetailsAvailable, cmVersion, sslForCmDbNativelySupportedExpected
+                {false, null, false},
+                {true, null, false},
+                {true, "", false},
+                {true, " ", false},
+                {true, "7.6.2", false},
+                {true, "7.9.0", false},
+                {true, "7.9.1", false},
+                {true, "7.9.2", true},
+                {true, "7.9.3", true},
+                {true, "7.10.0", true},
+        };
+    }
+
+    @ParameterizedTest(name = "cmRepoDetailsAvailable={0}, cmVersion={1}")
+    @MethodSource("sslForCmDbNativeSupportDataProvider")
+    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabledAndCmDbNativeSupport(boolean cmRepoDetailsAvailable, String cmVersion,
+            boolean sslForCmDbNativelySupportedExpected) {
+        Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+
+        Set<String> rootCerts = new LinkedHashSet<>();
+        rootCerts.add("cert1");
+        rootCerts.add("cert2");
+        Stack stackView = new Stack();
+        stackView.setExternalDatabaseEngineVersion(DBVERSION);
+        Cluster cluster = new Cluster();
+        cluster.setDbSslRootCertBundle(null);
+        cluster.setDatabaseServerCrn("crn");
+        cluster.setId(CLUSTER_ID);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stack.getCluster()).thenReturn(cluster);
+        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
+        when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+        when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, true));
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(cmRepoDetailsAvailable ? generateCmRepo(() -> cmVersion) : null);
+
+        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
+
+        SaltPillarProperties saltPillarProperties = servicePillar.get(POSTGRES_COMMON);
+        assertThat(saltPillarProperties).isNotNull();
+        assertThat(saltPillarProperties.getPath()).isEqualTo("/postgresql/root-certs.sls");
+
+        Map<String, Object> properties = saltPillarProperties.getProperties();
+        assertThat(properties).isNotNull();
+        assertThat(properties).hasSize(1);
+
+        Map<String, Object> rootSslCertsMap = (Map<String, Object>) properties.get("postgres_root_certs");
+        assertThat(rootSslCertsMap).isNotNull();
+        assertThat(rootSslCertsMap).containsOnly(
+                entry("ssl_certs", "cert1\ncert2"),
+                entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
+                entry("ssl_restart_required", "false"),
+                entry("ssl_for_cm_db_natively_supported", String.valueOf(sslForCmDbNativelySupportedExpected)),
+                entry("ssl_enabled", "true"));
+
+        verify(databaseSslService, never()).isDbSslEnabledByClusterView(any(StackView.class), any(ClusterView.class));
+    }
+
+    private ClouderaManagerRepo generateCmRepo(Versioned version) {
+        return new ClouderaManagerRepo()
+                .withBaseUrl("baseurl")
+                .withGpgKeyUrl("gpgurl")
+                .withPredefined(true)
+                .withVersion(version.getVersion());
+    }
+
+    @ParameterizedTest(name = "cmRepoDetailsAvailable={0}, cmVersion={1}")
+    @MethodSource("sslForCmDbNativeSupportDataProvider")
+    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabledAndCmDbNativeSupportAndRestartRequired(boolean cmRepoDetailsAvailable, String cmVersion,
+            boolean sslForCmDbNativelySupportedExpected) {
+        Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+
+        Stack stackView = new Stack();
+        stackView.setExternalDatabaseEngineVersion(DBVERSION);
+        Cluster cluster = new Cluster();
+        cluster.setDbSslEnabled(true);
+        cluster.setDbSslRootCertBundle("cert1");
+        cluster.setDatabaseServerCrn("crn");
+        cluster.setId(CLUSTER_ID);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stack.getCluster()).thenReturn(cluster);
+        when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
+        when(databaseSslService.isDbSslEnabledByClusterView(stackView, cluster)).thenReturn(true);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(cmRepoDetailsAvailable ? generateCmRepo(() -> cmVersion) : null);
+
+        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
+
+        SaltPillarProperties saltPillarProperties = servicePillar.get(POSTGRES_COMMON);
+        assertThat(saltPillarProperties).isNotNull();
+        assertThat(saltPillarProperties.getPath()).isEqualTo("/postgresql/root-certs.sls");
+
+        Map<String, Object> properties = saltPillarProperties.getProperties();
+        assertThat(properties).isNotNull();
+        assertThat(properties).hasSize(1);
+
+        Map<String, Object> rootSslCertsMap = (Map<String, Object>) properties.get("postgres_root_certs");
+        assertThat(rootSslCertsMap).isNotNull();
+        assertThat(rootSslCertsMap).containsOnly(
+                entry("ssl_certs", "cert1"),
+                entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
+                entry("ssl_restart_required", "true"),
+                entry("ssl_for_cm_db_natively_supported", String.valueOf(sslForCmDbNativelySupportedExpected)),
+                entry("ssl_enabled", "true"));
+
+        verify(databaseSslService, never()).getDbSslDetailsForCreationAndUpdateInCluster(any(StackDto.class));
+    }
+
 }

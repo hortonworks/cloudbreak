@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -19,6 +20,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
@@ -62,6 +66,9 @@ public class PostgresConfigService {
     @Inject
     private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
 
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentProvider;
+
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto) {
         Map<String, Object> postgresConfig = initPostgresConfig(stackDto);
         SSLSaltConfig sslSaltConfig;
@@ -89,6 +96,7 @@ public class PostgresConfigService {
                 dbSslEnabled);
         sslSaltConfig.setRootCertsBundle(dbSslRootCertBundle);
         sslSaltConfig.setSslEnabled(dbSslEnabled);
+        sslSaltConfig.setSslForCmDbNativelySupported(isSslForCmDbNativelySupported(cluster));
         sslSaltConfig.setRestartRequired(true);
         return sslSaltConfig;
     }
@@ -100,8 +108,35 @@ public class PostgresConfigService {
         LOGGER.info("Fetched SslDetails: {}", sslDetails);
         sslSaltConfig.setRootCertsBundle(sslDetails.getSslCertBundle());
         sslSaltConfig.setSslEnabled(sslDetails.isSslEnabledForStack());
+        sslSaltConfig.setSslForCmDbNativelySupported(isSslForCmDbNativelySupported(stackDto.getCluster()));
         sslSaltConfig.setRestartRequired(false);
         return sslSaltConfig;
+    }
+
+    private boolean isSslForCmDbNativelySupported(ClusterView clusterView) {
+        return isSslForCmDbNativelySupportedForCmVersion(getCmVersion(clusterView));
+    }
+
+    private String getCmVersion(ClusterView clusterView) {
+        String cmVersion = null;
+        Optional<ClouderaManagerRepo> cmRepoDetailsOpt = Optional.ofNullable(clusterComponentProvider.getClouderaManagerRepoDetails(clusterView.getId()));
+        if (cmRepoDetailsOpt.isPresent()) {
+            cmVersion = cmRepoDetailsOpt.get().getVersion();
+            LOGGER.info("ClouderaManagerRepoDetails is available for stack, found CM version '{}'", cmVersion);
+        } else {
+            LOGGER.warn("ClouderaManagerRepoDetails is unavailable for stack, thus CM version cannot be determined.");
+        }
+        return cmVersion;
+    }
+
+    private boolean isSslForCmDbNativelySupportedForCmVersion(String cmVersion) {
+        if (StringUtils.isBlank(cmVersion)) {
+            LOGGER.info("CM version is NOT specified, thus CM DB native SSL support is NOT available");
+            return false;
+        }
+        boolean available = CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(cmVersion, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2);
+        LOGGER.info("CM DB native SSL support {} available for CM version {}", available ? "is" : "is NOT", cmVersion);
+        return available;
     }
 
     private void generateDatabaseSSLConfiguration(Map<String, SaltPillarProperties> servicePillar, SSLSaltConfig sslSaltConfig) {
@@ -150,6 +185,8 @@ public class PostgresConfigService {
 
         private boolean restartRequired;
 
+        private boolean sslForCmDbNativelySupported;
+
         public String getRootCertsBundle() {
             return rootCertsBundle;
         }
@@ -174,12 +211,22 @@ public class PostgresConfigService {
             this.restartRequired = restartRequired;
         }
 
+        public boolean isSslForCmDbNativelySupported() {
+            return sslForCmDbNativelySupported;
+        }
+
+        public void setSslForCmDbNativelySupported(boolean sslForCmDbNativelySupported) {
+            this.sslForCmDbNativelySupported = sslForCmDbNativelySupported;
+        }
+
         public Map<String, Object> toMap() {
-            // Note: The Salt logic expects "ssl_enabled" and "ssl_restart_required" both be represented as strings, not primitive booleans.
+            // Note: The Salt logic expects "ssl_enabled", "ssl_restart_required" and "ssl_for_cm_db_natively_supported" be all represented as strings,
+            // not primitive booleans.
             return Map.of(
                     "ssl_certs", rootCertsBundle,
                     "ssl_restart_required", String.valueOf(restartRequired),
-                    "ssl_enabled", String.valueOf(sslEnabled)
+                    "ssl_enabled", String.valueOf(sslEnabled),
+                    "ssl_for_cm_db_natively_supported", String.valueOf(sslForCmDbNativelySupported)
             );
         }
     }

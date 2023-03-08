@@ -17,6 +17,7 @@ public class PostgresConfigServiceSSLSaltConfigTest {
         assertThat(underTest.getRootCertsBundle()).isEqualTo("");
         assertThat(underTest.isSslEnabled()).isFalse();
         assertThat(underTest.isRestartRequired()).isFalse();
+        assertThat(underTest.isSslForCmDbNativelySupported()).isFalse();
     }
 
     @Test
@@ -33,7 +34,8 @@ public class PostgresConfigServiceSSLSaltConfigTest {
         Map<String, Object> result = underTest.toMap();
 
         assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", ""), entry("ssl_restart_required", "false"), entry("ssl_enabled", "false")));
+        assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", ""), entry("ssl_restart_required", "false"), entry("ssl_enabled", "false"),
+                entry("ssl_for_cm_db_natively_supported", "false")));
     }
 
     @Test
@@ -41,12 +43,14 @@ public class PostgresConfigServiceSSLSaltConfigTest {
         PostgresConfigService.SSLSaltConfig underTest = new PostgresConfigService.SSLSaltConfig();
         underTest.setRestartRequired(false);
         underTest.setSslEnabled(true);
+        underTest.setSslForCmDbNativelySupported(false);
         underTest.setRootCertsBundle("myCert");
 
         Map<String, Object> result = underTest.toMap();
 
         assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", "myCert"), entry("ssl_restart_required", "false"), entry("ssl_enabled", "true")));
+        assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", "myCert"), entry("ssl_restart_required", "false"), entry("ssl_enabled", "true"),
+                entry("ssl_for_cm_db_natively_supported", "false")));
     }
 
     @Test
@@ -54,12 +58,29 @@ public class PostgresConfigServiceSSLSaltConfigTest {
         PostgresConfigService.SSLSaltConfig underTest = new PostgresConfigService.SSLSaltConfig();
         underTest.setRestartRequired(true);
         underTest.setSslEnabled(true);
+        underTest.setSslForCmDbNativelySupported(false);
         underTest.setRootCertsBundle("myCert");
 
         Map<String, Object> result = underTest.toMap();
 
         assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", "myCert"), entry("ssl_restart_required", "true"), entry("ssl_enabled", "true")));
+        assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", "myCert"), entry("ssl_restart_required", "true"), entry("ssl_enabled", "true"),
+                entry("ssl_for_cm_db_natively_supported", "false")));
+    }
+
+    @Test
+    void toMapTestWhenSslWithCmDbNativeSupport() {
+        PostgresConfigService.SSLSaltConfig underTest = new PostgresConfigService.SSLSaltConfig();
+        underTest.setRestartRequired(false);
+        underTest.setSslEnabled(true);
+        underTest.setSslForCmDbNativelySupported(true);
+        underTest.setRootCertsBundle("myCert");
+
+        Map<String, Object> result = underTest.toMap();
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(Map.ofEntries(entry("ssl_certs", "myCert"), entry("ssl_restart_required", "false"), entry("ssl_enabled", "true"),
+                entry("ssl_for_cm_db_natively_supported", "true")));
     }
 
 }
