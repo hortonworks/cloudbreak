@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -179,14 +180,14 @@ class AwsVolumeResourceBuilderTest {
 
     @BeforeEach
     void setUp() {
-        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        when(cloudContext.getLocation()).thenReturn(location);
-        when(location.getRegion()).thenReturn(region);
-        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
-        when(region.value()).thenReturn(REGION_NAME);
-        when(awsClient.createEc2Client(isA(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(amazonEC2Client);
-        when(cloudStack.getTags()).thenReturn(TAGS);
-        when(awsTaggingService.prepareEc2Tags(TAGS)).thenReturn(EC2_TAGS);
+        lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        lenient().when(cloudContext.getLocation()).thenReturn(location);
+        lenient().when(location.getRegion()).thenReturn(region);
+        lenient().when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
+        lenient().when(region.value()).thenReturn(REGION_NAME);
+        lenient().when(awsClient.createEc2Client(isA(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(amazonEC2Client);
+        lenient().when(cloudStack.getTags()).thenReturn(TAGS);
+        lenient().when(awsTaggingService.prepareEc2Tags(TAGS)).thenReturn(EC2_TAGS);
     }
 
     @Test
@@ -466,6 +467,23 @@ class AwsVolumeResourceBuilderTest {
         assertThrows(PreserveResourceException.class, () -> underTest.delete(awsContext, authenticatedContext, cloudResource));
 
         verify(amazonEC2Client, never()).modifyInstanceAttribute(any());
+    }
+
+    @Test
+    void testCreateReturnsEmptyWhenNoVolumes() {
+        List<CloudResource> result = underTest.create(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, createGroup(List.of(), Map.of(), 0L), null);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testCreateReturnsEmptyWhenAllVolumesEphemeral() {
+        Volume volume1 = new Volume("/vol1", AwsDiskType.Ephemeral.value(), 5, CloudVolumeUsageType.GENERAL);
+        Volume volume2 = new Volume("/vol2", AwsDiskType.Ephemeral.value(), 5, CloudVolumeUsageType.GENERAL);
+        List<CloudResource> result = underTest.create(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext,
+                createGroup(List.of(volume1, volume2), Map.of(), 0L), null);
+
+        assertTrue(result.isEmpty());
     }
 
     @SuppressWarnings("unchecked")
