@@ -129,9 +129,8 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     private Map<String, InstanceTemplate> getTemplateMap(List<CloudInstance> vms, AuthenticatedContext authenticatedContext) {
-        List<InstanceTemplate> templates = vms.stream().map(CloudInstance::getTemplate).collect(Collectors.toList());
         String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
-        return templates.stream()
+        return vms.stream()
                 .collect(Collectors.toMap(
                         template -> azureUtils.getPrivateInstanceId(stackName, template.getGroupName(), Long.toString(template.getPrivateId())),
                         template -> template));

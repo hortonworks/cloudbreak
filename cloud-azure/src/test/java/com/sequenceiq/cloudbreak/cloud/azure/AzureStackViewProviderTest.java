@@ -114,7 +114,7 @@ public class AzureStackViewProviderTest {
 
         AzureStackView actual = underTest.getAzureStack(azureCredentialView, cloudStack, client, ac);
 
-        assertEquals("i1", actual.getInstancesByGroupType().get(InstanceGroupType.CORE.name()).get(0).getInstanceId());
+        assertEquals("i1-c4ca4238", actual.getInstancesByGroupType().get(InstanceGroupType.CORE.name()).get(0).getInstanceId());
         assertEquals(GROUP_NAME, actual.getInstanceGroups().get(0).getName());
         assertEquals(imageId, actual.getInstancesByGroupType().get(InstanceGroupType.CORE.name()).get(0).getCustomImageId());
 
@@ -143,7 +143,8 @@ public class AzureStackViewProviderTest {
     }
 
     private CloudInstance createCloudInstance() {
-        return new CloudInstance(INSTANCE_ID, createInstanceTemplate(), null, "subnet-1", "az1");
+        return new CloudInstance(INSTANCE_ID, createInstanceTemplate(), null, "subnet-1", "az1",
+                Collections.singletonMap(CloudInstance.ID, 1L));
     }
 
     private InstanceTemplate createInstanceTemplate() {
