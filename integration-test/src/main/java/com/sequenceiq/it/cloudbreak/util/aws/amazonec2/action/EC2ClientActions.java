@@ -30,6 +30,7 @@ import software.amazon.awssdk.core.waiters.WaiterOverrideConfiguration;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.services.cloudformation.model.Stack;
 import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
+import software.amazon.awssdk.services.cloudformation.model.StackSummary;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
@@ -268,7 +269,9 @@ public class EC2ClientActions extends EC2Client {
     }
 
     public Boolean isCloudFormationExistForStack(String stack) {
-        return !cfClientActions.listCfStacksByName(stack).isEmpty();
+        List<StackSummary> stackSummaries = cfClientActions.listCfStacksByName(stack);
+        LOGGER.info("Stack summaries in AWS: {}", stackSummaries.toString());
+        return !stackSummaries.isEmpty();
     }
 
     public List<Stack> listCfStacksByEnvironment(String crn) {
