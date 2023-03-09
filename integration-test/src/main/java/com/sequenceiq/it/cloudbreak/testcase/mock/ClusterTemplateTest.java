@@ -322,11 +322,11 @@ public class ClusterTemplateTest extends AbstractMockTest {
             then = "the a cluster template should not be created"
     )
     public void testCreateLongDescriptionClusterTemplate(MockedTestContext testContext) {
-        String invalidLongDescripton = getLongNameGenerator().stringGenerator(1001);
+        String invalidLongDescription = getLongNameGenerator().stringGenerator(1001);
         testContext
                 .given(ClusterTemplateTestDto.class)
                 .withName(resourcePropertyProvider().getName())
-                .withDescription(invalidLongDescripton)
+                .withDescription(invalidLongDescription)
                 .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("size must be between 0 and 1000"))
                 .validate();
     }
@@ -367,7 +367,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
             assertNotNull(entity);
             assertNotNull(entity.getResponses());
             long defaultCount = entity.getResponses().stream().filter(template -> ResourceStatus.DEFAULT.equals(template.getStatus())).count();
-            long expectedCount = 659;
+            long expectedCount = 660;
             assertEquals("Should have " + expectedCount + " of default cluster templates.", expectedCount, defaultCount);
         } catch (Exception e) {
             throw new TestFailException(String.format("Failed to validate default count of cluster templates: %s", e.getMessage()), e);
