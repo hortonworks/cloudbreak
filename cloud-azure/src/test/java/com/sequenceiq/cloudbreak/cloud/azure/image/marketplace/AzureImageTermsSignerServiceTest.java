@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image.marketplace;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
@@ -121,17 +121,18 @@ public class AzureImageTermsSignerServiceTest {
         when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
         AzureImageTerms azureImageTerms = setupAzureImageTerms();
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenReturn(azureImageTerms);
-        when(azureRestOperationsService.httpPut(any(), any(), any(), anyString())).thenReturn(azureImageTerms);
+        when(azureRestOperationsService.httpPost(any(), any(), any(), anyString())).thenReturn(azureImageTerms);
 
         underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
 
         verify(azureClient).getAccessToken();
-        ArgumentCaptor<AzureImageTerms> argumentCaptor = ArgumentCaptor.forClass(AzureImageTerms.class);
+        ArgumentCaptor<URI> argumentCaptor = ArgumentCaptor.forClass(URI.class);
         InOrder inOrder = Mockito.inOrder(azureRestOperationsService);
         inOrder.verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
-        inOrder.verify(azureRestOperationsService).httpPut(any(), argumentCaptor.capture(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
-        AzureImageTerms azureImageTermsWithAccept = argumentCaptor.getValue();
-        assertTrue(azureImageTermsWithAccept.getProperties().isAccepted());
+        inOrder.verify(azureRestOperationsService).httpPost(argumentCaptor.capture(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+        URI signURI = argumentCaptor.getValue();
+        assertEquals(signURI.toString(), "https://management.azure.com/subscriptions/azureSubscriptionId/providers/Microsoft.MarketplaceOrdering/" +
+                "agreements/cloudera/offers/my-offer/plans/my-plan/sign?api-version=2021-01-01");
     }
 
     @Test
@@ -148,7 +149,7 @@ public class AzureImageTermsSignerServiceTest {
                 "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", exception.getMessage());
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService, never()).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
-        verify(azureRestOperationsService, never()).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+        verify(azureRestOperationsService, never()).httpPost(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
     }
 
     @ParameterizedTest
@@ -168,16 +169,16 @@ public class AzureImageTermsSignerServiceTest {
                 exception.getMessage());
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
-        verify(azureRestOperationsService, never()).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+        verify(azureRestOperationsService, never()).httpPost(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
     }
 
     @ParameterizedTest
     @MethodSource("exceptionsFromHttpMethod")
-    void testSignWhenPutTermsThrowsException(Exception restException, String customErrorMessage) {
+    void testSignWhenPostTermsThrowsException(Exception restException, String customErrorMessage) {
         when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
         AzureImageTerms azureImageTerms = setupAzureImageTerms();
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenReturn(azureImageTerms);
-        when(azureRestOperationsService.httpPut(any(), any(), any(), anyString())).thenThrow(restException);
+        when(azureRestOperationsService.httpPost(any(), any(), any(), anyString())).thenThrow(restException);
 
         Exception exception = Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
@@ -190,7 +191,7 @@ public class AzureImageTermsSignerServiceTest {
                 exception.getMessage());
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
-        verify(azureRestOperationsService).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+        verify(azureRestOperationsService).httpPost(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
     }
 
     private AzureImageTerms setupAzureImageTerms() {

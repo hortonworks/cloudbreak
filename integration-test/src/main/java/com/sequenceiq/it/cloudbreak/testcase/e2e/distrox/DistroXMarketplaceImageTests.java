@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -25,8 +24,8 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
-public class DistroXImagesTests extends AbstractE2ETest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXImagesTests.class);
+public class DistroXMarketplaceImageTests extends AbstractE2ETest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXMarketplaceImageTests.class);
 
     @Inject
     private DistroXTestClient distroXTestClient;
@@ -42,50 +41,31 @@ public class DistroXImagesTests extends AbstractE2ETest {
         createDefaultDatalake(testContext);
     }
 
-    @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
-    @Test(dataProvider = TEST_CONTEXT)
-    @UseSpotInstances
-    @Description(
-            given = "there is a running Cloudbreak",
-            when = "a basic DistroX create request is sent",
-            then = "DistroX should be available and deletable"
-    )
-    public void testDistroXWithPrewarmedImageCanBeCreatedSuccessfully(TestContext testContext) {
-        String distrox = resourcePropertyProvider().getName();
-
-        testContext
-                .given(distrox, DistroXTestDto.class)
-                .when(distroXTestClient.create(), key(distrox))
-                .await(STACK_AVAILABLE)
-                .then((context, dto, client) -> {
-                    dto.getResponse();
-                    return dto;
-                })
-                .when(distroXTestClient.get())
-                .validate();
-    }
-
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
-            when = "a valid DistroX create request is sent (latest Base Image)",
+            when = "a valid DistroX create request is sent (latest Marketplace Image)",
             then = "DistroX should be available and deletable")
-    public void testDistroXWithBaseImageCanBeCreatedSuccessfully(TestContext testContext) {
+    public void testDistroXWithMarketplaceImageCanBeCreatedSuccessfully(TestContext testContext) {
         String imageSettings = resourcePropertyProvider().getName();
-        String imageCatalog = resourcePropertyProvider().getName();
         String distrox = resourcePropertyProvider().getName();
         AtomicReference<String> selectedImageID = new AtomicReference<>();
         CloudProvider cloudProvider = testContext.getCloudProvider();
 
+        String imgCatalogKey = "mp-img-cat";
         testContext
-                .given(imageCatalog, ImageCatalogTestDto.class)
+                .given(imgCatalogKey, ImageCatalogTestDto.class)
+                .withName(imgCatalogKey)
+                .withUrl("https://gist.githubusercontent.com/daszabo/6b53c1a413d9b6cb847b9ad786e7bbf5/raw/0edb66302b7f485527b3bc03fdff1d68695d354c/" +
+                        "v3-marketplace-image-catalog.json")
+                .when(imageCatalogTestClient.createIfNotExistV4())
                 .when((tc, dto, client) -> {
-                    selectedImageID.set(cloudProvider.getLatestBaseImageID(tc, dto, client));
+                    selectedImageID.set(cloudProvider.getLatestPreWarmedImageID(tc, dto, client));
                     return dto;
                 })
                 .given(imageSettings, DistroXImageTestDto.class)
-                    .withImageCatalog(cloudProvider.getImageCatalogName())
+                    .withImageCatalog(imgCatalogKey)
                     .withImageId(selectedImageID.get())
                 .given(distrox, DistroXTestDto.class)
                     .withImageSettings(imageSettings)

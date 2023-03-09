@@ -35,6 +35,13 @@ public class AzureRestOperationsService {
         return executeHttpCall(responseClass, restTemplate, requestEntity, HttpMethod.PUT);
     }
 
+    public <T> T httpPost(URI uri, Object body, Class<T> responseClass, String token) {
+        RestTemplate restTemplate = restTemplateFactory.create();
+        HttpHeaders headers = getHttpHeaders(token);
+        RequestEntity requestEntity = new RequestEntity(body, headers, HttpMethod.POST, uri);
+        return executeHttpCall(responseClass, restTemplate, requestEntity, HttpMethod.POST);
+    }
+
     private <T> T executeHttpCall(Class<T> responseClass, RestTemplate restTemplate, RequestEntity requestEntity, HttpMethod httpMethod) {
         try {
             ResponseEntity<T> response = restTemplate.exchange(requestEntity, responseClass);
