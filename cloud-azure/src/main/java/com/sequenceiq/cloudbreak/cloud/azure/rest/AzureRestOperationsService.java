@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class AzureRestOperationsService {
     public <T> T httpPut(URI uri, Object body, Class<T> responseClass, String token) {
         RestTemplate restTemplate = azureRestTemplateFactory.create();
         HttpHeaders headers = getHttpHeaders(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         RequestEntity requestEntity = new RequestEntity(body, headers, HttpMethod.PUT, uri);
         return executeHttpCall(responseClass, restTemplate, requestEntity, HttpMethod.PUT);
     }
