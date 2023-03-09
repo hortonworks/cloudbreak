@@ -8,6 +8,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUES
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -453,6 +455,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
         String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
         Map<String, Object> params = new HashMap<>();
+        putIfPresent(params, CloudInstance.ID, getIfNotNull(instanceMetaData, InstanceMetaData::getId));
         if (hostName != null) {
             hostName = getFreeIpaHostname(instanceMetaData, hostName);
             LOGGER.debug("Setting FreeIPA hostname to {}", hostName);
