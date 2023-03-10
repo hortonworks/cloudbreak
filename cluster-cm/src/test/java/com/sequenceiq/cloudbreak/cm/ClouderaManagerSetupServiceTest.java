@@ -16,6 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +44,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiConfigPolicy;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
@@ -186,6 +188,42 @@ public class ClouderaManagerSetupServiceTest {
         underTest.validateLicence();
 
         verify(clouderaManagerLicenseService, times(1)).validateClouderaManagerLicense(any());
+    }
+
+    @Test
+    public void testPublishPolicyWhenGovCloudAndHigherThan792() throws ApiException, IOException {
+        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
+        ArgumentCaptor<ApiConfigPolicy> argumentCaptor = ArgumentCaptor.forClass(ApiConfigPolicy.class);
+
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.addConfigPolicy(argumentCaptor.capture())).thenReturn(new ApiConfigPolicy());
+
+        underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.2\",\"displayName\":\"opdb\"}", true);
+
+        verify(clouderaManagerResourceApi, times(1)).addConfigPolicy(any());
+        Assertions.assertEquals(argumentCaptor.getValue().getVersion(), "1.0");
+        Assertions.assertEquals(argumentCaptor.getValue().getName(), "FISMA Policy For Login Banner");
+        Assertions.assertEquals(argumentCaptor.getValue().getDescription(), "Cloudera configured FISMA Policy For Login Banner");
+    }
+
+    @Test
+    public void testPublishPolicyWhenNonGovCloudAndHigherThan792() throws ApiException, IOException {
+        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
+        ArgumentCaptor<ApiConfigPolicy> argumentCaptor = ArgumentCaptor.forClass(ApiConfigPolicy.class);
+
+        underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.2\",\"displayName\":\"opdb\"}", false);
+
+        verify(clouderaManagerResourceApi, times(0)).addConfigPolicy(any());
+    }
+
+    @Test
+    public void testPublishPolicyWhenGovCloudAndLowerThan792() throws ApiException, IOException {
+        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
+        ArgumentCaptor<ApiConfigPolicy> argumentCaptor = ArgumentCaptor.forClass(ApiConfigPolicy.class);
+
+        underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.1\",\"displayName\":\"opdb\"}", true);
+
+        verify(clouderaManagerResourceApi, times(0)).addConfigPolicy(any());
     }
 
     @Test

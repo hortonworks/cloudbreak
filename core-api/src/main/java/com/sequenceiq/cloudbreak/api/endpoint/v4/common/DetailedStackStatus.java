@@ -81,6 +81,8 @@ public enum DetailedStackStatus {
     REMOVE_INSTANCE(Status.UPDATE_IN_PROGRESS),
     // Cluster operation is in progress
     CLUSTER_OPERATION(Status.UPDATE_IN_PROGRESS),
+    // Configure policy
+    CONFIGURE_POLICY(Status.UPDATE_IN_PROGRESS),
     // Wait for sync
     WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC),
     // Retry

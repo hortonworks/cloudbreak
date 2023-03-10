@@ -27,6 +27,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CONFIGURE_MANAGEMENT_SERVICES_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CONFIGURE_SUPPORT_TAGS_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CONFIGURE_SUPPORT_TAGS_SUCCESS_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CONFIG_POLICY_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CONFIG_POLICY_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.EXECUTE_POST_INSTALL_RECIPES_FAILED_EVENT;
@@ -101,6 +103,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.START_MANAGEMENT_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.SUPPRESS_WARNINGS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.UPDATE_CONFIG_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.UPDATING_CONFIG_POLICIES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.UPLOAD_RECIPES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.VALIDATE_CLOUD_STORAGE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.VALIDATE_LICENCE_STATE;
@@ -220,9 +223,13 @@ public class ClusterCreationFlowConfig extends StackStatusFinalizerAbstractFlowC
                     .event(CLUSTER_UPDATE_CONFIG_SUCCESS_EVENT)
                     .failureEvent(CLUSTER_UPDATE_CONFIG_FAILED_EVENT)
             .from(REFRESH_PARCEL_REPOS_STATE)
-                    .to(INSTALLING_CLUSTER_STATE)
+                    .to(UPDATING_CONFIG_POLICIES_STATE)
                     .event(REFRESH_PARCEL_REPOS_SUCCESS_EVENT)
                     .failureEvent(REFRESH_PARCEL_REPOS_FAILED_EVENT)
+            .from(UPDATING_CONFIG_POLICIES_STATE)
+                    .to(INSTALLING_CLUSTER_STATE)
+                    .event(CONFIG_POLICY_SUCCESS_EVENT)
+                    .failureEvent(CONFIG_POLICY_FAILED_EVENT)
             .from(INSTALLING_CLUSTER_STATE)
                     .to(AUTOCONFIGURE_CLUSTER_MANAGER_STATE)
                     .event(INSTALL_CLUSTER_FINISHED_EVENT)

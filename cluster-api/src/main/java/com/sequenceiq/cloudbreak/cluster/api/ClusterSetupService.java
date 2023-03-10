@@ -44,6 +44,8 @@ public interface ClusterSetupService {
 
     void installCluster(String template);
 
+    void publishPolicy(String template, boolean govCloud);
+
     void autoConfigureClusterManager();
 
     void startManagementServices();
