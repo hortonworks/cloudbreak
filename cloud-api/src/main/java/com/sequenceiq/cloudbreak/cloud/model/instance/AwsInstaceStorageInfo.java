@@ -36,7 +36,7 @@ public class AwsInstaceStorageInfo {
         this.instanceStorageSize = instanceStorageSize;
     }
 
-    public boolean getInstanceStorageSupport() {
+    public boolean isInstanceStorageSupport() {
         return instanceStorageSupport;
     }
 

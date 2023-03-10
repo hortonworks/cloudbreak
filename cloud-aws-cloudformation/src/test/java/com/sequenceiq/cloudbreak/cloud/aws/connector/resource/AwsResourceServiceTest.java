@@ -72,7 +72,7 @@ public class AwsResourceServiceTest {
         assertEquals(1, results.size());
         assertEquals(1, results.get(0).getInstanceStorageCount());
         assertEquals(100, results.get(0).getInstanceStorageSize());
-        assertTrue(results.get(0).getInstanceStorageSupport());
+        assertTrue(results.get(0).isInstanceStorageSupport());
     }
 
     @Test
