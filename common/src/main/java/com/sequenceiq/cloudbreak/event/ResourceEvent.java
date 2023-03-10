@@ -290,7 +290,7 @@ public enum ResourceEvent {
     STACK_LB_RESTART_CM("stack.lb.update.restart.cm"),
     STACK_LB_UPDATE_FINISHED("stack.lb.update.finished"),
     STACK_LB_UPDATE_FAILED("stack.lb.update.failed"),
-
+    CONFIGURE_POLICY("configure.policy"),
     CLUSTER_BUILDING("cluster.building"),
     CLUSTER_RESET("cluster.reset"),
     CLUSTER_BUILT("cluster.built"),

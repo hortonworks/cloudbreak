@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
@@ -151,6 +152,13 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
     public void installCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
         StackDto stackDto = stackDtoService.getById(stackId);
         getClusterSetupService(stackDto).installCluster(stackDto.getCluster().getExtendedBlueprintText());
+    }
+
+    public void configurePolicy(Long stackId) {
+        StackDto stackDto = stackDtoService.getById(stackId);
+        getClusterSetupService(stackDto).publishPolicy(
+                stackDto.getCluster().getExtendedBlueprintText(),
+                stackDto.getPlatformVariant().equals(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value()));
     }
 
     public void autoConfigureCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {

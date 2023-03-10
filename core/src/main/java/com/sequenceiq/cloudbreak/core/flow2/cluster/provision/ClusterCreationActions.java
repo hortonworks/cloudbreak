@@ -32,6 +32,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AutoConfigureClusterManagerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AutoConfigureClusterManagerSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ConfigurePolicyRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ConfigurePolicySuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterRequest;
@@ -525,11 +527,27 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "INSTALLING_CLUSTER_STATE")
-    public Action<?, ?> installingClusterAction() {
+    @Bean(name = "UPDATING_CONFIG_POLICIES_STATE")
+    public Action<?, ?> configurePolicyAction() {
         return new AbstractClusterCreationAction<>(ClusterManagerRefreshParcelSuccess.class) {
             @Override
             protected void doExecute(ClusterCreationViewContext context, ClusterManagerRefreshParcelSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.configurePolicy(context.getStackId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterCreationViewContext context) {
+                return new ConfigurePolicyRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "INSTALLING_CLUSTER_STATE")
+    public Action<?, ?> installingClusterAction() {
+        return new AbstractClusterCreationAction<>(ConfigurePolicySuccess.class) {
+            @Override
+            protected void doExecute(ClusterCreationViewContext context, ConfigurePolicySuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.installingCluster(context.getStackId());
                 sendEvent(context);
             }

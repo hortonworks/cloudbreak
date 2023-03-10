@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.util.HostUtil;
 
 @Component
 public class ClouderaManagerApiClientProvider {
+
     public static final String API_ROOT = "/api";
 
     public static final String API_V_31 = API_ROOT + "/v31";

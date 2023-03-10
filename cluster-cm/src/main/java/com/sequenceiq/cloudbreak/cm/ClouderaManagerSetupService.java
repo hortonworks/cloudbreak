@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,9 @@ import com.cloudera.api.swagger.model.ApiCluster;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiConfigEnforcement;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiConfigPolicy;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
@@ -75,6 +79,7 @@ import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -136,19 +141,25 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private ApiClient apiClient;
 
+    private String banner;
+
     public ClouderaManagerSetupService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
     }
 
     @PostConstruct
-    public void initApiClient() throws ClusterClientInitException {
+    public void initApiClient() throws ClusterClientInitException, IOException {
         ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
+
+        banner = FileReaderUtils.readFileFromClasspath("banner.txt");
         try {
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(cluster.getId());
-            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
+            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_9_2)) {
+                apiClient = clouderaManagerApiClientProvider.getV51Client(stack.getGatewayPort(), user, password, clientConfig);
+            } else if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
                 apiClient = clouderaManagerApiClientProvider.getV40Client(stack.getGatewayPort(), user, password, clientConfig);
             } else {
                 apiClient = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
@@ -290,6 +301,32 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.info("Error while configuring cloud storage. Message: {}", e.getMessage(), e);
             throw new ClouderaManagerOperationFailedException(mapStorageError(e, stack.getResourceCrn(), stack.getCloudPlatform(), cluster), e);
         } catch (Exception e) {
+            throw mapException(e);
+        }
+    }
+
+    @Override
+    public void publishPolicy(String template, boolean govCloud) {
+        try {
+            ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
+            if (govCloud && isVersionNewerOrEqualThanLimited(apiClusterTemplate.getCmVersion(), CLOUDERAMANAGER_VERSION_7_9_2)) {
+                LOGGER.info("Policy configuration will happen because the cluster is AWS GOV cluster.");
+                ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
+                ApiConfigPolicy apiConfigPolicy = new ApiConfigPolicy();
+                apiConfigPolicy.setVersion("1.0");
+                apiConfigPolicy.setDescription("Cloudera configured FISMA Policy For Login Banner");
+                apiConfigPolicy.setName("FISMA Policy For Login Banner");
+
+                List<ApiConfigEnforcement> apiConfigEnforcements = new ArrayList<>();
+                ApiConfigEnforcement apiConfigEnforcement = new ApiConfigEnforcement();
+                apiConfigEnforcement.setLabel("LOGIN_BANNER");
+                apiConfigEnforcement.setDefaultValue(banner);
+                apiConfigEnforcements.add(apiConfigEnforcement);
+                apiConfigPolicy.setConfigEnforcements(apiConfigEnforcements);
+                clouderaManagerResourceApi.addConfigPolicy(apiConfigPolicy);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Policy configuration error occurred.", e);
             throw mapException(e);
         }
     }
