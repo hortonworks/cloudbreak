@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.marketplace.endpoint.AzureMarketplaceTermsEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.CredentialPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
@@ -79,5 +80,11 @@ public class EnvironmentApiClientConfig {
     @ConditionalOnBean(name = "environmentApiClientWebTarget")
     AccountTelemetryEndpoint accountTelemetryEndpoint(WebTarget environmentApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, AccountTelemetryEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "environmentApiClientWebTarget")
+    AzureMarketplaceTermsEndpoint azureMarketplaceTermsEndpoint(WebTarget environmentApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, AzureMarketplaceTermsEndpoint.class);
     }
 }
