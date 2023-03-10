@@ -173,6 +173,7 @@ public class AwsCredentialConnector implements CredentialConnector {
                 "Bucket_Access", awsPlatformParameters.getCdpBucketAccessPolicyJson().get(getPolicyType(govCloud)),
                 "Environment", awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(getPolicyType(govCloud)),
                 "Ranger_Audit", awsPlatformParameters.getCdpRangerAuditS3PolicyJson().get(getPolicyType(govCloud)),
+                "Ranger_Raz", awsPlatformParameters.getCdpRangerRazS3PolicyJson().get(getPolicyType(govCloud)),
                 "Datalake_Admin", awsPlatformParameters.getCdpDatalakeAdminS3PolicyJson().get(getPolicyType(govCloud))
         );
     }

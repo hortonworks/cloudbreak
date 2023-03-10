@@ -90,6 +90,8 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<PolicyType, String> cdpRangerAuditS3PolicyJson;
 
+    private Map<PolicyType, String> cdpRangerRazS3PolicyJson;
+
     @PostConstruct
     public void init() {
         credentialPoliciesJson = initCBPolicyJson();
@@ -100,6 +102,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         cdpDynamoDbPolicyJson = initCdpDynamoDbPolicyJson();
         cdpBucketAccessPolicyJson = initCdpBucketAccessPolicyJson();
         cdpRangerAuditS3PolicyJson = initCdpRangerAuditS3PolicyJson();
+        cdpRangerRazS3PolicyJson = initCdpRangerRazS3PolicyJson();
         cdpDatalakeAdminS3PolicyJson = initCdpDatalakeAdminS3PolicyJson();
     }
 
@@ -223,6 +226,10 @@ public class AwsPlatformParameters implements PlatformParameters {
         return cdpRangerAuditS3PolicyJson;
     }
 
+    public Map<PolicyType, String> getCdpRangerRazS3PolicyJson() {
+        return cdpRangerRazS3PolicyJson;
+    }
+
     private VmRecommendations initVmRecommendations() {
         VmRecommendations result = null;
         String vmRecommendation = resourceDefinition("vm-recommendation");
@@ -273,6 +280,11 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<PolicyType, String> initCdpRangerAuditS3PolicyJson() {
         String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-ranger-audit-s3-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private Map<PolicyType, String> initCdpRangerRazS3PolicyJson() {
+        String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-ranger-raz-s3-policy");
         return getPolicyJson(resourceDefinition);
     }
 

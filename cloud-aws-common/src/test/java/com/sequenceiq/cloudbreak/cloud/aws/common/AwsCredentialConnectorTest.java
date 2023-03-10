@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.experience.PolicyServiceName.MLX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -32,12 +33,15 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissing
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialViewProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponses;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialSettings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.common.model.CredentialType;
 
 import software.amazon.awssdk.core.exception.SdkException;
 
@@ -356,6 +360,42 @@ public class AwsCredentialConnectorTest {
         assertEquals("ml", result.getResults().stream().findFirst().get().getServiceName());
         assertEquals(exceptionMessageComesFromSdk, result.getResults().stream().findFirst().get().getServiceStatus());
         assertEquals(503, result.getResults().stream().findFirst().get().getStatusCode());
+    }
+
+    @Test
+    public void testgetPrerequisites() throws IOException {
+
+        Map<PolicyType, String> credentialPoliciesJson = Map.of(PolicyType.PUBLIC, "testCredentialPoliciesJson");
+        Map<PolicyType, String> auditPoliciesJson = Map.of(PolicyType.PUBLIC, "testAuditPoliciesJson");
+        Map<PolicyType, String> dynamodbJson = Map.of(PolicyType.PUBLIC, "testDynamodbJson");
+        Map<PolicyType, String> bucketAccessJson = Map.of(PolicyType.PUBLIC, "testBucketAccessJson");
+        Map<PolicyType, String> environmentJson = Map.of(PolicyType.PUBLIC, "testEnvironmentJson");
+        Map<PolicyType, String> rangerAuditJson = Map.of(PolicyType.PUBLIC, "testRangerAuditJson");
+        Map<PolicyType, String> rangeRazJson = Map.of(PolicyType.PUBLIC, "testRangeRazJson");
+        Map<PolicyType, String> dataLakeAdminJson = Map.of(PolicyType.PUBLIC, "testDataLakeAdminJson");
+
+        when(awsPlatformParameters.getCredentialPoliciesJson()).thenReturn(credentialPoliciesJson);
+        when(awsPlatformParameters.getAuditPoliciesJson()).thenReturn(auditPoliciesJson);
+        when(awsPlatformParameters.getCdpDynamoDbPolicyJson()).thenReturn(dynamodbJson);
+        when(awsPlatformParameters.getCdpBucketAccessPolicyJson()).thenReturn(bucketAccessJson);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(environmentJson);
+        when(awsPlatformParameters.getCdpRangerAuditS3PolicyJson()).thenReturn(rangerAuditJson);
+        when(awsPlatformParameters.getCdpRangerRazS3PolicyJson()).thenReturn(rangeRazJson);
+        when(awsPlatformParameters.getCdpDatalakeAdminS3PolicyJson()).thenReturn(dataLakeAdminJson);
+
+        CredentialPrerequisitesResponse result = underTest.getPrerequisites(CloudContext.Builder.builder().build(), "externalId",
+                "auditExtenralId", "deploymentaddress", CredentialType.ENVIRONMENT);
+
+        assertNotNull(result);
+        assertEquals(7, result.getAws().getPolicies().size());
+        assertTrue(result.getAws().getPolicies().containsKey("Audit"));
+        assertTrue(result.getAws().getPolicies().containsKey("DynamoDB"));
+        assertTrue(result.getAws().getPolicies().containsKey("Bucket_Access"));
+        assertTrue(result.getAws().getPolicies().containsKey("Environment"));
+        assertTrue(result.getAws().getPolicies().containsKey("Ranger_Audit"));
+        assertTrue(result.getAws().getPolicies().containsKey("Ranger_Raz"));
+        assertTrue(result.getAws().getPolicies().containsKey("Datalake_Admin"));
+
     }
 
 }
