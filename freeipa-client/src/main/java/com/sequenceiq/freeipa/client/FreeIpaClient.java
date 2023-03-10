@@ -141,8 +141,8 @@ public class FreeIpaClient {
      * Finds all users in FreeIPA. This command sends a user_find request with the sizelimit
      * and timelimit set to 0.
      *
-     * @param searchString      the search string
-     * @param additionalParams  additional parameters, e.g., ("all", true) or ("pkey_only", true)
+     * @param searchString     the search string
+     * @param additionalParams additional parameters, e.g., ("all", true) or ("pkey_only", true)
      * @return Set of found Users
      */
     public Set<User> userFindAll(Optional<String> searchString, Map<String, Object> additionalParams)
@@ -302,7 +302,7 @@ public class FreeIpaClient {
     public Set<Cert> findAllCert() throws FreeIpaClientException {
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, Cert.class);
-        return (Set<Cert>) invoke("cert_find", List.of(), Map.of(), type).getResult();
+        return (Set<Cert>) invoke("cert_find", List.of(), UNLIMITED_PARAMS, type).getResult();
     }
 
     public void revokeCert(long serialNumber) throws FreeIpaClientException {
@@ -322,7 +322,8 @@ public class FreeIpaClient {
     }
 
     public Set<Permission> findPermission(String permission) throws FreeIpaClientException {
-        Map<String, Object> params = Map.of("cn", permission);
+        Map<String, Object> params = new HashMap<>(UNLIMITED_PARAMS);
+        params.put("cn", permission);
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, Permission.class);
         return (Set<Permission>) invoke("permission_find", List.of(), params, type).getResult();
@@ -357,10 +358,8 @@ public class FreeIpaClient {
 
     public Set<DnsZone> findAllDnsZone() throws FreeIpaClientException {
         List<Object> flags = List.of();
-        Map<String, Object> params = Map.of(
-                "sizelimit", 0,
-                "raw", true
-        );
+        Map<String, Object> params = new HashMap<>(UNLIMITED_PARAMS);
+        params.put("raw", true);
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, DnsZone.class);
         return (Set<DnsZone>) invoke("dnszone_find", flags, params, type).getResult();
@@ -368,11 +367,11 @@ public class FreeIpaClient {
 
     public Set<DnsZone> findDnsZone(String cidr) throws FreeIpaClientException {
         List<Object> flags = List.of();
-        Map<String, Object> params = Map.of(
-                "sizelimit", 0,
+        Map<String, Object> params = new HashMap<>(UNLIMITED_PARAMS);
+        params.putAll(Map.of(
                 "raw", true,
                 "name_from_ip", cidr
-        );
+        ));
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, DnsZone.class);
         return (Set<DnsZone>) invoke("dnszone_find", flags, params, type).getResult();
@@ -507,10 +506,9 @@ public class FreeIpaClient {
 
     public Set<DnsRecord> findAllDnsRecordInZone(String dnsZoneName) throws FreeIpaClientException {
         List<Object> flags = List.of(dnsZoneName);
-        Map<String, Object> params = Map.of();
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, DnsRecord.class);
-        return (Set<DnsRecord>) invoke("dnsrecord_find", flags, params, type).getResult();
+        return (Set<DnsRecord>) invoke("dnsrecord_find", flags, UNLIMITED_PARAMS, type).getResult();
     }
 
     public RPCResponse<Object> deleteDnsRecord(String recordName, String dnsZoneName) throws FreeIpaClientException {
@@ -637,18 +635,16 @@ public class FreeIpaClient {
 
     public List<TopologySuffix> findAllTopologySuffixes() throws FreeIpaClientException {
         List<Object> flags = List.of();
-        Map<String, Object> params = Map.of();
         ParameterizedType type = TypeUtils
                 .parameterize(List.class, TopologySuffix.class);
-        return (List<TopologySuffix>) invoke("topologysuffix_find", flags, params, type).getResult();
+        return (List<TopologySuffix>) invoke("topologysuffix_find", flags, UNLIMITED_PARAMS, type).getResult();
     }
 
     public List<TopologySegment> findTopologySegments(String topologySuffixCn) throws FreeIpaClientException {
         List<Object> flags = List.of(topologySuffixCn);
-        Map<String, Object> params = Map.of();
         ParameterizedType type = TypeUtils
                 .parameterize(List.class, TopologySegment.class);
-        return (List<TopologySegment>) invoke("topologysegment_find", flags, params, type).getResult();
+        return (List<TopologySegment>) invoke("topologysegment_find", flags, UNLIMITED_PARAMS, type).getResult();
     }
 
     public TopologySegment addTopologySegment(String topologySuffixCn, TopologySegment topologySegment) throws FreeIpaClientException {
