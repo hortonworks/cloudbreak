@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.util.aws.amazoncf.action;
 
+import static software.amazon.awssdk.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
+import static software.amazon.awssdk.services.cloudformation.model.StackStatus.DELETE_IN_PROGRESS;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,6 +20,7 @@ import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesRe
 import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesResponse;
 import software.amazon.awssdk.services.cloudformation.model.Stack;
 import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
+import software.amazon.awssdk.services.cloudformation.model.StackStatus;
 import software.amazon.awssdk.services.cloudformation.model.StackSummary;
 
 @Component
@@ -25,7 +29,7 @@ public class CfClientActions {
 
     private static final String CLOUDERA_ENVIRONMENT_RESOURCE_NAME = "Cloudera-Environment-Resource-Name";
 
-    private static final Set DO_NOT_LIST_CLOUDFORMATIONS_STATUSES = Set.of("DELETE_COMPLETE", "DELETE_IN_PROGRESS");
+    private static final Set<StackStatus> DO_NOT_LIST_CLOUDFORMATIONS_STATUSES = Set.of(DELETE_COMPLETE, DELETE_IN_PROGRESS);
 
     @Inject
     private CfClient cfClient;
