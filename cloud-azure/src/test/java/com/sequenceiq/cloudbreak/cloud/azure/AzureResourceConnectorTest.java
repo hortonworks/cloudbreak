@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,12 +22,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentExportResult;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDatabaseResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -117,6 +121,9 @@ public class AzureResourceConnectorTest {
 
     @Mock
     private AzureDatabaseResourceService azureDatabaseResourceService;
+
+    @Mock
+    private AzureImageTermsSignerService azureImageTermsSignerService;
 
     private List<CloudResource> instances;
 
@@ -213,11 +220,29 @@ public class AzureResourceConnectorTest {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureImageFormatValidator.isMarketplaceImageFormat(any())).thenReturn(true);
+        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.TRUE.toString()));
+        ReflectionTestUtils.setField(underTest, "enableAzureImageTermsAutomaticSigner", true);
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
         underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
 
         verify(azureMarketplaceImageProviderService, times(1)).get(imageModel);
+        verify(azureImageTermsSignerService, times(1)).sign(eq(null), eq(null), any());
+    }
+
+    @Test
+    public void testWhenMarketplaceImageThenTemplateBuilderUsesMarketplaceImageGlobalSettingOff() {
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
+        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(any())).thenReturn(true);
+        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.FALSE.toString()));
+        ReflectionTestUtils.setField(underTest, "enableAzureImageTermsAutomaticSigner", true);
+
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
+        underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
+
+        verify(azureMarketplaceImageProviderService, times(1)).get(imageModel);
+        verify(azureImageTermsSignerService, never()).sign(eq(null), eq(null), any());
     }
 
     @Test

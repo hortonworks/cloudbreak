@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -120,9 +122,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
             LOGGER.debug("Launching with Azure Marketplace image {}", stackImage);
             AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stackImage);
-            if (enableAzureImageTermsAutomaticSigner) {
-                azureImageTermsSignerService.sign(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
-            }
+            signImageTermsIfAllowed(stack, azureCredentialView, client, azureMarketplaceImage);
             template = azureTemplateBuilder.build(stackName, null, azureCredentialView, azureStackView,
                     cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         } else {
@@ -182,6 +182,17 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         List<CloudResourceStatus> resources = check(ac, Collections.singletonList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
+    }
+
+    private void signImageTermsIfAllowed(CloudStack stack, AzureCredentialView azureCredentialView, AzureClient client,
+            AzureMarketplaceImage azureMarketplaceImage) {
+        Boolean automaticTermsAcceptance = Boolean.valueOf(stack.getParameters().get(ACCEPTANCE_POLICY_PARAMETER));
+        if (enableAzureImageTermsAutomaticSigner && automaticTermsAcceptance) {
+            azureImageTermsSignerService.sign(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
+        } else {
+            LOGGER.debug("Azure automatic image term signing skipped: [cb.arm.marketplace.image.automatic.signer={}], [automaticTermsAcceptancePolicy={}]",
+                    enableAzureImageTermsAutomaticSigner, automaticTermsAcceptance);
+        }
     }
 
     @Override

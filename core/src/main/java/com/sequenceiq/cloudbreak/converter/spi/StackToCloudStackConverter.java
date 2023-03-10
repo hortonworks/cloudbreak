@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_CRN_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
@@ -78,6 +79,7 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.marketplace.AzureMarketplaceTermsClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.TargetGroupPortProvider;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
@@ -135,6 +137,9 @@ public class StackToCloudStackConverter {
 
     @Inject
     private TargetGroupPortProvider targetGroupPortProvider;
+
+    @Inject
+    private AzureMarketplaceTermsClientService azureMarketplaceTermsClientService;
 
     public CloudStack convert(StackDtoDelegate stack) {
         return convert(stack, Collections.emptySet());
@@ -567,8 +572,14 @@ public class StackToCloudStackConverter {
             params.put(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName);
             params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
         }
+        Optional<Boolean> acceptancePolicy = getAzureMarketplaceTermsAcceptancePolicy(CloudPlatform.valueOf(stack.getCloudPlatform()));
+        acceptancePolicy.ifPresent(acceptance -> params.put(ACCEPTANCE_POLICY_PARAMETER, acceptance.toString()));
         params.put(RESOURCE_CRN_PARAMETER, stack.getResourceCrn());
         return params;
+    }
+
+    private Optional<Boolean> getAzureMarketplaceTermsAcceptancePolicy(CloudPlatform platform) {
+        return CloudPlatform.AZURE.equals(platform) ? Optional.of(azureMarketplaceTermsClientService.getAccepted()) : Optional.empty();
     }
 
     private Optional<AzureResourceGroup> getAzureResourceGroup(DetailedEnvironmentResponse environment, CloudPlatform platform) {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static java.util.Collections.emptyList;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -75,6 +77,7 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.marketplace.AzureMarketplaceTermsClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.TargetGroupPortProvider;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
@@ -193,6 +196,9 @@ public class StackToCloudStackConverterTest {
 
     @Mock
     private DetailedEnvironmentResponse environment;
+
+    @Mock
+    private AzureMarketplaceTermsClientService azureMarketplaceTermsClientService;
 
     @BeforeEach
     public void setUp() {
@@ -936,8 +942,9 @@ public class StackToCloudStackConverterTest {
         assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
     }
 
-    @Test
-    public void testBuildCloudStackParametersAzureSingleResourceGroup() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testBuildCloudStackParametersAzureSingleResourceGroup(Boolean input) {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform("AZURE");
         environmentResponse.setAzure(AzureEnvironmentParameters.builder()
@@ -952,13 +959,15 @@ public class StackToCloudStackConverterTest {
         expected.put("key", "value");
         when(stack.getParameters()).thenReturn(expected);
         when(stack.getStack()).thenReturn(stack);
+        when(azureMarketplaceTermsClientService.getAccepted()).thenReturn(input);
 
         CloudStack result = underTest.convert(stack);
         Map<String, String> parameters = result.getParameters();
 
         assertEquals(RESOURCE_GROUP, parameters.get(RESOURCE_GROUP_NAME_PARAMETER));
         assertEquals(ResourceGroupUsage.SINGLE.name(), parameters.get(RESOURCE_GROUP_USAGE_PARAMETER));
-        assertEquals(4, parameters.size());
+        assertEquals(parameters.get(ACCEPTANCE_POLICY_PARAMETER), input.toString());
+        assertEquals(5, parameters.size());
     }
 
     @Test
@@ -983,7 +992,8 @@ public class StackToCloudStackConverterTest {
 
         assertFalse(parameters.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
         assertFalse(parameters.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
-        assertEquals(2, parameters.size());
+        assertEquals(parameters.get(ACCEPTANCE_POLICY_PARAMETER), Boolean.FALSE.toString());
+        assertEquals(3, parameters.size());
     }
 
     private StackAuthentication createStackAuthentication() {
