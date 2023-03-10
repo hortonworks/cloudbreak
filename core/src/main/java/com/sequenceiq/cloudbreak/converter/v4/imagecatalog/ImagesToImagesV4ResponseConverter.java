@@ -1,13 +1,20 @@
 package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
@@ -26,6 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 
 @Component
 public class ImagesToImagesV4ResponseConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImagesToImagesV4ResponseConverter.class);
 
     @Inject
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
@@ -66,8 +75,19 @@ public class ImagesToImagesV4ResponseConverter {
                     imgJson.setRepository(new HashMap<>());
                     return imgJson;
                 })
+                .sorted((o1, o2) -> parseDate(o1).compareTo(parseDate(o2)))
                 .collect(Collectors.toList());
         return baseImages;
+    }
+
+    private Date parseDate(BaseImageV4Response image) {
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        try {
+            return formatter.parse(image.getDate());
+        } catch (ParseException e) {
+            LOGGER.error("Invalid Date in image catalog for image: {}", image);
+            return new Date();
+        }
     }
 
     private List<ClouderaManagerStackDetailsV4Response> getDefaultCdhStackInfo(Map<String, ImageBasedDefaultCDHInfo> defaultStackInfo) {
