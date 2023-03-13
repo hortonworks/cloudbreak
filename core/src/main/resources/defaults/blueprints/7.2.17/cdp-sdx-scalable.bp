@@ -95,6 +95,13 @@
       },
       {
         "cardinality":0,
+        "refName":"razHG",
+        "roleConfigGroupsRefNames":[
+          "ranger-RANGER_ADMIN-BASE"
+        ]
+      },
+      {
+        "cardinality":0,
         "refName":"AtlasHG",
         "roleConfigGroupsRefNames":[
           "atlas-ATLAS_SERVER-BASE"
