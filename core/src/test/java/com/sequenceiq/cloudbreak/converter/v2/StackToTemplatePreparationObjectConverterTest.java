@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
-import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -272,9 +271,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private LoadBalancerFqdnUtil loadBalancerFqdnUtil;
-
-    @Mock
-    private AwsEndpointProvider awsEndpointProvider;
 
     @BeforeEach
     public void setUp() throws IOException, TransactionService.TransactionExecutionException {

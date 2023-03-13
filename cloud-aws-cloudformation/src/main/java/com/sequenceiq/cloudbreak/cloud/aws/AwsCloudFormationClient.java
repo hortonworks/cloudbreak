@@ -34,7 +34,6 @@ public class AwsCloudFormationClient extends AwsClient {
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName))
                 .overrideConfiguration(getDefaultClientConfiguration());
-        setupFipsEndpointIfNecessary(CloudFormationClient.SERVICE_NAME, regionName, awsCredential).ifPresent(cloudFormationClientBuilder::endpointOverride);
         return cloudFormationClientBuilder.build();
     }
 
@@ -43,7 +42,6 @@ public class AwsCloudFormationClient extends AwsClient {
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName))
                 .overrideConfiguration(getDefaultClientConfiguration());
-        setupFipsEndpointIfNecessary(AutoScalingClient.SERVICE_NAME, regionName, awsCredential).ifPresent(autoScalingClientBuilder::endpointOverride);
         return new AmazonAutoScalingClient(proxy(autoScalingClientBuilder.build(), awsCredential, regionName), retry);
     }
 }

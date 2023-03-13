@@ -44,7 +44,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
@@ -473,7 +472,6 @@ class AwsInstanceConnectorTest {
             AwsDefaultZoneProvider.class,
             AwsEnvironmentVariableChecker.class,
             RetryService.class,
-            AwsEndpointProvider.class,
             AwsRegionEndpointProvider.class,
             AwsServiceEndpointProvider.class
     })

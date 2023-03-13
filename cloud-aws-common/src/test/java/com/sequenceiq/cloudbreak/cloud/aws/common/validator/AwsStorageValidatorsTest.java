@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSessionCredentialClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.config.AwsConfig;
-import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
@@ -245,7 +244,6 @@ public class AwsStorageValidatorsTest {
             SubnetFilterStrategyMultiplePreferPrivate.class,
             SubnetSelectorService.class,
             AwsPageCollector.class,
-            AwsEndpointProvider.class,
             AwsRegionEndpointProvider.class,
             AwsServiceEndpointProvider.class
     })
