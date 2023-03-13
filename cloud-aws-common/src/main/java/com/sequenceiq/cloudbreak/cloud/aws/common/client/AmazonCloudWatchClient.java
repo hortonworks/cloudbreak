@@ -1,36 +1,36 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.model.DeleteAlarmsRequest;
-import com.amazonaws.services.cloudwatch.model.DeleteAlarmsResult;
-import com.amazonaws.services.cloudwatch.model.DescribeAlarmsRequest;
-import com.amazonaws.services.cloudwatch.model.DescribeAlarmsResult;
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsRequest;
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
-import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest;
-import com.amazonaws.services.cloudwatch.model.PutMetricAlarmResult;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
+import software.amazon.awssdk.services.cloudwatch.model.DeleteAlarmsRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DeleteAlarmsResponse;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsResponse;
+import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsRequest;
+import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsResponse;
+import software.amazon.awssdk.services.cloudwatch.model.PutMetricAlarmRequest;
+import software.amazon.awssdk.services.cloudwatch.model.PutMetricAlarmResponse;
 
 public class AmazonCloudWatchClient extends AmazonClient {
 
-    private final AmazonCloudWatch client;
+    private final CloudWatchClient client;
 
-    public AmazonCloudWatchClient(AmazonCloudWatch client) {
+    public AmazonCloudWatchClient(CloudWatchClient client) {
         this.client = client;
     }
 
-    public PutMetricAlarmResult putMetricAlarm(PutMetricAlarmRequest metricAlarmRequest) {
+    public PutMetricAlarmResponse putMetricAlarm(PutMetricAlarmRequest metricAlarmRequest) {
         return client.putMetricAlarm(metricAlarmRequest);
     }
 
-    public DescribeAlarmsResult describeAlarms(DescribeAlarmsRequest request) {
+    public DescribeAlarmsResponse describeAlarms(DescribeAlarmsRequest request) {
         return client.describeAlarms(request);
     }
 
-    public DeleteAlarmsResult deleteAlarms(DeleteAlarmsRequest deleteAlarmsRequest) {
+    public DeleteAlarmsResponse deleteAlarms(DeleteAlarmsRequest deleteAlarmsRequest) {
         return client.deleteAlarms(deleteAlarmsRequest);
     }
 
-    public GetMetricStatisticsResult getMetricStatisticsResult(GetMetricStatisticsRequest getMetricStatisticsRequest) {
+    public GetMetricStatisticsResponse getMetricStatisticsResponse(GetMetricStatisticsRequest getMetricStatisticsRequest) {
         return client.getMetricStatistics(getMetricStatisticsRequest);
     }
 }

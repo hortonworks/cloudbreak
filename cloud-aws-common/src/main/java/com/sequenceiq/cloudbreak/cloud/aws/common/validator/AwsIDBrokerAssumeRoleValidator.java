@@ -16,20 +16,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.auth.policy.actions.SecurityTokenServiceActions;
-import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
-import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.PolicyEvaluationDecisionType;
-import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.IamException;
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.PolicyEvaluationDecisionType;
+import software.amazon.awssdk.services.iam.model.Role;
+
 @Component
 public class AwsIDBrokerAssumeRoleValidator {
-    static final Collection<String> ASSUME_ROLE_ACTION = Collections.singletonList(
-            SecurityTokenServiceActions.AssumeRole.getActionName());
+
+    private static final Collection<String> ASSUME_ROLE_ACTION = Collections.singletonList("sts:AssumeRole");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsIDBrokerAssumeRoleValidator.class);
 
@@ -38,26 +38,26 @@ public class AwsIDBrokerAssumeRoleValidator {
 
     public boolean canAssumeRoles(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
             Collection<Role> roles, ValidationResultBuilder resultBuilder) {
-        Collection<String> roleArns = roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new));
+        Collection<String> roleArns = roles.stream().map(Role::arn).collect(Collectors.toCollection(TreeSet::new));
 
-        for (Role instanceProfileRole : instanceProfile.getRoles()) {
+        for (Role instanceProfileRole : instanceProfile.roles()) {
             try {
                 List<EvaluationResult> evaluationResults = awsIamService.simulatePrincipalPolicy(iam,
-                        instanceProfileRole.getArn(), ASSUME_ROLE_ACTION, roleArns);
+                        instanceProfileRole.arn(), ASSUME_ROLE_ACTION, roleArns);
                 for (EvaluationResult evaluationResult : evaluationResults) {
-                    if (PolicyEvaluationDecisionType.Allowed.toString().equals(evaluationResult.getEvalDecision())) {
-                        roleArns.remove(evaluationResult.getEvalResourceName());
+                    if (PolicyEvaluationDecisionType.ALLOWED.toString().equals(evaluationResult.evalDecision().toString())) {
+                        roleArns.remove(evaluationResult.evalResourceName());
                     }
                 }
-            } catch (AmazonIdentityManagementException e) {
+            } catch (IamException e) {
                 // Log the error and return true. We don't want to block if there is an IAM failure.
                 // This can happen due to throttling or other issues.
                 // If error messages access denied we add the error to the result
                 LOGGER.error("Unable to check assume role from instance profile {} for roles {} due to {}",
-                        instanceProfile.getArn(), roleArns, e.getMessage(), e);
-                if ("AccessDenied".equals(e.getErrorCode())) {
+                        instanceProfile.arn(), roleArns, e.getMessage(), e);
+                if ("AccessDenied".equals(e.awsErrorDetails().errorCode())) {
                     resultBuilder.error(String.format("Unable to check assume role from Instance profile %s from roles %s because access is denied.",
-                            instanceProfile.getArn(), roleArns));
+                            instanceProfile.arn(), roleArns));
                     return false;
                 }
                 return true;
@@ -72,8 +72,8 @@ public class AwsIDBrokerAssumeRoleValidator {
         } else {
             resultBuilder.error(
                     String.format("Data Access Instance profile (%s) doesn't have permissions to assume " +
-                                    "the role(s): %s. " + getAdviceMessage(INSTANCE_PROFILE, ID_BROKER),
-                            instanceProfile.getArn(), roleArns));
+                                    "the role(s): %s. %s",
+                            instanceProfile.arn(), roleArns, getAdviceMessage(INSTANCE_PROFILE, ID_BROKER)));
             return false;
         }
     }

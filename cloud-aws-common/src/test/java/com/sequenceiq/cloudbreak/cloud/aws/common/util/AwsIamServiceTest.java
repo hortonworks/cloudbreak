@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.util;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,31 +25,29 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.auth.policy.Action;
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.auth.policy.Principal;
-import com.amazonaws.auth.policy.Resource;
-import com.amazonaws.auth.policy.Statement;
-import com.amazonaws.auth.policy.Statement.Effect;
-import com.amazonaws.auth.policy.actions.AutoScalingActions;
-import com.amazonaws.auth.policy.actions.S3Actions;
-import com.amazonaws.auth.policy.actions.SecurityTokenServiceActions;
-import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.GetInstanceProfileRequest;
-import com.amazonaws.services.identitymanagement.model.GetInstanceProfileResult;
-import com.amazonaws.services.identitymanagement.model.GetRoleRequest;
-import com.amazonaws.services.identitymanagement.model.GetRoleResult;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
-import com.amazonaws.services.identitymanagement.model.PolicyEvaluationDecisionType;
-import com.amazonaws.services.identitymanagement.model.Role;
-import com.amazonaws.services.identitymanagement.model.ServiceFailureException;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.CloudIdentityType;
+
+import software.amazon.awssdk.core.auth.policy.Action;
+import software.amazon.awssdk.core.auth.policy.Policy;
+import software.amazon.awssdk.core.auth.policy.Principal;
+import software.amazon.awssdk.core.auth.policy.Resource;
+import software.amazon.awssdk.core.auth.policy.Statement;
+import software.amazon.awssdk.core.auth.policy.Statement.Effect;
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.GetInstanceProfileRequest;
+import software.amazon.awssdk.services.iam.model.GetInstanceProfileResponse;
+import software.amazon.awssdk.services.iam.model.GetRoleRequest;
+import software.amazon.awssdk.services.iam.model.GetRoleResponse;
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.NoSuchEntityException;
+import software.amazon.awssdk.services.iam.model.PolicyEvaluationDecisionType;
+import software.amazon.awssdk.services.iam.model.Role;
+import software.amazon.awssdk.services.iam.model.ServiceFailureException;
+import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyRequest;
+import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsIamServiceTest {
@@ -107,16 +104,15 @@ public class AwsIamServiceTest {
     public void validInstanceProfile() {
         String instanceProfileArn = "account/validInstanceProfile";
 
-        InstanceProfile expectedInstanceProfile = new InstanceProfile().withArn(instanceProfileArn);
-        GetInstanceProfileResult getInstanceProfileResult = mock(GetInstanceProfileResult.class);
-        when(getInstanceProfileResult.getInstanceProfile()).thenReturn(expectedInstanceProfile);
+        InstanceProfile expectedInstanceProfile = InstanceProfile.builder().arn(instanceProfileArn).build();
+        GetInstanceProfileResponse getInstanceProfileResult = GetInstanceProfileResponse.builder().instanceProfile(expectedInstanceProfile).build();
         when(iam.getInstanceProfile(any(GetInstanceProfileRequest.class))).thenReturn(getInstanceProfileResult);
 
         ValidationResultBuilder validationRequestBuilder = new ValidationResultBuilder();
         InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn, CloudIdentityType.ID_BROKER,
                 validationRequestBuilder);
 
-        assertThat(instanceProfile.getArn()).isEqualTo(instanceProfileArn);
+        assertThat(instanceProfile.arn()).isEqualTo(instanceProfileArn);
         assertThat(validationRequestBuilder.build().hasError()).isFalse();
     }
 
@@ -163,15 +159,14 @@ public class AwsIamServiceTest {
     public void validRole() {
         String roleArn = "account/validRole";
 
-        Role expectedRole = new Role().withArn(roleArn);
-        GetRoleResult getRoleResult = mock(GetRoleResult.class);
-        when(getRoleResult.getRole()).thenReturn(expectedRole);
+        Role expectedRole = Role.builder().arn(roleArn).build();
+        GetRoleResponse getRoleResult = GetRoleResponse.builder().role(expectedRole).build();
         when(iam.getRole(any(GetRoleRequest.class))).thenReturn(getRoleResult);
 
         ValidationResultBuilder validationRequestBuilder = new ValidationResultBuilder();
         Role role = awsIamService.getRole(iam, roleArn, validationRequestBuilder);
 
-        assertThat(role.getArn()).isEqualTo(roleArn);
+        assertThat(role.arn()).isEqualTo(roleArn);
         assertThat(validationRequestBuilder.build().hasError()).isFalse();
     }
 
@@ -182,14 +177,12 @@ public class AwsIamServiceTest {
         String encodedAssumeRolePolicyDocument = URLEncoder.encode(assumeRolePolicyDocument,
                 StandardCharsets.UTF_8);
 
-
         Statement statement = new Statement(Effect.Allow).withId("1")
                 .withPrincipals(new Principal("AWS", "arn:aws:iam::123456890:role/assume-role"))
-                .withActions(SecurityTokenServiceActions.AssumeRole);
+                .withActions(new Action("sts:AssumeRole"));
         Policy expectedAssumeRolePolicy = new Policy().withStatements(statement);
 
-        Role role = mock(Role.class);
-        when(role.getAssumeRolePolicyDocument()).thenReturn(encodedAssumeRolePolicyDocument);
+        Role role = Role.builder().assumeRolePolicyDocument(encodedAssumeRolePolicyDocument).build();
 
         Policy assumeRolePolicy = awsIamService.getAssumeRolePolicy(role);
         assertThat(assumeRolePolicy).isNotNull();
@@ -198,8 +191,8 @@ public class AwsIamServiceTest {
 
     @Test
     public void testInvalidGetAssumeRolePolicyDocument() {
-        assertThat(awsIamService.getAssumeRolePolicy(new Role())).isNull();
-        Role role = new Role().withAssumeRolePolicyDocument("}garbage");
+        assertThat(awsIamService.getAssumeRolePolicy(Role.builder().build())).isNull();
+        Role role = Role.builder().assumeRolePolicyDocument("}garbage").build();
         assertThat(awsIamService.getAssumeRolePolicy(role)).isNull();
     }
 
@@ -240,11 +233,11 @@ public class AwsIamServiceTest {
 
         Policy expectedPolicyNoReplacements = new Policy().withStatements(
                 new Statement(Effect.Allow).withId("FullObjectAccessUnderAuditDir")
-                        .withActions(S3Actions.GetObject, S3Actions.PutObject)
+                        .withActions(new Action("s3:GetObject"), new Action("s3:PutObject"))
                         .withResources(new Resource("arn:${ARN_PARTITION}:s3:::${STORAGE_LOCATION_BASE}/ranger/audit/*")),
                 new Statement(Effect.Allow).withId("LimitedAccessToDataLakeBucket")
-                        .withActions(S3Actions.AbortMultipartUpload, S3Actions.ListObjects,
-                                S3Actions.ListBucketMultipartUploads)
+                        .withActions(new Action("s3:AbortMultipartUpload"), new Action("s3:ListBucket"),
+                                new Action("s3:ListBucketMultipartUploads"))
                         .withResources(new Resource("arn:${ARN_PARTITION}:s3:::${DATALAKE_BUCKET}"))
         );
         assertThat(awsIamService.getPolicy("aws-cdp-ranger-audit-s3-policy.json",
@@ -252,11 +245,11 @@ public class AwsIamServiceTest {
 
         Policy expectedPolicyWithReplacements = new Policy().withStatements(
                 new Statement(Effect.Allow).withId("FullObjectAccessUnderAuditDir")
-                        .withActions(S3Actions.GetObject, S3Actions.PutObject)
+                        .withActions(new Action("s3:GetObject"), new Action("s3:PutObject"))
                         .withResources(new Resource("arn:aws-us-gov:s3:::mybucket/mycluster/ranger/audit/*")),
                 new Statement(Effect.Allow).withId("LimitedAccessToDataLakeBucket")
-                        .withActions(S3Actions.AbortMultipartUpload, S3Actions.ListObjects,
-                                S3Actions.ListBucketMultipartUploads)
+                        .withActions(new Action("s3:AbortMultipartUpload"), new Action("s3:ListBucket"),
+                                new Action("s3:ListBucketMultipartUploads"))
                         .withResources(new Resource("arn:aws-us-gov:s3:::mybucket"))
         );
 
@@ -274,16 +267,16 @@ public class AwsIamServiceTest {
                 .isEqualTo(new TreeSet<>());
 
         SortedSet<String> expectedSingleAction = new TreeSet<>();
-        expectedSingleAction.add(S3Actions.GetObject.getActionName());
-        Statement statementSingleAction = new Statement(Effect.Allow).withActions(S3Actions.GetObject);
+        expectedSingleAction.add("s3:GetObject");
+        Statement statementSingleAction = new Statement(Effect.Allow).withActions(new Action("s3:GetObject"));
         assertThat(awsIamService.getStatementActions(statementSingleAction))
                 .isEqualTo(expectedSingleAction);
 
         SortedSet<String> expectedMultipleActions = new TreeSet<>();
-        expectedMultipleActions.add(S3Actions.GetObject.getActionName());
-        expectedMultipleActions.add(S3Actions.PutObject.getActionName());
+        expectedMultipleActions.add("s3:GetObject");
+        expectedMultipleActions.add("s3:PutObject");
         Statement statementMultipleActions = new Statement(Effect.Allow)
-                .withActions(S3Actions.GetObject, S3Actions.PutObject);
+                .withActions(new Action("s3:GetObject"), new Action("s3:PutObject"));
         assertThat(awsIamService.getStatementActions(statementMultipleActions))
                 .isEqualTo(expectedMultipleActions);
     }
@@ -315,23 +308,23 @@ public class AwsIamServiceTest {
     public void testValidateRolePolicies() {
         ArgumentCaptor<SimulatePrincipalPolicyRequest> simulatePolicyRequestCaptor = ArgumentCaptor.forClass(SimulatePrincipalPolicyRequest.class);
         when(iam.simulatePrincipalPolicy(simulatePolicyRequestCaptor.capture()))
-                .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(new EvaluationResult()
-                        .withEvalDecision(PolicyEvaluationDecisionType.Allowed)));
+                .thenReturn(SimulatePrincipalPolicyResponse.builder().evaluationResults(EvaluationResult.builder()
+                        .evalDecision(PolicyEvaluationDecisionType.ALLOWED).build()).build());
         Policy policy1 = new Policy();
         Set<Statement> statements1 = Set.of(
-                createStatement(Set.of(AutoScalingActions.CreateAutoScalingGroup, AutoScalingActions.DeleteAutoScalingGroup),
+                createStatement(Set.of(new Action("autoscaling:CreateAutoScalingGroup"), new Action("autoscaling:DeleteAutoScalingGroup")),
                         Set.of(new Resource("resource1"), new Resource("resource2"))),
-                createStatement(Set.of(S3Actions.GetObject, S3Actions.PutObject),
+                createStatement(Set.of(new Action("s3:GetObject"), new Action("s3:PutObject")),
                         Set.of(new Resource("resource1"), new Resource("resource2"), new Resource("resource3"), new Resource("resource4")))
         );
         policy1.getStatements().addAll(statements1);
         Policy policy2 = new Policy();
         Set<Statement> statements2 = Set.of(
-                createStatement(Set.of(AutoScalingActions.AttachLoadBalancers, AutoScalingActions.AttachLoadBalancerTargetGroups),
+                createStatement(Set.of(new Action("autoscaling:AttachLoadBalancers"), new Action("autoscaling:AttachLoadBalancerTargetGroups")),
                         Set.of(new Resource("resource1"), new Resource("resource2"))),
-                createStatement(Set.of(S3Actions.GetObject, S3Actions.PutObject),
+                createStatement(Set.of(new Action("s3:GetObject"), new Action("s3:PutObject")),
                         Set.of(new Resource("resource5"))),
-                createStatement(Set.of(S3Actions.GetObject, S3Actions.PutObject),
+                createStatement(Set.of(new Action("s3:GetObject"), new Action("s3:PutObject")),
                         Set.of(new Resource("resource6")))
         );
         policy2.setStatements(statements2);
@@ -345,33 +338,33 @@ public class AwsIamServiceTest {
 
         SimulatePrincipalPolicyRequest request1;
         SimulatePrincipalPolicyRequest request2;
-        if (requests.get(0).getResourceArns().size() == 6) {
+        if (requests.get(0).resourceArns().size() == 6) {
             request1 = requests.get(0);
             request2 = requests.get(1);
         } else {
             request1 = requests.get(1);
             request2 = requests.get(0);
         }
-        assertEquals("roleArn", request1.getPolicySourceArn());
-        assertEquals("roleArn", request2.getPolicySourceArn());
-        assertThat(request1.getResourceArns()).containsExactlyInAnyOrder("resource1", "resource2", "resource3", "resource4", "resource5", "resource6");
-        assertThat(request2.getResourceArns()).containsExactlyInAnyOrder("resource1", "resource2");
-        assertThat(request1.getActionNames()).containsExactlyInAnyOrder("s3:GetObject", "s3:PutObject");
-        assertThat(request2.getActionNames()).containsExactlyInAnyOrder("autoscaling:CreateAutoScalingGroup", "autoscaling:DeleteAutoScalingGroup",
+        assertEquals("roleArn", request1.policySourceArn());
+        assertEquals("roleArn", request2.policySourceArn());
+        assertThat(request1.resourceArns()).containsExactlyInAnyOrder("resource1", "resource2", "resource3", "resource4", "resource5", "resource6");
+        assertThat(request2.resourceArns()).containsExactlyInAnyOrder("resource1", "resource2");
+        assertThat(request1.actionNames()).containsExactlyInAnyOrder("s3:GetObject", "s3:PutObject");
+        assertThat(request2.actionNames()).containsExactlyInAnyOrder("autoscaling:CreateAutoScalingGroup", "autoscaling:DeleteAutoScalingGroup",
                 "autoscaling:AttachLoadBalancers", "autoscaling:AttachLoadBalancerTargetGroups");
     }
 
     @Test
     public void testInvalidValidateRolePolicies() {
         when(iam.simulatePrincipalPolicy(any()))
-                .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(new EvaluationResult()
-                        .withEvalDecision(PolicyEvaluationDecisionType.ExplicitDeny)));
+                .thenReturn(SimulatePrincipalPolicyResponse.builder().evaluationResults(EvaluationResult.builder()
+                        .evalDecision(PolicyEvaluationDecisionType.EXPLICIT_DENY).build()).build());
 
-        Policy policy = new Policy().withStatements(createStatement(Set.of(S3Actions.GetObject), Set.of(new Resource("resource1"))));
+        Policy policy = new Policy().withStatements(createStatement(Set.of(new Action("s3:GetObject")), Set.of(new Resource("resource1"))));
         List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, createRole(), Set.of(policy));
         assertThat(evaluationResults).hasSize(1);
         EvaluationResult evaluationResult = evaluationResults.get(0);
-        assertEquals("explicitDeny", evaluationResult.getEvalDecision());
+        assertEquals("explicitDeny", evaluationResult.evalDecision().toString());
         verify(iam, times(1)).simulatePrincipalPolicy(any());
     }
 
@@ -383,6 +376,6 @@ public class AwsIamServiceTest {
     }
 
     private Role createRole() {
-        return new Role().withArn("roleArn");
+        return Role.builder().arn("roleArn").build();
     }
 }

@@ -180,11 +180,7 @@ public class RepairInstancesService {
     public OperationStatus repairInstances(String accountId, RepairInstancesRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
         LOGGER.debug("Repairing freeipa instances, request: {}", request);
-        if (request.isForceRepair() && CollectionUtils.isEmpty(request.getInstanceIds())) {
-            String message = "Force repair requires the instance IDs to be provided.";
-            LOGGER.error(message);
-            throw new UnsupportedOperationException(message);
-        }
+        validateForceRepairHasInstances(request);
 
         Map<String, InstanceStatus> healthMap = request.isForceRepair() ? Collections.emptyMap() : getInstanceHealthMap(accountId, request.getEnvironmentCrn());
         Map<String, InstanceMetaData> allInstancesByInstanceId = getAllInstancesFromStack(stack);
@@ -210,6 +206,14 @@ public class RepairInstancesService {
                     operation.getOperationId(), nodeCount, new ArrayList<>(instancesToRepair.keySet()), additionalTerminatedInstanceIds));
         }
         return operationToOperationStatusConverter.convert(operation);
+    }
+
+    private void validateForceRepairHasInstances(RepairInstancesRequest request) {
+        if (request.isForceRepair() && CollectionUtils.isEmpty(request.getInstanceIds())) {
+            String message = "Force repair requires the instance IDs to be provided.";
+            LOGGER.error(message);
+            throw new BadRequestException(message);
+        }
     }
 
     private Set<InstanceMetaData> getRemainingGoodInstances(Map<String, InstanceMetaData> allInstancesByInstanceId,

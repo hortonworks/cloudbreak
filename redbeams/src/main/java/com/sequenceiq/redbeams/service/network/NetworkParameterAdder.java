@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.service.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
 import java.util.List;
 import java.util.Map;
 
@@ -27,8 +29,6 @@ public class NetworkParameterAdder {
     private static final String SHARED_PROJECT_ID = "sharedProjectId";
 
     private static final String VPC_CIDRS = "vpcCidrs";
-
-    private static final String SUBNET_ID = "subnetId";
 
     private static final String AVAILABILITY_ZONE = "availabilityZone";
 

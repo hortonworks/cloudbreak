@@ -13,10 +13,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
-import com.amazonaws.services.autoscaling.model.Instance;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -30,6 +26,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
+import software.amazon.awssdk.services.autoscaling.model.Instance;
 
 @Component
 public class AwsCloudFormationSetup extends AwsSetup {
@@ -61,10 +62,10 @@ public class AwsCloudFormationSetup extends AwsSetup {
                 inst -> InstanceStatus.CREATE_REQUESTED == inst.getTemplate().getStatus())).collect(Collectors.toList());
         Map<String, Group> groupMap = groups.stream().collect(
                 Collectors.toMap(g -> cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, g.getName()), g -> g));
-        DescribeAutoScalingGroupsResult result = amazonASClient.describeAutoScalingGroups(
-                new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(groupMap.keySet()));
-        for (AutoScalingGroup asg : result.getAutoScalingGroups()) {
-            Group group = groupMap.get(asg.getAutoScalingGroupName());
+        DescribeAutoScalingGroupsResponse result = amazonASClient.describeAutoScalingGroups(
+                DescribeAutoScalingGroupsRequest.builder().autoScalingGroupNames(groupMap.keySet()).build());
+        for (AutoScalingGroup asg : result.autoScalingGroups()) {
+            Group group = groupMap.get(asg.autoScalingGroupName());
             List<CloudInstance> groupInstances = group.getInstances().stream().filter(
                     inst -> InstanceStatus.CREATED.equals(inst.getTemplate().getStatus())).collect(Collectors.toList());
             List<CloudVmInstanceStatus> instanceStatuses = instanceConnector.check(ac, groupInstances);
@@ -73,20 +74,20 @@ public class AwsCloudFormationSetup extends AwsSetup {
                 LOGGER.info(errorMessage);
                 throw new CloudConnectorException(errorMessage);
             }
-            List<Instance> asgOnlyInstances = asg.getInstances().stream()
-                    .filter(inst -> groupInstances.stream().noneMatch(gi -> gi.getInstanceId().equals(inst.getInstanceId()))).collect(Collectors.toList());
+            List<Instance> asgOnlyInstances = asg.instances().stream()
+                    .filter(inst -> groupInstances.stream().noneMatch(gi -> gi.getInstanceId().equals(inst.instanceId()))).collect(Collectors.toList());
             List<CloudInstance> cbOnlyInstances = groupInstances.stream()
-                    .filter(gi -> asg.getInstances().stream().noneMatch(inst -> inst.getInstanceId().equals(gi.getInstanceId()))).collect(Collectors.toList());
+                    .filter(gi -> asg.instances().stream().noneMatch(inst -> inst.instanceId().equals(gi.getInstanceId()))).collect(Collectors.toList());
             if (!asgOnlyInstances.isEmpty() || !cbOnlyInstances.isEmpty()) {
                 String errorMessage = "The instances in the autoscaling group are not in sync with the instances in cloudbreak! Cloudbreak only instances: ["
                         + cbOnlyInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(",")) + "], AWS only instances: ["
-                        + asgOnlyInstances.stream().map(Instance::getInstanceId).collect(Collectors.joining(",")) + "]. Upscale is not possible!";
+                        + asgOnlyInstances.stream().map(Instance::instanceId).collect(Collectors.joining(",")) + "]. Upscale is not possible!";
                 LOGGER.info(errorMessage);
                 throw new CloudConnectorException(errorMessage);
             }
-            if (groupInstances.size() != asg.getDesiredCapacity()) {
+            if (groupInstances.size() != asg.desiredCapacity()) {
                 String errorMessage = String.format("The autoscale group's desired instance count is not match with the instance count in the cloudbreak."
-                        + " Desired count: %d <> cb instance count: %d. Upscale is not possible!", asg.getDesiredCapacity(), groupInstances.size());
+                        + " Desired count: %d <> cb instance count: %d. Upscale is not possible!", asg.desiredCapacity(), groupInstances.size());
                 LOGGER.info(errorMessage);
                 throw new CloudConnectorException(errorMessage);
             }

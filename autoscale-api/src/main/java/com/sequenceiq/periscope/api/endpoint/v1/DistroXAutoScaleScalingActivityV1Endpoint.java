@@ -70,8 +70,23 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_OPERATION_ID,
             produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
-    DistroXAutoscaleScalingActivityResponse getScalingActivityUsingOperationId(
+    DistroXAutoscaleScalingActivityResponse getScalingActivityUsingOperationIdAndClusterCrn(
             @PathParam("clusterCrn") @NotNull String clusterCrn,
+            @PathParam("operationId") @NotNull String operationId);
+
+    /**
+     * Returns Scaling activity for a particular operation ID value.
+     * @param clusterName Name of cluster where the scaling activity belongs.
+     * @param operationId the value for which we want the scaling activity value.
+     * @return A particular scaling activity value associated with the input Id value and cluster name.
+     */
+    @GET
+    @Path("cluster_name/{clusterName}/operation_id/{operationId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_OPERATION_ID,
+            produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
+    DistroXAutoscaleScalingActivityResponse getScalingActivityUsingOperationIdAndClusterName(
+            @PathParam("clusterName") @NotNull String clusterName,
             @PathParam("operationId") @NotNull String operationId);
 
     /**

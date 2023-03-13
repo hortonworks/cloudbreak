@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import com.amazonaws.services.rds.model.DBInstance;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
-import com.amazonaws.waiters.WaiterState;
+import software.amazon.awssdk.core.waiters.WaiterState;
+import software.amazon.awssdk.services.rds.model.DBInstance;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
 class DescribeDbInstanceForModifyFailureAcceptorTest {
 
@@ -21,9 +21,9 @@ class DescribeDbInstanceForModifyFailureAcceptorTest {
                         "failed".equals(status2) ||
                         "deleted".equals(status1) ||
                         "deleted".equals(status2);
-                DBInstance dbInstance1 = new DBInstance().withDBInstanceStatus(status1);
-                DBInstance dbInstance2 = new DBInstance().withDBInstanceStatus(status2);
-                DescribeDBInstancesResult describeDBInstanceResult = new DescribeDBInstancesResult().withDBInstances(dbInstance1, dbInstance2);
+                DBInstance dbInstance1 = DBInstance.builder().dbInstanceStatus(status1).build();
+                DBInstance dbInstance2 = DBInstance.builder().dbInstanceStatus(status2).build();
+                DescribeDbInstancesResponse describeDBInstanceResult = DescribeDbInstancesResponse.builder().dbInstances(dbInstance1, dbInstance2).build();
                 boolean matches = underTest.matches(describeDBInstanceResult);
                 assertThat(matches)
                         .withFailMessage("matches expected as '%s' but was '%s' for DB instance states '%s' and '%s'",
@@ -35,6 +35,6 @@ class DescribeDbInstanceForModifyFailureAcceptorTest {
 
     @Test
     void getState() {
-        assertThat(underTest.getState()).isEqualTo(WaiterState.FAILURE);
+        assertThat(underTest.waiterState()).isEqualTo(WaiterState.FAILURE);
     }
 }

@@ -208,7 +208,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> allTargets = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             uploadSignKey(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
             OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, targets, params);
-            Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
+            Callable<Boolean> saltBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt bootstrap", e);
@@ -381,10 +381,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void uploadMountScriptsAndMakeThemExecutable(Set<Node> nodes, ExitCriteriaModel exitModel, Set<String> allTargets, Target<String> allHosts,
             SaltConnector sc) throws IOException {
         Map.of(
-                DISK_INITIALIZE, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_INITIALIZE).getBytes(),
-                DISK_COMMON, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_COMMON).getBytes(),
-                DISK_FORMAT, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_FORMAT).getBytes(),
-                DISK_MOUNT, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_MOUNT).getBytes())
+                        DISK_INITIALIZE, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_INITIALIZE).getBytes(),
+                        DISK_COMMON, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_COMMON).getBytes(),
+                        DISK_FORMAT, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_FORMAT).getBytes(),
+                        DISK_MOUNT, readFileFromClasspath(DISK_SCRIPT_PATH + DISK_MOUNT).getBytes())
                 .entrySet()
                 .stream()
                 .map(script -> {
@@ -701,11 +701,13 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void installFreeIpaReplicas(SaltConnector sc, Set<String> newFreeIpaReplicaHostnames, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws Exception {
-        LOGGER.debug("New Replica FreeIPAs: [{}]", newFreeIpaReplicaHostnames);
-        if (!newFreeIpaReplicaHostnames.isEmpty()) {
+        LOGGER.debug("New Replica FreeIPAs: {}", newFreeIpaReplicaHostnames);
+        for (String newFreeIpaReplicaHostname : newFreeIpaReplicaHostnames) {
+            LOGGER.debug("New Replica FreeIPA: [{}]", newFreeIpaReplicaHostname);
             saltCommandRunner.runModifyGrainCommand(sc,
-                    new GrainAddRunner(saltStateService, newFreeIpaReplicaHostnames, allNodes, FREEIPA_REPLICA_ROLE), exitCriteriaModel, exitCriteria);
-            runNewService(sc, new HighStateRunner(saltStateService, newFreeIpaReplicaHostnames, allNodes), exitCriteriaModel);
+                    new GrainAddRunner(saltStateService, Set.of(newFreeIpaReplicaHostname), allNodes, FREEIPA_REPLICA_ROLE), exitCriteriaModel, exitCriteria);
+            runNewService(sc, new HighStateRunner(saltStateService, Set.of(newFreeIpaReplicaHostname), allNodes), exitCriteriaModel);
+            LOGGER.debug("New Replica FreeIPA installation finished for: [{}]", newFreeIpaReplicaHostname);
         }
     }
 

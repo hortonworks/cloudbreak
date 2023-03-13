@@ -35,7 +35,7 @@ public abstract class GcpDatabaseServerBaseService extends AbstractGcpDatabaseBa
     }
 
     protected CloudResource getDatabaseCloudResource(String deploymentName, String availabilityZone) {
-        return new CloudResource.Builder()
+        return CloudResource.builder()
                 .withType(ResourceType.GCP_DATABASE)
                 .withName(deploymentName)
                 .withAvailabilityZone(availabilityZone)

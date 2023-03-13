@@ -170,22 +170,41 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
     }
 
     @Test
-    public void testGetScalingActivityUsingOperationId() {
+    public void testGetScalingActivityUsingOperationIdAndClusterCrn() {
         DistroXAutoscaleScalingActivityResponse distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivityUsingOperationId(TEST_CLUSTER_CRN, TEST_OPERATION_ID);
+                .getScalingActivityUsingOperationIdAndClusterCrn(TEST_CLUSTER_CRN, TEST_OPERATION_ID);
         assertEquals(TEST_OPERATION_ID, distroXAutoscaleScalingActivityResponse.getOperationId());
     }
 
     @Test
-    public void testGetScalingActivityUsingOperationIdWithIdNotFound() {
-        assertThrows(NotFoundException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivityUsingOperationId(TEST_CLUSTER_CRN, TEST_OPERATION_ID_9));
+    public void testGetScalingActivityUsingOperationIdAndClusterName() {
+        DistroXAutoscaleScalingActivityResponse distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Endpoint
+                .getScalingActivityUsingOperationIdAndClusterName(TEST_CLUSTER_NAME, TEST_OPERATION_ID);
+        assertEquals(TEST_OPERATION_ID, distroXAutoscaleScalingActivityResponse.getOperationId());
     }
 
     @Test
-    public void testGetScalingActivityUsingOperationIdWithNullId() {
+    public void testGetScalingActivityUsingOperationIdAndClusterCrnWithIdNotFound() {
+        assertThrows(NotFoundException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
+                .getScalingActivityUsingOperationIdAndClusterCrn(TEST_CLUSTER_CRN, TEST_OPERATION_ID_9));
+    }
+
+    @Test
+    public void testGetScalingActivityUsingOperationIdAndClusterNameWithIdNotFound() {
+        assertThrows(NotFoundException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
+                .getScalingActivityUsingOperationIdAndClusterName(TEST_CLUSTER_NAME, TEST_OPERATION_ID_9));
+    }
+
+    @Test
+    public void testGetScalingActivityUsingOperationIdandClusterCrnWithNullId() {
         assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivityUsingOperationId(TEST_CLUSTER_CRN, TEST_OPERATION_ID_NULL));
+                .getScalingActivityUsingOperationIdAndClusterCrn(TEST_CLUSTER_CRN, TEST_OPERATION_ID_NULL));
+    }
+
+    @Test
+    public void testGetScalingActivityUsingOperationIdAndClusterNameWithNullId() {
+        assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
+                .getScalingActivityUsingOperationIdAndClusterName(TEST_CLUSTER_CRN, TEST_OPERATION_ID_NULL));
     }
 
     @Test

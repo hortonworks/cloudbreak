@@ -18,11 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.OrganizationsDecisionDetail;
-import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
@@ -31,6 +26,12 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.model.CloudIdentityType;
+
+import software.amazon.awssdk.core.auth.policy.Policy;
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
+import software.amazon.awssdk.services.iam.model.Role;
 
 @ExtendWith(MockitoExtension.class)
 class AwsLogRolePermissionValidatorTest {
@@ -90,8 +91,8 @@ class AwsLogRolePermissionValidatorTest {
         cloudFileSystem.setLocations(List.of(storageLocationBase));
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         when(awsIamService.validateRolePolicies(eq(amazonIdentityManagementClient), any(), any())).thenReturn(
-                List.of(new EvaluationResult().withOrganizationsDecisionDetail(
-                        new OrganizationsDecisionDetail().withAllowedByOrganizations(false)).withEvalDecision("deny")));
+                List.of(EvaluationResult.builder().organizationsDecisionDetail(
+                        OrganizationsDecisionDetail.builder().allowedByOrganizations(false).build()).evalDecision("deny").build()));
         underTest.validate(amazonIdentityManagementClient, instanceProfile, cloudFileSystem, "s3://logs/",
                 resultBuilder, new Policy(), false);
 
@@ -102,8 +103,9 @@ class AwsLogRolePermissionValidatorTest {
     }
 
     private InstanceProfile instanceProfile() {
-        return new InstanceProfile()
-                .withArn("arn:aws:iam::11111111111:instance-profile/instanceprofile")
-                .withRoles(new Role().withArn("arn:aws:iam::123456890:role/role"));
+        return InstanceProfile.builder()
+                .arn("arn:aws:iam::11111111111:instance-profile/instanceprofile")
+                .roles(Role.builder().arn("arn:aws:iam::123456890:role/role").build())
+                .build();
     }
 }

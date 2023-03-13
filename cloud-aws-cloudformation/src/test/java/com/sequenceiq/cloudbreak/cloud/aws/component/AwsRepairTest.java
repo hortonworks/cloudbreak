@@ -7,22 +7,18 @@ import static com.sequenceiq.cloudbreak.cloud.aws.component.ComponentTestUtil.IN
 import static com.sequenceiq.cloudbreak.cloud.aws.component.ComponentTestUtil.SIZE_DISK_1;
 import static com.sequenceiq.cloudbreak.cloud.aws.component.ComponentTestUtil.SIZE_DISK_2;
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +27,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -40,36 +37,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
-import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
-import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
-import com.amazonaws.services.autoscaling.model.Instance;
-import com.amazonaws.services.autoscaling.model.LifecycleState;
-import com.amazonaws.services.autoscaling.waiters.AmazonAutoScalingWaiters;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.StackResourceDetail;
-import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters;
-import com.amazonaws.services.cloudwatch.model.DescribeAlarmsResult;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.amazonaws.services.ec2.model.Reservation;
-import com.amazonaws.services.ec2.model.VolumeState;
-import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
-import com.amazonaws.services.elasticfilesystem.model.CreateFileSystemResult;
-import com.amazonaws.services.elasticfilesystem.model.DeleteFileSystemResult;
-import com.amazonaws.services.elasticfilesystem.model.DeleteMountTargetResult;
-import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsResult;
-import com.amazonaws.services.elasticfilesystem.model.DescribeMountTargetsResult;
-import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
-import com.amazonaws.services.elasticfilesystem.model.LifeCycleState;
-import com.amazonaws.services.elasticfilesystem.model.MountTargetDescription;
-import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
@@ -106,7 +75,34 @@ import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@RunWith(SpringRunner.class)
+import software.amazon.awssdk.core.waiters.Waiter;
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
+import software.amazon.awssdk.services.autoscaling.model.DescribeScalingActivitiesRequest;
+import software.amazon.awssdk.services.autoscaling.model.DescribeScalingActivitiesResponse;
+import software.amazon.awssdk.services.autoscaling.model.Instance;
+import software.amazon.awssdk.services.autoscaling.model.LifecycleState;
+import software.amazon.awssdk.services.autoscaling.waiters.AutoScalingWaiter;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourceResponse;
+import software.amazon.awssdk.services.cloudformation.model.StackResourceDetail;
+import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
+import software.amazon.awssdk.services.ec2.model.Reservation;
+import software.amazon.awssdk.services.ec2.model.VolumeState;
+import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
+import software.amazon.awssdk.services.efs.model.CreateFileSystemResponse;
+import software.amazon.awssdk.services.efs.model.DeleteFileSystemResponse;
+import software.amazon.awssdk.services.efs.model.DeleteMountTargetResponse;
+import software.amazon.awssdk.services.efs.model.DescribeFileSystemsResponse;
+import software.amazon.awssdk.services.efs.model.DescribeMountTargetsResponse;
+import software.amazon.awssdk.services.efs.model.FileSystemDescription;
+import software.amazon.awssdk.services.efs.model.LifeCycleState;
+import software.amazon.awssdk.services.efs.model.MountTargetDescription;
+
+@ExtendWith(SpringExtension.class)
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
         "cb.max.aws.resource.name.length=200",
@@ -148,31 +144,6 @@ public class AwsRepairTest {
 
     private static final String EFS_FILESYSTEM_ID = "fs-";
 
-    private static int efsIdIndex = 1;
-
-    private static final String EFS_CREATIONTOKEN = "efs-creation-token";
-
-    @MockBean
-    private CreateFileSystemResult createFileSystemResult;
-
-    @MockBean
-    private DescribeFileSystemsResult describeFileSystemsResult;
-
-    @MockBean
-    private FileSystemDescription efsDescription1;
-
-    @MockBean
-    private DescribeMountTargetsResult describeMountTargetsResult;
-
-    @MockBean
-    private MountTargetDescription mtDescription;
-
-    @MockBean
-    private DeleteMountTargetResult deleteMtResult;
-
-    @MockBean
-    private DeleteFileSystemResult deleteFileSystemResult;
-
     @MockBean
     private LocationHelper locationHelper;
 
@@ -213,19 +184,13 @@ public class AwsRepairTest {
     private AmazonAutoScalingClient amazonAutoScalingClient;
 
     @MockBean
-    private AmazonCloudFormationWaiters cfWaiters;
+    private CloudFormationWaiter cfWaiters;
 
     @MockBean
-    private AmazonAutoScalingWaiters asWaiters;
+    private AutoScalingWaiter asWaiters;
 
     @MockBean
-    private AmazonEC2Waiters ecWaiters;
-
-    @MockBean
-    private Waiter<DescribeStacksRequest> cfStackWaiter;
-
-    @MockBean
-    private Waiter<DescribeInstancesRequest> instanceWaiter;
+    private Ec2Waiter ecWaiters;
 
     @MockBean
     private AwsCloudFormationClient awsClient;
@@ -234,13 +199,10 @@ public class AwsRepairTest {
     private AmazonCloudWatchClient cloudWatchClient;
 
     @MockBean
-    private DescribeAlarmsResult describeAlarmsResult;
+    private Waiter<DescribeAutoScalingGroupsResponse> describeAutoScalingGroupsRequestWaiter;
 
     @MockBean
-    private Waiter<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequestWaiter;
-
-    @MockBean
-    private Waiter<DescribeScalingActivitiesRequest> describeScalingActivitiesRequestWaiter;
+    private Waiter<DescribeScalingActivitiesResponse> describeScalingActivitiesRequestWaiter;
 
     @MockBean
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;
@@ -267,40 +229,40 @@ public class AwsRepairTest {
         when(awsClient.createElasticFileSystemClient(any(), anyString())).thenReturn(amazonEfsClient);
         when(awsClient.createCloudFormationClient(any(), anyString())).thenReturn(amazonCloudFormationClient);
         when(amazonCloudFormationClient.waiters()).thenReturn(cfWaiters);
-        when(cfWaiters.stackCreateComplete()).thenReturn(cfStackWaiter);
-        when(cfWaiters.stackDeleteComplete()).thenReturn(cfStackWaiter);
         when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);
         when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);
         when(awsClient.createCloudWatchClient(any(), anyString())).thenReturn(cloudWatchClient);
-        when(cloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResult);
-        when(describeAlarmsResult.getMetricAlarms()).thenReturn(Collections.emptyList());
+        when(cloudWatchClient.describeAlarms(any())).thenReturn(DescribeAlarmsResponse.builder().build());
         when(amazonAutoScalingClient.waiters()).thenReturn(asWaiters);
-        when(asWaiters.groupInService()).thenReturn(describeAutoScalingGroupsRequestWaiter);
         when(amazonEC2Client.waiters()).thenReturn(ecWaiters);
-        when(ecWaiters.instanceRunning()).thenReturn(instanceWaiter);
-        when(ecWaiters.instanceTerminated()).thenReturn(instanceWaiter);
-        when(customAmazonWaiterProvider.getAutoscalingInstancesInServiceWaiter(any(), any())).thenReturn(describeAutoScalingGroupsRequestWaiter);
-        when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
+        when(customAmazonWaiterProvider.getAutoscalingInstancesInServiceWaiter(any())).thenReturn(describeAutoScalingGroupsRequestWaiter);
+        when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any())).thenReturn(describeScalingActivitiesRequestWaiter);
 
+        CreateFileSystemResponse createFileSystemResult = CreateFileSystemResponse.builder()
+                .fileSystemId(EFS_FILESYSTEM_ID)
+                .name(EFS_FILESYSTEM_ID)
+                .lifeCycleState("creating")
+                .build();
         when(amazonEfsClient.createFileSystem(any())).thenReturn(createFileSystemResult);
         when(amazonEfsClient.createFileSystem(any())).thenReturn(createFileSystemResult);
-        when(createFileSystemResult.getFileSystemId()).thenReturn(EFS_FILESYSTEM_ID + efsIdIndex);
-        when(createFileSystemResult.getName()).thenReturn(EFS_FILESYSTEM_ID + efsIdIndex);
-        when(createFileSystemResult.getLifeCycleState()).thenReturn("creating");
 
+        FileSystemDescription efsDescription1 = FileSystemDescription.builder()
+                .fileSystemId(EFS_FILESYSTEM_ID)
+                .lifeCycleState(LifeCycleState.AVAILABLE).build();
+        DescribeFileSystemsResponse describeFileSystemsResult = DescribeFileSystemsResponse.builder().fileSystems(efsDescription1).build();
         when(amazonEfsClient.describeFileSystems(any())).thenReturn(describeFileSystemsResult);
         when(amazonEfsClient.describeFileSystems(any())).thenReturn(describeFileSystemsResult);
-        when(describeFileSystemsResult.getFileSystems()).thenReturn(Arrays.asList(efsDescription1));
-        when(efsDescription1.getFileSystemId()).thenReturn(EFS_FILESYSTEM_ID + efsIdIndex);
-        when(efsDescription1.getLifeCycleState()).thenReturn(LifeCycleState.Available.toString());
 
+        DescribeMountTargetsResponse describeMountTargetsResult = DescribeMountTargetsResponse.builder()
+                .mountTargets(MountTargetDescription.builder().mountTargetId("mounttarget-1").build())
+                .build();
         when(amazonEfsClient.describeMountTargets(any())).thenReturn(describeMountTargetsResult);
         when(amazonEfsClient.describeMountTargets(any())).thenReturn(describeMountTargetsResult);
-        when(describeMountTargetsResult.getMountTargets()).thenReturn(Arrays.asList(mtDescription));
-        when(mtDescription.getMountTargetId()).thenReturn("mounttarget-1");
 
+        DeleteMountTargetResponse deleteMtResult = DeleteMountTargetResponse.builder().build();
         when(amazonEfsClient.deleteMountTarget(any())).thenReturn(deleteMtResult);
         when(amazonEfsClient.deleteMountTarget(any())).thenReturn(deleteMtResult);
+        DeleteFileSystemResponse deleteFileSystemResult = DeleteFileSystemResponse.builder().build();
         when(amazonEfsClient.deleteFileSystem(any())).thenReturn(deleteFileSystemResult);
         when(amazonEfsClient.deleteFileSystem(any())).thenReturn(deleteFileSystemResult);
 
@@ -309,7 +271,7 @@ public class AwsRepairTest {
     }
 
     private void setupRetryService() {
-        when(retry.testWith2SecDelayMax15Times(any())).then(answer -> ((Supplier) answer.getArgument(0)).get());
+        when(retry.testWith2SecDelayMax15Times(any())).then(answer -> ((Supplier<?>) answer.getArgument(0)).get());
     }
 
     private void upscaleStack() throws Exception {
@@ -327,56 +289,53 @@ public class AwsRepairTest {
         InMemoryStateStore.putStack(1L, PollGroup.POLLABLE);
 
         when(amazonCloudFormationClient.describeStackResource(any()))
-                .thenReturn(new DescribeStackResourceResult()
-                        .withStackResourceDetail(new StackResourceDetail().withPhysicalResourceId(AUTOSCALING_GROUP_NAME)));
+                .thenReturn(DescribeStackResourceResponse.builder()
+                        .stackResourceDetail(StackResourceDetail.builder().physicalResourceId(AUTOSCALING_GROUP_NAME).build()).build());
 
         when(amazonAutoScalingClient.describeAutoScalingGroups(any()))
-                .thenReturn(new DescribeAutoScalingGroupsResult()
-                        .withAutoScalingGroups(new AutoScalingGroup()
-                                .withAutoScalingGroupName(AUTOSCALING_GROUP_NAME)
-                                .withInstances(List.of(
-                                        new Instance().withInstanceId(INSTANCE_ID_1).withLifecycleState(LifecycleState.InService),
-                                        new Instance().withInstanceId(INSTANCE_ID_2).withLifecycleState(LifecycleState.InService)))
-                        ));
+                .thenReturn(DescribeAutoScalingGroupsResponse.builder()
+                        .autoScalingGroups(AutoScalingGroup.builder()
+                                .autoScalingGroupName(AUTOSCALING_GROUP_NAME)
+                                .instances(List.of(
+                                        Instance.builder().instanceId(INSTANCE_ID_1).lifecycleState(LifecycleState.IN_SERVICE).build(),
+                                        Instance.builder().instanceId(INSTANCE_ID_2).lifecycleState(LifecycleState.IN_SERVICE).build()))
+                                .build()
+                        ).build());
 
         when(amazonEC2Client.describeVolumes(any()))
-                .thenReturn(new DescribeVolumesResult().withVolumes(
-                        new com.amazonaws.services.ec2.model.Volume().withVolumeId(VOLUME_ID_1).withState(VolumeState.Available),
-                        new com.amazonaws.services.ec2.model.Volume().withVolumeId(VOLUME_ID_2).withState(VolumeState.Available),
-                        new com.amazonaws.services.ec2.model.Volume().withVolumeId(VOLUME_ID_3).withState(VolumeState.InUse)
-                ));
+                .thenReturn(DescribeVolumesResponse.builder().volumes(
+                        software.amazon.awssdk.services.ec2.model.Volume.builder().volumeId(VOLUME_ID_1).state(VolumeState.AVAILABLE).build(),
+                        software.amazon.awssdk.services.ec2.model.Volume.builder().volumeId(VOLUME_ID_2).state(VolumeState.AVAILABLE).build(),
+                        software.amazon.awssdk.services.ec2.model.Volume.builder().volumeId(VOLUME_ID_3).state(VolumeState.IN_USE).build()
+                ).build());
 
-        when(amazonEC2Client.describeInstances(any())).thenReturn(
-                new DescribeInstancesResult().withReservations(
-                        new Reservation().withInstances(new com.amazonaws.services.ec2.model.Instance().withInstanceId("i-instance")))
+        when(amazonEC2Client.describeInstances(any())).thenReturn(DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder()
+                        .instances(software.amazon.awssdk.services.ec2.model.Instance.builder().instanceId("i-instance").build())
+                        .build())
+                .build()
         );
 
-        DescribeScalingActivitiesResult result = new DescribeScalingActivitiesResult();
-        result.setActivities(List.of());
+        DescribeScalingActivitiesResponse result = DescribeScalingActivitiesResponse.builder().activities(List.of()).build();
         when(amazonAutoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
 
-        AmazonEC2Waiters waiters = mock(AmazonEC2Waiters.class);
-        when(amazonEC2Client.waiters()).thenReturn(waiters);
-        Waiter<DescribeInstancesRequest> instanceWaiter = mock(Waiter.class);
-        when(waiters.instanceRunning()).thenReturn(instanceWaiter);
-
+        when(amazonEC2Client.waiters()).thenReturn(ecWaiters);
         when(amazonAutoScalingClient.waiters()).thenReturn(asWaiters);
-        when(asWaiters.groupInService()).thenReturn(describeAutoScalingGroupsRequestWaiter);
 
         underTest.upscale(authenticatedContext, stack, cloudResources, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L));
 
-        verify(amazonAutoScalingClient).resumeProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.getAutoScalingGroupName())
-                && argument.getScalingProcesses().contains("Launch")));
+        verify(amazonAutoScalingClient).resumeProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.autoScalingGroupName())
+                && argument.scalingProcesses().contains("Launch")));
         verify(amazonAutoScalingClient).updateAutoScalingGroup(argThat(argument -> {
             Group workerGroup = stack.getGroups().get(1);
-            return AUTOSCALING_GROUP_NAME.equals(argument.getAutoScalingGroupName())
-                    && workerGroup.getInstancesSize().equals(argument.getMaxSize())
-                    && workerGroup.getInstancesSize().equals(argument.getDesiredCapacity());
+            return AUTOSCALING_GROUP_NAME.equals(argument.autoScalingGroupName())
+                    && workerGroup.getInstancesSize().equals(argument.maxSize())
+                    && workerGroup.getInstancesSize().equals(argument.desiredCapacity());
         }));
 
         verify(amazonAutoScalingClient, times(stack.getGroups().size()))
-                .suspendProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.getAutoScalingGroupName())
-                        && SUSPENDED_PROCESSES.equals(argument.getScalingProcesses())));
+                .suspendProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.autoScalingGroupName())
+                        && SUSPENDED_PROCESSES.equals(argument.scalingProcesses())));
 
         ArgumentCaptor<List<CloudResource>> updatedCloudResourceArgumentCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceNotifier, times(2)).notifyUpdates(updatedCloudResourceArgumentCaptor.capture(), any());
@@ -401,45 +360,42 @@ public class AwsRepairTest {
                     assertEquals(Integer.valueOf(sizeDisk), volumeSetAttributes.getVolumes().get(0).getSize());
                     assertEquals("standard", volumeSetAttributes.getVolumes().get(0).getType());
                     assertEquals(fstab, volumeSetAttributes.getFstab());
-                }, () -> fail("Volume resource was not saved for " + instanceId));
+                }, () -> Assertions.fail("Volume resource was not saved for " + instanceId));
     }
 
     private void downscaleStack() throws IOException {
         when(amazonEC2Client.describeVolumes(any()))
-                .thenReturn(new DescribeVolumesResult().
-                        withVolumes(new com.amazonaws.services.ec2.model.Volume()
-                                        .withVolumeId(VOLUME_ID_1)
-                                        .withState(VolumeState.InUse),
-                                new com.amazonaws.services.ec2.model.Volume()
-                                        .withVolumeId(VOLUME_ID_2)
-                                        .withState(VolumeState.InUse)
-                        ));
+                .thenReturn(DescribeVolumesResponse.builder()
+                        .volumes(software.amazon.awssdk.services.ec2.model.Volume.builder()
+                                        .volumeId(VOLUME_ID_1)
+                                        .state(VolumeState.IN_USE).build(),
+                                software.amazon.awssdk.services.ec2.model.Volume.builder()
+                                        .volumeId(VOLUME_ID_2)
+                                        .state(VolumeState.IN_USE).build()
+                        ).build());
 
         when(amazonCloudFormationClient.describeStackResource(any()))
-                .thenReturn(new DescribeStackResourceResult()
-                        .withStackResourceDetail(new StackResourceDetail().withPhysicalResourceId(AUTOSCALING_GROUP_NAME)));
+                .thenReturn(DescribeStackResourceResponse.builder()
+                        .stackResourceDetail(StackResourceDetail.builder().physicalResourceId(AUTOSCALING_GROUP_NAME).build()).build());
 
         when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenAnswer(a -> {
             DescribeInstancesRequest request = a.getArgument(0, DescribeInstancesRequest.class);
-            List<com.amazonaws.services.ec2.model.Instance> instances = request.getInstanceIds().stream()
-                    .map(i -> new com.amazonaws.services.ec2.model.Instance().withInstanceId(i))
+            List<software.amazon.awssdk.services.ec2.model.Instance> instances = request.instanceIds().stream()
+                    .map(i -> software.amazon.awssdk.services.ec2.model.Instance.builder().instanceId(i).build())
                     .collect(Collectors.toList());
-            return new DescribeInstancesResult().withReservations(new Reservation().withInstances(instances));
+            return DescribeInstancesResponse.builder().reservations(Reservation.builder().instances(instances).build()).build();
         });
 
-        AmazonEC2Waiters mockWaiter = mock(AmazonEC2Waiters.class);
-        when(amazonEC2Client.waiters())
-                .thenReturn(mockWaiter);
-        when(mockWaiter.instanceTerminated())
-                .thenReturn(mock(Waiter.class));
+        when(amazonEC2Client.waiters()).thenReturn(ecWaiters);
 
-        DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
-        AutoScalingGroup autoScalingGroup = new AutoScalingGroup();
-        autoScalingGroup.setInstances(List.of(
-                new Instance().withInstanceId(INSTANCE_ID_1),
-                new Instance().withInstanceId(INSTANCE_ID_2),
-                new Instance().withInstanceId(INSTANCE_ID_3)));
-        describeAutoScalingGroupsResult.setAutoScalingGroups(List.of(autoScalingGroup));
+        DescribeAutoScalingGroupsResponse describeAutoScalingGroupsResult = DescribeAutoScalingGroupsResponse.builder()
+                .autoScalingGroups(AutoScalingGroup.builder()
+                        .instances(
+                                Instance.builder().instanceId(INSTANCE_ID_1).build(),
+                                Instance.builder().instanceId(INSTANCE_ID_2).build(),
+                                Instance.builder().instanceId(INSTANCE_ID_3).build())
+                        .build())
+                .build();
         when(amazonAutoScalingClient.describeAutoScalingGroups(any())).thenReturn(describeAutoScalingGroupsResult);
 
         List<Volume> volumes = List.of();
@@ -472,19 +428,19 @@ public class AwsRepairTest {
                         && cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getDeleteOnTermination()),
                 eq(authenticatedContext.getCloudContext()));
 
-        verify(amazonAutoScalingClient).detachInstances(argThat(argument -> argument.getAutoScalingGroupName().equals(AUTOSCALING_GROUP_NAME)
-                && argument.getShouldDecrementDesiredCapacity()
-                && argument.getInstanceIds().size() == 2
-                && argument.getInstanceIds().contains(INSTANCE_ID_1)
-                && argument.getInstanceIds().contains(INSTANCE_ID_2)
+        verify(amazonAutoScalingClient).detachInstances(argThat(argument -> argument.autoScalingGroupName().equals(AUTOSCALING_GROUP_NAME)
+                && argument.shouldDecrementDesiredCapacity()
+                && argument.instanceIds().size() == 2
+                && argument.instanceIds().contains(INSTANCE_ID_1)
+                && argument.instanceIds().contains(INSTANCE_ID_2)
         ));
 
-        verify(amazonEC2Client).terminateInstances(argThat(argument -> argument.getInstanceIds().size() == 2
-                && argument.getInstanceIds().contains(INSTANCE_ID_1)
-                && argument.getInstanceIds().contains(INSTANCE_ID_2)));
+        verify(amazonEC2Client).terminateInstances(argThat(argument -> argument.instanceIds().size() == 2
+                && argument.instanceIds().contains(INSTANCE_ID_1)
+                && argument.instanceIds().contains(INSTANCE_ID_2)));
 
-        verify(amazonAutoScalingClient).updateAutoScalingGroup(argThat(argument -> argument.getAutoScalingGroupName().equals(AUTOSCALING_GROUP_NAME)
-                && argument.getMaxSize().equals(1)));
+        verify(amazonAutoScalingClient).updateAutoScalingGroup(argThat(argument -> argument.autoScalingGroupName().equals(AUTOSCALING_GROUP_NAME)
+                && argument.maxSize().equals(1)));
     }
 
     private CloudResource createVolumeResource(String volumeId, String instanceId, int sizeDisk, String fstab, CommonStatus status) {

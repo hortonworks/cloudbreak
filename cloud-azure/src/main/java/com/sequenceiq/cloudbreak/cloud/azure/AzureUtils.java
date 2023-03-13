@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudExceptionConverter;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -85,6 +86,10 @@ public class AzureUtils {
     private static final int NETWORKINTERFACE_DETACH_CHECKING_MAXATTEMPT = 5;
 
     private static final int MAX_DISK_ENCRYPTION_SET_NAME_LENGTH = 80;
+
+    private static final String AUTHORIZATION_FAILED_CODE = "AuthorizationFailed";
+
+    private static final String MICROSOFT_MARKETPLACE_ROLE = "Microsoft.Marketplace";
 
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
@@ -726,6 +731,24 @@ public class AzureUtils {
             String details = e.getValue().getDetails().stream().map(this::getCloudErrorMessage).collect(Collectors.joining(", "));
             return new CloudConnectorException(String.format("%s failed, status code %s, error message: %s, details: %s",
                     actionDescription, e.getValue().getCode(), e.getValue().getMessage(), details));
+        } else {
+            return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
+        }
+    }
+
+    public CloudConnectorException convertToCloudException(ManagementException e, String actionDescription) {
+        LOGGER.warn(String.format("%s failed, cloud exception happened:", actionDescription), e);
+        if (e.getValue() != null && e.getValue().getDetails() != null) {
+            String errorCode = e.getValue().getCode();
+            String errorMessage = e.getValue().getMessage();
+            String details = e.getValue().getDetails().stream().map(this::getCloudErrorMessage).collect(Collectors.joining(", "));
+            String exceptionMessage = String.format("%s failed, status code %s, error message: %s, details: %s",
+                    actionDescription, errorCode, errorMessage, details);
+            if (errorCode.contains(AUTHORIZATION_FAILED_CODE) && errorMessage.contains(MICROSOFT_MARKETPLACE_ROLE)) {
+                return new CloudImageException(exceptionMessage);
+            } else {
+                return new CloudConnectorException(exceptionMessage);
+            }
         } else {
             return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
         }

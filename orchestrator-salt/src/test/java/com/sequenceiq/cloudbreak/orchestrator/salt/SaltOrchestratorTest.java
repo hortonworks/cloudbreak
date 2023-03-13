@@ -189,15 +189,14 @@ class SaltOrchestratorTest {
 
     @Test
     void bootstrapTest() throws Exception {
-        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[] {});
+        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[]{});
 
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
 
         saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel);
 
-        verify(saltRunner, times(1)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
-        verify(saltRunner, times(3)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(4)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         // salt.zip, master_sign.pem, master_sign.pub
         verify(saltBootstrapFactory, times(1)).of(eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets),
                 eq(bootstrapParams));
@@ -267,7 +266,7 @@ class SaltOrchestratorTest {
     @Test
     void bootstrapNewNodesTest() throws Exception {
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
-        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[] {});
+        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[]{});
 
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
@@ -380,7 +379,7 @@ class SaltOrchestratorTest {
         doThrow(new NullPointerException("message")).when(saltStateService).stopMinions(eq(saltConnector), eq(privateIps));
 
         assertThatThrownBy(() ->
-            saltOrchestrator.tearDown(null, Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null))
+                saltOrchestrator.tearDown(null, Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null))
                 .hasMessage("message")
                 .isInstanceOf(CloudbreakOrchestratorFailedException.class)
                 .hasCauseInstanceOf(NullPointerException.class);
@@ -555,10 +554,11 @@ class SaltOrchestratorTest {
         saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway, replica1Config, replica2Config),
                 Set.of(primaryNode, replica1Node, replica2Node), exitCriteriaModel);
 
-        verify(saltRunner, times(2)).runnerWithCalculatedErrorCount(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt());
+        verify(saltRunner, times(3)).runnerWithCalculatedErrorCount(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt());
         List<SaltJobIdTracker> jobIdTrackers = saltJobIdTrackerArgumentCaptor.getAllValues();
         assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
-        assertEquals(Set.of("replica1.example.com", "replica2.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
+        assertEquals(Set.of("replica1.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
+        assertEquals(Set.of("replica2.example.com"), jobIdTrackers.get(2).getSaltJobRunner().getTargetHostnames());
     }
 
     @Test
@@ -616,10 +616,11 @@ class SaltOrchestratorTest {
         saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway, newReplica1Config, newReplica2Config),
                 Set.of(primaryNode, newReplica1Node, newReplica2Node), exitCriteriaModel);
 
-        verify(saltRunner, times(2)).runnerWithCalculatedErrorCount(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt());
+        verify(saltRunner, times(3)).runnerWithCalculatedErrorCount(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt());
         List<SaltJobIdTracker> jobIdTrackers = saltJobIdTrackerArgumentCaptor.getAllValues();
         assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
-        assertEquals(Set.of("new_replica1.example.com", "new_replica2.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
+        assertEquals(Set.of("new_replica2.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
+        assertEquals(Set.of("new_replica1.example.com"), jobIdTrackers.get(2).getSaltJobRunner().getTargetHostnames());
         Target<String> hostRoleAndTarget1 =
                 new HostAndRoleTarget("freeipa_primary", Set.of("new_replica2.example.com", "primary.example.com", "new_replica1.example.com"));
         Target<String> hostRoleAndTarget2 =

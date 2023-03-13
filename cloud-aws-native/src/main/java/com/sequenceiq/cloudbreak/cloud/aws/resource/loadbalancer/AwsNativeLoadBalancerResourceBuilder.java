@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteLoadBalancerRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteLoadBalancerResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
@@ -23,6 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteLoadBalancerRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteLoadBalancerResponse;
 
 @Service
 public class AwsNativeLoadBalancerResourceBuilder extends AbstractAwsNativeComputeBuilder {
@@ -49,10 +50,9 @@ public class AwsNativeLoadBalancerResourceBuilder extends AbstractAwsNativeCompu
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         LOGGER.info("Deleting load balancer ('{}') from provider side", resource.getReference());
         AmazonElasticLoadBalancingClient loadBalancingClient = context.getLoadBalancingClient();
-        DeleteLoadBalancerRequest deleteLoadBalancerRequest = new DeleteLoadBalancerRequest()
-                .withLoadBalancerArn(resource.getReference());
-        DeleteLoadBalancerResult deleteResult = awsMethodExecutor.execute(() -> loadBalancingClient.deleteLoadBalancer(deleteLoadBalancerRequest), null);
-        return deleteResult != null ? resource : null;
+        DeleteLoadBalancerRequest deleteLoadBalancerRequest = DeleteLoadBalancerRequest.builder().loadBalancerArn(resource.getReference()).build();
+        DeleteLoadBalancerResponse deleteResponse = awsMethodExecutor.execute(() -> loadBalancingClient.deleteLoadBalancer(deleteLoadBalancerRequest), null);
+        return deleteResponse != null ? resource : null;
     }
 
     @Override

@@ -6,8 +6,6 @@ public class AzureConstants {
 
     public static final String NETWORK_ID = "networkId";
 
-    public static final String SUBNET_ID = "subnetId";
-
     public static final String NO_PUBLIC_IP = "noPublicIp";
 
     public static final String DATABASE_PRIVATE_DNS_ZONE_ID = "databasePrivateDsZoneId";

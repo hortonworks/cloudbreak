@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.MapUtil.cleanMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -80,7 +81,7 @@ public class NetworkToNetworkV4ResponseConverter {
             } else if (anyMatchOfResourceTypeIn(aResource, NETWORK_RESOURCE_TYPES)) {
                 parameters.put("networkId", aResource.getResourceName());
             } else if (anyMatchOfResourceTypeIn(aResource, SUBNET_RESOURCE_TYPES)) {
-                parameters.put("subnetId", aResource.getResourceName());
+                parameters.put(SUBNET_ID, aResource.getResourceName());
             }
         }
     }

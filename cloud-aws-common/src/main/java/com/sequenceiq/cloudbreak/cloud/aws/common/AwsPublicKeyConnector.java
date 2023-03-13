@@ -5,10 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
-import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
-import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -18,6 +14,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyDescribeRequest;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyRegisterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyUnregisterRequest;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.ec2.model.DeleteKeyPairRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
 
 @Service
 public class AwsPublicKeyConnector implements PublicKeyConnector {
@@ -37,7 +39,10 @@ public class AwsPublicKeyConnector implements PublicKeyConnector {
         try {
             AmazonEc2Client client = awsClient.createEc2Client(awsCredential, request.getRegion());
             if (!exists(client, request.getPublicKeyId())) {
-                ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(request.getPublicKeyId(), request.getPublicKey());
+                ImportKeyPairRequest importKeyPairRequest = ImportKeyPairRequest.builder()
+                        .keyName(request.getPublicKeyId())
+                        .publicKeyMaterial(SdkBytes.fromUtf8String(request.getPublicKey()))
+                        .build();
                 client.importKeyPair(importKeyPairRequest);
             }
         } catch (Exception e) {
@@ -54,7 +59,7 @@ public class AwsPublicKeyConnector implements PublicKeyConnector {
         AwsCredentialView awsCredential = new AwsCredentialView(request.getCredential());
         try {
             AmazonEc2Client client = awsClient.createEc2Client(awsCredential, request.getRegion());
-            DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(request.getPublicKeyId());
+            DeleteKeyPairRequest deleteKeyPairRequest = DeleteKeyPairRequest.builder().keyName(request.getPublicKeyId()).build();
             client.deleteKeyPair(deleteKeyPairRequest);
         } catch (Exception e) {
             String errorMessage = String.format("Failed to delete public key [%s: '%s', region: '%s'], detailed message: %s",
@@ -90,10 +95,10 @@ public class AwsPublicKeyConnector implements PublicKeyConnector {
 
     private boolean exists(AmazonEc2Client client, String publicKeyId) {
         try {
-            client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(publicKeyId));
+            client.describeKeyPairs(DescribeKeyPairsRequest.builder().keyNames(publicKeyId).build());
             LOGGER.debug("Key-pair already exists: {}", publicKeyId);
             return true;
-        } catch (AmazonServiceException e) {
+        } catch (AwsServiceException e) {
             LOGGER.debug("Key-pair does not exist: {}", publicKeyId);
         }
         return false;

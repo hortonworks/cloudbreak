@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
@@ -49,6 +50,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
@@ -82,6 +84,9 @@ public class DatalakeRestoreActions {
 
     @Inject
     private FlowChainLogService flowChainLogService;
+
+    @Inject
+    private EventSenderService eventSenderService;
 
     @Bean(name = "DATALAKE_TRIGGERING_RESTORE_STATE")
     public Action<?, ?> triggerDatalakeRestore() {
@@ -326,13 +331,21 @@ public class DatalakeRestoreActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeRestoreFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
+                LOGGER.error("Datalake restore failed for datalake with id: {}", payload.getResourceId(), exception);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RESTORE_FINISHED,
                         getFailureReason(variables, exception), payload.getResourceId());
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FAILED, sdxCluster);
+
+                Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
+                if (flowChainLogService.isFlowTriggeredByFlowChain(
+                        DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
+                        lastFlowLog)) {
+                    eventSenderService.notifyEvent(context, ResourceEvent.DATALAKE_RESIZE_FAILED_DURING_RESTORE);
+                }
+
                 sendEvent(context, DATALAKE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
             }
 

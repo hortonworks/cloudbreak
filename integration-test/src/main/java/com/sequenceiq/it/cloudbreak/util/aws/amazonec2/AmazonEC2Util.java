@@ -7,8 +7,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.cloudformation.model.Stack;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.action.EC2ClientActions;
+
+import software.amazon.awssdk.services.cloudformation.model.Stack;
 
 @Component
 public class AmazonEC2Util {
@@ -20,6 +21,10 @@ public class AmazonEC2Util {
 
     public List<String> listInstanceVolumeIds(List<String> instanceIds) {
         return ec2ClientActions.getInstanceVolumeIds(instanceIds, false);
+    }
+
+    public List<String> listInstanceTypes(List<String> instanceIds) {
+        return ec2ClientActions.listInstanceTypes(instanceIds);
     }
 
     public List<String> listVolumeKmsKeyIds(List<String> instanceIds) {

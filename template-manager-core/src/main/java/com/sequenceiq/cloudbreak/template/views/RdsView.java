@@ -1,10 +1,16 @@
 package com.sequenceiq.cloudbreak.template.views;
 
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.template.views.dialect.RdsViewDialect;
 
 public class RdsView {
+
+    private static final String CONNECTION_URL_OPTIONS_DELIMITER = "?";
 
     private String connectionURL;
 
@@ -104,6 +110,13 @@ public class RdsView {
 
     public String getConnectionURL() {
         return connectionURL;
+    }
+
+    @Nonnull
+    public String getConnectionURLOptions() {
+        return Objects.requireNonNullElse(connectionURL, "").contains(CONNECTION_URL_OPTIONS_DELIMITER) ?
+                connectionURL.substring(connectionURL.indexOf(CONNECTION_URL_OPTIONS_DELIMITER)) :
+                "";
     }
 
     public boolean isUseSsl() {

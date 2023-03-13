@@ -3,59 +3,60 @@ package com.sequenceiq.cloudbreak.cloud.aws.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.autoscaling.model.BlockDeviceMapping;
-import com.amazonaws.services.autoscaling.model.CreateLaunchConfigurationRequest;
-import com.amazonaws.services.autoscaling.model.LaunchConfiguration;
+import software.amazon.awssdk.services.autoscaling.model.BlockDeviceMapping;
+import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
+import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 
 @Component
 public class LaunchConfigurationMapper {
 
-    @Autowired
+    @Inject
     private EmptyToNullStringMapper emptyToNullStringMapper;
 
-    public CreateLaunchConfigurationRequest mapExistingLaunchConfigToRequest(LaunchConfiguration launchConfiguration) {
+    public CreateLaunchConfigurationRequest.Builder mapExistingLaunchConfigToRequestBuilder(LaunchConfiguration launchConfiguration) {
         if (launchConfiguration == null) {
             return null;
         }
 
-        CreateLaunchConfigurationRequest createLaunchConfigurationRequest = new CreateLaunchConfigurationRequest();
+        CreateLaunchConfigurationRequest.Builder createLaunchConfigurationRequestBuilder = CreateLaunchConfigurationRequest.builder();
 
-        createLaunchConfigurationRequest.setLaunchConfigurationName(emptyToNullStringMapper.map(launchConfiguration.getLaunchConfigurationName()));
-        createLaunchConfigurationRequest.setImageId(emptyToNullStringMapper.map(launchConfiguration.getImageId()));
-        createLaunchConfigurationRequest.setKeyName(emptyToNullStringMapper.map(launchConfiguration.getKeyName()));
-        List<String> list = launchConfiguration.getSecurityGroups();
+        createLaunchConfigurationRequestBuilder.launchConfigurationName(emptyToNullStringMapper.map(launchConfiguration.launchConfigurationName()));
+        createLaunchConfigurationRequestBuilder.imageId(emptyToNullStringMapper.map(launchConfiguration.imageId()));
+        createLaunchConfigurationRequestBuilder.keyName(emptyToNullStringMapper.map(launchConfiguration.keyName()));
+        List<String> list = launchConfiguration.securityGroups();
         if (list != null) {
-            createLaunchConfigurationRequest.setSecurityGroups(new ArrayList<String>(list));
+            createLaunchConfigurationRequestBuilder.securityGroups(new ArrayList<>(list));
         } else {
-            createLaunchConfigurationRequest.setSecurityGroups(null);
+            createLaunchConfigurationRequestBuilder.securityGroups(List.of());
         }
-        createLaunchConfigurationRequest.setClassicLinkVPCId(emptyToNullStringMapper.map(launchConfiguration.getClassicLinkVPCId()));
-        List<String> list1 = launchConfiguration.getClassicLinkVPCSecurityGroups();
+        createLaunchConfigurationRequestBuilder.classicLinkVPCId(emptyToNullStringMapper.map(launchConfiguration.classicLinkVPCId()));
+        List<String> list1 = launchConfiguration.classicLinkVPCSecurityGroups();
         if (list1 != null) {
-            createLaunchConfigurationRequest.setClassicLinkVPCSecurityGroups(new ArrayList<String>(list1));
+            createLaunchConfigurationRequestBuilder.classicLinkVPCSecurityGroups(new ArrayList<>(list1));
         } else {
-            createLaunchConfigurationRequest.setClassicLinkVPCSecurityGroups(null);
+            createLaunchConfigurationRequestBuilder.classicLinkVPCSecurityGroups(List.of());
         }
-        createLaunchConfigurationRequest.setUserData(emptyToNullStringMapper.map(launchConfiguration.getUserData()));
-        createLaunchConfigurationRequest.setInstanceType(emptyToNullStringMapper.map(launchConfiguration.getInstanceType()));
-        createLaunchConfigurationRequest.setKernelId(emptyToNullStringMapper.map(launchConfiguration.getKernelId()));
-        createLaunchConfigurationRequest.setRamdiskId(emptyToNullStringMapper.map(launchConfiguration.getRamdiskId()));
-        List<BlockDeviceMapping> list2 = launchConfiguration.getBlockDeviceMappings();
+        createLaunchConfigurationRequestBuilder.userData(emptyToNullStringMapper.map(launchConfiguration.userData()));
+        createLaunchConfigurationRequestBuilder.instanceType(emptyToNullStringMapper.map(launchConfiguration.instanceType()));
+        createLaunchConfigurationRequestBuilder.kernelId(emptyToNullStringMapper.map(launchConfiguration.kernelId()));
+        createLaunchConfigurationRequestBuilder.ramdiskId(emptyToNullStringMapper.map(launchConfiguration.ramdiskId()));
+        List<BlockDeviceMapping> list2 = launchConfiguration.blockDeviceMappings();
         if (list2 != null) {
-            createLaunchConfigurationRequest.setBlockDeviceMappings(new ArrayList<BlockDeviceMapping>(list2));
+            createLaunchConfigurationRequestBuilder.blockDeviceMappings(new ArrayList<>(list2));
         } else {
-            createLaunchConfigurationRequest.setBlockDeviceMappings(null);
+            createLaunchConfigurationRequestBuilder.blockDeviceMappings(List.of());
         }
-        createLaunchConfigurationRequest.setInstanceMonitoring(launchConfiguration.getInstanceMonitoring());
-        createLaunchConfigurationRequest.setSpotPrice(emptyToNullStringMapper.map(launchConfiguration.getSpotPrice()));
-        createLaunchConfigurationRequest.setIamInstanceProfile(emptyToNullStringMapper.map(launchConfiguration.getIamInstanceProfile()));
-        createLaunchConfigurationRequest.setEbsOptimized(launchConfiguration.getEbsOptimized());
-        createLaunchConfigurationRequest.setAssociatePublicIpAddress(launchConfiguration.getAssociatePublicIpAddress());
-        createLaunchConfigurationRequest.setPlacementTenancy(emptyToNullStringMapper.map(launchConfiguration.getPlacementTenancy()));
+        createLaunchConfigurationRequestBuilder.instanceMonitoring(launchConfiguration.instanceMonitoring());
+        createLaunchConfigurationRequestBuilder.spotPrice(emptyToNullStringMapper.map(launchConfiguration.spotPrice()));
+        createLaunchConfigurationRequestBuilder.iamInstanceProfile(emptyToNullStringMapper.map(launchConfiguration.iamInstanceProfile()));
+        createLaunchConfigurationRequestBuilder.ebsOptimized(launchConfiguration.ebsOptimized());
+        createLaunchConfigurationRequestBuilder.associatePublicIpAddress(launchConfiguration.associatePublicIpAddress());
+        createLaunchConfigurationRequestBuilder.placementTenancy(emptyToNullStringMapper.map(launchConfiguration.placementTenancy()));
 
-        return createLaunchConfigurationRequest;
+        return createLaunchConfigurationRequestBuilder;
     }
 }

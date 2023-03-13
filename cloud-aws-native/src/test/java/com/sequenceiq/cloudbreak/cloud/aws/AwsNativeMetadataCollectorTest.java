@@ -33,15 +33,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceLifecycle;
-import com.amazonaws.services.ec2.model.Reservation;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
-import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
-import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancerSchemeEnum;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
@@ -65,6 +56,17 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceLifecycle;
+import software.amazon.awssdk.services.ec2.model.Reservation;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerSchemeEnum;
 
 @ExtendWith(MockitoExtension.class)
 class AwsNativeMetadataCollectorTest {
@@ -131,10 +133,10 @@ class AwsNativeMetadataCollectorTest {
 
         Instance anInstance = getAnInstance(anInstanceId);
         Instance secondInstance = getAnInstance(secondInstanceId);
-        Reservation reservation = new Reservation().withInstances(anInstance, secondInstance);
+        Reservation reservation = Reservation.builder().instances(anInstance, secondInstance).build();
         List<Reservation> reservations = List.of(reservation);
-        DescribeInstancesResult describeInstancesResult = new DescribeInstancesResult().withReservations(reservations);
-        when(ec2Client.describeInstances(any())).thenReturn(describeInstancesResult);
+        DescribeInstancesResponse describeInstancesResponse = DescribeInstancesResponse.builder().reservations(reservations).build();
+        when(ec2Client.describeInstances(any())).thenReturn(describeInstancesResponse);
 
         List<CloudVmMetaDataStatus> metaDataStatuses = underTest.collect(authenticatedContext, resources, cloudInstances, allInstances);
 
@@ -165,8 +167,10 @@ class AwsNativeMetadataCollectorTest {
         List<CloudInstance> cloudInstances = List.of(cloudInstance, secondCloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
         String instancesNotFoundMessage = String.format("Instance with id could not be found: '%s, %s'", anInstanceId, secondInstanceId);
-        AmazonServiceException amazonServiceException = new AmazonServiceException(instancesNotFoundMessage);
-        amazonServiceException.setErrorCode(INSTANCE_NOT_FOUND_ERROR_CODE);
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message(instancesNotFoundMessage)
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build())
+                .build();
         when(ec2Client.describeInstances(any())).thenThrow(amazonServiceException);
 
         List<CloudVmMetaDataStatus> metaDataStatuses = underTest.collect(authenticatedContext, resources, cloudInstances, allInstances);
@@ -196,13 +200,15 @@ class AwsNativeMetadataCollectorTest {
         List<CloudInstance> cloudInstances = List.of(cloudInstance, secondCloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
         Instance anInstance = getAnInstance(anInstanceId);
-        Reservation reservation = new Reservation().withInstances(anInstance);
+        Reservation reservation = Reservation.builder().instances(anInstance).build();
         List<Reservation> reservations = List.of(reservation);
-        DescribeInstancesResult describeInstancesResult = new DescribeInstancesResult().withReservations(reservations);
+        DescribeInstancesResponse describeInstancesResponse = DescribeInstancesResponse.builder().reservations(reservations).build();
         String instancesNotFoundMessage = String.format("Instance with ID could not be found: '%s'", secondInstanceId);
-        AmazonServiceException amazonServiceException = new AmazonServiceException(instancesNotFoundMessage);
-        amazonServiceException.setErrorCode(INSTANCE_NOT_FOUND_ERROR_CODE);
-        when(ec2Client.describeInstances(any())).thenThrow(amazonServiceException).thenReturn(describeInstancesResult);
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message(instancesNotFoundMessage)
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build())
+                .build();
+        when(ec2Client.describeInstances(any())).thenThrow(amazonServiceException).thenReturn(describeInstancesResponse);
 
         List<CloudVmMetaDataStatus> metaDataStatuses = underTest.collect(authenticatedContext, resources, cloudInstances, allInstances);
 
@@ -233,17 +239,20 @@ class AwsNativeMetadataCollectorTest {
             ec2Instances.add(getAnInstance(anInstanceId));
         }
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
-        DescribeInstancesResult describeInstancesResult1 = new DescribeInstancesResult()
-                .withReservations(List.of(new Reservation().withInstances(ec2Instances.subList(0, 5))));
-        DescribeInstancesResult describeInstancesResult2 = new DescribeInstancesResult()
-                .withReservations(List.of(new Reservation().withInstances(ec2Instances.subList(5, 10))));
-        DescribeInstancesResult describeInstancesResult3 = new DescribeInstancesResult()
-                .withReservations(List.of(new Reservation().withInstances(ec2Instances.subList(10, ec2Instances.size()))));
+        DescribeInstancesResponse describeInstancesResponse1 = DescribeInstancesResponse.builder()
+                .reservations(List.of(Reservation.builder().instances(ec2Instances.subList(0, 5)).build()))
+                .build();
+        DescribeInstancesResponse describeInstancesResponse2 = DescribeInstancesResponse.builder()
+                .reservations(List.of(Reservation.builder().instances(ec2Instances.subList(5, 10)).build()))
+                .build();
+        DescribeInstancesResponse describeInstancesResponse3 = DescribeInstancesResponse.builder()
+                .reservations(List.of(Reservation.builder().instances(ec2Instances.subList(10, ec2Instances.size())).build()))
+                .build();
 
         when(ec2Client.describeInstances(any()))
-                .thenReturn(describeInstancesResult1)
-                .thenReturn(describeInstancesResult2)
-                .thenReturn(describeInstancesResult3);
+                .thenReturn(describeInstancesResponse1)
+                .thenReturn(describeInstancesResponse2)
+                .thenReturn(describeInstancesResponse3);
 
         List<CloudVmMetaDataStatus> metaDataStatuses = underTest.collect(authenticatedContext, resources, cloudInstances, allInstances);
 
@@ -272,23 +281,30 @@ class AwsNativeMetadataCollectorTest {
             ec2Instances.add(getAnInstance(anInstanceId));
         }
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
-        AmazonServiceException amazonServiceException = new AmazonServiceException("Instance with id could not be found: 'anInstanceId0'");
-        amazonServiceException.setErrorCode(INSTANCE_NOT_FOUND_ERROR_CODE);
-        DescribeInstancesResult describeInstancesResult1 = new DescribeInstancesResult()
-                .withReservations(List.of(new Reservation().withInstances(ec2Instances.subList(1, 5))));
-        AmazonServiceException amazonServiceException2 = new AmazonServiceException("Instance with id could not be found: 'anInstanceId5'");
-        amazonServiceException2.setErrorCode(INSTANCE_NOT_FOUND_ERROR_CODE);
-        DescribeInstancesResult describeInstancesResult2 = new DescribeInstancesResult()
-                .withReservations(List.of(new Reservation().withInstances(ec2Instances.subList(6, 10))));
-        DescribeInstancesResult describeInstancesResult3 = new DescribeInstancesResult()
-                .withReservations(List.of(new Reservation().withInstances(ec2Instances.subList(10, ec2Instances.size()))));
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message("Instance with id could not be found: 'anInstanceId0'")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build())
+                .build();
+        DescribeInstancesResponse describeInstancesResponse1 = DescribeInstancesResponse.builder()
+                .reservations(List.of(Reservation.builder().instances(ec2Instances.subList(1, 5)).build()))
+                .build();
+        AwsServiceException amazonServiceException2 = AwsServiceException.builder()
+                .message("Instance with id could not be found: 'anInstanceId5'")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(INSTANCE_NOT_FOUND_ERROR_CODE).build())
+                .build();
+        DescribeInstancesResponse describeInstancesResponse2 = DescribeInstancesResponse.builder()
+                .reservations(List.of(Reservation.builder().instances(ec2Instances.subList(6, 10)).build()))
+                .build();
+        DescribeInstancesResponse describeInstancesResponse3 = DescribeInstancesResponse.builder()
+                .reservations(List.of(Reservation.builder().instances(ec2Instances.subList(10, ec2Instances.size())).build()))
+                .build();
 
         when(ec2Client.describeInstances(any()))
                 .thenThrow(amazonServiceException)
-                .thenReturn(describeInstancesResult1)
+                .thenReturn(describeInstancesResponse1)
                 .thenThrow(amazonServiceException2)
-                .thenReturn(describeInstancesResult2)
-                .thenReturn(describeInstancesResult3);
+                .thenReturn(describeInstancesResponse2)
+                .thenReturn(describeInstancesResponse3);
 
         List<CloudVmMetaDataStatus> metaDataStatuses = underTest.collect(authenticatedContext, resources, cloudInstances, allInstances);
 
@@ -314,7 +330,10 @@ class AwsNativeMetadataCollectorTest {
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         List<CloudInstance> cloudInstances = List.of(cloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
-        AmazonServiceException amazonServiceException = new AmazonServiceException("Something unexpected happened...");
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message("Something unexpected happened...")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("errorCode").build())
+                .build();
         when(ec2Client.describeInstances(any())).thenThrow(amazonServiceException);
 
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
@@ -356,8 +375,10 @@ class AwsNativeMetadataCollectorTest {
         CloudResource cloudResource = getCloudResource("secondCrn", "secondInstanceName", null, ELASTIC_LOAD_BALANCER);
         List<CloudResource> cloudResources = List.of(cloudResource);
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
-        LoadBalancerNotFoundException loadBalancerNotFoundException = new LoadBalancerNotFoundException("One or more elastic lb not found");
-        loadBalancerNotFoundException.setErrorCode(LOAD_BALANCER_NOT_FOUND_ERROR_CODE);
+        LoadBalancerNotFoundException loadBalancerNotFoundException = LoadBalancerNotFoundException.builder()
+                .message("One or more elastic lb not found")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(LOAD_BALANCER_NOT_FOUND_ERROR_CODE).build())
+                .build();
         when(loadBalancingClient.describeLoadBalancers(any())).thenThrow(loadBalancerNotFoundException);
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
@@ -373,12 +394,13 @@ class AwsNativeMetadataCollectorTest {
         CloudResource secondCloudResource = getCloudResource("secondCrn", "lbnamesecond", null, ELASTIC_LOAD_BALANCER);
         List<CloudResource> cloudResources = List.of(cloudResource, secondCloudResource);
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
-        LoadBalancerNotFoundException loadBalancerNotFoundException = new LoadBalancerNotFoundException("One or more elastic lb not found");
-        loadBalancerNotFoundException.setErrorCode(LOAD_BALANCER_NOT_FOUND_ERROR_CODE);
-        LoadBalancer loadBalancer = new LoadBalancer();
-        loadBalancer.setScheme(LoadBalancerSchemeEnum.Internal);
+        LoadBalancerNotFoundException loadBalancerNotFoundException = LoadBalancerNotFoundException.builder()
+                .message("One or more elastic lb not found")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(LOAD_BALANCER_NOT_FOUND_ERROR_CODE).build())
+                .build();
+        LoadBalancer loadBalancer = LoadBalancer.builder().scheme(LoadBalancerSchemeEnum.INTERNAL).build();
         when(loadBalancingClient.describeLoadBalancers(any()))
-                .thenReturn(new DescribeLoadBalancersResult().withLoadBalancers(loadBalancer))
+                .thenReturn(DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build())
                 .thenThrow(loadBalancerNotFoundException);
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
@@ -396,11 +418,10 @@ class AwsNativeMetadataCollectorTest {
         secondCloudResource.putParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.GATEWAY_PRIVATE);
         List<CloudResource> cloudResources = List.of(cloudResource, secondCloudResource);
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
-        LoadBalancer loadBalancer = new LoadBalancer();
-        loadBalancer.setScheme(LoadBalancerSchemeEnum.Internal);
+        LoadBalancer loadBalancer = LoadBalancer.builder().scheme(LoadBalancerSchemeEnum.INTERNAL).build();
         when(loadBalancingClient.describeLoadBalancers(any()))
-                .thenReturn(new DescribeLoadBalancersResult().withLoadBalancers(loadBalancer));
-        when(loadBalancerTypeConverter.convert(LoadBalancerSchemeEnum.Internal.toString())).thenReturn(LoadBalancerType.PRIVATE);
+                .thenReturn(DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build());
+        when(loadBalancerTypeConverter.convert(LoadBalancerSchemeEnum.INTERNAL)).thenReturn(LoadBalancerType.PRIVATE);
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
 
@@ -417,7 +438,10 @@ class AwsNativeMetadataCollectorTest {
         CloudResource cloudResource = getCloudResource("secondCrn", "secondInstanceName", null, ELASTIC_LOAD_BALANCER);
         List<CloudResource> cloudResources = List.of(cloudResource);
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
-        LoadBalancerNotFoundException loadBalancerNotFoundException = new LoadBalancerNotFoundException("One or more elastic lb not found");
+        LoadBalancerNotFoundException loadBalancerNotFoundException = LoadBalancerNotFoundException.builder()
+                .message("One or more elastic lb not found")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("errorCode").build())
+                .build();
         when(loadBalancingClient.describeLoadBalancers(any())).thenThrow(loadBalancerNotFoundException);
 
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
@@ -448,7 +472,7 @@ class AwsNativeMetadataCollectorTest {
     }
 
     private CloudResource getCloudResource(String reference, String name, String instanceId, ResourceType resourceType) {
-        return new CloudResource.Builder()
+        return CloudResource.builder()
                 .withType(resourceType)
                 .withReference(reference)
                 .withName(name)
@@ -457,11 +481,12 @@ class AwsNativeMetadataCollectorTest {
     }
 
     private Instance getAnInstance(String instanceId) {
-        return new Instance()
-                .withInstanceId(instanceId)
-                .withInstanceLifecycle(InstanceLifecycle.OnDemand.name())
-                .withPublicIpAddress("52.0.0.0")
-                .withPrivateIpAddress("10.0.0.0");
+        return Instance.builder()
+                .instanceId(instanceId)
+                .instanceLifecycle(InstanceLifecycle.ON_DEMAND.name())
+                .publicIpAddress("52.0.0.0")
+                .privateIpAddress("10.0.0.0")
+                .build();
     }
 
     private void verifyCloudInstance(List<CloudVmMetaDataStatus> metaDataStatuses, String instanceId, String subnetIdExpected,

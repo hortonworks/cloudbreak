@@ -2,21 +2,31 @@
 {%- from 'gateway/settings.sls' import gateway with context %}
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 
+{% set cloudera_manager_database_connection_url = 'jdbc:' ~ cloudera_manager.cloudera_manager_database.subprotocol ~ '://' ~ cloudera_manager.cloudera_manager_database.host ~ '/' ~ cloudera_manager.cloudera_manager_database.databaseName ~ '?sslmode=verify-full&sslrootcert=' ~ postgresql.root_certs_file %}
+
 init-cloudera-manager-db:
   cmd.run:
+{%- if postgresql.ssl_enabled == True and postgresql.ssl_for_cm_db_natively_supported == True %}
+    - name: /opt/cloudera/cm/schema/scm_prepare_database.sh -s -j "{{ cloudera_manager_database_connection_url }}" -h {{ cloudera_manager.cloudera_manager_database.host }} {{ cloudera_manager.cloudera_manager_database.subprotocol }} {{ cloudera_manager.cloudera_manager_database.databaseName }} $user $pass && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/init-cloudera-manager-db-executed
+{%- else %}
     - name: /opt/cloudera/cm/schema/scm_prepare_database.sh -h {{ cloudera_manager.cloudera_manager_database.host }} {{ cloudera_manager.cloudera_manager_database.subprotocol }} {{ cloudera_manager.cloudera_manager_database.databaseName }} $user $pass && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/init-cloudera-manager-db-executed
+{%- endif %}
     - unless: test -f /var/log/init-cloudera-manager-db-executed
     - env:
         - user: {{ cloudera_manager.cloudera_manager_database.connectionUserName }}
         - pass: {{ cloudera_manager.cloudera_manager_database.connectionPassword }}
+{%- if postgresql.ssl_enabled == True and postgresql.ssl_for_cm_db_natively_supported == True %}
+    - require:
+        - file: {{ postgresql.root_certs_file }}
+{%- endif %}
 
-# Configure JDBC URL for CM if client side DB server certificate validation is enabled for the cluster
-{% if postgresql.ssl_enabled == True %}
+# Configure JDBC URL for CM after DB init if client side DB server certificate validation is enabled for the cluster and the CM version is too old to support this natively
+{% if postgresql.ssl_enabled == True and postgresql.ssl_for_cm_db_natively_supported == False %}
 replace-db-connection-url:
   file.replace:
     - name: /etc/cloudera-scm-server/db.properties
     - pattern: "(#UPDATED BY CDP CP:\n)?com.cloudera.cmf.orm.hibernate.connection.url=.*"
-    - repl: "#UPDATED BY CDP CP:\ncom.cloudera.cmf.orm.hibernate.connection.url=jdbc:{{ cloudera_manager.cloudera_manager_database.subprotocol }}://{{ cloudera_manager.cloudera_manager_database.host }}/{{ cloudera_manager.cloudera_manager_database.databaseName }}?sslmode=verify-full&sslrootcert={{ postgresql.root_certs_file }}"
+    - repl: "#UPDATED BY CDP CP:\ncom.cloudera.cmf.orm.hibernate.connection.url={{ cloudera_manager_database_connection_url }}"
     - append_if_not_found: True
     - require:
         - cmd: init-cloudera-manager-db

@@ -18,9 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -31,6 +28,10 @@ import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.GroupSubnet;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.Subnet;
 
 @ExtendWith(MockitoExtension.class)
 class AwsGatewaySubnetMultiAzValidatorTest {
@@ -92,9 +93,10 @@ class AwsGatewaySubnetMultiAzValidatorTest {
         Group gatewayGroup = getGroup("aGroupName", InstanceGroupType.GATEWAY, groupNetwork);
         CloudStack cloudStack = getCloudStack(Set.of(gatewayGroup));
         when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
-        DescribeSubnetsResult describeSubnetsResult = new DescribeSubnetsResult()
-                .withSubnets(Set.of(new Subnet().withSubnetId(aSubnetId).withAvailabilityZone("anAZ")));
-        when(ec2Client.describeSubnets(any())).thenReturn(describeSubnetsResult);
+        DescribeSubnetsResponse describeSubnetsResponse = DescribeSubnetsResponse.builder()
+                .subnets(Set.of(Subnet.builder().subnetId(aSubnetId).availabilityZone("anAZ").build()))
+                .build();
+        when(ec2Client.describeSubnets(any())).thenReturn(describeSubnetsResponse);
 
         underTest.validate(authenticatedContext, cloudStack);
     }
@@ -108,11 +110,12 @@ class AwsGatewaySubnetMultiAzValidatorTest {
         Group gatewayGroup = getGroup("aGroupName", InstanceGroupType.GATEWAY, groupNetwork);
         CloudStack cloudStack = getCloudStack(Set.of(gatewayGroup));
         when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
-        Set<Subnet> subnets = Set.of(new Subnet().withSubnetId(aSubnetId).withAvailabilityZone(availabilityZone),
-                new Subnet().withSubnetId("anotherSubnetId").withAvailabilityZone(availabilityZone));
-        DescribeSubnetsResult describeSubnetsResult = new DescribeSubnetsResult()
-                .withSubnets(subnets);
-        when(ec2Client.describeSubnets(any())).thenReturn(describeSubnetsResult);
+        Set<Subnet> subnets = Set.of(Subnet.builder().subnetId(aSubnetId).availabilityZone(availabilityZone).build(),
+                Subnet.builder().subnetId("anotherSubnetId").availabilityZone(availabilityZone).build());
+        DescribeSubnetsResponse describeSubnetsResponse = DescribeSubnetsResponse.builder()
+                .subnets(subnets)
+                .build();
+        when(ec2Client.describeSubnets(any())).thenReturn(describeSubnetsResponse);
 
         Assertions.assertThrows(CloudConnectorException.class, () -> underTest.validate(authenticatedContext, cloudStack));
     }
@@ -125,7 +128,7 @@ class AwsGatewaySubnetMultiAzValidatorTest {
         Group gatewayGroup = getGroup("aGroupName", InstanceGroupType.GATEWAY, groupNetwork);
         CloudStack cloudStack = getCloudStack(Set.of(gatewayGroup));
         when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
-        when(ec2Client.describeSubnets(any())).thenThrow(new AmazonServiceException("Something went wrong"));
+        when(ec2Client.describeSubnets(any())).thenThrow(AwsServiceException.builder().message("Something went wrong").build());
 
         Assertions.assertThrows(CloudConnectorException.class, () -> underTest.validate(authenticatedContext, cloudStack));
     }

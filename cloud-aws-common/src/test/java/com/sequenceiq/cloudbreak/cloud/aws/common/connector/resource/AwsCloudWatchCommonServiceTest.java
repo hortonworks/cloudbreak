@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,13 +22,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.cloudwatch.model.AmazonCloudWatchException;
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsRequest;
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+
+import software.amazon.awssdk.services.cloudwatch.model.CloudWatchException;
+import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsRequest;
+import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsResponse;
+import software.amazon.awssdk.services.cloudwatch.model.Statistic;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsCloudWatchCommonServiceTest {
@@ -46,9 +47,6 @@ public class AwsCloudWatchCommonServiceTest {
 
     @Mock
     private AmazonCloudWatchClient amazonCloudWatchClient;
-
-    @Mock
-    private GetMetricStatisticsResult result;
 
     @InjectMocks
     private AwsCloudWatchCommonService underTest;
@@ -69,8 +67,8 @@ public class AwsCloudWatchCommonServiceTest {
     @Test
     public void getBucketSizeCloudWatchClientThrowsAmazonCloudWatchException() {
         when(awsClient.createCloudWatchClient(any(), eq(REGION))).thenReturn(amazonCloudWatchClient);
-        AmazonCloudWatchException cwException = new AmazonCloudWatchException("CW error");
-        when(amazonCloudWatchClient.getMetricStatisticsResult(any())).thenThrow(cwException);
+        CloudWatchException cwException = (CloudWatchException) CloudWatchException.builder().message("CW error").build();
+        when(amazonCloudWatchClient.getMetricStatisticsResponse(any())).thenThrow(cwException);
 
         CloudConnectorException ex = assertThrows(CloudConnectorException.class,
                 () -> underTest.getBucketSize(cloudCredential, REGION, startTime, endTime, BUCKET_NAME));
@@ -91,27 +89,29 @@ public class AwsCloudWatchCommonServiceTest {
 
     @Test
     public void getBucketSizeWorksCorrectly() {
-        when(awsClient.createCloudWatchClient(any(), eq(REGION))).thenReturn(amazonCloudWatchClient);
-        when(amazonCloudWatchClient.getMetricStatisticsResult(any())).thenReturn(result);
+        GetMetricStatisticsResponse result = GetMetricStatisticsResponse.builder().build();
 
-        GetMetricStatisticsResult returnedResult = underTest.getBucketSize(cloudCredential, REGION, startTime, endTime, BUCKET_NAME);
+        when(awsClient.createCloudWatchClient(any(), eq(REGION))).thenReturn(amazonCloudWatchClient);
+        when(amazonCloudWatchClient.getMetricStatisticsResponse(any())).thenReturn(result);
+
+        GetMetricStatisticsResponse returnedResult = underTest.getBucketSize(cloudCredential, REGION, startTime, endTime, BUCKET_NAME);
 
         assertEquals(result, returnedResult);
-        verify(amazonCloudWatchClient, times(1)).getMetricStatisticsResult(requestCaptor.capture());
+        verify(amazonCloudWatchClient, times(1)).getMetricStatisticsResponse(requestCaptor.capture());
 
         GetMetricStatisticsRequest request = requestCaptor.getValue();
-        assertEquals(3600, request.getPeriod());
-        assertEquals("BucketSizeBytes", request.getMetricName());
-        assertEquals("Bytes", request.getUnit());
-        assertEquals("AWS/S3", request.getNamespace());
-        assertEquals(startTime, request.getStartTime());
-        assertEquals(endTime, request.getEndTime());
-        assertEquals(List.of("Maximum"), request.getStatistics());
-        assertTrue(request.getDimensions().stream()
-                .filter(dimension -> "StorageType".equals(dimension.getName()))
-                .anyMatch(dimension -> "StandardStorage".equals(dimension.getValue())));
-        assertTrue(request.getDimensions().stream()
-                .filter(dimension -> "BucketName".equals(dimension.getName()))
-                .anyMatch(dimension -> BUCKET_NAME.equals(dimension.getValue())));
+        assertEquals(3600, request.period());
+        assertEquals("BucketSizeBytes", request.metricName());
+        assertEquals("Bytes", request.unit().toString());
+        assertEquals("AWS/S3", request.namespace());
+        assertEquals(startTime.toInstant(), request.startTime());
+        assertEquals(endTime.toInstant(), request.endTime());
+        assertTrue(request.statistics().contains(Statistic.MAXIMUM));
+        assertTrue(request.dimensions().stream()
+                .filter(dimension -> "StorageType".equals(dimension.name()))
+                .anyMatch(dimension -> "StandardStorage".equals(dimension.value())));
+        assertTrue(request.dimensions().stream()
+                .filter(dimension -> "BucketName".equals(dimension.name()))
+                .anyMatch(dimension -> BUCKET_NAME.equals(dimension.value())));
     }
 }

@@ -17,6 +17,8 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
 
     private @NotNull String objectStoragePath;
 
+    private @NotNull String region;
+
     public ObjectStorageMetadataRequest() {
     }
 
@@ -24,6 +26,7 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
         this.credential = builder.credential;
         this.cloudPlatform = builder.cloudPlatform;
         this.objectStoragePath = builder.objectStoragePath;
+        this.region = builder.region;
     }
 
     public static Builder builder() {
@@ -54,6 +57,10 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
         this.objectStoragePath = objectStoragePath;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -65,7 +72,8 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
         ObjectStorageMetadataRequest request = (ObjectStorageMetadataRequest) o;
         return Objects.equals(credential, request.credential) &&
                 Objects.equals(cloudPlatform, request.cloudPlatform) &&
-                Objects.equals(objectStoragePath, request.objectStoragePath);
+                Objects.equals(objectStoragePath, request.objectStoragePath) &&
+                Objects.equals(region, request.region);
     }
 
     @Override
@@ -78,6 +86,7 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
         return "ObjectStorageMetadataRequest{" +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", objectStoragePath='" + objectStoragePath + '\'' +
+                ", region='" + region + '\'' +
                 '}';
     }
 
@@ -99,6 +108,8 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
 
         private String objectStoragePath;
 
+        private String region;
+
         public Builder withCredential(CloudCredential credential) {
             this.credential = credential;
             return this;
@@ -111,6 +122,11 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
 
         public Builder withObjectStoragePath(String objectStoragePath) {
             this.objectStoragePath = objectStoragePath;
+            return this;
+        }
+
+        public Builder withRegion(String region) {
+            this.region = region;
             return this;
         }
 

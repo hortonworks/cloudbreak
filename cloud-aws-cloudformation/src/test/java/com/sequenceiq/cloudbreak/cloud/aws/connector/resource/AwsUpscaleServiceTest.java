@@ -37,10 +37,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
-import com.amazonaws.services.autoscaling.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -76,6 +72,11 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
+import software.amazon.awssdk.services.autoscaling.model.Instance;
 
 @ExtendWith(MockitoExtension.class)
 class AwsUpscaleServiceTest {
@@ -116,13 +117,14 @@ class AwsUpscaleServiceTest {
     }
 
     @Test
-    void upscaleTest() throws AmazonAutoscalingFailed {
+    void upscaleTest() throws AmazonAutoscalingFailedException {
         AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
         AmazonCloudFormationClient amazonCloudFormationClient = mock(AmazonCloudFormationClient.class);
-        DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult()
-                .withAutoScalingGroups(
+        DescribeAutoScalingGroupsResponse describeAutoScalingGroupsResult = DescribeAutoScalingGroupsResponse.builder()
+                .autoScalingGroups(
                         newAutoScalingGroup("masterASG", List.of("i-master1", "i-master2")),
-                        newAutoScalingGroup("workerASG", List.of("i-worker1", "i-worker2", "i-worker3")));
+                        newAutoScalingGroup("workerASG", List.of("i-worker1", "i-worker2", "i-worker3")))
+                .build();
 
         when(amazonAutoScalingClient.describeAutoScalingGroups(any(DescribeAutoScalingGroupsRequest.class)))
                 .thenReturn(describeAutoScalingGroupsResult);
@@ -191,14 +193,13 @@ class AwsUpscaleServiceTest {
     }
 
     @Test
-    void upscaleAwsASGroupFail() throws AmazonAutoscalingFailed {
+    void upscaleAwsASGroupFail() throws AmazonAutoscalingFailedException {
         AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
         AmazonCloudFormationClient amazonCloudFormationClient = mock(AmazonCloudFormationClient.class);
 
-        DescribeAutoScalingGroupsRequest request = new DescribeAutoScalingGroupsRequest();
-        request.setAutoScalingGroupNames(List.of("workerASG"));
-        DescribeAutoScalingGroupsResult describeScaledAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult()
-                .withAutoScalingGroups(newAutoScalingGroup("workerASG", List.of("i-worker1", "i-worker2", "i-worker3")));
+        DescribeAutoScalingGroupsRequest request = DescribeAutoScalingGroupsRequest.builder().autoScalingGroupNames("workerASG").build();
+        DescribeAutoScalingGroupsResponse describeScaledAutoScalingGroupsResult = DescribeAutoScalingGroupsResponse.builder()
+                .autoScalingGroups(newAutoScalingGroup("workerASG", List.of("i-worker1", "i-worker2", "i-worker3"))).build();
         when(amazonAutoScalingClient.describeAutoScalingGroups(eq(request)))
                 .thenReturn(describeScaledAutoScalingGroupsResult);
 
@@ -238,7 +239,7 @@ class AwsUpscaleServiceTest {
         when(awsAutoScalingService.getAutoscalingGroups(eq(amazonAutoScalingClient), any()))
                 .thenReturn(Collections.singletonList(newWorkerASGroup));
 
-        doThrow(new AmazonAutoscalingFailed("autoscaling failed"))
+        doThrow(new AmazonAutoscalingFailedException("autoscaling failed"))
                 .when(awsAutoScalingService).scheduleStatusChecks(
                 eq(List.of(worker)), eq(authenticatedContext), eq(amazonCloudFormationClient), any(Date.class), any());
 
@@ -259,14 +260,13 @@ class AwsUpscaleServiceTest {
     }
 
     @Test
-    void upscaleAwsVolumeFail() throws AmazonAutoscalingFailed {
+    void upscaleAwsVolumeFail() throws AmazonAutoscalingFailedException {
         AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
         AmazonCloudFormationClient amazonCloudFormationClient = mock(AmazonCloudFormationClient.class);
 
-        DescribeAutoScalingGroupsRequest request = new DescribeAutoScalingGroupsRequest();
-        request.setAutoScalingGroupNames(new ArrayList<>(Collections.singletonList("workerASG")));
-        DescribeAutoScalingGroupsResult describeScaledAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult()
-                .withAutoScalingGroups(newAutoScalingGroup("workerASG", List.of("i-worker1", "i-worker2", "i-worker3")));
+        DescribeAutoScalingGroupsRequest request = DescribeAutoScalingGroupsRequest.builder().autoScalingGroupNames("workerASG").build();
+        DescribeAutoScalingGroupsResponse describeScaledAutoScalingGroupsResult = DescribeAutoScalingGroupsResponse.builder()
+                .autoScalingGroups(newAutoScalingGroup("workerASG", List.of("i-worker1", "i-worker2", "i-worker3"))).build();
         when(amazonAutoScalingClient.describeAutoScalingGroups(eq(request)))
                 .thenReturn(describeScaledAutoScalingGroupsResult);
 
@@ -342,10 +342,10 @@ class AwsUpscaleServiceTest {
         AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
         AmazonCloudFormationClient amazonCloudFormationClient = mock(AmazonCloudFormationClient.class);
         when(amazonAutoScalingClient.describeAutoScalingGroups(any(DescribeAutoScalingGroupsRequest.class)))
-                .thenReturn(new DescribeAutoScalingGroupsResult()
-                        .withAutoScalingGroups(
+                .thenReturn(DescribeAutoScalingGroupsResponse.builder()
+                        .autoScalingGroups(
                                 newAutoScalingGroup("masterASG", List.of("i-master1", "i-master2")),
-                                newAutoScalingGroup("workerASG", List.of("i-worker1", "i-worker2", "i-worker3"))));
+                                newAutoScalingGroup("workerASG", List.of("i-worker1", "i-worker2", "i-worker3"))).build());
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonAutoScalingClient);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudFormationClient);
         when(awsClient.createEc2Client(any(), any())).thenReturn(mock(AmazonEc2Client.class));
@@ -443,10 +443,10 @@ class AwsUpscaleServiceTest {
     }
 
     private AutoScalingGroup newAutoScalingGroup(String groupName, List<String> instances) {
-        AutoScalingGroup autoScalingGroup = new AutoScalingGroup();
-        autoScalingGroup.setAutoScalingGroupName(groupName);
-        autoScalingGroup.setInstances(instances.stream().map(instance -> new Instance().withInstanceId(instance)).collect(Collectors.toList()));
-        return autoScalingGroup;
+        return AutoScalingGroup.builder()
+                .autoScalingGroupName(groupName)
+                .instances(instances.stream().map(instance -> Instance.builder().instanceId(instance).build()).collect(Collectors.toList()))
+                .build();
     }
 
     private CloudResource newInstanceResource(String name, String group, String instanceId) {

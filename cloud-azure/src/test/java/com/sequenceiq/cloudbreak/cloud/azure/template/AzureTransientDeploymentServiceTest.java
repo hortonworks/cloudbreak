@@ -93,7 +93,7 @@ public class AzureTransientDeploymentServiceTest {
     }
 
     private CloudResource createCloudResource(String name, ResourceType resourceType) {
-        return new CloudResource.Builder()
+        return CloudResource.builder()
                 .withName(name)
                 .withStatus(CommonStatus.CREATED)
                 .withType(resourceType)

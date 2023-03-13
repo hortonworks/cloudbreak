@@ -19,14 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.amazonaws.services.cloudformation.model.DescribeStackResourceRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
-import com.amazonaws.services.cloudformation.model.StackResourceDetail;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.TargetDescription;
-import com.amazonaws.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
@@ -43,6 +35,15 @@ import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourceRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourceResponse;
+import software.amazon.awssdk.services.cloudformation.model.StackResourceDetail;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 
 @ExtendWith(MockitoExtension.class)
 public class CloudFormationStackUtilTest {
@@ -85,7 +86,6 @@ public class CloudFormationStackUtilTest {
         ReflectionTestUtils.setField(underTest, "maxResourceNameLength", 200);
         when(loadBalancerTypeConverter.convert((LoadBalancerType) any())).thenCallRealMethod();
 
-
     }
 
     @Test
@@ -96,21 +96,24 @@ public class CloudFormationStackUtilTest {
 
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cfClient);
 
-        DescribeStackResourceResult resourcesResult = new DescribeStackResourceResult()
-                .withStackResourceDetail(new StackResourceDetail().withPhysicalResourceId("targetGroupArn"));
-        when(cfClient.describeStackResource(any(DescribeStackResourceRequest.class))).thenReturn(resourcesResult);
+        DescribeStackResourceResponse resourcesResponse = DescribeStackResourceResponse.builder()
+                .stackResourceDetail(StackResourceDetail.builder().physicalResourceId("targetGroupArn").build())
+                .build();
+        when(cfClient.describeStackResource(any(DescribeStackResourceRequest.class))).thenReturn(resourcesResponse);
 
-        TargetHealthDescription targetHealthDescription = new TargetHealthDescription();
-        targetHealthDescription.withTarget(new TargetDescription().withId("i-gatewayId"));
-        DescribeTargetHealthResult describeTargetHealthResult = new DescribeTargetHealthResult();
-        describeTargetHealthResult.withTargetHealthDescriptions(List.of(targetHealthDescription));
-        when(elbClient.describeTargetHealth(any(DescribeTargetHealthRequest.class))).thenReturn(describeTargetHealthResult);
+        TargetHealthDescription targetHealthDescription = TargetHealthDescription.builder()
+                .target(TargetDescription.builder().id("i-gatewayId").build())
+                .build();
+        DescribeTargetHealthResponse describeTargetHealthResponse = DescribeTargetHealthResponse.builder()
+                .targetHealthDescriptions(List.of(targetHealthDescription))
+                .build();
+        when(elbClient.describeTargetHealth(any(DescribeTargetHealthRequest.class))).thenReturn(describeTargetHealthResponse);
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
         TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(443, 443);
         cloudLoadBalancer.addPortToTargetGroupMapping(targetGroupPortPair, Set.of(gatewayGroup));
 
         //compute node
-        CloudResource cloudResource = new CloudResource.Builder()
+        CloudResource cloudResource = CloudResource.builder()
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
                 .withName("i-029627fe1ce09b970")
@@ -121,7 +124,6 @@ public class CloudFormationStackUtilTest {
                 .withParameters(Map.of("privateId", "9", "instanceType", "r5d.4xlarge"))
                 .build();
         underTest.addLoadBalancerTargets(authenticatedContext, cloudLoadBalancer, List.of(cloudResource));
-
 
         verify(elbClient, times(0)).registerTargets(any());
     }
@@ -134,21 +136,24 @@ public class CloudFormationStackUtilTest {
 
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cfClient);
 
-        DescribeStackResourceResult resourcesResult = new DescribeStackResourceResult()
-                .withStackResourceDetail(new StackResourceDetail().withPhysicalResourceId("targetGroupArn"));
-        when(cfClient.describeStackResource(any(DescribeStackResourceRequest.class))).thenReturn(resourcesResult);
+        DescribeStackResourceResponse resourcesResponse = DescribeStackResourceResponse.builder()
+                .stackResourceDetail(StackResourceDetail.builder().physicalResourceId("targetGroupArn").build())
+                .build();
+        when(cfClient.describeStackResource(any(DescribeStackResourceRequest.class))).thenReturn(resourcesResponse);
 
-        TargetHealthDescription targetHealthDescription = new TargetHealthDescription();
-        targetHealthDescription.withTarget(new TargetDescription().withId("i-gatewayId"));
-        DescribeTargetHealthResult describeTargetHealthResult = new DescribeTargetHealthResult();
-        describeTargetHealthResult.withTargetHealthDescriptions(List.of(targetHealthDescription));
-        when(elbClient.describeTargetHealth(any(DescribeTargetHealthRequest.class))).thenReturn(describeTargetHealthResult);
+        TargetHealthDescription targetHealthDescription = TargetHealthDescription.builder()
+                .target(TargetDescription.builder().id("i-gatewayId").build())
+                .build();
+        DescribeTargetHealthResponse describeTargetHealthResponse = DescribeTargetHealthResponse.builder()
+                .targetHealthDescriptions(List.of(targetHealthDescription))
+                .build();
+        when(elbClient.describeTargetHealth(any(DescribeTargetHealthRequest.class))).thenReturn(describeTargetHealthResponse);
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
         TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(443, 443);
         cloudLoadBalancer.addPortToTargetGroupMapping(targetGroupPortPair, Set.of(gatewayGroup));
 
         //compute node
-        CloudResource cloudResource = new CloudResource.Builder()
+        CloudResource cloudResource = CloudResource.builder()
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
                 .withName("i-029627fe1ce09b970")
@@ -163,8 +168,7 @@ public class CloudFormationStackUtilTest {
         ArgumentCaptor<RegisterTargetsRequest> captor = ArgumentCaptor.forClass(RegisterTargetsRequest.class);
 
         verify(elbClient, times(1)).registerTargets(captor.capture());
-        List<TargetDescription> targets = captor.getValue().getTargets();
-        Assertions.assertEquals(cloudResource.getInstanceId(), targets.get(0).getId());
-
+        List<TargetDescription> targets = captor.getValue().targets();
+        Assertions.assertEquals(cloudResource.getInstanceId(), targets.get(0).id());
     }
 }

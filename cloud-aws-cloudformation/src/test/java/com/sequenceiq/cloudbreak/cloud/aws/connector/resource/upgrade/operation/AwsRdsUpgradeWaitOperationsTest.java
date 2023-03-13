@@ -13,15 +13,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
-import com.amazonaws.waiters.Waiter;
 import com.dyngr.exception.PollerException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.util.poller.upgrade.UpgradeStartPoller;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+
+import software.amazon.awssdk.core.waiters.Waiter;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsRdsUpgradeWaitOperationsTest {
@@ -40,34 +40,26 @@ public class AwsRdsUpgradeWaitOperationsTest {
 
     @Test
     void testWaitUntilUpgradeStarts() {
-        DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest();
-
-        underTest.waitUntilUpgradeStarts(rdsClient, describeDBInstancesRequest);
+        underTest.waitUntilUpgradeStarts(rdsClient, DescribeDbInstancesRequest.builder().build());
 
         verify(upgradeStartPoller).waitForUpgradeToStart(any());
     }
 
     @Test
     void testWaitUntilUpgradeStartsWhenPollingThrows() {
-        DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest();
         doThrow(PollerException.class).when(upgradeStartPoller).waitForUpgradeToStart(any());
 
         Assertions.assertThrows(CloudConnectorException.class, () ->
-            underTest.waitUntilUpgradeStarts(rdsClient, describeDBInstancesRequest)
+            underTest.waitUntilUpgradeStarts(rdsClient, DescribeDbInstancesRequest.builder().build())
         );
     }
 
     @Test
     void testWaitUntilUpgradeFinishes() {
-        CloudContext cloudContext = mock(CloudContext.class);
-        when(cloudContext.getId()).thenReturn(1L);
-        AuthenticatedContext ac = mock(AuthenticatedContext.class);
-        when(ac.getCloudContext()).thenReturn(cloudContext);
-        DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest();
-        Waiter<DescribeDBInstancesRequest> rdsWaiter = mock(Waiter.class);
-        when(customAmazonWaiterProvider.getDbInstanceModifyWaiter(rdsClient)).thenReturn(rdsWaiter);
+        Waiter<DescribeDbInstancesResponse> rdsWaiter = mock(Waiter.class);
+        when(customAmazonWaiterProvider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
 
-        underTest.waitUntilUpgradeFinishes(ac, rdsClient, describeDBInstancesRequest);
+        underTest.waitUntilUpgradeFinishes(rdsClient, DescribeDbInstancesRequest.builder().build());
 
         verify(rdsWaiter).run(any());
     }

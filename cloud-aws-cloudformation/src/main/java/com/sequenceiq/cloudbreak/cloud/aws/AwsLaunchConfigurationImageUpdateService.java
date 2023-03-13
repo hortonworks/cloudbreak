@@ -8,14 +8,15 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
-import com.amazonaws.services.autoscaling.model.LaunchConfiguration;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 
 @Service
 public class AwsLaunchConfigurationImageUpdateService {
@@ -50,7 +51,7 @@ public class AwsLaunchConfigurationImageUpdateService {
         String launchConfigurationName = launchConfigurationHandler.createNewLaunchConfiguration(
                 stack.getImage().getImageName(), autoScalingClient, oldLaunchConfiguration, authenticatedContext.getCloudContext());
 
-        autoScalingGroupHandler.updateAutoScalingGroupWithLaunchConfiguration(autoScalingClient, autoScalingGroup.getKey().getAutoScalingGroupName(),
+        autoScalingGroupHandler.updateAutoScalingGroupWithLaunchConfiguration(autoScalingClient, autoScalingGroup.getKey().autoScalingGroupName(),
                 oldLaunchConfiguration, launchConfigurationName);
 
         launchConfigurationHandler.removeOldLaunchConfiguration(oldLaunchConfiguration, autoScalingClient, authenticatedContext.getCloudContext());
@@ -59,9 +60,9 @@ public class AwsLaunchConfigurationImageUpdateService {
     private Map.Entry<AutoScalingGroup, String> getAutoScalingGroupForLaunchConfiguration(Map<AutoScalingGroup, String> scalingGroups,
             LaunchConfiguration oldLaunchConfiguration) {
         return scalingGroups.entrySet().stream()
-                .filter(entry -> entry.getKey().getLaunchConfigurationName()
-                        .equalsIgnoreCase(oldLaunchConfiguration.getLaunchConfigurationName()))
+                .filter(entry -> entry.getKey().launchConfigurationName()
+                        .equalsIgnoreCase(oldLaunchConfiguration.launchConfigurationName()))
                 .findFirst().orElseThrow(() -> new NoSuchElementException("Launch configuration not found for: "
-                        + oldLaunchConfiguration.getLaunchConfigurationName()));
+                        + oldLaunchConfiguration.launchConfigurationName()));
     }
 }

@@ -12,14 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
 
 @Service
 public class S3Client {
@@ -38,16 +38,16 @@ public class S3Client {
         return awsProperties;
     }
 
-    public AmazonS3 buildS3Client() {
+    public software.amazon.awssdk.services.s3.S3Client buildS3Client() {
         String accessKeyId = awsProperties.getCredential().getAccessKeyId();
         String secretKey = awsProperties.getCredential().getSecretKey();
         String region = awsProperties.getRegion();
 
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKeyId, secretKey);
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKeyId, secretKey);
 
-        return AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                .withRegion(region)
+        return software.amazon.awssdk.services.s3.S3Client.builder()
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                .region(Region.of(region))
                 .build();
     }
 

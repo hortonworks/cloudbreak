@@ -1,7 +1,11 @@
 package com.sequenceiq.flow.core;
 
 public class FlowConstants {
+    public static final String FLOW = "FLOW";
+
     public static final String FLOW_ID = "FLOW_ID";
+
+    public static final String FLOW_CHAIN = "FLOW_CHAIN";
 
     public static final String FLOW_CHAIN_TYPE = "FLOW_CHAIN_TYPE";
 

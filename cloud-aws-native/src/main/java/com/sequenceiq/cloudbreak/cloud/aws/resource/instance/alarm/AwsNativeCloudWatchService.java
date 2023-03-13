@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance.alarm;
 
-import static com.amazonaws.services.cloudwatch.model.Statistic.Maximum;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static software.amazon.awssdk.services.cloudwatch.model.Statistic.MAXIMUM;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,19 +17,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.cloudwatch.model.AlarmType;
-import com.amazonaws.services.cloudwatch.model.AmazonCloudWatchException;
-import com.amazonaws.services.cloudwatch.model.DeleteAlarmsRequest;
-import com.amazonaws.services.cloudwatch.model.DescribeAlarmsRequest;
-import com.amazonaws.services.cloudwatch.model.Dimension;
-import com.amazonaws.services.cloudwatch.model.MetricAlarm;
-import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+
+import software.amazon.awssdk.services.cloudwatch.model.AlarmType;
+import software.amazon.awssdk.services.cloudwatch.model.CloudWatchException;
+import software.amazon.awssdk.services.cloudwatch.model.DeleteAlarmsRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsRequest;
+import software.amazon.awssdk.services.cloudwatch.model.Dimension;
+import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
+import software.amazon.awssdk.services.cloudwatch.model.PutMetricAlarmRequest;
 
 @Service
 public class AwsNativeCloudWatchService {
@@ -77,8 +78,8 @@ public class AwsNativeCloudWatchService {
             LOGGER.debug("The following cloudwatch alarm - for instanceId: {} - has created and about to put it on AWS side: [{}]",
                     resource.getReference(), metricAlarmRequest);
             commonAwsClient.createCloudWatchClient(credentialView, regionName).putMetricAlarm(metricAlarmRequest);
-        } catch (AmazonCloudWatchException acwe) {
-            LOGGER.error("Unable to create cloudwatch alarm for instanceId {}: {}", resource.getReference(), acwe.getLocalizedMessage());
+        } catch (CloudWatchException acwe) {
+            LOGGER.error("Unable to create cloudwatch alarm for instanceId {}: {}", resource.getReference(), acwe.getLocalizedMessage(), acwe);
         }
     }
 
@@ -150,29 +151,30 @@ public class AwsNativeCloudWatchService {
         for (String instanceId : instanceIds) {
             alarmNames.add(instanceId + alarmSuffix);
         }
-        DescribeAlarmsRequest req = new DescribeAlarmsRequest()
-                .withAlarmTypes(AlarmType.MetricAlarm)
-                .withAlarmNames(alarmNames);
-        return commonAwsClient.createCloudWatchClient(credentialView, regionName).describeAlarms(req).getMetricAlarms();
+        DescribeAlarmsRequest req = DescribeAlarmsRequest.builder()
+                .alarmTypes(AlarmType.METRIC_ALARM)
+                .alarmNames(alarmNames)
+                .build();
+        return commonAwsClient.createCloudWatchClient(credentialView, regionName).describeAlarms(req).metricAlarms();
     }
 
     private Stream<List<String>> getExistingCloudWatchAlarms(String regionName, AwsCredentialView credentialView, List<String> alarmNames) {
         Stream<List<String>> filteredAlarmNamesStream;
         LOGGER.info("Searching for cloudwatch alarms [{}]", alarmNames);
         try {
-            DescribeAlarmsRequest request = new DescribeAlarmsRequest().withAlarmNames(alarmNames).withMaxRecords(maxBatchsize);
+            DescribeAlarmsRequest request = DescribeAlarmsRequest.builder().alarmNames(alarmNames).maxRecords(maxBatchsize).build();
             List<String> filteredAlarmNames = commonAwsClient.createCloudWatchClient(credentialView, regionName)
                     .describeAlarms(request)
-                    .getMetricAlarms()
+                    .metricAlarms()
                     .stream()
-                    .map(MetricAlarm::getAlarmName)
+                    .map(MetricAlarm::alarmName)
                     .collect(toList());
             filteredAlarmNamesStream = Stream.of(filteredAlarmNames);
             LOGGER.debug("Checking cloudwatch alarms [{}] for existence and found [{}]", alarmNames, filteredAlarmNames);
-        } catch (AmazonCloudWatchException acwe) {
+        } catch (CloudWatchException acwe) {
             LOGGER.error("Unable to describe cloudwatch alarms falling back to delete all alarms individually [{}]: {}", alarmNames,
-                    acwe.getLocalizedMessage());
-            filteredAlarmNamesStream = alarmNames.stream().map(alarmName -> List.of(alarmName));
+                    acwe.getLocalizedMessage(), acwe);
+            filteredAlarmNamesStream = alarmNames.stream().map(List::of);
         }
         return filteredAlarmNamesStream;
     }
@@ -180,31 +182,32 @@ public class AwsNativeCloudWatchService {
     private void deleteCloudWatchAlarms(String regionName, AwsCredentialView credentialView, List<String> alarmNames) {
         LOGGER.info("Attempting to delete cloudwatch alarms [{}]", alarmNames);
         try {
-            DeleteAlarmsRequest deleteAlarmsRequest = new DeleteAlarmsRequest().withAlarmNames(alarmNames);
+            DeleteAlarmsRequest deleteAlarmsRequest = DeleteAlarmsRequest.builder().alarmNames(alarmNames).build();
             commonAwsClient.createCloudWatchClient(credentialView, regionName).deleteAlarms(deleteAlarmsRequest);
             LOGGER.info("Deleted cloudwatch alarms [{}]", alarmNames);
-        } catch (AmazonCloudWatchException acwe) {
-            LOGGER.error("Unable to delete cloudwatch alarms [{}]: {}", alarmNames, acwe.getLocalizedMessage());
+        } catch (CloudWatchException acwe) {
+            LOGGER.error("Unable to delete cloudwatch alarms [{}]: {}", alarmNames, acwe.getLocalizedMessage(), acwe);
             throw new CloudConnectorException("Unable to delete cloud watch alarms: " + acwe.getLocalizedMessage(), acwe);
         }
     }
 
     private PutMetricAlarmRequest createPutMetricAlarmRequest(String instanceId, String regionName, boolean govCloud) {
-        return new PutMetricAlarmRequest()
-                .withPeriod(cloudwatchPeriod)
-                .withNamespace(EC2_NAMESPACE_VALUE)
-                .withMetricName(GENERAL_METRIC_NAME)
-                .withComparisonOperator(GREATER_THAN_OR_EQUAL_TO_THRESHOLD_COMPARISON_OPERATOR)
-                .withDimensions(createMetricAlarmDimensionWithInstanceId(instanceId))
-                .withAlarmActions(combineAlarmActionsValue(regionName, govCloud))
-                .withEvaluationPeriods(cloudwatchEvaluationPeriods)
-                .withAlarmName(instanceId + alarmSuffix)
-                .withThreshold(cloudwatchThreshhold)
-                .withStatistic(Maximum);
+        return PutMetricAlarmRequest.builder()
+                .period(cloudwatchPeriod)
+                .namespace(EC2_NAMESPACE_VALUE)
+                .metricName(GENERAL_METRIC_NAME)
+                .comparisonOperator(GREATER_THAN_OR_EQUAL_TO_THRESHOLD_COMPARISON_OPERATOR)
+                .dimensions(createMetricAlarmDimensionWithInstanceId(instanceId))
+                .alarmActions(combineAlarmActionsValue(regionName, govCloud))
+                .evaluationPeriods(cloudwatchEvaluationPeriods)
+                .alarmName(instanceId + alarmSuffix)
+                .threshold(cloudwatchThreshhold)
+                .statistic(MAXIMUM)
+                .build();
     }
 
     private Dimension createMetricAlarmDimensionWithInstanceId(String instanceId) {
-        return new Dimension().withName(DIMENSION_NAME_FOR_INSTANCE).withValue(instanceId);
+        return Dimension.builder().name(DIMENSION_NAME_FOR_INSTANCE).value(instanceId).build();
     }
 
     private String combineAlarmActionsValue(String regionName, boolean govCloud) {

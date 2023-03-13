@@ -11,14 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.Reservation;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.Reservation;
 
 @Service
 public class AwsInstanceCommonService {
@@ -31,20 +32,21 @@ public class AwsInstanceCommonService {
     public Set<String> getAttachedVolumes(CloudCredential cloudCredential, String region, String instanceId) {
         AwsCredentialView credentialView = new AwsCredentialView(cloudCredential);
         AmazonEc2Client ec2Client = awsClient.createAccessWithMinimalRetries(credentialView, region);
-        DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest()
-                .withInstanceIds(instanceId);
-        DescribeInstancesResult describeInstancesResult = ec2Client.describeInstances(describeInstancesRequest);
-        Optional<Reservation> reservation = describeInstancesResult.getReservations()
+        DescribeInstancesRequest describeInstancesRequest = DescribeInstancesRequest.builder()
+                .instanceIds(instanceId)
+                .build();
+        DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances(describeInstancesRequest);
+        Optional<Reservation> reservation = describeInstancesResponse.reservations()
                 .stream()
                 .findFirst();
 
         Set<String> result = new HashSet<>();
         if (reservation.isPresent()) {
-            Optional<Instance> instance = reservation.get().getInstances().stream().findFirst();
+            Optional<Instance> instance = reservation.get().instances().stream().findFirst();
             if (instance.isPresent()) {
-                result = instance.get().getBlockDeviceMappings()
+                result = instance.get().blockDeviceMappings()
                         .stream()
-                        .map(e -> e.getEbs().getVolumeId())
+                        .map(e -> e.ebs().volumeId())
                         .collect(Collectors.toSet());
             }
         }

@@ -734,6 +734,17 @@
     {%- endif %}
     {%- endif %}
 
+    {% if 'EFM_SERVER' in salt['pillar.get']('gateway:location') -%}
+        {% if 'EFM-UI' in exposed -%}
+            <service>
+                <role>EFM-UI</role>
+                {% for hostloc in salt['pillar.get']('gateway:location')['EFM_SERVER'] -%}
+                <url>{{ protocol }}://{{ hostloc }}:{{ ports['EFM-UI'] }}</url>
+                {%- endfor %}
+            </service>
+        {%- endif %}
+    {%- endif %}
+
     {% if 'STREAMS_MESSAGING_MANAGER_UI' in salt['pillar.get']('gateway:location') -%}
         {% if 'SMM-UI' in exposed -%}
             <service>

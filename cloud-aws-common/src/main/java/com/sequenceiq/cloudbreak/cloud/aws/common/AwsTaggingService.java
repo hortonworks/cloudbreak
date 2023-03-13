@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,17 +11,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.CreateTagsRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
-import com.amazonaws.services.ec2.model.ResourceType;
-import com.amazonaws.services.ec2.model.Tag;
-import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+
+import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.ResourceType;
+import software.amazon.awssdk.services.ec2.model.Tag;
+import software.amazon.awssdk.services.ec2.model.TagSpecification;
 
 @Service
 public class AwsTaggingService {
@@ -32,43 +31,34 @@ public class AwsTaggingService {
 
     private static final int MAX_RESOURCE_PER_REQUEST = 1000;
 
-    public Collection<com.amazonaws.services.cloudformation.model.Tag> prepareCloudformationTags(AuthenticatedContext ac, Map<String, String> userDefinedTags) {
-        Collection<com.amazonaws.services.cloudformation.model.Tag> tags = new ArrayList<>();
-        tags.addAll(userDefinedTags.entrySet().stream()
+    public Collection<software.amazon.awssdk.services.cloudformation.model.Tag> prepareCloudformationTags(AuthenticatedContext ac,
+            Map<String, String> userDefinedTags) {
+        return userDefinedTags.entrySet().stream()
                 .map(entry -> prepareCloudformationTag(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList()));
-        return tags;
+                .collect(Collectors.toList());
     }
 
-    public Collection<com.amazonaws.services.ec2.model.Tag> prepareEc2Tags(Map<String, String> userDefinedTags) {
-        Collection<com.amazonaws.services.ec2.model.Tag> tags = new ArrayList<>();
-        tags.addAll(userDefinedTags.entrySet().stream()
+    public Collection<software.amazon.awssdk.services.ec2.model.Tag> prepareEc2Tags(Map<String, String> userDefinedTags) {
+        return userDefinedTags.entrySet().stream()
                 .map(entry -> prepareEc2Tag(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList()));
-        return tags;
+                .collect(Collectors.toList());
     }
 
-    public Collection<com.amazonaws.services.elasticloadbalancingv2.model.Tag> prepareElasticLoadBalancingTags(Map<String, String> userDefinedTags) {
-        Collection<com.amazonaws.services.elasticloadbalancingv2.model.Tag> tags = new ArrayList<>();
-        tags.addAll(userDefinedTags.entrySet().stream()
+    public Collection<software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag> prepareElasticLoadBalancingTags(Map<String, String> userDefinedTags) {
+        return userDefinedTags.entrySet().stream()
                 .map(entry -> prepareElasticLoadBalancingTag(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList()));
-        return tags;
+                .collect(Collectors.toList());
     }
 
-    public Collection<com.amazonaws.services.elasticfilesystem.model.Tag> prepareEfsTags(Map<String, String> userDefinedTags) {
-        Collection<com.amazonaws.services.elasticfilesystem.model.Tag> tags = new ArrayList<>();
-        tags.addAll(userDefinedTags.entrySet().stream()
+    public Collection<software.amazon.awssdk.services.efs.model.Tag> prepareEfsTags(Map<String, String> userDefinedTags) {
+        return userDefinedTags.entrySet().stream()
                 .map(entry -> prepareEfsTag(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList()));
-        return tags;
+                .collect(Collectors.toList());
     }
 
-    public Map<String, String> convertAwsEfsTags(Collection<com.amazonaws.services.elasticfilesystem.model.Tag> awsTags) {
-        Map<String, String> efsTagMap = new HashMap<>();
-        awsTags.stream().map(awsTag -> efsTagMap.put(awsTag.getKey(), awsTag.getValue())).collect(Collectors.toList());
-
-        return efsTagMap;
+    public Map<String, String> convertAwsEfsTags(Collection<software.amazon.awssdk.services.efs.model.Tag> awsTags) {
+        return awsTags.stream()
+                .collect(Collectors.toMap(software.amazon.awssdk.services.efs.model.Tag::key, software.amazon.awssdk.services.efs.model.Tag::value));
     }
 
     public void tagRootVolumes(AuthenticatedContext ac, AmazonEc2Client ec2Client, List<CloudResource> instanceResources,
@@ -76,13 +66,13 @@ public class AwsTaggingService {
         String stackName = ac.getCloudContext().getName();
         LOGGER.debug("Fetch AWS instances to collect all root volume ids for stack: {}", stackName);
         List<String> instanceIds = instanceResources.stream().map(CloudResource::getInstanceId).collect(Collectors.toList());
-        DescribeInstancesResult describeInstancesResult = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
+        DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder().instanceIds(instanceIds).build());
 
-        List<Instance> instances = describeInstancesResult.getReservations().stream().flatMap(res -> res.getInstances().stream()).collect(Collectors.toList());
+        List<Instance> instances = describeInstancesResponse.reservations().stream().flatMap(res -> res.instances().stream()).collect(Collectors.toList());
         List<String> rootVolumeIds = instances.stream()
                 .map(this::getRootVolumeId)
                 .filter(Optional::isPresent)
-                .map(blockDeviceMapping -> blockDeviceMapping.get().getEbs().getVolumeId())
+                .map(blockDeviceMapping -> blockDeviceMapping.get().ebs().volumeId())
                 .collect(Collectors.toList());
 
         int instanceCount = instances.size();
@@ -100,31 +90,31 @@ public class AwsTaggingService {
         Collection<Tag> tags = prepareEc2Tags(userDefinedTags);
         for (List<String> volumeIds : volumeIdChunks) {
             LOGGER.debug("Tag {} root volumes for stack: {}", volumeIds.size(), stackName);
-            ec2Client.createTags(new CreateTagsRequest().withResources(volumeIds).withTags(tags));
+            ec2Client.createTags(CreateTagsRequest.builder().resources(volumeIds).tags(tags).build());
         }
     }
 
     public TagSpecification prepareEc2TagSpecification(Map<String, String> userDefinedTags, ResourceType resourceType) {
-        return new TagSpecification().withTags(prepareEc2Tags(userDefinedTags)).withResourceType(resourceType);
+        return TagSpecification.builder().tags(prepareEc2Tags(userDefinedTags)).resourceType(resourceType).build();
     }
 
-    private com.amazonaws.services.cloudformation.model.Tag prepareCloudformationTag(String key, String value) {
-        return new com.amazonaws.services.cloudformation.model.Tag().withKey(key).withValue(value);
+    private software.amazon.awssdk.services.cloudformation.model.Tag prepareCloudformationTag(String key, String value) {
+        return software.amazon.awssdk.services.cloudformation.model.Tag.builder().key(key).value(value).build();
     }
 
-    private com.amazonaws.services.ec2.model.Tag prepareEc2Tag(String key, String value) {
-        return new com.amazonaws.services.ec2.model.Tag().withKey(key).withValue(value);
+    private software.amazon.awssdk.services.ec2.model.Tag prepareEc2Tag(String key, String value) {
+        return software.amazon.awssdk.services.ec2.model.Tag.builder().key(key).value(value).build();
     }
 
-    private com.amazonaws.services.elasticfilesystem.model.Tag prepareEfsTag(String key, String value) {
-        return new com.amazonaws.services.elasticfilesystem.model.Tag().withKey(key).withValue(value);
+    private software.amazon.awssdk.services.efs.model.Tag prepareEfsTag(String key, String value) {
+        return software.amazon.awssdk.services.efs.model.Tag.builder().key(key).value(value).build();
     }
 
-    private Optional<InstanceBlockDeviceMapping> getRootVolumeId(com.amazonaws.services.ec2.model.Instance instance) {
-        return instance.getBlockDeviceMappings().stream().filter(mapping -> mapping.getDeviceName().equals(instance.getRootDeviceName())).findFirst();
+    private Optional<InstanceBlockDeviceMapping> getRootVolumeId(software.amazon.awssdk.services.ec2.model.Instance instance) {
+        return instance.blockDeviceMappings().stream().filter(mapping -> mapping.deviceName().equals(instance.rootDeviceName())).findFirst();
     }
 
-    private com.amazonaws.services.elasticloadbalancingv2.model.Tag prepareElasticLoadBalancingTag(String key, String value) {
-        return new com.amazonaws.services.elasticloadbalancingv2.model.Tag().withKey(key).withValue(value);
+    private software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag prepareElasticLoadBalancingTag(String key, String value) {
+        return software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(key).value(value).build();
     }
 }

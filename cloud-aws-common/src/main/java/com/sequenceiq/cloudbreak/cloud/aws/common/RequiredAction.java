@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.amazonaws.services.identitymanagement.model.ContextEntry;
+import software.amazon.awssdk.services.iam.model.ContextEntry;
 
 public class RequiredAction {
     private String resourceArn;

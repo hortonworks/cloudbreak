@@ -32,6 +32,12 @@ public interface CloudFunctionality {
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
+    List<String> listInstanceTypes(String clusterName, List<String> instanceIds);
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
     List<String> listVolumeEncryptionKeyIds(String clusterName, String resourceGroupName, List<String> instanceIds);
 
     @Retryable(

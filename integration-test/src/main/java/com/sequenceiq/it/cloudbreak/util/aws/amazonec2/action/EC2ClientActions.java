@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.aws.amazonec2.action;
 
 import static java.lang.String.format;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -19,75 +20,70 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.cloudformation.model.Stack;
-import com.amazonaws.services.cloudformation.model.StackResourceSummary;
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
-import com.amazonaws.services.ec2.model.DescribeLaunchTemplateVersionsResult;
-import com.amazonaws.services.ec2.model.DescribeLaunchTemplatesRequest;
-import com.amazonaws.services.ec2.model.DescribeLaunchTemplatesResult;
-import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
-import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
-import com.amazonaws.services.ec2.model.InstanceState;
-import com.amazonaws.services.ec2.model.Reservation;
-import com.amazonaws.services.ec2.model.StopInstancesRequest;
-import com.amazonaws.services.ec2.model.StopInstancesResult;
-import com.amazonaws.services.ec2.model.Tag;
-import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
-import com.amazonaws.services.ec2.model.TerminateInstancesResult;
-import com.amazonaws.services.ec2.model.Volume;
-import com.amazonaws.services.lambda.model.EC2UnexpectedException;
-import com.amazonaws.waiters.FixedDelayStrategy;
-import com.amazonaws.waiters.MaxAttemptsRetryStrategy;
-import com.amazonaws.waiters.PollingStrategy;
-import com.amazonaws.waiters.WaiterParameters;
-import com.amazonaws.waiters.WaiterTimedOutException;
-import com.amazonaws.waiters.WaiterUnrecoverableException;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.aws.amazoncf.action.CfClientActions;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.client.EC2Client;
+
+import software.amazon.awssdk.core.retry.backoff.FixedDelayBackoffStrategy;
+import software.amazon.awssdk.core.waiters.WaiterOverrideConfiguration;
+import software.amazon.awssdk.core.waiters.WaiterResponse;
+import software.amazon.awssdk.services.cloudformation.model.Stack;
+import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
+import software.amazon.awssdk.services.cloudformation.model.StackSummary;
+import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplatesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplatesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
+import software.amazon.awssdk.services.ec2.model.EbsInstanceBlockDevice;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.InstanceState;
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
+import software.amazon.awssdk.services.ec2.model.Reservation;
+import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.StopInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Tag;
+import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Volume;
+import software.amazon.awssdk.services.lambda.model.Ec2UnexpectedException;
 
 @Component
 public class EC2ClientActions extends EC2Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EC2ClientActions.class);
 
-    private static final String TERMINATED_STATE = "terminated";
-
-    private static final String STOPPED_STATE = "stopped";
-
-    @Inject
-    private SdxUtil sdxUtil;
-
     @Inject
     private CfClientActions cfClientActions;
 
     public List<String> getInstanceVolumeIds(List<String> instanceIds, boolean rootVolumes) {
-        AmazonEC2 ec2Client = buildEC2Client();
-        DescribeInstancesResult describeInstancesResult = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
-        Map<String, Set<String>> instanceIdVolumeIdMap = describeInstancesResult.getReservations()
+        DescribeInstancesResponse describeInstancesResponse;
+        try (Ec2Client ec2Client = buildEC2Client()) {
+            describeInstancesResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder().instanceIds(instanceIds).build());
+        }
+
+        Map<String, Set<String>> instanceIdVolumeIdMap = describeInstancesResponse.reservations()
                 .stream()
-                .map(Reservation::getInstances)
+                .map(Reservation::instances)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toMap(Instance::getInstanceId,
-                        instance -> instance.getBlockDeviceMappings()
+                .collect(Collectors.toMap(Instance::instanceId,
+                        instance -> instance.blockDeviceMappings()
                                 .stream()
                                 .filter(dev -> {
                                     if (BooleanUtils.isTrue(rootVolumes)) {
-                                        return "/dev/xvda".equals(dev.getDeviceName());
+                                        return "/dev/xvda".equals(dev.deviceName());
                                     } else {
-                                        return !"/dev/xvda".equals(dev.getDeviceName());
+                                        return !"/dev/xvda".equals(dev.deviceName());
                                     }
                                 })
-                                .map(InstanceBlockDeviceMapping::getEbs)
-                                .map(EbsInstanceBlockDevice::getVolumeId)
+                                .map(InstanceBlockDeviceMapping::ebs)
+                                .map(EbsInstanceBlockDevice::volumeId)
                                 .collect(Collectors.toSet())
                 ));
         instanceIdVolumeIdMap.forEach((instanceId, volumeIds) -> Log.log(LOGGER, format(" Attached volume IDs are %s for [%s] EC2 instance ",
@@ -99,124 +95,150 @@ public class EC2ClientActions extends EC2Client {
                 .collect(Collectors.toList());
     }
 
+    public List<String> listInstanceTypes(List<String> instanceIds) {
+        try (Ec2Client ec2Client = buildEC2Client()) {
+            DescribeInstancesResponse describeInstanceResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder()
+                    .instanceIds(instanceIds)
+                    .build());
+            return describeInstanceResponse.reservations().stream()
+                    .flatMap(instances -> instances.instances().stream().map(instance -> instance.instanceType().toString()))
+                    .collect(Collectors.toList());
+        }
+    }
+
     public void deleteHostGroupInstances(List<String> instanceIds) {
-        AmazonEC2 ec2Client = buildEC2Client();
+        try (Ec2Client ec2Client = buildEC2Client()) {
+            TerminateInstancesResponse terminateInstancesResponse = ec2Client.terminateInstances(TerminateInstancesRequest.builder()
+                    .instanceIds(instanceIds).build());
+            for (String instanceId : instanceIds) {
+                try {
+                    Log.log(LOGGER, format(" EC2 instance [%s] state is [%s] ", instanceId,
+                            Objects.requireNonNull(terminateInstancesResponse.terminatingInstances().stream()
+                                    .filter(instance -> instance.instanceId().equals(instanceId))
+                                    .findAny().orElse(null)
+                            ).currentState().name()));
 
-        TerminateInstancesResult terminateInstancesResult = ec2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
-        for (String instanceId : instanceIds) {
-            try {
-                Log.log(LOGGER, format(" EC2 instance [%s] state is [%s] ", instanceId,
-                        Objects.requireNonNull(terminateInstancesResult.getTerminatingInstances().stream()
-                                .filter(instance -> instance.getInstanceId().equals(instanceId))
-                                .findAny().orElse(null)
-                        ).getCurrentState().getName()));
+                    WaiterResponse<DescribeInstancesResponse> waiterResponse = ec2Client.waiter().waitUntilInstanceTerminated(
+                            DescribeInstancesRequest.builder()
+                                    .instanceIds(instanceId)
+                                    .build(),
+                            WaiterOverrideConfiguration.builder()
+                                    .maxAttempts(80)
+                                    .backoffStrategy(FixedDelayBackoffStrategy.create(Duration.ofSeconds(30))).build());
 
-                ec2Client.waiters().instanceTerminated().run(new WaiterParameters<DescribeInstancesRequest>(new DescribeInstancesRequest()
-                        .withInstanceIds(instanceId))
-                        .withPollingStrategy(
-                                new PollingStrategy(
-                                        new MaxAttemptsRetryStrategy(80), new FixedDelayStrategy(30)
-                                )
-                        )
-                );
+                    if (waiterResponse.matched().exception().isPresent()) {
+                        throw waiterResponse.matched().exception().get();
+                    }
 
-                DescribeInstancesResult describeInstanceResult = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId));
-                InstanceState actualInstanceState = describeInstanceResult.getReservations().get(0).getInstances().get(0).getState();
-                if (TERMINATED_STATE.equals(actualInstanceState.getName())) {
-                    Log.log(LOGGER, format(" EC2 Instance: %s state is: %s ", instanceId, TERMINATED_STATE));
-                } else {
-                    LOGGER.error("EC2 Instance: {} termination has not been successful. So the actual state is: {} ",
-                            instanceId, actualInstanceState.getName());
-                    throw new TestFailException(" EC2 Instance: " + instanceId
-                            + " termination has not been successful, because of the actual state is: "
-                            + actualInstanceState.getName());
+                    DescribeInstancesResponse describeInstanceResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder()
+                            .instanceIds(instanceId)
+                            .build());
+                    InstanceState actualInstanceState = describeInstanceResponse.reservations().get(0).instances().get(0).state();
+                    if (InstanceStateName.TERMINATED == actualInstanceState.name()) {
+                        Log.log(LOGGER, format(" EC2 Instance: %s state is: %s ", instanceId, InstanceStateName.TERMINATED));
+                    } else {
+                        LOGGER.error("EC2 Instance: {} termination has not been successful. So the actual state is: {} ",
+                                instanceId, actualInstanceState.name());
+                        throw new TestFailException(" EC2 Instance: " + instanceId
+                                + " termination has not been successful, because of the actual state is: "
+                                + actualInstanceState.name());
+                    }
+                } catch (Ec2UnexpectedException e) {
+                    LOGGER.error("EC2 Instance {} termination has not been successful, because of EC2UnexpectedException: {}", instanceId, e);
+                } catch (Throwable e) {
+                    LOGGER.error("EC2 Instance {} termination has not been successful, because of Exception: {}", instanceId, e);
                 }
-            } catch (WaiterUnrecoverableException e) {
-                LOGGER.error("EC2 Instance {} termination has not been successful, because of WaiterUnrecoverableException: {}", instanceId, e);
-            } catch (WaiterTimedOutException e) {
-                LOGGER.error("EC2 Instance {} termination has not been successful, because of WaiterTimedOutException: {}", instanceId, e);
-            } catch (EC2UnexpectedException e) {
-                LOGGER.error("EC2 Instance {} termination has not been successful, because of EC2UnexpectedException: {}", instanceId, e);
             }
         }
     }
 
     public void stopHostGroupInstances(List<String> instanceIds) {
-        AmazonEC2 ec2Client = buildEC2Client();
+        try (Ec2Client ec2Client = buildEC2Client()) {
+            StopInstancesResponse stopInstancesResponse = ec2Client.stopInstances(StopInstancesRequest.builder().instanceIds(instanceIds).build());
+            for (String instanceId : instanceIds) {
+                try {
+                    Log.log(LOGGER, format(" EC2 instance [%s] state is [%s] ", instanceId,
+                            Objects.requireNonNull(stopInstancesResponse.stoppingInstances().stream()
+                                    .filter(instance -> instance.instanceId().equals(instanceId))
+                                    .findAny().orElse(null)
+                            ).currentState().name()));
 
-        StopInstancesResult stopInstancesResult = ec2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instanceIds));
-        for (String instanceId : instanceIds) {
-            try {
-                Log.log(LOGGER, format(" EC2 instance [%s] state is [%s] ", instanceId,
-                        Objects.requireNonNull(stopInstancesResult.getStoppingInstances().stream()
-                                .filter(instance -> instance.getInstanceId().equals(instanceId))
-                                .findAny().orElse(null)
-                        ).getCurrentState().getName()));
+                    WaiterResponse<DescribeInstancesResponse> waiterResponse = ec2Client.waiter().waitUntilInstanceStopped(
+                            DescribeInstancesRequest.builder()
+                                    .instanceIds(instanceId)
+                                    .build(),
+                            WaiterOverrideConfiguration.builder()
+                                    .maxAttempts(80)
+                                    .backoffStrategy(FixedDelayBackoffStrategy.create(Duration.ofSeconds(30))).build());
 
-                ec2Client.waiters().instanceStopped().run(new WaiterParameters<DescribeInstancesRequest>(new DescribeInstancesRequest()
-                        .withInstanceIds(instanceId))
-                        .withPollingStrategy(
-                                new PollingStrategy(
-                                        new MaxAttemptsRetryStrategy(80), new FixedDelayStrategy(30)
-                                )
-                        )
-                );
+                    if (waiterResponse.matched().exception().isPresent()) {
+                        throw waiterResponse.matched().exception().get();
+                    }
 
-                DescribeInstancesResult describeInstanceResult = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId));
-                InstanceState actualInstanceState = describeInstanceResult.getReservations().get(0).getInstances().get(0).getState();
-                if (STOPPED_STATE.equals(actualInstanceState.getName())) {
-                    Log.log(LOGGER, format(" EC2 Instance: %s state is: %s ", instanceId, STOPPED_STATE));
-                } else {
-                    LOGGER.error("EC2 Instance: {} stop has not been successful. So the actual state is: {} ",
-                            instanceId, actualInstanceState.getName());
-                    throw new TestFailException(" EC2 Instance: " + instanceId
-                            + " stop has not been successful, because of the actual state is: "
-                            + actualInstanceState.getName());
+                    DescribeInstancesResponse describeInstanceResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder()
+                            .instanceIds(instanceId)
+                            .build());
+                    InstanceState actualInstanceState = describeInstanceResponse.reservations().get(0).instances().get(0).state();
+                    if (InstanceStateName.STOPPED.equals(actualInstanceState.name())) {
+                        Log.log(LOGGER, format(" EC2 Instance: %s state is: %s ", instanceId, InstanceStateName.STOPPED));
+                    } else {
+                        LOGGER.error("EC2 Instance: {} stop has not been successful. So the actual state is: {} ",
+                                instanceId, actualInstanceState.name());
+                        throw new TestFailException(" EC2 Instance: " + instanceId
+                                + " stop has not been successful, because of the actual state is: "
+                                + actualInstanceState.name());
+                    }
+                } catch (Ec2UnexpectedException e) {
+                    LOGGER.error("EC2 Instance {} stop has not been successful, because of EC2UnexpectedException: {}", instanceId, e);
+                } catch (Throwable e) {
+                    LOGGER.error("EC2 Instance {} termination has not been successful, because of Exception: {}", instanceId, e);
                 }
-            } catch (WaiterUnrecoverableException e) {
-                LOGGER.error("EC2 Instance {} stop has not been successful, because of WaiterUnrecoverableException: {}", instanceId, e);
-            } catch (WaiterTimedOutException e) {
-                LOGGER.error("EC2 Instance {} stop has not been successful, because of WaiterTimedOutException: {}", instanceId, e);
-            } catch (EC2UnexpectedException e) {
-                LOGGER.error("EC2 Instance {} stop has not been successful, because of EC2UnexpectedException: {}", instanceId, e);
             }
         }
     }
 
     public Map<String, Boolean> enaSupport(List<String> instanceIds) {
-        AmazonEC2 ec2Client = buildEC2Client();
-        DescribeInstancesResult describeInstanceResult = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
-        return describeInstanceResult.getReservations().stream().flatMap(it -> it.getInstances().stream())
-                .collect(Collectors.toMap(Instance::getInstanceId, Instance::getEnaSupport));
+        try (Ec2Client ec2Client = buildEC2Client()) {
+            DescribeInstancesResponse describeInstanceResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder()
+                    .instanceIds(instanceIds).build());
+            return describeInstanceResponse.reservations().stream().flatMap(it -> it.instances().stream())
+                    .collect(Collectors.toMap(Instance::instanceId, Instance::enaSupport));
+        }
     }
 
     public Map<String, String> instanceSubnet(List<String> instanceIds) {
-        AmazonEC2 ec2Client = buildEC2Client();
-        DescribeInstancesResult result = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
-        return result.getReservations().stream().flatMap(it -> it.getInstances().stream())
-                .collect(Collectors.toMap(Instance::getInstanceId, Instance::getSubnetId));
+        try (Ec2Client ec2Client = buildEC2Client()) {
+            DescribeInstancesResponse response = ec2Client.describeInstances(DescribeInstancesRequest.builder()
+                    .instanceIds(instanceIds).build());
+            return response.reservations().stream().flatMap(it -> it.instances().stream())
+                    .collect(Collectors.toMap(Instance::instanceId, Instance::subnetId));
+        }
     }
 
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
-        DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
-        DescribeInstancesResult describeInstancesResult = buildEC2Client().describeInstances(describeInstancesRequest);
-        return describeInstancesResult.getReservations().stream()
-                .flatMap(reservation -> reservation.getInstances().stream())
-                .collect(Collectors.toMap(Instance::getInstanceId, this::getTagsForInstance));
+        try (Ec2Client ec2Client = buildEC2Client()) {
+            DescribeInstancesRequest describeInstancesRequest = DescribeInstancesRequest.builder().instanceIds(instanceIds).build();
+            DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances(describeInstancesRequest);
+            return describeInstancesResponse.reservations().stream()
+                    .flatMap(reservation -> reservation.instances().stream())
+                    .collect(Collectors.toMap(Instance::instanceId, this::getTagsForInstance));
+        }
     }
 
     private Map<String, String> getTagsForInstance(Instance instance) {
-        return instance.getTags().stream()
-                .collect(Collectors.toMap(Tag::getKey, Tag::getValue));
+        return instance.tags().stream()
+                .collect(Collectors.toMap(Tag::key, Tag::value));
     }
 
     public List<String> getRootVolumesKmsKeys(List<String> instanceIds) {
-        AmazonEC2 ec2Client = buildEC2Client();
         List<String> volumeIds = getInstanceVolumeIds(instanceIds, true);
-        DescribeVolumesResult describeVolumesResult = ec2Client.describeVolumes(new DescribeVolumesRequest().withVolumeIds(volumeIds));
-        Map<String, String> volumeIdKmsIdMap = describeVolumesResult.getVolumes()
+        DescribeVolumesResponse describeVolumesResponse;
+        try (Ec2Client ec2Client = buildEC2Client()) {
+            describeVolumesResponse = ec2Client.describeVolumes(DescribeVolumesRequest.builder().volumeIds(volumeIds).build());
+        }
+        Map<String, String> volumeIdKmsIdMap = describeVolumesResponse.volumes()
                 .stream()
-                .collect(Collectors.toMap(Volume::getVolumeId, Volume::getKmsKeyId));
+                .collect(Collectors.toMap(Volume::volumeId, Volume::kmsKeyId));
         volumeIdKmsIdMap.forEach((volumeId, kmsKeyId) -> Log.log(LOGGER, format(" Following KMS Key IDs are available: [%s] for '%s' EC2 volume. ",
                 kmsKeyId, volumeId)));
         return new ArrayList<>(volumeIdKmsIdMap.values());
@@ -229,24 +251,27 @@ public class EC2ClientActions extends EC2Client {
         } catch (Exception e) {
             launchTemplateList = List.of();
         }
-        AmazonEC2 client = buildEC2Client();
-
         Map<String, String> result = new HashMap<>();
-        DescribeLaunchTemplatesResult launchTemplates = client.describeLaunchTemplates(new DescribeLaunchTemplatesRequest()
-                .withLaunchTemplateIds(launchTemplateList.stream().map(lt -> lt.getPhysicalResourceId()).collect(Collectors.toList())));
-        for (int i = 0; i < launchTemplateList.size(); i++) {
-            DescribeLaunchTemplateVersionsResult ver = client.describeLaunchTemplateVersions(new DescribeLaunchTemplateVersionsRequest()
-                    .withLaunchTemplateId(launchTemplates.getLaunchTemplates().get(i).getLaunchTemplateId())
-                    .withVersions(String.valueOf(launchTemplates.getLaunchTemplates().get(i).getLatestVersionNumber())));
-            String userData = new String(Base64.getDecoder().decode(ver.getLaunchTemplateVersions().get(0).getLaunchTemplateData().getUserData()));
-            result.put(launchTemplates.getLaunchTemplates().get(i).getLaunchTemplateId(), userData);
+        try (Ec2Client client = buildEC2Client()) {
+            DescribeLaunchTemplatesResponse launchTemplates = client.describeLaunchTemplates(DescribeLaunchTemplatesRequest.builder()
+                    .launchTemplateIds(launchTemplateList.stream().map(StackResourceSummary::physicalResourceId).collect(Collectors.toList())).build());
+            for (int i = 0; i < launchTemplateList.size(); i++) {
+                DescribeLaunchTemplateVersionsResponse ver = client.describeLaunchTemplateVersions(DescribeLaunchTemplateVersionsRequest.builder()
+                        .launchTemplateId(launchTemplates.launchTemplates().get(i).launchTemplateId())
+                        .versions(String.valueOf(launchTemplates.launchTemplates().get(i).latestVersionNumber()))
+                        .build());
+                String userData = new String(Base64.getDecoder().decode(ver.launchTemplateVersions().get(0).launchTemplateData().userData()));
+                result.put(launchTemplates.launchTemplates().get(i).launchTemplateId(), userData);
+            }
         }
 
         return result;
     }
 
     public Boolean isCloudFormationExistForStack(String stack) {
-        return !cfClientActions.listCfStacksByName(stack).isEmpty();
+        List<StackSummary> stackSummaries = cfClientActions.listCfStacksByName(stack);
+        LOGGER.info("Stack summaries in AWS: {}", stackSummaries.toString());
+        return !stackSummaries.isEmpty();
     }
 
     public List<Stack> listCfStacksByEnvironment(String crn) {

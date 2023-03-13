@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.util;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceLifecycleType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceLifeCycle;
+
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceLifecycleType;
 
 class AwsLifeCycleMapperTest {
 
@@ -13,7 +14,7 @@ class AwsLifeCycleMapperTest {
 
     @Test
     void spotLifeCycle() {
-        Instance spotInstance = new Instance().withInstanceLifecycle(InstanceLifecycleType.Spot);
+        Instance spotInstance = Instance.builder().instanceLifecycle(InstanceLifecycleType.SPOT).build();
 
         CloudInstanceLifeCycle lifeCycle = underTest.getLifeCycle(spotInstance);
 
@@ -22,7 +23,7 @@ class AwsLifeCycleMapperTest {
 
     @Test
     void scheduledLifeCycle() {
-        Instance scheduledInstance = new Instance().withInstanceLifecycle(InstanceLifecycleType.Scheduled);
+        Instance scheduledInstance = Instance.builder().instanceLifecycle(InstanceLifecycleType.SCHEDULED).build();
 
         CloudInstanceLifeCycle lifeCycle = underTest.getLifeCycle(scheduledInstance);
 
@@ -31,7 +32,7 @@ class AwsLifeCycleMapperTest {
 
     @Test
     void nullLifeCycle() {
-        Instance onDemandInstance = new Instance().withInstanceLifecycle((String) null);
+        Instance onDemandInstance = Instance.builder().instanceLifecycle((String) null).build();
 
         CloudInstanceLifeCycle lifeCycle = underTest.getLifeCycle(onDemandInstance);
 

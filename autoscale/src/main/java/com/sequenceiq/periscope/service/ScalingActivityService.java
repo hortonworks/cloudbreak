@@ -111,6 +111,11 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
         return scalingActivityRepository.findByOperationIdAndClusterCrn(operationId, clusterCrn).orElseThrow(notFound("ScalingActivity", operationId));
     }
 
+    public ScalingActivity findByOperationIdAndClusterName(String operationId, String clusterName) {
+        LOGGER.info("Retrieving ScalingActivity by Id: {}", operationId);
+        return scalingActivityRepository.findByOperationIdAndClusterName(operationId, clusterName).orElseThrow(notFound("ScalingActivity", operationId));
+    }
+
     public void setEndTime(Long scalingActivityId, long endTimeMillis) {
         scalingActivityRepository.setEndTimeForScalingActivity(scalingActivityId, new Date(endTimeMillis));
     }

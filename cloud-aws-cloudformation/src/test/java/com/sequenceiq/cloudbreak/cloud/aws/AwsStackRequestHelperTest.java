@@ -29,11 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import com.amazonaws.services.cloudformation.model.CreateStackRequest;
-import com.amazonaws.services.cloudformation.model.Parameter;
-import com.amazonaws.services.cloudformation.model.Tag;
-import com.amazonaws.services.ec2.model.DescribeImagesRequest;
-import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -51,6 +46,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
+
+import software.amazon.awssdk.services.cloudformation.model.CreateStackRequest;
+import software.amazon.awssdk.services.cloudformation.model.Parameter;
+import software.amazon.awssdk.services.cloudformation.model.Tag;
+import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -135,37 +136,37 @@ public class AwsStackRequestHelperTest {
     @Test
     void testCreateCreateStackRequestForCloudStack() {
         when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("region"), new AvailabilityZone("az")));
-        DescribeImagesResult imagesResult = new DescribeImagesResult();
-        when(amazonEC2Client.describeImages(any(DescribeImagesRequest.class)))
-                .thenReturn(imagesResult.withImages(new com.amazonaws.services.ec2.model.Image()));
+        DescribeImagesResponse imagesResponse = DescribeImagesResponse.builder()
+                .images(software.amazon.awssdk.services.ec2.model.Image.builder().build()).build();
+        when(amazonEC2Client.describeImages(any(DescribeImagesRequest.class))).thenReturn(imagesResponse);
         when(network.getStringParameter(anyString())).thenReturn("");
 
-        Collection<Tag> tags = Lists.newArrayList(new Tag().withKey("mytag").withValue("myvalue"));
+        Collection<Tag> tags = Lists.newArrayList(Tag.builder().key("mytag").value("myvalue").build());
         when(awsTaggingService.prepareCloudformationTags(authenticatedContext, cloudStack.getTags())).thenReturn(tags);
 
         CreateStackRequest createStackRequest =
                 underTest.createCreateStackRequest(authenticatedContext, cloudStack, "stackName", "subnet", "template");
 
-        assertEquals("stackName", createStackRequest.getStackName());
-        assertEquals("template", createStackRequest.getTemplateBody());
+        assertEquals("stackName", createStackRequest.stackName());
+        assertEquals("template", createStackRequest.templateBody());
 
         verify(awsTaggingService).prepareCloudformationTags(authenticatedContext, cloudStack.getTags());
-        assertEquals(tags, createStackRequest.getTags());
+        assertEquals(tags, createStackRequest.tags());
     }
 
     @Test
     void testCreateCreateStackRequestForDatabaseStack() {
-        Collection<Tag> tags = Lists.newArrayList(new Tag().withKey("mytag").withValue("myvalue"));
+        Collection<Tag> tags = Lists.newArrayList(Tag.builder().key("mytag").value("myvalue").build());
         when(awsTaggingService.prepareCloudformationTags(authenticatedContext, databaseStack.getTags())).thenReturn(tags);
 
         CreateStackRequest createStackRequest =
                 underTest.createCreateStackRequest(authenticatedContext, databaseStack, "stackName", "template");
 
-        assertEquals("stackName", createStackRequest.getStackName());
-        assertEquals("template", createStackRequest.getTemplateBody());
+        assertEquals("stackName", createStackRequest.stackName());
+        assertEquals("template", createStackRequest.templateBody());
 
         verify(awsTaggingService).prepareCloudformationTags(authenticatedContext, cloudStack.getTags());
-        assertEquals(tags, createStackRequest.getTags());
+        assertEquals(tags, createStackRequest.tags());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -292,7 +293,7 @@ public class AwsStackRequestHelperTest {
         assertFalse(Character.isWhitespace(key1ParameterValue.charAt(0)));
 
         int totalLenght = parameters.stream()
-                .map(Parameter::getParameterValue)
+                .map(Parameter::parameterValue)
                 .map(String::length)
                 .reduce(0, Integer::sum);
         assertEquals(len, totalLenght, "Total chunk parameters length is not equal to the original string length");
@@ -335,20 +336,20 @@ public class AwsStackRequestHelperTest {
         StringBuilder sb = new StringBuilder();
         keys.forEach(key -> {
             Optional<Parameter> param = parameters.stream()
-                    .filter(p -> p.getParameterKey().equals(key))
+                    .filter(p -> p.parameterKey().equals(key))
                     .findFirst();
             assertTrue(param.isPresent(), "Parameter is missing with key: " + key);
-            sb.append(param.get().getParameterValue());
+            sb.append(param.get().parameterValue());
         });
         return sb.toString();
     }
 
     private String getParameterValue(Collection<Parameter> parameters, String key) {
         Optional<Parameter> foundParameterOpt = parameters.stream()
-                .filter(p -> p.getParameterKey().equals(key))
+                .filter(p -> p.parameterKey().equals(key))
                 .findFirst();
         assertTrue(foundParameterOpt.isPresent(), "Parameters are missing " + key);
-        return foundParameterOpt.get().getParameterValue();
+        return foundParameterOpt.get().parameterValue();
     }
 
     private void assertContainsParameter(Collection<Parameter> parameters, String key, String value) {
@@ -359,7 +360,7 @@ public class AwsStackRequestHelperTest {
 
     private void assertDoesNotContainParameter(Collection<Parameter> parameters, String key) {
         Optional<Parameter> foundParameterOpt = parameters.stream()
-                .filter(p -> p.getParameterKey().equals(key))
+                .filter(p -> p.parameterKey().equals(key))
                 .findFirst();
         assertFalse(foundParameterOpt.isPresent(), "Parameters include " + key);
     }

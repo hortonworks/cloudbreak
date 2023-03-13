@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import static com.amazonaws.util.StringUtils.isNullOrEmpty;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.ENABLED_TYPES;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
@@ -15,6 +14,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -43,55 +43,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
-import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypesResult;
-import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
-import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
-import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
-import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
-import com.amazonaws.services.ec2.model.DescribeRegionsResult;
-import com.amazonaws.services.ec2.model.DescribeRouteTablesRequest;
-import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
-import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
-import com.amazonaws.services.ec2.model.DescribeVpcsResult;
-import com.amazonaws.services.ec2.model.DiskInfo;
-import com.amazonaws.services.ec2.model.Filter;
-import com.amazonaws.services.ec2.model.InstanceStorageInfo;
-import com.amazonaws.services.ec2.model.InstanceTypeInfo;
-import com.amazonaws.services.ec2.model.InternetGateway;
-import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
-import com.amazonaws.services.ec2.model.KeyPairInfo;
-import com.amazonaws.services.ec2.model.RouteTable;
-import com.amazonaws.services.ec2.model.SecurityGroup;
-import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.ec2.model.Tag;
-import com.amazonaws.services.ec2.model.Vpc;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesRequest;
-import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
-import com.amazonaws.services.identitymanagement.model.ListRolesRequest;
-import com.amazonaws.services.identitymanagement.model.ListRolesResult;
-import com.amazonaws.services.identitymanagement.model.Role;
-import com.amazonaws.services.kms.model.AliasListEntry;
-import com.amazonaws.services.kms.model.DescribeKeyRequest;
-import com.amazonaws.services.kms.model.DescribeKeyResult;
-import com.amazonaws.services.kms.model.KeyListEntry;
-import com.amazonaws.services.kms.model.KeyMetadata;
-import com.amazonaws.services.kms.model.ListAliasesRequest;
-import com.amazonaws.services.kms.model.ListAliasesResult;
-import com.amazonaws.services.kms.model.ListKeysRequest;
-import com.amazonaws.services.kms.model.ListKeysResult;
-import com.amazonaws.services.rds.model.Certificate;
-import com.amazonaws.services.rds.model.DescribeCertificatesRequest;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.CloudParameterConst;
@@ -154,6 +105,59 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.services.dynamodb.model.ListTablesRequest;
+import software.amazon.awssdk.services.dynamodb.model.ListTablesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeRegionsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeRegionsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
+import software.amazon.awssdk.services.ec2.model.DiskInfo;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.ec2.model.InstanceStorageInfo;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.InstanceTypeInfo;
+import software.amazon.awssdk.services.ec2.model.InstanceTypeOffering;
+import software.amazon.awssdk.services.ec2.model.InternetGateway;
+import software.amazon.awssdk.services.ec2.model.InternetGatewayAttachment;
+import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.ec2.model.LocationType;
+import software.amazon.awssdk.services.ec2.model.RouteTable;
+import software.amazon.awssdk.services.ec2.model.SecurityGroup;
+import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.Tag;
+import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.ListInstanceProfilesRequest;
+import software.amazon.awssdk.services.iam.model.ListInstanceProfilesResponse;
+import software.amazon.awssdk.services.iam.model.ListRolesRequest;
+import software.amazon.awssdk.services.iam.model.ListRolesResponse;
+import software.amazon.awssdk.services.iam.model.Role;
+import software.amazon.awssdk.services.kms.model.AliasListEntry;
+import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
+import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
+import software.amazon.awssdk.services.kms.model.KeyListEntry;
+import software.amazon.awssdk.services.kms.model.KeyMetadata;
+import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
+import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
+import software.amazon.awssdk.services.kms.model.ListKeysRequest;
+import software.amazon.awssdk.services.kms.model.ListKeysResponse;
+import software.amazon.awssdk.services.rds.model.Certificate;
+import software.amazon.awssdk.services.rds.model.DescribeCertificatesRequest;
 
 @Service
 public class AwsPlatformResources implements PlatformResources {
@@ -348,18 +352,18 @@ public class AwsPlatformResources implements PlatformResources {
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), region.value());
         try {
             LOGGER.debug("Describing route tables in region {}", region.getRegionName());
-            List<RouteTable> allRouteTables = awsPageCollector.getAllRouteTables(ec2Client, new DescribeRouteTablesRequest());
+            List<RouteTable> allRouteTables = awsPageCollector.getAllRouteTables(ec2Client, DescribeRouteTablesRequest.builder().build());
             DescribeVpcsRequest describeVpcsRequest = getDescribeVpcsRequestWithFilters(filters);
             Set<CloudNetwork> cloudNetworks = new HashSet<>();
 
-            DescribeVpcsResult describeVpcsResult = null;
+            DescribeVpcsResponse describeVpcsResponse = null;
             boolean first = true;
-            while (first || !isNullOrEmpty(describeVpcsResult.getNextToken())) {
+            while (first || !isEmpty(describeVpcsResponse.nextToken())) {
                 LOGGER.debug("Getting VPC list in region {}{}", region.getRegionName(), first ? "" : " (continuation)");
                 first = false;
-                describeVpcsRequest.setNextToken(describeVpcsResult == null ? null : describeVpcsResult.getNextToken());
-                describeVpcsResult = ec2Client.describeVpcs(describeVpcsRequest);
-                Set<CloudNetwork> partialNetworks = getCloudNetworks(ec2Client, allRouteTables, describeVpcsResult);
+                describeVpcsRequest = describeVpcsRequest.toBuilder().nextToken(describeVpcsResponse == null ? null : describeVpcsResponse.nextToken()).build();
+                describeVpcsResponse = ec2Client.describeVpcs(describeVpcsRequest);
+                Set<CloudNetwork> partialNetworks = getCloudNetworks(ec2Client, allRouteTables, describeVpcsResponse);
                 cloudNetworks.addAll(partialNetworks);
             }
             Map<String, Set<CloudNetwork>> result = new HashMap<>();
@@ -374,29 +378,29 @@ public class AwsPlatformResources implements PlatformResources {
     private DescribeVpcsRequest getDescribeVpcsRequestWithFilters(Map<String, String> filters) {
         //create vpc filter view
         PlatformResourceVpcFilterView filter = new PlatformResourceVpcFilterView(filters);
-        DescribeVpcsRequest describeVpcsRequest = new DescribeVpcsRequest();
+        DescribeVpcsRequest.Builder describeVpcsRequestBuilder = DescribeVpcsRequest.builder();
         // If the filtervalue is provided then we should filter only for those vpc
         if (!Strings.isNullOrEmpty(filter.getVpcId())) {
-            describeVpcsRequest.withVpcIds(filter.getVpcId());
+            describeVpcsRequestBuilder.vpcIds(filter.getVpcId());
         }
-        return describeVpcsRequest;
+        return describeVpcsRequestBuilder.build();
     }
 
-    private Set<CloudNetwork> getCloudNetworks(AmazonEc2Client ec2Client, List<RouteTable> describeRouteTablesResult,
-            DescribeVpcsResult describeVpcsResult) {
+    private Set<CloudNetwork> getCloudNetworks(AmazonEc2Client ec2Client, List<RouteTable> describeRouteTablesResponse,
+            DescribeVpcsResponse describeVpcsResponse) {
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
         LOGGER.debug("Processing VPCs");
-        for (Vpc vpc : describeVpcsResult.getVpcs()) {
+        for (Vpc vpc : describeVpcsResponse.vpcs()) {
             List<Subnet> awsSubnets = getSubnets(ec2Client, vpc);
-            Set<CloudSubnet> subnets = convertAwsSubnetsToCloudSubnets(describeRouteTablesResult, awsSubnets);
+            Set<CloudSubnet> subnets = convertAwsSubnetsToCloudSubnets(describeRouteTablesResponse, awsSubnets);
 
             Map<String, Object> properties = prepareNetworkProperties(vpc);
-            Optional<String> name = getName(vpc.getTags());
+            Optional<String> name = getName(vpc.tags());
             if (name.isPresent()) {
-                cloudNetworks.add(new CloudNetwork(name.get(), vpc.getVpcId(), subnets, properties));
+                cloudNetworks.add(new CloudNetwork(name.get(), vpc.vpcId(), subnets, properties));
             } else {
-                cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), vpc.getVpcId(), subnets, properties));
+                cloudNetworks.add(new CloudNetwork(vpc.vpcId(), vpc.vpcId(), subnets, properties));
             }
         }
         return cloudNetworks;
@@ -404,34 +408,34 @@ public class AwsPlatformResources implements PlatformResources {
 
     private List<Subnet> getSubnets(AmazonEc2Client ec2Client, Vpc vpc) {
         List<Subnet> awsSubnets = new ArrayList<>();
-        DescribeSubnetsResult describeSubnetsResult = null;
+        DescribeSubnetsResponse describeSubnetsResponse = null;
         do {
-            LOGGER.debug("Describing subnets for VPC {}{}", vpc.getVpcId(), describeSubnetsResult == null ? "" : " (continuation)");
-            DescribeSubnetsRequest describeSubnetsRequest = createSubnetsDescribeRequest(vpc, describeSubnetsResult == null
+            LOGGER.debug("Describing subnets for VPC {}{}", vpc.vpcId(), describeSubnetsResponse == null ? "" : " (continuation)");
+            DescribeSubnetsRequest describeSubnetsRequest = createSubnetsDescribeRequest(vpc, describeSubnetsResponse == null
                     ? null
-                    : describeSubnetsResult.getNextToken());
-            describeSubnetsResult = ec2Client.describeSubnets(describeSubnetsRequest);
-            describeSubnetsResult.getSubnets().stream()
-                    .filter(subnet -> enabledAvailabilityZones.contains(availabilityZone(subnet.getAvailabilityZone())))
+                    : describeSubnetsResponse.nextToken());
+            describeSubnetsResponse = ec2Client.describeSubnets(describeSubnetsRequest);
+            describeSubnetsResponse.subnets().stream()
+                    .filter(subnet -> enabledAvailabilityZones.contains(availabilityZone(subnet.availabilityZone())))
                     .forEach(awsSubnets::add);
-        } while (!isNullOrEmpty(describeSubnetsResult.getNextToken()));
+        } while (!isEmpty(describeSubnetsResponse.nextToken()));
         return awsSubnets;
     }
 
-    private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(List<RouteTable> describeRouteTablesResult, List<Subnet> awsSubnets) {
+    private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(List<RouteTable> describeRouteTablesResponse, List<Subnet> awsSubnets) {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Subnet subnet : awsSubnets) {
-            boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnet.getSubnetId(), subnet.getVpcId());
+            boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResponse, subnet.subnetId(), subnet.vpcId());
             LOGGER.info("The subnet {} has internetGateway value is '{}'", subnet, hasInternetGateway);
-            Optional<String> subnetName = getName(subnet.getTags());
+            Optional<String> subnetName = getName(subnet.tags());
             subnets.add(
                     new CloudSubnet(
-                            subnet.getSubnetId(),
-                            subnetName.orElse(subnet.getSubnetId()),
-                            subnet.getAvailabilityZone(),
-                            subnet.getCidrBlock(),
+                            subnet.subnetId(),
+                            subnetName.orElse(subnet.subnetId()),
+                            subnet.availabilityZone(),
+                            subnet.cidrBlock(),
                             !hasInternetGateway,
-                            subnet.getMapPublicIpOnLaunch(),
+                            subnet.mapPublicIpOnLaunch(),
                             hasInternetGateway,
                             hasInternetGateway ? PUBLIC : PRIVATE)
             );
@@ -441,27 +445,28 @@ public class AwsPlatformResources implements PlatformResources {
 
     private Map<String, Object> prepareNetworkProperties(Vpc vpc) {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("cidrBlock", vpc.getCidrBlock());
-        properties.put("default", vpc.getIsDefault());
-        properties.put("dhcpOptionsId", vpc.getDhcpOptionsId());
-        properties.put("instanceTenancy", vpc.getInstanceTenancy());
-        properties.put("state", vpc.getState());
+        properties.put("cidrBlock", vpc.cidrBlock());
+        properties.put("default", vpc.isDefault());
+        properties.put("dhcpOptionsId", vpc.dhcpOptionsId());
+        properties.put("instanceTenancy", vpc.instanceTenancy());
+        properties.put("state", vpc.state());
         return properties;
     }
 
     private Optional<String> getName(List<Tag> tags) {
         for (Tag tag : tags) {
-            if ("Name".equals(tag.getKey())) {
-                return Optional.ofNullable(tag.getValue());
+            if ("Name".equals(tag.key())) {
+                return Optional.ofNullable(tag.value());
             }
         }
         return Optional.empty();
     }
 
     private DescribeSubnetsRequest createSubnetsDescribeRequest(Vpc vpc, String nextToken) {
-        return new DescribeSubnetsRequest()
-                .withFilters(new Filter("vpc-id", singletonList(vpc.getVpcId())))
-                .withNextToken(nextToken);
+        return DescribeSubnetsRequest.builder()
+                .filters(Filter.builder().name("vpc-id").values(singletonList(vpc.vpcId())).build())
+                .nextToken(nextToken)
+                .build();
     }
 
     @Override
@@ -478,17 +483,17 @@ public class AwsPlatformResources implements PlatformResources {
                     //create sshkey filter view
                     PlatformResourceSshKeyFilterView filter = new PlatformResourceSshKeyFilterView(filters);
 
-                    DescribeKeyPairsRequest describeKeyPairsRequest = new DescribeKeyPairsRequest();
+                    DescribeKeyPairsRequest.Builder describeKeyPairsRequestBuilder = DescribeKeyPairsRequest.builder();
 
                     // If the filtervalue is provided then we should filter only for those securitygroups
                     if (!Strings.isNullOrEmpty(filter.getKeyName())) {
-                        describeKeyPairsRequest.withKeyNames(filter.getKeyName());
+                        describeKeyPairsRequestBuilder.keyNames(filter.getKeyName());
                     }
 
-                    for (KeyPairInfo keyPairInfo : ec2Client.describeKeyPairs(describeKeyPairsRequest).getKeyPairs()) {
+                    for (KeyPairInfo keyPairInfo : ec2Client.describeKeyPairs(describeKeyPairsRequestBuilder.build()).keyPairs()) {
                         Map<String, Object> properties = new HashMap<>();
-                        properties.put("fingerPrint", keyPairInfo.getKeyFingerprint());
-                        cloudSshKeys.add(new CloudSshKey(keyPairInfo.getKeyName(), properties));
+                        properties.put("fingerPrint", keyPairInfo.keyFingerprint());
+                        cloudSshKeys.add(new CloudSshKey(keyPairInfo.keyName(), properties));
                     }
                     result.put(actualRegion.value(), cloudSshKeys);
                 }
@@ -506,25 +511,25 @@ public class AwsPlatformResources implements PlatformResources {
         //create securitygroup filter view
         PlatformResourceSecurityGroupFilterView filter = new PlatformResourceSecurityGroupFilterView(filters);
 
-        DescribeSecurityGroupsRequest describeSecurityGroupsRequest = new DescribeSecurityGroupsRequest();
+        DescribeSecurityGroupsRequest.Builder describeSecurityGroupsRequestBuilder = DescribeSecurityGroupsRequest.builder();
         // If the filtervalue is provided then we should filter only for those securitygroups
         if (!Strings.isNullOrEmpty(filter.getVpcId())) {
-            describeSecurityGroupsRequest.withFilters(new Filter("vpc-id", singletonList(filter.getVpcId())));
+            describeSecurityGroupsRequestBuilder.filters(Filter.builder().name("vpc-id").values(singletonList(filter.getVpcId())).build());
         }
         if (!Strings.isNullOrEmpty(filter.getGroupId())) {
-            describeSecurityGroupsRequest.withGroupIds(filter.getGroupId());
+            describeSecurityGroupsRequestBuilder.groupIds(filter.getGroupId());
         }
         if (!Strings.isNullOrEmpty(filter.getGroupName())) {
-            describeSecurityGroupsRequest.withGroupNames(filter.getGroupName());
+            describeSecurityGroupsRequestBuilder.groupNames(filter.getGroupName());
         }
 
-        for (SecurityGroup securityGroup : fetchSecurityGroups(ec2Client, describeSecurityGroupsRequest)) {
+        for (SecurityGroup securityGroup : fetchSecurityGroups(ec2Client, describeSecurityGroupsRequestBuilder.build())) {
             Map<String, Object> properties = new HashMap<>();
-            properties.put("vpcId", securityGroup.getVpcId());
-            properties.put("description", securityGroup.getDescription());
-            properties.put("ipPermissions", securityGroup.getIpPermissions());
-            properties.put("ipPermissionsEgress", securityGroup.getIpPermissionsEgress());
-            cloudSecurityGroups.add(new CloudSecurityGroup(securityGroup.getGroupName(), securityGroup.getGroupId(), properties));
+            properties.put("vpcId", securityGroup.vpcId());
+            properties.put("description", securityGroup.description());
+            properties.put("ipPermissions", securityGroup.ipPermissions());
+            properties.put("ipPermissionsEgress", securityGroup.ipPermissionsEgress());
+            cloudSecurityGroups.add(new CloudSecurityGroup(securityGroup.groupName(), securityGroup.groupId(), properties));
         }
         result.put(region.value(), cloudSecurityGroups);
         return new CloudSecurityGroups(result);
@@ -532,10 +537,10 @@ public class AwsPlatformResources implements PlatformResources {
 
     private List<SecurityGroup> fetchSecurityGroups(AmazonEc2Client ec2Client, DescribeSecurityGroupsRequest describeSecurityGroupsRequest) {
         try {
-            return ec2Client.describeSecurityGroups(describeSecurityGroupsRequest).getSecurityGroups();
-        } catch (AmazonEC2Exception e) {
-            if (e.getStatusCode() == HttpStatus.BAD_REQUEST.value() || e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
-                throw new PermanentlyFailedException(e.getErrorMessage(), e);
+            return ec2Client.describeSecurityGroups(describeSecurityGroupsRequest).securityGroups();
+        } catch (Ec2Exception e) {
+            if (e.statusCode() == HttpStatus.BAD_REQUEST.value() || e.statusCode() == HttpStatus.NOT_FOUND.value()) {
+                throw new PermanentlyFailedException(e.awsErrorDetails().errorMessage(), e);
             } else {
                 throw e;
             }
@@ -545,24 +550,24 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #availabilityZonesNeeded }")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
-        boolean availabilityZonesNeeded) {
+            boolean availabilityZonesNeeded) {
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential));
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
 
-        DescribeRegionsResult describeRegionsResult = describeRegionsResult(ec2Client);
+        DescribeRegionsResponse describeRegionsResponse = describeRegionsResponse(ec2Client);
         String defaultRegion = awsDefaultZoneProvider.getDefaultZone(cloudCredential);
 
-        for (com.amazonaws.services.ec2.model.Region awsRegion : describeRegionsResult.getRegions()) {
-            if (!enabledRegions.contains(region(awsRegion.getRegionName()))) {
+        for (software.amazon.awssdk.services.ec2.model.Region awsRegion : describeRegionsResponse.regions()) {
+            if (!enabledRegions.contains(region(awsRegion.regionName()))) {
                 continue;
             }
-            if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.getRegionName().equals(region.value())) {
+            if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.regionName().equals(region.value())) {
                 try {
                     fetchAZsIfNeeded(availabilityZonesNeeded, regionListMap, awsRegion, cloudCredential);
-                } catch (AmazonEC2Exception e) {
-                    LOGGER.info("Failed to retrieve AZ from Region: {}!", awsRegion.getRegionName(), e);
+                } catch (Ec2Exception e) {
+                    LOGGER.info("Failed to retrieve AZ from Region: {}!", awsRegion.regionName(), e);
                 }
                 addDisplayName(displayNames, awsRegion);
                 addCoordinate(coordinates, awsRegion);
@@ -575,61 +580,59 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private void fetchAZsIfNeeded(boolean availabilityZonesNeeded, Map<Region, List<AvailabilityZone>> regionListMap,
-            com.amazonaws.services.ec2.model.Region awsRegion, CloudCredential cloudCredential) {
+            software.amazon.awssdk.services.ec2.model.Region awsRegion, CloudCredential cloudCredential) {
         List<AvailabilityZone> collectedAZs = new ArrayList<>();
         if (availabilityZonesNeeded) {
             DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = getDescribeAvailabilityZonesRequest(awsRegion);
-            LOGGER.debug("Describing AZs in region {}", awsRegion.getRegionName());
-            List<com.amazonaws.services.ec2.model.AvailabilityZone> availabilityZones
+            LOGGER.debug("Describing AZs in region {}", awsRegion.regionName());
+            List<software.amazon.awssdk.services.ec2.model.AvailabilityZone> availabilityZones
                     = awsAvailabilityZoneProvider.describeAvailabilityZones(cloudCredential, describeAvailabilityZonesRequest, awsRegion);
             availabilityZones.stream()
-                    .map(com.amazonaws.services.ec2.model.AvailabilityZone::getZoneName)
+                    .map(software.amazon.awssdk.services.ec2.model.AvailabilityZone::zoneName)
                     .map(AvailabilityZone::availabilityZone)
                     .filter(enabledAvailabilityZones::contains)
                     .forEach(collectedAZs::add);
         }
-        regionListMap.put(region(awsRegion.getRegionName()), collectedAZs);
+        regionListMap.put(region(awsRegion.regionName()), collectedAZs);
     }
 
-    private DescribeAvailabilityZonesRequest getDescribeAvailabilityZonesRequest(com.amazonaws.services.ec2.model.Region awsRegion) {
-        DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = new DescribeAvailabilityZonesRequest();
-        Filter filter = new Filter();
-        filter.setName("region-name");
-        Collection<String> list = new ArrayList<>();
-        list.add(awsRegion.getRegionName());
-        filter.setValues(list);
-        describeAvailabilityZonesRequest.withFilters(filter);
-        return describeAvailabilityZonesRequest;
+    private DescribeAvailabilityZonesRequest getDescribeAvailabilityZonesRequest(software.amazon.awssdk.services.ec2.model.Region awsRegion) {
+        return DescribeAvailabilityZonesRequest.builder()
+                .filters(Filter.builder()
+                        .name("region-name")
+                        .values(awsRegion.regionName())
+                        .build())
+                .build();
     }
 
-    public void addDisplayName(Map<Region, String> displayNames, com.amazonaws.services.ec2.model.Region awsRegion) {
-        DisplayName displayName = regionDisplayNames.get(region(awsRegion.getRegionName()));
+    public void addDisplayName(Map<Region, String> displayNames, software.amazon.awssdk.services.ec2.model.Region awsRegion) {
+        DisplayName displayName = regionDisplayNames.get(region(awsRegion.regionName()));
         if (displayName == null || Strings.isNullOrEmpty(displayName.value())) {
-            displayNames.put(region(awsRegion.getRegionName()), awsRegion.getRegionName());
+            displayNames.put(region(awsRegion.regionName()), awsRegion.regionName());
         } else {
-            displayNames.put(region(awsRegion.getRegionName()), displayName.value());
+            displayNames.put(region(awsRegion.regionName()), displayName.value());
         }
     }
 
-    public void addCoordinate(Map<Region, Coordinate> coordinates, com.amazonaws.services.ec2.model.Region awsRegion) {
-        Coordinate coordinate = regionCoordinates.get(region(awsRegion.getRegionName()));
+    public void addCoordinate(Map<Region, Coordinate> coordinates, software.amazon.awssdk.services.ec2.model.Region awsRegion) {
+        Coordinate coordinate = regionCoordinates.get(region(awsRegion.regionName()));
         if (coordinate == null || coordinate.getLongitude() == null || coordinate.getLatitude() == null) {
-            LOGGER.warn("Unregistered region with location coordinates on aws side: {} using default California", awsRegion.getRegionName());
-            coordinates.put(region(awsRegion.getRegionName()), Coordinate.defaultCoordinate());
+            LOGGER.warn("Unregistered region with location coordinates on aws side: {} using default California", awsRegion.regionName());
+            coordinates.put(region(awsRegion.regionName()), Coordinate.defaultCoordinate());
         } else {
-            coordinates.put(region(awsRegion.getRegionName()), coordinate);
+            coordinates.put(region(awsRegion.regionName()), coordinate);
         }
     }
 
-    private DescribeRegionsResult describeRegionsResult(AmazonEc2Client ec2Client) {
+    private DescribeRegionsResponse describeRegionsResponse(AmazonEc2Client ec2Client) {
         LOGGER.debug("Getting regions");
         try {
-            DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
+            DescribeRegionsRequest describeRegionsRequest = DescribeRegionsRequest.builder().build();
             return ec2Client.describeRegions(describeRegionsRequest);
-        } catch (AmazonEC2Exception e) {
+        } catch (Ec2Exception e) {
             LOGGER.info("Failed to retrieve regions!", e);
         }
-        return new DescribeRegionsResult();
+        return DescribeRegionsResponse.builder().build();
     }
 
     @Override
@@ -656,18 +659,23 @@ public class AwsPlatformResources implements PlatformResources {
             CloudRegions regions = regions(cloudCredential, region, filters, true);
             AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
             AmazonEc2Client ec2Client = awsClient.createEc2Client(awsCredentialView, region.getRegionName());
-            List<String> instanceTypes = ec2Client
+            List<InstanceType> instanceTypes = ec2Client
                     .describeInstanceTypeOfferings(getOfferingsRequest(region))
-                    .getInstanceTypeOfferings()
+                    .instanceTypeOfferings()
                     .stream()
-                    .map(e -> e.getInstanceType())
+                    .map(InstanceTypeOffering::instanceType)
+                    .filter(instanceType -> InstanceType.UNKNOWN_TO_SDK_VERSION != instanceType)
                     .collect(Collectors.toList());
 
             Set<VmType> awsInstances = new HashSet<>();
             for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment += SEGMENT) {
-                DescribeInstanceTypesRequest request = new DescribeInstanceTypesRequest();
-                request.withFilters(new Filter().withName("processor-info.supported-architecture").withValues("x86_64"));
-                request.setInstanceTypes(getInstanceTypes(instanceTypes, actualSegment));
+                DescribeInstanceTypesRequest request = DescribeInstanceTypesRequest.builder()
+                        .filters(Filter.builder()
+                                .name("processor-info.supported-architecture")
+                                .values("x86_64")
+                                .build())
+                        .instanceTypes(getInstanceTypes(instanceTypes, actualSegment))
+                        .build();
                 getVmTypesWithAwsCall(awsInstances, ec2Client.describeInstanceTypes(request));
             }
             if (enableMinimalHardwareFilter) {
@@ -683,11 +691,11 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private void fillUpAvailabilityZones(Region region,
-        Predicate<VmType> enabledInstanceTypeFilter,
-        CloudRegions regions,
-        Map<String, Set<VmType>> cloudVmResponses,
-        Map<String, VmType> defaultCloudVmResponses,
-        Set<VmType> awsInstances) {
+            Predicate<VmType> enabledInstanceTypeFilter,
+            CloudRegions regions,
+            Map<String, Set<VmType>> cloudVmResponses,
+            Map<String, VmType> defaultCloudVmResponses,
+            Set<VmType> awsInstances) {
         List<AvailabilityZone> availabilityZones = regions.getCloudRegions().get(region);
         if (availabilityZones != null && !availabilityZones.isEmpty()) {
             for (AvailabilityZone availabilityZone : availabilityZones) {
@@ -703,10 +711,11 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private DescribeInstanceTypeOfferingsRequest getOfferingsRequest(Region region) {
-        return new DescribeInstanceTypeOfferingsRequest()
-                .withLocationType("region")
-                .withFilters(new Filter().withName("location").withValues(region.getRegionName()))
-                .withMaxResults(MAX_RESULTS);
+        return DescribeInstanceTypeOfferingsRequest.builder()
+                .locationType(LocationType.REGION)
+                .filters(Filter.builder().name("location").values(region.getRegionName()).build())
+                .maxResults(MAX_RESULTS)
+                .build();
     }
 
     private void filterInstancesByFilters(Predicate<VmType> enabledInstanceTypeFilter, Map<String, Set<VmType>> cloudVmResponses) {
@@ -719,11 +728,11 @@ public class AwsPlatformResources implements PlatformResources {
         });
     }
 
-    private void getVmTypesWithAwsCall(Set<VmType> awsInstances, DescribeInstanceTypesResult describeInstanceTypesResult) {
-        for (InstanceTypeInfo instanceType : describeInstanceTypesResult.getInstanceTypes()) {
-            if (!instanceType.isBareMetal()) {
+    private void getVmTypesWithAwsCall(Set<VmType> awsInstances, DescribeInstanceTypesResponse describeInstanceTypesResponse) {
+        for (InstanceTypeInfo instanceType : describeInstanceTypesResponse.instanceTypes()) {
+            if (!instanceType.bareMetal()) {
                 VmTypeMetaBuilder vmTypeMetaBuilder = VmTypeMetaBuilder.builder()
-                        .withCpuAndMemory(instanceType.getVCpuInfo().getDefaultVCpus(), getMemory(instanceType))
+                        .withCpuAndMemory(instanceType.vCpuInfo().defaultVCpus(), getMemory(instanceType))
                         .withMagneticConfig(new VolumeParameterConfig(
                                 MAGNETIC,
                                 MINIMUM_MAGNETIC_SIZE,
@@ -742,20 +751,20 @@ public class AwsPlatformResources implements PlatformResources {
                                 MAXIMUM_ST1_SIZE,
                                 ONE,
                                 TWENTY_FOUR));
-                if (instanceType.getInstanceStorageSupported()) {
-                    InstanceStorageInfo instanceStorageInfo = instanceType.getInstanceStorageInfo();
-                    DiskInfo diskInfo = instanceStorageInfo.getDisks().get(0);
+                if (instanceType.instanceStorageSupported()) {
+                    InstanceStorageInfo instanceStorageInfo = instanceType.instanceStorageInfo();
+                    DiskInfo diskInfo = instanceStorageInfo.disks().get(0);
                     vmTypeMetaBuilder.withEphemeralConfig(new VolumeParameterConfig(
                             EPHEMERAL,
-                            diskInfo.getSizeInGB().intValue(),
-                            diskInfo.getSizeInGB().intValue(),
-                            diskInfo.getCount(),
-                            diskInfo.getCount()));
+                            diskInfo.sizeInGB().intValue(),
+                            diskInfo.sizeInGB().intValue(),
+                            diskInfo.count(),
+                            diskInfo.count()));
                 }
                 if (getEncryptionSupported(instanceType)) {
                     vmTypeMetaBuilder.withVolumeEncryptionSupport(true);
                 }
-                VmType vmType = vmTypeWithMeta(instanceType.getInstanceType(), vmTypeMetaBuilder.create(), true);
+                VmType vmType = vmTypeWithMeta(instanceType.instanceTypeAsString(), vmTypeMetaBuilder.create(), true);
                 awsInstances.add(vmType);
             }
         }
@@ -764,19 +773,19 @@ public class AwsPlatformResources implements PlatformResources {
     @VisibleForTesting
     boolean getEncryptionSupported(InstanceTypeInfo instanceTypeInfo) {
         boolean supported = false;
-        if (instanceTypeInfo.getEbsInfo() != null) {
-            if (instanceTypeInfo.getEbsInfo().getEncryptionSupport() != null) {
-                supported = instanceTypeInfo.getEbsInfo().getEncryptionSupport().toLowerCase().equals(SUPPORTED);
+        if (instanceTypeInfo.ebsInfo() != null) {
+            if (instanceTypeInfo.ebsInfo().encryptionSupport() != null) {
+                supported = instanceTypeInfo.ebsInfo().encryptionSupportAsString().equalsIgnoreCase(SUPPORTED);
             }
         }
         return supported;
     }
 
     private float getMemory(InstanceTypeInfo instanceType) {
-        return (float) instanceType.getMemoryInfo().getSizeInMiB() / ONE_THOUSAND_TWENTY_FOUR;
+        return (float) instanceType.memoryInfo().sizeInMiB() / ONE_THOUSAND_TWENTY_FOUR;
     }
 
-    private List<String> getInstanceTypes(List<String> instanceTypes, int i) {
+    private List<InstanceType> getInstanceTypes(List<InstanceType> instanceTypes, int i) {
         return instanceTypes.subList(i, (i + SEGMENT) < instanceTypes.size() ? (i + SEGMENT) : instanceTypes.size());
     }
 
@@ -789,17 +798,17 @@ public class AwsPlatformResources implements PlatformResources {
                 if (regionListEntry.getKey().value().equals(region.value())) {
                     AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), regionListEntry.getKey().value());
 
-                    DescribeInternetGatewaysRequest describeInternetGatewaysRequest = new DescribeInternetGatewaysRequest();
-                    DescribeInternetGatewaysResult describeInternetGatewaysResult = ec2Client.describeInternetGateways(describeInternetGatewaysRequest);
+                    DescribeInternetGatewaysRequest describeInternetGatewaysRequest = DescribeInternetGatewaysRequest.builder().build();
+                    DescribeInternetGatewaysResponse describeInternetGatewaysResponse = ec2Client.describeInternetGateways(describeInternetGatewaysRequest);
 
                     Set<CloudGateWay> gateWays = new HashSet<>();
-                    for (InternetGateway internetGateway : describeInternetGatewaysResult.getInternetGateways()) {
+                    for (InternetGateway internetGateway : describeInternetGatewaysResponse.internetGateways()) {
                         CloudGateWay cloudGateWay = new CloudGateWay();
-                        cloudGateWay.setId(internetGateway.getInternetGatewayId());
-                        cloudGateWay.setName(internetGateway.getInternetGatewayId());
+                        cloudGateWay.setId(internetGateway.internetGatewayId());
+                        cloudGateWay.setName(internetGateway.internetGatewayId());
                         Collection<String> vpcs = new ArrayList<>();
-                        for (InternetGatewayAttachment internetGatewayAttachment : internetGateway.getAttachments()) {
-                            vpcs.add(internetGatewayAttachment.getVpcId());
+                        for (InternetGatewayAttachment internetGatewayAttachment : internetGateway.attachments()) {
+                            vpcs.add(internetGatewayAttachment.vpcId());
                         }
                         Map<String, Object> properties = new HashMap<>();
                         properties.put("attachment", vpcs);
@@ -848,37 +857,37 @@ public class AwsPlatformResources implements PlatformResources {
             List<KeyListEntry> listKeyResult = getListKeyResult(client);
             List<AliasListEntry> listAliasesResult = getListAliasResult(client);
             for (AliasListEntry aliasListEntry : listAliasesResult) {
-                String targetKeyId = aliasListEntry.getTargetKeyId();
+                String targetKeyId = aliasListEntry.targetKeyId();
                 try {
                     listKeyResult.stream()
-                            .filter(item -> item.getKeyId().equals(targetKeyId)).findFirst()
+                            .filter(item -> item.keyId().equals(targetKeyId)).findFirst()
                             .ifPresent(item -> {
-                                DescribeKeyRequest describeKeyRequest = new DescribeKeyRequest().withKeyId(item.getKeyId());
-                                DescribeKeyResult describeKeyResult = client.describeKey(describeKeyRequest);
-                                KeyMetadata keyMetaData = describeKeyResult.getKeyMetadata();
+                                DescribeKeyRequest describeKeyRequest = DescribeKeyRequest.builder().keyId(item.keyId()).build();
+                                DescribeKeyResponse describeKeyResponse = client.describeKey(describeKeyRequest);
+                                KeyMetadata keyMetaData = describeKeyResponse.keyMetadata();
                                 Map<String, Object> meta = new HashMap<>();
-                                meta.put("awsAccountId", keyMetaData.getAWSAccountId());
-                                meta.put("creationDate", keyMetaData.getCreationDate());
-                                meta.put("enabled", keyMetaData.getEnabled());
-                                meta.put("expirationModel", keyMetaData.getExpirationModel());
-                                meta.put("keyManager", keyMetaData.getKeyManager());
-                                meta.put("keyState", keyMetaData.getKeyState());
-                                meta.put("keyUsage", keyMetaData.getKeyUsage());
-                                meta.put("origin", keyMetaData.getOrigin());
-                                meta.put("validTo", keyMetaData.getValidTo());
+                                meta.put("awsAccountId", keyMetaData.awsAccountId());
+                                meta.put("creationDate", keyMetaData.creationDate());
+                                meta.put("enabled", keyMetaData.enabled());
+                                meta.put("expirationModel", keyMetaData.expirationModel());
+                                meta.put("keyManager", keyMetaData.keyManager());
+                                meta.put("keyState", keyMetaData.keyState());
+                                meta.put("keyUsage", keyMetaData.keyUsage());
+                                meta.put("origin", keyMetaData.origin());
+                                meta.put("validTo", keyMetaData.validTo());
 
-                                if (!CloudConstants.AWS.equalsIgnoreCase(keyMetaData.getKeyManager())) {
+                                if (keyMetaData.keyManager() == null || !CloudConstants.AWS.equalsIgnoreCase(keyMetaData.keyManager().name())) {
                                     CloudEncryptionKey key = new CloudEncryptionKey(
-                                            item.getKeyArn(),
-                                            keyMetaData.getKeyId(),
-                                            keyMetaData.getDescription(),
-                                            aliasListEntry.getAliasName().replace("alias/", ""),
+                                            item.keyArn(),
+                                            keyMetaData.keyId(),
+                                            keyMetaData.description(),
+                                            aliasListEntry.aliasName().replace("alias/", ""),
                                             meta);
                                     cloudEncryptionKeys.getCloudEncryptionKeys().add(key);
                                 }
                             });
-                } catch (AmazonServiceException e) {
-                    if (e.getStatusCode() == UNAUTHORIZED) {
+                } catch (AwsServiceException e) {
+                    if (e.awsErrorDetails().sdkHttpResponse().statusCode() == UNAUTHORIZED) {
                         String policyMessage = "Could not fetch the encryption keys since the user does not have enough " +
                                 "permission to perform the DescribeKey operation.";
                         LOGGER.error(policyMessage, e);
@@ -889,8 +898,8 @@ public class AwsPlatformResources implements PlatformResources {
                     LOGGER.warn(queryFailedMessage, e);
                 }
             }
-        } catch (AmazonServiceException ase) {
-            if (ase.getStatusCode() == UNAUTHORIZED) {
+        } catch (AwsServiceException ase) {
+            if (ase.awsErrorDetails().sdkHttpResponse().statusCode() == UNAUTHORIZED) {
                 String policyMessage = "Could not fetch the encryption keys since the user does not have enough permission to perform the ListKeys operation.";
                 LOGGER.error(policyMessage, ase);
                 throw new CloudUnauthorizedException(policyMessage, ase);
@@ -909,10 +918,10 @@ public class AwsPlatformResources implements PlatformResources {
         String nextMarker = null;
         List<KeyListEntry> kmsKeys = new ArrayList<>();
         do {
-            ListKeysRequest listKeysRequest = new ListKeysRequest().withMarker(nextMarker);
-            ListKeysResult listKeysResult = client.listKeys(listKeysRequest);
-            kmsKeys.addAll(listKeysResult.getKeys());
-            nextMarker = listKeysResult.getNextMarker();
+            ListKeysRequest listKeysRequest = ListKeysRequest.builder().marker(nextMarker).build();
+            ListKeysResponse listKeysResponse = client.listKeys(listKeysRequest);
+            kmsKeys.addAll(listKeysResponse.keys());
+            nextMarker = listKeysResponse.nextMarker();
         } while (nextMarker != null);
         return kmsKeys;
     }
@@ -921,10 +930,10 @@ public class AwsPlatformResources implements PlatformResources {
         String aliasNextMarker = null;
         List<AliasListEntry> aliasListEntries = new ArrayList<>();
         do {
-            ListAliasesRequest listAliasesRequest = new ListAliasesRequest().withMarker(aliasNextMarker);
-            ListAliasesResult listAliasesResult = client.listAliases(listAliasesRequest);
-            aliasListEntries.addAll(listAliasesResult.getAliases());
-            aliasNextMarker = listAliasesResult.getNextMarker();
+            ListAliasesRequest listAliasesRequest = ListAliasesRequest.builder().marker(aliasNextMarker).build();
+            ListAliasesResponse listAliasesResponse = client.listAliases(listAliasesRequest);
+            aliasListEntries.addAll(listAliasesResponse.aliases());
+            aliasNextMarker = listAliasesResponse.nextMarker();
         } while (aliasNextMarker != null);
         return aliasListEntries;
     }
@@ -933,16 +942,19 @@ public class AwsPlatformResources implements PlatformResources {
     public CloudNoSqlTables noSqlTables(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         List<CloudNoSqlTable> noSqlTables = new ArrayList<>();
         AmazonDynamoDBClient dynamoDbClient = getAmazonDynamoDBClient(cloudCredential, region);
-        ListTablesRequest listTablesRequest = new ListTablesRequest();
-        ListTablesResult listTablesResult = null;
+        ListTablesRequest listTablesRequest = ListTablesRequest.builder().build();
+        ListTablesResponse listTablesResponse = null;
         boolean first = true;
-        while (first || !isNullOrEmpty(listTablesResult.getLastEvaluatedTableName())) {
+        while (first || isNotEmpty(listTablesResponse.lastEvaluatedTableName())) {
             first = false;
-            listTablesRequest.setExclusiveStartTableName(listTablesResult == null ? null : listTablesResult.getLastEvaluatedTableName());
-            listTablesResult = dynamoDbClient.listTables(listTablesRequest);
-            List<String> partialTableNames = listTablesResult.getTableNames();
-            List<CloudNoSqlTable> partialResult = partialTableNames.stream().map(CloudNoSqlTable::new).collect(Collectors.toList());
-            noSqlTables.addAll(partialResult);
+
+            listTablesRequest = listTablesRequest.toBuilder()
+                    .exclusiveStartTableName(listTablesResponse == null ? null : listTablesResponse.lastEvaluatedTableName())
+                    .build();
+            listTablesResponse = dynamoDbClient.listTables(listTablesRequest);
+            List<String> partialTableNames = listTablesResponse.tableNames();
+            List<CloudNoSqlTable> partialResponse = partialTableNames.stream().map(CloudNoSqlTable::new).collect(Collectors.toList());
+            noSqlTables.addAll(partialResponse);
         }
         return new CloudNoSqlTables(noSqlTables);
     }
@@ -962,9 +974,9 @@ public class AwsPlatformResources implements PlatformResources {
         requireNonNull(cloudCredential);
         requireNonNull(region);
         AmazonRdsClient rdsClient = getAmazonRdsClient(cloudCredential, region);
-        List<Certificate> certificates = rdsClient.describeCertificates(new DescribeCertificatesRequest());
+        List<Certificate> certificates = rdsClient.describeCertificates(DescribeCertificatesRequest.builder().build());
         Set<CloudDatabaseServerSslCertificate> sslCertificates = certificates.stream()
-                .map(Certificate::getCertificateIdentifier)
+                .map(Certificate::certificateIdentifier)
                 .map(id -> new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, id))
                 .collect(Collectors.toSet());
         return new CloudDatabaseServerSslCertificates(sslCertificates);
@@ -992,25 +1004,24 @@ public class AwsPlatformResources implements PlatformResources {
             String marker = null;
             Set<InstanceProfile> instanceProfiles = new LinkedHashSet<>();
             while (!finished) {
-                ListInstanceProfilesRequest listInstanceProfilesRequest = new ListInstanceProfilesRequest();
-                listInstanceProfilesRequest.setMaxItems(fetchMaxItems);
+                ListInstanceProfilesRequest.Builder listInstanceProfilesRequestBuilder = ListInstanceProfilesRequest.builder().maxItems(fetchMaxItems);
                 if (isNotEmpty(marker)) {
-                    listInstanceProfilesRequest.setMarker(marker);
+                    listInstanceProfilesRequestBuilder.marker(marker);
                 }
                 LOGGER.debug("About to fetch instance profiles...");
-                ListInstanceProfilesResult listInstanceProfilesResult = client.listInstanceProfiles(listInstanceProfilesRequest);
-                List<InstanceProfile> fetchedInstanceProfiles = listInstanceProfilesResult.getInstanceProfiles();
+                ListInstanceProfilesResponse listInstanceProfilesResponse = client.listInstanceProfiles(listInstanceProfilesRequestBuilder.build());
+                List<InstanceProfile> fetchedInstanceProfiles = listInstanceProfilesResponse.instanceProfiles();
                 instanceProfiles.addAll(fetchedInstanceProfiles);
-                if (listInstanceProfilesResult.isTruncated()) {
-                    marker = listInstanceProfilesResult.getMarker();
+                if (listInstanceProfilesResponse.isTruncated()) {
+                    marker = listInstanceProfilesResponse.marker();
                 } else {
                     finished = true;
                 }
             }
             LOGGER.debug("The total of {} instance profile(s) has fetched.", instanceProfiles.size());
             return instanceProfiles.stream().map(this::instanceProfileToCloudAccessConfig).collect(Collectors.toSet());
-        } catch (AmazonServiceException ase) {
-            if (ase.getStatusCode() == UNAUTHORIZED) {
+        } catch (AwsServiceException ase) {
+            if (ase.statusCode() == UNAUTHORIZED) {
                 LOGGER.error("Could not get instance profiles because the user does not have enough permission.", ase);
                 throw new CloudUnauthorizedException(ase.getMessage(), ase);
             } else {
@@ -1031,26 +1042,25 @@ public class AwsPlatformResources implements PlatformResources {
             String marker = null;
             List<Role> roles = new LinkedList<>();
             while (!finished) {
-                ListRolesRequest listRolesRequest = new ListRolesRequest();
-                listRolesRequest.setMaxItems(fetchMaxItems);
+                ListRolesRequest.Builder listRolesRequestBuilder = ListRolesRequest.builder().maxItems(fetchMaxItems);
                 if (isNotEmpty(marker)) {
-                    listRolesRequest.setMarker(marker);
+                    listRolesRequestBuilder.marker(marker);
                 }
                 LOGGER.debug("About to fetch roles...");
-                ListRolesResult listRolesResult = client.listRoles(listRolesRequest);
-                roles.addAll(listRolesResult.getRoles());
-                if (listRolesResult.isTruncated()) {
-                    marker = listRolesResult.getMarker();
+                ListRolesResponse listRolesResponse = client.listRoles(listRolesRequestBuilder.build());
+                roles.addAll(listRolesResponse.roles());
+                if (listRolesResponse.isTruncated()) {
+                    marker = listRolesResponse.marker();
                 } else {
                     finished = true;
                 }
             }
             return roles.stream().map(this::roleToCloudAccessConfig).collect(Collectors.toSet());
-        } catch (AmazonServiceException ase) {
-            if (ase.getStatusCode() == UNAUTHORIZED) {
+        } catch (AwsServiceException ase) {
+            if (ase.statusCode() == UNAUTHORIZED) {
                 String policyMessage = "Could not get roles because the user does not have enough permission. ";
                 LOGGER.error(policyMessage + ase.getMessage(), ase);
-                throw new CloudUnauthorizedException(ase.getErrorMessage(), ase);
+                throw new CloudUnauthorizedException(ase.awsErrorDetails().errorMessage(), ase);
             } else {
                 LOGGER.info(queryFailedMessage + ase.getMessage(), ase);
                 throw new CloudConnectorException(ase.getMessage(), ase);
@@ -1062,17 +1072,17 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private CloudAccessConfig roleToCloudAccessConfig(Role role) {
-        Map<String, Object> properties = getCloudAccessConfigProperties(role.getArn(), role.getCreateDate().toString(), role.getArn());
-        return new CloudAccessConfig(role.getRoleName(), role.getRoleId(), properties);
+        Map<String, Object> properties = getCloudAccessConfigProperties(role.arn(), role.createDate().toString(), role.arn());
+        return new CloudAccessConfig(role.roleName(), role.roleId(), properties);
     }
 
     private CloudAccessConfig instanceProfileToCloudAccessConfig(InstanceProfile instanceProfile) {
-        String roleName = instanceProfile.getArn();
-        if (!instanceProfile.getRoles().isEmpty()) {
-            roleName = instanceProfile.getRoles().get(0).getArn();
+        String roleName = instanceProfile.arn();
+        if (!instanceProfile.roles().isEmpty()) {
+            roleName = instanceProfile.roles().get(0).arn();
         }
-        Map<String, Object> properties = getCloudAccessConfigProperties(instanceProfile.getArn(), instanceProfile.getCreateDate().toString(), roleName);
-        return new CloudAccessConfig(instanceProfile.getInstanceProfileName(), instanceProfile.getInstanceProfileId(), properties);
+        Map<String, Object> properties = getCloudAccessConfigProperties(instanceProfile.arn(), instanceProfile.createDate().toString(), roleName);
+        return new CloudAccessConfig(instanceProfile.instanceProfileName(), instanceProfile.instanceProfileId(), properties);
     }
 
     private Map<String, Object> getCloudAccessConfigProperties(String arn, String creationDate, String roleArn) {

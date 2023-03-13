@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.CancellableWaiterConfiguration.cancellableWaiterConfiguration;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.handleWaiterError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.ResourceStatus;
-import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
-import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
-import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -39,7 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessagePro
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -47,6 +41,14 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.model.ResourceStatus;
+import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
+import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
 
 @Service
 public class AwsLaunchService {
@@ -108,16 +110,16 @@ public class AwsLaunchService {
         Network network = stack.getNetwork();
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+        DescribeStacksRequest describeStacksRequest = DescribeStacksRequest.builder().stackName(cFStackName).build();
 
         ModelContext modelContext = null;
         try {
             cfClient.describeStacks(describeStacksRequest);
             LOGGER.debug("Stack already exists: {}", cFStackName);
-        } catch (AmazonServiceException ignored) {
+        } catch (AwsServiceException ignored) {
             boolean existingVPC = awsNetworkView.isExistingVPC();
             boolean existingSubnet = awsNetworkView.isExistingSubnet();
-            CloudResource cloudFormationStack = new Builder()
+            CloudResource cloudFormationStack = CloudResource.builder()
                     .withType(ResourceType.CLOUDFORMATION_STACK)
                     .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
                     .withName(cFStackName)
@@ -133,10 +135,14 @@ public class AwsLaunchService {
         }
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
 
-        Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();
-        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(creationWaiter, describeStacksRequest, stackCancellationCheck, String.format("CloudFormation stack %s creation failed.", cFStackName),
-                () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.CREATE_FAILED));
+        try (CloudFormationWaiter waiter = cfClient.waiters()) {
+            LOGGER.debug("Waiting for CloudFormation stack {} creation", cFStackName);
+            StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
+            waiter.waitUntilStackCreateComplete(describeStacksRequest, cancellableWaiterConfiguration(stackCancellationCheck));
+        } catch (Exception e) {
+            handleWaiterError(String.format("CloudFormation stack %s creation failed.", cFStackName),
+                    () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.CREATE_FAILED), e);
+        }
 
         List<CloudResource> networkResources = saveGeneratedSubnet(ac, stack, cFStackName, cfClient, resourceNotifier);
         suspendAutoscalingGoupsWhenNewInstancesAreReady(ac, stack);
@@ -191,11 +197,14 @@ public class AwsLaunchService {
                 LOGGER.debug("Importing public key to {} region on AWS", region);
                 AmazonEc2Client client = awsClient.createEc2Client(awsCredential, region);
                 String keyPairName = awsClient.getKeyPairName(ac);
-                ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(keyPairName, stack.getInstanceAuthentication().getPublicKey());
+                ImportKeyPairRequest importKeyPairRequest = ImportKeyPairRequest.builder()
+                        .keyName(keyPairName)
+                        .publicKeyMaterial(SdkBytes.fromUtf8String(stack.getInstanceAuthentication().getPublicKey()))
+                        .build();
                 try {
-                    client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
+                    client.describeKeyPairs(DescribeKeyPairsRequest.builder().keyNames(keyPairName).build());
                     LOGGER.debug("Key-pair already exists: {}", keyPairName);
-                } catch (AmazonServiceException e) {
+                } catch (AwsServiceException e) {
                     client.importKeyPair(importKeyPairRequest);
                 }
             } catch (Exception e) {
@@ -218,7 +227,7 @@ public class AwsLaunchService {
         String availabilityZone = ac.getCloudContext().getLocation().getAvailabilityZone().value();
         if (awsNetworkView.isExistingVPC()) {
             String vpcId = awsNetworkView.getExistingVpc();
-            CloudResource vpc = new Builder()
+            CloudResource vpc = CloudResource.builder()
                     .withType(ResourceType.AWS_VPC)
                     .withName(vpcId)
                     .withAvailabilityZone(availabilityZone)
@@ -227,7 +236,7 @@ public class AwsLaunchService {
             resources.add(vpc);
         } else {
             String vpcId = getCreatedVpc(cFStackName, client);
-            CloudResource vpc = new Builder()
+            CloudResource vpc = CloudResource.builder()
                     .withType(ResourceType.AWS_VPC)
                     .withAvailabilityZone(availabilityZone)
                     .withName(vpcId)
@@ -238,7 +247,7 @@ public class AwsLaunchService {
 
         if (awsNetworkView.isExistingSubnet()) {
             String subnetId = awsNetworkView.getExistingSubnet();
-            CloudResource subnet = new Builder()
+            CloudResource subnet = CloudResource.builder()
                     .withType(ResourceType.AWS_SUBNET)
                     .withName(subnetId)
                     .withAvailabilityZone(availabilityZone)
@@ -247,7 +256,7 @@ public class AwsLaunchService {
             resources.add(subnet);
         } else {
             String subnetId = getCreatedSubnet(cFStackName, client);
-            CloudResource subnet = new Builder()
+            CloudResource subnet = CloudResource.builder()
                     .withType(ResourceType.AWS_SUBNET)
                     .withName(subnetId)
                     .withAvailabilityZone(availabilityZone)
@@ -284,9 +293,9 @@ public class AwsLaunchService {
                 ac.getCloudContext().getLocation().getRegion().value());
         try {
             awsAutoScalingService.scheduleStatusChecks(stack.getGroups(), ac, cloudFormationClient);
-        } catch (AmazonAutoscalingFailed amazonAutoscalingFailed) {
-            LOGGER.info("Amazon autoscaling failed", amazonAutoscalingFailed);
-            throw new CloudConnectorException(amazonAutoscalingFailed);
+        } catch (AmazonAutoscalingFailedException amazonAutoscalingFailedException) {
+            LOGGER.info("Amazon autoscaling failed", amazonAutoscalingFailedException);
+            throw new CloudConnectorException(amazonAutoscalingFailedException);
         }
         awsAutoScalingService.suspendAutoScaling(ac, stack);
     }

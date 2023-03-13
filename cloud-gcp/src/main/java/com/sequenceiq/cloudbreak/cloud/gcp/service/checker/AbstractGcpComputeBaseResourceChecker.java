@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -66,7 +65,7 @@ public abstract class AbstractGcpComputeBaseResourceChecker extends AbstractGcpB
     }
 
     protected CloudResource createOperationAwareCloudResource(CloudResource resource, Operation operation) {
-        CloudResource build = new Builder()
+        CloudResource build = CloudResource.builder()
                 .cloudResource(resource)
                 .withParameters(resource.getParameters())
                 .withPersistent(false)

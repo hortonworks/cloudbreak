@@ -42,18 +42,6 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceState;
-import com.amazonaws.services.ec2.model.Reservation;
-import com.amazonaws.services.ec2.model.StartInstancesRequest;
-import com.amazonaws.services.ec2.model.StartInstancesResult;
-import com.amazonaws.services.ec2.model.StopInstancesRequest;
-import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
@@ -74,6 +62,19 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.RetryService;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceState;
+import software.amazon.awssdk.services.ec2.model.Reservation;
+import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.StartInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.StopInstancesResponse;
 
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {
@@ -100,9 +101,6 @@ class AwsInstanceConnectorTest {
 
     @Mock
     private AmazonEc2Client amazonEC2Client;
-
-    @Mock
-    private InstanceProfileCredentialsProvider instanceProfileCredentialsProvider;
 
     @SpyBean
     private CommonAwsClient commonAwsClient;
@@ -134,8 +132,8 @@ class AwsInstanceConnectorTest {
         CloudCredential credential = new CloudCredential("id", "alma", Map.of("accessKey", "ac", "secretKey", "secret"), "acc");
         authenticatedContext = awsAuthenticator.authenticate(context, credential);
 
-        StopInstancesResult stopInstancesResult = new StopInstancesResult();
-        StartInstancesResult startInstanceResult = new StartInstancesResult();
+        StopInstancesResponse stopInstancesResult = StopInstancesResponse.builder().build();
+        StartInstancesResponse startInstanceResult = StartInstancesResponse.builder().build();
         when(amazonEC2Client.stopInstances(any(StopInstancesRequest.class))).thenReturn(stopInstancesResult);
         when(amazonEC2Client.startInstances(any(StartInstancesRequest.class))).thenReturn(startInstanceResult);
 
@@ -180,7 +178,7 @@ class AwsInstanceConnectorTest {
     void testCheckException() {
         mockDescribeInstancesException("silence of the lambs", "would you ...");
         List<CloudInstance> list = getCloudInstances();
-        assertThrows(AmazonEC2Exception.class, () -> underTest.check(authenticatedContext, list));
+        assertThrows(Ec2Exception.class, () -> underTest.check(authenticatedContext, list));
         assertThat(list, hasSize(2));
     }
 
@@ -188,15 +186,18 @@ class AwsInstanceConnectorTest {
     void testCheckExceptionHandle() {
         mockDescribeInstancesException(INSTANCE_NOT_FOUND_ERROR_CODE, "i-1 is a sheep!");
         List<CloudInstance> mutableList = new ArrayList<>(getCloudInstances());
-        assertThrows(AmazonEC2Exception.class, () -> underTest.check(authenticatedContext, mutableList));
+        assertThrows(Ec2Exception.class, () -> underTest.check(authenticatedContext, mutableList));
         assertThat(mutableList, hasSize(1));
     }
 
     @Test
     void testCheckSdkExceptionRetry() {
-        when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenThrow(new SdkClientException("lamb"),
-                new SdkClientException("sheep"),
-                new SdkClientException("shepherd")).thenReturn(getDescribeInstancesResult("running", 16));
+        when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class)))
+                .thenThrow(
+                        SdkClientException.builder().message("lamb").build(),
+                        SdkClientException.builder().message("sheep").build(),
+                        SdkClientException.builder().message("shepherd").build())
+                .thenReturn(getDescribeInstancesResult("running", 16));
         List<CloudInstance> list = getCloudInstances();
         List<CloudVmInstanceStatus> result = underTest.check(authenticatedContext, list);
         verify(amazonEC2Client, times(4)).describeInstances(any(DescribeInstancesRequest.class));
@@ -217,7 +218,7 @@ class AwsInstanceConnectorTest {
 
         //then
         verify(amazonEC2Client, times(1)).startInstances(captorStart.capture());
-        assertEquals(inputList.size(), captorStart.getValue().getInstanceIds().size());
+        assertEquals(inputList.size(), captorStart.getValue().instanceIds().size());
         assertThat(result, hasItem(allOf(hasProperty("status", is(stopped1)))));
     }
 
@@ -235,7 +236,7 @@ class AwsInstanceConnectorTest {
 
         //then
         verify(amazonEC2Client, times(1)).stopInstances(captorStop.capture());
-        assertEquals(inputList.size(), captorStop.getValue().getInstanceIds().size());
+        assertEquals(inputList.size(), captorStop.getValue().instanceIds().size());
         assertThat(result, hasItem(allOf(hasProperty("status", is(stopped1)))));
     }
 
@@ -246,7 +247,7 @@ class AwsInstanceConnectorTest {
 
         List<CloudVmInstanceStatus> result = underTest.start(authenticatedContext, List.of(), inputList);
         verify(amazonEC2Client, times(1)).startInstances(captor.capture());
-        assertTrue(captor.getValue().getInstanceIds().size() < inputList.size());
+        assertTrue(captor.getValue().instanceIds().size() < inputList.size());
         assertThat(result, hasItem(allOf(hasProperty("status", is(InstanceStatus.STARTED)))));
     }
 
@@ -257,7 +258,7 @@ class AwsInstanceConnectorTest {
 
         List<CloudVmInstanceStatus> result = underTest.stop(authenticatedContext, List.of(), inputList);
         verify(amazonEC2Client, times(1)).stopInstances(captor.capture());
-        assertTrue(captor.getValue().getInstanceIds().size() < inputList.size());
+        assertTrue(captor.getValue().instanceIds().size() < inputList.size());
         assertThat(result, hasItem(allOf(hasProperty("status", is(InstanceStatus.STOPPED)))));
     }
 
@@ -288,7 +289,7 @@ class AwsInstanceConnectorTest {
 
         assertThrows(PollerStoppedException.class, () -> underTest.start(authenticatedContext, List.of(), inputList));
         verify(amazonEC2Client, times(1)).startInstances(captor.capture());
-        assertEquals(inputList.size(), captor.getValue().getInstanceIds().size());
+        assertEquals(inputList.size(), captor.getValue().instanceIds().size());
     }
 
     @Test
@@ -298,20 +299,20 @@ class AwsInstanceConnectorTest {
 
         assertThrows(PollerStoppedException.class, () -> underTest.stop(authenticatedContext, List.of(), inputList));
         verify(amazonEC2Client, times(1)).stopInstances(captor.capture());
-        assertEquals(inputList.size(), captor.getValue().getInstanceIds().size());
+        assertEquals(inputList.size(), captor.getValue().instanceIds().size());
     }
 
     @Test
     void testStartException() {
         mockDescribeInstancesException("silence of the lambs", "would you ...");
-        assertThrows(AmazonEC2Exception.class, () -> underTest.start(authenticatedContext, List.of(), inputList));
+        assertThrows(Ec2Exception.class, () -> underTest.start(authenticatedContext, List.of(), inputList));
         assertThat(inputList, hasSize(2));
     }
 
     @Test
     void testStopException() {
         mockDescribeInstancesException("silence of the lambs", "would you ...");
-        assertThrows(AmazonEC2Exception.class, () -> underTest.stop(authenticatedContext, List.of(), inputList));
+        assertThrows(Ec2Exception.class, () -> underTest.stop(authenticatedContext, List.of(), inputList));
         assertThat(inputList, hasSize(2));
     }
 
@@ -319,7 +320,7 @@ class AwsInstanceConnectorTest {
     void testStartExceptionHandle() {
         mockDescribeInstancesException(INSTANCE_NOT_FOUND_ERROR_CODE, "i-1 is a sheep!");
         List<CloudInstance> mutableList = new ArrayList<>(getCloudInstances());
-        assertThrows(AmazonEC2Exception.class, () -> underTest.start(authenticatedContext, List.of(), mutableList));
+        assertThrows(Ec2Exception.class, () -> underTest.start(authenticatedContext, List.of(), mutableList));
         assertThat(mutableList, hasSize(1));
     }
 
@@ -327,15 +328,18 @@ class AwsInstanceConnectorTest {
     void testStopExceptionHandle() {
         mockDescribeInstancesException(INSTANCE_NOT_FOUND_ERROR_CODE, "i-1 is a sheep!");
         List<CloudInstance> mutableList = new ArrayList<>(getCloudInstances());
-        assertThrows(AmazonEC2Exception.class, () -> underTest.stop(authenticatedContext, List.of(), mutableList));
+        assertThrows(Ec2Exception.class, () -> underTest.stop(authenticatedContext, List.of(), mutableList));
         assertThat(mutableList, hasSize(1));
     }
 
     @Test
     void testStartSdkExceptionRetry() {
-        when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenThrow(new SdkClientException("lamb"),
-                new SdkClientException("sheep"),
-                new SdkClientException("shepherd")).thenReturn(getDescribeInstancesResult("running", 16));
+        when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class)))
+                .thenThrow(
+                        SdkClientException.builder().message("lamb").build(),
+                        SdkClientException.builder().message("sheep").build(),
+                        SdkClientException.builder().message("shepherd").build())
+                .thenReturn(getDescribeInstancesResult("running", 16));
         List<CloudVmInstanceStatus> result = underTest.start(authenticatedContext, List.of(), inputList);
         verify(amazonEC2Client, times(5)).describeInstances(any(DescribeInstancesRequest.class));
         assertThat(result, hasSize(2));
@@ -343,9 +347,12 @@ class AwsInstanceConnectorTest {
 
     @Test
     void testStopSdkExceptionRetry() {
-        when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenThrow(new SdkClientException("lamb"),
-                new SdkClientException("sheep"),
-                new SdkClientException("shepherd")).thenReturn(getDescribeInstancesResult("stopped", 55));
+        when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class)))
+                .thenThrow(
+                        SdkClientException.builder().message("lamb").build(),
+                        SdkClientException.builder().message("sheep").build(),
+                        SdkClientException.builder().message("shepherd").build())
+                .thenReturn(getDescribeInstancesResult("stopped", 55));
         List<CloudVmInstanceStatus> result = underTest.stop(authenticatedContext, List.of(), inputList);
         verify(amazonEC2Client, times(5)).describeInstances(any(DescribeInstancesRequest.class));
         assertThat(result, hasSize(2));
@@ -376,8 +383,8 @@ class AwsInstanceConnectorTest {
                 getDescribeInstancesResult("stopped", 16));
     }
 
-    private void mockListOfDescribeInstancesStopAndThenRunning(DescribeInstancesResult cons, int repeatNo, DescribeInstancesResult stopped) {
-        DescribeInstancesResult[] describeInstancesResults = new DescribeInstancesResult[repeatNo * 2];
+    private void mockListOfDescribeInstancesStopAndThenRunning(DescribeInstancesResponse cons, int repeatNo, DescribeInstancesResponse stopped) {
+        DescribeInstancesResponse[] describeInstancesResults = new DescribeInstancesResponse[repeatNo * 2];
         Arrays.fill(describeInstancesResults, cons);
         describeInstancesResults[2] = stopped;
         describeInstancesResults[4] = stopped;
@@ -388,8 +395,8 @@ class AwsInstanceConnectorTest {
                 describeInstancesResults);
     }
 
-    private void mockListOfDescribeInstances(DescribeInstancesResult cons, int repeatNo, DescribeInstancesResult last) {
-        DescribeInstancesResult[] describeInstancesResults = new DescribeInstancesResult[repeatNo];
+    private void mockListOfDescribeInstances(DescribeInstancesResponse cons, int repeatNo, DescribeInstancesResponse last) {
+        DescribeInstancesResponse[] describeInstancesResults = new DescribeInstancesResponse[repeatNo];
         Arrays.fill(describeInstancesResults, cons);
         describeInstancesResults[repeatNo - 1] = last;
         when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenReturn(cons,
@@ -398,47 +405,48 @@ class AwsInstanceConnectorTest {
 
     private void mockDescribeInstancesException(String errorCode, String errorMessage) {
         when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).then(invocation -> {
-            AmazonEC2Exception exception = new AmazonEC2Exception("Sheep lost control");
-            exception.setErrorCode(errorCode);
-            exception.setErrorMessage(errorMessage);
+            Ec2Exception exception = (Ec2Exception) Ec2Exception.builder()
+                    .message("Sheep lost control")
+                    .awsErrorDetails(AwsErrorDetails.builder().errorCode(errorCode).errorMessage(errorMessage).build())
+                    .build();
             throw exception;
         });
     }
 
     private void testCheckStates(String running, int code, InstanceStatus status) {
         List<CloudInstance> list = getCloudInstances();
-        DescribeInstancesResult instancesResult = getDescribeInstancesResult(running, code);
+        DescribeInstancesResponse instancesResult = getDescribeInstancesResult(running, code);
         when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenReturn(instancesResult);
         List<CloudVmInstanceStatus> result = underTest.check(authenticatedContext, list);
         assertThat(result, hasSize(2));
         assertThat(result, everyItem(hasProperty("status", is(status))));
     }
 
-    private DescribeInstancesResult getDescribeInstancesResult(String state, int code) {
+    private DescribeInstancesResponse getDescribeInstancesResult(String state, int code) {
         Instance instances1 = getAwsInstance("i-1", state, code);
         Instance instances2 = getAwsInstance("i-2", state, code);
         Reservation reservation1 = getReservation(instances1, "1");
         Reservation reservation2 = getReservation(instances2, "2");
 
-        return new DescribeInstancesResult().withReservations(reservation1, reservation2);
+        return DescribeInstancesResponse.builder().reservations(reservation1, reservation2).build();
     }
 
-    private DescribeInstancesResult getDescribeInstancesResultOneRunning(String state, int code) {
+    private DescribeInstancesResponse getDescribeInstancesResultOneRunning(String state, int code) {
         Instance instances1 = getAwsInstance("i-1", state, code);
         Instance instances2 = getAwsInstance("i-2", "running", 16);
         Reservation reservation1 = getReservation(instances1, "1");
         Reservation reservation2 = getReservation(instances2, "2");
 
-        return new DescribeInstancesResult().withReservations(reservation1, reservation2);
+        return DescribeInstancesResponse.builder().reservations(reservation1, reservation2).build();
     }
 
-    private DescribeInstancesResult getDescribeInstancesResultOneStopped(String state, int code) {
+    private DescribeInstancesResponse getDescribeInstancesResultOneStopped(String state, int code) {
         Instance instances1 = getAwsInstance("i-1", state, code);
         Instance instances2 = getAwsInstance("i-2", "stopped", 16);
         Reservation reservation1 = getReservation(instances1, "1");
         Reservation reservation2 = getReservation(instances2, "2");
 
-        return new DescribeInstancesResult().withReservations(reservation1, reservation2);
+        return DescribeInstancesResponse.builder().reservations(reservation1, reservation2).build();
     }
 
     private List<CloudInstance> getCloudInstances() {
@@ -448,11 +456,11 @@ class AwsInstanceConnectorTest {
     }
 
     private Reservation getReservation(Instance instances1, String s) {
-        return new Reservation().withReservationId(s).withInstances(instances1);
+        return Reservation.builder().reservationId(s).instances(instances1).build();
     }
 
     private Instance getAwsInstance(String s, String state, int code) {
-        return new Instance().withState(new InstanceState().withName(state).withCode(code)).withInstanceId(s);
+        return Instance.builder().state(InstanceState.builder().name(state).code(code).build()).instanceId(s).build();
     }
 
     @Configuration

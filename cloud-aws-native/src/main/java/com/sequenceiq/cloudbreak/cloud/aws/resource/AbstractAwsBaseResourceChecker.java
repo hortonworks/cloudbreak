@@ -6,7 +6,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 public abstract class AbstractAwsBaseResourceChecker {
 
     protected CloudResource createNamedResource(ResourceType type, String name, String availabilityZone) {
-        return new CloudResource.Builder()
+        return CloudResource.builder()
                 .withType(type)
                 .withName(name)
                 .withAvailabilityZone(availabilityZone)

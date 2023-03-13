@@ -331,7 +331,7 @@ cb:
   blueprint:
     cm:
       gov:
-        exclusionList: "flow-management,flow-management-small,flink-heavy,flink-light"
+        exclusionList: "cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light"
       defaults:
         7.1.0: >
           7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
@@ -551,7 +551,7 @@ cb:
           7.2.17 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
           7.2.17 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
           7.2.17 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
-          7.2.17 - SDX Medium Duty Scalable: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-scalable;
+          7.2.17 - SDX Scalable: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-scalable;
           7.2.17 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
           7.2.17 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
           7.2.17 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
@@ -566,7 +566,8 @@ cb:
           7.2.17 - Search Analytics=cdp-search-analytics;
           7.2.17 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
           7.2.17 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
-          7.2.17 - COD Edge Node=cdp-cod-edge-node
+          7.2.17 - COD Edge Node=cdp-cod-edge-node;
+          7.2.17 - Edge Flow Management Light Duty=cdp-edge-flow-management-small
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |

@@ -478,6 +478,23 @@ public class AzureUtilsTest {
     }
 
     @Test
+    void convertToCloudExceptionTestWhenCloudExceptionAndDetails() {
+        ApiError cloudError = AzureTestUtils.apiError("123", "foobar");
+        List<ManagementError> details = new ArrayList<>();
+        details.add(AzureTestUtils.managementError("123", "detail1"));
+        String message = "The client does not have authorization to perform action 'Microsoft.Marketplace/offerTypes/publishers/offers/plans/agreements/read'";
+        details.add(AzureTestUtils.managementError("AuthorizationFailed", message));
+        AzureTestUtils.setDetails(cloudError, details);
+        ApiErrorException e = new ApiErrorException("Authorization failed", null, cloudError);
+
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Stack provision failed");
+
+        verifyCloudConnectorException(result,
+                "Stack provision failed failed, status code 123, error message: foobar, details: detail1, " +
+                        "The client does not have authorization to perform action 'Microsoft.Marketplace/offerTypes/publishers/offers/plans/agreements/read'");
+    }
+
+    @Test
     void convertToCloudConnectorExceptionTestWhenDetailCloudErrorsHaveRequestDisallowedByPolicyCode() throws NoSuchFieldException {
         ApiError cloudError = AzureTestUtils.apiError("InvalidTemplateDeployment",
                 "The template deployment failed with multiple errors. Please see details for more information.");

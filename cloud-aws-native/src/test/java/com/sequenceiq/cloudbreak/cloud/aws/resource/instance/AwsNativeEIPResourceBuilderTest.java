@@ -17,9 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.ec2.model.AllocateAddressResult;
-import com.amazonaws.services.ec2.model.AssociateAddressResult;
-import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsElasticIpService;
@@ -39,6 +36,10 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.ec2.model.AllocateAddressResponse;
+import software.amazon.awssdk.services.ec2.model.AssociateAddressResponse;
+import software.amazon.awssdk.services.ec2.model.TagSpecification;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsNativeEIPResourceBuilderTest {
@@ -168,10 +169,10 @@ public class AwsNativeEIPResourceBuilderTest {
                 .withParameters(emptyMap())
                 .build();
 
-        when(awsTaggingService.prepareEc2TagSpecification(any(), any())).thenReturn(new TagSpecification());
-        when(amazonEc2Client.allocateAddress(any())).thenReturn(new AllocateAddressResult().withAllocationId("allocId"));
+        when(awsTaggingService.prepareEc2TagSpecification(any(), any())).thenReturn(TagSpecification.builder().build());
+        when(amazonEc2Client.allocateAddress(any())).thenReturn(AllocateAddressResponse.builder().allocationId("allocId").build());
         when(awsElasticIpService.associateElasticIpsToInstances(any(), any(), any()))
-                .thenReturn(List.of(new AssociateAddressResult().withAssociationId("assocId")));
+                .thenReturn(List.of(AssociateAddressResponse.builder().associationId("assocId").build()));
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getId()).thenReturn(0L);
         when(persistenceRetriever.notifyRetrieve(0L, "0", CommonStatus.CREATED, ResourceType.AWS_INSTANCE))

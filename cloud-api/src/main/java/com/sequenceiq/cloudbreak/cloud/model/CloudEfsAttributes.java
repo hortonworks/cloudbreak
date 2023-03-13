@@ -10,11 +10,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.LifeCycleState;
 
 @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudEfsAttributes {
+
     public static final String EFS_TAGKEY_NAME = "Name";
 
     public static final String EFS_TAGKEY_NAME_VALUE_DEFAULT = "defaultName";
@@ -37,7 +37,7 @@ public class CloudEfsAttributes {
 
     private String kmsKeyId;
 
-    private LifeCycleState fileState;
+    private String fileState;
 
     @JsonCreator
     public CloudEfsAttributes(@JsonProperty("creationToken") String creationToken, @JsonProperty("deleteOnTermination") Boolean deleteOnTermination,
@@ -56,10 +56,6 @@ public class CloudEfsAttributes {
         if (this.tags == null) {
             this.tags = new HashMap<>();
         }
-
-        // we don't know the value untile the response from AWS
-        this.fileSystemId = null;
-        this.fileState = LifeCycleState.PREPARE;
     }
 
     public CloudEfsAttributes(CloudEfsAttributes oriAttributes) {
@@ -150,11 +146,11 @@ public class CloudEfsAttributes {
         this.fileSystemId = fileSystemId;
     }
 
-    public LifeCycleState getFileState() {
+    public String getFileState() {
         return fileState;
     }
 
-    public void setFileState(LifeCycleState fileState) {
+    public void setFileState(String fileState) {
         this.fileState = fileState;
     }
 

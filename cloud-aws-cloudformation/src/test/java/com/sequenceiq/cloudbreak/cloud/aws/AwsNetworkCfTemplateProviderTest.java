@@ -27,8 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.amazonaws.services.ec2.model.DescribeVpcEndpointServicesResult;
-import com.amazonaws.services.ec2.model.ServiceDetail;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -41,6 +39,8 @@ import com.sequenceiq.common.model.PrivateEndpointType;
 
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointServicesResponse;
+import software.amazon.awssdk.services.ec2.model.ServiceDetail;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsNetworkCfTemplateProviderTest {
@@ -61,11 +61,11 @@ public class AwsNetworkCfTemplateProviderTest {
     private static Stream<Arguments> privateSubnetArguments() {
         return Stream.of(
                 Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-onlygatewayvpcendpoints.json", List.of("gateway1", "gateway2"),
-                        List.of("interface1", "interface2"), new DescribeVpcEndpointServicesResult()),
+                        List.of("interface1", "interface2"), DescribeVpcEndpointServicesResponse.builder().build()),
                 Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-onlyinterfacevpcendpoints.json", List.of(),
                         List.of("interface1", "interface2"), createDescribeVpcEndpointServicesResult("interface1", "interface2")),
                 Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-novpcendpoints.json", List.of(), List.of("interface1", "interface2"),
-                        new DescribeVpcEndpointServicesResult()),
+                        DescribeVpcEndpointServicesResponse.builder().build()),
                 Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-vpcendpoints.json", List.of("gateway1", "gateway2"),
                         List.of("interface1", "interface2"), createDescribeVpcEndpointServicesResult("interface1", "interface2")),
                 Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-vpcendpoints-templatenamechange.json", List.of("gateway-1", "gateway.2"),
@@ -131,36 +131,40 @@ public class AwsNetworkCfTemplateProviderTest {
         return List.of(subnetRequest1, subnetRequest2, subnetRequest3, subnetRequest4);
     }
 
-    private static DescribeVpcEndpointServicesResult createDescribeVpcEndpointServicesResult(String... services) {
-        DescribeVpcEndpointServicesResult describeVpcEndpointServicesResult = new DescribeVpcEndpointServicesResult();
+    private static DescribeVpcEndpointServicesResponse createDescribeVpcEndpointServicesResult(String... services) {
         List<ServiceDetail> serviceDetails = new ArrayList<>();
         for (String service : services) {
-            ServiceDetail serviceDetail = new ServiceDetail().withServiceName(
-                    String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", service));
-            serviceDetail.setAvailabilityZones(List.of("az1", "az2"));
+            ServiceDetail serviceDetail = ServiceDetail.builder()
+                    .serviceName(String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", service))
+                    .availabilityZones(List.of("az1", "az2"))
+                    .build();
             serviceDetails.add(serviceDetail);
         }
-        describeVpcEndpointServicesResult.setServiceDetails(serviceDetails);
-        return describeVpcEndpointServicesResult;
+        return DescribeVpcEndpointServicesResponse.builder()
+                .serviceDetails(serviceDetails)
+                .build();
     }
 
-    private static DescribeVpcEndpointServicesResult createDescribeVpcEndpointServicesResultWithDifferentAzs() {
-        DescribeVpcEndpointServicesResult describeVpcEndpointServicesResult = new DescribeVpcEndpointServicesResult();
+    private static DescribeVpcEndpointServicesResponse createDescribeVpcEndpointServicesResultWithDifferentAzs() {
         List<ServiceDetail> serviceDetails = new ArrayList<>();
-        ServiceDetail serviceDetail1 = new ServiceDetail().withServiceName(
-                String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface1"));
-        serviceDetail1.setAvailabilityZones(List.of("az1"));
+        ServiceDetail serviceDetail1 = ServiceDetail.builder()
+                .serviceName(String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface1"))
+                .availabilityZones(List.of("az1"))
+                .build();
         serviceDetails.add(serviceDetail1);
-        ServiceDetail serviceDetail2 = new ServiceDetail().withServiceName(
-                String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface2"));
-        serviceDetail2.setAvailabilityZones(List.of("az2", "az3"));
+        ServiceDetail serviceDetail2 = ServiceDetail.builder()
+                .serviceName(String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface2"))
+                .availabilityZones(List.of("az2", "az3"))
+                .build();
         serviceDetails.add(serviceDetail2);
-        ServiceDetail serviceDetail3 = new ServiceDetail().withServiceName(String.format(
-                AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface3"));
-        serviceDetail3.setAvailabilityZones(List.of("az5", "az6"));
+        ServiceDetail serviceDetail3 = ServiceDetail.builder()
+                .serviceName(String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface3"))
+                .availabilityZones(List.of("az5", "az6"))
+                .build();
         serviceDetails.add(serviceDetail3);
-        describeVpcEndpointServicesResult.setServiceDetails(serviceDetails);
-        return describeVpcEndpointServicesResult;
+        return DescribeVpcEndpointServicesResponse.builder()
+                .serviceDetails(serviceDetails)
+                .build();
     }
 
     @BeforeEach
@@ -178,7 +182,7 @@ public class AwsNetworkCfTemplateProviderTest {
     @ParameterizedTest
     @MethodSource("privateSubnetArguments")
     public void testProvideWhenPrivateSubnetCreationEnabled(String expectedTemplate, List<String> gatewayServices, List<String> interfaceServices,
-            DescribeVpcEndpointServicesResult describeVpcEndpointServicesResult) throws IOException, TemplateException {
+            DescribeVpcEndpointServicesResponse describeVpcEndpointServicesResult) throws IOException, TemplateException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode expectedJson = objectMapper.readTree(new File(expectedTemplate));
 

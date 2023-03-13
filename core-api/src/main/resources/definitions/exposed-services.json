@@ -379,6 +379,36 @@
       "visibleForDatahub": true
     },
     {
+      "name": "EFM-UI",
+      "displayName": "Edge FLow Manager UI",
+      "serviceName": "EFM_SERVER",
+      "knoxService": "EFM-UI",
+      "knoxUrl": "/efm-ui/",
+      "ssoSupported": true,
+      "port": 10090,
+      "tlsPort": 10090,
+      "apiOnly": false,
+      "apiIncluded": false,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true,
+      "minVersion": "7.2.17"
+    },
+    {
+      "name": "EFM-API",
+      "displayName": "Edge Flow Manager API",
+      "serviceName": "EFM_SERVER",
+      "knoxService": "EFM-API",
+      "knoxUrl": "/efm-api/",
+      "ssoSupported": true,
+      "port": 10090,
+      "tlsPort": 10090,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true,
+      "minVersion": "7.2.17"
+    },
+    {
       "name": "SMM_UI",
       "displayName": "Streams Messaging Manager",
       "serviceName": "STREAMS_MESSAGING_MANAGER_UI",

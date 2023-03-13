@@ -24,5 +24,7 @@ public class KafkaConfigs {
 
     static final String SASL_AUTH_METHOD = "sasl.plain.auth";
 
+    static final String METADATA_STORE = "metadata.store";
+
     private KafkaConfigs() { }
 }

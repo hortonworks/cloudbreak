@@ -20,21 +20,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.BlockDeviceMapping;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Filter;
-import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
-import com.amazonaws.services.ec2.model.RunInstancesRequest;
-import com.amazonaws.services.ec2.model.RunInstancesResult;
-import com.amazonaws.services.ec2.model.StartInstancesRequest;
-import com.amazonaws.services.ec2.model.Tag;
-import com.amazonaws.services.ec2.model.TagSpecification;
-import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
-import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
@@ -59,10 +44,25 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
 
+import software.amazon.awssdk.services.ec2.model.AttributeValue;
+import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.ec2.model.IamInstanceProfileSpecification;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
+import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.Tag;
+import software.amazon.awssdk.services.ec2.model.TagSpecification;
+import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
+
 @Service
 public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBuilder {
-
-    public static final String PLACEMENT_GROUP_NAME_PREFIX = "PlacementGroup";
 
     public static final int AWS_INSTANCE_RUNNING_CODE = 16;
 
@@ -115,61 +115,64 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         CloudResource cloudResource = buildableResource.get(0);
         Optional<Instance> existedOpt = resourceByName(amazonEc2Client, cloudResource.getName());
         Instance instance;
-        if (existedOpt.isPresent() && existedOpt.get().getState().getCode() != AWS_INSTANCE_TERMINATED_CODE) {
+        if (existedOpt.isPresent() && existedOpt.get().state().code() != AWS_INSTANCE_TERMINATED_CODE) {
             instance = existedOpt.get();
-            LOGGER.info("Instance exists with name: {} ({}), check the state: {}", cloudResource.getName(), instance.getInstanceId(),
-                    instance.getState().getName());
+            LOGGER.info("Instance exists with name: {} ({}), check the state: {}", cloudResource.getName(), instance.instanceId(),
+                    instance.state().name());
             if (!instanceRunning(instance)) {
-                LOGGER.info("Instance is existing but not running, try to start: {}, {}", instance.getInstanceId(), instance.getState());
-                amazonEc2Client.startInstances(new StartInstancesRequest().withInstanceIds(instance.getInstanceId()));
+                LOGGER.info("Instance is existing but not running, try to start: {}, {}", instance.instanceId(), instance.state());
+                amazonEc2Client.startInstances(StartInstancesRequest.builder().instanceIds(instance.instanceId()).build());
             }
         } else {
             LOGGER.info("Create new instance with name: {}", cloudResource.getName());
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
-                    com.amazonaws.services.ec2.model.ResourceType.Instance);
-            tagSpecification.withTags(
-                    new Tag().withKey("Name").withValue(awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId)),
-                    new Tag().withKey("instanceGroup").withValue(group.getName())
+                    software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE);
+            tagSpecification.toBuilder().tags(
+                    Tag.builder().key("Name").value(awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId)).build(),
+                    Tag.builder().key("instanceGroup").value(group.getName()).build()
             );
-            RunInstancesRequest request = new RunInstancesRequest()
-                    .withInstanceType(instanceTemplate.getFlavor())
-                    .withImageId(cloudStack.getImage().getImageName())
-                    .withSubnetId(cloudInstance.getSubnetId())
-                    .withSecurityGroupIds(securityGroupBuilderUtil.getSecurityGroupIds(context, group))
-                    .withEbsOptimized(isEbsOptimized(instanceTemplate))
-                    .withTagSpecifications(tagSpecification)
-                    .withIamInstanceProfile(getIamInstanceProfile(group))
-                    .withUserData(getUserData(cloudStack, group))
-                    .withMinCount(1)
-                    .withMaxCount(1)
-                    .withBlockDeviceMappings(blocks(group, cloudStack, ac))
-                    .withKeyName(cloudStack.getInstanceAuthentication().getPublicKeyId());
-            RunInstancesResult instanceResult = amazonEc2Client.createInstance(request);
-            instance = instanceResult.getReservation().getInstances().get(0);
-            LOGGER.info("Instance creation initiated for resource: {} and instance id: {}", cloudResource, instance.getInstanceId());
+            RunInstancesRequest request = RunInstancesRequest.builder()
+                    .instanceType(instanceTemplate.getFlavor())
+                    .imageId(cloudStack.getImage().getImageName())
+                    .subnetId(cloudInstance.getSubnetId())
+                    .securityGroupIds(securityGroupBuilderUtil.getSecurityGroupIds(context, group))
+                    .ebsOptimized(isEbsOptimized(instanceTemplate))
+                    .tagSpecifications(tagSpecification)
+                    .iamInstanceProfile(getIamInstanceProfile(group))
+                    .userData(getUserData(cloudStack, group))
+                    .minCount(1)
+                    .maxCount(1)
+                    .blockDeviceMappings(blocks(group, cloudStack, ac))
+                    .keyName(cloudStack.getInstanceAuthentication().getPublicKeyId())
+                    .build();
+            RunInstancesResponse instanceResponse = amazonEc2Client.createInstance(request);
+            instance = instanceResponse.instances().get(0);
+
+            LOGGER.info("Instance creation initiated for resource: {} and instance id: {}", cloudResource, instance.instanceId());
         }
-        cloudResource.setInstanceId(instance.getInstanceId());
+        cloudResource.setInstanceId(instance.instanceId());
         return buildableResource;
     }
 
     @Override
     public CloudResource update(AwsContext context, CloudResource cloudResource, CloudInstance instance,
-        AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+            AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
         Optional<Instance> existedOpt = resourceById(amazonEc2Client, instance.getInstanceId());
         Instance awsInstance;
-        if (existedOpt.isPresent() && existedOpt.get().getState().getCode() != AWS_INSTANCE_TERMINATED_CODE) {
+        if (existedOpt.isPresent() && existedOpt.get().state().code() != AWS_INSTANCE_TERMINATED_CODE) {
             awsInstance = existedOpt.get();
-            LOGGER.info("Instance exists with name: {} ({}), check the state: {}", awsInstance.getInstanceId(), instance.getInstanceId(),
-                    awsInstance.getState().getName());
+            LOGGER.info("Instance exists with name: {} ({}), check the state: {}", awsInstance.instanceId(), instance.getInstanceId(),
+                    awsInstance.state().name());
             String requestedInstanceType = instance.getTemplate().getFlavor();
-            if (!awsInstance.getInstanceType().equals(requestedInstanceType)) {
-                ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = new ModifyInstanceAttributeRequest();
-                modifyInstanceAttributeRequest.setInstanceId(awsInstance.getInstanceId());
-                modifyInstanceAttributeRequest.setInstanceType(instance.getTemplate().getFlavor());
+            if (!awsInstance.instanceType().toString().equals(requestedInstanceType)) {
+                ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = ModifyInstanceAttributeRequest.builder()
+                        .instanceId(awsInstance.instanceId())
+                        .instanceType(AttributeValue.builder().value(instance.getTemplate().getFlavor()).build())
+                        .build();
                 amazonEc2Client.modifyInstanceAttribute(modifyInstanceAttributeRequest);
             } else {
-                LOGGER.info("Instance ID {} using the same type what was requested: {}", awsInstance.getInstanceId(), requestedInstanceType);
+                LOGGER.info("Instance ID {} is using the same type what was requested: {}", awsInstance.instanceId(), requestedInstanceType);
             }
 
         }
@@ -189,17 +192,17 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     private Optional<Instance> resourceByName(AmazonEc2Client amazonEc2Client, String name) {
         return awsMethodExecutor.execute(() -> {
-            DescribeInstancesResult describeInstancesResult = amazonEc2Client.describeInstances(new DescribeInstancesRequest()
-                    .withFilters(new Filter().withName("tag:Name").withValues(name)));
-            return describeInstancesResult.getReservations().stream().flatMap(s -> s.getInstances().stream()).findFirst();
+            DescribeInstancesResponse describeInstancesResponse = amazonEc2Client.describeInstances(DescribeInstancesRequest.builder()
+                    .filters(Filter.builder().name("tag:Name").values(name).build())
+                    .build());
+            return describeInstancesResponse.reservations().stream().flatMap(s -> s.instances().stream()).findFirst();
         }, Optional.empty());
     }
 
     private Optional<Instance> resourceById(AmazonEc2Client amazonEc2Client, String id) {
         return awsMethodExecutor.execute(() -> {
-            DescribeInstancesResult describeInstancesResult = amazonEc2Client.describeInstances(new DescribeInstancesRequest()
-                    .withInstanceIds(id));
-            return describeInstancesResult.getReservations().stream().flatMap(s -> s.getInstances().stream()).findFirst();
+            DescribeInstancesResponse describeInstancesResponse = amazonEc2Client.describeInstances(DescribeInstancesRequest.builder().instanceIds(id).build());
+            return describeInstancesResponse.reservations().stream().flatMap(s -> s.instances().stream()).findFirst();
         }, Optional.empty());
     }
 
@@ -211,19 +214,20 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         if (StringUtils.isNotEmpty(resource.getInstanceId())) {
             try {
                 LOGGER.debug("Check instance {} for {}.", operation, resource.getInstanceId());
-                DescribeInstancesResult describeInstancesResult = context.getAmazonEc2Client().describeInstances(new DescribeInstancesRequest()
-                        .withInstanceIds(resource.getInstanceId()));
+                DescribeInstancesResponse describeInstancesResponse = context.getAmazonEc2Client().describeInstances(DescribeInstancesRequest.builder()
+                        .instanceIds(resource.getInstanceId())
+                        .build());
                 if (creation) {
-                    finished = describeInstancesResult.getReservations().stream()
-                            .flatMap(s -> s.getInstances().stream())
+                    finished = describeInstancesResponse.reservations().stream()
+                            .flatMap(s -> s.instances().stream())
                             .allMatch(this::instanceRunningOrTerminated);
                 } else {
-                    finished = describeInstancesResult.getReservations().stream()
-                            .flatMap(s -> s.getInstances().stream())
+                    finished = describeInstancesResponse.reservations().stream()
+                            .flatMap(s -> s.instances().stream())
                             .allMatch(this::instanceTerminated);
                 }
-            } catch (AmazonEC2Exception e) {
-                if (e.getErrorCode().contains("NotFound") && !creation) {
+            } catch (Ec2Exception e) {
+                if (e.awsErrorDetails().errorCode().contains("NotFound") && !creation) {
                     LOGGER.info("Aws resource does not found: {}", e.getMessage());
                     finished = true;
                 } else {
@@ -244,13 +248,13 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     }
 
     private boolean instanceRunning(Instance instance) {
-        LOGGER.debug("Check running state of {}. Current: {}", instance.getInstanceId(), instance.getState());
-        return instance.getState().getCode() == AWS_INSTANCE_RUNNING_CODE;
+        LOGGER.debug("Check running state of {}. Current: {}", instance.instanceId(), instance.state());
+        return instance.state().code() == AWS_INSTANCE_RUNNING_CODE;
     }
 
     private boolean instanceTerminated(Instance instance) {
-        LOGGER.debug("check termination state of {}. Current: {}", instance.getInstanceId(), instance.getState());
-        return instance.getState().getCode() == AWS_INSTANCE_TERMINATED_CODE;
+        LOGGER.debug("check termination state of {}. Current: {}", instance.instanceId(), instance.state());
+        return instance.state().code() == AWS_INSTANCE_TERMINATED_CODE;
     }
 
     private String getUserData(CloudStack cloudStack, Group group) {
@@ -263,16 +267,16 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     }
 
     private IamInstanceProfileSpecification getIamInstanceProfile(Group group) {
-        return new IamInstanceProfileSpecification().withArn(getInstanceProfile(group));
+        return IamInstanceProfileSpecification.builder().arn(getInstanceProfile(group)).build();
     }
 
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         LOGGER.info("Terminate instance with instance id: {}", resource.getInstanceId());
         if (resource.getInstanceId() != null) {
-            TerminateInstancesRequest request = new TerminateInstancesRequest().withInstanceIds(resource.getInstanceId());
-            TerminateInstancesResult terminateInstancesResult = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().deleteInstance(request), null);
-            return terminateInstancesResult == null ? null : resource;
+            TerminateInstancesRequest request = TerminateInstancesRequest.builder().instanceIds(resource.getInstanceId()).build();
+            TerminateInstancesResponse terminateInstancesResponse = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().deleteInstance(request), null);
+            return terminateInstancesResponse == null ? null : resource;
         } else {
             return resource;
         }
@@ -295,7 +299,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     private String getInstanceProfile(Group group) {
         return group.getIdentity().map(cloudFileSystemView -> {
-            CloudS3View cloudS3View = CloudS3View.class.cast(cloudFileSystemView);
+            CloudS3View cloudS3View = (CloudS3View) cloudFileSystemView;
             return cloudS3View.getInstanceProfile();
         }).orElse(null);
     }

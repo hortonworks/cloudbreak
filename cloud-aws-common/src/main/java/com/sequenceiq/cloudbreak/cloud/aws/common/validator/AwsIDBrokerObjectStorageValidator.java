@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.Role;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
@@ -27,6 +25,9 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.model.CloudIdentityType;
+
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.Role;
 
 @Component
 public class AwsIDBrokerObjectStorageValidator {
@@ -81,7 +82,7 @@ public class AwsIDBrokerObjectStorageValidator {
     private void validateIDBroker(ObjectStorageValidateRequest validationRequest, AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
             CloudS3View cloudFileSystem, String accountId, boolean skipOrgPolicyDecisions, ValidationResultBuilder resultBuilder) {
         LOGGER.info("Permission validation on IBBroker role: {} for operation: {}",
-                instanceProfile.getInstanceProfileName(), validationRequest.getBackupOperationType().name());
+                instanceProfile.instanceProfileName(), validationRequest.getBackupOperationType().name());
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, cloudFileSystem.getCloudIdentityType(), resultBuilder);
         Set<Role> allMappedRoles = getAllMappedRoles(iam, cloudFileSystem, resultBuilder);
         awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, allMappedRoles, resultBuilder);
@@ -95,7 +96,7 @@ public class AwsIDBrokerObjectStorageValidator {
             InstanceProfile instanceProfile, CloudS3View cloudFileSystem, String accountId, boolean skipOrgPolicyDecisions,
             ValidationResultBuilder resultBuilder) {
         LOGGER.info("Permission validation on Role: {} for operation: {}",
-                instanceProfile.getInstanceProfileName(), validationRequest.getBackupOperationType().name());
+                instanceProfile.instanceProfileName(), validationRequest.getBackupOperationType().name());
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, cloudFileSystem.getCloudIdentityType(), resultBuilder);
         awsLogRolePermissionValidator.validateLog(iam, instanceProfile, cloudFileSystem, validationRequest.getLogsLocationBase(), skipOrgPolicyDecisions,
                 resultBuilder);

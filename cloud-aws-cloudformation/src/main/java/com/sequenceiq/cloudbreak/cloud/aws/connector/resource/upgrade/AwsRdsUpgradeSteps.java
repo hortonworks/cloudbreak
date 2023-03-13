@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.rds.model.DBInstance;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsParameterGroupService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeOperations;
@@ -27,6 +25,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.common.database.Version;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.rds.model.DBInstance;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
 @Component
 public class AwsRdsUpgradeSteps {
@@ -47,15 +48,15 @@ public class AwsRdsUpgradeSteps {
 
     public RdsInfo getRdsInfo(AmazonRdsClient rdsClient, String dbInstanceIdentifier) {
         LOGGER.debug("Started to retrieve RDS info for upgrade, dbInstanceIdentifier: {}", dbInstanceIdentifier);
-        DescribeDBInstancesResult describeDBInstanceResult = awsRdsUpgradeOperations.describeRds(rdsClient, dbInstanceIdentifier);
+        DescribeDbInstancesResponse describeDBInstanceResponse = awsRdsUpgradeOperations.describeRds(rdsClient, dbInstanceIdentifier);
 
-        Set<String> currentDbEngineVersions = describeDBInstanceResult.getDBInstances().stream()
-                .map(DBInstance::getEngineVersion)
+        Set<String> currentDbEngineVersions = describeDBInstanceResponse.dbInstances().stream()
+                .map(DBInstance::engineVersion)
                 .collect(Collectors.toSet());
         awsRdsUpgradeValidatorService.validateClusterHasASingleVersion(currentDbEngineVersions);
 
-        Map<String, String> dbArnToInstanceStatuses = describeDBInstanceResult.getDBInstances().stream()
-                .collect(Collectors.toMap(DBInstance::getDBInstanceArn, DBInstance::getDBInstanceStatus));
+        Map<String, String> dbArnToInstanceStatuses = describeDBInstanceResponse.dbInstances().stream()
+                .collect(Collectors.toMap(DBInstance::dbInstanceArn, DBInstance::dbInstanceStatus));
         RdsState rdsState = rdsInstanceStatusesToRdsStateConverter.convert(dbArnToInstanceStatuses);
         RdsInfo rdsInfo = new RdsInfo(rdsState, dbArnToInstanceStatuses, new RdsEngineVersion(currentDbEngineVersions.iterator().next()));
 
@@ -79,8 +80,8 @@ public class AwsRdsUpgradeSteps {
         return cloudResources;
     }
 
-    public void waitForUpgrade(AuthenticatedContext ac, AmazonRdsClient rdsClient, DatabaseServer databaseServer) {
-        awsRdsUpgradeOperations.waitForRdsUpgrade(ac, rdsClient, databaseServer.getServerId());
+    public void waitForUpgrade(AmazonRdsClient rdsClient, DatabaseServer databaseServer) {
+        awsRdsUpgradeOperations.waitForRdsUpgrade(rdsClient, databaseServer.getServerId());
     }
 
     private boolean isCustomParameterGroupNeeded(DatabaseServer databaseServer) {
@@ -88,7 +89,7 @@ public class AwsRdsUpgradeSteps {
     }
 
     private CloudResource createParamGroupResource(AuthenticatedContext ac, String dbParameterGroupName) {
-        return new CloudResource.Builder()
+        return CloudResource.builder()
                 .withType(ResourceType.RDS_DB_PARAMETER_GROUP)
                 .withName(dbParameterGroupName)
                 .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())

@@ -33,19 +33,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.elasticloadbalancingv2.model.AmazonElasticLoadBalancingException;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateListenerResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateLoadBalancerResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateTargetGroupResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeListenersResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetGroupsResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.Listener;
-import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
-import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.Tag;
-import com.amazonaws.services.elasticloadbalancingv2.model.TargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsLoadBalancerCommonService;
@@ -68,6 +55,21 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateListenerResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ElasticLoadBalancingV2Exception;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
 
 @ExtendWith(MockitoExtension.class)
 class AwsNativeLoadBalancerLaunchServiceTest {
@@ -147,7 +149,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(awsTaggingService.prepareElasticLoadBalancingTags(any())).thenReturn(List.of(new Tag().withKey("aTag").withValue("aValue")));
+        when(awsTaggingService.prepareElasticLoadBalancingTags(any())).thenReturn(List.of(Tag.builder().key("aTag").value("aValue").build()));
         CloudContext cloudContext = authenticatedContext.getCloudContext();
         when(cloudContext.getCrn()).thenReturn(STACK_CRN);
         when(cloudContext.getName()).thenReturn(STACK_NAME);
@@ -198,7 +200,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        when(loadBalancingClient.registerLoadBalancer(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
+        when(loadBalancingClient.registerLoadBalancer(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
         Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
@@ -210,19 +212,20 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
         when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
-        AmazonServiceException loadBalancerDuplicatedExc = new AmazonServiceException(DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE);
-        loadBalancerDuplicatedExc.setErrorCode(DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE);
+        AwsServiceException loadBalancerDuplicatedExc = AwsServiceException.builder()
+                .message(DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE)
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE).build())
+                .build();
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
         when(loadBalancingClient.registerLoadBalancer(any())).thenThrow(loadBalancerDuplicatedExc);
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        DescribeLoadBalancersResult loadBalancerResult = new DescribeLoadBalancersResult().withLoadBalancers(loadBalancer);
-        when(loadBalancingClient.describeLoadBalancers(any())).thenReturn(loadBalancerResult);
+        LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
+        DescribeLoadBalancersResponse loadBalancerResponse = DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.describeLoadBalancers(any())).thenReturn(loadBalancerResponse);
         when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
-        when(loadBalancingClient.createTargetGroup(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
+        when(loadBalancingClient.createTargetGroup(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
         Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
@@ -242,15 +245,13 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult()
-                .withLoadBalancers(loadBalancer);
-        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
+        LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
         when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
-        when(loadBalancingClient.createTargetGroup(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
+        when(loadBalancingClient.createTargetGroup(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
         Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
@@ -270,23 +271,20 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
-        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
+        LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
         when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
-        TargetGroup targetGroup = new TargetGroup()
-                .withTargetGroupArn("aTargetGroupArn");
-        CreateTargetGroupResult createTargetGroupResult = new CreateTargetGroupResult()
-                .withTargetGroups(List.of(targetGroup));
-        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
+        TargetGroup targetGroup = TargetGroup.builder().targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResponse = CreateTargetGroupResponse.builder().targetGroups(List.of(targetGroup)).build();
+        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResponse);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
-        when(loadBalancingClient.registerListener(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
+        when(loadBalancingClient.registerListener(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
         Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
@@ -312,26 +310,25 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
-        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
+        LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
         when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
-        AmazonServiceException amazonServiceException = new AmazonServiceException(DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE);
-        amazonServiceException.setErrorCode(DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE);
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message(DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE)
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE).build())
+                .build();
         when(loadBalancingClient.createTargetGroup(any())).thenThrow(amazonServiceException);
-        TargetGroup targetGroup = new TargetGroup()
-                .withTargetGroupArn("aTargetGroupArn");
-        DescribeTargetGroupsResult describeTargetGroupsResult = new DescribeTargetGroupsResult()
-                .withTargetGroups(targetGroup);
-        when(loadBalancingClient.describeTargetGroup(any())).thenReturn(describeTargetGroupsResult);
+        TargetGroup targetGroup = TargetGroup.builder().targetGroupArn("aTargetGroupArn").build();
+        DescribeTargetGroupsResponse describeTargetGroupsResponse = DescribeTargetGroupsResponse.builder().targetGroups(targetGroup).build();
+        when(loadBalancingClient.describeTargetGroup(any())).thenReturn(describeTargetGroupsResponse);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
-        when(loadBalancingClient.registerListener(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
+        when(loadBalancingClient.registerListener(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
         Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
@@ -357,28 +354,23 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
-        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
+        LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
         when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
-        TargetGroup targetGroup = new TargetGroup()
-                .withTargetGroupArn("aTargetGroupArn");
-        CreateTargetGroupResult createTargetGroupResult = new CreateTargetGroupResult()
-                .withTargetGroups(List.of(targetGroup));
-        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
+        TargetGroup targetGroup = TargetGroup.builder().targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResponse = CreateTargetGroupResponse.builder().targetGroups(List.of(targetGroup)).build();
+        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResponse);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
-        Listener listener = new Listener()
-                .withListenerArn("aListenerArn");
-        CreateListenerResult createListenerResult = new CreateListenerResult()
-                .withListeners(listener);
-        when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
-        when(loadBalancingClient.registerTargets(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
+        Listener listener = Listener.builder().listenerArn("aListenerArn").build();
+        CreateListenerResponse createListenerResponse = CreateListenerResponse.builder().listeners(listener).build();
+        when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResponse);
+        when(loadBalancingClient.registerTargets(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
         Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
@@ -407,31 +399,28 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
-        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
+        LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
         when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
-        TargetGroup targetGroup = new TargetGroup()
-                .withTargetGroupArn("aTargetGroupArn");
-        CreateTargetGroupResult createTargetGroupResult = new CreateTargetGroupResult()
-                .withTargetGroups(List.of(targetGroup));
-        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
+        TargetGroup targetGroup = TargetGroup.builder().targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResponse = CreateTargetGroupResponse.builder().targetGroups(List.of(targetGroup)).build();
+        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResponse);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
-        AmazonServiceException amazonServiceException = new AmazonServiceException(DUPLICATE_LISTENER_ERROR_CODE);
-        amazonServiceException.setErrorCode(DUPLICATE_LISTENER_ERROR_CODE);
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message(DUPLICATE_LISTENER_ERROR_CODE)
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(DUPLICATE_LISTENER_ERROR_CODE).build())
+                .build();
         when(loadBalancingClient.registerListener(any())).thenThrow(amazonServiceException);
-        Listener listener = new Listener()
-                .withListenerArn("aListenerArn");
-        DescribeListenersResult describeListenersResult = new DescribeListenersResult()
-                .withListeners(listener);
-        when(loadBalancingClient.describeListeners(any())).thenReturn(describeListenersResult);
-        when(loadBalancingClient.registerTargets(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
+        Listener listener = Listener.builder().listenerArn("aListenerArn").build();
+        DescribeListenersResponse describeListenersResponse = DescribeListenersResponse.builder().listeners(listener).build();
+        when(loadBalancingClient.describeListeners(any())).thenReturn(describeListenersResponse);
+        when(loadBalancingClient.registerTargets(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
         Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
@@ -462,29 +451,24 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(getLbNameNoHash(awsLoadBalancerScheme));
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
-        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
+        LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn(("anARN")).build();
+        CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
         String tgNameNew = getTgName(awsLoadBalancerScheme);
         when(resourceNameService.resourceName(
                 ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, awsLoadBalancerScheme.resourceName(), USER_FACING_PORT)).thenReturn(tgNameNew);
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(getTgNameNoHash(awsLoadBalancerScheme));
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
-        TargetGroup targetGroup = new TargetGroup()
-                .withTargetGroupArn("aTargetGroupArn");
-        CreateTargetGroupResult createTargetGroupResult = new CreateTargetGroupResult()
-                .withTargetGroups(List.of(targetGroup));
-        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
+        TargetGroup targetGroup = TargetGroup.builder().targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResponse = CreateTargetGroupResponse.builder().targetGroups(List.of(targetGroup)).build();
+        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResponse);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
-        Listener listener = new Listener()
-                .withListenerArn("aListenerArn");
-        CreateListenerResult createListenerResult = new CreateListenerResult()
-                .withListeners(listener);
-        when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
-        when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
+        Listener listener = Listener.builder().listenerArn("aListenerArn").build();
+        CreateListenerResponse createListenerResponse = CreateListenerResponse.builder().listeners(listener).build();
+        when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResponse);
+        when(loadBalancingClient.registerTargets(any())).thenReturn(RegisterTargetsResponse.builder().build());
 
         List<CloudResourceStatus> statuses = underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
                 true);
@@ -534,19 +518,15 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(internal ? TG_NAME_INTERNAL_NO_HASH : TG_NAME_EXTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
-        TargetGroup targetGroup = new TargetGroup()
-                .withTargetGroupArn("aTargetGroupArn");
-        CreateTargetGroupResult createTargetGroupResult = new CreateTargetGroupResult()
-                .withTargetGroups(List.of(targetGroup));
-        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
+        TargetGroup targetGroup = TargetGroup.builder().targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResponse = CreateTargetGroupResponse.builder().targetGroups(List.of(targetGroup)).build();
+        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResponse);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
-        Listener listener = new Listener()
-                .withListenerArn("aListenerArn");
-        CreateListenerResult createListenerResult = new CreateListenerResult()
-                .withListeners(listener);
-        when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
-        when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
+        Listener listener = Listener.builder().listenerArn("aListenerArn").build();
+        CreateListenerResponse createListenerResponse = CreateListenerResponse.builder().listeners(listener).build();
+        when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResponse);
+        when(loadBalancingClient.registerTargets(any())).thenReturn(RegisterTargetsResponse.builder().build());
 
         List<CloudResourceStatus> statuses = underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
                 true);
@@ -583,9 +563,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .build();
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of(loadBalancerResource));
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
+        LoadBalancer loadBalancer = LoadBalancer.builder().
+                loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
         when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, schemeNew, USER_FACING_PORT))
@@ -593,19 +573,19 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(existingInternal ? TG_NAME_EXTERNAL_NO_HASH : TG_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
-        TargetGroup targetGroup = new TargetGroup()
-                .withTargetGroupArn("aTargetGroupArn");
-        CreateTargetGroupResult createTargetGroupResult = new CreateTargetGroupResult()
-                .withTargetGroups(List.of(targetGroup));
+        TargetGroup targetGroup = TargetGroup.builder()
+                .targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResult = CreateTargetGroupResponse.builder()
+                .targetGroups(List.of(targetGroup)).build();
         when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
-        Listener listener = new Listener()
-                .withListenerArn("aListenerArn");
-        CreateListenerResult createListenerResult = new CreateListenerResult()
-                .withListeners(listener);
+        Listener listener = Listener.builder()
+                .listenerArn("aListenerArn").build();
+        CreateListenerResponse createListenerResult = CreateListenerResponse.builder()
+                .listeners(listener).build();
         when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
-        when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
+        when(loadBalancingClient.registerTargets(any())).thenReturn(RegisterTargetsResponse.builder().build());
 
         List<CloudResourceStatus> statuses = underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
                 true);
@@ -641,10 +621,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(internal ? LB_NAME_INTERNAL_NO_HASH : LB_NAME_EXTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
-        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
+        LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
         String tgName = internal ? TG_NAME_INTERNAL : TG_NAME_EXTERNAL;
         CloudResource targetGroupResource = CloudResource.builder()
                 .withName(tgName)
@@ -662,12 +641,10 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(tgNameNoHash);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
-        Listener listener = new Listener()
-                .withListenerArn("aListenerArn");
-        CreateListenerResult createListenerResult = new CreateListenerResult()
-                .withListeners(listener);
-        when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
-        when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
+        Listener listener = Listener.builder().listenerArn("aListenerArn").build();
+        CreateListenerResponse createListenerResponse = CreateListenerResponse.builder().listeners(listener).build();
+        when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResponse);
+        when(loadBalancingClient.registerTargets(any())).thenReturn(RegisterTargetsResponse.builder().build());
 
         List<CloudResourceStatus> statuses = underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
                 true);
@@ -702,10 +679,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(existingInternal ? LB_NAME_EXTERNAL_NO_HASH : LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
-        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
+        LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
         String tgName = existingInternal ? TG_NAME_INTERNAL : TG_NAME_EXTERNAL;
         CloudResource targetGroupResource = CloudResource.builder()
                 .withName(tgName)
@@ -720,19 +696,19 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .thenReturn(tgNameNew);
         when(resourceNameService.trimHash(tgName)).thenReturn(existingInternal ? TG_NAME_INTERNAL_NO_HASH : TG_NAME_EXTERNAL_NO_HASH);
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(existingInternal ? TG_NAME_EXTERNAL_NO_HASH : TG_NAME_INTERNAL_NO_HASH);
-        TargetGroup targetGroup = new TargetGroup()
-                .withTargetGroupArn("aTargetGroupArn");
-        CreateTargetGroupResult createTargetGroupResult = new CreateTargetGroupResult()
-                .withTargetGroups(List.of(targetGroup));
+        TargetGroup targetGroup = TargetGroup.builder()
+                .targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResult = CreateTargetGroupResponse.builder()
+                .targetGroups(List.of(targetGroup)).build();
         when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
-        Listener listener = new Listener()
-                .withListenerArn("aListenerArn");
-        CreateListenerResult createListenerResult = new CreateListenerResult()
-                .withListeners(listener);
+        Listener listener = Listener.builder()
+                .listenerArn("aListenerArn").build();
+        CreateListenerResponse createListenerResult = CreateListenerResponse.builder()
+                .listeners(listener).build();
         when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
-        when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
+        when(loadBalancingClient.registerTargets(any())).thenReturn(RegisterTargetsResponse.builder().build());
 
         List<CloudResourceStatus> statuses = underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
                 true);
@@ -768,9 +744,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(internal ? LB_NAME_INTERNAL_NO_HASH : LB_NAME_EXTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
+        LoadBalancer loadBalancer = LoadBalancer.builder()
+                .loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = internal ? TG_NAME_INTERNAL_NEW : TG_NAME_EXTERNAL_NEW;
         when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, scheme, USER_FACING_PORT))
@@ -779,11 +755,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(tgNameNoHash);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
-        TargetGroup targetGroup = new TargetGroup()
-                .withTargetGroupArn("aTargetGroupArn");
-        CreateTargetGroupResult createTargetGroupResult = new CreateTargetGroupResult()
-                .withTargetGroups(List.of(targetGroup));
-        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
+        TargetGroup targetGroup = TargetGroup.builder().targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResponse = CreateTargetGroupResponse.builder().targetGroups(List.of(targetGroup)).build();
+        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResponse);
         String listenerName = internal ? TG_NAME_INTERNAL : TG_NAME_EXTERNAL;
         CloudResource listenerResource = CloudResource.builder()
                 .withName(listenerName)
@@ -794,7 +768,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID))
                 .thenReturn(List.of(listenerResource));
-        when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
+        when(loadBalancingClient.registerTargets(any())).thenReturn(RegisterTargetsResponse.builder().build());
 
         List<CloudResourceStatus> statuses = underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
                 true);
@@ -829,9 +803,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(existingInternal ? LB_NAME_EXTERNAL_NO_HASH : LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
-        LoadBalancer loadBalancer = new LoadBalancer()
-                .withLoadBalancerArn("anARN");
-        CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
+        LoadBalancer loadBalancer = LoadBalancer.builder()
+                .loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
         when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, schemeNew, USER_FACING_PORT))
@@ -840,10 +814,10 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(tgNameNoHash);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
-        TargetGroup targetGroup = new TargetGroup()
-                .withTargetGroupArn("aTargetGroupArn");
-        CreateTargetGroupResult createTargetGroupResult = new CreateTargetGroupResult()
-                .withTargetGroups(List.of(targetGroup));
+        TargetGroup targetGroup = TargetGroup.builder()
+                .targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResult = CreateTargetGroupResponse.builder()
+                .targetGroups(List.of(targetGroup)).build();
         when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
         String listenerName = existingInternal ? TG_NAME_INTERNAL : TG_NAME_EXTERNAL;
         CloudResource listenerResource = CloudResource.builder()
@@ -855,12 +829,12 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID))
                 .thenReturn(List.of(listenerResource));
-        Listener listener = new Listener()
-                .withListenerArn("aListenerArn");
-        CreateListenerResult createListenerResult = new CreateListenerResult()
-                .withListeners(listener);
+        Listener listener = Listener.builder()
+                .listenerArn("aListenerArn").build();
+        CreateListenerResponse createListenerResult = CreateListenerResponse.builder()
+                .listeners(listener).build();
         when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
-        when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
+        when(loadBalancingClient.registerTargets(any())).thenReturn(RegisterTargetsResponse.builder().build());
 
         List<CloudResourceStatus> statuses = underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
                 true);

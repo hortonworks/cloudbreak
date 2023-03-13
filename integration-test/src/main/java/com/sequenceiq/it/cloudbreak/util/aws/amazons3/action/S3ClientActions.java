@@ -12,69 +12,81 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectsRequest;
-import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.collect.Lists;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.client.S3Client;
 
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
+import software.amazon.awssdk.services.s3.model.Delete;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
+import software.amazon.awssdk.services.s3.model.S3Object;
+
 @Component
 public class S3ClientActions extends S3Client {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(S3ClientActions.class);
 
     public void deleteNonVersionedBucket(String baseLocation) {
-        AmazonS3 s3Client = buildS3Client();
         String bucketName = getBucketName(baseLocation);
         String keyPrefix = getKeyPrefix(baseLocation);
 
-        if (s3Client.doesBucketExistV2(bucketName)) {
-            try {
-                ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
-                        .withBucketName(bucketName)
-                        .withPrefix(keyPrefix);
-                ObjectListing objectListing = s3Client.listObjects(listObjectsRequest);
+        try (software.amazon.awssdk.services.s3.S3Client s3Client = buildS3Client()) {
+            if (doesBucketExist(s3Client, bucketName)) {
+                try {
+                    ListObjectsV2Request listObjectsRequest = ListObjectsV2Request.builder()
+                            .bucket(bucketName)
+                            .prefix(keyPrefix)
+                            .build();
+                    ListObjectsV2Response objectsResponse = s3Client.listObjectsV2(listObjectsRequest);
 
-                do {
-                    List<KeyVersion> deletableObjects = Lists.newArrayList();
-                    for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-                        deletableObjects.add(new KeyVersion(objectSummary.getKey()));
-                    }
-                    DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
-                    deleteObjectsRequest.setKeys(deletableObjects);
-                    s3Client.deleteObjects(deleteObjectsRequest);
-                    if (objectListing.isTruncated()) {
-                        objectListing = s3Client.listNextBatchOfObjects(objectListing);
-                    }
-                } while (objectListing.isTruncated());
-            } catch (AmazonServiceException e) {
-                LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
-                throw new TestFailException("Amazon S3 couldn't process the call.", e);
-            } catch (SdkClientException e) {
-                LOGGER.error("Amazon S3 response could not been parsed, because of error!", e);
-                throw new TestFailException("Amazon S3 response could not been parsed", e);
-            } finally {
-                s3Client.shutdown();
+                    do {
+                        List<ObjectIdentifier> deletableObjects = Lists.newArrayList();
+                        for (S3Object s3Object : objectsResponse.contents()) {
+                            deletableObjects.add(ObjectIdentifier.builder().key(s3Object.key()).build());
+                        }
+                        DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
+                                .bucket(bucketName)
+                                .delete(Delete.builder().objects(deletableObjects).build())
+                                .build();
+                        s3Client.deleteObjects(deleteObjectsRequest);
+                        if (objectsResponse.isTruncated()) {
+                            objectsResponse = s3Client.listObjectsV2(listObjectsRequest);
+                        }
+                    } while (objectsResponse.isTruncated());
+                } catch (AwsServiceException e) {
+                    LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
+                    throw new TestFailException("Amazon S3 couldn't process the call.", e);
+                } catch (SdkClientException e) {
+                    LOGGER.error("Amazon S3 response could not been parsed, because of error!", e);
+                    throw new TestFailException("Amazon S3 response could not been parsed", e);
+                }
+            } else {
+                LOGGER.error("Amazon S3 bucket is not present with name: {}", bucketName);
+                throw new TestFailException("Amazon S3 bucket is not present with name: " + bucketName);
             }
-        } else {
-            LOGGER.error("Amazon S3 bucket is not present with name: {}", bucketName);
-            throw new TestFailException("Amazon S3 bucket is not present with name: " + bucketName);
         }
     }
 
+    private boolean doesBucketExist(software.amazon.awssdk.services.s3.S3Client s3Client, String bucketName) {
+        return s3Client.headBucket(HeadBucketRequest.builder().bucket(bucketName).build())
+                .sdkHttpResponse()
+                .isSuccessful();
+    }
+
     public void listBucketSelectedObject(String baseLocation, String selectedObject, boolean zeroContent) {
-        AmazonS3 s3Client = buildS3Client();
         String bucketName = getBucketName(baseLocation);
         String keyPrefix = getKeyPrefix(baseLocation);
-        List<S3ObjectSummary> filteredObjectSummaries;
+        List<S3Object> filteredObjectSummaries;
 
         if (StringUtils.isEmpty(selectedObject)) {
             selectedObject = "ranger";
@@ -84,24 +96,25 @@ public class S3ClientActions extends S3Client {
         Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
         Log.log(LOGGER, format(" Amazon S3 Key Prefix: %s", keyPrefix));
         Log.log(LOGGER, format(" Amazon S3 Object: %s", selectedObject));
+        try (software.amazon.awssdk.services.s3.S3Client s3Client = buildS3Client()) {
 
-        if (s3Client.doesBucketExistV2(bucketName)) {
-            try {
-                ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
-                        .withBucketName(bucketName)
-                        .withPrefix(keyPrefix);
-                ObjectListing objectListing = s3Client.listObjects(listObjectsRequest);
+            if (doesBucketExist(s3Client, bucketName)) {
+                try {
+                    ListObjectsV2Request.Builder listObjectsRequestBuilder = ListObjectsV2Request.builder()
+                            .bucket(bucketName)
+                            .prefix(keyPrefix);
+                    ListObjectsV2Response objectListing = s3Client.listObjectsV2(listObjectsRequestBuilder.build());
 
-                do {
-                    String finalSelectedObject = selectedObject;
-                    filteredObjectSummaries = objectListing.getObjectSummaries().stream()
-                            .filter(objectSummary -> objectSummary.getKey().contains(finalSelectedObject))
-                            .collect(Collectors.toList());
+                    do {
+                        String finalSelectedObject = selectedObject;
+                        filteredObjectSummaries = objectListing.contents().stream()
+                                .filter(objectSummary -> objectSummary.key().contains(finalSelectedObject))
+                                .collect(Collectors.toList());
 
-                    if (objectListing.isTruncated()) {
-                        objectListing = s3Client.listNextBatchOfObjects(objectListing);
-                    }
-                } while (filteredObjectSummaries.isEmpty() && objectListing.isTruncated());
+                        if (objectListing.isTruncated()) {
+                            objectListing = s3Client.listObjectsV2(listObjectsRequestBuilder.continuationToken(objectListing.nextContinuationToken()).build());
+                        }
+                    } while (filteredObjectSummaries.isEmpty() && objectListing.isTruncated());
 
                 if (filteredObjectSummaries.isEmpty()) {
                     LOGGER.error("Amazon S3 object: {} has 0 sub-objects or it is not present!", selectedObject);
@@ -111,34 +124,34 @@ public class S3ClientActions extends S3Client {
                             selectedObject, filteredObjectSummaries.size()));
                 }
 
-                for (S3ObjectSummary objectSummary : filteredObjectSummaries.stream().limit(10).collect(Collectors.toList())) {
-                    S3Object object = s3Client.getObject(bucketName, objectSummary.getKey());
-                    S3ObjectInputStream inputStream = object.getObjectContent();
+                    for (S3Object objectSummary : filteredObjectSummaries.stream().limit(10).collect(Collectors.toList())) {
+                        ResponseInputStream<GetObjectResponse> object = s3Client.getObject(GetObjectRequest.builder()
+                                .bucket(bucketName).key(objectSummary.key()).build(), ResponseTransformer.toInputStream());
 
-                    if (!zeroContent && object.getObjectMetadata().getContentLength() == 0) {
-                        LOGGER.error("Amazon S3 path: {} has 0 bytes of content!", object.getKey());
-                        throw new TestFailException(format("Amazon S3 path: %s has 0 bytes of content!", object.getKey()));
+                        if (!zeroContent && object.response().contentLength() == 0) {
+                            LOGGER.error("Amazon S3 path: {} has 0 bytes of content!", objectSummary.key());
+                            throw new TestFailException(format("Amazon S3 path: %s has 0 bytes of content!", objectSummary.key()));
+                        }
+                        try {
+                            object.abort();
+                            object.close();
+                        } catch (IOException e) {
+                            LOGGER.error("Unable to close Amazon S3 object {}. It has been returned with error!", objectSummary.key(), e);
+                        }
                     }
-                    try {
-                        inputStream.abort();
-                        object.close();
-                    } catch (IOException e) {
-                        LOGGER.error("Unable to close Amazon S3 object {}. It has been returned with error!", object.getKey(), e);
-                    }
+                } catch (AwsServiceException e) {
+                    LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
+                    throw new TestFailException("Amazon S3 couldn't process the call.", e);
+                } catch (SdkClientException e) {
+                    LOGGER.error("Amazon S3 response could not been parsed, because of error!", e);
+                    throw new TestFailException("Amazon S3 response could not been parsed", e);
                 }
-            } catch (AmazonServiceException e) {
-                LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
-                throw new TestFailException("Amazon S3 couldn't process the call.", e);
-            } catch (SdkClientException e) {
-                LOGGER.error("Amazon S3 response could not been parsed, because of error!", e);
-                throw new TestFailException("Amazon S3 response could not been parsed", e);
-            } finally {
-                s3Client.shutdown();
+            } else {
+                LOGGER.error("Amazon S3 bucket is NOT present with name: {}", bucketName);
+                throw new TestFailException("Amazon S3 bucket is NOT present with name: " + bucketName);
             }
-        } else {
-            LOGGER.error("Amazon S3 bucket is NOT present with name: {}", bucketName);
-            throw new TestFailException("Amazon S3 bucket is NOT present with name: " + bucketName);
         }
+
     }
 
     public String getLoggingUrl(String baseLocation, String clusterLogPath) {
@@ -149,7 +162,7 @@ public class S3ClientActions extends S3Client {
 
         Log.log(LOGGER, format(" Amazon S3 URI: %s", baseLocationUri));
         Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
-        Log.log(LOGGER, format(" Amazon S3 Log Path: %s",  logPath));
+        Log.log(LOGGER, format(" Amazon S3 Log Path: %s", logPath));
         Log.log(LOGGER, format(" Amazon S3 Cluster Logs: %s", clusterLogPath));
 
         if (StringUtils.containsIgnoreCase(getAwsProperties().getRegion(), "us-gov")) {

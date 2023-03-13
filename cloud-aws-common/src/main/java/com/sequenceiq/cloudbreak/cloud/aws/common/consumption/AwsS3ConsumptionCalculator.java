@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.cloudwatch.model.Datapoint;
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
 import com.cloudera.thunderhead.service.metering.events.MeteringEventsProto;
 import com.sequenceiq.cloudbreak.cloud.ConsumptionCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsCloudWatchCommonService;
@@ -23,6 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.model.StorageSizeResponse;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.StorageType;
 import com.sequenceiq.common.model.FileSystemType;
+
+import software.amazon.awssdk.services.cloudwatch.model.Datapoint;
+import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsResponse;
 
 @Service
 public class AwsS3ConsumptionCalculator implements ConsumptionCalculator {
@@ -49,14 +50,14 @@ public class AwsS3ConsumptionCalculator implements ConsumptionCalculator {
 
     @Override
     public Set<StorageSizeResponse> calculate(StorageSizeRequest request) {
-        GetMetricStatisticsResult result = cloudWatchCommonService.getBucketSize(request.getCredential(), request.getRegion().value(),
+        GetMetricStatisticsResponse result = cloudWatchCommonService.getBucketSize(request.getCredential(), request.getRegion().value(),
                 request.getStartTime(), request.getEndTime(), request.getFirstCloudObjectId());
-        Optional<Datapoint> latestDatapoint = result.getDatapoints().stream().max(Comparator.comparing(Datapoint::getTimestamp));
+        Optional<Datapoint> latestDatapoint = result.datapoints().stream().max(Comparator.comparing(Datapoint::timestamp));
         if (latestDatapoint.isPresent()) {
             Datapoint datapoint = latestDatapoint.get();
             LOGGER.debug("Gathered datapoint from CloudWatch: {}", datapoint);
             StorageSizeResponse storageSizeResponse = StorageSizeResponse.builder()
-                    .withStorageInBytes(datapoint.getMaximum())
+                    .withStorageInBytes(datapoint.maximum())
                     .build();
             return Set.of(storageSizeResponse);
         } else {

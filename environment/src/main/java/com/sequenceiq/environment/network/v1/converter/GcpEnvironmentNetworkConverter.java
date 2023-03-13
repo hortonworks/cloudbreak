@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -141,7 +142,9 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
         param.put(GcpStackUtil.SHARED_PROJECT_ID, gcpNetwork.getSharedProjectId());
         param.put(GcpStackUtil.NO_PUBLIC_IP, gcpNetwork.getNoPublicIp());
         param.put(GcpStackUtil.NO_FIREWALL_RULES, gcpNetwork.getNoFirewallRules());
-        param.put(GcpStackUtil.SUBNET_ID, baseNetwork.getSubnetMetas().entrySet().stream().findFirst().get().getKey());
+        param.put(NetworkConstants.SUBNET_ID, baseNetwork.getSubnetMetas().entrySet().stream().findFirst().get().getKey());
+        baseNetwork.getEndpointGatewaySubnetMetas().entrySet().stream().findFirst()
+                .ifPresent(meta -> param.put(NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID, meta.getKey()));
         param.put(GcpStackUtil.REGION, baseNetwork.getEnvironments().stream().findFirst().get().getLocation());
         return new Network(null, param);
     }

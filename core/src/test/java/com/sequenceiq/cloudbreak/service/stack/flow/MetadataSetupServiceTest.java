@@ -630,7 +630,7 @@ class MetadataSetupServiceTest {
     }
 
     private Iterable<CloudLoadBalancerMetadata> getCloudLoadBalancerMetaDataStatuses() {
-        return List.of(new CloudLoadBalancerMetadata.Builder().withType(LoadBalancerType.PUBLIC)
+        return List.of(CloudLoadBalancerMetadata.builder().withType(LoadBalancerType.PUBLIC)
                 .withCloudDns(CLOUD_DNS)
                 .withHostedZoneId(HOSTED_ZONE)
                 .withIp(PUBLIC_IP).withName(LB_NAME).build());

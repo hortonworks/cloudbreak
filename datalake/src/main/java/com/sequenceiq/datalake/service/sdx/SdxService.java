@@ -141,7 +141,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public static final String MEDIUM_DUTY_REQUIRED_VERSION = "7.2.7";
 
-    public static final String MEDIUM_DUTY_SCALABLE_REQUIRED_VERSION = "7.2.17";
+    public static final String SCALABLE_DATALAKE_REQUIRED_VERSION = "7.2.17";
 
     public static final String CCMV2_JUMPGATE_REQUIRED_VERSION = "7.2.6";
 
@@ -998,10 +998,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
                         + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + runtime);
             }
-        } else if (SdxClusterShape.MEDIUM_DUTY_HA_SCALABLE.equals(shape)) {
-            if (!isShapeVersionSupportedByRuntime(runtime, MEDIUM_DUTY_SCALABLE_REQUIRED_VERSION)) {
-                validationBuilder.error("Provisioning a Medium Duty Scalable SDX shape is only valid for CM version greater than or equal to "
-                        + MEDIUM_DUTY_SCALABLE_REQUIRED_VERSION + " and not " + runtime);
+        } else if (SdxClusterShape.SCALABLE.equals(shape)) {
+            if (!isShapeVersionSupportedByRuntime(runtime, SCALABLE_DATALAKE_REQUIRED_VERSION)) {
+                validationBuilder.error("Provisioning a Scalable SDX shape is only valid for CM version greater than or equal to "
+                        + SCALABLE_DATALAKE_REQUIRED_VERSION + " and not " + runtime);
             }
         }
         ValidationResult validationResult = validationBuilder.build();

@@ -11,13 +11,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.autoscaling.model.ScalingActivityInProgressException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.service.Retry;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.services.autoscaling.model.ScalingActivityInProgressException;
 
 @ExtendWith(MockitoExtension.class)
 public class SdkClientExceptionMapperTest {
@@ -43,9 +46,21 @@ public class SdkClientExceptionMapperTest {
 
     @Test
     public void testMapWhenMethodNameAdded() {
-        SdkClientException e = new AmazonServiceException("message");
+        SdkException e = AwsServiceException.builder().message("message").awsErrorDetails(AwsErrorDetails.builder().build()).build();
 
-        String message = "message (Service: null; Status Code: 0; Error Code: null; Request ID: null; Proxy: null)";
+        String message = "message (Service: null, Status Code: 0, Request ID: null)";
+        when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
+
+        RuntimeException actual = underTest.map(ac, REGION, e, signature);
+
+        Assertions.assertEquals("Cannot execute method: methodName. " + message, actual.getMessage());
+    }
+
+    @Test
+    public void testMapWhenMethodNameAddedAndNoErrorDetails() {
+        SdkException e = AwsServiceException.builder().message("message").build();
+
+        String message = "message";
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
 
         RuntimeException actual = underTest.map(ac, REGION, e, signature);
@@ -55,7 +70,7 @@ public class SdkClientExceptionMapperTest {
 
     @Test
     public void testMapMessageEncodedAndMethodNameContained() {
-        SdkClientException e = new SdkClientException("message");
+        SdkClientException e = SdkClientException.create("message");
 
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, "message")).thenReturn("encoded: methodName");
 
@@ -68,7 +83,7 @@ public class SdkClientExceptionMapperTest {
     @Test
     public void testMapMessageRateExceededAndMethodNameContained() {
         String message = "Rate exceeded: methodName";
-        SdkClientException e = new SdkClientException(message);
+        SdkClientException e = SdkClientException.create(message);
 
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
 
@@ -81,7 +96,7 @@ public class SdkClientExceptionMapperTest {
     @Test
     public void testMapMessageRateExceeded() {
         String message = "Rate exceeded";
-        SdkClientException e = new SdkClientException(message);
+        SdkClientException e = SdkClientException.create(message);
 
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
 
@@ -94,7 +109,7 @@ public class SdkClientExceptionMapperTest {
     @Test
     public void testMapMessageRequestLimitExceededAndMethodNameContained() {
         String message = "Request limit exceeded: methodName";
-        SdkClientException e = new SdkClientException(message);
+        SdkClientException e = SdkClientException.create(message);
 
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
 
@@ -107,7 +122,7 @@ public class SdkClientExceptionMapperTest {
     @Test
     public void testMapMessageRequestLimitExceeded() {
         String message = "Request limit exceeded";
-        SdkClientException e = new SdkClientException(message);
+        SdkClientException e = SdkClientException.create(message);
 
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
 
@@ -119,8 +134,11 @@ public class SdkClientExceptionMapperTest {
 
     @Test
     public void testMapScalingActivityInProgressExceptionToActionFailed() {
-        String message = "Activity 123 is in progress. (Service: null; Status Code: 0; Error Code: null; Request ID: null; Proxy: null)";
-        ScalingActivityInProgressException e = new ScalingActivityInProgressException("Activity 123 is in progress.");
+        String message = "Activity 123 is in progress. (Service: null, Status Code: 0, Request ID: null)";
+        ScalingActivityInProgressException e = ScalingActivityInProgressException.builder()
+                .message("Activity 123 is in progress.")
+                .awsErrorDetails(AwsErrorDetails.builder().build())
+                .build();
 
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
 
@@ -129,6 +147,6 @@ public class SdkClientExceptionMapperTest {
         Assertions.assertEquals(Retry.ActionFailedException.class, actual.getClass());
         Assertions.assertEquals(
                 "Cannot execute method: methodName. Activity 123 is in progress. " +
-                        "(Service: null; Status Code: 0; Error Code: null; Request ID: null; Proxy: null)", actual.getMessage());
+                        "(Service: null, Status Code: 0, Request ID: null)", actual.getMessage());
     }
 }

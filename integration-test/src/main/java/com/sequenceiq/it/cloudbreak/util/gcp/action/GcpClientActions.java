@@ -62,6 +62,23 @@ public class GcpClientActions extends GcpClient {
         return instanceTags;
     }
 
+    public List<String> listInstanceTypes(List<String> instanceIds) {
+        Compute compute = buildCompute();
+        return instanceIds.stream().map(id -> {
+            Instance instance = null;
+            try {
+                instance = compute.instances().get(getProjectId(), getAvailabilityZone(), id).execute();
+            } catch (IOException e) {
+
+            }
+            String machineType = instance.getMachineType();
+            if (machineType != null) {
+                machineType = machineType.substring(machineType.lastIndexOf('/') + 1);
+            }
+            return machineType;
+        }).collect(Collectors.toList());
+    }
+
     public List<String> listInstanceDiskNames(List<String> instanceIds) {
         LOGGER.info("Collect disk names for instance ids: '{}'", String.join(", ", instanceIds));
         Map<String, List<String>> instanceIdDiskNamesMap = new HashMap<>();

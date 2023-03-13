@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 
 @Component
 public class AwsMethodExecutor {
@@ -24,8 +24,8 @@ public class AwsMethodExecutor {
             LOGGER.debug("Fetch data from AWS");
             ret = awsMethod.get();
             LOGGER.debug("Data fetched: {}", ret);
-        } catch (AmazonEC2Exception e) {
-            if (e.getErrorCode().contains("NotFound")) {
+        } catch (Ec2Exception e) {
+            if (e.awsErrorDetails().errorCode().contains("NotFound")) {
                 LOGGER.info("Aws resource does not found: {}", e.getMessage());
                 ret = def;
             } else {

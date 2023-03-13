@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.amazonaws.services.cloudformation.model.Capability.CAPABILITY_IAM;
 import static java.util.Arrays.asList;
+import static software.amazon.awssdk.services.cloudformation.model.Capability.CAPABILITY_IAM;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,16 +12,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.cloudformation.model.CreateStackRequest;
-import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
-import com.amazonaws.services.cloudformation.model.ListStackResourcesRequest;
-import com.amazonaws.services.cloudformation.model.OnFailure;
-import com.amazonaws.services.cloudformation.model.Parameter;
-import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
-import com.amazonaws.services.cloudformation.model.ValidateTemplateRequest;
-import com.amazonaws.services.ec2.model.DescribeImagesRequest;
-import com.amazonaws.services.ec2.model.DescribeImagesResult;
-import com.amazonaws.services.ec2.model.Image;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
@@ -40,6 +30,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+
+import software.amazon.awssdk.services.cloudformation.model.CreateStackRequest;
+import software.amazon.awssdk.services.cloudformation.model.DeleteStackRequest;
+import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesRequest;
+import software.amazon.awssdk.services.cloudformation.model.OnFailure;
+import software.amazon.awssdk.services.cloudformation.model.Parameter;
+import software.amazon.awssdk.services.cloudformation.model.UpdateStackRequest;
+import software.amazon.awssdk.services.cloudformation.model.ValidateTemplateRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
+import software.amazon.awssdk.services.ec2.model.Image;
 
 @Component
 public class AwsStackRequestHelper {
@@ -62,55 +63,62 @@ public class AwsStackRequestHelper {
     private AwsRdsVersionOperations awsRdsVersionOperations;
 
     public CreateStackRequest createCreateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String subnet, String cfTemplate) {
-        return new CreateStackRequest()
-                .withStackName(cFStackName)
-                .withOnFailure(OnFailure.DO_NOTHING)
-                .withTemplateBody(cfTemplate)
-                .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
-                .withCapabilities(CAPABILITY_IAM)
-                .withParameters(getStackParameters(ac, stack, cFStackName, subnet));
+        return CreateStackRequest.builder()
+                .stackName(cFStackName)
+                .onFailure(OnFailure.DO_NOTHING)
+                .templateBody(cfTemplate)
+                .tags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
+                .capabilities(CAPABILITY_IAM)
+                .parameters(getStackParameters(ac, stack, cFStackName, subnet))
+                .build();
     }
 
     public CreateStackRequest createCreateStackRequest(AuthenticatedContext ac, DatabaseStack stack, String cFStackName, String cfTemplate) {
-        return new CreateStackRequest()
-                .withStackName(cFStackName)
-                .withOnFailure(OnFailure.DO_NOTHING)
-                .withTemplateBody(cfTemplate)
-                .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
-                .withCapabilities(CAPABILITY_IAM)
-                .withParameters(getStackParameters(ac, stack, true));
+        return CreateStackRequest.builder()
+                .stackName(cFStackName)
+                .onFailure(OnFailure.DO_NOTHING)
+                .templateBody(cfTemplate)
+                .tags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
+                .capabilities(CAPABILITY_IAM)
+                .parameters(getStackParameters(ac, stack, true))
+                .build();
     }
 
     public ValidateTemplateRequest createValidateTemplateRequest(String cfTemplate) {
-        return new ValidateTemplateRequest()
-                .withTemplateBody(cfTemplate);
+        return ValidateTemplateRequest.builder()
+                .templateBody(cfTemplate)
+                .build();
     }
 
     public UpdateStackRequest createUpdateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String cfTemplate) {
-        return new UpdateStackRequest()
-                .withStackName(cFStackName)
-                .withParameters(getStackParameters(ac, stack, cFStackName, null))
-                .withTemplateBody(cfTemplate);
+        return UpdateStackRequest.builder()
+                .stackName(cFStackName)
+                .parameters(getStackParameters(ac, stack, cFStackName, null))
+                .templateBody(cfTemplate)
+                .build();
     }
 
     public DeleteStackRequest createDeleteStackRequest(String cFStackName, String... retainResources) {
-        return new DeleteStackRequest()
-                .withRetainResources(retainResources)
-                .withStackName(cFStackName);
+        return DeleteStackRequest.builder()
+                .retainResources(retainResources)
+                .stackName(cFStackName)
+                .build();
     }
 
     public UpdateStackRequest createUpdateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String subnet, String cfTemplate) {
-        return new UpdateStackRequest()
-                .withStackName(cFStackName)
-                .withParameters(getStackParameters(ac, stack, cFStackName, subnet))
-                .withTemplateBody(cfTemplate)
-                .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
-                .withCapabilities(CAPABILITY_IAM);
+        return UpdateStackRequest.builder()
+                .stackName(cFStackName)
+                .parameters(getStackParameters(ac, stack, cFStackName, subnet))
+                .templateBody(cfTemplate)
+                .tags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
+                .capabilities(CAPABILITY_IAM)
+                .build();
     }
 
     public ListStackResourcesRequest createListStackResourcesRequest(String cFStackName) {
-        return new ListStackResourcesRequest()
-                .withStackName(cFStackName);
+        return ListStackResourcesRequest.builder()
+                .stackName(cFStackName)
+                .build();
     }
 
     private Collection<Parameter> getStackParameters(AuthenticatedContext ac, CloudStack stack, String stackName, String newSubnetCidr) {
@@ -127,28 +135,28 @@ public class AwsStackRequestHelper {
         }
         addParameterChunks(parameters, "CBGateWayUserData", stack.getImage().getUserDataByType(InstanceGroupType.GATEWAY), CHUNK_COUNT);
         parameters.addAll(asList(
-                new Parameter().withParameterKey("StackName").withParameterValue(stackName),
-                new Parameter().withParameterKey("KeyName").withParameterValue(keyPairName),
-                new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
-                new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
+                Parameter.builder().parameterKey("StackName").parameterValue(stackName).build(),
+                Parameter.builder().parameterKey("KeyName").parameterValue(keyPairName).build(),
+                Parameter.builder().parameterKey("AMI").parameterValue(stack.getImage().getImageName()).build(),
+                Parameter.builder().parameterKey("RootDeviceName").parameterValue(getRootDeviceName(ac, stack)).build()
         ));
         if (awsInstanceProfileView.isInstanceProfileAvailable()) {
-            parameters.add(new Parameter().withParameterKey("InstanceProfile").withParameterValue(awsInstanceProfileView.getInstanceProfile()));
+            parameters.add(Parameter.builder().parameterKey("InstanceProfile").parameterValue(awsInstanceProfileView.getInstanceProfile()).build());
         }
         if (ac.getCloudContext().getLocation().getAvailabilityZone() != null
                 && ac.getCloudContext().getLocation().getAvailabilityZone().value() != null) {
-            parameters.add(new Parameter().withParameterKey("AvailabilitySet")
-                    .withParameterValue(ac.getCloudContext().getLocation().getAvailabilityZone().value()));
+            parameters.add(Parameter.builder().parameterKey("AvailabilitySet")
+                    .parameterValue(ac.getCloudContext().getLocation().getAvailabilityZone().value()).build());
         }
         if (awsNetworkView.isExistingVPC()) {
-            parameters.add(new Parameter().withParameterKey("VPCId").withParameterValue(awsNetworkView.getExistingVpc()));
+            parameters.add(Parameter.builder().parameterKey("VPCId").parameterValue(awsNetworkView.getExistingVpc()).build());
             if (awsNetworkView.isExistingIGW()) {
-                parameters.add(new Parameter().withParameterKey("InternetGatewayId").withParameterValue(awsNetworkView.getExistingIgw()));
+                parameters.add(Parameter.builder().parameterKey("InternetGatewayId").parameterValue(awsNetworkView.getExistingIgw()).build());
             }
             if (awsNetworkView.isExistingSubnet()) {
-                parameters.add(new Parameter().withParameterKey("SubnetId").withParameterValue(awsNetworkView.getExistingSubnet()));
+                parameters.add(Parameter.builder().parameterKey("SubnetId").parameterValue(awsNetworkView.getExistingSubnet()).build());
             } else {
-                parameters.add(new Parameter().withParameterKey("SubnetCIDR").withParameterValue(newSubnetCidr));
+                parameters.add(Parameter.builder().parameterKey("SubnetCIDR").parameterValue(newSubnetCidr).build());
             }
         }
         return parameters;
@@ -164,13 +172,15 @@ public class AwsStackRequestHelper {
 
     private Parameter getStackOwner(AuthenticatedContext ac, String tagValue, String referenceName) {
         if (Strings.isNullOrEmpty(tagValue)) {
-            return new Parameter()
-                    .withParameterKey(referenceName)
-                    .withParameterValue(String.valueOf(ac.getCloudContext().getUserName()));
+            return Parameter.builder()
+                    .parameterKey(referenceName)
+                    .parameterValue(String.valueOf(ac.getCloudContext().getUserName()))
+                    .build();
         } else {
-            return new Parameter()
-                    .withParameterKey(referenceName)
-                    .withParameterValue(tagValue);
+            return Parameter.builder()
+                    .parameterKey(referenceName)
+                    .parameterValue(tagValue)
+                    .build();
         }
     }
 
@@ -179,7 +189,7 @@ public class AwsStackRequestHelper {
         int chunk = 0;
         String parameterKey = baseParameterKey;
         if (parameterValue == null) {
-            parameters.add(new Parameter().withParameterKey(parameterKey).withParameterValue(null));
+            parameters.add(Parameter.builder().parameterKey(parameterKey).parameterValue(null).build());
         } else {
             int len = parameterValue.length();
             int offset = 0;
@@ -194,33 +204,33 @@ public class AwsStackRequestHelper {
                 } while ((Character.isWhitespace(c) || Character.isWhitespace(c2)) && (offset <= limit - 2));
 
                 String slice = parameterValue.substring(offset, limit);
-                parameters.add(new Parameter().withParameterKey(parameterKey).withParameterValue(slice));
+                parameters.add(Parameter.builder().parameterKey(parameterKey).parameterValue(slice).build());
                 chunk++;
                 parameterKey = baseParameterKey + chunk;
                 offset = limit;
                 limit += CHUNK_SIZE + 1;
             }
             // Add the final partial chunk
-            parameters.add(new Parameter().withParameterKey(parameterKey).withParameterValue(parameterValue.substring(offset, len)));
+            parameters.add(Parameter.builder().parameterKey(parameterKey).parameterValue(parameterValue.substring(offset, len)).build());
         }
         // Pad with empty chunks if necessary
         while (++chunk < chunkCount) {
             parameterKey = baseParameterKey + chunk;
-            parameters.add(new Parameter().withParameterKey(parameterKey).withParameterValue(""));
+            parameters.add(Parameter.builder().parameterKey(parameterKey).parameterValue("").build());
         }
     }
 
     private String getRootDeviceName(AuthenticatedContext ac, CloudStack cloudStack) {
         AmazonEc2Client ec2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
-        DescribeImagesResult images = ec2Client.describeImages(new DescribeImagesRequest().withImageIds(cloudStack.getImage().getImageName()));
-        if (images.getImages().isEmpty()) {
+        DescribeImagesResponse images = ec2Client.describeImages(DescribeImagesRequest.builder().imageIds(cloudStack.getImage().getImageName()).build());
+        if (images.images().isEmpty()) {
             throw new CloudConnectorException(String.format("AMI is not available: '%s'.", cloudStack.getImage().getImageName()));
         }
-        Image image = images.getImages().get(0);
+        Image image = images.images().get(0);
         if (image == null) {
             throw new CloudConnectorException(String.format("Couldn't describe AMI '%s'.", cloudStack.getImage().getImageName()));
         }
-        return image.getRootDeviceName();
+        return image.rootDeviceName();
     }
 
     @VisibleForTesting
@@ -232,14 +242,14 @@ public class AwsStackRequestHelper {
         AwsRdsVpcSecurityGroupView awsRdsVpcSecurityGroupView = new AwsRdsVpcSecurityGroupView(databaseServer);
         AwsRdsDbParameterGroupView awsRdsDbParameterGroupView = new AwsRdsDbParameterGroupView(databaseServer, awsRdsVersionOperations);
         List<Parameter> parameters = new ArrayList<>(asList(
-                new Parameter().withParameterKey("DBInstanceClassParameter").withParameterValue(awsRdsInstanceView.getDBInstanceClass()),
-                new Parameter().withParameterKey("DBInstanceIdentifierParameter").withParameterValue(awsRdsInstanceView.getDBInstanceIdentifier()),
-                new Parameter().withParameterKey("DBSubnetGroupNameParameter").withParameterValue(awsRdsDbSubnetGroupView.getDBSubnetGroupName()),
-                new Parameter().withParameterKey("DBSubnetGroupSubnetIdsParameter").withParameterValue(String.join(",", awsNetworkView.getSubnetList())),
-                new Parameter().withParameterKey("EngineParameter").withParameterValue(awsRdsInstanceView.getEngine()),
-                new Parameter().withParameterKey("MasterUsernameParameter").withParameterValue(awsRdsInstanceView.getMasterUsername()),
-                new Parameter().withParameterKey("MasterUserPasswordParameter").withParameterValue(awsRdsInstanceView.getMasterUserPassword()),
-                new Parameter().withParameterKey("DeletionProtectionParameter").withParameterValue(deleteProtection ? "true" : "false"))
+                Parameter.builder().parameterKey("DBInstanceClassParameter").parameterValue(awsRdsInstanceView.getDBInstanceClass()).build(),
+                Parameter.builder().parameterKey("DBInstanceIdentifierParameter").parameterValue(awsRdsInstanceView.getDBInstanceIdentifier()).build(),
+                Parameter.builder().parameterKey("DBSubnetGroupNameParameter").parameterValue(awsRdsDbSubnetGroupView.getDBSubnetGroupName()).build(),
+                Parameter.builder().parameterKey("DBSubnetGroupSubnetIdsParameter").parameterValue(String.join(",", awsNetworkView.getSubnetList())).build(),
+                Parameter.builder().parameterKey("EngineParameter").parameterValue(awsRdsInstanceView.getEngine()).build(),
+                Parameter.builder().parameterKey("MasterUsernameParameter").parameterValue(awsRdsInstanceView.getMasterUsername()).build(),
+                Parameter.builder().parameterKey("MasterUserPasswordParameter").parameterValue(awsRdsInstanceView.getMasterUserPassword()).build(),
+                Parameter.builder().parameterKey("DeletionProtectionParameter").parameterValue(deleteProtection ? "true" : "false").build())
         );
 
         addParameterIfNotNull(parameters, "AllocatedStorageParameter", awsRdsInstanceView.getAllocatedStorage());
@@ -259,15 +269,16 @@ public class AwsStackRequestHelper {
             // VPC-id and VPC cidr should be filled in
             parameters.addAll(
                     asList(
-                            new Parameter().withParameterKey("VPCIdParameter").withParameterValue(String.valueOf(awsNetworkView.getExistingVpc())),
-                            new Parameter().withParameterKey("DBSecurityGroupNameParameter")
-                                    .withParameterValue(awsRdsVpcSecurityGroupView.getDBSecurityGroupName())
+                            Parameter.builder().parameterKey("VPCIdParameter").parameterValue(String.valueOf(awsNetworkView.getExistingVpc())).build(),
+                            Parameter.builder().parameterKey("DBSecurityGroupNameParameter")
+                                    .parameterValue(awsRdsVpcSecurityGroupView.getDBSecurityGroupName()).build()
                     )
             );
         } else {
             parameters.add(
-                    new Parameter().withParameterKey("VPCSecurityGroupsParameter")
-                            .withParameterValue(String.join(",", awsRdsInstanceView.getVPCSecurityGroups()))
+                    Parameter.builder().parameterKey("VPCSecurityGroupsParameter")
+                            .parameterValue(String.join(",", awsRdsInstanceView.getVPCSecurityGroups()))
+                            .build()
             );
         }
 
@@ -276,7 +287,7 @@ public class AwsStackRequestHelper {
 
     private void addParameterIfNotNull(List<Parameter> parameters, String key, Object value) {
         if (value != null) {
-            parameters.add(new Parameter().withParameterKey(key).withParameterValue(Objects.toString(value)));
+            parameters.add(Parameter.builder().parameterKey(key).parameterValue(Objects.toString(value)).build());
         }
     }
 }

@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 
 @Component
 public class ResourceToCloudResourceConverter {
@@ -13,7 +12,7 @@ public class ResourceToCloudResourceConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceToCloudResourceConverter.class);
 
     public CloudResource convert(Resource resource) {
-        return new Builder()
+        return CloudResource.builder()
                 .withType(resource.getResourceType())
                 .withName(resource.getResourceName())
                 .withReference(resource.getResourceReference())

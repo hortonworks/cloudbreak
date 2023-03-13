@@ -13,6 +13,8 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupNetworkRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.InstanceGroupAwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -81,7 +83,7 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
                 .withTelemetry("telemetry")
                 .withVariant(AWS)
                 .withUpgradeCatalogAndImage();
-        freeipa.getRequest().getInstanceGroups().stream().forEach(igr -> igr.getNetwork().getAws().setSubnetIds(List.of(subnet)));
+        modifyFreeipaDtoToSingleSubnet(subnet, freeipa);
         freeipa.when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .given(ClusterTestDto.class)
@@ -116,6 +118,18 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                 .then(cloudformationTemplateForStackDoesNotExist())
                 .validate();
+    }
+
+    private void modifyFreeipaDtoToSingleSubnet(String subnet, FreeIpaTestDto freeipa) {
+        freeipa.getRequest().getInstanceGroups().stream().forEach(igr -> {
+            if (igr.getNetwork() == null) {
+                igr.setNetwork(new InstanceGroupNetworkRequest());
+            }
+            if (igr.getNetwork().getAws() == null) {
+                igr.getNetwork().setAws(new InstanceGroupAwsNetworkParameters());
+            }
+            igr.getNetwork().getAws().setSubnetIds(List.of(subnet));
+        });
     }
 
     private NetworkRequest getNetworkRequest() {

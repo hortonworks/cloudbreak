@@ -164,7 +164,7 @@ public class YarnMetadataCollector implements MetadataCollector {
 
         for (LoadBalancerType loadBalancerType : loadBalancerTypes) {
             Container container = containerIterator.next();
-            CloudLoadBalancerMetadata metadata = new CloudLoadBalancerMetadata.Builder()
+            CloudLoadBalancerMetadata metadata = CloudLoadBalancerMetadata.builder()
                     .withType(loadBalancerType)
                     .withName(applicationNameUtil.createLoadBalancerComponentName(loadBalancerApplicationName, loadBalancerType))
                     .withIp(container.getIp()).build();

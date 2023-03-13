@@ -10,7 +10,7 @@ create-root-certs-file:
     - group: root
     - mode: 644
 
-{% if postgresql.ssl_restart_required == True %}
+{% if postgresql.ssl_restart_required == True and postgresql.ssl_enabled == True and "manager_server" in grains.get('roles', []) %}
 cm-server-restart-root-cert-changed:
   service.running:
     - name: cloudera-scm-server

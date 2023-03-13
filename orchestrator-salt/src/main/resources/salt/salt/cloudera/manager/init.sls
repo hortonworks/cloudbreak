@@ -30,7 +30,7 @@ setup_missed_cm_heartbeat:
     - text: setsettings MISSED_HB_BAD {{ cloudera_manager.settings.missed_heartbeat_interval }}
     - unless: grep "MISSED_HB_BAD" /etc/cloudera-scm-server/cm.settings
 
-{% if salt['pillar.get']('cloudera-manager:settings:gov_cloud') == True %}
+{% if salt['pillar.get']('cluster:gov_cloud', False) == True %}
 
 setup_tls_chipher:
   file.append:
@@ -44,7 +44,10 @@ add_settings_file_to_cfm_server_args:
   file.replace:
     - name: /etc/default/cloudera-scm-server
     - pattern: "CMF_SERVER_ARGS=.*"
-{% if salt['pillar.get']('cloudera-manager:settings:set_cdp_env') == True %}
+{% if salt['pillar.get']('cloudera-manager:settings:cloud_provider_setup_supported') == True %}
+    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings -cp {{ salt['pillar.get']('platform') }} -env PUBLIC_CLOUD"
+    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings -cp {{ salt['pillar.get']('platform') }}\"" /etc/default/cloudera-scm-server
+{% elif salt['pillar.get']('cloudera-manager:settings:set_cdp_env') == True %}
     - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings -env PUBLIC_CLOUD"
     - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings -env PUBLIC_CLOUD\"" /etc/default/cloudera-scm-server
 {% else %}

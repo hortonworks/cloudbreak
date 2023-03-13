@@ -6,21 +6,23 @@ import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.INTERNET_GATEWAY_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.VPC_ID;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 
+@ExtendWith(MockitoExtension.class)
 public class AwsNetworkViewTest {
 
     private static final String SUBNET_1 = "subnet-123";
@@ -38,10 +40,8 @@ public class AwsNetworkViewTest {
 
     private AwsNetworkView underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        initMocks(this);
-
         underTest = new AwsNetworkView(network);
     }
 
@@ -68,7 +68,7 @@ public class AwsNetworkViewTest {
     @Test
     public void testNoVpcCidr() {
         when(network.getStringParameter(VPC_ID)).thenReturn(null);
-        assertNull(underTest.getExistingVpcCidr());
+        assertNull(underTest.getExistingVpc());
     }
 
     @Test

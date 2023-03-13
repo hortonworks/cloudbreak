@@ -51,7 +51,7 @@ public class AwsRdsUpgradeService {
         if (awsRdsUpgradeValidatorService.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)) {
             awsRdsUpgradeValidatorService.validateRdsIsAvailableOrUpgrading(rdsInfo);
             upgradeRdsIfNotUpgradingAlready(ac, targetMajorVersion, databaseServer, rdsClient, rdsInfo, persistenceNotifier);
-            waitForRdsUpgrade(ac, databaseServer, rdsClient);
+            waitForRdsUpgrade(databaseServer, rdsClient);
             List<CloudResource> removedResources = awsRdsParameterGroupService.removeFormerParamGroups(rdsClient, dbStack.getDatabaseServer(), cloudResources);
             persistenceNotifier.notifyDeletions(removedResources, ac.getCloudContext());
         }
@@ -73,8 +73,8 @@ public class AwsRdsUpgradeService {
         }
     }
 
-    private void waitForRdsUpgrade(AuthenticatedContext ac, DatabaseServer databaseServer, AmazonRdsClient rdsClient) {
-        awsRdsUpgradeSteps.waitForUpgrade(ac, rdsClient, databaseServer);
+    private void waitForRdsUpgrade(DatabaseServer databaseServer, AmazonRdsClient rdsClient) {
+        awsRdsUpgradeSteps.waitForUpgrade(rdsClient, databaseServer);
     }
 
     private AmazonRdsClient getAmazonRdsClient(AuthenticatedContext ac) {

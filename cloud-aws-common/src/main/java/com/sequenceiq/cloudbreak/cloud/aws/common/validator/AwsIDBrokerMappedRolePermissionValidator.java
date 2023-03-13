@@ -17,10 +17,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
-import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.Role;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -32,7 +28,13 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 
+import software.amazon.awssdk.core.auth.policy.Policy;
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.IamException;
+import software.amazon.awssdk.services.iam.model.Role;
+
 public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractAwsSimulatePolicyValidator {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsIDBrokerMappedRolePermissionValidator.class);
 
     private static final int MAX_SIZE = 5;
@@ -99,23 +101,23 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
             }
             for (Role role : roles) {
                 try {
-                    LOGGER.info("Permission validation on role: {} on locations {}", role.getArn(),
+                    LOGGER.info("Permission validation on role: {} on locations {}", role.arn(),
                             Lists.newArrayList(getLocations(cloudFileSystem.getLocations()), backupLocation));
-                    policies.stream().forEach(p -> LOGGER.info("Policies being validated {}", p.toJson()));
+                    policies.forEach(p -> LOGGER.info("Policies being validated {}", p.toJson()));
                     List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, role, policies);
                     failedActions.addAll(getFailedActions(role, evaluationResults, skipOrgPolicyDecisions));
-                    warnings.addAll(getWarnings(role, evaluationResults));
-                } catch (AmazonIdentityManagementException e) {
+                    warnings.addAll(getWarnings(evaluationResults));
+                } catch (IamException e) {
                     // Only log the error and keep processing. Failed actions won't be added, but
                     // processing doesn't get stopped either. This can happen due to rate limiting.
-                    LOGGER.error("Unable to validate role policies for role {} due to {}", role.getArn(), e.getMessage(), e);
+                    LOGGER.error("Unable to validate role policies for role {} due to {}", role.arn(), e.getMessage(), e);
                 }
             }
             if (!warnings.isEmpty()) {
                 String validationWarningMessage = String.format("The validation of the Data Access Role (%s) was not successful" +
                                 " because there are missing context values (%s). This is not an issue in itself you might have an SCPs configured" +
                                 " in your aws account and the system couldn't guess these extra parameters.",
-                        String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
+                        String.join(", ", roles.stream().map(Role::arn).collect(Collectors.toCollection(TreeSet::new))),
                         String.join(", ", warnings)
                 );
                 LOGGER.info(validationWarningMessage);
@@ -125,7 +127,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
                 String validationErrorMessage = String.format("Data Access Role (%s) is not set up correctly. " +
                                 "Please follow the official documentation on required policies for Data Access Role.%n" +
                                 "Missing policies (chunked):%n%s",
-                        String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
+                        String.join(", ", roles.stream().map(Role::arn).collect(Collectors.toCollection(TreeSet::new))),
                         String.join("\n", failedActions.stream().limit(MAX_SIZE).collect(Collectors.toSet())));
 
                 if (validationErrorMessage.contains(AbstractAwsSimulatePolicyValidator.DENIED_BY_ORGANIZATION_RULE)) {
@@ -136,7 +138,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
                 }
 
                 String fullErrorMessage = String.format("Data Access Role (%s) is not set up correctly. Missing policies:%n%s",
-                        String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
+                        String.join(", ", roles.stream().map(Role::arn).collect(Collectors.toCollection(TreeSet::new))),
                         String.join("\n", failedActions));
 
                 LOGGER.info(fullErrorMessage);

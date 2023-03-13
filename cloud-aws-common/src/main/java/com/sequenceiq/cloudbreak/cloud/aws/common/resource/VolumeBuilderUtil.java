@@ -6,13 +6,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ec2.model.BlockDeviceMapping;
-import com.amazonaws.services.ec2.model.DescribeImagesRequest;
-import com.amazonaws.services.ec2.model.DescribeImagesResult;
-import com.amazonaws.services.ec2.model.EbsBlockDevice;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeThroughputCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -21,8 +24,25 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 
+import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
+import software.amazon.awssdk.services.ec2.model.EbsBlockDevice;
+import software.amazon.awssdk.services.ec2.model.Image;
+
 @Component
 public class VolumeBuilderUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VolumeBuilderUtil.class);
+
+    @Inject
+    private AwsVolumeIopsCalculator awsVolumeIopsCalculator;
+
+    @Inject
+    private AwsVolumeThroughputCalculator awsVolumeThroughputCalculator;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public List<BlockDeviceMapping> getEphemeral(AwsInstanceView awsInstanceView) {
         Long ephemeralCount = getEphemeralCount(awsInstanceView);
@@ -33,9 +53,10 @@ public class VolumeBuilderUtil {
             int xIndex = 0;
             while (xIndex < seq.size() && ephemeralBlockDeviceMappings.size() < ephemeralCount) {
                 String blockDeviceNameIndex = seq.get(xIndex);
-                ephemeralBlockDeviceMappings.add(new BlockDeviceMapping()
-                        .withDeviceName("/dev/xvd" + blockDeviceNameIndex)
-                        .withVirtualName("ephemeral" + xIndex));
+                ephemeralBlockDeviceMappings.add(BlockDeviceMapping.builder()
+                        .deviceName("/dev/xvd" + blockDeviceNameIndex)
+                        .virtualName("ephemeral" + xIndex)
+                        .build());
                 xIndex++;
             }
         }
@@ -53,37 +74,45 @@ public class VolumeBuilderUtil {
     }
 
     public BlockDeviceMapping getRootVolume(AwsInstanceView awsInstanceView, Group group, CloudStack cloudStack, AuthenticatedContext ac) {
-        return new BlockDeviceMapping()
-                .withDeviceName(getRootDeviceName(ac, cloudStack))
-                .withEbs(getEbs(awsInstanceView, group));
+        return BlockDeviceMapping.builder()
+                .deviceName(getRootDeviceName(ac, cloudStack))
+                .ebs(getRootEbs(awsInstanceView, group, ac.getCloudCredential().getAccountId()))
+                .build();
     }
 
-    public EbsBlockDevice getEbs(AwsInstanceView awsInstanceView, Group group) {
-        EbsBlockDevice ebsBlockDevice = new EbsBlockDevice()
-                .withDeleteOnTermination(true)
-                .withVolumeType("gp2")
-                .withVolumeSize(group.getRootVolumeSize());
+    public EbsBlockDevice getRootEbs(AwsInstanceView awsInstanceView, Group group, String accountId) {
+        String volumeType = entitlementService.isAwsGp3RootVolumeAsDefaultEnabled(accountId) ? "gp3" : "gp2";
+        int rootVolumeSize = group.getRootVolumeSize();
+
+        LOGGER.debug("AwsInstanceView: {},  root volume type: {}, size: {}", awsInstanceView, volumeType, rootVolumeSize);
+
+        EbsBlockDevice.Builder ebsBlockDeviceBuilder = EbsBlockDevice.builder()
+                .deleteOnTermination(true)
+                .volumeType(volumeType)
+                .iops(awsVolumeIopsCalculator.getIops(volumeType, rootVolumeSize))
+                .throughput(awsVolumeThroughputCalculator.getThroughput(volumeType, rootVolumeSize))
+                .volumeSize(rootVolumeSize);
 
         if (awsInstanceView.isEncryptedVolumes()) {
-            ebsBlockDevice.withEncrypted(true);
+            ebsBlockDeviceBuilder.encrypted(true);
         }
 
         if (awsInstanceView.isKmsCustom()) {
-            ebsBlockDevice.withKmsKeyId(awsInstanceView.getKmsKey());
+            ebsBlockDeviceBuilder.kmsKeyId(awsInstanceView.getKmsKey());
         }
-        return ebsBlockDevice;
+        return ebsBlockDeviceBuilder.build();
     }
 
     public String getRootDeviceName(AuthenticatedContext ac, CloudStack cloudStack) {
         AmazonEc2Client ec2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
-        DescribeImagesResult images = ec2Client.describeImages(new DescribeImagesRequest().withImageIds(cloudStack.getImage().getImageName()));
-        if (images.getImages().isEmpty()) {
+        DescribeImagesResponse images = ec2Client.describeImages(DescribeImagesRequest.builder().imageIds(cloudStack.getImage().getImageName()).build());
+        if (images.images().isEmpty()) {
             throw new CloudConnectorException(String.format("AMI is not available: '%s'.", cloudStack.getImage().getImageName()));
         }
-        com.amazonaws.services.ec2.model.Image image = images.getImages().get(0);
+        Image image = images.images().get(0);
         if (image == null) {
             throw new CloudConnectorException(String.format("Couldn't describe AMI '%s'.", cloudStack.getImage().getImageName()));
         }
-        return image.getRootDeviceName();
+        return image.rootDeviceName();
     }
 }

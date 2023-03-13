@@ -14,10 +14,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.ec2.AmazonEC2;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.services.ec2.Ec2Client;
 
 @ExtendWith(MockitoExtension.class)
 class AmazonClientExceptionHandlerTest {
@@ -29,13 +30,13 @@ class AmazonClientExceptionHandlerTest {
     @Mock
     private SdkClientExceptionMapper sdkClientExceptionMapper;
 
-    private AmazonEC2 mockAmazonClient;
+    private Ec2Client mockAmazonClient;
 
     @BeforeEach
     void setUp() {
         lenient().when(sdkClientExceptionMapper.map(any(), eq(REGION), any(), any())).thenReturn(MAPPED_EXCEPTION);
 
-        AmazonEC2 ec2 = mock(AmazonEC2.class);
+        Ec2Client ec2 = mock(Ec2Client.class);
         AspectJProxyFactory proxyFactory = new AspectJProxyFactory(ec2);
         proxyFactory.addAspect(new AmazonClientExceptionHandler(mock(AwsCredentialView.class), REGION, sdkClientExceptionMapper));
         this.mockAmazonClient = proxyFactory.getProxy();
@@ -52,7 +53,7 @@ class AmazonClientExceptionHandlerTest {
 
     @Test
     void testSdkClientExceptionIsMapped() {
-        when(mockAmazonClient.describeRouteTables()).thenThrow(new SdkClientException("clientException"));
+        when(mockAmazonClient.describeRouteTables()).thenThrow(SdkClientException.builder().build());
 
         Assertions.assertThatThrownBy(() -> mockAmazonClient.describeRouteTables())
                 .isEqualTo(MAPPED_EXCEPTION);

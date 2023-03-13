@@ -11,10 +11,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
-import com.amazonaws.services.cloudformation.model.StackResource;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -37,6 +33,11 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.cloudformation.model.CloudFormationException;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourcesRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourcesResponse;
+import software.amazon.awssdk.services.cloudformation.model.StackResource;
 
 @Component
 public class AwsMigrationUtil {
@@ -73,8 +74,8 @@ public class AwsMigrationUtil {
         int i = 0;
         while (empty && i < asGroups.size()) {
             StackResource asGroup = asGroups.get(i);
-            List<String> result = cfStackUtil.getInstanceIds(awsClient.createAutoScalingClient(awsCredential, regionName), asGroup.getPhysicalResourceId());
-            LOGGER.debug("{} autoScalingGroup has {} instance(s): {}", asGroup.getPhysicalResourceId(), result.size(), result);
+            List<String> result = cfStackUtil.getInstanceIds(awsClient.createAutoScalingClient(awsCredential, regionName), asGroup.physicalResourceId());
+            LOGGER.debug("{} autoScalingGroup has {} instance(s): {}", asGroup.physicalResourceId(), result.size(), result);
             empty = result.isEmpty();
             i++;
         }
@@ -87,13 +88,13 @@ public class AwsMigrationUtil {
         List<StackResource> asGroups = new ArrayList<>();
         String stackName = cloudResource.getName();
         try {
-            DescribeStackResourcesResult describeStackResourcesResult = awsClient.createCloudFormationClient(awsCredential, regionName)
-                    .describeStackResources(new DescribeStackResourcesRequest().withStackName(stackName));
-            asGroups = describeStackResourcesResult.getStackResources().stream()
-                    .filter(it -> "AWS::AutoScaling::AutoScalingGroup".equals(it.getResourceType()))
+            DescribeStackResourcesResponse describeStackResourcesResult = awsClient.createCloudFormationClient(awsCredential, regionName)
+                    .describeStackResources(DescribeStackResourcesRequest.builder().stackName(stackName).build());
+            asGroups = describeStackResourcesResult.stackResources().stream()
+                    .filter(it -> "AWS::AutoScaling::AutoScalingGroup".equals(it.resourceType()))
                     .collect(Collectors.toList());
-        } catch (AmazonCloudFormationException e) {
-            if (e.getErrorMessage().contains(stackName + " does not exist")) {
+        } catch (CloudFormationException e) {
+            if (e.awsErrorDetails().errorMessage().contains(stackName + " does not exist")) {
                 LOGGER.info("CloudFormation resource does not found: {}", e.getMessage());
             } else {
                 LOGGER.error("Cannot describe stack resources: {}", e.getMessage(), e);

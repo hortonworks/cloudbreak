@@ -6,11 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
+
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.ec2.Ec2Client;
 
 @Service
 public class EC2Client {
@@ -22,16 +23,16 @@ public class EC2Client {
     public EC2Client() {
     }
 
-    public AmazonEC2 buildEC2Client() {
+    public Ec2Client buildEC2Client() {
         String accessKeyId = awsProperties.getCredential().getAccessKeyId();
         String secretKey = awsProperties.getCredential().getSecretKey();
         String region = awsProperties.getRegion();
 
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKeyId, secretKey);
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKeyId, secretKey);
 
-        return AmazonEC2ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                .withRegion(region)
+        return Ec2Client.builder()
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                .region(Region.of(region))
                 .build();
     }
 }

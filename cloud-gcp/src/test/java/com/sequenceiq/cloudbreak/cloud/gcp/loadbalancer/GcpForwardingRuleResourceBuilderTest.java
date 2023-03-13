@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import static java.util.Collections.emptyMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -14,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +52,7 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-public class GcpForwardingRuleResourceBuilderTest {
+class GcpForwardingRuleResourceBuilderTest {
     @Mock
     private GcpContext gcpContext;
 
@@ -97,8 +98,6 @@ public class GcpForwardingRuleResourceBuilderTest {
     @Mock
     private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
 
-    private Image image;
-
     private CloudStack cloudStack;
 
     private CloudResource resource;
@@ -110,7 +109,7 @@ public class GcpForwardingRuleResourceBuilderTest {
     @BeforeEach
     void setup() {
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
-        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
         GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(underTest, "resourceNameService", resourceNameService);
@@ -120,7 +119,7 @@ public class GcpForwardingRuleResourceBuilderTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);
-        resource = new CloudResource.Builder()
+        resource = CloudResource.builder()
                 .withType(ResourceType.GCP_FORWARDING_RULE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -129,7 +128,7 @@ public class GcpForwardingRuleResourceBuilderTest {
                 .withPersistent(true)
                 .build();
 
-        backendResource = new CloudResource.Builder()
+        backendResource = CloudResource.builder()
                 .withType(ResourceType.GCP_BACKEND_SERVICE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -138,7 +137,7 @@ public class GcpForwardingRuleResourceBuilderTest {
                 .withPersistent(true)
                 .build();
 
-        ipResource = new CloudResource.Builder()
+        ipResource = CloudResource.builder()
                 .withType(ResourceType.GCP_RESERVED_IP)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -148,7 +147,7 @@ public class GcpForwardingRuleResourceBuilderTest {
     }
 
     @Test
-    public void testCreateWhereEverythingGoesFine() {
+    void testCreateWhereEverythingGoesFine() {
         when(gcpContext.getName()).thenReturn("name");
         when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PUBLIC);
         Map<TargetGroupPortPair, Set<Group>> targetGroupPortPairSetHashMap = new HashMap<>();
@@ -157,14 +156,14 @@ public class GcpForwardingRuleResourceBuilderTest {
 
         List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
 
-        Assertions.assertTrue(cloudResources.get(0).getName().startsWith("name-public-80"));
-        Assertions.assertEquals(1, cloudResources.size());
-        Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
-        Assertions.assertEquals(80, cloudResources.get(0).getParameter("trafficport", Integer.class));
+        assertTrue(cloudResources.get(0).getName().startsWith("name-public-80"));
+        assertEquals(1, cloudResources.size());
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals(80, cloudResources.get(0).getParameter("trafficport", Integer.class));
     }
 
     @Test
-    public void testBuild() throws Exception {
+    void testBuild() throws Exception {
         mockCalls(LoadBalancerType.PRIVATE);
 
 
@@ -172,32 +171,44 @@ public class GcpForwardingRuleResourceBuilderTest {
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
 
         ForwardingRule arg = forwardingRuleArg.getValue();
-        Assert.assertEquals("https://www.googleapis.com/compute/v1/projects/id/global/networks/default-network", arg.getNetwork());
-        Assert.assertEquals("https://www.googleapis.com/compute/v1/projects/id/regions/us-west2/subnetworks/default-subnet", arg.getSubnetwork());
-        Assert.assertEquals("super", cloudResources.get(0).getName());
-        Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals("https://www.googleapis.com/compute/v1/projects/id/global/networks/default-network", arg.getNetwork());
+        assertEquals("https://www.googleapis.com/compute/v1/projects/id/regions/us-west2/subnetworks/default-subnet", arg.getSubnetwork());
+        assertEquals("super", cloudResources.get(0).getName());
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
     }
 
     @Test
-    public void buildForPublic() throws Exception {
+    void buildForPublic() throws Exception {
         mockCalls(LoadBalancerType.PUBLIC);
         List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
 
         ForwardingRule arg = forwardingRuleArg.getValue();
-        Assert.assertEquals(null, arg.getNetwork());
-        Assert.assertEquals(null, arg.getSubnetwork());
-        Assert.assertEquals("super", cloudResources.get(0).getName());
-        Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
-
+        assertNull(arg.getNetwork());
+        assertNull(arg.getSubnetwork());
+        assertEquals("super", cloudResources.get(0).getName());
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
     }
 
     @Test
-    public void buildforSharedVPC() throws Exception {
+    void buildForGatewayPrivate() throws Exception {
+        mockCalls(LoadBalancerType.GATEWAY_PRIVATE);
+        List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
+                Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
+
+        ForwardingRule arg = forwardingRuleArg.getValue();
+        assertEquals("https://www.googleapis.com/compute/v1/projects/id/global/networks/default-network", arg.getNetwork());
+        assertEquals("https://www.googleapis.com/compute/v1/projects/id/regions/us-west2/subnetworks/default-gw-subnet", arg.getSubnetwork());
+        assertEquals("super", cloudResources.get(0).getName());
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+    }
+
+    @Test
+    void buildforSharedVPC() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8443);
         parameters.put("trafficports", List.of(443, 11443));
-        resource = new CloudResource.Builder()
+        resource = CloudResource.builder()
                 .withType(ResourceType.GCP_FORWARDING_RULE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -206,7 +217,7 @@ public class GcpForwardingRuleResourceBuilderTest {
                 .withPersistent(true)
                 .build();
 
-        backendResource = new CloudResource.Builder()
+        backendResource = CloudResource.builder()
                 .withType(ResourceType.GCP_BACKEND_SERVICE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -222,18 +233,17 @@ public class GcpForwardingRuleResourceBuilderTest {
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
 
         ForwardingRule arg = forwardingRuleArg.getValue();
-        Assert.assertEquals("https://www.googleapis.com/compute/v1/projects/custom-project/global/networks/default-network", arg.getNetwork());
-        Assert.assertEquals("https://www.googleapis.com/compute/v1/projects/custom-project/regions/us-west2/subnetworks/default-subnet",
-                arg.getSubnetwork());
-        Assert.assertEquals("super", cloudResources.get(0).getName());
-        Assertions.assertEquals(8443, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals("https://www.googleapis.com/compute/v1/projects/custom-project/global/networks/default-network", arg.getNetwork());
+        assertEquals("https://www.googleapis.com/compute/v1/projects/custom-project/regions/us-west2/subnetworks/default-subnet", arg.getSubnetwork());
+        assertEquals("super", cloudResources.get(0).getName());
+        assertEquals(8443, cloudResources.get(0).getParameter("hcport", Integer.class));
         List<Integer> ports = (List<Integer>) cloudResources.get(0).getParameters().get("trafficports");
-        Assertions.assertTrue(ports.contains(443));
-        Assertions.assertTrue(ports.contains(11443));
+        assertTrue(ports.contains(443));
+        assertTrue(ports.contains(11443));
     }
 
     @Test
-    public void testDelete() throws Exception {
+    void testDelete() throws Exception {
         Compute.ForwardingRules.Delete forwardingRulesDelete = mock(Compute.ForwardingRules.Delete.class);
 
         when(gcpContext.getCompute()).thenReturn(compute);
@@ -249,9 +259,9 @@ public class GcpForwardingRuleResourceBuilderTest {
 
         CloudResource delete = underTest.delete(gcpContext, authenticatedContext, resource);
 
-        Assert.assertEquals(ResourceType.GCP_FORWARDING_RULE, delete.getType());
-        Assert.assertEquals(CommonStatus.CREATED, delete.getStatus());
-        Assert.assertEquals("super", delete.getName());
+        assertEquals(ResourceType.GCP_FORWARDING_RULE, delete.getType());
+        assertEquals(CommonStatus.CREATED, delete.getStatus());
+        assertEquals("super", delete.getName());
     }
 
     private void mockCalls(LoadBalancerType lbType) throws IOException {
@@ -272,6 +282,7 @@ public class GcpForwardingRuleResourceBuilderTest {
         when(cloudLoadBalancer.getType()).thenReturn(lbType);
         lenient().when(gcpStackUtil.getCustomNetworkId(any())).thenReturn("default-network");
         lenient().when(gcpStackUtil.getSubnetId(any())).thenReturn("default-subnet");
+        lenient().when(gcpStackUtil.getEndpointGatewaySubnetId(any())).thenReturn("default-gw-subnet");
         lenient().when(gcpStackUtil.getNetworkUrl(anyString(), anyString())).thenCallRealMethod();
         lenient().when(gcpStackUtil.getSubnetUrl(anyString(), anyString(), anyString())).thenCallRealMethod();
         lenient().when(gcpLoadBalancerTypeConverter.getScheme(any(CloudLoadBalancer.class))).thenCallRealMethod();

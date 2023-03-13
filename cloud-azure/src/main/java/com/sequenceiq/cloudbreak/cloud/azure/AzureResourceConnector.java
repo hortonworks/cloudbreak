@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -162,7 +161,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                     resourceGroupName, stackName, notifier, cloudContext, subnetNameList, networkName, client);
             azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentTypeWithThreshold, instances, networkResources);
         } catch (ManagementException e) {
-            throw azureUtils.convertToCloudConnectorException(e, "Stack provisioning");
+            throw azureUtils.convertToCloudException(e, "Stack provisioning");
         } catch (Exception e) {
             LOGGER.warn("Provisioning error:", e);
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
@@ -176,7 +175,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             }
         }
 
-        CloudResource cloudResource = new Builder()
+        CloudResource cloudResource = CloudResource.builder()
                 .withType(ResourceType.ARM_TEMPLATE)
                 .withName(resourceGroupName)
                 .build();

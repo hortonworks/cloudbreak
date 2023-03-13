@@ -5,6 +5,7 @@ import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,15 +15,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.AllocateAddressRequest;
-import com.amazonaws.services.ec2.model.AllocateAddressResult;
-import com.amazonaws.services.ec2.model.AssociateAddressResult;
-import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
-import com.amazonaws.services.ec2.model.DomainType;
-import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
-import com.amazonaws.services.ec2.model.ReleaseAddressResult;
-import com.amazonaws.services.ec2.model.Tag;
-import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsElasticIpService;
@@ -41,6 +33,15 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.ec2.model.AllocateAddressRequest;
+import software.amazon.awssdk.services.ec2.model.AllocateAddressResponse;
+import software.amazon.awssdk.services.ec2.model.AssociateAddressResponse;
+import software.amazon.awssdk.services.ec2.model.DisassociateAddressRequest;
+import software.amazon.awssdk.services.ec2.model.DomainType;
+import software.amazon.awssdk.services.ec2.model.ReleaseAddressRequest;
+import software.amazon.awssdk.services.ec2.model.ReleaseAddressResponse;
+import software.amazon.awssdk.services.ec2.model.TagSpecification;
 
 @Service
 public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder {
@@ -94,29 +95,30 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
         if (!buildableResource.isEmpty()) {
             LOGGER.info("Trying to create EIp for instance with privateId: {}, resource name: {}", privateId, buildableResource.get(0).getName());
             AmazonEc2Client amazonEC2Client = context.getAmazonEc2Client();
-            TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(
-                    cloudStack.getTags(),
-                    com.amazonaws.services.ec2.model.ResourceType.ElasticIp);
-            tagSpecification.getTags().add(new Tag().withKey("Name").withValue(buildableResource.get(0).getName()));
+            Map<String, String> tags = new HashMap<>(cloudStack.getTags());
+            tags.put("Name", buildableResource.get(0).getName());
+            TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(tags,
+                    software.amazon.awssdk.services.ec2.model.ResourceType.ELASTIC_IP);
 
-            AllocateAddressRequest allocateAddressRequest = new AllocateAddressRequest()
-                    .withTagSpecifications(tagSpecification)
-                    .withDomain(DomainType.Vpc);
-            AllocateAddressResult allocateAddressResult = amazonEC2Client
+            AllocateAddressRequest allocateAddressRequest = AllocateAddressRequest.builder()
+                    .tagSpecifications(tagSpecification)
+                    .domain(DomainType.VPC)
+                    .build();
+            AllocateAddressResponse allocateAddressResponse = amazonEC2Client
                     .allocateAddress(allocateAddressRequest);
 
             Optional<CloudResource> instanceResourceOpt = persistenceRetriever.notifyRetrieve(ac.getCloudContext().getId(), String.valueOf(privateId),
                     CommonStatus.CREATED, ResourceType.AWS_INSTANCE);
             CloudResource instanceResource = instanceResourceOpt.orElseThrow();
-            String allocationId = allocateAddressResult.getAllocationId();
+            String allocationId = allocateAddressResponse.allocationId();
             List<String> eips = List.of(allocationId);
             String instanceId = instanceResource.getInstanceId();
-            List<AssociateAddressResult> associateAddressResults = awsElasticIpService.associateElasticIpsToInstances(
+            List<AssociateAddressResponse> associateAddressResponses = awsElasticIpService.associateElasticIpsToInstances(
                     amazonEC2Client,
                     eips,
                     List.of(instanceId));
 
-            String associationId = associateAddressResults.get(0).getAssociationId();
+            String associationId = associateAddressResponses.get(0).associationId();
             CloudResource cloudResource = CloudResource.builder()
                     .cloudResource(buildableResource.get(0))
                     .withInstanceId(instanceId)
@@ -148,17 +150,19 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
         EIpAttributes eipAttributes = resource.getParameter(CloudResource.ATTRIBUTES, EIpAttributes.class);
         CloudResource ret = null;
         if (eipAttributes != null) {
-            DisassociateAddressRequest disassociateAddressRequest = new DisassociateAddressRequest()
-                    .withAssociationId(eipAttributes.getAssociationId());
+            DisassociateAddressRequest disassociateAddressRequest = DisassociateAddressRequest.builder()
+                    .associationId(eipAttributes.getAssociationId())
+                    .build();
             awsMethodExecutor.execute(() -> context.getAmazonEc2Client().disassociateAddress(disassociateAddressRequest), null);
         } else {
             LOGGER.info("Cannot find attribute for {}, disassociate address operation is skipped", resource.getName());
         }
         LOGGER.debug("Releasing EIP address with allocation id: '{}' and instance id: '{}'", allocationId, resource.getInstanceId());
-        ReleaseAddressRequest request = new ReleaseAddressRequest()
-                .withAllocationId(allocationId);
-        ReleaseAddressResult releaseAddressResult = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().releaseAddress(request), null);
-        return releaseAddressResult == null ? null : resource;
+        ReleaseAddressRequest request = ReleaseAddressRequest.builder()
+                .allocationId(allocationId)
+                .build();
+        ReleaseAddressResponse releaseAddressResponse = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().releaseAddress(request), null);
+        return releaseAddressResponse == null ? null : resource;
     }
 
     @Override

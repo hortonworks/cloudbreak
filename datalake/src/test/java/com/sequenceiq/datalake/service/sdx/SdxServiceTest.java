@@ -12,8 +12,8 @@ import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAUL
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA_SCALABLE;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.SCALABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1640,10 +1640,10 @@ class SdxServiceTest {
     void testCreateMediumDutyScalable() throws IOException, TransactionExecutionException {
         final String runtime = "7.2.17";
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
-        String mediumDutyV2Json = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/medium_duty_ha_scalable.json");
-        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyV2Json, StackV4Request.class));
+        String scalableJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/scalable.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(scalableJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA_SCALABLE);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, SCALABLE);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         withCloudStorage(sdxClusterRequest);
         withRecipe(sdxClusterRequest);
@@ -1670,18 +1670,18 @@ class SdxServiceTest {
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(recipeV4Endpoint, times(1)).listInternal(anyLong(), anyString());
         SdxCluster capturedSdx = captor.getValue();
-        assertEquals(MEDIUM_DUTY_HA_SCALABLE, capturedSdx.getClusterShape());
+        assertEquals(SCALABLE, capturedSdx.getClusterShape());
     }
 
     @Test
     void testCreateMediumDutyScalableWrongVersion() {
         final String runtime = "7.2.11";
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA_SCALABLE);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, SCALABLE);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE, null);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals("Provisioning a Medium Duty Scalable SDX shape is only valid for CM version greater than or equal to 7.2.17 and not 7.2.11",
+        assertEquals("Provisioning a Scalable SDX shape is only valid for CM version greater than or equal to 7.2.17 and not 7.2.11",
                 badRequestException.getMessage());
     }
 

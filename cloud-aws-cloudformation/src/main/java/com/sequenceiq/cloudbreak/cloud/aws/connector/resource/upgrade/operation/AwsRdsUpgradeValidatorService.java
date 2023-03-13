@@ -19,14 +19,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.rds.model.DBParameterGroupStatus;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsStatusLookupService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.database.Version;
 import com.sequenceiq.cloudbreak.util.MajorVersionComparator;
+
+import software.amazon.awssdk.services.rds.model.DBParameterGroupStatus;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
 @Service
 public class AwsRdsUpgradeValidatorService {
@@ -81,9 +82,9 @@ public class AwsRdsUpgradeValidatorService {
         if (stack.getDatabaseServer().isUseSslEnforcement()) {
             LOGGER.info("Custom parameter group check is skipped as CB use its own custom group for ssl enforcement");
         } else {
-            DescribeDBInstancesResult describeDBInstancesResult = awsRdsStatusLookupService.getDescribeDBInstancesResult(authenticatedContext, stack);
-            if (describeDBInstancesResult != null && CollectionUtils.isNotEmpty(describeDBInstancesResult.getDBInstances())) {
-                String nonDefaultParamGroupNames = getNonDefaultParamGroupNames(describeDBInstancesResult);
+            DescribeDbInstancesResponse describeDbInstancesResponse = awsRdsStatusLookupService.getDescribeDBInstancesResult(authenticatedContext, stack);
+            if (describeDbInstancesResponse != null && CollectionUtils.isNotEmpty(describeDbInstancesResponse.dbInstances())) {
+                String nonDefaultParamGroupNames = getNonDefaultParamGroupNames(describeDbInstancesResponse);
                 if (StringUtils.isNotBlank(nonDefaultParamGroupNames)) {
                     String message = String.format("The following custom parameter groups are attached to the RDS instance [%s]: %s. " +
                                     "As we could not guarantee parameter compatibility between RDS versions, " +
@@ -98,11 +99,11 @@ public class AwsRdsUpgradeValidatorService {
         }
     }
 
-    private String getNonDefaultParamGroupNames(DescribeDBInstancesResult describeDBInstancesResult) {
-        return describeDBInstancesResult.getDBInstances().stream()
-                .filter(instance -> Objects.nonNull(instance.getDBParameterGroups()))
-                .flatMap(instance -> instance.getDBParameterGroups().stream())
-                .map(DBParameterGroupStatus::getDBParameterGroupName)
+    private String getNonDefaultParamGroupNames(DescribeDbInstancesResponse describeDbInstancesResponse) {
+        return describeDbInstancesResponse.dbInstances().stream()
+                .filter(instance -> Objects.nonNull(instance.dbParameterGroups()))
+                .flatMap(instance -> instance.dbParameterGroups().stream())
+                .map(DBParameterGroupStatus::dbParameterGroupName)
                 .filter(groupName -> !groupName.startsWith("default."))
                 .collect(Collectors.joining(", "));
     }

@@ -122,7 +122,7 @@ public class GcpBackendServiceResourceBuilderTest {
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 80);
 
-        CloudResource hcResource = new CloudResource.Builder()
+        CloudResource hcResource = CloudResource.builder()
                 .withType(ResourceType.GCP_HEALTH_CHECK)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -131,7 +131,7 @@ public class GcpBackendServiceResourceBuilderTest {
                 .withPersistent(true)
                 .build();
 
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_BACKEND_SERVICE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -181,7 +181,7 @@ public class GcpBackendServiceResourceBuilderTest {
         parameters.put("hcport", 8443);
         parameters.put("trafficports", List.of(443, 11443));
 
-        CloudResource hcResource = new CloudResource.Builder()
+        CloudResource hcResource = CloudResource.builder()
                 .withType(ResourceType.GCP_HEALTH_CHECK)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -190,7 +190,7 @@ public class GcpBackendServiceResourceBuilderTest {
                 .withPersistent(true)
                 .build();
 
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_BACKEND_SERVICE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -243,7 +243,7 @@ public class GcpBackendServiceResourceBuilderTest {
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 80);
 
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_BACKEND_SERVICE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")

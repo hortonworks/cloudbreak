@@ -34,6 +34,7 @@ public class SdxUpgradeRecoveryTests extends PreconditionSdxE2ETest {
 
     private static final String INJECT_UPGRADE_FAILURE_CMD =
             "sudo sh -c \"echo -e '"
+                    + "\\n127.0.0.1 archive.cloudera.com"
                     + "\\n127.0.0.1 cloudera-build-us-west-1.vpc.cloudera.com"
                     + "\\n127.0.0.1 build-cache-azure.kc.cloudera.com"
                     + "\\n127.0.0.1 cloudera-build-2-us-west-2.vpc.cloudera.com"

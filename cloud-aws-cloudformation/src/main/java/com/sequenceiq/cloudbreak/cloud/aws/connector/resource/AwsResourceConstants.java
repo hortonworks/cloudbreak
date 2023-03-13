@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAILED;
-import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
-import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_COMPLETE;
-import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_FAILED;
-import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_IN_PROGRESS;
 import static java.util.Arrays.asList;
+import static software.amazon.awssdk.services.cloudformation.model.StackStatus.CREATE_FAILED;
+import static software.amazon.awssdk.services.cloudformation.model.StackStatus.DELETE_FAILED;
+import static software.amazon.awssdk.services.cloudformation.model.StackStatus.ROLLBACK_COMPLETE;
+import static software.amazon.awssdk.services.cloudformation.model.StackStatus.ROLLBACK_FAILED;
+import static software.amazon.awssdk.services.cloudformation.model.StackStatus.ROLLBACK_IN_PROGRESS;
 
 import java.util.Collections;
 import java.util.List;
 
-import com.amazonaws.services.cloudformation.model.StackStatus;
+import software.amazon.awssdk.services.cloudformation.model.StackStatus;
 
 public class AwsResourceConstants {
 

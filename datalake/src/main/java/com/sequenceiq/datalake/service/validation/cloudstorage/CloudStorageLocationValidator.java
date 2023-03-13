@@ -38,7 +38,8 @@ public class CloudStorageLocationValidator {
     public void validate(String storageLocation, FileSystemType fileSystemType, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder) {
         String bucketName = getBucketName(fileSystemType, storageLocation);
         CloudCredential cloudCredential = credentialResponseToCloudCredentialConverter.convert(environment.getCredential());
-        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
+        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
+                environment.getLocation().getName());
         ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () ->
@@ -55,11 +56,13 @@ public class CloudStorageLocationValidator {
         return storageLocation.split("/")[0];
     }
 
-    private ObjectStorageMetadataRequest createObjectStorageMetadataRequest(String cloudPlatform, CloudCredential credential, String objectStoragePath) {
+    private ObjectStorageMetadataRequest createObjectStorageMetadataRequest(String cloudPlatform, CloudCredential credential, String objectStoragePath,
+            String regionName) {
         return ObjectStorageMetadataRequest.builder()
                 .withCloudPlatform(cloudPlatform)
                 .withCredential(credential)
                 .withObjectStoragePath(objectStoragePath)
+                .withRegion(regionName)
                 .build();
     }
 

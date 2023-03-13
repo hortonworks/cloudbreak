@@ -79,7 +79,8 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
                 String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
                 Map<String, Object> parameters = Map.of(TRAFFICPORTS, trafficPorts, HCPORT, healthCheckPort,
                         CloudResource.ATTRIBUTES, Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getType().name()));
-                resources.add(new CloudResource.Builder().withType(resourceType())
+                resources.add(CloudResource.builder()
+                        .withType(resourceType())
                         .withName(resourceName)
                         .withParameters(parameters)
                         .build());
@@ -90,7 +91,8 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
                 String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
                 Map<String, Object> parameters = Map.of(TRAFFICPORT, targetGroupPortPair.getTrafficPort(), HCPORT, healthCheckPort,
                         CloudResource.ATTRIBUTES, Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getType().name()));
-                resources.add(new CloudResource.Builder().withType(resourceType())
+                resources.add(CloudResource.builder()
+                        .withType(resourceType())
                         .withName(resourceName)
                         .withParameters(parameters)
                         .build());

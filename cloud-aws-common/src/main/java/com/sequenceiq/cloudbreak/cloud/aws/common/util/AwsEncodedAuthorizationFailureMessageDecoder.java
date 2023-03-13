@@ -9,13 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.securitytoken.model.AWSSecurityTokenServiceException;
-import com.amazonaws.services.securitytoken.model.DecodeAuthorizationMessageRequest;
-import com.amazonaws.services.securitytoken.model.DecodeAuthorizationMessageResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.common.json.Json;
+
+import software.amazon.awssdk.services.sts.model.DecodeAuthorizationMessageRequest;
+import software.amazon.awssdk.services.sts.model.DecodeAuthorizationMessageResponse;
+import software.amazon.awssdk.services.sts.model.StsException;
 
 @Component
 public class AwsEncodedAuthorizationFailureMessageDecoder {
@@ -38,8 +39,8 @@ public class AwsEncodedAuthorizationFailureMessageDecoder {
         if (matcher.find()) {
             try {
                 result = getResultMessage(credentialView, region, matcher.group(1));
-            } catch (AWSSecurityTokenServiceException e) {
-                if ("AccessDenied".equals(e.getErrorCode())) {
+            } catch (StsException e) {
+                if ("AccessDenied".equals(e.awsErrorDetails().errorCode())) {
                     result = replaceAwsMessage(message, matcher.group(0)) + " Please contact your system administrator to update your AWS policy with the " +
                             "sts:DecodeAuthorizationMessage permission to get more details next time.";
                 } else {
@@ -59,9 +60,10 @@ public class AwsEncodedAuthorizationFailureMessageDecoder {
 
     private String getResultMessage(AwsCredentialView credentialView, String region, String encodedMessage) {
         AmazonSecurityTokenServiceClient awsSts = awsClient.createSecurityTokenService(credentialView, region);
-        DecodeAuthorizationMessageRequest decodeAuthorizationMessageRequest = new DecodeAuthorizationMessageRequest().withEncodedMessage(encodedMessage);
-        DecodeAuthorizationMessageResult decodeAuthorizationMessageResult = awsSts.decodeAuthorizationMessage(decodeAuthorizationMessageRequest);
-        String decodedMessage = decodeAuthorizationMessageResult.getDecodedMessage();
+        DecodeAuthorizationMessageRequest decodeAuthorizationMessageRequest = DecodeAuthorizationMessageRequest.builder()
+                .encodedMessage(encodedMessage).build();
+        DecodeAuthorizationMessageResponse decodeAuthorizationMessageResponse = awsSts.decodeAuthorizationMessage(decodeAuthorizationMessageRequest);
+        String decodedMessage = decodeAuthorizationMessageResponse.decodedMessage();
 
         Json authorizationError = new Json(decodedMessage);
         String action = authorizationError.getValue("context.action");

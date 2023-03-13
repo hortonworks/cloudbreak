@@ -52,6 +52,8 @@ public class GeneralClusterConfigs {
 
     private boolean govCloud;
 
+    private String creatorWorkloadUserCrn;
+
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }
@@ -234,5 +236,13 @@ public class GeneralClusterConfigs {
 
     public void setGovCloud(boolean govCloud) {
         this.govCloud = govCloud;
+    }
+
+    public String getCreatorWorkloadUserCrn() {
+        return creatorWorkloadUserCrn;
+    }
+
+    public void setCreatorWorkloadUserCrn(String creatorWorkloadUserCrn) {
+        this.creatorWorkloadUserCrn = creatorWorkloadUserCrn;
     }
 }

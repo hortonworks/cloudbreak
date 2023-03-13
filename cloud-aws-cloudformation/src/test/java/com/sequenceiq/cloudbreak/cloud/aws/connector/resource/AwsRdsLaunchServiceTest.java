@@ -28,10 +28,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters;
-import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -55,6 +51,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
 
 @ExtendWith(MockitoExtension.class)
 class AwsRdsLaunchServiceTest {
@@ -131,10 +132,7 @@ class AwsRdsLaunchServiceTest {
     private AmazonCloudFormationClient cfRetryClient;
 
     @Mock
-    private AmazonCloudFormationWaiters cfWaiters;
-
-    @Mock
-    private Waiter<DescribeStacksRequest> creationWaiter;
+    private CloudFormationWaiter cfWaiters;
 
     @Captor
     private ArgumentCaptor<RDSModelContext> rdsModelContextCaptor;
@@ -165,10 +163,10 @@ class AwsRdsLaunchServiceTest {
 
         when(awsClient.createCloudFormationClient(isA(AwsCredentialView.class), eq(REGION))).thenReturn(cfRetryClient);
 
-        when(cfRetryClient.describeStacks(isA(DescribeStacksRequest.class))).thenThrow(new AmazonServiceException("Stack not found"));
+        when(cfRetryClient.describeStacks(isA(DescribeStacksRequest.class)))
+                .thenThrow(AwsServiceException.builder().awsErrorDetails(AwsErrorDetails.builder().errorMessage("Stack not found").build()).build());
 
         when(cfRetryClient.waiters()).thenReturn(cfWaiters);
-        when(cfWaiters.stackCreateComplete()).thenReturn(creationWaiter);
 
         when(cloudFormationTemplateBuilder.build(isA(RDSModelContext.class))).thenReturn(CF_TEMPLATE);
     }

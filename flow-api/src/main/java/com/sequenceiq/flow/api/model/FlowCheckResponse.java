@@ -15,6 +15,12 @@ public class FlowCheckResponse {
 
     private Long endTime;
 
+    private String currentState;
+
+    private String nextEvent;
+
+    private String flowType;
+
     public String getFlowId() {
         return flowId;
     }
@@ -53,5 +59,42 @@ public class FlowCheckResponse {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    public String getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(String currentFailedState) {
+        this.currentState = currentFailedState;
+    }
+
+    public String getNextEvent() {
+        return nextEvent;
+    }
+
+    public void setNextEvent(String nextEvent) {
+        this.nextEvent = nextEvent;
+    }
+
+    public String getFlowType() {
+        return flowType;
+    }
+
+    public void setFlowType(String flowType) {
+        this.flowType = flowType;
+    }
+
+    public String toString() {
+        return "FlowCheckResponse{" +
+                "flowId='" + flowId + '\'' +
+                ", flowChainId='" + flowChainId + '\'' +
+                ", hasActiveFlow='" + hasActiveFlow + '\'' +
+                ", latestFlowFinalizedAndFailed='" + latestFlowFinalizedAndFailed + '\'' +
+                ", endTime='" + endTime + '\'' +
+                ", currentState='" + currentState + '\'' +
+                ", nextEvent=" + nextEvent + '\'' +
+                ", flowType=" + flowType + '\'' +
+                '}';
     }
 }

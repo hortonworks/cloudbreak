@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -106,7 +105,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                 .withAvailabilityZone(instance.getAvailabilityZone())
                 .withDeleteOnTermination(Boolean.TRUE)
                 .withVolumes(volumes).build()));
-        return new Builder()
+        return CloudResource.builder()
                 .withType(resourceType())
                 .withStatus(CommonStatus.REQUESTED)
                 .withName(resourceName)
@@ -158,7 +157,8 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                 futures.add(submit);
             }
             volumeSetResource.putParameter(OPERATION_ID, operations);
-            result.add(new Builder().cloudResource(volumeSetResource)
+            result.add(CloudResource.builder()
+                    .cloudResource(volumeSetResource)
                     .withStatus(CommonStatus.CREATED)
                     .withParameters(volumeSetResource.getParameters())
                     .build());

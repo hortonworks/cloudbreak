@@ -1,25 +1,25 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.ec2.model.AvailabilityZone;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 
-@RunWith(MockitoJUnitRunner.class)
+import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
+import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesResponse;
+
+@ExtendWith(MockitoExtension.class)
 public class AwsSubnetRequestProviderTest {
 
     private static final String CIDR_1 = "1.1.1.1/24";
@@ -104,21 +104,20 @@ public class AwsSubnetRequestProviderTest {
         assertEquals(CIDR_2, actual.get(1).getPublicSubnetCidr());
         assertEquals(AZ_2, actual.get(1).getAvailabilityZone());
 
-        assertTrue(actual.size() == 2);
+        assertEquals(2, actual.size());
     }
 
     private AmazonEc2Client createEc2Client(List<AvailabilityZone> availabilityZones) {
         AmazonEc2Client ec2Client = Mockito.mock(AmazonEc2Client.class);
-        DescribeAvailabilityZonesResult result = new DescribeAvailabilityZonesResult();
-        result.setAvailabilityZones(availabilityZones);
+        DescribeAvailabilityZonesResponse result = DescribeAvailabilityZonesResponse.builder()
+                .availabilityZones(availabilityZones)
+                .build();
         Mockito.when(ec2Client.describeAvailabilityZones()).thenReturn(result);
         return ec2Client;
     }
 
     private AvailabilityZone createAZ(String name) {
-        AvailabilityZone availabilityZone = new AvailabilityZone();
-        availabilityZone.setZoneName(name);
-        return availabilityZone;
+        return AvailabilityZone.builder().zoneName(name).build();
     }
 
     private NetworkSubnetRequest createSubnetRequest(String s) {

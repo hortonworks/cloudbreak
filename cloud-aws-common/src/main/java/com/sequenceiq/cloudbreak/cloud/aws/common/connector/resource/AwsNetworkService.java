@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource;
 
-import static java.util.Collections.singletonList;
-
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -19,14 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
-import com.amazonaws.services.ec2.model.Filter;
-import com.amazonaws.services.ec2.model.PrefixList;
-import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.ec2.model.Vpc;
-import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
@@ -40,6 +30,15 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
+import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.ec2.model.PrefixList;
+import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcCidrBlockAssociation;
+
 @Service
 public class AwsNetworkService {
 
@@ -50,8 +49,6 @@ public class AwsNetworkService {
     private static final int CIDR_PREFIX = 24;
 
     private static final int INCREMENT_HOST_NUM = 256;
-
-    private static final String CFS_OUTPUT_EIPALLOCATION_ID = "EIPAllocationID";
 
     @Inject
     private CommonAwsClient awsClient;
@@ -67,14 +64,14 @@ public class AwsNetworkService {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()), region);
-        DescribeSubnetsRequest subnetsRequest = new DescribeSubnetsRequest().withSubnetIds(awsNetworkView.getSubnetList());
-        List<Subnet> subnets = ec2Client.describeSubnets(subnetsRequest).getSubnets();
+        DescribeSubnetsRequest subnetsRequest = DescribeSubnetsRequest.builder().subnetIds(awsNetworkView.getSubnetList()).build();
+        List<Subnet> subnets = ec2Client.describeSubnets(subnetsRequest).subnets();
         if (subnets.isEmpty()) {
             throw new CloudConnectorException("The specified subnet does not exist (maybe it's in a different region).");
         }
         List<String> cidrs = Lists.newArrayList();
         for (Subnet subnet : subnets) {
-            cidrs.add(subnet.getCidrBlock());
+            cidrs.add(subnet.cidrBlock());
         }
         return cidrs;
     }
@@ -89,12 +86,11 @@ public class AwsNetworkService {
 
     public boolean isMapPublicOnLaunch(List<String> subnetIds, AmazonEc2Client amazonEC2Client) {
         boolean mapPublicIpOnLaunch = true;
-        DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
-        describeSubnetsRequest.setSubnetIds(subnetIds);
-        DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(describeSubnetsRequest);
-        if (!describeSubnetsResult.getSubnets().isEmpty()) {
-            mapPublicIpOnLaunch = describeSubnetsResult.getSubnets().get(0).isMapPublicIpOnLaunch();
-            LOGGER.debug("The {} subnet is mapPublicIpOnLaunch: {}", describeSubnetsResult.getSubnets().get(0).getSubnetId(), mapPublicIpOnLaunch);
+        DescribeSubnetsRequest describeSubnetsRequest = DescribeSubnetsRequest.builder().subnetIds(subnetIds).build();
+        DescribeSubnetsResponse describeSubnetsResponse = amazonEC2Client.describeSubnets(describeSubnetsRequest);
+        if (!describeSubnetsResponse.subnets().isEmpty()) {
+            mapPublicIpOnLaunch = describeSubnetsResponse.subnets().get(0).mapPublicIpOnLaunch();
+            LOGGER.debug("The {} subnet is mapPublicIpOnLaunch: {}", describeSubnetsResponse.subnets().get(0).subnetId(), mapPublicIpOnLaunch);
         }
         return mapPublicIpOnLaunch;
     }
@@ -104,15 +100,17 @@ public class AwsNetworkService {
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()), region);
 
-        DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVpc());
-        Vpc vpc = ec2Client.describeVpcs(vpcRequest).getVpcs().get(0);
-        String vpcCidr = vpc.getCidrBlock();
+        DescribeVpcsRequest vpcRequest = DescribeVpcsRequest.builder().vpcIds(awsNetworkView.getExistingVpc()).build();
+        Vpc vpc = ec2Client.describeVpcs(vpcRequest).vpcs().get(0);
+        String vpcCidr = vpc.cidrBlock();
         LOGGER.debug("Subnet cidr is empty, find a non-overlapping subnet for VPC cidr: {}", vpcCidr);
 
-        DescribeSubnetsRequest request = new DescribeSubnetsRequest().withFilters(new Filter("vpc-id", singletonList(awsNetworkView.getExistingVpc())));
-        List<Subnet> awsSubnets = ec2Client.describeSubnets(request).getSubnets();
-        List<String> subnetCidrs = awsSubnets.stream().map(Subnet::getCidrBlock).collect(Collectors.toList());
-        LOGGER.debug("The selected VPCs: {}, has the following subnets: {}", vpc.getVpcId(), String.join(",", subnetCidrs));
+        DescribeSubnetsRequest request = DescribeSubnetsRequest.builder()
+                .filters(Filter.builder().name("vpc-id").values(awsNetworkView.getExistingVpc()).build())
+                .build();
+        List<Subnet> awsSubnets = ec2Client.describeSubnets(request).subnets();
+        List<String> subnetCidrs = awsSubnets.stream().map(Subnet::cidrBlock).collect(Collectors.toList());
+        LOGGER.debug("The selected VPCs: {}, has the following subnets: {}", vpc.vpcId(), String.join(",", subnetCidrs));
 
         return calculateSubnet(ac.getCloudContext().getName(), vpc, subnetCidrs);
     }
@@ -122,10 +120,10 @@ public class AwsNetworkService {
             String region = ac.getCloudContext().getLocation().getRegion().value();
             AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()), region);
 
-            DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVpc());
-            Vpc vpc = ec2Client.describeVpcs(vpcRequest).getVpcs().get(0);
-            List<String> cidrBlockAssociationSet = vpc.getCidrBlockAssociationSet().stream()
-                    .map(VpcCidrBlockAssociation::getCidrBlock)
+            DescribeVpcsRequest vpcRequest = DescribeVpcsRequest.builder().vpcIds(awsNetworkView.getExistingVpc()).build();
+            Vpc vpc = ec2Client.describeVpcs(vpcRequest).vpcs().get(0);
+            List<String> cidrBlockAssociationSet = vpc.cidrBlockAssociationSet().stream()
+                    .map(VpcCidrBlockAssociation::cidrBlock)
                     .collect(Collectors.toList());
             LOGGER.info("VPC associated CIDR blocks: [{}]", cidrBlockAssociationSet);
             return cidrBlockAssociationSet;
@@ -135,17 +133,17 @@ public class AwsNetworkService {
     }
 
     private String calculateSubnet(String stackName, Vpc vpc, Iterable<String> subnetCidrs) {
-        SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
+        SubnetInfo vpcInfo = new SubnetUtils(vpc.cidrBlock()).getInfo();
         String[] cidrParts = vpcInfo.getCidrSignature().split("/");
         int netmask = Integer.parseInt(cidrParts[cidrParts.length - 1]);
         int netmaskBits = CIDR_PREFIX - netmask;
         if (netmaskBits <= 0) {
             throw new CloudConnectorException("The selected VPC has to be in a bigger CIDR range than /24");
         }
-        int numberOfSubnets = Double.valueOf(Math.pow(2, netmaskBits)).intValue();
+        int numberOfSubnets = Double.valueOf(StrictMath.pow(2, netmaskBits)).intValue();
         int targetSubnet = 0;
         if (stackName != null) {
-            byte[] b = stackName.getBytes(Charset.forName("UTF-8"));
+            byte[] b = stackName.getBytes(StandardCharsets.UTF_8);
             for (byte ascii : b) {
                 targetSubnet += ascii;
             }
@@ -162,7 +160,7 @@ public class AwsNetworkService {
     }
 
     private String getSubnetCidrInRange(Vpc vpc, Iterable<String> subnetCidrs, int start, int end) {
-        SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
+        SubnetInfo vpcInfo = new SubnetUtils(vpc.cidrBlock()).getInfo();
         String lowProbe = incrementIp(vpcInfo.getLowAddress());
         String highProbe = new SubnetUtils(toSubnetCidr(lowProbe)).getInfo().getHighAddress();
         // start from the target subnet
@@ -190,7 +188,7 @@ public class AwsNetworkService {
         }
         if (foundProbe && isInRange(highProbe, vpcInfo)) {
             String subnet = toSubnetCidr(lowProbe);
-            LOGGER.debug("The following subnet cidr found: {} for VPC: {}", subnet, vpc.getVpcId());
+            LOGGER.debug("The following subnet cidr found: {} for VPC: {}", subnet, vpc.vpcId());
             return subnet;
         } else {
             return null;
@@ -220,9 +218,9 @@ public class AwsNetworkService {
             Set<String> gatewayRegionServices = enabledGatewayServices.stream()
                     .map(s -> String.format(VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, regionName, s))
                     .collect(Collectors.toSet());
-            result = amazonEC2Client.describePrefixLists().getPrefixLists().stream()
-                    .filter(pl -> gatewayRegionServices.contains(pl.getPrefixListName()))
-                    .map(PrefixList::getPrefixListId)
+            result = amazonEC2Client.describePrefixLists().prefixLists().stream()
+                    .filter(pl -> gatewayRegionServices.contains(pl.prefixListName()))
+                    .map(PrefixList::prefixListId)
                     .collect(Collectors.toList());
         }
         return result;

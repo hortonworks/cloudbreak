@@ -1,0 +1,5 @@
+{
+  "instanceType": "db.m5.large",
+  "vendor": "postgres",
+  "volumeSize": 100
+}

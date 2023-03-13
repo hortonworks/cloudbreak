@@ -59,9 +59,13 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_6_0 = () -> "7.6.0";
 
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_6_2 = () -> "7.6.2";
+
     public static final Versioned CLOUDERAMANAGER_VERSION_7_7_1 = () -> "7.7.1";
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_9_0 = () -> "7.9.0";
+
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_9_2 = () -> "7.9.2";
 
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_7 = () -> "7.2.7";
 
@@ -77,9 +81,13 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_16 = () -> "7.2.16";
 
+    public static final Versioned CLOUDERA_STACK_VERSION_7_2_17 = () -> "7.2.17";
+
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
 
     public static final Versioned CFM_VERSION_2_2_3_0 = () -> "2.2.3.0";
+
+    public static final Versioned FLINK_VERSION_1_15_1 = () -> "1.15.1";
 
     public static final Versioned CDPD_VERSION_7_2_11 = () -> "7.2.11";
 
@@ -125,7 +133,7 @@ public class CMRepositoryVersionUtil {
     }
 
     public static boolean isIgnorePropertyValidationSupportedViaBlueprint(ClouderaManagerRepo clouderaManagerRepoDetails) {
-        LOGGER.info("ClouderaManagerRepo is compared for ignore porperty validation support");
+        LOGGER.info("ClouderaManagerRepo is compared for ignore property validation support");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0);
     }
 
@@ -179,10 +187,15 @@ public class CMRepositoryVersionUtil {
         return RAZ_ENABLED_CLOUD_PLATFORMS.getOrDefault(cloudPlatform, Collections.emptyList()).contains(stackType);
     }
 
-    public static boolean isRazTokenConfigurationSupported(String cdhVersion, CloudPlatform cloudPlatform, StackType stackType) {
-        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger token support in Data Hub and Data Lake");
+    public static boolean isRazConfigurationForServiceTypeSupported(String cdhVersion, CloudPlatform cloudPlatform, StackType stackType) {
+        LOGGER.info("Cloud Platform {} is checked for Raz Service type configuration in {} for cdhVersion {}", cloudPlatform, stackType, cdhVersion);
         return isVersionNewerOrEqualThanLimited(() -> cdhVersion, CLOUDERA_STACK_VERSION_7_2_10)
                 && isRazSupportedForCloudAndStack(cloudPlatform, stackType);
+    }
+
+    public static boolean isRazConfigurationForRazRoleNeeded(String cmVersion, CloudPlatform cloudPlatform, StackType stackType) {
+        LOGGER.info("Cloud Platform {} is checked for Raz role configuration in {} for cmVersion {}", cloudPlatform, stackType, cmVersion);
+        return cloudPlatform == GCP && isRazConfigurationSupported(cmVersion, cloudPlatform, stackType);
     }
 
     public static boolean isSudoAccessNeededForHostCertRotation(ClouderaManagerRepo clouderaManagerRepoDetails) {

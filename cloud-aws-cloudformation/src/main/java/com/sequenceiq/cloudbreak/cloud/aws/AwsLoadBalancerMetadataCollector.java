@@ -9,9 +9,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
-import com.amazonaws.services.cloudformation.model.StackResourceSummary;
-import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
@@ -19,6 +16,10 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsLoadBalancerMetadataView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+
+import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesResponse;
+import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 
 @Service
 public class AwsLoadBalancerMetadataCollector {
@@ -37,10 +38,10 @@ public class AwsLoadBalancerMetadataCollector {
         String cFStackName = cloudFormationStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         AmazonCloudFormationClient cfRetryClient = awsClient.createCloudFormationClient(credentialView, region);
-        ListStackResourcesResult result = cfRetryClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
+        ListStackResourcesResponse result = cfRetryClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
 
-        Map<String, Object> parameters = parseTargetGroupCloudParams(scheme, result.getStackResourceSummaries());
-        parameters.put(AwsLoadBalancerMetadataView.LOADBALANCER_ARN, loadBalancer.getLoadBalancerArn());
+        Map<String, Object> parameters = parseTargetGroupCloudParams(scheme, result.stackResourceSummaries());
+        parameters.put(AwsLoadBalancerMetadataView.LOADBALANCER_ARN, loadBalancer.loadBalancerArn());
         return parameters;
     }
 
@@ -58,9 +59,9 @@ public class AwsLoadBalancerMetadataCollector {
         // port information for the load balancer via its associated listeners, and will use that list to construct the
         // names of all listeners and target groups associated with the LB.
         List<Integer> ports = summaries.stream()
-            .filter(summary -> summary.getLogicalResourceId().startsWith(AwsListener.LISTENER_NAME_PREFIX))
-            .filter(summary -> summary.getLogicalResourceId().endsWith(scheme.resourceName()))
-            .map(summary -> getPortFromListenerName(summary.getLogicalResourceId(), scheme))
+            .filter(summary -> summary.logicalResourceId().startsWith(AwsListener.LISTENER_NAME_PREFIX))
+            .filter(summary -> summary.logicalResourceId().endsWith(scheme.resourceName()))
+            .map(summary -> getPortFromListenerName(summary.logicalResourceId(), scheme))
             .collect(Collectors.toList());
 
         Map<String, Object> targetGroupParameters = new HashMap<>();
@@ -69,12 +70,12 @@ public class AwsLoadBalancerMetadataCollector {
         // which in this case is the resource ARN.
         ports.forEach(port -> {
             String listenerArn = summaries.stream()
-                .filter(summary -> AwsListener.getListenerName(port, scheme).equals(summary.getLogicalResourceId()))
-                .map(StackResourceSummary::getPhysicalResourceId)
+                .filter(summary -> AwsListener.getListenerName(port, scheme).equals(summary.logicalResourceId()))
+                .map(StackResourceSummary::physicalResourceId)
                 .findFirst().orElse(null);
             String targetGroupArn = summaries.stream()
-                .filter(summary -> AwsTargetGroup.getTargetGroupName(port, scheme).equals(summary.getLogicalResourceId()))
-                .map(StackResourceSummary::getPhysicalResourceId)
+                .filter(summary -> AwsTargetGroup.getTargetGroupName(port, scheme).equals(summary.logicalResourceId()))
+                .map(StackResourceSummary::physicalResourceId)
                 .findFirst().orElse(null);
 
             targetGroupParameters.put(AwsLoadBalancerMetadataView.getTargetGroupParam(port), targetGroupArn);
