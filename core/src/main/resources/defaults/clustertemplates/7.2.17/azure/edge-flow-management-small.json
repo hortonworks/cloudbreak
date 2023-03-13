@@ -1,0 +1,30 @@
+{
+  "name": "7.2.17 - Edge Flow Management Light Duty for Azure",
+  "description": "",
+  "type": "FLOW_MANAGEMENT",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.17 - Edge Flow Management Light Duty"
+    },
+    "instanceGroups": [
+      {
+        "nodeCount": 1,
+        "name": "management",
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "instanceType": "Standard_D8_v3",
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "Standard_LRS"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
