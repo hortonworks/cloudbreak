@@ -128,23 +128,6 @@
       "recipeNames": []
     },
     {
-      "name": "razHG",
-      "template": {
-        "instanceType": "m5.xlarge",
-        "attachedVolumes": [
-          {
-            "count": 1,
-            "size": 128,
-            "type": "gp2"
-          }
-        ]
-      },
-      "nodeCount": 0,
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
-      "recipeNames": []
-    },
-    {
       "name": "atlasHG",
       "template": {
         "instanceType": "m5.xlarge",
