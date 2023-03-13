@@ -3,9 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.net.URI;
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
@@ -22,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonPricingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
@@ -90,9 +86,6 @@ public abstract class AwsClient {
     @Inject
     private SdkClientExceptionMapper sdkClientExceptionMapper;
 
-    @Inject
-    private AwsEndpointProvider awsEndpointProvider;
-
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         try {
@@ -137,7 +130,6 @@ public abstract class AwsClient {
                 .overrideConfiguration(clientConfiguration)
                 .endpointProvider(new DefaultEc2EndpointProvider())
                 .region(Region.of(regionName));
-        setupFipsEndpointIfNecessary(Ec2Client.SERVICE_NAME, regionName, awsCredential).ifPresent(ec2ClientBuilder::endpointOverride);
         return proxy(ec2ClientBuilder.build(), awsCredential, regionName);
     }
 
@@ -146,7 +138,6 @@ public abstract class AwsClient {
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName));
-        setupFipsEndpointIfNecessary(CloudWatchClient.SERVICE_NAME, regionName, awsCredential).ifPresent(cloudWatchClientBuilder::endpointOverride);
         return new AmazonCloudWatchClient(proxy(cloudWatchClientBuilder.build(), awsCredential, regionName));
     }
 
@@ -160,7 +151,6 @@ public abstract class AwsClient {
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .region(Region.of(regionName));
-        setupFipsEndpointIfNecessary(StsClient.SERVICE_NAME, regionName, awsCredential).ifPresent(stsClientBuilder::endpointOverride);
         return new AmazonSecurityTokenServiceClient(proxy(stsClientBuilder.build(), awsCredential, regionName));
     }
 
@@ -170,7 +160,6 @@ public abstract class AwsClient {
                 .region(Region.of(regionName))
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .credentialsProvider(getCredentialProvider(awsCredential));
-        setupFipsEndpointIfNecessary(IamClient.SERVICE_NAME, regionName, awsCredential).ifPresent(iamClientBuilder::endpointOverride);
         return new AmazonIdentityManagementClient(proxy(iamClientBuilder.build(), awsCredential, regionName));
     }
 
@@ -178,7 +167,6 @@ public abstract class AwsClient {
         KmsClientBuilder kmsClientBuilder = KmsClient.builder()
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName));
-        setupFipsEndpointIfNecessary(KmsClient.SERVICE_NAME, regionName, awsCredential).ifPresent(kmsClientBuilder::endpointOverride);
         return new AmazonKmsClient(proxy(kmsClientBuilder.build(), awsCredential, regionName));
     }
 
@@ -187,8 +175,6 @@ public abstract class AwsClient {
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName))
                 .overrideConfiguration(getDefaultClientConfiguration());
-        setupFipsEndpointIfNecessary(ElasticLoadBalancingV2Client.SERVICE_NAME, regionName, awsCredential)
-                .ifPresent(loadBalancingClientBuilder::endpointOverride);
         return new AmazonElasticLoadBalancingClient(proxy(loadBalancingClientBuilder.build(), awsCredential, regionName));
     }
 
@@ -196,7 +182,6 @@ public abstract class AwsClient {
         EfsClientBuilder efsClientBuilder = EfsClient.builder()
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName));
-        setupFipsEndpointIfNecessary(EfsClient.SERVICE_NAME, regionName, awsCredential).ifPresent(efsClientBuilder::endpointOverride);
         return new AmazonEfsClient(proxy(efsClientBuilder.build(), awsCredential, regionName), retry);
     }
 
@@ -204,7 +189,6 @@ public abstract class AwsClient {
         S3ClientBuilder s3ClientBuilder = S3Client.builder()
                 .region(Region.of(regionName))
                 .credentialsProvider(getCredentialProvider(awsCredential));
-        setupFipsEndpointIfNecessary(S3Client.SERVICE_NAME, regionName, awsCredential).ifPresent(s3ClientBuilder::endpointOverride);
         return new AmazonS3Client(proxy(s3ClientBuilder.build(), awsCredential, regionName));
     }
 
@@ -213,7 +197,6 @@ public abstract class AwsClient {
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName));
-        setupFipsEndpointIfNecessary(DynamoDbClient.SERVICE_NAME, regionName, awsCredential).ifPresent(dynamoDbClientBuilder::endpointOverride);
         return new AmazonDynamoDBClient(proxy(dynamoDbClientBuilder.build(), awsCredential, regionName));
     }
 
@@ -222,7 +205,6 @@ public abstract class AwsClient {
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .region(Region.of(regionName));
-        setupFipsEndpointIfNecessary(RdsClient.SERVICE_NAME, regionName, awsCredential).ifPresent(rdsClientBuilder::endpointOverride);
         return new AmazonRdsClient(proxy(rdsClientBuilder.build(), awsCredential, regionName), awsPageCollector);
     }
 
@@ -231,7 +213,6 @@ public abstract class AwsClient {
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .region(Region.of(regionName));
-        setupFipsEndpointIfNecessary(PricingClient.SERVICE_NAME, regionName, awsCredential).ifPresent(clientBuilder::endpointOverride);
         return new AmazonPricingClient(proxy(clientBuilder.build(), awsCredential, regionName), retry);
     }
 
@@ -296,10 +277,6 @@ public abstract class AwsClient {
         AspectJProxyFactory proxyFactory = new AspectJProxyFactory(client);
         proxyFactory.addAspect(new AmazonClientExceptionHandler(awsCredentialView, regionName, sdkClientExceptionMapper));
         return proxyFactory.getProxy();
-    }
-
-    protected Optional<URI> setupFipsEndpointIfNecessary(String service, String regionName, AwsCredentialView awsCredential) {
-        return awsEndpointProvider.setupFipsEndpointIfNecessary(service, regionName, awsCredential.isGovernmentCloudEnabled()).map(URI::create);
     }
 
     protected ClientOverrideConfiguration getDefaultClientConfiguration() {
