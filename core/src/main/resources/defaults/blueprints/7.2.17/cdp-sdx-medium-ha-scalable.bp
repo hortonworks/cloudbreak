@@ -72,46 +72,46 @@
         ]
       },
       {
-        "cardinality":0,
+        "cardinality":1,
         "refName":"solrHG",
         "roleConfigGroupsRefNames":[
-          "solr-SOLR_SERVER-BASE"
+          "solr-SOLR_SERVER-EXTERNAL"
         ]
       },
       {
         "cardinality":0,
         "refName":"storageHG",
         "roleConfigGroupsRefNames":[
-          "hbase-REGIONSERVER-BASE",
-          "hdfs-DATANODE-BASE"
+          "hbase-REGIONSERVER-EXTERNAL",
+          "hdfs-DATANODE-EXTERNAL"
         ]
       },
       {
-        "cardinality":0,
+        "cardinality":1,
         "refName":"kafkaHG",
         "roleConfigGroupsRefNames":[
-          "kafka-KAFKA_BROKER-BASE"
+          "kafka-KAFKA_BROKER-EXTERNAL"
         ]
       },
       {
-        "cardinality":0,
+        "cardinality":1,
         "refName":"razHG",
         "roleConfigGroupsRefNames":[
-          "ranger-RANGER_ADMIN-BASE"
+          "ranger-RANGER_ADMIN-EXTERNAL"
         ]
       },
       {
         "cardinality":0,
         "refName":"AtlasHG",
         "roleConfigGroupsRefNames":[
-          "atlas-ATLAS_SERVER-BASE"
+          "atlas-ATLAS_SERVER-EXTERNAL"
         ]
       },
       {
         "cardinality":0,
         "refName":"hmsHG",
         "roleConfigGroupsRefNames":[
-          "hive-HIVEMETASTORE-BASE"
+          "hive-HIVEMETASTORE-EXTERNAL"
         ]
       }
     ],
@@ -161,6 +161,29 @@
           {
             "base":true,
             "refName":"ranger-RANGER_ADMIN-BASE",
+            "roleType":"RANGER_ADMIN",
+            "configs":[
+              {
+                "name":"role_config_suppression_ranger_admin_max_heap_size",
+                "value":"true"
+              },
+              {
+                "name":"ranger.audit.solr.no.replica",
+                "value":"2"
+              },
+              {
+                "name":"ranger.audit.solr.no.shards",
+                "value":"3"
+              },
+              {
+                "name":"ranger.audit.solr.max.shards.per.node",
+                "value":"2"
+              }
+            ]
+          },
+          {
+            "base":true,
+            "refName":"ranger-RANGER_ADMIN-EXTERNAL",
             "roleType":"RANGER_ADMIN",
             "configs":[
               {
@@ -243,6 +266,37 @@
             ],
             "refName":"atlas-ATLAS_SERVER-BASE",
             "roleType":"ATLAS_SERVER"
+          },
+          {
+            "base":true,
+            "configs":[
+              {
+                "name":"role_config_suppression_atlas_max_heap_size",
+                "value":"true"
+              },
+              {
+                "name":"atlas_authentication_method_file",
+                "value":"false"
+              },
+              {
+                "name":"atlas_solr_shards",
+                "value":"3"
+              },
+              {
+                "name":"atlas_solr_replication_factor",
+                "value":"2"
+              },
+              {
+                "name":"atlas_ssl_exclude_protocols",
+                "value":"TLSv1,TLSv1.1"
+              },
+              {
+                "name":"atlas_max_heap_size",
+                "value":8192
+              }
+            ],
+            "refName":"atlas-ATLAS_SERVER-EXTERNAL",
+            "roleType":"ATLAS_SERVER"
           }
         ],
         "serviceConfigs":[
@@ -291,6 +345,32 @@
             "refName":"solr-SOLR_SERVER-BASE",
             "roleType":"SOLR_SERVER"
           },
+      {
+        "refName":"solr",
+        "roleConfigGroups":[
+          {
+            "base":true,
+            "configs":[
+              {
+                "name":"solr_https_port",
+                "value":"8985"
+              },
+              {
+                "name":"solr_java_opts",
+                "value":"{{JAVA_GC_ARGS}} -Dsolr.hdfs.allow.location.override=true"
+              },
+              {
+                "name":"solr_java_heapsize",
+                "value":8589934592
+              },
+              {
+                "name":"solr_java_direct_memory_size",
+                "value":1073741824
+              }
+            ],
+            "refName":"solr-SOLR_SERVER-EXTERNAL",
+            "roleType":"SOLR_SERVER"
+          },
           {
             "base":true,
             "refName":"solr-GATEWAY-BASE",
@@ -324,6 +404,21 @@
           {
             "base":true,
             "refName":"hbase-REGIONSERVER-BASE",
+            "roleType":"REGIONSERVER",
+            "configs":[
+              {
+                "name":"hbase_bucketcache_ioengine",
+                "value":""
+              },
+              {
+                "name":"hbase_regionserver_java_heapsize",
+                "value":7516192768
+              }
+            ]
+          },
+          {
+            "base":true,
+            "refName":"hbase-REGIONSERVER-EXTERNAL",
             "roleType":"REGIONSERVER",
             "configs":[
               {
@@ -399,6 +494,17 @@
           },
           {
             "base":true,
+            "refName":"hdfs-DATANODE-EXTERNAL",
+            "roleType":"DATANODE",
+            "configs":[
+              {
+                "name":"dfs_datanode_max_locked_memory",
+                "value":1073741824
+              }
+            ]
+          },
+          {
+            "base":true,
             "refName":"hdfs-BALANCER-BASE",
             "roleType":"BALANCER"
           },
@@ -450,6 +556,11 @@
             "base":true,
             "refName":"kafka-KAFKA_BROKER-BASE",
             "roleType":"KAFKA_BROKER"
+          },
+          {
+            "base":true,
+            "refName":"kafka-KAFKA_BROKER-EXTERNAL",
+            "roleType":"KAFKA_BROKER"
           }
         ],
         "serviceConfigs":[
@@ -496,6 +607,21 @@
           {
             "base":true,
             "refName":"hive-HIVEMETASTORE-BASE",
+            "roleType":"HIVEMETASTORE",
+            "configs":[
+              {
+                "name":"hive_service_config_safety_valve",
+                "value":"<property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property><property><name>hive.metastore.try.direct.sql</name><value>true</value></property>"
+              },
+              {
+                "name":"hive_metastore_java_heapsize",
+                "value":8589934592
+              }
+            ]
+          },
+          {
+            "base":true,
+            "refName":"hive-HIVEMETASTORE-EXTERNAL",
             "roleType":"HIVEMETASTORE",
             "configs":[
               {
