@@ -83,7 +83,7 @@ ext {
 
   // Cloudera
   cmClientVersion = '7.9.2'
-  clouderaCryptoOpenSslProviderVersion = '1.0.0-b8'
+  clouderaCryptoOpenSslProviderVersion = '1.0.1-b2'
 
   // Testing
   assertjVersion = '3.21.0'
