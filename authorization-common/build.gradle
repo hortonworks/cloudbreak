@@ -49,7 +49,7 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',    version: springBootVersion
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
 
-  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.12.22'
+  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.14.2'
 
 }
 
