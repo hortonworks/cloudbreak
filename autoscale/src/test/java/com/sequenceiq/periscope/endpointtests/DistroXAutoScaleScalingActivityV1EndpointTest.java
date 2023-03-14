@@ -228,9 +228,25 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
     }
 
     @Test
+    public void testGetFailedScalingActivitiesInTimeRangeByClusterNameWithNullName() {
+        assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
+                .getFailedScalingActivitiesBetweenIntervalByClusterName(TEST_CLUSTER_NAME_NULL,
+                        Instant.now().minus(60, MINUTES).toEpochMilli(),
+                        Instant.now().minus(30, MINUTES).toEpochMilli(), 0, 10).getContent());
+    }
+
+    @Test
     public void testGetScalingActivitiesInTimeRangeByClusterCrnWithNullCrn() {
         assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
                 .getScalingActivitiesBetweenIntervalByClusterCrn(TEST_CLUSTER_CRN_NULL,
+                        Instant.now().minus(60, MINUTES).toEpochMilli(),
+                        Instant.now().minus(30, MINUTES).toEpochMilli(), 0, 10).getContent());
+    }
+
+    @Test
+    public void testGetFailedScalingActivitiesInTimeRangeByClusterCrnWithNullCrn() {
+        assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
+                .getFailedScalingActivitiesBetweenIntervalByClusterCrn(TEST_CLUSTER_CRN_NULL,
                         Instant.now().minus(60, MINUTES).toEpochMilli(),
                         Instant.now().minus(30, MINUTES).toEpochMilli(), 0, 10).getContent());
     }
