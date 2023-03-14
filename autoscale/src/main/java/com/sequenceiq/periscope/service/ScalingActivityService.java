@@ -152,6 +152,19 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
                                 ActivityStatus.SCALING_FLOW_FAILED), startTimeAfter, pageable);
     }
 
+    public Page<ScalingActivity> findAllByFailedStatusesInTimeRangeForCluster(NameOrCrn clusterNameOrCrn,
+            long timestampFrom, long timestampUntil, Pageable pageable) {
+        Date startTimeUntil = Date.from(Instant.ofEpochMilli(timestampUntil));
+        Date startTimeFrom = Date.from(Instant.ofEpochMilli(timestampFrom));
+        return clusterNameOrCrn.hasName() ?
+                scalingActivityRepository.findAllByClusterNameAndInStatusesBetweenInterval(clusterNameOrCrn.getName(),
+                        newArrayList(ActivityStatus.DOWNSCALE_TRIGGER_FAILED, ActivityStatus.UPSCALE_TRIGGER_FAILED, ActivityStatus.METRICS_COLLECTION_FAILED,
+                                ActivityStatus.SCALING_FLOW_FAILED), startTimeFrom, startTimeUntil, pageable) :
+                scalingActivityRepository.findAllByClusterCrnAndInStatusesBetweenInterval(clusterNameOrCrn.getCrn(),
+                        newArrayList(ActivityStatus.DOWNSCALE_TRIGGER_FAILED, ActivityStatus.UPSCALE_TRIGGER_FAILED, ActivityStatus.METRICS_COLLECTION_FAILED,
+                                ActivityStatus.SCALING_FLOW_FAILED), startTimeFrom, startTimeUntil, pageable);
+    }
+
     public Page<ScalingActivity> findAllInTimeRangeForCluster(NameOrCrn clusterNameOrCrn, long timestampFrom, long timestampUntil, Pageable pageable) {
         Date startTimeUntil = Date.from(Instant.ofEpochMilli(timestampUntil));
         Date startTimeFrom = Date.from(Instant.ofEpochMilli(timestampFrom));

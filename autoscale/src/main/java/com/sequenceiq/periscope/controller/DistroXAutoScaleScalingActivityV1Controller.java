@@ -92,6 +92,38 @@ public class DistroXAutoScaleScalingActivityV1Controller implements DistroXAutoS
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    public Page<DistroXAutoscaleScalingActivityResponse> getFailedScalingActivitiesBetweenIntervalByClusterName(@ResourceName String clusterName,
+            long startTimeFromInEpochMilliSec, long startTimeUntilInEpochMilliSec, Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startTime").descending());
+        if (startTimeFromInEpochMilliSec == 0) {
+            startTimeFromInEpochMilliSec = Instant.now().minus(MINUTES_TO_SUBTRACT, MINUTES).toEpochMilli();
+        }
+        if (startTimeUntilInEpochMilliSec == 0) {
+            startTimeUntilInEpochMilliSec = Instant.now().toEpochMilli();
+        }
+        Page<ScalingActivity> scalingActivityPage = scalingActivityService.findAllByFailedStatusesInTimeRangeForCluster(NameOrCrn.ofName(clusterName),
+                startTimeFromInEpochMilliSec, startTimeUntilInEpochMilliSec, pageable);
+        return scalingActivityPage.map(distroXAutoscaleScalingActivityResponseConverter::convert);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    public Page<DistroXAutoscaleScalingActivityResponse> getFailedScalingActivitiesBetweenIntervalByClusterCrn(@ResourceCrn String clusterCrn,
+            long startTimeFromInEpochMilliSec, long startTimeUntilInEpochMilliSec, Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startTime").descending());
+        if (startTimeFromInEpochMilliSec == 0) {
+            startTimeFromInEpochMilliSec = Instant.now().minus(MINUTES_TO_SUBTRACT, MINUTES).toEpochMilli();
+        }
+        if (startTimeUntilInEpochMilliSec == 0) {
+            startTimeUntilInEpochMilliSec = Instant.now().toEpochMilli();
+        }
+        Page<ScalingActivity> scalingActivityPage = scalingActivityService.findAllByFailedStatusesInTimeRangeForCluster(NameOrCrn.ofCrn(clusterCrn),
+                startTimeFromInEpochMilliSec, startTimeUntilInEpochMilliSec, pageable);
+        return scalingActivityPage.map(distroXAutoscaleScalingActivityResponseConverter::convert);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
     public Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesBetweenIntervalByClusterName(@ResourceName String clusterName,
             long startTimeFromInEpochMilliSec, long startTimeUntilInEpochMilliSec, Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startTime").descending());

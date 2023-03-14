@@ -63,6 +63,18 @@ public interface ScalingActivityRepository extends PagingAndSortingRepository<Sc
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.id = :clusterId AND st.activityStatus IN :statuses")
     List<ScalingActivity> findAllByClusterAndInStatuses(@Param("clusterId") Long clusterId, @Param("statuses") Collection<ActivityStatus> statuses);
 
+    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackName = :clusterName AND st.activityStatus IN :statuses " +
+            "AND st.startTime >= :startTimeFrom AND st.startTime < :startTimeUntil ORDER BY st.startTime DESC")
+    Page<ScalingActivity> findAllByClusterNameAndInStatusesBetweenInterval(@Param("clusterName") String clusterName,
+            @Param("statuses") Collection<ActivityStatus> statuses, @Param("startTimeFrom") Date startTimeFrom,
+            @Param("startTimeUntil") Date startTimeUntil, Pageable pageable);
+
+    @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackCrn = :clusterCrn AND st.activityStatus IN :statuses " +
+            "AND st.startTime >= :startTimeFrom AND st.startTime < :startTimeUntil ORDER BY st.startTime DESC")
+    Page<ScalingActivity> findAllByClusterCrnAndInStatusesBetweenInterval(@Param("clusterCrn") String clusterCrn,
+            @Param("statuses") Collection<ActivityStatus> statuses, @Param("startTimeFrom") Date startTimeFrom,
+            @Param("startTimeUntil") Date startTimeUntil, Pageable pageable);
+
     @Query("SELECT st FROM ScalingActivity st WHERE st.cluster.stackName = :clusterName " +
             "AND st.startTime >= :startTimeFrom AND st.startTime < :startTimeUntil ORDER BY st.startTime DESC")
     Page<ScalingActivity> findAllByClusterNameBetweenInterval(@Param("clusterName") String clusterName, @Param("startTimeFrom") Date startTimeFrom,

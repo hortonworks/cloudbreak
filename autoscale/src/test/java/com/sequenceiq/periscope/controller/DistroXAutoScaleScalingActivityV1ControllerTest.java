@@ -191,6 +191,54 @@ public class DistroXAutoScaleScalingActivityV1ControllerTest {
     }
 
     @Test
+    public void testGetFailedScalingActivitiesInTimeRangeByClusterName() {
+        Cluster testCluster = getACluster();
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                Instant.now().minus(5, MINUTES).toEpochMilli(), TEST_OPERATION_ID);
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                Instant.now().minus(4, MINUTES).toEpochMilli(), TEST_OPERATION_ID_2);
+        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_FAILED,
+                Instant.now().minus(2, MINUTES).toEpochMilli(), TEST_OPERATION_ID_3);
+
+        doReturn(new PageImpl<>(List.of(scalingActivity3, scalingActivity2, scalingActivity1))).when(scalingActivityService)
+                .findAllByFailedStatusesInTimeRangeForCluster(NameOrCrn.ofName(TEST_CLUSTER_NAME), 1676481427849L, 1676483227849L,
+                        PageRequest.of(0, 3, Sort.by("startTime").descending()));
+        doReturn(convert(scalingActivity3)).when(distroXAutoscaleScalingActivityResponseConverter).convert(scalingActivity3);
+        doReturn(convert(scalingActivity2)).when(distroXAutoscaleScalingActivityResponseConverter).convert(scalingActivity2);
+        doReturn(convert(scalingActivity1)).when(distroXAutoscaleScalingActivityResponseConverter).convert(scalingActivity1);
+
+        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Controller
+                .getFailedScalingActivitiesBetweenIntervalByClusterName(TEST_CLUSTER_NAME, 1676481427849L,
+                        1676483227849L, 0, 3)
+                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
+        assertEquals(distroXAutoscaleScalingActivityResponse, List.of(TEST_OPERATION_ID_3, TEST_OPERATION_ID_2, TEST_OPERATION_ID));
+    }
+
+    @Test
+    public void testGetFailedScalingActivitiesInTimeRangeByClusterCrn() {
+        Cluster testCluster = getACluster();
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                Instant.now().minus(3, MINUTES).toEpochMilli(), TEST_OPERATION_ID);
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                Instant.now().minus(2, MINUTES).toEpochMilli(), TEST_OPERATION_ID_2);
+        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_FAILED,
+                Instant.now().minus(1, MINUTES).toEpochMilli(), TEST_OPERATION_ID_3);
+
+        doReturn(new PageImpl<>(List.of(scalingActivity3, scalingActivity2, scalingActivity1))).when(scalingActivityService)
+                .findAllByFailedStatusesInTimeRangeForCluster(NameOrCrn.ofCrn(TEST_CLUSTER_CRN), 1676481427849L, 1676483227849L,
+                        PageRequest.of(0, 3, Sort.by("startTime").descending()));
+        doReturn(convert(scalingActivity3)).when(distroXAutoscaleScalingActivityResponseConverter).convert(scalingActivity3);
+        doReturn(convert(scalingActivity2)).when(distroXAutoscaleScalingActivityResponseConverter).convert(scalingActivity2);
+        doReturn(convert(scalingActivity1)).when(distroXAutoscaleScalingActivityResponseConverter).convert(scalingActivity1);
+
+        List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Controller
+                .getFailedScalingActivitiesBetweenIntervalByClusterCrn(TEST_CLUSTER_CRN, 1676481427849L,
+                        1676483227849L, 0, 3)
+                .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
+        assertEquals(distroXAutoscaleScalingActivityResponse, List.of(TEST_OPERATION_ID_3, TEST_OPERATION_ID_2, TEST_OPERATION_ID));
+    }
+
+    @Test
     public void testGetScalingActivitiesInTimeRangeByClusterName() {
         Cluster testCluster = getACluster();
         ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_FAILED,

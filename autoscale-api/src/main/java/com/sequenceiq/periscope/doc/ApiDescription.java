@@ -90,6 +90,8 @@ public class ApiDescription {
         public static final String SCALING_ACTIVITIES_GET_ALL = "Get all scaling activities";
         public static final String FAILED_SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES = "Get all failed scaling activities in given duration in minutes";
         public static final String SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL = "Get all scaling activities between start and end time in epoch milliseconds";
+        public static final String FAILED_SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL =
+                "Get all failed scaling activities between start and end time in epoch milliseconds";
         public static final String SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES = "Get all scaling activities in given time duration in minutes";
         public static final String SCALING_OPERATION_ID = "Get a particular scaling activity using it's operation ID";
         public static final String CLUSTER_PUT = "modify cluster";

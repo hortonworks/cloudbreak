@@ -293,6 +293,60 @@ class ScalingActivityRepositoryTest {
     }
 
     @Test
+    void testfindAllByClusterNameAndInStatusesBetweenInterval() {
+        Instant now = Instant.now();
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
+                now.minus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_FAILED,
+                now.minus(15, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_FAILED,
+                now.minus(11, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity4 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                now.minus(1, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity5 = createScalingActivity(testCluster, ActivityStatus.SCALING_FLOW_IN_PROGRESS,
+                now.minus(5, MINUTES).toEpochMilli());
+
+        saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3, scalingActivity4, scalingActivity5);
+
+        Set<ActivityStatus> statuses = Set.of(ActivityStatus.METRICS_COLLECTION_FAILED, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                ActivityStatus.DOWNSCALE_TRIGGER_FAILED);
+        Date start = new Date(now.minus(100, MINUTES).toEpochMilli());
+        Date end = new Date(now.toEpochMilli());
+        Pageable pageable = PageRequest.of(0, 5);
+
+        Page<ScalingActivity> result = underTest.findAllByClusterNameAndInStatusesBetweenInterval(testCluster.getStackName(), statuses, start, end, pageable);
+
+        assertThat(result.getContent()).hasSize(3).hasSameElementsAs(asList(scalingActivity2, scalingActivity3, scalingActivity4));
+    }
+
+    @Test
+    void testfindAllByClusterCrnAndInStatusesBetweenInterval() {
+        Instant now = Instant.now();
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
+                now.minus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_FAILED,
+                now.minus(15, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_FAILED,
+                now.minus(11, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity4 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                now.minus(1, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity5 = createScalingActivity(testCluster, ActivityStatus.SCALING_FLOW_IN_PROGRESS,
+                now.minus(5, MINUTES).toEpochMilli());
+
+        saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3, scalingActivity4, scalingActivity5);
+
+        Set<ActivityStatus> statuses = Set.of(ActivityStatus.METRICS_COLLECTION_FAILED, ActivityStatus.UPSCALE_TRIGGER_FAILED,
+                ActivityStatus.DOWNSCALE_TRIGGER_FAILED);
+        Date start = new Date(now.minus(10, MINUTES).toEpochMilli());
+        Date end = new Date(now.toEpochMilli());
+        Pageable pageable = PageRequest.of(0, 5);
+
+        Page<ScalingActivity> result = underTest.findAllByClusterCrnAndInStatusesBetweenInterval(testCluster.getStackCrn(), statuses, start, end, pageable);
+
+        assertThat(result.getContent()).hasSize(1).hasSameElementsAs(asList(scalingActivity4));
+    }
+
+    @Test
     void testDeleteAllForCluster() {
         Instant now = Instant.now();
         Cluster cluster = getACluster();

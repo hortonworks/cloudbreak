@@ -124,6 +124,44 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
             @QueryParam("size") @DefaultValue("100") Integer size);
 
     /**
+     * Returns all the failed scaling activities having start_time in the given time interval between startTimeFrom and startTimeUntil.
+     * @param clusterName Name of cluster for which we require all the failed scaling activities.
+     * @param startTimeFromInEpochMilliSec time in epoch milliseconds after which we want the activities.
+     * @param startTimeUntilInEpochMilliSec time in epoch milliseconds till which we want the activities.
+     * @return All the scaling activities which have failed in the given duration.
+     */
+    @GET
+    @Path("cluster_name/{clusterName}/failed_activities_in_time_interval")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ApiDescription.ClusterOpDescription.FAILED_SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL,
+            produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
+    Page<DistroXAutoscaleScalingActivityResponse> getFailedScalingActivitiesBetweenIntervalByClusterName(
+            @PathParam("clusterName") @NotNull String clusterName,
+            @QueryParam("startTimeFromInEpochMilliSec")  long startTimeFromInEpochMilliSec,
+            @QueryParam("startTimeUntilInEpochMilliSec") long startTimeUntilInEpochMilliSec,
+            @QueryParam("page") @DefaultValue("0") Integer page,
+            @QueryParam("size") @DefaultValue("100") Integer size);
+
+    /**
+     * Returns all the failed scaling activities having start_time in the given time interval between startTimeFrom and startTimeUntil.
+     * @param clusterCrn Crn of cluster for which we require all the failed scaling activities.
+     * @param startTimeFromInEpochMilliSec time in epoch milliseconds after which we want the activities.
+     * @param startTimeUntilInEpochMilliSec time in epoch milliseconds till which we want the activities.
+     * @return All the scaling activities which have failed in the given duration.
+     */
+    @GET
+    @Path("cluster_crn/{clusterCrn}/failed_activities_in_time_interval")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ApiDescription.ClusterOpDescription.FAILED_SCALING_ACTIVITIES_BETWEEN_TIME_INTERVAL,
+            produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
+    Page<DistroXAutoscaleScalingActivityResponse> getFailedScalingActivitiesBetweenIntervalByClusterCrn(
+            @PathParam("clusterCrn") @NotNull String clusterCrn,
+            @QueryParam("startTimeFromInEpochMilliSec")  long startTimeFromInEpochMilliSec,
+            @QueryParam("startTimeUntilInEpochMilliSec") long startTimeUntilInEpochMilliSec,
+            @QueryParam("page") @DefaultValue("0") Integer page,
+            @QueryParam("size") @DefaultValue("100") Integer size);
+
+    /**
      * Returns all the scaling activities having start_time in the given time interval between startTimeFrom and startTimeUntil.
      * @param clusterName Name of cluster for which we require the scaling activities.
      * @param startTimeFromInEpochMilliSec time in epoch milliseconds after which we want the activities.
