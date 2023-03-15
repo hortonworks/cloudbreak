@@ -90,21 +90,21 @@
         "cardinality":0,
         "refName":"kafkaHG",
         "roleConfigGroupsRefNames":[
-          "kafka-KAFKA_BROKER-BASE"
+          "kafka-KAFKA_BROKER_EXTERNAL"
         ]
       },
       {
         "cardinality":0,
         "refName":"razHG",
         "roleConfigGroupsRefNames":[
-          "ranger-RANGER_ADMIN-BASE"
+          "ranger-RANGER_ADMIN_EXTERNAL"
         ]
       },
       {
         "cardinality":0,
         "refName":"AtlasHG",
         "roleConfigGroupsRefNames":[
-          "atlas-ATLAS_SERVER-BASE"
+          "atlas-ATLAS_SERVER_EXTERNAL"
         ]
       },
       {
@@ -161,6 +161,29 @@
           {
             "base":true,
             "refName":"ranger-RANGER_ADMIN-BASE",
+            "roleType":"RANGER_ADMIN",
+            "configs":[
+              {
+                "name":"role_config_suppression_ranger_admin_max_heap_size",
+                "value":"true"
+              },
+              {
+                "name":"ranger.audit.solr.no.replica",
+                "value":"2"
+              },
+              {
+                "name":"ranger.audit.solr.no.shards",
+                "value":"3"
+              },
+              {
+                "name":"ranger.audit.solr.max.shards.per.node",
+                "value":"2"
+              }
+            ]
+          },
+          {
+            "base":true,
+            "refName":"ranger-RANGER_ADMIN_EXTERNAL",
             "roleType":"RANGER_ADMIN",
             "configs":[
               {
@@ -242,6 +265,37 @@
               }
             ],
             "refName":"atlas-ATLAS_SERVER-BASE",
+            "roleType":"ATLAS_SERVER"
+          },
+          {
+            "base":true,
+            "configs":[
+              {
+                "name":"role_config_suppression_atlas_max_heap_size",
+                "value":"true"
+              },
+              {
+                "name":"atlas_authentication_method_file",
+                "value":"false"
+              },
+              {
+                "name":"atlas_solr_shards",
+                "value":"3"
+              },
+              {
+                "name":"atlas_solr_replication_factor",
+                "value":"2"
+              },
+              {
+                "name":"atlas_ssl_exclude_protocols",
+                "value":"TLSv1,TLSv1.1"
+              },
+              {
+                "name":"atlas_max_heap_size",
+                "value":8192
+              }
+            ],
+            "refName":"atlas-ATLAS_SERVER_EXTERNAL",
             "roleType":"ATLAS_SERVER"
           }
         ],
@@ -449,6 +503,11 @@
           {
             "base":true,
             "refName":"kafka-KAFKA_BROKER-BASE",
+            "roleType":"KAFKA_BROKER"
+          },
+          {
+            "base":true,
+            "refName":"kafka-KAFKA_BROKER_EXTERNAL",
             "roleType":"KAFKA_BROKER"
           }
         ],
