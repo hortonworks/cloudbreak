@@ -288,6 +288,8 @@ public class DatalakeBackupActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_CANCELLED,
                         "Datalake backup cancelled", payload.getResourceId());
+                Flow flow = getFlow(context.getFlowParameters().getFlowId());
+                flow.setFlowFailed(new Exception("Datalake backup cancelled"));
             }
 
             @Override

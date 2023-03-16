@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertEquals;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.time.Duration;
@@ -37,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
@@ -261,6 +263,65 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal).withWaitForFlow(Boolean.FALSE))
                 .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
                 .then(SdxUpgradeTestAssertion.validateUpgradeCandidateWithLockedComponentIsAvailable())
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running Cloudbreak",
+            when = "upgrade the cluster but during the process of backup, cancel the backup",
+            then = "stack status reason should be datalake cancelled when stack turns back to be RUNNING"
+    )
+    public void testSdxUpgradeFailedWithBackupCancelled(MockedTestContext testContext) {
+        String sdxName = resourcePropertyProvider().getName();
+        String upgradeImageCatalogName = resourcePropertyProvider().getName();
+        createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
+        String sdxInternal = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
+        String cluster = "cmcluster";
+        String imageSettings = "imageSettingsUpgrade";
+
+        testContext
+                .given(EnvironmentTestDto.class)
+                .withCreateFreeIpa(Boolean.FALSE)
+                .withName(resourcePropertyProvider().getEnvironmentName())
+                .withBackup("location/of/the/backup/cancel")
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .given(cluster, ClusterTestDto.class)
+                .given(imageSettings, ImageSettingsTestDto.class)
+                .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
+                .withImageCatalog(upgradeImageCatalogName)
+                .given("NoAttachedDisksTemplate", InstanceTemplateV4TestDto.class)
+                .withAttachedVolume(testContext.init(VolumeV4TestDto.class).withCount(0))
+                .given("InstanceGroupWithoutAttachedDisk", InstanceGroupTestDto.class)
+                .withHostGroup(HostGroupType.MASTER)
+                .withTemplate("NoAttachedDisksTemplate")
+                .given(stack, StackTestDto.class)
+                .withCluster(cluster)
+                .withImageSettings(imageSettings)
+                .replaceInstanceGroups("InstanceGroupWithoutAttachedDisk")
+                .given(sdxInternal, SdxInternalTestDto.class)
+                .withStackRequest(key(cluster), key(stack))
+                .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .await(SdxClusterStatusResponse.RUNNING)
+                .given(SdxUpgradeTestDto.class)
+                .setSkipBackup(Boolean.FALSE)
+                .withRuntime(null)
+                .withLockComponents(true)
+                .withReplaceVms(SdxUpgradeReplaceVms.ENABLED)
+                .given(sdxInternal, SdxInternalTestDto.class)
+                .then(setCmVersionInMockToUpgradedVersion())
+                .when(sdxTestClient.upgradeInternal(), key(sdxInternal))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxName).withWaitForFlow(Boolean.FALSE))
+                .then((tc, testDto, client) -> {
+                    SdxClusterDetailResponse sdx = testDto.getResponse();
+                    assertEquals(sdx.getStatusReason(), "Datalake backup cancelled");
+                    return testDto;
+                })
                 .validate();
     }
 
