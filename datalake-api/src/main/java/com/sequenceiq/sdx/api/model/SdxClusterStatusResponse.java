@@ -21,6 +21,7 @@ public enum SdxClusterStatusResponse {
     REPAIR_FAILED,
     CHANGE_IMAGE_IN_PROGRESS,
     DATALAKE_UPGRADE_IN_PROGRESS,
+    DATALAKE_ROLLING_UPGRADE_IN_PROGRESS,
     DATALAKE_UPGRADE_FAILED,
     RECOVERY_IN_PROGRESS,
     RECOVERY_FAILED,
@@ -77,5 +78,9 @@ public enum SdxClusterStatusResponse {
 
     public boolean isAvailable() {
         return RUNNING.equals(this) || DATALAKE_BACKUP_INPROGRESS.equals(this);
+    }
+
+    public boolean isRollingUpgradeInProgress() {
+        return DATALAKE_ROLLING_UPGRADE_IN_PROGRESS.equals(this) || DATALAKE_UPGRADE_PREPARATION_IN_PROGRESS.equals(this);
     }
 }

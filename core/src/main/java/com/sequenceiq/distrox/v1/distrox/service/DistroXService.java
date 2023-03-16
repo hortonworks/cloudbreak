@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -82,9 +83,14 @@ public class DistroXService {
         }
         Set<Pair<String, StatusCheckResult>> sdxCrnsWithAvailability = platformAwareSdxConnector.listSdxCrnsWithAvailability(environment.getName(),
                 environment.getCrn(), sdxCrns);
-        if (!sdxCrnsWithAvailability.stream().map(Pair::getValue).allMatch(StatusCheckResult.AVAILABLE::equals)) {
+        if (!sdxCrnsWithAvailability.stream().map(Pair::getValue).allMatch(isSdxAvailable())) {
             throw new BadRequestException("Data Lake stacks of environment should be available.");
         }
+    }
+
+    private Predicate<StatusCheckResult> isSdxAvailable() {
+        return statusResult -> StatusCheckResult.AVAILABLE.name().equals(statusResult.name())
+                || StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS.name().equals(statusResult.name());
     }
 
 }

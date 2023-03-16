@@ -211,7 +211,7 @@ public class SdxUpgradeServiceTest {
 
         underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, true, true);
 
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS,
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS,
                 ResourceEvent.DATALAKE_ROLLING_OS_UPGRADE_STARTED, "Rolling OS upgrade started", sdxCluster);
         verify(stackV4Endpoint).get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString());
         verify(stackV4Endpoint).upgradeOsByUpgradeSetsInternal(0L, sdxCluster.getCrn(), orderedOSUpgradeSetRequest);
