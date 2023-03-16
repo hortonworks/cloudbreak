@@ -25,6 +25,7 @@ import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
+import com.sequenceiq.periscope.model.ScalingAdjustmentType;
 
 @ExtendWith(MockitoExtension.class)
 public class UsageReportingServiceTest {
@@ -59,7 +60,7 @@ public class UsageReportingServiceTest {
         when(cluster.getStackName()).thenReturn("testStackName");
 
         underTest.reportAutoscalingTriggered(10, 20, ScalingStatus.SUCCESS,
-                "Scaling was triggered", alert, cluster);
+                "Scaling was triggered", alert, cluster, ScalingAdjustmentType.REGULAR);
 
         ArgumentCaptor<UsageProto.CDPDatahubAutoscaleTriggered> captor = ArgumentCaptor.forClass(UsageProto.CDPDatahubAutoscaleTriggered.class);
         verify(usageReporter, times(1)).cdpDatahubAutoscaleTriggered(captor.capture());
@@ -101,7 +102,7 @@ public class UsageReportingServiceTest {
         when(cluster.getStackName()).thenReturn("testStackName");
 
         underTest.reportAutoscalingTriggered(10, 20, ScalingStatus.SUCCESS,
-                "Scaling was triggered", alert, cluster);
+                "Scaling was triggered", alert, cluster, ScalingAdjustmentType.REGULAR);
 
         ArgumentCaptor<UsageProto.CDPDatahubAutoscaleTriggered> captor = ArgumentCaptor.forClass(UsageProto.CDPDatahubAutoscaleTriggered.class);
         verify(usageReporter, times(1)).cdpDatahubAutoscaleTriggered(captor.capture());

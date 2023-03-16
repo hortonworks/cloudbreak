@@ -18,6 +18,7 @@ import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.model.ScalingAdjustmentType;
 
 @Service
 public class UsageReportingService {
@@ -29,7 +30,8 @@ public class UsageReportingService {
 
     @Async
     public void reportAutoscalingTriggered(int adjustmentCount, int clusterSize, ScalingStatus scalingStatus, String scalingAction,
-            BaseAlert alert, Cluster cluster) {
+            BaseAlert alert, Cluster cluster, ScalingAdjustmentType scalingAdjustmentType) {
+
         UsageProto.CDPDatahubAutoscaleTriggered.Builder cdpAutoscaleTriggerDetailsBuilder =
                 UsageProto.CDPDatahubAutoscaleTriggered.newBuilder().setAutoscaleTriggerDetails(
                         UsageProto.CDPAutoscaleTriggerDetails.newBuilder()
@@ -41,6 +43,7 @@ public class UsageReportingService {
                                 .setAutoscalingPolicyDefinition(withAlert(alert))
                                 .setOriginalHostGroupNodeCount(clusterSize)
                                 .setDesiredHostGroupNodeCount(clusterSize + adjustmentCount)
+                                .setAutoscaleScalingAdjustmentType(getAutoScalingAdjustmentType(scalingAdjustmentType))
                                 .build());
 
         usageReporter.cdpDatahubAutoscaleTriggered(cdpAutoscaleTriggerDetailsBuilder.build());
@@ -91,6 +94,17 @@ public class UsageReportingService {
                 return UsageProto.AutoscaleScalingStatusType.Value.AUTOSCALE_TRIGGER_FAILED;
             default:
                 return UsageProto.AutoscaleScalingStatusType.Value.UNSET;
+        }
+    }
+
+    private UsageProto.AutoscaleScalingAdjustmentType.Value getAutoScalingAdjustmentType(ScalingAdjustmentType scalingAdjustmentType) {
+        switch (scalingAdjustmentType) {
+            case STOPSTART:
+                return UsageProto.AutoscaleScalingAdjustmentType.Value.STOPSTART;
+            case REGULAR:
+                return UsageProto.AutoscaleScalingAdjustmentType.Value.REGULAR;
+            default:
+                return UsageProto.AutoscaleScalingAdjustmentType.Value.UNSET;
         }
     }
 }

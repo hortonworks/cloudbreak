@@ -190,7 +190,7 @@ public class ScalingRequest implements Runnable {
                     hostGroup, cluster.getStackCrn(), desiredHostGroupNodeCount, statusReason, e);
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED);
         } finally {
-            processAutoscalingTriggered(scalingAdjustment, hostGroupNodeCount, statusReason, scalingStatus);
+            processAutoscalingTriggered(scalingAdjustment, hostGroupNodeCount, statusReason, scalingStatus, scalingAdjustmentType);
         }
     }
 
@@ -228,7 +228,7 @@ public class ScalingRequest implements Runnable {
             LOGGER.error("Couldn't trigger downscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
                     hostGroup, cluster.getStackCrn(), desiredHostGroupNodeCount, statusReason, e);
         } finally {
-            processAutoscalingTriggered(scalingAdjustment, totalNodes, statusReason, scalingStatus);
+            processAutoscalingTriggered(scalingAdjustment, totalNodes, statusReason, scalingStatus, scalingAdjustmentType);
         }
     }
 
@@ -264,7 +264,7 @@ public class ScalingRequest implements Runnable {
                             "decommissionNodeIds '{}', error '{}' ", hostGroup, cluster.getStackCrn(), decommissionNodeIds.size(),
                     decommissionNodeIds, statusReason, e);
         } finally {
-            processAutoscalingTriggered(-decommissionNodeIds.size(), existingHostGroupNodeCount, statusReason, scalingStatus);
+            processAutoscalingTriggered(-decommissionNodeIds.size(), existingHostGroupNodeCount, statusReason, scalingStatus, scalingAdjustmentType);
         }
     }
 
@@ -282,13 +282,15 @@ public class ScalingRequest implements Runnable {
         return scalingAdjustment;
     }
 
-    private void processAutoscalingTriggered(int adjustmentCount, int hostGroupNodeCount, String statusReason, ScalingStatus scalingStatus) {
+    private void processAutoscalingTriggered(int adjustmentCount, int hostGroupNodeCount, String statusReason, ScalingStatus scalingStatus,
+            ScalingAdjustmentType scalingAdjustmentType) {
         History history = historyService.createEntry(scalingStatus,
                 StringUtils.left(statusReason, STATUSREASON_MAX_LENGTH), hostGroupNodeCount, adjustmentCount, policy);
         notificationSender.sendHistoryUpdateNotification(history, cluster);
         auditService.auditAutoscaleServiceEvent(scalingStatus, statusReason, cluster.getStackCrn(),
                 cluster.getClusterPertain().getTenant(), System.currentTimeMillis());
-        usageReportingService.reportAutoscalingTriggered(adjustmentCount, hostGroupNodeCount, scalingStatus, statusReason, policy.getAlert(), cluster);
+        usageReportingService.reportAutoscalingTriggered(adjustmentCount, hostGroupNodeCount, scalingStatus, statusReason, policy.getAlert(),
+                cluster, scalingAdjustmentType);
     }
 
     private String getMessageForCBException(Exception cbApiException) {
