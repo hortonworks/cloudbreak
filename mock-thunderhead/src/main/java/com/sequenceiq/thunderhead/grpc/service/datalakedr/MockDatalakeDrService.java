@@ -37,12 +37,21 @@ public class MockDatalakeDrService extends datalakeDRGrpc.datalakeDRImplBase {
     @Override
     public void backupDatalake(datalakeDRProto.BackupDatalakeRequest request, StreamObserver<datalakeDRProto.BackupDatalakeResponse> responseObserver) {
         LOGGER.info("Backing up for {}", request.getBackupName());
+        String backupLocaiton = request.getBackupLocation();
         UUID id = UUID.randomUUID();
-        mockStatusDatabase.put(id.toString(), DatalakeOperationStatus.State.STARTED);
-        responseObserver.onNext(datalakeDRProto.BackupDatalakeResponse.newBuilder()
-                .setBackupName(request.getBackupName())
-                .setBackupId(id.toString())
-                .setOverallState(DatalakeOperationStatus.State.STARTED.name()).build());
+        if (!backupLocaiton.contains("/cancel")) {
+            mockStatusDatabase.put(id.toString(), DatalakeOperationStatus.State.STARTED);
+            responseObserver.onNext(datalakeDRProto.BackupDatalakeResponse.newBuilder()
+                    .setBackupName(request.getBackupName())
+                    .setBackupId(id.toString())
+                    .setOverallState(DatalakeOperationStatus.State.STARTED.name()).build());
+        } else {
+            mockStatusDatabase.put(id.toString(), DatalakeOperationStatus.State.CANCELLED);
+            responseObserver.onNext(datalakeDRProto.BackupDatalakeResponse.newBuilder()
+                    .setBackupName(request.getBackupName())
+                    .setBackupId(id.toString())
+                    .setOverallState(DatalakeOperationStatus.State.CANCELLED.name()).build());
+        }
         responseObserver.onCompleted();
     }
 
