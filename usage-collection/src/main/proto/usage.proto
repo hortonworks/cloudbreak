@@ -5,7 +5,6 @@ package usage;
 option java_package = "com.cloudera.thunderhead.service.common.usage";
 option java_outer_classname = "UsageProto";
 option go_package = "com/cloudera/cdp/protobuf";
-import "google/protobuf/timestamp.proto";
 
 // This proto defines the Altus usage event schema. Find the usage system design
 // at docs/usage_reporting.md. This proto file is meant to be the documentation
@@ -225,44 +224,56 @@ message Event {
     CDPEnvironmentProxyConfigEditEvent cdpEnvironmentProxyConfigEditEvent = 107;
     // A CDP CDW Usage Event.
     CDPCDWUsageEvent cdpCDWUsageEvent = 108;
+    // A CDP Liftie summary heartbeat usage event
+    CDPLiftieClusterNodeStatesHeartbeatSummary cdpLiftieClusterNodeStatesHeartbeatSummary = 109;
+    // A CDP CDE session is requested.
+    CDPCDESessionRequested cdpCDESessionRequested = 110;
+    // A CDP CDE session state changed.
+    CDPCDESessionStateChanged cdpCDESessionStateChanged = 111;
+    // A CDP CDE session statement was executed.
+    CDPCDESessionStatementExecuted cdpCDESessionStatementExecuted = 112;
     // A CDP CML session start usage event.
-    CDPCMLSessionStartEvent cdpCMLsessionStartEvent = 109;
+    SessionStartEvent sessionStartEvent = 113;
     // A CDP CML engine stop usage event.
-    CDPCMLEngineStopEvent cdpCMLengineStopEvent = 110;
+    EngineStopEvent engineStopEvent = 114;
     // A CDP CML engine delete usage event.
-    CDPCMLEngineDeleteEvent cdpCMLengineDeleteEvent = 111;
+    EngineDeleteEvent engineDeleteEvent = 115;
     // A CDP CML engine heartbeat usage event.
-    CDPCMLEngineHeartBeatEvent cdpCMLengineHeartBeatEvent = 112;
+    EngineHeartBeatEvent engineHeartBeatEvent = 116;
     // A CDP CML job start event.
-    CDPCMLJobStartEvent cdpCMLjobStartEvent = 113;
+    JobStartEvent jobStartEvent = 117;
     // A CDP CML job created or modified event.
-    CDPCMLJobCreatedOrModifiedEvent cdpCMLjobCreatedOrModifiedEvent = 114;
+    JobCreatedOrModifiedEvent jobCreatedOrModifiedEvent = 118;
     // A CDP CML experiment started event.
-    CDPCMLExperimentStartEvent cdpCMLexperimentStartEvent = 115;
+    ExperimentStartEvent experimentStartEvent = 119;
     // A CDP CML model deployed event.
-    CDPCMLModelDeployedEvent cdpCMLmodelDeployedEvent = 116;
+    ModelDeployedEvent modelDeployedEvent = 120;
     // A CDP CML application deployed event.
-    CDPCMLApplicationDeployedEvent cdpCMLapplicationDeployedEvent = 117;
+    ApplicationDeployedEvent applicationDeployedEvent = 121;
     // A CDP CML project created event.
-    CDPCMLProjectCreatedEvent cdpCMLprojectCreatedEvent = 118;
+    ProjectCreatedEvent projectCreatedEvent = 122;
     // A CDP CML prototype completed event.
-    CDPCMLPrototypeCompletedEvent cdpCMLprototypeCompletedEvent = 119;
+    PrototypeCompletedEvent prototypeCompletedEvent = 123;
     // A CDP CML application created or modified event.
-    CDPCMLApplicationCreatedOrModifiedEvent cdpCMLapplicationCreatedOrModifiedEvent = 120;
+    ApplicationCreatedOrModifiedEvent applicationCreatedOrModifiedEvent = 124;
     // A CDP CML experiment event.
-    CDPCMLExperimentEvent cdpCMLexperimentEvent = 121;
+    ExperimentEvent experimentEvent = 125;
     // A CDP CML experiment run event.
-    CDPCMLExperimentRunEvent cdpCMLexperimentRunEvent = 122;
+    ExperimentRunEvent experimentRunEvent = 126;
     // A CDP CML data connection action event.
-    CDPCMLDataConnectionActionEvent cdpCMLdataConnectionActionEvent = 123;
+    DataConnectionActionEvent dataConnectionActionEvent = 127;
     // A CDP CML workspace login event.
-    CDPCMLLoginEvent cdpCMLLoginEvent = 124;
+    LoginEvent LoginEvent = 128;
     // A CDP CML workspace logout event.
-    CDPCMLLogoutEvent cdpCMLLogoutEvent = 125;
+    LogoutEvent LogoutEvent = 129;
     // A CDP CML worker start event.
-    CDPCMLWorkerStartEvent cdpCMLworkerStartEvent = 126;
+    WorkerStartEvent workerStartEvent = 130;
     // A CDP CML spark executor event.
-    CDPCMLSparkExecutorEvent cdpCMLSparkExecutorEvent = 127;
+    SparkExecutorEvent SparkExecutorEvent = 131;
+    // A CDP CML application metrics report event.
+    ApplicationMetricsReportEvent ApplicationMetricsReportEvent = 132;
+    // A CDP CML model V2 upload event.
+    ModelV2UploadedEvent modelV2UploadedEvent = 133;
   }
 }
 
@@ -702,7 +713,7 @@ message CDPDatalakeBackupRestoreComplete {
   int32 vertexIndexCollectionDuration = 12;
   // The duration taken to perform operation on the edgeIndexCollection collection.
   int32 edgeIndexCollectionDuration = 13;
-  // The duration taken to perform operation on the fulltextxIndexCollection collection.
+  // The duration taken to perform operation on the fulltextIndexCollection collection.
   int32 fulltextIndexCollectionDuration = 14;
   // The duration taken to perform operation on the rangerAuditsCollection collection.
   int32 rangerAuditsCollectionDuration = 15;
@@ -710,11 +721,11 @@ message CDPDatalakeBackupRestoreComplete {
   int32 vertexIndexCollectionDeleteDuration = 16;
   // The duration taken to perform deletion on the edgeIndexCollection collection.
   int32 edgeIndexCollectionDeleteDuration = 17;
-  // The duration taken to perform deletion on the fulltextxIndexCollection collection.
+  // The duration taken to perform deletion on the fulltextIndexCollection collection.
   int32 fulltextIndexCollectionDeleteDuration = 18;
   // The duration taken to perform deletion on the rangerAuditsCollection collection.
   int32 rangerAuditsCollectionDeleteDuration = 19;
-  // The duration taken to perform operation on the postgress database
+  // The duration taken to perform operation on the postgres databases.
   int32 databaseDuration = 20;
   // Operation type
   CDPDatalakeOperationType.Value operationType = 21;
@@ -723,6 +734,36 @@ message CDPDatalakeBackupRestoreComplete {
   // A failure message for the Datalake cluster. This will only be set if status is
   // *_FAILED.
   string failureReason = 23;
+  // The size in megabytes of the atlas audit events table.
+  uint64 atlasAuditsEventsSize = 24;
+  // The size in megabytes of the atlas Janus table.
+  uint64 atlasJanusSize = 25;
+  // The size in megabytes of the vertexIndexCollection.
+  uint64 vertexIndexCollectionSize = 26;
+  // The size in megabytes of the edgeIndexCollection.
+  uint64 edgeIndexCollectionSize = 27;
+  // The size in megabytes of the fulltextIndexCollection.
+  uint64 fulltextIndexCollectionSize = 28;
+  // The size in megabytes of the rangerAuditsCollection.
+  uint64 rangerAuditsCollectionSize = 29;
+  // The size in megabytes of the postgres databases.
+  uint64 databaseSize = 30;
+  // The predicted duration in minutes to perform operation on the atlas audit events table.
+  uint64 atlasAuditsEventsPredictedDuration = 31;
+  // The predicted duration in minutes to perform operation on the atlas janus table.
+  uint64 atlasJanusPredictedDuration = 32;
+  // The predicted duration in minutes to perform operation on the vertex index collection.
+  uint64 vertexIndexCollectionPredictedDuration = 33;
+  // The predicted duration in minutes to perform operation on the edge index collection.
+  uint64 edgeIndexCollectionPredictedDuration = 34;
+  // The predicted duration in minutes to perform operation on the fulltext index collection.
+  uint64 fulltextIndexCollectionPredictedDuration = 35;
+  // The predicted duration in minutes to perform operation on the ranger audits collection.
+  uint64 rangerAuditsCollectionPredictedDuration = 36;
+  // The predicted duration in minutes to perform operation on the postgres databases.
+  uint64 databasePredictedDuration = 37;
+  // The total predicted duration in minutes for the entire operation.
+  uint64 totalPredictedDuration = 38;
 }
 
 // The status of a CDP Cloudbreak workspace.
@@ -1103,6 +1144,8 @@ message CDPCMLWorkspaceNodeStatesHeartbeat {
   string cdpdVersion = 7;
   // The CML workspace version deployed.
   string workspaceVersion = 8;
+  // The status of the CML workspace
+  string workspaceStatus = 9;
 }
 
 message CDPCMLWorkspaceNodeState {
@@ -1354,6 +1397,8 @@ message CDPLiftieClusterNodeStatesHeartbeat {
   string liftieVersion = 7;
   // The Kubernetes version.
   string kubernetesVersion = 8;
+  // The cluster id
+  string clusterId = 9;
 }
 
 message CDPLiftieClusterNodeState {
@@ -1401,6 +1446,54 @@ message CDPLiftieClusterNodeCondition {
   string reason = 5;
   // Human readable string containing details about the last transition
   string message = 6;
+}
+
+// Summary of the state of a Liftie Cluster
+message CDPLiftieClusterNodeStatesHeartbeatSummary {
+  // The Compute Cluster CRN
+  string clusterCrn = 1;
+  // The cluster id
+  string clusterId = 2;
+  // The CDP environment CRN.
+  string environmentCrn = 3;
+  // CDP Control Plane Liftie Version.
+  string liftieVersion = 4;
+  // The Kubernetes version.
+  string kubernetesVersion = 5;
+  // workload CRN for which this cluster
+  string workloadCRN = 6;
+  // Summary of info for all the nodes
+  CDPLiftieClusterNodesSummary nodesSummary = 7;
+  // Summary info for the clusters metering related pods
+  CDPLiftieClusterMeteringPodsSummary meteringPodsSummary = 8;
+}
+
+message CDPLiftieClusterNodesSummary {
+  // Total number of nodes in the cluster
+  int32 numNodes = 1;
+  // Total number of metered nodes in the cluster
+  int32 numNodesMetered = 2;
+  // Total number of healthy metered nodes
+  int32 numNodesMeteredHealthy = 3;
+  // Total number of unhealthy metered
+  int32 numNodesMeteredUnhealthy = 4;
+  // Total number of healthy non-metered nodes
+  int32 numNodesNonmeteredHealthy = 5;
+  // Total number of unhealthy non-metered nodes
+  int32 numNodesNonmeteredUnhealthy = 6;
+  // The names of any unhealthy nodes
+  repeated string unhealthyNodes = 7;
+}
+
+message CDPLiftieClusterMeteringPodsSummary {
+  // Total number of fluentd pods
+  int32 numFluentdPods = 1;
+  // Total number of unhealthy fluentd pods
+  int32 numFluentdPodsUnhealthy = 2;
+  // Total number of metering pods
+  int32 numMeteringPods = 3;
+  // Total number of unhealthy metering pods
+  int32 numMeteringPodsUnhealthy = 4;
 }
 
 // The status of a CDP request
@@ -2207,6 +2300,10 @@ message CDPDFFlowDesignLifecycle {
   string username = 7;
   // Optional. Actor crn publishing the flow design to the flow catalog. Should only have a value for events coming from the control plane (CDPDFFlowDesignAction.PUBLISHED action)
   string actorCrn = 8;
+  // Optional. The crn of the basis flow version from which this draft flow was created.
+  string basisFlowVersionCrn = 9;
+  // Optional. The crn of the flow after it is successfully published into the flow catalog. (Only ever included for CDPDFFlowDesignAction.PUBLISHED action)
+  string publishedFlowVersionCrn = 10;
 }
 
 // The status of a CDP DataFlow service.
@@ -2801,6 +2898,18 @@ message AutoscaleScalingStatusType {
   }
 }
 
+//Autoscale scaling adjustment type
+message AutoscaleScalingAdjustmentType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Stop start scaling not used.
+    REGULAR = 1;
+    // Stop start scaling is used.
+    STOPSTART = 2;
+  }
+}
+
 //Autoscale Trigger Details
 message CDPAutoscaleTriggerDetails {
   // The CDP account ID of the datahub cluster.
@@ -2819,6 +2928,8 @@ message CDPAutoscaleTriggerDetails {
   string autoscalingAction = 7;
   // The status of the trigger
   AutoscaleScalingStatusType.Value autoscaleStatus = 8;
+  // The autoscaling scaling adjustment details.
+  AutoscaleScalingAdjustmentType.Value autoscaleScalingAdjustmentType = 9;
 }
 
 // Generated after autoscale has been triggered.
@@ -3246,6 +3357,8 @@ message CDPCDEServiceRequested {
   // Set of properties used while requesting CDE service. The format of this is a map serialized
   // into a string as json. e.g.:   "properties": "{\"prop1\":\"value1\",\"prop2\":\"value2\"}"
   string properties = 14;
+  // Kubernetes version of CDE service.
+  string kubernetesVersion = 16;
 }
 
 // Generated when the status of a CDE service changes.
@@ -3334,6 +3447,12 @@ message CDPCDEServiceUpgradeRequested {
   string fromVersion = 4;
   // Version CDE service was upgraded to.
   string toVersion = 5;
+  // Indicates if the kubernetes version was also upgraded.
+  bool kubernetesUpgrade = 6;
+  // Current kubernetes version of CDE cluster.
+  string currentKubernetesVersion = 7;
+  // Target kubernetes version of the CDE cluster.
+  string targetKubernetesVersion = 8;
 }
 
 
@@ -3373,6 +3492,107 @@ message CDPCDEJobCreated {
   CDPCDEEventType.Value eventType = 4;
   // cde-client header
   string client = 5;
+}
+
+// Generated when a CDP CDE session is requested.
+message CDPCDESessionRequested {
+  // Cluster ID(also known as service-id) of the CDP CDE service.
+  string clusterId = 1;
+  // Cluster CRN of the CDP CDE service.
+  string clusterCrn = 2;
+  // ID of the virtual cluster(vc) where the session was created.
+  string vcId = 3;
+  // Unique identifier of the session
+  string id = 4;
+  // Creator of the session.(hashed field)
+  string creator = 5;
+  // Description of the session. The field will be hashed to avoid getting any sensitive information.(hashed field)
+  string description = 6;
+  // Type of the session.
+  string type = 7;
+  // TTL of the session.
+  string ttl = 8;
+  // Details of an interactive spark session.
+  InteractiveSpark interactiveSpark = 9;
+  // Resources mounted to a session.
+  repeated CDPCDEResourceDetails resourceMounts = 10;
+  // Source of creation of the session. eg UI, cli, api etc.
+  string client = 11;
+  // Creation time
+  uint64 created = 12;
+}
+
+// Details specific to a CDE interactive spark session
+message InteractiveSpark {
+  // Driver Cores
+  int32 driverCores = 1;
+  // Executor Cores
+  int32 executorCores = 2;
+  // Driver Memory
+  string driverMemory = 3;
+  // Executor Memory
+  string executorMemory = 4;
+  // Number of executors
+  int32 numExecutors = 5;
+  // Number of jars used for session creation, tracks API parameter "jars" or cli parameter --jars
+  int32 numJars = 6;
+  // Number of files used for session creation, tracks API parameter "files" or cli parameter --files
+  int32 numFiles = 7;
+  // Number of python files used for session creation, tracks API parameter "pyFiles" or cli parameter --pyFiles
+  int32 numPyFiles = 8;
+  // Spark configs used with the session. The list of configs received with this usage event is whitelisted in CDE code.
+  map<string, string> conf = 9;
+  // Idle timeout for the session. The session is killed if it stays idle for this duration.
+  string IdleTimeout = 10;
+}
+
+
+message CDPCDESessionStateChanged {
+  // Cluster ID(also known as service-id) of the CDP CDE service.
+  string clusterId = 1;
+  // Cluster CRN of the CDP CDE service.
+  string clusterCrn = 2;
+  // ID of the virtual cluster(vc) where the session was created.
+  string vcId = 3;
+  // Unique identifier of the session
+  string id = 4;
+  // New state of the session.
+  string newState = 5;
+  // Old state of the session
+  string oldState = 6;
+  // Type of the session
+  string type = 7;
+  // Duration of the session(Termination time - creation time) in seconds
+  uint64 duration = 8;
+  // Client trigerring the status change event. nil if due to internal triggers.
+  string client = 9;
+}
+
+message CDPCDESessionStatementExecuted {
+  // Cluster ID(also known as service-id) of the CDP CDE service.
+  string clusterId = 1;
+  // Cluster CRN of the CDP CDE service.
+  string clusterCrn = 2;
+  // ID of the virtual cluster(vc) where the session was created.
+  string vcId = 3;
+  // Unique identifier of the session
+  string sessionId = 4;
+  // State of the session.
+  string sessionState = 5;
+  // Type of the session.
+  string type = 6;
+  // Number of characters in a statement.
+  int32 statementNumChars = 7;
+  // Statement submission time;
+  uint64  statementSubmittedTime = 8;
+  // Start time of the statement execution.
+  uint64 statementExecutionStarted = 9;
+  // Completed time of statement execution.
+  uint64  statementExecutionCompleted = 10;
+  // Source of execution of the statement. eg UI, cli, api etc.
+  string client = 11;
+  // Number of newlines in the statement
+  int32 statementNumNewLines = 12;
 }
 
 // Type for CDPCDE event generated.
@@ -3457,6 +3677,13 @@ message CDPCDEJobDetails {
   string logLevel = 11;
   // Indicates if the job was created using Pipelines Editor.
   bool pipelinesUsed = 12;
+  // Airflow specific job details
+  CDPCDEAirflowJobDetails airflow = 13;
+}
+
+message CDPCDEAirflowJobDetails {
+  // Airflow file mounts represents a list of file resources mounted for the airflow job
+  repeated CDPCDEResourceDetails fileMounts = 1;
 }
 
 // Details of a CDP CDE resource type.
@@ -3639,6 +3866,8 @@ message CDPDiagnosticResult {
     METERING_HB_FAILURE = 2;
     // Cluster Not Reachable
     CLUSTER_NOT_REACHABLE = 3;
+    // Metering monitoring is unavailable.
+    METERING_MONITORING_UNAVAILABLE = 4;
   }
 }
 
@@ -4035,7 +4264,7 @@ message CDPEnvironmentProxyConfigEditResult {
 }
 
 // CDP CML workload event status.
-enum CDPCMLWorkloadEventStatus {
+enum WorkloadEventStatus {
   SCHEDULING = 0;
   STARTING = 1;
   RUNNING = 2;
@@ -4048,7 +4277,7 @@ enum CDPCMLWorkloadEventStatus {
 }
 
 // CDP CML internal error codes for workloads.
-enum CDPCMLWorkloadInternalErrorCode {
+enum WorkloadInternalErrorCode {
   UNKNOWN_INTERNAL = 0;
   QUOTA_REQUESTS_CPU_NOT_SPECIFIED = 1;
   QUOTA_REQUESTS_MEMORY_NOT_SPECIFIED = 2;
@@ -4060,29 +4289,29 @@ enum CDPCMLWorkloadInternalErrorCode {
 }
 
 // CDP CML kubernetes engine status.
-message CDPCMLK8SEngineStatus {
+message K8SEngineStatus {
   string engineId = 1;
-  CDPCMLWorkloadEventStatus status = 2;
+  WorkloadEventStatus status = 2;
   string podIP = 3;
   bool oomKilled = 4;
   int32 k8sExitCode = 5;
   int32 k8sSignal = 6;
   string k8sMessage = 7;
   string k8sReason = 8;
-  google.protobuf.Timestamp k8sStartedAt = 9;
-  google.protobuf.Timestamp k8sFinishedAt = 10;
+  uint64 k8sStartedAt = 9;
+  uint64 k8sFinishedAt = 10;
   bool found = 11;
-  CDPCMLWorkloadInternalErrorCode internalErrorCode = 12;
+  WorkloadInternalErrorCode internalErrorCode = 12;
 }
 
 // CDP CML addons for runtimes.
-message CDPCMLUsageRuntimeAddon {
+message UsageRuntimeAddon {
   string uniqueName = 1;
   string component = 2;
 }
 
 // CDP CML workload runtimes.
-message CDPCMLUsageRuntime {
+message UsageRuntime {
   string kernel = 1;
   string editor = 2;
   string version = 3;
@@ -4090,7 +4319,7 @@ message CDPCMLUsageRuntime {
 }
 
 // A CDP CML session start usage event.
-message CDPCMLSessionStartEvent {
+message SessionStartEvent {
   reserved 1;
   float cpu = 2;
   float mem = 3;
@@ -4101,13 +4330,13 @@ message CDPCMLSessionStartEvent {
   string image = 9;
   string engineId = 10;
   bool cli = 11;
-  CDPCMLK8SEngineStatus k8SEngineStatus = 12;
-  CDPCMLUsageRuntime runtime = 13;
-  repeated CDPCMLUsageRuntimeAddon addons = 14;
+  K8SEngineStatus k8SEngineStatus = 12;
+  UsageRuntime runtime = 13;
+  repeated UsageRuntimeAddon addons = 14;
 }
 
 // A CDP CML engine stop usage event.
-message CDPCMLEngineStopEvent {
+message EngineStopEvent {
   uint32 userId = 1;
   uint32 projectId = 2;
   string engineId = 3;
@@ -4119,11 +4348,11 @@ message CDPCMLEngineStopEvent {
   }
   KilledByReason killedBy = 4;
   reserved 5;
-  CDPCMLK8SEngineStatus k8SEngineStatus = 6;
+  K8SEngineStatus k8SEngineStatus = 6;
 }
 
 // A CDP CML engine delete usage event.
-message CDPCMLEngineDeleteEvent {
+message EngineDeleteEvent {
   string engineId = 1;
   enum DeletedByReason {
     UNKNOWN = 0; //Default value
@@ -4136,17 +4365,17 @@ message CDPCMLEngineDeleteEvent {
     NO_APP = 7; //Pod is running, but application is no longer referring it as its dashboard
   }
   DeletedByReason deletedByReason = 2;
-  CDPCMLK8SEngineStatus k8SEngineStatus = 3;
+  K8SEngineStatus k8SEngineStatus = 3;
 }
 
 // A CDP CML engine heartbeat usage event.
-message CDPCMLEngineHeartBeatEvent {
+message EngineHeartBeatEvent {
   string engineId = 1;
   double engineAge = 2;
-  CDPCMLK8SEngineStatus k8SEngineStatus = 3;
+  K8SEngineStatus k8SEngineStatus = 3;
 }
 
-message CDPCMLJobStartEvent {
+message JobStartEvent {
   string type = 1;
   float cpu = 2;
   float mem = 3;
@@ -4157,13 +4386,13 @@ message CDPCMLJobStartEvent {
   reserved 8;
   string image = 9;
   string engineId = 10;
-  CDPCMLK8SEngineStatus k8SEngineStatus = 11;
+  K8SEngineStatus k8SEngineStatus = 11;
   uint32 jobId = 12;
-  CDPCMLUsageRuntime runtime = 13;
-  repeated CDPCMLUsageRuntimeAddon addons = 14;
+  UsageRuntime runtime = 13;
+  repeated UsageRuntimeAddon addons = 14;
 }
 
-message CDPCMLJobCreatedOrModifiedEvent {
+message JobCreatedOrModifiedEvent {
   uint32 userId = 1;
   uint32 projectId = 2;
   uint32 jobId = 3;
@@ -4178,7 +4407,7 @@ message CDPCMLJobCreatedOrModifiedEvent {
   string reportAttachments = 12;
 }
 
-message CDPCMLExperimentStartEvent {
+message ExperimentStartEvent {
   float cpu = 1;
   float mem = 2;
   uint32 gpu = 3;
@@ -4189,12 +4418,12 @@ message CDPCMLExperimentStartEvent {
   uint32 runId = 8;
   string image = 9;
   string engineId = 10;
-  CDPCMLK8SEngineStatus k8SEngineStatus = 11;
-  CDPCMLUsageRuntime runtime = 12;
-  repeated CDPCMLUsageRuntimeAddon addons = 13;
+  K8SEngineStatus k8SEngineStatus = 11;
+  UsageRuntime runtime = 12;
+  repeated UsageRuntimeAddon addons = 13;
 }
 
-message CDPCMLExperimentEvent {
+message ExperimentEvent {
   string projectId = 1;
   uint32 userId = 2;
   string experimentId = 3;
@@ -4202,7 +4431,7 @@ message CDPCMLExperimentEvent {
   string action = 5;
 }
 
-message CDPCMLExperimentRunEvent {
+message ExperimentRunEvent {
   string projectId = 1;
   uint32 userId = 2;
   string experimentId = 3;
@@ -4215,7 +4444,7 @@ message CDPCMLExperimentRunEvent {
   uint32 artifacts = 10;
 }
 
-message CDPCMLModelDeployedEvent {
+message ModelDeployedEvent {
   float cpu = 1;
   float mem = 2;
   uint32 gpu = 3;
@@ -4227,11 +4456,11 @@ message CDPCMLModelDeployedEvent {
   string image = 9;
   string functionName = 10;
   string engineId = 11;
-  CDPCMLUsageRuntime runtime = 12;
-  repeated CDPCMLUsageRuntimeAddon addons = 13;
+  UsageRuntime runtime = 12;
+  repeated UsageRuntimeAddon addons = 13;
 }
 
-message CDPCMLApplicationDeployedEvent {
+message ApplicationDeployedEvent {
   float cpu = 1;
   float mem = 2;
   uint32 gpu = 3;
@@ -4243,8 +4472,8 @@ message CDPCMLApplicationDeployedEvent {
   string subdomain = 9;
   string engineId = 10;
   uint32 applicationId = 11;
-  CDPCMLUsageRuntime runtime = 12;
-  repeated CDPCMLUsageRuntimeAddon addons = 13;
+  UsageRuntime runtime = 12;
+  repeated UsageRuntimeAddon addons = 13;
   enum EmbeddedApp {
     NONE = 0;
     CDV = 1;
@@ -4252,7 +4481,7 @@ message CDPCMLApplicationDeployedEvent {
   EmbeddedApp embeddedApp = 14;
 }
 
-message CDPCMLApplicationCreatedOrModifiedEvent {
+message ApplicationCreatedOrModifiedEvent {
   uint32 applicationId = 1;
   enum BypassAuthentication {
     NOT_CHANGED = 0;
@@ -4262,7 +4491,7 @@ message CDPCMLApplicationCreatedOrModifiedEvent {
   BypassAuthentication bypassAuthentication = 2;
 }
 
-message CDPCMLProjectCreatedEvent {
+message ProjectCreatedEvent {
   uint32 userId = 1;
   enum UserType {
     USER = 0;
@@ -4291,12 +4520,12 @@ message CDPCMLProjectCreatedEvent {
   uint32 forkedProjectId = 9;
 }
 
-message CDPCMLPrototypeCompletedEvent {
+message PrototypeCompletedEvent {
   uint32 projectId = 1;
   bool succeeded = 2;
 }
 
-message CDPCMLLoginEvent {
+message LoginEvent {
   uint32 userId = 1;
   string usernameHash = 2;
   bool isAdmin = 3;
@@ -4309,11 +4538,11 @@ message CDPCMLLoginEvent {
   AuthType authType = 5;
 }
 
-message CDPCMLLogoutEvent {
+message LogoutEvent {
   uint32 userId = 1;
 }
 
-message CDPCMLWorkerStartEvent {
+message WorkerStartEvent {
   uint32 userId = 1;
   uint32 projectId = 2;
   string engineId = 3;
@@ -4323,7 +4552,7 @@ message CDPCMLWorkerStartEvent {
   uint32 gpu = 7;
 }
 
-message CDPCMLSparkExecutorEvent {
+message SparkExecutorEvent {
   string executorId = 1;
   string action = 2;
   string masterId = 3;
@@ -4333,7 +4562,7 @@ message CDPCMLSparkExecutorEvent {
   string applicationId = 7;
 }
 
-message CDPCMLDataConnectionActionEvent {
+message DataConnectionActionEvent {
   uint32 userId = 1;
   uint32 projectId = 2;
   uint32 dataConnectionId = 3;
@@ -4345,4 +4574,21 @@ message CDPCMLDataConnectionActionEvent {
   string virtualWarehouseName = 9;
   string crn = 10;
   string engineId = 11;
+}
+
+message ApplicationMetricsReportEvent {
+  string engineId = 1;
+  uint32 applicationId = 2;
+  string eventType = 3;
+  string eventDetails = 4;
+}
+
+message ModelV2UploadedEvent {
+  string modelId = 1;
+  string modelVersionId = 2;
+  uint32 versionNumber = 3;
+  string experimentId = 4;
+  string runId = 5;
+  uint32 userId = 6;
+  uint32 projectId = 7;
 }
