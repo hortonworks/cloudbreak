@@ -75,43 +75,43 @@
         "cardinality":0,
         "refName":"solrHG",
         "roleConfigGroupsRefNames":[
-          "solr-SOLR_SERVER-BASE"
+          "solr-SOLR_SERVER-EXTERNAL"
         ]
       },
       {
         "cardinality":0,
         "refName":"storageHG",
         "roleConfigGroupsRefNames":[
-          "hbase-REGIONSERVER-BASE",
-          "hdfs-DATANODE-BASE"
+          "hbase-REGIONSERVER-EXTERNAL",
+          "hdfs-DATANODE-EXTERNAL"
         ]
       },
       {
         "cardinality":0,
         "refName":"kafkaHG",
         "roleConfigGroupsRefNames":[
-          "kafka-KAFKA_BROKER_EXTERNAL"
+          "kafka-KAFKA_BROKER-EXTERNAL"
         ]
       },
       {
         "cardinality":0,
         "refName":"razHG",
         "roleConfigGroupsRefNames":[
-          "ranger-RANGER_ADMIN_EXTERNAL"
+          "ranger-RANGER_ADMIN-EXTERNAL"
         ]
       },
       {
         "cardinality":0,
         "refName":"AtlasHG",
         "roleConfigGroupsRefNames":[
-          "atlas-ATLAS_SERVER_EXTERNAL"
+          "atlas-ATLAS_SERVER-EXTERNAL"
         ]
       },
       {
         "cardinality":0,
         "refName":"hmsHG",
         "roleConfigGroupsRefNames":[
-          "hive-HIVEMETASTORE-BASE"
+          "hive-HIVEMETASTORE-EXTERNAL"
         ]
       }
     ],
@@ -182,27 +182,9 @@
             ]
           },
           {
-            "base":true,
-            "refName":"ranger-RANGER_ADMIN_EXTERNAL",
-            "roleType":"RANGER_ADMIN",
-            "configs":[
-              {
-                "name":"role_config_suppression_ranger_admin_max_heap_size",
-                "value":"true"
-              },
-              {
-                "name":"ranger.audit.solr.no.replica",
-                "value":"2"
-              },
-              {
-                "name":"ranger.audit.solr.no.shards",
-                "value":"3"
-              },
-              {
-                "name":"ranger.audit.solr.max.shards.per.node",
-                "value":"2"
-              }
-            ]
+            "base":false,
+            "refName":"ranger-RANGER_ADMIN-EXTERNAL",
+            "roleType":"RANGER_ADMIN"
           }
         ],
         "serviceConfigs":[
@@ -268,34 +250,8 @@
             "roleType":"ATLAS_SERVER"
           },
           {
-            "base":true,
-            "configs":[
-              {
-                "name":"role_config_suppression_atlas_max_heap_size",
-                "value":"true"
-              },
-              {
-                "name":"atlas_authentication_method_file",
-                "value":"false"
-              },
-              {
-                "name":"atlas_solr_shards",
-                "value":"3"
-              },
-              {
-                "name":"atlas_solr_replication_factor",
-                "value":"2"
-              },
-              {
-                "name":"atlas_ssl_exclude_protocols",
-                "value":"TLSv1,TLSv1.1"
-              },
-              {
-                "name":"atlas_max_heap_size",
-                "value":8192
-              }
-            ],
-            "refName":"atlas-ATLAS_SERVER_EXTERNAL",
+            "base":false,
+            "refName":"atlas-ATLAS_SERVER-EXTERNAL",
             "roleType":"ATLAS_SERVER"
           }
         ],
@@ -327,7 +283,7 @@
             "configs":[
               {
                 "name":"solr_https_port",
-                "value":"8985"
+                "value":"8692"
               },
               {
                 "name":"solr_java_opts",
@@ -343,6 +299,11 @@
               }
             ],
             "refName":"solr-SOLR_SERVER-BASE",
+            "roleType":"SOLR_SERVER"
+          },
+          {
+            "base":false,
+            "refName":"solr-SOLR_SERVER-EXTERNAL",
             "roleType":"SOLR_SERVER"
           },
           {
@@ -389,6 +350,11 @@
                 "value":8589934592
               }
             ]
+          },
+          {
+            "base":false,
+            "refName":"hbase-REGIONSERVER-EXTERNAL",
+            "roleType":"REGIONSERVER"
           },
           {
             "base":true,
@@ -452,6 +418,11 @@
             ]
           },
           {
+            "base":false,
+            "refName":"hdfs-DATANODE-EXTERNAL",
+            "roleType":"DATANODE"
+          },
+          {
             "base":true,
             "refName":"hdfs-BALANCER-BASE",
             "roleType":"BALANCER"
@@ -506,8 +477,8 @@
             "roleType":"KAFKA_BROKER"
           },
           {
-            "base":true,
-            "refName":"kafka-KAFKA_BROKER_EXTERNAL",
+            "base":false,
+            "refName":"kafka-KAFKA_BROKER-EXTERNAL",
             "roleType":"KAFKA_BROKER"
           }
         ],
@@ -566,6 +537,11 @@
                 "value":8589934592
               }
             ]
+          },
+          {
+            "base":false,
+            "refName":"hive-HIVEMETASTORE-EXTERNAL",
+            "roleType":"HIVEMETASTORE"
           }
         ],
         "serviceType":"HIVE"
