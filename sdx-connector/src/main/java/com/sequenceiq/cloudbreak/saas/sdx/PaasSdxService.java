@@ -77,7 +77,13 @@ public class PaasSdxService extends AbstractSdxService<SdxClusterStatusResponse>
 
     @Override
     public StatusCheckResult getAvailabilityStatusCheckResult(SdxClusterStatusResponse status) {
-        return status.isAvailable() ? StatusCheckResult.AVAILABLE : StatusCheckResult.NOT_AVAILABLE;
+        if (status.isAvailable()) {
+            return StatusCheckResult.AVAILABLE;
+        } else if (status.isRollingUpgradeInProgress()) {
+            return StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS;
+        } else {
+            return StatusCheckResult.NOT_AVAILABLE;
+        }
     }
 
 }

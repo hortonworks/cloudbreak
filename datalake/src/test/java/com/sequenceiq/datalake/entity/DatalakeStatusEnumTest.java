@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.entity;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CERT_ROTATION_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CERT_ROTATION_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_CCM_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_CCM_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_FAILED;
@@ -52,6 +53,7 @@ class DatalakeStatusEnumTest {
                     entry(ENVIRONMENT_CREATED, PROVISIONING_FAILED), entry(EXTERNAL_DATABASE_CREATION_IN_PROGRESS, PROVISIONING_FAILED),
                     entry(STACK_DELETION_IN_PROGRESS, DELETE_FAILED), entry(EXTERNAL_DATABASE_DELETION_IN_PROGRESS, DELETE_FAILED),
                     entry(DELETE_REQUESTED, DELETE_FAILED), entry(REPAIR_IN_PROGRESS, REPAIR_FAILED), entry(CHANGE_IMAGE_IN_PROGRESS, DATALAKE_UPGRADE_FAILED),
+                    entry(DATALAKE_ROLLING_UPGRADE_IN_PROGRESS, DATALAKE_UPGRADE_FAILED),
                     entry(DATALAKE_UPGRADE_IN_PROGRESS, DATALAKE_UPGRADE_FAILED), entry(CERT_ROTATION_IN_PROGRESS, CERT_ROTATION_FAILED),
                     entry(RECOVERY_IN_PROGRESS, RECOVERY_FAILED), entry(DATALAKE_UPGRADE_CCM_IN_PROGRESS, DATALAKE_UPGRADE_CCM_FAILED),
                     entry(SALT_PASSWORD_ROTATION_IN_PROGRESS, SALT_PASSWORD_ROTATION_FAILED))

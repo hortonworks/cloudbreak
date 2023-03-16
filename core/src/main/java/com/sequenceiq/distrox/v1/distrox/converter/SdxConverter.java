@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedse
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @Component
 public class SdxConverter {
@@ -19,7 +20,8 @@ public class SdxConverter {
             LOGGER.info("We don't attach the cluster to any Datalake, because the environment has not SDX. So we continue the creation as simple WORKLOAD.");
             return null;
         }
-        if (!sdx.getStatus().isAvailable()) {
+        SdxClusterStatusResponse sdxStatus = sdx.getStatus();
+        if (!(sdxStatus.isRollingUpgradeInProgress() || sdxStatus.isAvailable())) {
             throw new BadRequestException(
                     String.format("Your current Environment %s contains one Data Lake the name of which is %s. " +
                             "This Data Lake should be in running/available state but currently it is in '%s' instead of Running. " +
@@ -28,7 +30,7 @@ public class SdxConverter {
                             "If your Data Lake has failed to provision please check our documentation " +
                             "https://docs.cloudera.com/management-console/cloud/data-lakes/topics/mc-data-lake.html or contact " +
                             "the Cloudera support to get some help or try to provision a new Data Lake with the " +
-                            "correct configuration.", sdx.getEnvironmentName(), sdx.getName(), sdx.getStatus()));
+                            "correct configuration.", sdx.getEnvironmentName(), sdx.getName(), sdxStatus));
         }
         return getSharedServiceV4Request(sdx);
     }

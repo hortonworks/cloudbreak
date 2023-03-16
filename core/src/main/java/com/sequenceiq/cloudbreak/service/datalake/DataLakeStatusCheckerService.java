@@ -36,7 +36,8 @@ public class DataLakeStatusCheckerService {
             sdxClientService
                     .getByEnvironmentCrn(stack.getEnvironmentCrn())
                     .forEach(sdxClusterResponse -> {
-                        if (!sdxClusterResponse.getStatus().isAvailable()) {
+                        SdxClusterStatusResponse status = sdxClusterResponse.getStatus();
+                        if (!(status.isRollingUpgradeInProgress() || status.isAvailable())) {
                             throw new BadRequestException("This action requires the Data Lake to be available, but the status is "
                                     + sdxClusterResponse.getStatusReason());
                         }

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ROLLING_OS_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ROLLING_UPGRADE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE_STARTED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS;
 
 import java.util.Optional;
@@ -91,8 +92,7 @@ public class SdxUpgradeService {
 
     public void upgradeRuntime(Long id, String imageId, boolean rollingUpgradeEnabled) {
         SdxCluster sdxCluster = sdxService.getById(id);
-        sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_IN_PROGRESS,
-                rollingUpgradeEnabled ? DATALAKE_ROLLING_UPGRADE_STARTED : DATALAKE_UPGRADE_STARTED, "Upgrading datalake runtime", sdxCluster);
+        sendRuntimeUpgradeNotification(rollingUpgradeEnabled, sdxCluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -104,6 +104,15 @@ public class SdxUpgradeService {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Upgrade failed on cluster: [%s]. Message: [%s]", sdxCluster.getClusterName(), exceptionMessage);
             throw new CloudbreakApiException(message, e);
+        }
+    }
+
+    private void sendRuntimeUpgradeNotification(boolean rollingUpgradeEnabled, SdxCluster sdxCluster) {
+        if (rollingUpgradeEnabled) {
+            sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_ROLLING_UPGRADE_IN_PROGRESS, DATALAKE_ROLLING_UPGRADE_STARTED, "Upgrading datalake runtime",
+                    sdxCluster);
+        } else {
+            sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_IN_PROGRESS, DATALAKE_UPGRADE_STARTED, "Upgrading datalake runtime", sdxCluster);
         }
     }
 
@@ -178,7 +187,7 @@ public class SdxUpgradeService {
     private void sendOsUpgradeNotification(boolean rollingUpgradeEnabled, SdxCluster cluster) {
         if (rollingUpgradeEnabled) {
             sdxStatusService.setStatusForDatalakeAndNotify(
-                    DATALAKE_UPGRADE_IN_PROGRESS, DATALAKE_ROLLING_OS_UPGRADE_STARTED, "Rolling OS upgrade started", cluster);
+                    DATALAKE_ROLLING_UPGRADE_IN_PROGRESS, DATALAKE_ROLLING_OS_UPGRADE_STARTED, "Rolling OS upgrade started", cluster);
         } else {
             sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_IN_PROGRESS, DATALAKE_OS_UPGRADE_STARTED, "OS upgrade started", cluster);
         }

@@ -304,6 +304,35 @@ class DistroXServiceTest {
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
     }
 
+    @Test
+    public void testIfDlRollingUpgradeInProgress() {
+        String envName = "someAwesomeEnvironment";
+        DistroXV1Request request = new DistroXV1Request();
+        request.setEnvironmentName(envName);
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setCrn("crn");
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
+        Workspace workspace = new Workspace();
+        Tenant tenant = new Tenant();
+        tenant.setName("test");
+        workspace.setTenant(tenant);
+        doNothing().when(fedRampModificationService).prepare(any(), any());
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
+        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
+                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS)));
+
+        underTest.post(request);
+
+        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
+    }
+
     private static VerificationMode calledOnce() {
         return times(1);
     }

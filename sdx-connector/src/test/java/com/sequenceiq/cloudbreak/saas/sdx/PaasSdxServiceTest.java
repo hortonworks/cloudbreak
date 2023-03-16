@@ -75,6 +75,8 @@ public class PaasSdxServiceTest {
         assertEquals(StatusCheckResult.AVAILABLE, underTest.getAvailabilityStatusCheckResult(SdxClusterStatusResponse.DATALAKE_BACKUP_INPROGRESS));
         assertEquals(StatusCheckResult.NOT_AVAILABLE, underTest.getAvailabilityStatusCheckResult(SdxClusterStatusResponse.RECOVERY_IN_PROGRESS));
         assertEquals(StatusCheckResult.NOT_AVAILABLE, underTest.getAvailabilityStatusCheckResult(SdxClusterStatusResponse.DATALAKE_UPGRADE_CCM_IN_PROGRESS));
+        assertEquals(StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS,
+                underTest.getAvailabilityStatusCheckResult(SdxClusterStatusResponse.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS));
     }
 
     private SdxClusterResponse getSdxClusterResponse() {

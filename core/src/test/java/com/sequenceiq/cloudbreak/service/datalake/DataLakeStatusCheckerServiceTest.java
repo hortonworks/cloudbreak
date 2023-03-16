@@ -66,6 +66,17 @@ public class DataLakeStatusCheckerServiceTest {
     }
 
     @Test
+    public void testValidateAvailableStateShouldNotThrowExceptionWhenRollingUpgradeInProgress() {
+        Stack stack = createStack();
+        List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS,
+                "Rolling upgrade in Progress");
+
+        when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
+
+        underTest.validateAvailableState(stack);
+    }
+
+    @Test
     public void testValidateAvailableStateShouldThrowExceptionWhenSdxIsNotAvailable() {
         Stack stack = createStack();
         List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,

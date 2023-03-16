@@ -8,10 +8,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -29,7 +27,8 @@ public class SdxConverterTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = SdxClusterStatusResponse.class, names = {"RUNNING", "DATALAKE_BACKUP_INPROGRESS"})
+    @EnumSource(value = SdxClusterStatusResponse.class, names = { "RUNNING", "DATALAKE_BACKUP_INPROGRESS", "DATALAKE_ROLLING_UPGRADE_IN_PROGRESS",
+            "DATALAKE_UPGRADE_PREPARATION_IN_PROGRESS" })
     public void testGetSharedServiceWhenSdxIsAvailable(SdxClusterStatusResponse status) {
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         sdxClusterResponse.setName("some-sdx");
@@ -57,11 +56,5 @@ public class SdxConverterTest {
                 " https://docs.cloudera.com/management-console/cloud/data-lakes/topics/mc-data-lake.html or" +
                 " contact the Cloudera support to get some help or try to provision a new Data Lake with the" +
                 " correct configuration.");
-    }
-
-    private StackStatus getStatus(Status status) {
-        StackStatus stackStatus = new StackStatus();
-        stackStatus.setStatus(status);
-        return stackStatus;
     }
 }
