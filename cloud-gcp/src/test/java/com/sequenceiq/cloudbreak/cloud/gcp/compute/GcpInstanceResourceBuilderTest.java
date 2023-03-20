@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -204,8 +203,8 @@ public class GcpInstanceResourceBuilderTest {
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(builder, "resourceNameService", resourceNameService);
         Network network = new Network(null);
-        cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
-                null, null, null, null, null, null);
+        cloudStack = new CloudStack(emptyList(), network, image, emptyMap(), emptyMap(), null,
+                null, null, null, null);
     }
 
     @Test
@@ -305,7 +304,7 @@ public class GcpInstanceResourceBuilderTest {
         context.addComputeResources(0L, buildableResources);
         cloudStack = new CloudStack(singletonList(group), new Network(null), image,
                 ImmutableMap.of(CLOUD_STACK_TYPE_PARAMETER, FREEIPA_STACK_TYPE), emptyMap(), null,
-                null, null, null, null, null, null);
+                null, null, null, null);
 
         // WHEN
         when(compute.instances()).thenReturn(instances);
@@ -359,7 +358,7 @@ public class GcpInstanceResourceBuilderTest {
 
         CloudStack cloudStack = new CloudStack(emptyList(), new Network(null), image,
                 emptyMap(), emptyMap(), null, null, null, null,
-                new SpiFileSystem("test", FileSystemType.GCS, List.of(cloudGcsView)), null, null);
+                new SpiFileSystem("test", FileSystemType.GCS, List.of(cloudGcsView)));
 
         Group group = newGroupWithParams(ImmutableMap.of(), cloudGcsView);
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);

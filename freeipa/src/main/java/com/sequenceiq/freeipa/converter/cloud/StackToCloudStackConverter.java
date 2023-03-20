@@ -108,6 +108,14 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return convert(stack, Collections.emptySet());
     }
 
+    public CloudStack convertForDownscale(Stack stack, Set<String> deleteRequestedInstances) {
+        return convert(stack, deleteRequestedInstances);
+    }
+
+    public CloudStack convertForTermination(Stack stack, String instanceId) {
+        return convert(stack, Collections.singleton(instanceId));
+    }
+
     public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
         Image image = imageConverter.convert(imageService.getByStack(stack));
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
@@ -123,8 +131,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
 
         return new CloudStack(instanceGroups, network, image, parameters,
                 getUserDefinedTags(stack), stack.getTemplate(), instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), null,
-                image.getUserdata().get(InstanceGroupType.GATEWAY), null);
+                instanceAuthentication.getPublicKey(), null);
     }
 
     public CloudInstance buildInstance(Stack stack, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,

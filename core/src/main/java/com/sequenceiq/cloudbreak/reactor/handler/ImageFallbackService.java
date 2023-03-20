@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.handler;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -20,11 +18,8 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Service
@@ -45,12 +40,6 @@ public class ImageFallbackService {
     private ImageService imageService;
 
     @Inject
-    private UserDataService userDataService;
-
-    @Inject
-    private StackService stackService;
-
-    @Inject
     private PlatformStringTransformer platformStringTransformer;
 
     public void fallbackToVhd(Long stackId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
@@ -69,18 +58,15 @@ public class ImageFallbackService {
         StatedImage image = imageCatalogService.getImage(stackView.getWorkspaceId(), currentImage.getImageCatalogUrl(),
                 currentImage.getImageCatalogName(), currentImage.getImageId());
         String imageName = imageService.determineImageNameByRegion(stackView.getCloudPlatform(), platformString, stackView.getRegion(), image.getImage());
-        Map<InstanceGroupType, String> userData = userDataService.getUserData(stackView.getId());
 
         component.setAttributes(new Json(new Image(imageName,
-                new HashMap<>(),
+                currentImage.getUserdata(),
                 currentImage.getOs(),
                 currentImage.getOsType(),
                 currentImage.getImageCatalogUrl(),
                 currentImage.getImageCatalogName(),
                 currentImage.getImageId(),
                 currentImage.getPackageVersions())));
-
-        userDataService.updateUserData(stackId, userData);
         componentConfigProviderService.store(component);
     }
 }

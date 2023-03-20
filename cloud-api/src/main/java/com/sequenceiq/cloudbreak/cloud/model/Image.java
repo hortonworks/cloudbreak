@@ -19,7 +19,6 @@ public class Image {
 
     private final String imageName;
 
-    @Deprecated
     private Map<InstanceGroupType, String> userdata;
 
     private final String os;
@@ -57,13 +56,15 @@ public class Image {
         return imageName;
     }
 
+    public String getUserDataByType(InstanceGroupType key) {
+        return userdata.get(key);
+    }
+
     public Map<InstanceGroupType, String> getUserdata() {
         return userdata;
     }
 
     public void setUserdata(Map<InstanceGroupType, String> userdata) {
-        // This is a deprecated field because of FedRAMP we moved this value into vault. Old clusters still
-        // using this value but the new clusters using stack.coreUserData and stack.gatewayUserData
         this.userdata = userdata;
     }
 

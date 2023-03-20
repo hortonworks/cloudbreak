@@ -5,7 +5,6 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 import java.util.Objects;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -17,16 +16,10 @@ import javax.persistence.SequenceGenerator;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 
-import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
-import com.sequenceiq.cloudbreak.service.secret.SecretValue;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
-
 @Entity(name = "image")
 @Audited
 @AuditTable("image_history")
-public class ImageEntity implements AccountIdAwareResource {
+public class ImageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "image_generator")
@@ -39,13 +32,7 @@ public class ImageEntity implements AccountIdAwareResource {
 
     private String imageName;
 
-    @Deprecated
     private String userdata;
-
-    // The new userdata field which stored in vault
-    @Convert(converter = SecretToString.class)
-    @SecretValue
-    private Secret gatewayUserdata = Secret.EMPTY;
 
     private String os;
 
@@ -61,8 +48,6 @@ public class ImageEntity implements AccountIdAwareResource {
     private String date;
 
     private String ldapAgentVersion;
-
-    private String accountId;
 
     public String getImageName() {
         return imageName;
@@ -112,10 +97,6 @@ public class ImageEntity implements AccountIdAwareResource {
         return userdata;
     }
 
-    public String getUserdataWrapper() {
-        return Strings.isNullOrEmpty(getGatewayUserdata()) ? getUserdata() : getGatewayUserdata();
-    }
-
     public void setUserdata(String userdata) {
         this.userdata = userdata;
     }
@@ -156,29 +137,6 @@ public class ImageEntity implements AccountIdAwareResource {
         this.ldapAgentVersion = ldapAgentVersion;
     }
 
-    public String getGatewayUserdata() {
-        return gatewayUserdata.getRaw();
-    }
-
-    public Secret getGatewayUserdataSecret() {
-        return gatewayUserdata;
-    }
-
-    public void setGatewayUserdata(String gatewayUserdata) {
-        if (gatewayUserdata != null) {
-            this.gatewayUserdata = new Secret(gatewayUserdata);
-        }
-    }
-
-    @Override
-    public String getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
-    }
-
     @Override
     public String toString() {
         return "ImageEntity{" +
@@ -192,7 +150,6 @@ public class ImageEntity implements AccountIdAwareResource {
                 ", imageCatalogName='" + imageCatalogName + '\'' +
                 ", date='" + date + '\'' +
                 ", ldapAgentVersion='" + ldapAgentVersion + '\'' +
-                ", accountId='" + accountId + '\'' +
                 '}';
     }
 
@@ -208,7 +165,6 @@ public class ImageEntity implements AccountIdAwareResource {
         }
     }
 
-    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     private boolean isFieldEquals(ImageEntity that) {
         return Objects.equals(id, that.id)
                 && Objects.equals(imageName, that.imageName)
@@ -219,13 +175,11 @@ public class ImageEntity implements AccountIdAwareResource {
                 && Objects.equals(imageId, that.imageId)
                 && Objects.equals(imageCatalogName, that.imageCatalogName)
                 && Objects.equals(ldapAgentVersion, that.ldapAgentVersion)
-                && Objects.equals(accountId, that.accountId)
                 && Objects.equals(date, that.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, imageName, userdata, os, osType, imageCatalogUrl, imageId,
-                imageCatalogName, date, ldapAgentVersion, accountId);
+        return Objects.hash(id, imageName, userdata, os, osType, imageCatalogUrl, imageId, imageCatalogName, date, ldapAgentVersion);
     }
 }
