@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -70,6 +72,9 @@ class StackDownscaleServiceTest {
 
     @Captor
     private ArgumentCaptor<Iterable<Resource>> resourcesCaptor;
+
+    @Captor
+    private ArgumentCaptor<Resource> resourceCaptor;
 
     @Test
     public void finishStackDownscaleAndSaveVolumeFQDNTest() throws TransactionService.TransactionExecutionException {
@@ -155,6 +160,49 @@ class StackDownscaleServiceTest {
         Iterable<Resource> resourcesCaptorValue = resourcesCaptor.getValue();
         Resource diskResource = resourcesCaptorValue.iterator().next();
         assertEquals(CommonStatus.DETACHED, diskResource.getResourceStatus());
+    }
+
+    @Test
+    public void finishStackDownscaleButMultipleVolumsetForTheSameFQDNSoCleanUpShouldHappen()
+            throws TransactionService.TransactionExecutionException {
+        StackScalingFlowContext stackScalingFlowContext = mock(StackScalingFlowContext.class);
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stackScalingFlowContext.getStack()).thenReturn(stack);
+        when(stackScalingFlowContext.isRepair()).thenReturn(true);
+        InstanceMetaData master = new InstanceMetaData();
+        master.setInstanceId("i-2222");
+        master.setDiscoveryFQDN("master1.cloudera.site");
+        master.setPrivateId(123L);
+        ArrayList<Resource> volumes = new ArrayList<>();
+        Resource volume1 = new Resource();
+        volumes.add(volume1);
+        volume1.setId(1L);
+        volume1.setInstanceId("i-1111");
+        volume1.setResourceStatus(CommonStatus.CREATED);
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az1", false, "",
+                new ArrayList<>(), 50, "gp2");
+        volumeSetAttributes.setDiscoveryFQDN("master1.cloudera.site");
+        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(volume1, VolumeSetAttributes.class);
+        Resource volume2 = new Resource();
+        volume2.setId(2L);
+        volumes.add(volume2);
+        volume2.setInstanceId("i-1122");
+        volume2.setResourceStatus(CommonStatus.CREATED);
+        VolumeSetAttributes volumeSetAttributes2 = new VolumeSetAttributes("az1", false, "",
+                new ArrayList<>(), 50, "gp2");
+        volumeSetAttributes2.setDiscoveryFQDN("master1.cloudera.site");
+        doReturn(Optional.of(volumeSetAttributes2)).when(resourceAttributeUtil).getTypedAttributes(volume2, VolumeSetAttributes.class);
+        when(resourceService.findByStackIdAndType(any(), any())).thenReturn(volumes);
+        when(instanceMetaDataService.getInstanceMetadataViewsByStackIdAndPrivateIds(1L, Set.of(123L))).thenReturn(List.of(master));
+        stackDownscaleService.finishStackDownscale(stackScalingFlowContext, Set.of(123L));
+        verify(resourceService).save(resourceCaptor.capture());
+        assertEquals(CommonStatus.FAILED, volume1.getResourceStatus());
+        Iterable<Resource> resourcesCaptorValue = resourceCaptor.getAllValues();
+        Iterator<Resource> resourceIterator = resourcesCaptorValue.iterator();
+        Resource diskResource1 = resourceIterator.next();
+        assertEquals(CommonStatus.FAILED, diskResource1.getResourceStatus());
+        assertFalse(resourceIterator.hasNext());
     }
 
 }
