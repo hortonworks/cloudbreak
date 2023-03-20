@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
@@ -28,6 +30,8 @@ import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @Configuration
 public class DetermineDatalakeDataSizesActions {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DetermineDatalakeDataSizesActions.class);
+
     @Inject
     private StackUpdater stackUpdater;
 
@@ -65,6 +69,7 @@ public class DetermineDatalakeDataSizesActions {
             protected void doExecute(DetermineDatalakeDataSizesContext context, DetermineDatalakeDataSizesSubmissionEvent payload,
                     Map<Object, Object> variables) {
                 Stack stack = stackService.getById(context.getStackId());
+                LOGGER.info("Submitting datalake data sizes info '{}' for cluster {}.", payload.getDataSizesResult(), stack.getResourceCrn());
                 String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 ThreadBasedUserCrnProvider.doAsInternalActor(
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
