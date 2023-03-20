@@ -8,6 +8,9 @@
     "cluster": {
       "blueprintName": "7.2.17 - Edge Flow Management Light Duty"
     },
+    "externalDatabase": {
+      "availabilityType": "NON_HA"
+    },
     "instanceGroups": [
       {
         "nodeCount": 1,
