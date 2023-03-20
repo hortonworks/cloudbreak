@@ -8,7 +8,8 @@ public class DetermineDatalakeDataSizesBaseEvent extends StackEvent {
     private final String operationId;
 
     @JsonCreator
-    public DetermineDatalakeDataSizesBaseEvent(@JsonProperty("selector") String selector, @JsonProperty("resourceId") Long stackId,
+    public DetermineDatalakeDataSizesBaseEvent(@JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
             @JsonProperty("operationId") String operationId) {
         super(selector, stackId);
         this.operationId = operationId;

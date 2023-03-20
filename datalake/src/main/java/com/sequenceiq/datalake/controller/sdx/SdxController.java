@@ -62,6 +62,7 @@ import com.sequenceiq.datalake.service.sdx.StorageValidationService;
 import com.sequenceiq.datalake.service.sdx.VerticalScaleService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRenewalService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRotationService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -140,6 +141,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxDeleteService sdxDeleteService;
+
+    @Inject
+    private SdxBackupRestoreService sdxBackupRestoreService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -495,7 +499,7 @@ public class SdxController implements SdxEndpoint {
     public void submitDatalakeDataSizesInternal(@TenantAwareParam String crn, String operationId, String dataSizesJson,
             @InitiatorUserCrn String initiatorUserCrn) {
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
-        sdxService.submitDatalakeDataSizes(sdxCluster, operationId, dataSizesJson);
+        sdxBackupRestoreService.submitDatalakeDataInfo(operationId, dataSizesJson, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     private SdxCluster getSdxClusterByName(String name) {
