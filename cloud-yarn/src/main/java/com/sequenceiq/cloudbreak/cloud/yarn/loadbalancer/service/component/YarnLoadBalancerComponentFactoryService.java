@@ -126,7 +126,7 @@ public class YarnLoadBalancerComponentFactoryService {
      */
     private String createLoadBalancerLaunchCommand(CloudStack cloudStack) {
         return String.format("/bootstrap/start-systemd '%s' '%s' '%s'",
-                Base64.getEncoder().encodeToString(cloudStack.getUserDataByType(InstanceGroupType.CORE).getBytes()),
+                Base64.getEncoder().encodeToString(cloudStack.getImage().getUserDataByType(InstanceGroupType.CORE).getBytes()),
                 cloudStack.getLoginUserName(), cloudStack.getPublicKey());
     }
 

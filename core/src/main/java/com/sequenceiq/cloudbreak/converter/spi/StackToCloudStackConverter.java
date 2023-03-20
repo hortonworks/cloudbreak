@@ -79,7 +79,6 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.TargetGroupPortProvider;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -90,7 +89,6 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -138,9 +136,6 @@ public class StackToCloudStackConverter {
     @Inject
     private TargetGroupPortProvider targetGroupPortProvider;
 
-    @Inject
-    private UserDataService userDataService;
-
     public CloudStack convert(StackDtoDelegate stack) {
         return convert(stack, Collections.emptySet());
     }
@@ -175,12 +170,9 @@ public class StackToCloudStackConverter {
         Map<String, String> parameters = buildCloudStackParameters(stack, environment);
         List<CloudLoadBalancer> cloudLoadBalancers = buildLoadBalancers(stack.getStack(), instanceGroups);
 
-        Map<InstanceGroupType, String> userData = userDataService.getUserData(stack.getId());
-
         return new CloudStack(instanceGroups, network, image, parameters, getUserDefinedTags(stack.getStack()), template,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                cloudFileSystem, cloudLoadBalancers, additionalCloudFileSystem,
-                userData.get(InstanceGroupType.GATEWAY), userData.get(InstanceGroupType.CORE));
+                cloudFileSystem, cloudLoadBalancers, additionalCloudFileSystem);
     }
 
     public List<CloudInstance> buildInstances(StackDtoDelegate stack, DetailedEnvironmentResponse environment) {

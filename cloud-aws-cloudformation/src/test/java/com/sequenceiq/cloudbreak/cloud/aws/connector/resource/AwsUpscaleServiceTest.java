@@ -169,7 +169,7 @@ class AwsUpscaleServiceTest {
         tags.put("owner", "cbuser");
         tags.put("created", "yesterday");
         CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), tags, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
@@ -229,7 +229,7 @@ class AwsUpscaleServiceTest {
         groups.add(worker);
 
         CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
 
@@ -307,7 +307,7 @@ class AwsUpscaleServiceTest {
         groups.add(worker);
 
         CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
 
@@ -392,7 +392,7 @@ class AwsUpscaleServiceTest {
         tags.put("owner", "cbuser");
         tags.put("created", "yesterday");
         CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), tags, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers, null, null);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -31,7 +30,6 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
@@ -56,9 +54,6 @@ public class StackImageService {
     private PlatformStringTransformer platformStringTransformer;
 
     @Inject
-    private UserDataService userDataService;
-
-    @Inject
     private StackDtoService stackDtoService;
 
     public void storeNewImageComponent(StackDtoDelegate stack, StatedImage targetImage) {
@@ -77,8 +72,7 @@ public class StackImageService {
                     stack.getPlatformVariant());
             String cloudPlatform = platform(stack.getCloudPlatform()).value().toLowerCase();
             String newImageName = imageService.determineImageName(cloudPlatform, platformString, stack.getRegion(), targetImage.getImage());
-            userDataService.updateUserData(stack.getId(), currentImage.getUserdata());
-            return new Image(newImageName, new HashMap<>(), targetImage.getImage().getOs(), targetImage.getImage().getOsType(),
+            return new Image(newImageName, currentImage.getUserdata(), targetImage.getImage().getOs(), targetImage.getImage().getOsType(),
                     targetImage.getImageCatalogUrl(), targetImage.getImageCatalogName(), targetImage.getImage().getUuid(),
                     targetImage.getImage().getPackageVersions());
         } catch (CloudbreakImageNotFoundException e) {

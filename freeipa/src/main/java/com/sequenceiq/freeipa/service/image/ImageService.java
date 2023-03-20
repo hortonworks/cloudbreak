@@ -31,7 +31,6 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.image.change.action.ImageRevisionReaderService;
 import com.sequenceiq.freeipa.repository.ImageRepository;
-import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 
 @Service
 public class ImageService {
@@ -58,9 +57,6 @@ public class ImageService {
     @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
 
-    @Inject
-    private UserDataService userDataService;
-
     public ImageEntity create(Stack stack, ImageSettingsRequest imageRequest) {
         Pair<ImageWrapper, String> imageWrapperAndNamePair = fetchImageWrapperAndName(stack, imageRequest);
         ImageEntity imageEntity = createImageEntity(stack, imageWrapperAndNamePair);
@@ -69,10 +65,9 @@ public class ImageService {
 
     private ImageEntity createImageEntity(Stack stack, Pair<ImageWrapper, String> imageWrapperAndNamePair) {
         ImageWrapper imageWrapper = imageWrapperAndNamePair.getLeft();
-        ImageEntity imageEntity = imageConverter.convert(stack.getAccountId(), imageWrapper.getImage());
+        ImageEntity imageEntity = imageConverter.convert(imageWrapper.getImage());
         imageEntity.setStack(stack);
         imageEntity.setImageName(imageWrapperAndNamePair.getRight());
-        imageEntity.setAccountId(stack.getAccountId());
         imageEntity.setImageCatalogUrl(imageWrapper.getCatalogUrl());
         imageEntity.setImageCatalogName(imageWrapper.getCatalogName());
         return imageEntity;
@@ -120,7 +115,6 @@ public class ImageService {
     private ImageEntity updateImageWithNewValues(Stack stack, ImageWrapper imageWrapper, String imageName) {
         ImageEntity imageEntity = imageRepository.getByStack(stack);
         imageEntity.setImageName(imageName);
-        imageEntity.setAccountId(stack.getAccountId());
         imageEntity.setImageId(imageWrapper.getImage().getUuid());
         imageEntity.setImageCatalogUrl(imageWrapper.getCatalogUrl());
         imageEntity.setImageCatalogName(imageWrapper.getCatalogName());
@@ -129,12 +123,11 @@ public class ImageService {
         return imageEntity;
     }
 
-    public void revertImageToRevision(String accountId, Long imageEntityId, Number revision) {
+    public void revertImageToRevision(Long imageEntityId, Number revision) {
         ImageEntity originalImageEntity = imageRevisionReaderService.find(imageEntityId, revision);
         LOGGER.info("Reverting to revision [{}] using {}", revision, originalImageEntity);
         ImageEntity imageEntity = imageRepository.findById(imageEntityId).get();
         imageEntity.setImageName(originalImageEntity.getImageName());
-        imageEntity.setAccountId(accountId);
         imageEntity.setImageId(originalImageEntity.getImageId());
         imageEntity.setImageCatalogName(originalImageEntity.getImageCatalogName());
         imageEntity.setImageCatalogUrl(originalImageEntity.getImageCatalogUrl());
@@ -155,7 +148,9 @@ public class ImageService {
     }
 
     public ImageEntity decorateImageWithUserDataForStack(Stack stack, String userdata) {
-        return userDataService.updateUserData(stack.getId(), userdata);
+        ImageEntity imageEntity = getByStack(stack);
+        imageEntity.setUserdata(userdata);
+        return imageRepository.save(imageEntity);
     }
 
     public ImageWrapper getImage(ImageSettingsRequest imageSettings, String region, String platform) {

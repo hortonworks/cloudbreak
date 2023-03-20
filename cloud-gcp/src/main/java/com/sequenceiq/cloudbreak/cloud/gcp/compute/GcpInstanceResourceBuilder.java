@@ -182,7 +182,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Items startupScript = new Items();
         startupScript.setKey("startup-script");
-        startupScript.setValue(cloudStack.getUserDataByType(group.getType()));
+        startupScript.setValue(cloudStack.getImage().getUserDataByType(group.getType()));
 
         metadata.getItems().add(sshMetaData);
         metadata.getItems().add(startupScript);

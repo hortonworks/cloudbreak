@@ -80,7 +80,7 @@ public class UserDataUpdateActions {
             @Override
             protected Selectable createRequest(StackContext context) {
                 Stack stack = context.getStack();
-                String userData = stack.getImage().getUserdataWrapper();
+                String userData = stack.getImage().getUserdata();
                 List<CloudResource> cloudResources = getCloudResources(stack.getId());
                 return new UserDataUpdateOnProviderRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         cloudResources, userData);
