@@ -77,4 +77,6 @@ public interface BlueprintTextProcessor {
 
     List<String> getHostTemplateNames();
 
+    List<String> getHostTemplateRoleNames(String groupName);
+
 }
