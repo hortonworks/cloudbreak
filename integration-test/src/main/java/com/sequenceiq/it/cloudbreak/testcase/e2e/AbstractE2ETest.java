@@ -21,6 +21,7 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
+import com.sequenceiq.it.cloudbreak.assertion.safelogic.SafeLogicAssertions;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -48,6 +49,9 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     @Inject
     private AzureCloudFunctionality azureCloudFunctionality;
 
+    @Inject
+    private SafeLogicAssertions safeLogicAssertions;
+
     @Override
     protected void setupTest(ITestResult testResult) {
         boolean shouldUseSpotInstances = spotUtil.shouldUseSpotInstancesForTest(testResult.getMethod().getConstructorOrMethod().getMethod());
@@ -64,10 +68,14 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     }
 
     @AfterMethod
-    public void tearDownSpotValidateTags(Object[] data) {
-        if (MapUtils.isEmpty(((TestContext) data[0]).getExceptionMap())) {
+    public void tearDownAbstract(Object[] data) {
+        TestContext testContext = (TestContext) data[0];
+        if (MapUtils.isEmpty(testContext.getExceptionMap())) {
             LOGGER.info("Validating default tags on the created and tagged test resources...");
-            ((TestContext) data[0]).getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, (TestContext) data[0]));
+            testContext.getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, testContext));
+
+            LOGGER.info("Validating SafeLogic installation of created resources...");
+            safeLogicAssertions.validate(testContext);
         }
         spotUtil.setUseSpotInstances(Boolean.FALSE);
     }

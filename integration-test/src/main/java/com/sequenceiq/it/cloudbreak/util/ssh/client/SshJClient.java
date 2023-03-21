@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -118,6 +121,12 @@ public class SshJClient {
             LOGGER.error("SSH fail on [{}] while executing command [{}]. {}", instanceIP, command, e.getMessage());
             throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + command + "].", e);
         }
+    }
+
+    protected Map<String, Pair<Integer, String>> executeCommands(Set<String> ipAddresses, String command) {
+        Map<String, Pair<Integer, String>> results = new HashMap<>();
+        ipAddresses.forEach(ipAddress -> results.put(ipAddress, executeCommand(ipAddress, command)));
+        return results;
     }
 
     private Session startSshSession(SSHClient ssh) throws ConnectionException, TransportException {

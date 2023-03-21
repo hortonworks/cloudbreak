@@ -119,7 +119,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
         createDefaultCredential(testContext);
     }
 
-    @AfterMethod(onlyForGroups = "azure_singlerg", dependsOnMethods = { "tearDown", "tearDownSpotValidateTags" })
+    @AfterMethod(onlyForGroups = "azure_singlerg", dependsOnMethods = { "tearDown", "tearDownAbstract"})
     public void singleResourceGroupTearDown(Object[] data) {
         LOGGER.info("Delete the '{}' resource group after test has been done!", resourceGroupForTest);
         deleteResourceGroupCreatedForEnvironment(resourceGroupForTest);
