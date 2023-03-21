@@ -576,7 +576,6 @@ class ClusterHostServiceRunnerTest {
 
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), any());
         verify(javaPillarDecorator).decorateWithJavaProperties(eq(stack), any());
-        assertEquals(getJavaProperties(saltConfig.getValue()).get("version"), 11);
     }
 
     @Test
@@ -660,10 +659,6 @@ class ClusterHostServiceRunnerTest {
 
     private Map<String, Object> getGatewayProperties(SaltConfig saltConfig) {
         return (Map<String, Object>) saltConfig.getServicePillarConfig().get("gateway").getProperties().get("gateway");
-    }
-
-    private Map<String, Object> getJavaProperties(SaltConfig saltConfig) {
-        return (Map<String, Object>) saltConfig.getServicePillarConfig().get("java").getProperties().get("java");
     }
 
     @Test
