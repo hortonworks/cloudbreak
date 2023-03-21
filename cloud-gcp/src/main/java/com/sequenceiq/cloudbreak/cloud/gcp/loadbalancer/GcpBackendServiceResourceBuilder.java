@@ -131,7 +131,7 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
         for (Group group : groups) {
             Backend backend = new Backend();
             String groupname = getResourceNameService()
-                    .resourceName(ResourceType.GCP_INSTANCE_GROUP, context.getName(), group.getName(), auth.getCloudContext().getId());
+                    .group(context.getName(), group.getName(), auth.getCloudContext().getId());
             backend.setGroup(String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT,
                     projectId, zone, groupname));
             backend.setBalancingMode(CONNECTION);

@@ -11,75 +11,23 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.gcp.service.naming.GcpInstanceGroupResourceName;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
-import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service("GcpResourceNameServiceV2")
 public class GcpResourceNameService extends CloudbreakResourceNameService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpResourceNameService.class);
 
     private static final String FIREWALL_INTERNAL_NAME_SUFFIX = "internal";
 
     private static final String FIREWALL_IN_NAME_SUFFIX = "in";
 
-    private static final int ATTACHED_DISKS_PART_COUNT = 4;
-
     private static final int INSTANCE_GROUP_NO_STACK_PART_COUNT = 2;
 
     private static final int INSTANCE_GROUP_WITH_STACK_PART_COUNT = 3;
 
-    private static final int INSTANCE_NAME_PART_COUNT = 3;
-
-    private static final int LOAD_BALANCER_WITH_PORT_NAME_PART_COUNT = 3;
-
     @Value("${cb.max.gcp.resource.name.length:}")
     private int maxResourceNameLength;
-
-    @Override
-    @SuppressWarnings("checkstyle:CyclomaticComplexity")
-    public String resourceName(ResourceType resourceType, Object... parts) {
-        String resourceName;
-
-        switch (resourceType) {
-            case GCP_NETWORK:
-                resourceName = gcpNetworkResourceName(parts);
-                break;
-            case GCP_SUBNET:
-                resourceName = gcpSubnetResourceName(parts);
-                break;
-            case GCP_FIREWALL_INTERNAL:
-                resourceName = stackBasedResourceWithSuffix(FIREWALL_INTERNAL_NAME_SUFFIX, parts);
-                break;
-            case GCP_FIREWALL_IN:
-                resourceName = stackBasedResourceWithSuffix(FIREWALL_IN_NAME_SUFFIX, parts);
-                break;
-            case GCP_RESERVED_IP:
-                resourceName = instanceName(parts);
-                break;
-            case GCP_INSTANCE:
-                resourceName = instanceName(parts);
-                break;
-            case GCP_DISK:
-                resourceName = instanceName(parts);
-                break;
-            case GCP_ATTACHED_DISKSET:
-                resourceName = attachedDiskResourceName(parts);
-                break;
-            case GCP_DATABASE:
-                resourceName = deploymentTemplateName(parts);
-                break;
-            case GCP_INSTANCE_GROUP:
-                resourceName = gcpGroupResourceName(parts);
-                break;
-            case GCP_BACKEND_SERVICE:
-            case GCP_HEALTH_CHECK:
-            case GCP_FORWARDING_RULE:
-                resourceName = gcpLoadBalancerWithPortResourceName(parts);
-                break;
-            default:
-                throw new IllegalStateException("Unsupported resource type: " + resourceType);
-        }
-        return resourceName;
-    }
 
     public GcpInstanceGroupResourceName decodeInstanceGroupResourceNameFromString(String cloudResourceName) {
         String[] parts = StringUtils.split(cloudResourceName, '-');
@@ -94,22 +42,17 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         throw new IllegalArgumentException("instance group name '{}' is not normalized, must follow the structure CONTEXT-GROUP-NUMBER");
     }
 
-    private String attachedDiskResourceName(Object[] parts) {
-        checkArgs(ATTACHED_DISKS_PART_COUNT, parts);
-        String cnt = String.valueOf(parts[ATTACHED_DISKS_PART_COUNT - 1]);
-        String name = instanceName(parts);
+    public String attachedDisk(String stackName, String groupName, Long privateId, int count) {
+        String name = instance(stackName, groupName, String.valueOf(privateId));
         name = trimHash(name);
-        name = appendPart(name, cnt);
+        name = appendPart(name, count);
         name = appendHash(name, new Date());
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
 
-    private String deploymentTemplateName(Object[] parts) {
-        checkArgs(2, parts);
+    public String deploymentTemplate(String stackName, Long stackId) {
         String deploymentName;
-        String stackName = String.valueOf(parts[0]);
-        String stackId = String.valueOf(parts[1]);
         deploymentName = normalize(stackName);
         deploymentName = adjustPartLength(deploymentName);
         deploymentName = appendHash(deploymentName, stackId);
@@ -117,27 +60,32 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         return deploymentName;
     }
 
-    private String instanceName(Object[] parts) {
-        checkArgs(INSTANCE_NAME_PART_COUNT, parts);
-        String name;
-        String stackName = String.valueOf(parts[0]);
-        String instanceGroupName = WordUtils.initials(String.valueOf(parts[1]).replaceAll("_", " "));
-        String privateId = String.valueOf(parts[2]);
+    public String instance(String stackName, String groupName, Long privateId) {
+        return instance(stackName, groupName, String.valueOf(privateId));
+    }
 
+    public String instance(String stackName, String groupName, String privateId) {
+        String name;
+        String instanceGroupName = WordUtils.initials(String.valueOf(groupName).replaceAll("_", " "));
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(instanceGroupName));
         name = appendPart(name, privateId);
         name = appendHash(name, new Date());
         name = adjustBaseLength(name, maxResourceNameLength);
-
         return name;
     }
 
-    private String stackBasedResourceWithSuffix(String suffix, Object[] parts) {
-        checkArgs(1, parts);
-        String stackName = String.valueOf(parts[0]);
-        LOGGER.debug("Generating stack based resource name with suffix. Stack {}; suffix {}", parts, suffix);
+    public String firewallIn(String stackName) {
+        return stackBasedResourceWithSuffix(FIREWALL_IN_NAME_SUFFIX, stackName);
+    }
+
+    public String firewallInternal(String stackName) {
+        return stackBasedResourceWithSuffix(FIREWALL_INTERNAL_NAME_SUFFIX, stackName);
+    }
+
+    private String stackBasedResourceWithSuffix(String suffix, String stackName) {
+        LOGGER.debug("Generating stack based resource name with suffix. Stack {}; suffix {}", stackName, suffix);
         String name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, suffix);
@@ -146,10 +94,8 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         return name;
     }
 
-    private String gcpNetworkResourceName(Object[] parts) {
-        checkArgs(1, parts);
+    public String network(String stackName) {
         String networkName;
-        String stackName = String.valueOf(parts[0]);
         networkName = normalize(stackName);
         networkName = adjustPartLength(networkName);
         networkName = appendHash(networkName, new Date());
@@ -157,10 +103,8 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         return networkName;
     }
 
-    private String gcpSubnetResourceName(Object[] parts) {
-        checkArgs(1, parts);
+    public String subnet(String stackName) {
         String subnetName;
-        String stackName = String.valueOf(parts[0]);
         subnetName = normalize(stackName);
         subnetName = adjustPartLength(subnetName);
         subnetName = appendHash(subnetName, new Date());
@@ -168,30 +112,21 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         return subnetName;
     }
 
-    private String gcpGroupResourceName(Object[] parts) {
-        checkArgs(INSTANCE_GROUP_WITH_STACK_PART_COUNT, parts);
+    public String group(String stackName, String groupName, Long stackId) {
         String name;
-        String stackName = String.valueOf(parts[0]);
-        String groupName = String.valueOf(parts[1]);
-        String datalake = String.valueOf(parts[2]);
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(groupName));
-        name = appendPart(name, normalize(datalake));
+        name = appendPart(name, normalize(stackId));
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
 
-    private String gcpLoadBalancerWithPortResourceName(Object[] parts) {
-        checkArgs(LOAD_BALANCER_WITH_PORT_NAME_PART_COUNT, parts);
+    public String loadBalancerWithPort(String stackName, LoadBalancerType loadBalancerType, Integer port) {
         String name;
-        String stackName = String.valueOf(parts[0]);
-        String lbType = String.valueOf(parts[1]);
-        String port = String.valueOf(parts[2]);
-
         name = normalize(stackName);
         name = adjustPartLength(name);
-        name = appendPart(name, normalize(lbType));
+        name = appendPart(name, normalize(loadBalancerType.name()));
         name = appendPart(name, port);
         name = appendHash(name, new Date());
         name = adjustBaseLength(name, maxResourceNameLength);

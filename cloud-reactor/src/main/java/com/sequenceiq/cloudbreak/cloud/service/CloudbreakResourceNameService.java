@@ -14,7 +14,8 @@ import org.springframework.util.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
-public abstract class CloudbreakResourceNameService implements ResourceNameService {
+public abstract class CloudbreakResourceNameService {
+
     public static final String DELIMITER = "-";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakResourceNameService.class);
@@ -22,12 +23,6 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
     private static final int MAX_PART_LENGTH = 20;
 
     private static final String DATE_FORMAT = "yyyyMMddHHmmss";
-
-    protected void checkArgs(int argCnt, Object... parts) {
-        if (null == parts || parts.length < argCnt) {
-            throw new IllegalStateException("No suitable name parts provided to generate resource name!");
-        }
-    }
 
     public String trimHash(String part) {
         if (part == null) {
@@ -93,6 +88,10 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
         }
     }
 
+    public String normalize(Long part) {
+        return normalize(String.valueOf(part));
+    }
+
     public String normalize(String part) {
         if (part == null) {
             throw new IllegalStateException("Resource name part must not be null!");
@@ -115,14 +114,25 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
         if (null == base && null == part) {
             throw new IllegalArgumentException("base and part are both null! Can't append them!");
         }
-        StringBuilder sb;
-        sb = null != base ? new StringBuilder(base).append(DELIMITER).append(part) : new StringBuilder(part);
+        StringBuilder sb = null != base ? new StringBuilder(base).append(DELIMITER).append(part) : new StringBuilder(part);
         return sb.toString();
+    }
+
+    protected String appendPart(String base, Long part) {
+        return appendPart(base, String.valueOf(part));
+    }
+
+    protected String appendPart(String base, int part) {
+        return appendPart(base, String.valueOf(part));
     }
 
     protected String appendHash(String name, Date timestamp) {
         DateFormat df = new SimpleDateFormat(DATE_FORMAT);
         return Joiner.on("").join(name, DELIMITER, df.format(timestamp));
+    }
+
+    protected String appendHash(String name, Long value) {
+        return appendHash(name, String.valueOf(value));
     }
 
     protected int getDefaultHashLength() {
@@ -134,6 +144,6 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
     }
 
     protected String appendHash(String name, String toBeHashed, int length) {
-        return Joiner.on("").join(name, DELIMITER, DigestUtils.md5DigestAsHex(toBeHashed.getBytes()).substring(0, length));
+        return Joiner.on("").join(name, DELIMITER, DigestUtils.md5DigestAsHex(String.valueOf(toBeHashed).getBytes()).substring(0, length));
     }
 }

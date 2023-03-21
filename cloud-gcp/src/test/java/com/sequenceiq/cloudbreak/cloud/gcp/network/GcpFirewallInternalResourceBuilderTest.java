@@ -82,7 +82,7 @@ public class GcpFirewallInternalResourceBuilderTest {
 
         when(gcpContext.getName()).thenReturn("name");
         when(gcpStackUtil.noFirewallRules(network)).thenReturn(false);
-        when(resourceNameService.resourceName(any(ResourceType.class), any())).thenReturn("test");
+        when(resourceNameService.firewallInternal(any())).thenReturn("test");
 
         CloudResource cloudResource = underTest.create(gcpContext, authenticatedContext, network);
 

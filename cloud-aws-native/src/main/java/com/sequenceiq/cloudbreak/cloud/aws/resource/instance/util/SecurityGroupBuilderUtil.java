@@ -68,7 +68,7 @@ public class SecurityGroupBuilderUtil {
         CreateSecurityGroupRequest request = CreateSecurityGroupRequest.builder()
                 .description("Allow access from web and bastion as well as outbound HTTP and HTTPS traffic")
                 .vpcId(awsNetworkView.getExistingVpc())
-                .groupName(awsResourceNameService.resourceName(ResourceType.AWS_SECURITY_GROUP, context.getName(), group.getName(), context.getId()))
+                .groupName(awsResourceNameService.securityGroup(context.getName(), group.getName(), context.getId()))
                 .tagSpecifications(awsTaggingService.prepareEc2TagSpecification(group.getTags(),
                         software.amazon.awssdk.services.ec2.model.ResourceType.SECURITY_GROUP))
                 .build();

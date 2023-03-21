@@ -19,6 +19,7 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpFirewallInResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -84,7 +85,7 @@ public class GcpFirewallInResourceBuilderTest {
 
         when(gcpContext.getName()).thenReturn("name");
         when(gcpStackUtil.noFirewallRules(network)).thenReturn(false);
-        when(resourceNameService.resourceName(any(ResourceType.class), any())).thenReturn("test");
+        when(resourceNameService.firewallIn(any())).thenReturn("test");
 
         CloudResource cloudResource = underTest.create(gcpContext, authenticatedContext, group, network);
 

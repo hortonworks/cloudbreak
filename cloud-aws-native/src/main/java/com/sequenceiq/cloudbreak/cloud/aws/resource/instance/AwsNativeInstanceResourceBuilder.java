@@ -91,7 +91,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
-        String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), cloudContext.getId(), privateId);
+        String resourceName = getResourceNameService().nativeInstance(cloudContext.getName(), group.getName(), cloudContext.getId(), privateId);
         return singletonList(CloudResource.builder()
                 .withGroup(group.getName())
                 .withType(resourceType())

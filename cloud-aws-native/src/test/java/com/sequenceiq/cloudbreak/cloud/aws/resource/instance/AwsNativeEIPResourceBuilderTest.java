@@ -103,7 +103,7 @@ public class AwsNativeEIPResourceBuilderTest {
         when(cloudInstance.getSubnetId()).thenReturn(subnetId);
         when(awsNetworkService.isMapPublicOnLaunch(List.of(subnetId), amazonEc2Client)).thenReturn(true);
         when(cloudContext.getName()).thenReturn(name);
-        when(resourceNameService.resourceName(ResourceType.AWS_RESERVED_IP, name, groupName, privateId)).thenReturn(resName);
+        when(resourceNameService.eip(name, groupName, privateId)).thenReturn(resName);
 
         List<CloudResource> actual = underTest.create(awsContext, cloudInstance, privateId, ac, group, image);
 
@@ -128,7 +128,7 @@ public class AwsNativeEIPResourceBuilderTest {
 
         Assertions.assertEquals(0L, actual.size());
         verify(awsNetworkService).isMapPublicOnLaunch(List.of(subnetId), amazonEc2Client);
-        verify(resourceNameService, never()).resourceName(ResourceType.AWS_RESERVED_IP, name, groupName, privateId);
+        verify(resourceNameService, never()).eip(name, groupName, privateId);
     }
 
     @Test
@@ -143,7 +143,7 @@ public class AwsNativeEIPResourceBuilderTest {
 
         Assertions.assertEquals(0L, actual.size());
         verify(awsNetworkService, never()).isMapPublicOnLaunch(List.of(subnetId), amazonEc2Client);
-        verify(resourceNameService, never()).resourceName(ResourceType.AWS_RESERVED_IP, name, groupName, privateId);
+        verify(resourceNameService, never()).eip(name, groupName, privateId);
     }
 
     @Test

@@ -72,7 +72,7 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
 
             boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(List.of(instance.getSubnetId()), amazonEC2Client);
             if (mapPublicIpOnLaunch) {
-                String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
+                String resourceName = getResourceNameService().eip(cloudContext.getName(), group.getName(), privateId);
                 return singletonList(CloudResource.builder()
                         .withGroup(group.getName())
                         .withType(resourceType())

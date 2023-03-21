@@ -42,7 +42,7 @@ public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBu
         Integer hcPort = loadBalancer.getPortToTargetGroupMapping().keySet().stream().map(TargetGroupPortPair::getHealthCheckPort).findFirst().orElse(KNOX_PORT);
         if (!context.getNoPublicIp()) {
             String resourceName =
-                    getResourceNameService().resourceName(resourceType(), auth.getCloudContext().getName(), loadBalancer.getType(), hcPort.toString());
+                    getResourceNameService().instance(auth.getCloudContext().getName(), loadBalancer.getType().name(), hcPort.toString());
             return List.of(CloudResource.builder().withType(resourceType())
                 .withName(resourceName)
                 .build());

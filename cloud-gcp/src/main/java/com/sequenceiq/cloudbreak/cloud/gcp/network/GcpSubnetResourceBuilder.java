@@ -33,7 +33,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
         String resourceName = gcpStackUtil.isExistingSubnet(network) ?
                 gcpStackUtil.getSubnetId(network) :
-                getResourceNameService().resourceName(resourceType(), context.getName());
+                getResourceNameService().subnet(context.getName());
         return createNamedResource(resourceType(), resourceName, null);
     }
 

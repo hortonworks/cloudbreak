@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.group;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -75,7 +76,7 @@ public class AwsSecurityGroupResourceBuilderTest {
     @Test
     public void testCreateWhenSecurityIdNull() {
         when(awsContext.getLocation()).thenReturn(Location.location(Region.region(REGION_NAME), AvailabilityZone.availabilityZone(AZ)));
-        when(resourceNameService.resourceName(any(), any())).thenReturn("groupId");
+        when(resourceNameService.securityGroup(any(), any(), anyLong())).thenReturn("groupId");
         when(group.getSecurity()).thenReturn(security);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(security.getCloudSecurityId()).thenReturn(null);

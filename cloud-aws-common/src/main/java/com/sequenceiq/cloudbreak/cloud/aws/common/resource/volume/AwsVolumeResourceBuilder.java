@@ -205,7 +205,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         return CloudResource.builder()
                 .withPersistent(true)
                 .withType(resourceType())
-                .withName(getResourceNameService().resourceName(resourceType(), stackName, groupName, privateId))
+                .withName(getResourceNameService().attachedDisk(stackName, groupName, privateId))
                 .withAvailabilityZone(targetAvailabilityZone)
                 .withGroup(group.getName())
                 .withStatus(CommonStatus.REQUESTED)

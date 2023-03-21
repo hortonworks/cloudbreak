@@ -43,7 +43,7 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
         List<Integer> healthPorts = loadBalancer.getPortToTargetGroupMapping().keySet().stream().map(TargetGroupPortPair::getHealthCheckPort)
                 .distinct().collect(Collectors.toList());
         for (Integer healthCheckPort : healthPorts) {
-            String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
+            String resourceName = getResourceNameService().loadBalancerWithPort(context.getName(), loadBalancer.getType(), healthCheckPort);
             Map<String, Object> parameters = Map.of(HCPORT, healthCheckPort);
             resources.add(CloudResource.builder()
                     .withType(resourceType())
