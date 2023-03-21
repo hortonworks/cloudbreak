@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.gcp.group;
+package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
 import static com.sequenceiq.common.api.type.ResourceType.GCP_FIREWALL_IN;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -27,7 +27,7 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpNetworkResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.group.AbstractGcpGroupBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -54,7 +54,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         if (gcpStackUtil.noFirewallRules(network)) {
             throw new ResourceNotNeededException("Firewall rules won't be created.");
         }
-        String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
+        String resourceName = getResourceNameService().firewallIn(context.getName());
         return createNamedResource(resourceType(), resourceName, null);
     }
 

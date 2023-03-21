@@ -60,7 +60,7 @@ public class GcpSubnetResourceBuilderTest {
         Network network = mock(Network.class);
 
         when(gcpStackUtil.isExistingSubnet(network)).thenReturn(false);
-        when(resourceNameService.resourceName(any(ResourceType.class), any())).thenReturn("test");
+        when(resourceNameService.subnet(any())).thenReturn("test");
 
         CloudResource cloudResource = underTest.create(gcpContext, authenticatedContext, network);
 

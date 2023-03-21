@@ -43,7 +43,7 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeGroupBuild
         String availabilityZone = context.getLocation().getAvailabilityZone().value();
         CloudResource ret = null;
         if (securityGroupId == null) {
-            securityGroupId = getResourceNameService().resourceName(resourceType(), context.getName(), group.getName(), cloudContext.getId());
+            securityGroupId = getResourceNameService().securityGroup(context.getName(), group.getName(), cloudContext.getId());
             ret = createNamedResource(resourceType(), securityGroupId, availabilityZone);
         } else {
             LOGGER.info("Security group id exists with id: {}", securityGroupId);

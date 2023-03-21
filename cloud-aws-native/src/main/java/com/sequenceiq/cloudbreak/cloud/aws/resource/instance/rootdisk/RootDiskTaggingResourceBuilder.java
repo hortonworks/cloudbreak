@@ -37,7 +37,7 @@ public class RootDiskTaggingResourceBuilder extends AbstractAwsNativeComputeBuil
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
-        String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), auth.getCloudContext().getId(), group.getName(),
+        String resourceName = getResourceNameService().rootDisk(context.getName(), auth.getCloudContext().getId(), group.getName(),
                 privateId);
         return singletonList(CloudResource.builder()
                 .withGroup(group.getName())

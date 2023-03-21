@@ -150,6 +150,7 @@ public class GcpBackendServiceResourceBuilderTest {
         when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
 
         when(gcpContext.getCompute()).thenReturn(compute);
+        when(gcpContext.getName()).thenReturn("stackName");
         when(gcpContext.getProjectId()).thenReturn("id");
         when(gcpContext.getLoadBalancerResources(any())).thenReturn(List.of(hcResource));
         when(gcpContext.getLocation()).thenReturn(location);
@@ -210,6 +211,7 @@ public class GcpBackendServiceResourceBuilderTest {
         when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
 
         when(gcpContext.getCompute()).thenReturn(compute);
+        when(gcpContext.getName()).thenReturn("stackName");
         when(gcpContext.getProjectId()).thenReturn("id");
         when(gcpContext.getLoadBalancerResources(any())).thenReturn(List.of(hcResource));
         when(gcpContext.getLocation()).thenReturn(location);

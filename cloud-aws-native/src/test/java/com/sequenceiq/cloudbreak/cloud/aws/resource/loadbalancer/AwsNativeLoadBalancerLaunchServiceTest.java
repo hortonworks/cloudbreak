@@ -162,7 +162,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         AwsLoadBalancer loadBalancer = mock(AwsLoadBalancer.class);
         when(loadBalancer.getScheme()).thenReturn(AwsLoadBalancerScheme.INTERNAL);
 
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(LB_NAME_INTERNAL)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         CloudResource loadBalancerResource = CloudResource.builder()
@@ -196,7 +196,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     void testLaunchLoadBalancerResourcesWhenLoadBalancerCouldNotBeCreated() {
         CloudStack stack = getCloudStack();
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
@@ -210,7 +210,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     void testLaunchLoadBalancerResourcesWhenLoadBalancerAlreadyExistsWithNameAndTargetGroupCouldNotBeCreated() {
         CloudStack stack = getCloudStack();
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         AwsServiceException loadBalancerDuplicatedExc = AwsServiceException.builder()
                 .message(DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE)
@@ -222,7 +222,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         DescribeLoadBalancersResponse loadBalancerResponse = DescribeLoadBalancersResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.describeLoadBalancers(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
         when(loadBalancingClient.createTargetGroup(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
@@ -241,14 +241,14 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     void testLaunchLoadBalancerResourcesWhenLoadBalancerTargetGroupCouldNotBeCreated() {
         CloudStack stack = getCloudStack();
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
         when(loadBalancingClient.createTargetGroup(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
@@ -267,14 +267,14 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     void testLaunchLoadBalancerResourcesWhenLoadBalancerListenerCouldNotBeCreated() {
         CloudStack stack = getCloudStack();
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
@@ -306,14 +306,14 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     void testLaunchLoadBalancerResourcesWhenTargetGroupAlreadyExistsWithNameAndLoadBalancerListenerCouldNotBeCreated() {
         CloudStack stack = getCloudStack();
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
@@ -350,14 +350,14 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     void testLaunchLoadBalancerResourcesWhenLoadBalancerTargetsCouldNotBeRegistered() {
         CloudStack stack = getCloudStack();
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
@@ -395,14 +395,14 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     void testLaunchLoadBalancerResourcesWhenListenerAlreadyExistsAndLoadBalancerTargetsCouldNotBeRegistered() {
         CloudStack stack = getCloudStack();
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
+        when(resourceNameService.loadBalancer(STACK_NAME, INTERNAL)).thenReturn(LB_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(LB_NAME_INTERNAL_NEW)).thenReturn(LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
         LoadBalancer loadBalancer = LoadBalancer.builder().loadBalancerArn("anARN").build();
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, INTERNAL, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, INTERNAL, USER_FACING_PORT))
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(resourceNameService.trimHash(TG_NAME_INTERNAL_NEW)).thenReturn(TG_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
@@ -447,7 +447,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CloudStack stack = getCloudStack();
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer(awsLoadBalancerScheme)));
         String lbNameNew = getLbName(awsLoadBalancerScheme);
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, awsLoadBalancerScheme.resourceName())).thenReturn(lbNameNew);
+        when(resourceNameService.loadBalancer(STACK_NAME, awsLoadBalancerScheme.resourceName())).thenReturn(lbNameNew);
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(getLbNameNoHash(awsLoadBalancerScheme));
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
@@ -455,8 +455,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResponse loadBalancerResponse = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResponse);
         String tgNameNew = getTgName(awsLoadBalancerScheme);
-        when(resourceNameService.resourceName(
-                ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, awsLoadBalancerScheme.resourceName(), USER_FACING_PORT)).thenReturn(tgNameNew);
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, awsLoadBalancerScheme.resourceName(), USER_FACING_PORT)).thenReturn(tgNameNew);
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(getTgNameNoHash(awsLoadBalancerScheme));
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
@@ -500,7 +499,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 getAwsLoadBalancer(internal ? AwsLoadBalancerScheme.INTERNAL : AwsLoadBalancerScheme.INTERNET_FACING)));
         String scheme = internal ? INTERNAL : EXTERNAL;
         String lbNameNew = internal ? LB_NAME_INTERNAL_NEW : LB_NAME_EXTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, scheme)).thenReturn(lbNameNew);
+        when(resourceNameService.loadBalancer(STACK_NAME, scheme)).thenReturn(lbNameNew);
         String lbName = internal ? LB_NAME_INTERNAL : LB_NAME_EXTERNAL;
         String lbNameNoHash = internal ? LB_NAME_INTERNAL_NO_HASH : LB_NAME_EXTERNAL_NO_HASH;
         when(resourceNameService.trimHash(lbName)).thenReturn(lbNameNoHash);
@@ -513,7 +512,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of(loadBalancerResource));
         String tgNameNew = internal ? TG_NAME_INTERNAL_NEW : TG_NAME_EXTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, scheme, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, scheme, USER_FACING_PORT))
                 .thenReturn(tgNameNew);
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(internal ? TG_NAME_INTERNAL_NO_HASH : TG_NAME_EXTERNAL_NO_HASH);
         when(resourceRetriever
@@ -552,7 +551,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 getAwsLoadBalancer(existingInternal ? AwsLoadBalancerScheme.INTERNET_FACING : AwsLoadBalancerScheme.INTERNAL)));
         String schemeNew = existingInternal ? EXTERNAL : INTERNAL;
         String lbNameNew = existingInternal ? LB_NAME_EXTERNAL_NEW : LB_NAME_INTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, schemeNew)).thenReturn(lbNameNew);
+        when(resourceNameService.loadBalancer(STACK_NAME, schemeNew)).thenReturn(lbNameNew);
         String lbName = existingInternal ? LB_NAME_INTERNAL : LB_NAME_EXTERNAL;
         when(resourceNameService.trimHash(lbName)).thenReturn(existingInternal ? LB_NAME_INTERNAL_NO_HASH : LB_NAME_EXTERNAL_NO_HASH);
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(existingInternal ? LB_NAME_EXTERNAL_NO_HASH : LB_NAME_INTERNAL_NO_HASH);
@@ -568,7 +567,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, schemeNew, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT))
                 .thenReturn(tgNameNew);
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(existingInternal ? TG_NAME_EXTERNAL_NO_HASH : TG_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
@@ -617,7 +616,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 getAwsLoadBalancer(internal ? AwsLoadBalancerScheme.INTERNAL : AwsLoadBalancerScheme.INTERNET_FACING)));
         String scheme = internal ? INTERNAL : EXTERNAL;
         String lbNameNew = internal ? LB_NAME_INTERNAL_NEW : LB_NAME_EXTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, scheme)).thenReturn(lbNameNew);
+        when(resourceNameService.loadBalancer(STACK_NAME, scheme)).thenReturn(lbNameNew);
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(internal ? LB_NAME_INTERNAL_NO_HASH : LB_NAME_EXTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
@@ -634,7 +633,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID))
                 .thenReturn(List.of(targetGroupResource));
         String tgNameNew = internal ? TG_NAME_INTERNAL_NEW : TG_NAME_EXTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, scheme, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, scheme, USER_FACING_PORT))
                 .thenReturn(tgNameNew);
         String tgNameNoHash = internal ? TG_NAME_INTERNAL_NO_HASH : TG_NAME_EXTERNAL_NO_HASH;
         when(resourceNameService.trimHash(tgName)).thenReturn(tgNameNoHash);
@@ -675,7 +674,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 getAwsLoadBalancer(existingInternal ? AwsLoadBalancerScheme.INTERNET_FACING : AwsLoadBalancerScheme.INTERNAL)));
         String schemeNew = existingInternal ? EXTERNAL : INTERNAL;
         String lbNameNew = existingInternal ? LB_NAME_EXTERNAL_NEW : LB_NAME_INTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, schemeNew)).thenReturn(lbNameNew);
+        when(resourceNameService.loadBalancer(STACK_NAME, schemeNew)).thenReturn(lbNameNew);
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(existingInternal ? LB_NAME_EXTERNAL_NO_HASH : LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
@@ -692,7 +691,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID))
                 .thenReturn(List.of(targetGroupResource));
         String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, schemeNew, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT))
                 .thenReturn(tgNameNew);
         when(resourceNameService.trimHash(tgName)).thenReturn(existingInternal ? TG_NAME_INTERNAL_NO_HASH : TG_NAME_EXTERNAL_NO_HASH);
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(existingInternal ? TG_NAME_EXTERNAL_NO_HASH : TG_NAME_INTERNAL_NO_HASH);
@@ -740,7 +739,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 getAwsLoadBalancer(internal ? AwsLoadBalancerScheme.INTERNAL : AwsLoadBalancerScheme.INTERNET_FACING)));
         String scheme = internal ? INTERNAL : EXTERNAL;
         String lbNameNew = internal ? LB_NAME_INTERNAL_NEW : LB_NAME_EXTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, scheme)).thenReturn(lbNameNew);
+        when(resourceNameService.loadBalancer(STACK_NAME, scheme)).thenReturn(lbNameNew);
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(internal ? LB_NAME_INTERNAL_NO_HASH : LB_NAME_EXTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
@@ -749,7 +748,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = internal ? TG_NAME_INTERNAL_NEW : TG_NAME_EXTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, scheme, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, scheme, USER_FACING_PORT))
                 .thenReturn(tgNameNew);
         String tgNameNoHash = internal ? TG_NAME_INTERNAL_NO_HASH : TG_NAME_EXTERNAL_NO_HASH;
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(tgNameNoHash);
@@ -799,7 +798,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 getAwsLoadBalancer(existingInternal ? AwsLoadBalancerScheme.INTERNET_FACING : AwsLoadBalancerScheme.INTERNAL)));
         String schemeNew = existingInternal ? EXTERNAL : INTERNAL;
         String lbNameNew = existingInternal ? LB_NAME_EXTERNAL_NEW : LB_NAME_INTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, STACK_NAME, schemeNew)).thenReturn(lbNameNew);
+        when(resourceNameService.loadBalancer(STACK_NAME, schemeNew)).thenReturn(lbNameNew);
         when(resourceNameService.trimHash(lbNameNew)).thenReturn(existingInternal ? LB_NAME_EXTERNAL_NO_HASH : LB_NAME_INTERNAL_NO_HASH);
         when(resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
@@ -808,7 +807,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
-        when(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_NAME, schemeNew, USER_FACING_PORT))
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT))
                 .thenReturn(tgNameNew);
         String tgNameNoHash = existingInternal ? TG_NAME_EXTERNAL_NO_HASH : TG_NAME_INTERNAL_NO_HASH;
         when(resourceNameService.trimHash(tgNameNew)).thenReturn(tgNameNoHash);

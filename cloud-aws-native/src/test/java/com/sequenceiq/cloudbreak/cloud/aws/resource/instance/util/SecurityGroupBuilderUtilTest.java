@@ -99,7 +99,7 @@ class SecurityGroupBuilderUtilTest {
     @Test
     void testSecurityGroupWhenCloudSecurityIdsNotEmptyThenCreateSecurityGroupAndIngressButNotEgressCreateCalled() {
         when(group.getSecurity()).thenReturn(mock(Security.class));
-        when(resourceNameService.resourceName(any(), any())).thenReturn("secGroupName");
+        when(resourceNameService.securityGroup(any(), any(), any())).thenReturn("secGroupName");
         String groupId = "groupId";
         when(amazonEc2Client.createSecurityGroup(any())).thenReturn(CreateSecurityGroupResponse.builder().groupId(groupId).build());
         stubRegionName();

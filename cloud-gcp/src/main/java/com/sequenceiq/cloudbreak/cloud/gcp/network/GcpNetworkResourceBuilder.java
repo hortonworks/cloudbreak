@@ -29,7 +29,7 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
         String name = gcpStackUtil.isExistingNetwork(network) ?
                 gcpStackUtil.getCustomNetworkId(network) :
-                getResourceNameService().resourceName(resourceType(), context.getName());
+                getResourceNameService().network(context.getName());
         return createNamedResource(resourceType(), name, null);
     }
 

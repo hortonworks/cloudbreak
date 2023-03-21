@@ -46,7 +46,7 @@ public class AwsNativeCloudWatchResourceBuilder extends AbstractAwsNativeCompute
         if (instanceResourceOpt.isEmpty()) {
             return emptyList();
         }
-        String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), auth.getCloudContext().getId(), group.getName(),
+        String resourceName = getResourceNameService().cloudWatch(context.getName(), auth.getCloudContext().getId(), group.getName(),
                 privateId);
         return singletonList(CloudResource.builder()
                 .withGroup(group.getName())

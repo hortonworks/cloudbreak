@@ -169,7 +169,7 @@ public class AzureVolumeResourceBuilderTest {
         when(auth.getCloudContext()).thenReturn(cloudContext);
         when(auth.getParameter(AzureClient.class)).thenReturn(azureClient);
 
-        when(resourceNameService.resourceName(eq(ResourceType.AZURE_VOLUMESET), any(), any(), eq(PRIVATE_ID), any())).thenReturn("someResourceName");
+        when(resourceNameService.volumeSet(any(), any(), eq(PRIVATE_ID), any())).thenReturn("someResourceName");
 
         Region region = Region.region(REGION);
         Location location = Location.location(region);
