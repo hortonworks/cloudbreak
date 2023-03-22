@@ -22,8 +22,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetail
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateInstancesHealthEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateNewInstancesHealthFailedEvent;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.stack.FreeIpaSafeInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -56,7 +56,7 @@ class ValidateInstancesHealthHandlerTest {
         Exception e = new Exception("puff");
         Event<ValidateInstancesHealthEvent> event = new Event<>(new ValidateInstancesHealthEvent(3L, List.of()));
 
-        UpscaleFailureEvent result = (UpscaleFailureEvent) underTest.defaultFailureEvent(2L, e, event);
+        ValidateNewInstancesHealthFailedEvent result = (ValidateNewInstancesHealthFailedEvent) underTest.defaultFailureEvent(2L, e, event);
 
         assertEquals(e, result.getException());
         assertEquals(2L, result.getResourceId());
@@ -105,7 +105,8 @@ class ValidateInstancesHealthHandlerTest {
         when(healthService.getInstanceHealthDetails(stack, im2)).thenReturn(unhealthy);
 
         ValidateInstancesHealthEvent validateInstancesHealthEvent = new ValidateInstancesHealthEvent(1L, instanceIds);
-        UpscaleFailureEvent result = (UpscaleFailureEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(validateInstancesHealthEvent)));
+        ValidateNewInstancesHealthFailedEvent result =
+                (ValidateNewInstancesHealthFailedEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(validateInstancesHealthEvent)));
 
         assertEquals(1L, result.getResourceId());
         assertEquals(PHASE, result.getFailedPhase());

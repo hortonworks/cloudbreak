@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeI
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateNewInstancesHealthFailedEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
 
@@ -54,6 +55,7 @@ public enum UpscaleFlowEvent implements FlowEvent {
     UPSCALE_FREEIPA_POST_INSTALL_FAILED_EVENT(EventSelectorUtil.selector(PostInstallFreeIpaFailed.class)),
     UPSCALE_UPDATE_METADATA_FINISHED_EVENT("UPSCALE_UPDATE_METADATA_FINISHED_EVENT"),
     UPSCALE_VALIDATE_NEW_INSTANCES_HEALTH_FINISHED_EVENT,
+    UPSCALE_VALIDATE_NEW_INSTANCES_HEALTH_FAILED_EVENT(EventSelectorUtil.selector(ValidateNewInstancesHealthFailedEvent.class)),
     UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT("UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT"),
     UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT("UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT"),
     UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT("UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT"),

@@ -92,6 +92,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.HostMetadataSetupFail
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.InstallFreeIpaServicesFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.PostInstallFreeIpaFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.UpscaleStackResultToUpscaleFailureEventConverter;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.ValidateNewInstancesHealthFailedToUpscaleFailureConverter;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationRequest;
@@ -669,6 +670,7 @@ public class FreeIpaUpscaleActions {
                 payloadConverters.add(new InstallFreeIpaServicesFailedToUpscaleFailureEventConverter());
                 payloadConverters.add(new ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverter());
                 payloadConverters.add(new PostInstallFreeIpaFailedToUpscaleFailureEventConverter());
+                payloadConverters.add(new ValidateNewInstancesHealthFailedToUpscaleFailureConverter());
             }
         };
     }

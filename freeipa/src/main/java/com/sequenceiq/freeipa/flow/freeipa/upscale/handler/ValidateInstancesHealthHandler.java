@@ -23,8 +23,8 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateInstancesHealthEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateNewInstancesHealthFailedEvent;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.stack.FreeIpaSafeInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -54,7 +54,7 @@ public class ValidateInstancesHealthHandler extends ExceptionCatcherEventHandler
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ValidateInstancesHealthEvent> event) {
         LOGGER.error("Unexpected exception during the validation of FreeIPA instances' health", e);
-        return new UpscaleFailureEvent(resourceId, PHASE, Set.of(), Map.of(), e);
+        return new ValidateNewInstancesHealthFailedEvent(resourceId, e, PHASE, Set.of(), Map.of());
     }
 
     @Override
@@ -70,13 +70,13 @@ public class ValidateInstancesHealthHandler extends ExceptionCatcherEventHandler
         }
     }
 
-    private UpscaleFailureEvent handleUnhealthyInstancesPresent(HandlerEvent<ValidateInstancesHealthEvent> event, List<NodeHealthDetails> healthDetails,
-            List<NodeHealthDetails> notHealthyNodes) {
+    private ValidateNewInstancesHealthFailedEvent handleUnhealthyInstancesPresent(HandlerEvent<ValidateInstancesHealthEvent> event,
+            List<NodeHealthDetails> healthDetails, List<NodeHealthDetails> notHealthyNodes) {
         LOGGER.warn("Non healthy instances found: {}", notHealthyNodes);
         Set<String> healthyInstances = collectHealthyInstanceIds(healthDetails);
         Map<String, String> failureDetails = constructFailureDetails(notHealthyNodes);
         Exception exceptionForFailureEvent = new Exception("Unhealthy instances found: " + failureDetails.keySet());
-        return new UpscaleFailureEvent(event.getData().getResourceId(), PHASE, healthyInstances, failureDetails, exceptionForFailureEvent);
+        return new ValidateNewInstancesHealthFailedEvent(event.getData().getResourceId(), exceptionForFailureEvent, PHASE, healthyInstances, failureDetails);
     }
 
     private Map<String, String> constructFailureDetails(List<NodeHealthDetails> notHealthyNodes) {
