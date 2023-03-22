@@ -20,6 +20,7 @@ import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.flow.converter.OperationDetailsPopulator;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @Component
 public class OperationService {
@@ -66,7 +67,7 @@ public class OperationService {
     private void handleProvisionOperation(String resourceCrn, OperationView sdxOperationView, boolean detailed) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, resourceCrn);
-        boolean createDb = sdxCluster.isCreateDatabase();
+        boolean createDb = sdxCluster.getDatabaseAvailabilityType() != SdxDatabaseAvailabilityType.NONE;
         Map<OperationResource, OperationView> subOperations = new HashMap<>();
         Map<OperationResource, OperationCondition> conditionMap = new HashMap<>();
         conditionMap.put(OperationResource.DATALAKE, OperationCondition.REQUIRED);

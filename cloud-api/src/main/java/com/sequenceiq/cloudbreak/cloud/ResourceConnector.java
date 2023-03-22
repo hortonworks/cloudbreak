@@ -319,8 +319,9 @@ public interface ResourceConnector {
     /**
      * Gets the cloud platform related database stack template.
      *
+     * @param databaseStack contains the full description of infrastructure
      * @return the platform related database stack template
      * @throws TemplatingNotSupportedException if templating is not supported by provider
      */
-    String getDBStackTemplate() throws TemplatingNotSupportedException;
+    String getDBStackTemplate(DatabaseStack databaseStack) throws TemplatingNotSupportedException;
 }

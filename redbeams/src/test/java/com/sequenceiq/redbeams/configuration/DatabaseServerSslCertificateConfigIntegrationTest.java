@@ -29,9 +29,11 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final int TWO_CERTS = 2;
 
+    private static final int THREE_CERTS = 3;
+
     private static final int FOUR_CERTS = 4;
 
-    private static final int NUM_CERTS_TOTAL = 19;
+    private static final int NUM_CERTS_TOTAL = 20;
 
     private static final int VERSION_0 = 0;
 
@@ -155,7 +157,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_USGE1)).isEqualTo(FOUR_CERTS);
         assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_DUMMY)).isEqualTo(SINGLE_CERT);
         assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_APS3)).isEqualTo(SINGLE_CERT);
-        assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEqualTo(TWO_CERTS);
+        assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEqualTo(THREE_CERTS);
     }
 
     @Test
@@ -183,7 +185,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_USGE1)).isEqualTo(VERSION_3);
         assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_DUMMY)).isEqualTo(VERSION_0);
         assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_APS3)).isEqualTo(VERSION_0);
-        assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEqualTo(VERSION_1);
+        assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEqualTo(VERSION_2);
     }
 
     @Test
@@ -279,7 +281,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         Set<SslCertificateEntry> certsAzure = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null);
 
         assertThat(certsAzure).isNotNull();
-        assertThat(certsAzure).hasSize(TWO_CERTS);
+        assertThat(certsAzure).hasSize(THREE_CERTS);
         assertThat(certsAzure).doesNotContainNull();
     }
 

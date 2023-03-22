@@ -91,7 +91,7 @@ class ResourceConnectorTest {
         }
 
         @Override
-        public String getDBStackTemplate() {
+        public String getDBStackTemplate(DatabaseStack databaseStack) {
             return null;
         }
 

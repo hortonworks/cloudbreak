@@ -237,7 +237,7 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public String getDBStackTemplate() {
+    public String getDBStackTemplate(DatabaseStack databaseStack) {
         try {
             return freemarkerConfiguration.getTemplate(awsDbCloudformationTemplatePath, "UTF-8").toString();
         } catch (IOException e) {

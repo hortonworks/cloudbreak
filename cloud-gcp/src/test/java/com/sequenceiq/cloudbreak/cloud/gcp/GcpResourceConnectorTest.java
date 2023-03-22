@@ -88,7 +88,7 @@ public class GcpResourceConnectorTest {
 
     @Test
     public void testGetDBStackTemplateWhenEverythingIsFine() throws TemplatingNotSupportedException {
-        Assert.assertTrue(underTest.getDBStackTemplate().equals(""));
+        Assert.assertTrue(underTest.getDBStackTemplate(null).equals(""));
     }
 
     @Test

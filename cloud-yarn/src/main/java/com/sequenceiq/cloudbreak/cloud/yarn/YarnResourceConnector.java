@@ -293,7 +293,7 @@ public class YarnResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public String getDBStackTemplate() throws TemplatingNotSupportedException {
+    public String getDBStackTemplate(DatabaseStack databaseStack) throws TemplatingNotSupportedException {
         throw new TemplatingNotSupportedException();
     }
 }

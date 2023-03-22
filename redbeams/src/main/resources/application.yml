@@ -165,6 +165,7 @@ cb:
     template.path: templates/arm-v2.ftl
     parameter.path: templates/parameters.ftl
     database.template.path: templates/arm-dbstack.ftl
+    flexible.database.template.path: templates/arm-flexible-dbstack.ftl
     app.creation.template:
       command.path: templates/app-creation-command.ftl
       command.audit.path: templates/app-audit-creation-command.ftl

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.gcp.GcpDatabaseServerV4Parameters;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -18,8 +19,12 @@ public class GcpDatabaseServerParameterSetter implements DatabaseServerParameter
     int backupRetentionPeriodNonHa;
 
     @Override
-    public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType, String databaseEngineVersion) {
+    public void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster) {
         GcpDatabaseServerV4Parameters parameters = new GcpDatabaseServerV4Parameters();
+        SdxDatabaseAvailabilityType availabilityType = DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(sdxCluster.getSdxDatabase(),
+                sdxCluster.getDatabaseAvailabilityType(), sdxCluster.isCreateDatabase());
+        String databaseEngineVersion = DatabaseParameterFallbackUtil.getDatabaseEngineVersion(
+                sdxCluster.getSdxDatabase(), sdxCluster.getDatabaseEngineVersion());
         if (SdxDatabaseAvailabilityType.HA.equals(availabilityType)) {
             parameters.setBackupRetentionDays(backupRetentionPeriodNonHa);
         } else if (SdxDatabaseAvailabilityType.NON_HA.equals(availabilityType)) {

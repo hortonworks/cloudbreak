@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
@@ -85,6 +86,9 @@ class RedbeamsCreationServiceTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CloudConnector connector;
 
+    @Mock
+    private DBStackToDatabaseStackConverter databaseStackConverter;
+
     @BeforeEach
     public void setup() {
         dbStack = new DBStack();
@@ -111,7 +115,7 @@ class RedbeamsCreationServiceTest {
     @Test
     public void testLaunchDatabaseServer() throws Exception {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(connector);
-        when(connector.resources().getDBStackTemplate()).thenReturn(TEMPLATE);
+        when(connector.resources().getDBStackTemplate(null)).thenReturn(TEMPLATE);
 
         Crn crn = Crn.fromString("crn:cdp:iam:us-west-1:1234:database:2312312");
         when(dbStackService.findByNameAndEnvironmentCrn(DB_STACK_NAME, ENVIRONMENT_CRN)).thenReturn(Optional.empty());

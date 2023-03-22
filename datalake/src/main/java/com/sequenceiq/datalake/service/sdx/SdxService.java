@@ -112,11 +112,14 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterFallbackUtil;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -232,6 +235,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
+
+    @Inject
+    private SdxDatabaseRepository sdxDatabaseRepository;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -471,7 +477,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
 
         DatabaseRequest internalDatabaseRequest = Optional.ofNullable(internalStackV4Request).map(StackV4Request::getExternalDatabase).orElse(null);
-        externalDatabaseConfigurer.configure(cloudPlatform, internalDatabaseRequest, sdxClusterRequest.getExternalDatabase(), sdxCluster);
+        sdxCluster.setSdxDatabase(externalDatabaseConfigurer.configure(
+                cloudPlatform, internalDatabaseRequest, sdxClusterRequest.getExternalDatabase(), sdxCluster));
+
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
                 internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request, sdxClusterRequest.getJavaVersion());
@@ -489,7 +497,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         SdxCluster savedSdxCluster;
         try {
             savedSdxCluster = transactionService.required(() -> {
-                SdxCluster created = sdxClusterRepository.save(sdxCluster);
+                SdxCluster created = save(sdxCluster);
                 ownerAssignmentService.assignResourceOwnerRoleIfEntitled(userCrn, created.getCrn(), created.getAccountId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", created);
                 return created;
@@ -603,8 +611,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw new BadRequestException("Cloud storage parameter is required.");
         }
 
-        newSdxCluster.setDatabaseAvailabilityType(sdxCluster.getDatabaseAvailabilityType());
-        newSdxCluster.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
+        newSdxCluster.setSdxDatabase(DatabaseParameterFallbackUtil.setupDatabaseInitParams(newSdxCluster, sdxCluster.getDatabaseAvailabilityType(),
+                sdxCluster.getDatabaseEngineVersion(), Optional.ofNullable(sdxCluster.getSdxDatabase()).map(SdxDatabase::getAttributes).orElse(null)));
         StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null,
                 stackV4Response.getJavaVersion());
         if (shape == SdxClusterShape.MEDIUM_DUTY_HA) {
@@ -1324,7 +1332,19 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public SdxCluster save(SdxCluster sdxCluster) {
-        return sdxClusterRepository.save(sdxCluster);
+        try {
+            return transactionService.required(() -> {
+                SdxCluster created = sdxClusterRepository.save(sdxCluster);
+                if (sdxCluster.getSdxDatabase() != null && sdxCluster.getSdxDatabase().getId() == null) {
+                    SdxDatabase sdxDatabase = sdxCluster.getSdxDatabase();
+                    sdxDatabase.setSdxClusterId(created.getId());
+                    created.setSdxDatabase(sdxDatabaseRepository.save(sdxDatabase));
+                }
+                return created;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     public void updateCertExpirationState(Long id, CertExpirationState state) {

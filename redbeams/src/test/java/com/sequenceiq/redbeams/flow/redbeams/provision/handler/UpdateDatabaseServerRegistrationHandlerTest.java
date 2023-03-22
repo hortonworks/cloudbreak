@@ -203,7 +203,8 @@ class UpdateDatabaseServerRegistrationHandlerTest {
         addDatabaseServerToDBStack(dbStack);
         setupMocksMinimal();
 
-        when(userGeneratorService.updateUserName(ROOT_USER_NAME, Optional.of(CloudPlatform.AZURE), DB_HOST_NAME))
+        when(userGeneratorService.updateUserName(null, ROOT_USER_NAME,
+                Optional.of(CloudPlatform.AZURE), DB_HOST_NAME))
                 .thenReturn(ROOT_USER_NAME + "@" + DB_SHORT_HOST_NAME);
 
         Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
@@ -231,7 +232,8 @@ class UpdateDatabaseServerRegistrationHandlerTest {
         addDatabaseServerToDBStack(dbStack);
         setupMocksMinimal();
 
-        when(userGeneratorService.updateUserName(ROOT_USER_NAME, Optional.of(CloudPlatform.AZURE), DB_HOST_NAME))
+        when(userGeneratorService.updateUserName(null, ROOT_USER_NAME,
+                Optional.of(CloudPlatform.AZURE), DB_HOST_NAME))
                 .thenReturn(ROOT_USER_NAME + "@" + DB_SHORT_HOST_NAME);
 
         Exception e = new Exception();

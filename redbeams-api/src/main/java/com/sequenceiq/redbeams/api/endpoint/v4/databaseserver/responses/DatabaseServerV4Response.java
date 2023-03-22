@@ -58,6 +58,9 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
     @ApiModelProperty(DatabaseServer.MAJOR_VERSION)
     private MajorVersion majorVersion;
 
+    @ApiModelProperty(value = DatabaseServer.DATABASE_PROPERTIES, required = true)
+    private DatabasePropertiesV4Response databasePropertiesV4Response;
+
     public Long getId() {
         return id;
     }
@@ -162,6 +165,14 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
         this.majorVersion = majorVersion;
     }
 
+    public DatabasePropertiesV4Response getDatabasePropertiesV4Response() {
+        return databasePropertiesV4Response;
+    }
+
+    public void setDatabasePropertiesV4Response(DatabasePropertiesV4Response databasePropertiesV4Response) {
+        this.databasePropertiesV4Response = databasePropertiesV4Response;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", DatabaseServerV4Response.class.getSimpleName() + "[", "]")
@@ -178,6 +189,7 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
                 .add("sslConfig=" + sslConfig)
                 .add("clusterCrn='" + clusterCrn + "'")
                 .add("majorVersion=" + majorVersion)
+                .add("databasePropertiesV4Response=" + databasePropertiesV4Response)
                 .toString();
     }
 }

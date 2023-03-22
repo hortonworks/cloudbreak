@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.view;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
+import com.sequenceiq.common.model.AzureDatabaseType;
 
 public class AzureDatabaseServerView {
 
@@ -119,4 +120,7 @@ public class AzureDatabaseServerView {
         return databaseServer.getStringParameter(KEY_VAULT_RESOURCE_GROUP_NAME);
     }
 
+    public AzureDatabaseType getAzureDatabaseType() {
+        return AzureDatabaseType.safeValueOf(databaseServer.getStringParameter(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
+    }
 }

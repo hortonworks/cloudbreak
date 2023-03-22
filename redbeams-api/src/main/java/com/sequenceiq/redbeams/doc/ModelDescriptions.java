@@ -28,6 +28,7 @@ public final class ModelDescriptions {
     public static final String DATABASE_TEST_RESPONSE = "Response for testing connectivity to a database";
     public static final String SUPPORT_CERTIFICATE_REQUEST = "Request for testing database certificate ";
     public static final String SUPPORT_CERTIFICATE_RESPONSE = "Response for testing database certificate";
+    public static final String DATABASE_PROPERTIES_RESPONSE = "Response for the database properties of a database server";
 
 
     public static final String FLOW_IDENTIFIER = "The id of the flow or flow chain that was triggered as part of the process.";
@@ -88,6 +89,8 @@ public final class ModelDescriptions {
                 "Cloud provider specific identifier of the SSL certificate currently active for the database server";
         public static final String TAGS = "UserDefined tags for the DB";
         public static final String MAJOR_VERSION = "Major version of the database server engine";
+        public static final String CONNECTION_NAME_FORMAT = "The format of the username for the database connection";
+        public static final String DATABASE_PROPERTIES = "Database server properties";
     }
 
     public static class DatabaseServerTest {
@@ -151,6 +154,7 @@ public final class ModelDescriptions {
         public static final String SKU_TIER = "The tier of SKU for the database server";
         public static final String STORAGE_AUTO_GROW = "Whether the database server will automatically grow storage when necessary";
         public static final String DB_VERSION = "The version of the database software to use";
+        public static final String AZURE_DATABASE_TYPE = "The type of the azure database: single server / flexible server";
     }
 
     public static class GcpDatabaseServerModelDescriptions {

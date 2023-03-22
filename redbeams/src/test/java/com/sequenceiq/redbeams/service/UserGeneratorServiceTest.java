@@ -3,12 +3,15 @@ package com.sequenceiq.redbeams.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.AzureDatabaseType;
 
 public class UserGeneratorServiceTest {
 
@@ -36,20 +39,38 @@ public class UserGeneratorServiceTest {
     }
 
     @Test
-    public void testUpdateUserNameAzure() {
-        String updatedUserName = underTest.updateUserName(USER_NAME, Optional.of(CloudPlatform.AZURE), DB_HOST_NAME);
+    public void testUpdateUserNameAzureNullDbType() {
+        String updatedUserName = underTest.updateUserName(DatabaseServer.builder().build(), USER_NAME, Optional.of(CloudPlatform.AZURE), DB_HOST_NAME);
         assertEquals(USER_NAME + "@" + DB_SHORT_HOST_NAME, updatedUserName);
     }
 
     @Test
+    public void testUpdateUserNameAzureSingleServer() {
+        DatabaseServer databaseServer = DatabaseServer.builder()
+                .withParams(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()))
+                .build();
+        String updatedUserName = underTest.updateUserName(databaseServer, USER_NAME, Optional.of(CloudPlatform.AZURE), DB_HOST_NAME);
+        assertEquals(USER_NAME + "@" + DB_SHORT_HOST_NAME, updatedUserName);
+    }
+
+    @Test
+    public void testUpdateUserNameAzureFlexibleServer() {
+        DatabaseServer databaseServer = DatabaseServer.builder()
+                .withParams(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name()))
+                .build();
+        String updatedUserName = underTest.updateUserName(databaseServer, USER_NAME, Optional.of(CloudPlatform.AZURE), DB_HOST_NAME);
+        assertEquals(USER_NAME, updatedUserName);
+    }
+
+    @Test
     public void testUpdateUserNameDefault() {
-        String updatedUserName = underTest.updateUserName(USER_NAME, Optional.of(CloudPlatform.MOCK), DB_HOST_NAME);
+        String updatedUserName = underTest.updateUserName(DatabaseServer.builder().build(), USER_NAME, Optional.of(CloudPlatform.MOCK), DB_HOST_NAME);
         assertEquals(USER_NAME, updatedUserName);
     }
 
     @Test
     public void testUpdateUserNamePlatformUnknown() {
-        String updatedUserName = underTest.updateUserName(USER_NAME, Optional.empty(), DB_HOST_NAME);
+        String updatedUserName = underTest.updateUserName(DatabaseServer.builder().build(), USER_NAME, Optional.empty(), DB_HOST_NAME);
         assertEquals(USER_NAME, updatedUserName);
     }
 
