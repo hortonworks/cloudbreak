@@ -14,7 +14,6 @@ import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.network.dto.AwsParams;
@@ -48,7 +47,7 @@ public class NetworkRequestToDtoConverter {
                     .withResourceGroupName(network.getAzure().getResourceGroupName())
                     .withDatabasePrivateDnsZoneId(network.getAzure().getDatabasePrivateDnsZoneId())
                     .withAksPrivateDnsZoneId(network.getAzure().getAksPrivateDnsZoneId())
-                    .withNoOutboundLoadBalancer(isNoOutboundLoadBalancer(network.getAzure()))
+                    .withNoOutboundLoadBalancer(network.getAzure().isNoOutboundLoadBalancer())
                     .build();
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());
@@ -122,13 +121,5 @@ public class NetworkRequestToDtoConverter {
 
     private LoadBalancerCreation getLoadBalancerCreation(EnvironmentNetworkRequest network) {
         return Optional.ofNullable(network.getLoadBalancerCreation()).orElse(LoadBalancerCreation.ENABLED);
-    }
-
-    private boolean isNoOutboundLoadBalancer(EnvironmentNetworkAzureParams azureParams) {
-        if (azureParams.getNoOutboundLoadBalancer() != null) {
-            return azureParams.getNoOutboundLoadBalancer();
-        } else {
-            return azureParams.getNetworkId() != null && azureParams.getResourceGroupName() != null;
-        }
     }
 }

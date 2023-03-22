@@ -143,7 +143,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateLoadBalancerForDataLakePrivateSubnets() {
         Stack stack = createAwsStack(StackType.DATALAKE, PRIVATE_ID_1);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -163,7 +163,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testDisableLoadBalancer() {
         Stack stack = createAwsStack(StackType.DATALAKE, PUBLIC_ID_1);
         CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS");
         environment.getNetwork().setLoadBalancerCreation(LoadBalancerCreation.DISABLED);
         StackV4Request request = new StackV4Request();
 
@@ -176,7 +176,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateLoadBalancerForDataLakePublicSubnets(boolean enablePublicEndpointGateway) {
         Stack stack = createAwsStack(StackType.DATALAKE, PUBLIC_ID_1);
         CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, enablePublicEndpointGateway, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, enablePublicEndpointGateway, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -194,7 +194,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateLoadBalancerForYarn() {
         Stack stack = createYarnStack();
         CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, true, "YARN", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, true, "YARN");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -209,7 +209,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     @Test
     void testCreateLoadBalancerForDatahubPrivateSubnet() {
         Stack stack = createAwsStack(StackType.WORKLOAD, PRIVATE_ID_1);
-        DetailedEnvironmentResponse environment = createEnvironment(getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1), false, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1), false, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
         when(loadBalancerEnabler.isLoadBalancerEnabled(any(), any(), any(), anyBoolean())).thenReturn(false);
@@ -220,7 +220,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     @Test
     void testCreateLoadBalancerForDataLakeEntitlementDisabled() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1), false, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1), false, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -232,7 +232,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAWSLoadBalancerForDataLakeEntitlementDisabledPublicSubnets() {
         Stack stack = createAwsStack(StackType.DATALAKE, PUBLIC_ID_1);
         CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, true, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, true, "AWS");
         environment.setCloudPlatform(CloudPlatform.AWS.name());
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
@@ -251,7 +251,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAWSLoadBalancerForDataLakeEntitlementDisabledPrivateSubnets() {
         Stack stack = createAwsStack(StackType.DATALAKE, PRIVATE_ID_1);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS");
         environment.setCloudPlatform(CloudPlatform.AWS.name());
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
@@ -275,7 +275,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateLoadBalancersForEndpointGateway(StackType stackType) {
         Stack stack = createAwsStack(stackType, PRIVATE_ID_1);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, true, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, true, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -294,7 +294,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateLoadBalancersForDatahubWithPublicSubnet() {
         Stack stack = createAwsStack(StackType.WORKLOAD, PUBLIC_ID_1);
         CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(true);
 
@@ -312,7 +312,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateLoadBalancersForDatahubWithPrivateSubnet() {
         Stack stack = createAwsStack(StackType.WORKLOAD, PRIVATE_ID_1);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(true);
 
@@ -330,7 +330,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateLoadBalancersForEndpointGatewayDatalakePublicSubnetsOnly() {
         Stack stack = createAwsStack(StackType.DATALAKE, PUBLIC_ID_1);
         CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, true, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, true, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -347,7 +347,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     @Test
     void testCreateLoadBalancersUnsupportedStackType() {
         Stack stack1 = createAwsStack(StackType.TEMPLATE, PRIVATE_ID_1);
-        DetailedEnvironmentResponse environment = createEnvironment(getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1), true, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1), true, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -373,7 +373,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     @Test
     void testCreateLoadBalancersEndpointGatewayNullNetwork() {
         Stack stack = createAwsStack(StackType.DATALAKE, PUBLIC_ID_1);
-        DetailedEnvironmentResponse environment = createEnvironment(getPrivateCloudSubnet(PUBLIC_ID_1, AZ_1), true, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(getPrivateCloudSubnet(PUBLIC_ID_1, AZ_1), true, "AWS");
         environment.setNetwork(null);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
@@ -387,7 +387,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         Stack stack = createAwsStack(StackType.DATALAKE, null);
         stack.setNetwork(null);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -400,7 +400,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         Stack stack = createAwsStack(StackType.DATALAKE, null);
         stack.getNetwork().setAttributes(null);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -412,7 +412,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateLoadBalancerNoSubnetSpecified() {
         Stack stack = createAwsStack(StackType.DATALAKE, null);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -435,7 +435,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         Stack stack = createAwsStack(StackType.DATALAKE, PRIVATE_ID_1);
         stack.setCloudPlatform(GCP);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "GCP", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "GCP");
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -447,7 +447,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateLoadBalancerDryRun() {
         Stack stack = createAwsStack(StackType.DATALAKE, PRIVATE_ID_1);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS", true);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AWS");
 
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
         when(knoxGroupDeterminer.getKnoxGatewayGroupNames(stack)).thenReturn(Set.of("master"));
@@ -463,7 +463,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAzurePrivateLoadBalancer() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, true, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, true, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -489,7 +489,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAzurePublicLoadBalancer() {
         Stack stack = createAzureStack(StackType.DATALAKE, PUBLIC_ID_1, false);
         CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, true, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, true, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -513,7 +513,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAzurePrivateLoadBalancerWithOozieHA() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -540,7 +540,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testAzureLoadBalancerDisabledWithOozieHA() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
         azureParameters.setLoadBalancerSku(LoadBalancerSku.NONE);
         StackV4Request request = new StackV4Request();
@@ -557,7 +557,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAzureEndpointGateway() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, true, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, true, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -579,7 +579,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAzureLoadBalancerWithSkuSetToStandard() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
         azureParameters.setLoadBalancerSku(LoadBalancerSku.STANDARD);
         StackV4Request request = new StackV4Request();
@@ -609,7 +609,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAzureLoadBalancerWithSkuSetToBasic() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
         azureParameters.setLoadBalancerSku(LoadBalancerSku.BASIC);
         StackV4Request request = new StackV4Request();
@@ -638,7 +638,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAzureLoadBalancerSelectsDefaultWhenSkuIsNotSet() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -670,7 +670,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testAzureLoadBalancerDisabled() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
         azureParameters.setLoadBalancerSku(LoadBalancerSku.NONE);
         StackV4Request request = new StackV4Request();
@@ -719,7 +719,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAzureMultipleKnoxInstanceGroups() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         StackV4Request request = new StackV4Request();
         request.setEnableLoadBalancer(false);
 
@@ -734,7 +734,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void isDatalakeLoadBalancerEntitlementEnabled() {
         Stack azureStack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, false);
         Set<LoadBalancer> loadBalancers = underTest.setupLoadBalancers(azureStack, environment, false, true, LoadBalancerSku.BASIC);
         assertEquals(new HashSet<>(), loadBalancers);
     }
@@ -743,7 +743,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     void testCreateAzureLoadBalancerWithoutOutboundLoadBalancer() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, true, true);
+        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, true);
         AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
         azureParameters.setLoadBalancerSku(LoadBalancerSku.STANDARD);
         StackV4Request request = new StackV4Request();
@@ -766,35 +766,6 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         assertTrue(loadBalancers.stream().allMatch(l -> LoadBalancerSku.STANDARD.equals(l.getSku())));
 
-        checkAvailabilitySetAttributes(loadBalancers);
-    }
-
-    @Test
-    void testWhenNewNetworkIsCreatedShouldEnableOutboundLoadBalancerByDefault() {
-        Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
-        CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
-        DetailedEnvironmentResponse environment = createAzureEnvironment(subnet, false, null, false);
-        AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
-        azureParameters.setLoadBalancerSku(LoadBalancerSku.STANDARD);
-        StackV4Request request = new StackV4Request();
-        request.setAzure(azureParameters);
-
-        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
-        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
-        when(knoxGroupDeterminer.getKnoxGatewayGroupNames(stack)).thenReturn(Set.of("master"));
-        when(loadBalancerEnabler.isLoadBalancerEnabled(any(), any(), any(), anyBoolean())).thenReturn(true);
-        when(loadBalancerEnabler.isEndpointGatewayEnabled(ACCOUNT_ID, environment.getNetwork())).thenReturn(false);
-
-        Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
-
-        assertEquals(2, loadBalancers.size());
-        assertTrue(loadBalancers.stream().allMatch(l -> LoadBalancerSku.STANDARD.equals(l.getSku())));
-        assertTrue(loadBalancers.stream().anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType())));
-        assertTrue(loadBalancers.stream().anyMatch(l -> LoadBalancerType.OUTBOUND.equals(l.getType())));
-        InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
-                .filter(ig -> "master".equals(ig.getGroupName()))
-                .findFirst().get();
-        assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         checkAvailabilitySetAttributes(loadBalancers);
     }
 
@@ -909,10 +880,9 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         return stack;
     }
 
-    private DetailedEnvironmentResponse createEnvironment(CloudSubnet subnet, boolean enableEndpointGateway, String cloudPlatform, boolean existingNetwork) {
+    private DetailedEnvironmentResponse createEnvironment(CloudSubnet subnet, boolean enableEndpointGateway, String cloudPlatform) {
         EnvironmentNetworkResponse network = new EnvironmentNetworkResponse();
         network.setSubnetMetas(Map.of("key", subnet));
-        network.setExistingNetwork(existingNetwork);
         if (enableEndpointGateway) {
             network.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
         }
@@ -923,9 +893,8 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
         return environment;
     }
 
-    private DetailedEnvironmentResponse createAzureEnvironment(CloudSubnet subnet, boolean enableEndpointGateway, Boolean noOutboundLoadBalancer,
-            boolean existingNetwork) {
-        DetailedEnvironmentResponse environment = createEnvironment(subnet, enableEndpointGateway, AZURE, existingNetwork);
+    private DetailedEnvironmentResponse createAzureEnvironment(CloudSubnet subnet, boolean enableEndpointGateway, boolean noOutboundLoadBalancer) {
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, enableEndpointGateway, AZURE);
         EnvironmentNetworkAzureParams azureParameters = EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder
                 .anEnvironmentNetworkAzureParams()
                 .withNoOutboundLoadBalancer(noOutboundLoadBalancer)
