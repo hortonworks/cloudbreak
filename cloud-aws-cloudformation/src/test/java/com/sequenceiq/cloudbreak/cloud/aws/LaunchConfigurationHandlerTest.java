@@ -7,11 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,8 +25,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.mapper.LaunchConfigurationMapper;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -48,6 +52,9 @@ class LaunchConfigurationHandlerTest {
     @Mock
     private AmazonAutoScalingClient autoScalingClient;
 
+    @Mock
+    private ResizedRootBlockDeviceMappingProvider resizedRootBlockDeviceMappingProvider;
+
     @InjectMocks
     private LaunchConfigurationHandler underTest;
 
@@ -67,6 +74,8 @@ class LaunchConfigurationHandlerTest {
     @Test
     void createNewLaunchConfiguration() {
         String lName = "lName";
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        CloudStack stack = mock(CloudStack.class);
         when(launchConfigurationMapper.mapExistingLaunchConfigToRequestBuilder(any(LaunchConfiguration.class)))
                 .thenReturn(CreateLaunchConfigurationRequest.builder().launchConfigurationName(lName));
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -78,13 +87,12 @@ class LaunchConfigurationHandlerTest {
                 .withLocation(location(region("region"), availabilityZone("az1")))
                 .build();
         String imageName = "imageName";
-        String launchConfigurationName = underTest.createNewLaunchConfiguration(imageName, autoScalingClient,
-                LaunchConfiguration.builder().launchConfigurationName(lName).build(), cloudContext);
+        String launchConfigurationName = underTest.createNewLaunchConfiguration(Map.of(LaunchTemplateField.IMAGE_ID, imageName), autoScalingClient,
+                LaunchConfiguration.builder().launchConfigurationName(lName).build(), cloudContext, ac, stack);
         ArgumentCaptor<CreateLaunchConfigurationRequest> captor = ArgumentCaptor.forClass(CreateLaunchConfigurationRequest.class);
         verify(autoScalingClient).createLaunchConfiguration(captor.capture());
         assertTrue(captor.getValue().launchConfigurationName().startsWith(lName));
-        assertTrue(captor.getValue().launchConfigurationName().endsWith(imageName));
-        assertEquals(lName + '-' + imageName, launchConfigurationName);
+        assertTrue(launchConfigurationName.matches(lName + "-" + "[a-zA-Z0-9]{12}"));
         verify(resourceNotifier, times(1)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
     }
 

@@ -4,6 +4,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIP
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FAILED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPGRADE_STARTED;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_EVENT;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScalingTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
@@ -61,6 +63,10 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradeEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, event.getOperationId()));
+        if (event.getVerticalScaleRequest() != null) {
+            flowEventChain.add(new FreeIpaVerticalScalingTriggerEvent(STACK_VERTICALSCALE_EVENT.event(), event.getResourceId(),
+                    event.getVerticalScaleRequest()).withOperationId(event.getOperationId()));
+        }
         flowEventChain.add(new ImageChangeEvent(IMAGE_CHANGE_EVENT.event(), event.getResourceId(), event.getImageSettingsRequest())
                 .withOperationId(event.getOperationId()));
 

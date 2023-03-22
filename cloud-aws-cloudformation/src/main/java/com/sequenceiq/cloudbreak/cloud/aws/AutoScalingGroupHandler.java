@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
-import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourcesRequest;
 import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourcesResponse;
@@ -27,7 +26,7 @@ public class AutoScalingGroupHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoScalingGroupHandler.class);
 
     public void updateAutoScalingGroupWithLaunchConfiguration(AmazonAutoScalingClient autoScalingClient, String autoScalingGroupName,
-            LaunchConfiguration oldLaunchConfiguration, String launchConfigurationName) {
+            String launchConfigurationName) {
         UpdateAutoScalingGroupRequest updateAutoScalingGroupRequest = UpdateAutoScalingGroupRequest.builder()
                 .autoScalingGroupName(autoScalingGroupName)
                 .launchConfigurationName(launchConfigurationName)

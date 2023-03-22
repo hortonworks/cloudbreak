@@ -9,6 +9,8 @@ public class FreeIpaVerticalScalingTriggerEvent extends StackEvent {
 
     private VerticalScaleRequest request;
 
+    private String operationId;
+
     @JsonCreator
     public FreeIpaVerticalScalingTriggerEvent(
             @JsonProperty("selector") String selector,
@@ -26,10 +28,24 @@ public class FreeIpaVerticalScalingTriggerEvent extends StackEvent {
         this.request = request;
     }
 
+    public String getOperationId() {
+        return operationId;
+    }
+
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
+    }
+
+    public FreeIpaVerticalScalingTriggerEvent withOperationId(String operationId) {
+        this.operationId = operationId;
+        return this;
+    }
+
     @Override
     public String toString() {
-        return super.toString() + "FreeIpaVerticalScalingTriggerEvent{" +
+        return "FreeIpaVerticalScalingTriggerEvent{" +
                 "request=" + request +
-                '}';
+                ", operationId='" + operationId + '\'' +
+                "} " + super.toString();
     }
 }

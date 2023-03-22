@@ -32,7 +32,7 @@ public class Group extends DynamicModel {
 
     private final Optional<CloudInstance> skeleton;
 
-    private final int rootVolumeSize;
+    private int rootVolumeSize;
 
     private final Optional<CloudFileSystemView> identity;
 
@@ -193,6 +193,10 @@ public class Group extends DynamicModel {
 
     public Map<String, String> getTags() {
         return tags;
+    }
+
+    public void setRootVolumeSize(int rootVolumeSize) {
+        this.rootVolumeSize = rootVolumeSize;
     }
 
     @Override

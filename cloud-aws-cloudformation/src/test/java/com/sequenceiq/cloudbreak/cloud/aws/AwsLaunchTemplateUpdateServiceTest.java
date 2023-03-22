@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +48,7 @@ import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupR
 import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupResponse;
 import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionRequest;
 import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionResponse;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMappingRequest;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateResponse;
@@ -86,6 +88,9 @@ public class AwsLaunchTemplateUpdateServiceTest {
 
     @Mock
     private Image image;
+
+    @Mock
+    private ResizedRootBlockDeviceMappingProvider resizedRootBlockDeviceMappingProvider;
 
     @InjectMocks
     private AwsLaunchTemplateUpdateService underTest;
@@ -133,7 +138,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
         when(autoScalingClient.updateAutoScalingGroup(any(UpdateAutoScalingGroupRequest.class))).thenReturn(UpdateAutoScalingGroupResponse.builder().build());
 
         // WHEN
-        underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
+        underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()), stack);
 
         // THEN
         verify(ec2Client).createLaunchTemplateVersion(argumentCaptor.capture());
@@ -157,7 +162,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
         when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(CreateLaunchTemplateVersionResponse.builder()
                 .launchTemplateVersion(LaunchTemplateVersion.builder().versionNumber(LAUNCH_TEMPLATE_VERSION).build()).build());
         // WHEN
-        underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(), updatableFieldMap);
+        underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(), updatableFieldMap, stack);
 
         // THEN
         verify(ec2Client).createLaunchTemplateVersion(argumentCaptor.capture());
@@ -183,7 +188,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
         when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(CreateLaunchTemplateVersionResponse.builder()
                 .launchTemplateVersion(LaunchTemplateVersion.builder().versionNumber(LAUNCH_TEMPLATE_VERSION).build()).build());
         // WHEN
-        underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(), updatableFieldMap);
+        underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(), updatableFieldMap, stack);
 
         // THEN
         verify(ec2Client).createLaunchTemplateVersion(argumentCaptor.capture());
@@ -208,16 +213,22 @@ public class AwsLaunchTemplateUpdateServiceTest {
         ModifyLaunchTemplateResponse modifyLaunchTemplateResult = ModifyLaunchTemplateResponse.builder().build();
         UpdateAutoScalingGroupResponse updateAutoScalingGroupResult = UpdateAutoScalingGroupResponse.builder().build();
 
-        when(ec2Client.createLaunchTemplateVersion(any())).thenReturn(createLaunchTemplateVersionResult);
+        ArgumentCaptor<CreateLaunchTemplateVersionRequest> launchTemplateVersionCaptor = ArgumentCaptor.forClass(CreateLaunchTemplateVersionRequest.class);
+        when(ec2Client.createLaunchTemplateVersion(launchTemplateVersionCaptor.capture())).thenReturn(createLaunchTemplateVersionResult);
         when(ec2Client.modifyLaunchTemplate(any())).thenReturn(modifyLaunchTemplateResult);
         when(autoScalingClient.updateAutoScalingGroup(any())).thenReturn(updateAutoScalingGroupResult);
+        List<LaunchTemplateBlockDeviceMappingRequest> blockDeviceMappingRequests = List.of(LaunchTemplateBlockDeviceMappingRequest.builder().build());
+        when(resizedRootBlockDeviceMappingProvider.createResizedRootBlockDeviceMapping(ec2Client, updatableFields, launchTemplateSpecification, stack))
+                .thenReturn(blockDeviceMappingRequests);
         // WHEN
-        underTest.updateLaunchTemplate(updatableFields, false, autoScalingClient, ec2Client, asgEntry);
+        underTest.updateLaunchTemplate(updatableFields, false, autoScalingClient, ec2Client, asgEntry, stack);
 
         // THEN
         verify(ec2Client, times(1)).createLaunchTemplateVersion(any());
         verify(ec2Client, times(1)).modifyLaunchTemplate(any());
         verify(autoScalingClient, times(1)).updateAutoScalingGroup(any());
+        CreateLaunchTemplateVersionRequest launchTemplateVersionRequest = launchTemplateVersionCaptor.getValue();
+        assertEquals(blockDeviceMappingRequests, launchTemplateVersionRequest.launchTemplateData().blockDeviceMappings());
     }
 
     @Test
@@ -238,7 +249,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
         // WHEN and THEN exception
         assertThrows(CloudConnectorException.class,
                 () -> underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(),
-                        Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName())));
+                        Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()), stack));
     }
 
     private Map<AutoScalingGroup, String> createAutoScalingGroupHandler() {

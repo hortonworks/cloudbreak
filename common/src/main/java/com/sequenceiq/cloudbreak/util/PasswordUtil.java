@@ -41,7 +41,7 @@ public class PasswordUtil {
         return generate(count, false, true);
     }
 
-    private static String generate(int count, boolean letters, boolean numbers) {
+    public static String generate(int count, boolean letters, boolean numbers) {
         return RandomStringUtils.random(count, 0, 0, letters, numbers, null, SECURE_RANDOM);
     }
 

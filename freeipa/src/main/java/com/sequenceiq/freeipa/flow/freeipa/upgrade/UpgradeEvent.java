@@ -7,6 +7,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class UpgradeEvent extends StackEvent {
@@ -26,6 +27,8 @@ public class UpgradeEvent extends StackEvent {
 
     private final String triggeredVariant;
 
+    private final VerticalScaleRequest verticalScaleRequest;
+
     @JsonCreator
     public UpgradeEvent(
             @JsonProperty("selector") String selector,
@@ -36,7 +39,8 @@ public class UpgradeEvent extends StackEvent {
             @JsonProperty("imageSettingsRequest") ImageSettingsRequest imageSettingsRequest,
             @JsonProperty("backupSet") boolean backupSet,
             @JsonProperty("needMigration") boolean needMigration,
-            @JsonProperty("triggeredVariant") String triggeredVariant) {
+            @JsonProperty("triggeredVariant") String triggeredVariant,
+            @JsonProperty("verticalScaleRequest") VerticalScaleRequest verticalScaleRequest) {
         super(selector, stackId);
         this.instanceIds = instanceIds;
         this.primareGwInstanceId = primareGwInstanceId;
@@ -45,6 +49,7 @@ public class UpgradeEvent extends StackEvent {
         this.backupSet = backupSet;
         this.needMigration = needMigration;
         this.triggeredVariant = triggeredVariant;
+        this.verticalScaleRequest = verticalScaleRequest;
     }
 
     public Set<String> getInstanceIds() {
@@ -75,6 +80,10 @@ public class UpgradeEvent extends StackEvent {
         return triggeredVariant;
     }
 
+    public VerticalScaleRequest getVerticalScaleRequest() {
+        return verticalScaleRequest;
+    }
+
     @Override
     public boolean equalsEvent(StackEvent other) {
         return isClassAndEqualsEvent(UpgradeEvent.class, other,
@@ -83,7 +92,9 @@ public class UpgradeEvent extends StackEvent {
                         && Objects.equals(primareGwInstanceId, event.primareGwInstanceId)
                         && Objects.equals(imageSettingsRequest, event.imageSettingsRequest)
                         && Objects.equals(triggeredVariant, event.triggeredVariant)
-                        && backupSet == event.backupSet);
+                        && backupSet == event.backupSet
+                        && needMigration == event.needMigration
+                        && Objects.equals(verticalScaleRequest, event.verticalScaleRequest));
     }
 
 }

@@ -45,6 +45,8 @@ import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysRequest
 import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribePrefixListsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeRegionsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeRegionsResponse;
@@ -274,5 +276,9 @@ public class AmazonEc2Client extends AmazonClient {
 
     public ModifyLaunchTemplateResponse modifyLaunchTemplate(ModifyLaunchTemplateRequest request) {
         return client.modifyLaunchTemplate(request);
+    }
+
+    public DescribeLaunchTemplateVersionsResponse describeLaunchTemplateVersions(DescribeLaunchTemplateVersionsRequest request) {
+        return client.describeLaunchTemplateVersions(request);
     }
 }

@@ -43,6 +43,7 @@ import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalSc
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleResult;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScalingTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -129,6 +130,9 @@ public class FreeIpaVerticalScaleActions {
     public Action<?, ?> verticalScaleFailedAction() {
         return new AbstractFreeIpaVerticalScaleAction<>(FreeIpaVerticalScaleFailureEvent.class) {
 
+            @Inject
+            private OperationService operationService;
+
             @Override
             protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<FreeIpaVerticalScaleState,
                     FreeIpaVerticalScaleEvent> stateContext,
@@ -141,10 +145,13 @@ public class FreeIpaVerticalScaleActions {
             @Override
             protected void doExecute(StackContext context, FreeIpaVerticalScaleFailureEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                String message = "Vertical scale failed during " + payload.getFailedPhase();
-                LOGGER.debug(message);
                 String errorReason = getErrorReason(payload.getException());
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.VERTICAL_SCALE_FAILED, errorReason);
+                String message = "Vertical scale failed with [" + payload.getFailedPhase() + "]. " + errorReason;
+                LOGGER.debug(message);
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.VERTICAL_SCALE_FAILED, message);
+                if (isOperationIdSet(variables)) {
+                    operationService.failOperation(stack.getAccountId(), getOperationId(variables), message);
+                }
                 enableStatusChecker(stack, "Failed vertical scaling FreeIPA");
                 enableNodeStatusChecker(stack, "Failed vertical scaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchConfigurationUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -45,6 +46,9 @@ public class AwsUpdateService {
     @Inject
     private AwsLaunchTemplateUpdateService awsLaunchTemplateUpdateService;
 
+    @Inject
+    private AwsLaunchConfigurationUpdateService launchConfigurationUpdateService;
+
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
         ArrayList<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
         LOGGER.info("The update method which will be followed is {}.", type);
@@ -71,22 +75,23 @@ public class AwsUpdateService {
 
     private void updateWithVerticalScaling(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         String cfTemplate = stack.getTemplate();
-        if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
-            CloudResource cfResource = getCloudFormationStack(resources);
-            for (Group group : stack.getGroups()) {
-                Map<LaunchTemplateField, String> updatableFields = Map.of(
-                        LaunchTemplateField.INSTANCE_TYPE,
-                        group.getReferenceInstanceConfiguration().getTemplate().getFlavor()
-                );
+        CloudResource cfResource = getCloudFormationStack(resources);
+        for (Group group : stack.getGroups()) {
+            Map<LaunchTemplateField, String> updatableFields = Map.of(
+                    LaunchTemplateField.INSTANCE_TYPE,
+                    group.getReferenceInstanceConfiguration().getTemplate().getFlavor(),
+                    LaunchTemplateField.ROOT_DISK,
+                    String.valueOf(group.getRootVolumeSize())
+            );
+            if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
                 LOGGER.info("Update fields on launchtemplate {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
-                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields,
-                        authenticatedContext,
-                        cfResource.getName(),
-                        group);
+                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
+            } else {
+                LOGGER.info("Update fields on launchconfiguration {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
+                launchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource, updatableFields, group);
             }
-        } else {
-            throw new NotImplementedException("Vertical scale update for stack template is not implemented yet, only for AWS::EC2::LaunchTemplate.");
         }
+
     }
 
     public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
@@ -98,7 +103,7 @@ public class AwsUpdateService {
                 String groupUserData = userData.get(group.getType());
                 String encodedGroupUserData = Base64.getEncoder().encodeToString(groupUserData.getBytes());
                 Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.USER_DATA, encodedGroupUserData);
-                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group);
+                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
             });
         } else {
             throw new NotImplementedException("UserData update for stack template is not implemented yet, only for AWS::EC2::LaunchTemplate.");
@@ -108,8 +113,8 @@ public class AwsUpdateService {
     public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
         CloudResource cfResource = getCloudFormationStack(resources);
         awsLaunchTemplateUpdateService.updateFieldsOnAllLaunchTemplate(authenticatedContext, cfResource.getName(), Map.of(LaunchTemplateField.DESCRIPTION,
-                String.format("Latest modifyLaunchTemplate check for upgrade: %s", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date()))),
-                true);
+                String.format("Latest modifyLaunchTemplate check for upgrade: %s",
+                        new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date()))), true, stack);
     }
 
     private CloudResource getCloudFormationStack(List<CloudResource> resources) {
