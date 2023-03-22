@@ -48,7 +48,7 @@ public class AutoScalingGroupHandlerTest {
         String autoScalingGroupName = "autoScalingGroupName";
         String launchConfigurationName = "launchConfigurationName";
         LaunchConfiguration oldLaunchConfiguration = LaunchConfiguration.builder().build();
-        underTest.updateAutoScalingGroupWithLaunchConfiguration(autoScalingClient, autoScalingGroupName, oldLaunchConfiguration, launchConfigurationName);
+        underTest.updateAutoScalingGroupWithLaunchConfiguration(autoScalingClient, autoScalingGroupName, launchConfigurationName);
         ArgumentCaptor<UpdateAutoScalingGroupRequest> captor = ArgumentCaptor.forClass(UpdateAutoScalingGroupRequest.class);
         verify(autoScalingClient, times(1)).updateAutoScalingGroup(captor.capture());
         UpdateAutoScalingGroupRequest request = captor.getValue();

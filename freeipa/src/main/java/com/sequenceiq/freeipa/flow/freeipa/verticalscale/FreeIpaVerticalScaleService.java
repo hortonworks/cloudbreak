@@ -57,6 +57,9 @@ public class FreeIpaVerticalScaleService {
                 template.setVolumeSize(requestedAttachedVolume.getSize());
                 template.setVolumeType(requestedAttachedVolume.getType());
             }
+            if (instanceTemplateRequest.getRootVolume() != null && instanceTemplateRequest.getRootVolume().getSize() != null) {
+                template.setRootVolumeSize(instanceTemplateRequest.getRootVolume().getSize());
+            }
             templateService.save(template);
         }
     }

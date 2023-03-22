@@ -19,6 +19,8 @@ public class InstanceTemplateRequest extends InstanceTemplateBase {
 
     private Set<VolumeRequest> attachedVolumes;
 
+    private VolumeRequest rootVolume;
+
     @Valid
     @ApiModelProperty(FreeIpaModelDescriptions.AWS_PARAMETERS)
     private AwsInstanceTemplateParameters aws;
@@ -39,12 +41,20 @@ public class InstanceTemplateRequest extends InstanceTemplateBase {
         this.aws = aws;
     }
 
+    public VolumeRequest getRootVolume() {
+        return rootVolume;
+    }
+
+    public void setRootVolume(VolumeRequest rootVolume) {
+        this.rootVolume = rootVolume;
+    }
+
     @Override
     public String toString() {
         return "InstanceTemplateRequest{" +
-                "InstanceTemplateBase=" + super.toString() +
-                ", attachedVolumes=" + attachedVolumes +
+                "attachedVolumes=" + attachedVolumes +
+                ", rootVolume=" + rootVolume +
                 ", aws=" + aws +
-                '}';
+                "} " + super.toString();
     }
 }

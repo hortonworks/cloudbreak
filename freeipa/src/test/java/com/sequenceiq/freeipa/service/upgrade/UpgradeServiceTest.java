@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.upgrade;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,22 +24,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeOptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.handler.AwsMigrationUtil;
+import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -74,6 +80,9 @@ class UpgradeServiceTest {
     @Mock
     private AwsMigrationUtil awsMigrationUtil;
 
+    @Mock
+    private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
+
     @InjectMocks
     private UpgradeService underTest;
 
@@ -85,6 +94,7 @@ class UpgradeServiceTest {
         String triggeredVariant = "triggeredVariant";
 
         Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
@@ -98,6 +108,7 @@ class UpgradeServiceTest {
         when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
         when(awsMigrationUtil.calculateUpgradeVariant(stack, ACCOUNT_ID)).thenReturn(triggeredVariant);
         when(awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
+        when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
 
         FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
 
@@ -115,6 +126,63 @@ class UpgradeServiceTest {
         assertFalse(upgradeEvent.isBackupSet());
         assertTrue(upgradeEvent.isNeedMigration());
         assertEquals(triggeredVariant, upgradeEvent.getTriggeredVariant());
+        assertNull(upgradeEvent.getVerticalScaleRequest());
+
+        verify(validationService).validateEntitlement(ACCOUNT_ID);
+        verify(validationService).validateStackForUpgrade(allInstances, stack);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
+    }
+
+    @Test
+    public void testUpgradeTriggeredWithVerticalScaleRequest() {
+        FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
+        request.setImage(new ImageSettingsRequest());
+        request.setEnvironmentCrn(ENVIRONMENT_CRN);
+        String triggeredVariant = "triggeredVariant";
+
+        Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        Set<InstanceMetaData> allInstances = createValidImSet();
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        Template template = new Template();
+        template.setRootVolumeSize(50);
+        instanceGroup.setTemplate(template);
+        instanceGroup.setGroupName("master");
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+        ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
+        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        Operation operation = mockOperation(OperationState.RUNNING);
+        ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
+        when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
+        when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
+        when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
+        when(awsMigrationUtil.calculateUpgradeVariant(stack, ACCOUNT_ID)).thenReturn(triggeredVariant);
+        when(awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
+        when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
+
+        FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
+
+        assertEquals(flowIdentifier, response.getFlowIdentifier());
+        assertEquals(operation.getOperationId(), response.getOperationId());
+        assertEquals(currentImage, response.getOriginalImage());
+        assertEquals(selectedImage, response.getTargetImage());
+
+        UpgradeEvent upgradeEvent = (UpgradeEvent) eventCaptor.getValue();
+        assertEquals(request.getImage(), upgradeEvent.getImageSettingsRequest());
+        assertEquals(operation.getOperationId(), upgradeEvent.getOperationId());
+        assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
+        assertEquals(2, upgradeEvent.getInstanceIds().size());
+        assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
+        assertFalse(upgradeEvent.isBackupSet());
+        assertTrue(upgradeEvent.isNeedMigration());
+        assertEquals(triggeredVariant, upgradeEvent.getTriggeredVariant());
+        VerticalScaleRequest verticalScaleRequest = upgradeEvent.getVerticalScaleRequest();
+        assertEquals(100, verticalScaleRequest.getTemplate().getRootVolume().getSize());
+        assertEquals("master", verticalScaleRequest.getGroup());
+        assertNull(verticalScaleRequest.getTemplate().getInstanceType());
 
         verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
@@ -128,6 +196,7 @@ class UpgradeServiceTest {
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
 
         Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         when(stack.getBackup()).thenReturn(new Backup());
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
@@ -140,6 +209,7 @@ class UpgradeServiceTest {
         when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
         when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
+        when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
 
         FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
 
@@ -189,6 +259,7 @@ class UpgradeServiceTest {
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
 
         Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
@@ -201,6 +272,7 @@ class UpgradeServiceTest {
         when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
         when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
+        when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
 
         FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
 

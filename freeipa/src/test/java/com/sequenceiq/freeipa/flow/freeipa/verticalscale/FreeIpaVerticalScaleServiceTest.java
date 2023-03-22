@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.verticalscale;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -68,7 +68,7 @@ public class FreeIpaVerticalScaleServiceTest {
         verify(instanceGroupService, times(1)).getByStackIdAndInstanceGroupNameWithFetchTemplate(anyLong(), anyString());
         verify(templateService, times(1)).findById(any());
         verify(templateService, times(1)).save(captor.capture());
-        Assert.assertEquals("big1", captor.getValue().getInstanceType());
+        assertEquals("big1", captor.getValue().getInstanceType());
     }
 
     @Test
@@ -105,8 +105,43 @@ public class FreeIpaVerticalScaleServiceTest {
         verify(instanceGroupService, times(1)).getByStackIdAndInstanceGroupNameWithFetchTemplate(anyLong(), anyString());
         verify(templateService, times(1)).findById(any());
         verify(templateService, times(1)).save(captor.capture());
-        Assert.assertEquals(Integer.valueOf(1), captor.getValue().getVolumeCount());
-        Assert.assertEquals(Integer.valueOf(50), captor.getValue().getVolumeSize());
-        Assert.assertEquals("ebs", captor.getValue().getVolumeType());
+        assertEquals(Integer.valueOf(1), captor.getValue().getVolumeCount());
+        assertEquals(Integer.valueOf(50), captor.getValue().getVolumeSize());
+        assertEquals("ebs", captor.getValue().getVolumeType());
+    }
+
+    @Test
+    void testUpdateTemplateWithVerticalScaleInformationWithRootDiskSize() {
+        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+        verticalScaleRequest.setGroup("master");
+        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        VolumeRequest rootVolume = new VolumeRequest();
+        rootVolume.setSize(150);
+        instanceTemplateRequest.setRootVolume(rootVolume);
+        verticalScaleRequest.setTemplate(instanceTemplateRequest);
+
+        Template template = new Template();
+        template.setVolumeSize(100);
+        template.setId(1L);
+
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setTemplate(template);
+        instanceGroup.setGroupName("master");
+
+        when(instanceGroupService.getByStackIdAndInstanceGroupNameWithFetchTemplate(anyLong(), anyString()))
+                .thenReturn(Optional.of(instanceGroup));
+        when(templateService.findById(anyLong()))
+                .thenReturn(Optional.of(template));
+        when(templateService.save(any(Template.class)))
+                .thenReturn(template);
+
+        underTest.updateTemplateWithVerticalScaleInformation(1L, verticalScaleRequest);
+
+        ArgumentCaptor<Template> captor = ArgumentCaptor.forClass(Template.class);
+
+        verify(instanceGroupService, times(1)).getByStackIdAndInstanceGroupNameWithFetchTemplate(anyLong(), anyString());
+        verify(templateService, times(1)).findById(any());
+        verify(templateService, times(1)).save(captor.capture());
+        assertEquals(rootVolume.getSize(), captor.getValue().getRootVolumeSize());
     }
 }

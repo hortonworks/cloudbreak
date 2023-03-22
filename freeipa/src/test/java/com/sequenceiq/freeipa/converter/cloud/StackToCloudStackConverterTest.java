@@ -39,6 +39,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -171,6 +172,9 @@ public class StackToCloudStackConverterTest {
         freeIPAVerticalScaleRequest.setGroup(GROUP_NAME);
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
         instanceTemplateRequest.setInstanceType("ec2big");
+        VolumeRequest rootVolume = new VolumeRequest();
+        rootVolume.setSize(100);
+        instanceTemplateRequest.setRootVolume(rootVolume);
         freeIPAVerticalScaleRequest.setTemplate(instanceTemplateRequest);
 
         CloudStack result = underTest.updateWithVerticalScaleRequest(cloudStack, freeIPAVerticalScaleRequest);
@@ -184,6 +188,7 @@ public class StackToCloudStackConverterTest {
                 .getFlavor();
 
         assertEquals("ec2big", resultFlavor);
+        assertEquals(100, result.getGroups().get(0).getRootVolumeSize());
     }
 
     @Test

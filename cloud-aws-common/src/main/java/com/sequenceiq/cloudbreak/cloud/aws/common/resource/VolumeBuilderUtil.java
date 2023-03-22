@@ -106,6 +106,10 @@ public class VolumeBuilderUtil {
 
     public String getRootDeviceName(AuthenticatedContext ac, CloudStack cloudStack) {
         AmazonEc2Client ec2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
+        return getRootDeviceName(cloudStack, ec2Client);
+    }
+
+    public String getRootDeviceName(CloudStack cloudStack, AmazonEc2Client ec2Client) {
         DescribeImagesResponse images = ec2Client.describeImages(DescribeImagesRequest.builder().imageIds(cloudStack.getImage().getImageName()).build());
         if (images.images().isEmpty()) {
             throw new CloudConnectorException(String.format("AMI is not available: '%s'.", cloudStack.getImage().getImageName()));

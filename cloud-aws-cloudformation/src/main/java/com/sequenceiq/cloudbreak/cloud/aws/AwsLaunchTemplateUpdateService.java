@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,17 +18,16 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
-import software.amazon.awssdk.services.autoscaling.model.Instance;
 import software.amazon.awssdk.services.autoscaling.model.LaunchTemplateSpecification;
 import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupResponse;
-import software.amazon.awssdk.services.ec2.model.AttributeValue;
 import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionRequest;
 import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionResponse;
-import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMappingRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateResponse;
 import software.amazon.awssdk.services.ec2.model.RequestLaunchTemplateData;
@@ -46,12 +46,19 @@ public class AwsLaunchTemplateUpdateService {
     @Inject
     private CloudFormationStackUtil cfStackUtil;
 
-    public void updateFieldsOnAllLaunchTemplate(AuthenticatedContext authenticatedContext, String stackName, Map<LaunchTemplateField, String> updatableFields) {
-        updateFieldsOnAllLaunchTemplate(authenticatedContext, stackName, updatableFields, false);
+    @Inject
+    private ResizedRootBlockDeviceMappingProvider resizedRootBlockDeviceMappingProvider;
+
+    @Inject
+    private InstanceInAutoScalingGroupUpdater instanceUpdater;
+
+    public void updateFieldsOnAllLaunchTemplate(AuthenticatedContext authenticatedContext, String stackName, Map<LaunchTemplateField, String> updatableFields,
+            CloudStack cloudStack) {
+        updateFieldsOnAllLaunchTemplate(authenticatedContext, stackName, updatableFields, false, cloudStack);
     }
 
     public void updateFieldsOnAllLaunchTemplate(AuthenticatedContext authenticatedContext, String stackName,
-            Map<LaunchTemplateField, String> updatableFields, boolean dryRun) {
+            Map<LaunchTemplateField, String> updatableFields, boolean dryRun, CloudStack cloudStack) {
         AmazonAutoScalingClient autoScalingClient = getAutoScalingClient(authenticatedContext);
         AmazonEc2Client ec2Client = getEc2Client(authenticatedContext);
         Map<AutoScalingGroup, String> autoScalingGroups = getAutoScalingGroups(authenticatedContext, stackName, dryRun);
@@ -60,7 +67,7 @@ public class AwsLaunchTemplateUpdateService {
                 autoScalingGroups.values(),
                 dryRun);
         for (Map.Entry<AutoScalingGroup, String> asgEntry : autoScalingGroups.entrySet()) {
-            updateLaunchTemplate(updatableFields, dryRun, autoScalingClient, ec2Client, asgEntry.getKey());
+            updateLaunchTemplate(updatableFields, dryRun, autoScalingClient, ec2Client, asgEntry.getKey(), cloudStack);
         }
     }
 
@@ -90,11 +97,11 @@ public class AwsLaunchTemplateUpdateService {
     }
 
     public void updateLaunchTemplate(Map<LaunchTemplateField, String> updatableFields, boolean dryRun,
-            AmazonAutoScalingClient autoScalingClient, AmazonEc2Client ec2Client, AutoScalingGroup asgEntry) {
+            AmazonAutoScalingClient autoScalingClient, AmazonEc2Client ec2Client, AutoScalingGroup asgEntry, CloudStack cloudStack) {
         LOGGER.debug("Creating new launchtemplate version for [{}] autoscale group...", asgEntry.autoScalingGroupName());
         LaunchTemplateSpecification launchTemplateSpecification = getLaunchTemplateSpecification(asgEntry);
-        CreateLaunchTemplateVersionResponse createLaunchTemplateVersionResponse = getCreateLaunchTemplateVersionRequest(ec2Client, updatableFields,
-                launchTemplateSpecification);
+        CreateLaunchTemplateVersionResponse createLaunchTemplateVersionResponse = createLaunchTemplateVersion(ec2Client, updatableFields,
+                launchTemplateSpecification, cloudStack);
         modifyLaunchTemplate(ec2Client, launchTemplateSpecification, createLaunchTemplateVersionResponse, !dryRun);
         if (dryRun) {
             LOGGER.debug("Autoscale group update will be skipped because of dryrun, which just test the permissions for modifiying the launch template.");
@@ -103,7 +110,8 @@ public class AwsLaunchTemplateUpdateService {
         }
     }
 
-    public void updateLaunchTemplate(Map<LaunchTemplateField, String> updatableFields, AuthenticatedContext ac, String stackName, Group group) {
+    public void updateLaunchTemplate(Map<LaunchTemplateField, String> updatableFields, AuthenticatedContext ac, String stackName, Group group,
+            CloudStack cloudStack) {
         AmazonCloudFormationClient amazonCloudFormationClient = getAmazonCloudFormationClient(ac);
         AmazonAutoScalingClient autoScalingClient = getAutoScalingClient(ac);
         AmazonEc2Client ec2Client = getEc2Client(ac);
@@ -117,8 +125,8 @@ public class AwsLaunchTemplateUpdateService {
             LOGGER.info("Get launch template specification for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
             LaunchTemplateSpecification launchTemplateSpecification = getLaunchTemplateSpecification(autoScalingGroup);
             LOGGER.info("Update launch template specification for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
-            CreateLaunchTemplateVersionResponse newLaunchTemplate = getCreateLaunchTemplateVersionRequest(ec2Client, updatableFields,
-                    launchTemplateSpecification);
+            CreateLaunchTemplateVersionResponse newLaunchTemplate = createLaunchTemplateVersion(ec2Client, updatableFields,
+                    launchTemplateSpecification, cloudStack);
             LOGGER.info("Set the new launchtemplate version on autoscaling group for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
             setLaunchTemplateNewVersionAsDefault(ec2Client, launchTemplateSpecification, newLaunchTemplate);
             updateAutoScalingGroup(updatableFields,
@@ -127,7 +135,7 @@ public class AwsLaunchTemplateUpdateService {
                     launchTemplateSpecification,
                     newLaunchTemplate);
             LOGGER.info("Update all instance for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
-            updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group);
+            instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group);
         }
     }
 
@@ -166,8 +174,10 @@ public class AwsLaunchTemplateUpdateService {
         return launchTemplateSpecification;
     }
 
-    private CreateLaunchTemplateVersionResponse getCreateLaunchTemplateVersionRequest(AmazonEc2Client ec2Client,
-            Map<LaunchTemplateField, String> updatableFields, LaunchTemplateSpecification launchTemplateSpecification) {
+    private CreateLaunchTemplateVersionResponse createLaunchTemplateVersion(AmazonEc2Client ec2Client,
+            Map<LaunchTemplateField, String> updatableFields, LaunchTemplateSpecification launchTemplateSpecification, CloudStack cloudStack) {
+        List<LaunchTemplateBlockDeviceMappingRequest> resizedRootBlockDeviceMapping =
+                resizedRootBlockDeviceMappingProvider.createResizedRootBlockDeviceMapping(ec2Client, updatableFields, launchTemplateSpecification, cloudStack);
         CreateLaunchTemplateVersionRequest createLaunchTemplateVersionRequest = CreateLaunchTemplateVersionRequest.builder()
                 .launchTemplateId(launchTemplateSpecification.launchTemplateId())
                 .sourceVersion(launchTemplateSpecification.version())
@@ -175,7 +185,9 @@ public class AwsLaunchTemplateUpdateService {
                 .launchTemplateData(RequestLaunchTemplateData.builder()
                         .imageId(updatableFields.getOrDefault(LaunchTemplateField.IMAGE_ID, null))
                         .userData(updatableFields.getOrDefault(LaunchTemplateField.USER_DATA, null))
-                        .instanceType(updatableFields.getOrDefault(LaunchTemplateField.INSTANCE_TYPE, null)).build())
+                        .instanceType(updatableFields.getOrDefault(LaunchTemplateField.INSTANCE_TYPE, null))
+                        .blockDeviceMappings(CollectionUtils.isNotEmpty(resizedRootBlockDeviceMapping) ? resizedRootBlockDeviceMapping : null)
+                        .build())
                 .build();
         CreateLaunchTemplateVersionResponse createLaunchTemplateVersionResponse = ec2Client.createLaunchTemplateVersion(createLaunchTemplateVersionRequest);
         validateCreatedLaunchTemplateVersionResponse(createLaunchTemplateVersionResponse);
@@ -222,22 +234,5 @@ public class AwsLaunchTemplateUpdateService {
         LOGGER.info("Create new LauncTemplateVersion {} with new fields {} and attached it to the {} autoscaling group.", newLaunchTemplateSpecification,
                 updatableFields, autoScalingGroup.autoScalingGroupName());
         return updateAutoScalingGroupResponse;
-    }
-
-    private void updateInstanceInAutoscalingGroup(AmazonEc2Client ec2Client, AutoScalingGroup autoScalingGroup, Group group) {
-        for (Instance instance : autoScalingGroup.instances()) {
-            String requestedFlavor = group.getReferenceInstanceTemplate().getFlavor();
-            LOGGER.info("Instance with name: {}, will use the new type which is: {}", instance.instanceId(),
-                    requestedFlavor);
-            if (!instance.instanceType().equals(requestedFlavor)) {
-                ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = ModifyInstanceAttributeRequest.builder()
-                        .instanceId(instance.instanceId())
-                        .instanceType(AttributeValue.builder().value(requestedFlavor).build())
-                        .build();
-                ec2Client.modifyInstanceAttribute(modifyInstanceAttributeRequest);
-            } else {
-                LOGGER.info("Instance {} using the same type what was requested: {}", instance.instanceId(), requestedFlavor);
-            }
-        }
     }
 }

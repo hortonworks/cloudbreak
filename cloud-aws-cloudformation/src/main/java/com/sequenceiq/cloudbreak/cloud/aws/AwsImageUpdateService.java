@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 public class AwsImageUpdateService {
 
     @Inject
-    private AwsLaunchConfigurationImageUpdateService awsLaunchConfigurationImageUpdateService;
+    private AwsLaunchConfigurationUpdateService awsLaunchConfigurationUpdateService;
 
     @Inject
     private AwsLaunchTemplateUpdateService awsLaunchTemplateUpdateService;
@@ -24,10 +24,11 @@ public class AwsImageUpdateService {
     public void updateImage(AuthenticatedContext authenticatedContext, CloudStack stack, CloudResource cfResource) {
         String cfTemplate = stack.getTemplate();
         if (cfTemplate.contains(AwsUpdateService.LAUNCH_CONFIGURATION)) {
-            awsLaunchConfigurationImageUpdateService.updateImage(authenticatedContext, stack, cfResource);
+            awsLaunchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource,
+                    Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
         } else if (cfTemplate.contains(AwsUpdateService.LAUNCH_TEMPLATE)) {
             awsLaunchTemplateUpdateService.updateFieldsOnAllLaunchTemplate(authenticatedContext,
-                    cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
+                    cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()), stack);
         } else {
             throw new NotImplementedException("Image update for stack template is not implemented yet.");
         }

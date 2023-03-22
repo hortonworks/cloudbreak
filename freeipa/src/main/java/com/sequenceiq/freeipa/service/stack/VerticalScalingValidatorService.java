@@ -48,7 +48,7 @@ public class VerticalScalingValidatorService {
             throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloud platform", stack.getCloudPlatform()));
         }
         if (!stack.isStopped()) {
-            throw new BadRequestException(String.format("You must stop FreeIPA to be able to vertically scale it."));
+            throw new BadRequestException("You must stop FreeIPA to be able to vertically scale it.");
         }
         if (verticalScaleV4Request.getTemplate() == null) {
             throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s FreeIpa.", stack.getCloudPlatform()));

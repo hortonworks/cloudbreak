@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeOptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeResponse;
@@ -30,6 +33,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.handler.AwsMigrationUtil;
+import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -60,6 +64,9 @@ public class UpgradeService {
 
     @Inject
     private AwsMigrationUtil awsMigrationUtil;
+
+    @Inject
+    private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
 
     @SuppressWarnings("IllegalType")
     public FreeIpaUpgradeResponse upgradeFreeIpa(String accountId, FreeIpaUpgradeRequest request) {
@@ -97,8 +104,22 @@ public class UpgradeService {
         Operation operation = startUpgradeOperation(stack.getAccountId(), request);
         String triggeredVariant = awsMigrationUtil.calculateUpgradeVariant(stack, accountId);
         boolean needMigration = awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant);
+        int defaultRootVolumeSize = rootVolumeSizeProvider.getForPlatform(stack.getCloudPlatform());
+        List<VerticalScaleRequest> verticalScaleRequests = stack.getInstanceGroups().stream()
+                .filter(ig -> ig.getTemplate().getRootVolumeSize() < defaultRootVolumeSize)
+                .map(ig -> {
+                    VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+                    verticalScaleRequest.setGroup(ig.getGroupName());
+                    InstanceTemplateRequest templateRequest = new InstanceTemplateRequest();
+                    VolumeRequest rootVolume = new VolumeRequest();
+                    rootVolume.setSize(defaultRootVolumeSize);
+                    templateRequest.setRootVolume(rootVolume);
+                    verticalScaleRequest.setTemplate(templateRequest);
+                    return verticalScaleRequest;
+                }).collect(Collectors.toList());
         UpgradeEvent upgradeEvent = new UpgradeEvent(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, stack.getId(), nonPgwInstanceIds, pgwInstanceId,
-                operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()), needMigration, triggeredVariant);
+                operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()), needMigration, triggeredVariant,
+                verticalScaleRequests.isEmpty() ? null : verticalScaleRequests.get(0));
         LOGGER.info("Trigger upgrade flow with event: {}", upgradeEvent);
         FlowIdentifier flowIdentifier = flowManager.notify(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, upgradeEvent);
         return new FreeIpaUpgradeResponse(flowIdentifier, selectedImage, currentImage, operation.getOperationId());

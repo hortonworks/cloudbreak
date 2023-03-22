@@ -70,7 +70,7 @@ public class FreeIpaVerticalScaleHandler implements CloudPlatformEventHandler<Fr
             LOGGER.error("Vertical scaling stack failed", e);
             FreeIpaVerticalScaleFailureEvent result = new FreeIpaVerticalScaleFailureEvent(
                     request.getResourceId(),
-                    "Unexpected failure in during action",
+                    "Failure while trying to vertically upscale on the provider side",
                     Set.of(),
                     Map.of(),
                     e);

@@ -28,12 +28,12 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -219,7 +219,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     private List<Group> buildInstanceGroups(Stack stack, List<InstanceGroup> instanceGroups, Collection<String> deleteRequests,
-        String imageName, Optional<CloudFileSystemView> fileSystemView) {
+            String imageName, Optional<CloudFileSystemView> fileSystemView) {
         String cloudPlatform = stack.getCloudPlatform();
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
@@ -323,11 +323,18 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         InstanceTemplateRequest template = request.getTemplate();
         if (template != null) {
             cloudStack.getGroups()
-                .stream()
-                .filter(group -> group.getName().equals(request.getGroup()))
-                .flatMap(group -> group.getInstances().stream())
-                .filter(instance -> !Strings.isNullOrEmpty(template.getInstanceType()))
-                .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
+                    .stream()
+                    .filter(group -> group.getName().equals(request.getGroup()))
+                    .flatMap(group -> group.getInstances().stream())
+                    .filter(instance -> StringUtils.isNotBlank(template.getInstanceType()))
+                    .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
+            if (request.getTemplate().getRootVolume() != null
+                    && request.getTemplate().getRootVolume().getSize() != null) {
+                cloudStack.getGroups()
+                        .stream()
+                        .filter(group -> group.getName().equals(request.getGroup()))
+                        .forEach(group -> group.setRootVolumeSize(request.getTemplate().getRootVolume().getSize()));
+            }
         }
         return cloudStack;
     }
@@ -350,22 +357,22 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
 
     private void checkLoggingAndBackupFileSystemConflicting(Logging logging, Backup backup) {
         if (logging.getS3() != null && backup.getS3() != null && !logging.getS3().equals(backup.getS3())) {
-                throw new BadRequestException(
-                        String.format("Logging [%s] and backup [%s] instance profiles are conflicting. " +
-                        "Please use the same for both or define only one of them",
-                        logging.getS3(), backup.getS3()));
+            throw new BadRequestException(
+                    String.format("Logging [%s] and backup [%s] instance profiles are conflicting. " +
+                                    "Please use the same for both or define only one of them",
+                            logging.getS3(), backup.getS3()));
         }
         if (logging.getAdlsGen2() != null && backup.getAdlsGen2() != null && !logging.getAdlsGen2().equals(backup.getAdlsGen2())) {
-                throw new BadRequestException(
-                        String.format("Logging [%s] and backup [%s] managed identities are conflicting. " +
-                        "Please use the same for both or define only one of them",
-                        logging.getAdlsGen2(), backup.getAdlsGen2()));
+            throw new BadRequestException(
+                    String.format("Logging [%s] and backup [%s] managed identities are conflicting. " +
+                                    "Please use the same for both or define only one of them",
+                            logging.getAdlsGen2(), backup.getAdlsGen2()));
         }
         if (logging.getGcs() != null && backup.getGcs() != null && !logging.getGcs().equals(backup.getGcs())) {
-                throw new BadRequestException(
-                        String.format("Logging [%s] and backup [%s] service account emails are conflicting. " +
-                        "Please use the same for both or define only one of them",
-                        logging.getGcs(), backup.getGcs()));
+            throw new BadRequestException(
+                    String.format("Logging [%s] and backup [%s] service account emails are conflicting. " +
+                                    "Please use the same for both or define only one of them",
+                            logging.getGcs(), backup.getGcs()));
         }
     }
 
