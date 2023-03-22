@@ -129,6 +129,7 @@ public class AzureCloudResourceService {
                 cloudResourceBuilder.withType(ResourceType.AZURE_PRIVATE_ENDPOINT);
                 break;
             case "Microsoft.DBforPostgreSQL/servers":
+            case "Microsoft.DBforPostgreSQL/flexibleServers":
                 cloudResourceBuilder.withType(ResourceType.AZURE_DATABASE);
                 break;
             case "Microsoft.DBforPostgreSQL/servers/securityAlertPolicies":

@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.sdx.database.AzureDatabaseAttributesService;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
@@ -31,6 +32,9 @@ public class SdxExternalDatabaseConfigurerTest {
 
     @Mock
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
+    @Mock
+    private AzureDatabaseAttributesService  azureDatabaseAttributesService;
 
     @InjectMocks
     private SdxExternalDatabaseConfigurer underTest;

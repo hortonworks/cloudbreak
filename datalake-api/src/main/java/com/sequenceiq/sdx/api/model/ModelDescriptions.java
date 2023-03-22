@@ -139,6 +139,10 @@ public class ModelDescriptions {
 
     public static final String DATABASE_ENGINE_VERSION = "Database engine version.";
 
+    public static final String AZURE_DATABASE_REQUEST = "Azure Database request.";
+
+    public static final String AZURE_DATABASE_TYPE = "The type of the azure database: single server / flexible server";
+
     public static final String EXTERNAL_DATABASE_OPTIONS = "External database options.";
 
     public static final String AWS_OPTIONS = "AWS options.";

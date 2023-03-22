@@ -76,7 +76,8 @@ public class UpdateDatabaseServerRegistrationHandler extends ExceptionCatcherEve
             String dbHostnameString = dbHostname.getName();
             dbServerConfig.setHost(dbHostnameString);
             dbServerConfig.setPort(Integer.parseInt(dbPort.getName()));
-            String updatedUserName = userGeneratorService.updateUserName(dbServerConfig.getConnectionUserName(), Optional.of(cloudPlatform), dbHostnameString);
+            String updatedUserName = userGeneratorService.updateUserName(request.getDatabaseStack().getDatabaseServer(), dbServerConfig.getConnectionUserName(),
+                    Optional.of(cloudPlatform), dbHostnameString);
             dbServerConfig.setConnectionUserName(updatedUserName);
 
             databaseServerConfigService.update(dbServerConfig);

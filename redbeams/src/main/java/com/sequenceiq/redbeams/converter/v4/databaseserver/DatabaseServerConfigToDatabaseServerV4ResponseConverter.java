@@ -4,13 +4,21 @@ import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.Ss
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode.ENABLED;
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType.NONE;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
+import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ConnectionNameFormat;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabasePropertiesV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
 import com.sequenceiq.redbeams.api.model.common.Status;
@@ -47,6 +55,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
         response.setClusterCrn(source.getClusterCrn());
 
         response.setResourceStatus(source.getResourceStatus());
+        response.setDatabasePropertiesV4Response(createDatabaseProperties(source));
         if (source.getDbStack().isPresent()) {
             DBStack dbStack = source.getDbStack().get();
             response.setStatus(dbStack.getStatus());
@@ -82,4 +91,20 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
         return response;
     }
 
+    private DatabasePropertiesV4Response createDatabaseProperties(DatabaseServerConfig source) {
+        DatabasePropertiesV4Response response = new DatabasePropertiesV4Response();
+        source.getDbStack().ifPresent(dbStack -> {
+            Json attributes = dbStack.getDatabaseServer().getAttributes();
+            Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+            if (dbStack.getCloudPlatform().equals(CloudPlatform.AZURE.name())) {
+                String dbTypeStr = (String) params.get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY);
+                AzureDatabaseType azureDatabaseType =
+                        StringUtils.isNotBlank(dbTypeStr) ? AzureDatabaseType.valueOf(dbTypeStr) : AzureDatabaseType.SINGLE_SERVER;
+                if (azureDatabaseType == AzureDatabaseType.SINGLE_SERVER) {
+                    response.setConnectionNameFormat(ConnectionNameFormat.USERNAME_WITH_HOSTNAME);
+                }
+            }
+        });
+        return response;
+    }
 }

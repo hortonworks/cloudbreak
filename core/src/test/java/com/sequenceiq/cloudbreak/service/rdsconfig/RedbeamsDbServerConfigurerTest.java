@@ -66,7 +66,7 @@ public class RedbeamsDbServerConfigurerTest {
     public void getRdsConfigWhenAws() {
         when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(createDatabaseServerV4Response(DB_HOST));
         when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(EXAMPLE_JDBC_URL);
-        when(dbUsernameConverterService.toConnectionUsername(anyString(), anyString())).thenReturn(DB_USER);
+        when(dbUsernameConverterService.toConnectionUsername(any(), anyString())).thenReturn(DB_USER);
         Cluster testCluster = createCluster(DB_SERVER_CRN);
         Stack testStack = createStack(testCluster);
 
@@ -93,7 +93,7 @@ public class RedbeamsDbServerConfigurerTest {
     public void getRdsConfigWhenAwsAndSsl(String testCaseName, SslMode sslMode, RdsSslMode rdsSslModeExpected) {
         when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(createDatabaseServerV4ResponseWithSsl(DB_HOST, sslMode));
         when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(EXAMPLE_JDBC_URL);
-        when(dbUsernameConverterService.toConnectionUsername(anyString(), anyString())).thenReturn(DB_USER);
+        when(dbUsernameConverterService.toConnectionUsername(any(), anyString())).thenReturn(DB_USER);
         Cluster testCluster = createCluster(DB_SERVER_CRN);
         Stack testStack = createStack(testCluster);
 
@@ -110,7 +110,7 @@ public class RedbeamsDbServerConfigurerTest {
     public void getRdsConfigWhenAzure() {
         when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(createDatabaseServerV4Response(DB_HOST_AZURE));
         when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(EXAMPLE_JDBC_URL_AZURE);
-        when(dbUsernameConverterService.toConnectionUsername(anyString(), anyString())).thenReturn("cmuser@" + DB_HOST_SHORT_NAME);
+        when(dbUsernameConverterService.toConnectionUsername(any(), anyString())).thenReturn("cmuser@" + DB_HOST_SHORT_NAME);
         Cluster testCluster = createCluster(DB_SERVER_CRN);
         Stack testStack = createStack(testCluster);
 
@@ -128,7 +128,7 @@ public class RedbeamsDbServerConfigurerTest {
     public void getRdsConfigWhenAzureAndSsl(String testCaseName, SslMode sslMode, RdsSslMode rdsSslModeExpected) {
         when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(createDatabaseServerV4ResponseWithSsl(DB_HOST_AZURE, sslMode));
         when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(EXAMPLE_JDBC_URL_AZURE);
-        when(dbUsernameConverterService.toConnectionUsername(anyString(), anyString())).thenReturn("cmuser@" + DB_HOST_SHORT_NAME);
+        when(dbUsernameConverterService.toConnectionUsername(any(), anyString())).thenReturn("cmuser@" + DB_HOST_SHORT_NAME);
         Cluster testCluster = createCluster(DB_SERVER_CRN);
         Stack testStack = createStack(testCluster);
 

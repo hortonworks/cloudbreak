@@ -36,6 +36,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxDatabaseOperation;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -69,6 +70,9 @@ public class DatabaseService {
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
+
+    @Inject
+    private SdxDatabaseRepository sdxDatabaseRepository;
 
     @Inject
     private SdxStatusService sdxStatusService;
@@ -117,7 +121,8 @@ public class DatabaseService {
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env), initiatorUserCrn));
                 dbResourceCrn = serverStatusV4Response.getResourceCrn();
-                sdxCluster.setDatabaseCrn(dbResourceCrn);
+                DatabaseParameterFallbackUtil.setDatabaseCrn(sdxCluster, dbResourceCrn);
+                sdxDatabaseRepository.save(sdxCluster.getSdxDatabase());
                 sdxClusterRepository.save(sdxCluster);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
                         "External database creation in progress", sdxCluster);
@@ -226,7 +231,7 @@ public class DatabaseService {
         req.setInstanceType(databaseConfig.getInstanceType());
         req.setDatabaseVendor(databaseConfig.getVendor());
         req.setStorageSize(databaseConfig.getVolumeSize());
-        databaseServerParameterSetterMap.get(cloudPlatform).setParameters(req, sdxCluster.getDatabaseAvailabilityType(), sdxCluster.getDatabaseEngineVersion());
+        databaseServerParameterSetterMap.get(cloudPlatform).setParameters(req, sdxCluster);
         return req;
     }
 

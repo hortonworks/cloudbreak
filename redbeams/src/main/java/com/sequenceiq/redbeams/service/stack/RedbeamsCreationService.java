@@ -14,8 +14,10 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
@@ -45,6 +47,9 @@ public class RedbeamsCreationService {
 
     @Inject
     private RedbeamsFlowManager flowManager;
+
+    @Inject
+    private DBStackToDatabaseStackConverter databaseStackConverter;
 
     public DBStack launchDatabaseServer(DBStack dbStack, String clusterCrn) {
         if (LOGGER.isDebugEnabled()) {
@@ -104,10 +109,11 @@ public class RedbeamsCreationService {
         CloudPlatformVariant platformVariant = new CloudPlatformVariant(dbStack.getCloudPlatform(), dbStack.getPlatformVariant());
         try {
             CloudConnector connector = cloudPlatformConnectors.get(platformVariant);
+            DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
             if (connector == null) {
                 throw new RedbeamsException("Failed to find cloud connector for platform variant " + platformVariant);
             }
-            String template = connector.resources().getDBStackTemplate();
+            String template = connector.resources().getDBStackTemplate(databaseStack);
             if (template == null) {
                 throw new RedbeamsException("No database stack template is available for platform variant " + platformVariant);
             }

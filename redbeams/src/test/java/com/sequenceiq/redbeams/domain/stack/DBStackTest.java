@@ -177,7 +177,8 @@ public class DBStackTest {
                 Arguments.of(CloudPlatform.GCP,
                         new Json("{\"engineVersion\":\"11\",\"cloudPlatform\":\"GCP\"}")),
                 Arguments.of(CloudPlatform.AZURE,
-                        new Json("{\"cloudPlatform\":\"AZURE\",\"geoRedundantBackup\":false,\"dbVersion\":\"11\",\"storageAutoGrow\":false}")),
+                        new Json("{\"cloudPlatform\":\"AZURE\",\"AZURE_DATABASE_TYPE\":\"SINGLE_SERVER\"," +
+                                "\"geoRedundantBackup\":false,\"dbVersion\":\"11\",\"storageAutoGrow\":false}")),
                 Arguments.of(CloudPlatform.MOCK, SAMPLE_JSON),
                 Arguments.of(CloudPlatform.YARN, SAMPLE_JSON),
                 Arguments.of(CloudPlatform.OPENSTACK, SAMPLE_JSON)

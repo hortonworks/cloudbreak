@@ -25,6 +25,9 @@ public class SdxDatabaseRequest {
     @Pattern(regexp = POSTGRES_VERSION_REGEX, message = "Not a valid database major version")
     private String databaseEngineVersion;
 
+    @ApiModelProperty(ModelDescriptions.AZURE_DATABASE_REQUEST)
+    private SdxDatabaseAzureRequest sdxDatabaseAzureRequest;
+
     public Boolean getCreate() {
         return create;
     }
@@ -47,5 +50,13 @@ public class SdxDatabaseRequest {
 
     public void setDatabaseEngineVersion(String databaseEngineVersion) {
         this.databaseEngineVersion = databaseEngineVersion;
+    }
+
+    public SdxDatabaseAzureRequest getSdxDatabaseAzureRequest() {
+        return sdxDatabaseAzureRequest;
+    }
+
+    public void setSdxDatabaseAzureRequest(SdxDatabaseAzureRequest sdxDatabaseAzureRequest) {
+        this.sdxDatabaseAzureRequest = sdxDatabaseAzureRequest;
     }
 }

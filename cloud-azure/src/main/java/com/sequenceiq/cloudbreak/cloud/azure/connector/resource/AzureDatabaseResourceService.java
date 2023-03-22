@@ -286,8 +286,8 @@ public class AzureDatabaseResourceService {
         }
     }
 
-    public String getDBStackTemplate() {
-        return azureDatabaseTemplateProvider.getDBTemplateString();
+    public String getDBStackTemplate(DatabaseStack databaseStack) {
+        return azureDatabaseTemplateProvider.getDBTemplateString(databaseStack);
     }
 
     public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,

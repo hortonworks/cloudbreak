@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -91,7 +92,7 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public String getDBStackTemplate() throws TemplatingNotSupportedException {
+    public String getDBStackTemplate(DatabaseStack databaseStack) throws TemplatingNotSupportedException {
         throw new TemplatingNotSupportedException();
     }
 

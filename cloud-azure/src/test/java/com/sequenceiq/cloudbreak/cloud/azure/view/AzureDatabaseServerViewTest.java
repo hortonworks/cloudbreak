@@ -12,8 +12,13 @@ import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
+import com.sequenceiq.common.model.AzureDatabaseType;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureDatabaseServerViewTest {
@@ -162,4 +168,20 @@ public class AzureDatabaseServerViewTest {
         assertThat(underTest.getKeyVaultResourceGroupName()).isEqualTo("dummyResourceGroupName");
     }
 
+    @ParameterizedTest
+    @MethodSource("azureDatabaseTypes")
+    public void testGetAzureDatabaseTypeWhenStringParamMissing(String parameterValue, AzureDatabaseType expectedDatabaseType) {
+        when(server.getStringParameter(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY)).thenReturn(parameterValue);
+        assertThat(underTest.getAzureDatabaseType()).isEqualTo(expectedDatabaseType);
+    }
+
+    private static Stream<Arguments> azureDatabaseTypes() {
+        return Stream.of(
+                Arguments.of("", AzureDatabaseType.SINGLE_SERVER),
+                Arguments.of(null, AzureDatabaseType.SINGLE_SERVER),
+                Arguments.of(AzureDatabaseType.SINGLE_SERVER.name(), AzureDatabaseType.SINGLE_SERVER),
+                Arguments.of(AzureDatabaseType.FLEXIBLE_SERVER.name(), AzureDatabaseType.FLEXIBLE_SERVER),
+                Arguments.of("invalid", AzureDatabaseType.SINGLE_SERVER)
+        );
+    }
 }

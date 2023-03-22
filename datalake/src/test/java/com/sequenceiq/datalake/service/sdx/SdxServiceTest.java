@@ -60,6 +60,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -115,9 +116,11 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
@@ -137,6 +140,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequestBase;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 
@@ -253,6 +257,9 @@ class SdxServiceTest {
 
     @Mock
     private SdxBackupRestoreService sdxBackupRestoreService;
+
+    @Mock
+    private SdxDatabaseRepository sdxDatabaseRepository;
 
     @InjectMocks
     private SdxService underTest;
@@ -380,6 +387,8 @@ class SdxServiceTest {
         lenient().when(entitlementService.isRazForGcpEnabled(anyString()))
                 .thenReturn(true);
         lenient().when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
+        lenient().when(externalDatabaseConfigurer.configure(any(CloudPlatform.class), ArgumentMatchers.isNull(), any(SdxDatabaseRequest.class),
+                        any(SdxCluster.class))).thenReturn(new SdxDatabase());
     }
 
     @Test
@@ -461,7 +470,7 @@ class SdxServiceTest {
     }
 
     @Test
-    void testUpdateRangerRazEnabledForSdxClusterWhenRangerRazIsPresent() {
+    void testUpdateRangerRazEnabledForSdxClusterWhenRangerRazIsPresent() throws TransactionExecutionException {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setEnvName("env");
         sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
@@ -474,6 +483,7 @@ class SdxServiceTest {
         environmentResponse.setCloudPlatform("AWS");
 
         RangerRazEnabledV4Response response = mock(RangerRazEnabledV4Response.class);
+        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         when(stackV4Endpoint.rangerRazEnabledInternal(anyLong(), anyString(), anyString())).thenReturn(response);
         when(response.isRangerRazEnabled()).thenReturn(true);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
@@ -1200,7 +1210,7 @@ class SdxServiceTest {
         sdxClusterRequest.setClusterShape(shape);
         sdxClusterRequest.addTags(TAGS);
         sdxClusterRequest.setEnvironment("envir");
-
+        sdxClusterRequest.setExternalDatabase(new SdxDatabaseRequest());
         return sdxClusterRequest;
     }
 
@@ -1241,7 +1251,7 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(TAGS);
         sdxClusterRequest.setEnvironment("envir");
         sdxClusterRequest.setImageSettingsV4Request(imageSettingsV4Request);
-
+        sdxClusterRequest.setExternalDatabase(new SdxDatabaseRequest());
         return sdxClusterRequest;
     }
 

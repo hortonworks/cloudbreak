@@ -2,12 +2,15 @@ package com.sequenceiq.datalake.entity;
 
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -33,6 +36,7 @@ import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.converter.SdxClusterShapeConverter;
 import com.sequenceiq.datalake.converter.SdxDatabaseAvailabilityTypeConverter;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterFallbackUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
@@ -100,11 +104,6 @@ public class SdxCluster implements AccountAwareResource {
 
     private Long created;
 
-    @Column(nullable = false)
-    private boolean createDatabase;
-
-    private String databaseCrn;
-
     @Column(columnDefinition = "TEXT")
     private String cloudStorageBaseLocation;
 
@@ -121,9 +120,6 @@ public class SdxCluster implements AccountAwareResource {
 
     private String lastCbFlowId;
 
-    @Convert(converter = SdxDatabaseAvailabilityTypeConverter.class)
-    private SdxDatabaseAvailabilityType databaseAvailabilityType;
-
     @Column(name = "ranger_raz_enabled")
     private boolean rangerRazEnabled;
 
@@ -138,7 +134,35 @@ public class SdxCluster implements AccountAwareResource {
     @Column(nullable = false)
     private boolean detached;
 
+    /**
+     * @deprecated Kept only for backward compatibility. Use the {@link SdxDatabase#createDatabase} instead. Will be removed in CB-21369.
+     */
+    @Deprecated
+    @Column(nullable = false)
+    private boolean createDatabase;
+
+    /**
+     * @deprecated Kept only for backward compatibility. Use the {@link SdxDatabase#databaseCrn} instead. Will be removed in CB-21369.
+     */
+    @Deprecated
+    private String databaseCrn;
+
+    /**
+     * @deprecated Kept only for backward compatibility. Use the {@link SdxDatabase#databaseEngineVersion} instead. Will be removed in CB-21369.
+     */
+    @Deprecated
     private String databaseEngineVersion;
+
+    /**
+     * @deprecated Kept only for backward compatibility. Use the {@link SdxDatabase#databaseAvailabilityType} instead. Will be removed in CB-21369.
+     */
+    @Deprecated
+    @Convert(converter = SdxDatabaseAvailabilityTypeConverter.class)
+    private SdxDatabaseAvailabilityType databaseAvailabilityType;
+
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JoinColumn(name = "sdxdatabase_id")
+    private SdxDatabase sdxDatabase;
 
     public Long getId() {
         return id;
@@ -290,26 +314,6 @@ public class SdxCluster implements AccountAwareResource {
         this.created = created;
     }
 
-    public boolean isCreateDatabase() {
-        return createDatabase;
-    }
-
-    /**
-     * @deprecated Kept only for backward compatibility. Use the {@link #setDatabaseAvailabilityType(SdxDatabaseAvailabilityType)} instead.
-     */
-    @Deprecated
-    public void setCreateDatabase(Boolean createDatabase) {
-        this.createDatabase = createDatabase;
-    }
-
-    public String getDatabaseCrn() {
-        return databaseCrn;
-    }
-
-    public void setDatabaseCrn(String databaseCrn) {
-        this.databaseCrn = databaseCrn;
-    }
-
     public String getCloudStorageBaseLocation() {
         return cloudStorageBaseLocation;
     }
@@ -358,29 +362,8 @@ public class SdxCluster implements AccountAwareResource {
         this.enableMultiAz = enableMultiAz;
     }
 
-    public SdxDatabaseAvailabilityType getDatabaseAvailabilityType() {
-        if (databaseAvailabilityType != null) {
-            return databaseAvailabilityType;
-        } else {
-            if (createDatabase) {
-                return SdxDatabaseAvailabilityType.HA;
-            } else {
-                return SdxDatabaseAvailabilityType.NONE;
-            }
-        }
-    }
-
-    public boolean hasExternalDatabase() {
-        return !SdxDatabaseAvailabilityType.NONE.equals(getDatabaseAvailabilityType());
-    }
-
-    public void setDatabaseAvailabilityType(SdxDatabaseAvailabilityType databaseAvailabilityType) {
-        this.databaseAvailabilityType = databaseAvailabilityType;
-        if (SdxDatabaseAvailabilityType.NONE.equals(databaseAvailabilityType)) {
-            createDatabase = false;
-        } else {
-            createDatabase = true;
-        }
+    public boolean isCreateDatabase() {
+        return DatabaseParameterFallbackUtil.isCreateDatabase(sdxDatabase, createDatabase);
     }
 
     public boolean isRangerRazEnabled() {
@@ -407,8 +390,37 @@ public class SdxCluster implements AccountAwareResource {
         this.detached = detached;
     }
 
+    /**
+     * @deprecated Kept only for backward compatibility. Use the {@link #setDatabaseAvailabilityType(SdxDatabaseAvailabilityType)} instead.
+     */
+    @Deprecated
+    public void setCreateDatabase(Boolean createDatabase) {
+        this.createDatabase = createDatabase;
+    }
+
+    public String getDatabaseCrn() {
+        return DatabaseParameterFallbackUtil.getDatabaseCrn(sdxDatabase, databaseCrn);
+    }
+
+    public void setDatabaseCrn(String databaseCrn) {
+        this.databaseCrn = databaseCrn;
+    }
+
+    public SdxDatabaseAvailabilityType getDatabaseAvailabilityType() {
+        return DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(sdxDatabase, databaseAvailabilityType, createDatabase);
+    }
+
+    public boolean hasExternalDatabase() {
+        return SdxDatabaseAvailabilityType.hasExternalDatabase(getDatabaseAvailabilityType());
+    }
+
+    public void setDatabaseAvailabilityType(SdxDatabaseAvailabilityType databaseAvailabilityType) {
+        this.databaseAvailabilityType = databaseAvailabilityType;
+        createDatabase = SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType);
+    }
+
     public String getDatabaseEngineVersion() {
-        return databaseEngineVersion;
+        return DatabaseParameterFallbackUtil.getDatabaseEngineVersion(sdxDatabase, databaseEngineVersion);
     }
 
     public void setDatabaseEngineVersion(String databaseEngineVersion) {
@@ -429,6 +441,14 @@ public class SdxCluster implements AccountAwareResource {
 
     public void setRepairFlowChainId(String repairFlowChainId) {
         this.repairFlowChainId = repairFlowChainId;
+    }
+
+    public SdxDatabase getSdxDatabase() {
+        return sdxDatabase;
+    }
+
+    public void setSdxDatabase(SdxDatabase sdxDatabase) {
+        this.sdxDatabase = sdxDatabase;
     }
 
     //CHECKSTYLE:OFF

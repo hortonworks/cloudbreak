@@ -8,11 +8,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -25,9 +26,11 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ConnectionNameFormat;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
@@ -70,7 +73,11 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
     private static final String REGION = "myRegion";
 
-    private static final String DATABASE_SERVER_ATTRIBUTES = "{ \"engine\": \"10\", \"this\": \"that\" }";
+    private static final String DATABASE_SERVER_ATTRIBUTES_SINGLE =
+            "{ \"engine\": \"10\", \"this\": \"that\", \"AZURE_DATABASE_TYPE\": \"SINGLE_SERVER\" }";
+
+    private static final String DATABASE_SERVER_ATTRIBUTES_FLEXIBLE =
+            "{ \"engine\": \"10\", \"this\": \"that\", \"AZURE_DATABASE_TYPE\": \"FLEXIBLE_SERVER\" }";
 
     @Mock
     private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
@@ -82,8 +89,8 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
     private DatabaseServerConfigToDatabaseServerV4ResponseConverter converter;
 
     @ParameterizedTest
-    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
-    public void testConversion(CloudPlatform cloudPlatform) {
+    @MethodSource("conversionParams")
+    public void testConversion(CloudPlatform cloudPlatform, AzureDatabaseType azureDatabaseType, ConnectionNameFormat connectionNameFormat) {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setId(1L);
         server.setResourceCrn(TestData.getTestCrn(RESOURCE_TYPE_DATABASE_SERVER, RESOURCE_ID));
@@ -99,7 +106,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         server.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
         DBStack dbStack = new DBStack();
         initDBStackStatus(dbStack);
-        setDatabaseServer(dbStack);
+        setDatabaseServer(dbStack, azureDatabaseType);
         dbStack.setCloudPlatform(cloudPlatform.name());
         server.setDbStack(dbStack);
         when(stringToSecretResponseConverter.convert(anyString())).thenReturn(new SecretResponse());
@@ -125,11 +132,16 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(response.getStatus()).isEqualTo(dbStack.getStatus());
         assertThat(response.getStatusReason()).isEqualTo(dbStack.getStatusReason());
         assertThat(response.getMajorVersion()).isEqualTo(dbStack.getMajorVersion());
+        assertThat(response.getDatabasePropertiesV4Response().getConnectionNameFormat()).isEqualTo(connectionNameFormat);
     }
 
-    private static void setDatabaseServer(DBStack dbStack) {
+    private static void setDatabaseServer(DBStack dbStack, AzureDatabaseType azureDatabaseType) {
         DatabaseServer databaseServer = new DatabaseServer();
-        databaseServer.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES));
+        if (azureDatabaseType == AzureDatabaseType.FLEXIBLE_SERVER) {
+            databaseServer.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES_FLEXIBLE));
+        } else {
+            databaseServer.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES_SINGLE));
+        }
         dbStack.setDatabaseServer(databaseServer);
     }
 
@@ -138,6 +150,16 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         dbStackStatus.setStatus(Status.CREATE_IN_PROGRESS);
         dbStackStatus.setStatusReason(STATUS_REASON);
         dbStack.setDBStackStatus(dbStackStatus);
+    }
+
+    private static Stream<Arguments> conversionParams() {
+        return Stream.of(
+                Arguments.of(CloudPlatform.AWS, null, ConnectionNameFormat.USERNAME_ONLY),
+                Arguments.of(CloudPlatform.GCP, null, ConnectionNameFormat.USERNAME_ONLY),
+                Arguments.of(CloudPlatform.AZURE, null, ConnectionNameFormat.USERNAME_WITH_HOSTNAME),
+                Arguments.of(CloudPlatform.AZURE, AzureDatabaseType.SINGLE_SERVER, ConnectionNameFormat.USERNAME_WITH_HOSTNAME),
+                Arguments.of(CloudPlatform.AZURE, AzureDatabaseType.FLEXIBLE_SERVER, ConnectionNameFormat.USERNAME_ONLY)
+        );
     }
 
     @Test
@@ -204,7 +226,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         DBStack dbStack = new DBStack();
         initDBStackStatus(dbStack);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
-        setDatabaseServer(dbStack);
+        setDatabaseServer(dbStack, null);
         server.setDbStack(dbStack);
 
         DatabaseServerV4Response response = converter.convert(server);
@@ -225,7 +247,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         dbStack.setSslConfig(new SslConfig());
         initDBStackStatus(dbStack);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
-        setDatabaseServer(dbStack);
+        setDatabaseServer(dbStack, null);
         server.setDbStack(dbStack);
 
         DatabaseServerV4Response response = converter.convert(server);
@@ -249,7 +271,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         sslConfig.setSslCertificateType(SslCertificateType.BRING_YOUR_OWN);
         dbStack.setSslConfig(sslConfig);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
-        setDatabaseServer(dbStack);
+        setDatabaseServer(dbStack, null);
         server.setDbStack(dbStack);
 
         DatabaseServerV4Response response = converter.convert(server);
@@ -283,7 +305,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
 
         DBStack dbStack = new DBStack();
-        setDatabaseServer(dbStack);
+        setDatabaseServer(dbStack, null);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         dbStack.setRegion(REGION);
         SslConfig sslConfig = new SslConfig();
