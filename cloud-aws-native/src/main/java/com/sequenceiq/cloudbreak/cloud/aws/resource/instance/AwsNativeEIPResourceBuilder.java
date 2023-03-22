@@ -97,8 +97,9 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(
                     cloudStack.getTags(),
                     com.amazonaws.services.ec2.model.ResourceType.ElasticIp);
-            tagSpecification.getTags().add(new Tag().withKey("Name").withValue(buildableResource.get(0).getName()));
-
+            if (tagSpecification.getTags().stream().noneMatch(tag -> "Name".equals(tag.getKey()))) {
+                tagSpecification.getTags().add(new Tag().withKey("Name").withValue(buildableResource.get(0).getName()));
+            }
             AllocateAddressRequest allocateAddressRequest = new AllocateAddressRequest()
                     .withTagSpecifications(tagSpecification)
                     .withDomain(DomainType.Vpc);

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
 import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -31,6 +32,7 @@ import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -149,6 +151,45 @@ class AwsNativeInstanceResourceBuilderTest {
         RunInstancesRequest runInstancesRequest = runInstancesRequestArgumentCaptor.getValue();
         Assertions.assertEquals(actual.get(0).getInstanceId(), "instanceId");
         Assertions.assertEquals("sg-id", runInstancesRequest.getSecurityGroupIds().get(0));
+        assertThat(runInstancesRequest.getTagSpecifications().get(0)).matches(ts -> ts.getTags().stream()
+                .anyMatch(t -> "Name".equals(t.getKey()) && "stackname".equals(t.getValue())));
+    }
+
+    @Test
+    void testBuildWhenExistingNameTagShouldNotOverride() throws Exception {
+        RunInstancesResult runInstancesResult = mock(RunInstancesResult.class);
+        InstanceAuthentication authentication = mock(InstanceAuthentication.class);
+        Instance instance = new Instance().withInstanceId("instanceId");
+        CloudResource cloudResource = CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("groupName")
+                .withParameters(emptyMap())
+                .build();
+
+        Image image = mock(Image.class);
+
+        long privateId = 0;
+        when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.empty());
+        when(awsTaggingService.prepareEc2TagSpecification(cloudStack.getTags(), com.amazonaws.services.ec2.model.ResourceType.Instance))
+                .thenReturn(new TagSpecification().withTags(new Tag("Name", "doNotOverride")));
+        when(amazonEc2Client.createInstance(any())).thenReturn(runInstancesResult);
+        when(runInstancesResult.getReservation()).thenReturn(new Reservation().withInstances(instance));
+        when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
+        when(group.getName()).thenReturn("groupName");
+        when(cloudStack.getImage()).thenReturn(image);
+        when(image.getImageName()).thenReturn("img-name");
+        when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
+
+        ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
+        List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+        verify(amazonEc2Client).createInstance(runInstancesRequestArgumentCaptor.capture());
+        RunInstancesRequest runInstancesRequest = runInstancesRequestArgumentCaptor.getValue();
+        assertThat(runInstancesRequest.getTagSpecifications().get(0)).matches(ts -> ts.getTags().stream()
+                .anyMatch(t -> "Name".equals(t.getKey()) && "doNotOverride".equals(t.getValue())));
     }
 
     @Test

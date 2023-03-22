@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
 import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,12 +14,15 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.amazonaws.services.ec2.model.AllocateAddressRequest;
 import com.amazonaws.services.ec2.model.AllocateAddressResult;
 import com.amazonaws.services.ec2.model.AssociateAddressResult;
+import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -184,5 +188,46 @@ public class AwsNativeEIPResourceBuilderTest {
         EIpAttributes eIpAttributes = actual.get(0).getParameter(CloudResource.ATTRIBUTES, EIpAttributes.class);
         Assertions.assertEquals("allocId", eIpAttributes.getAllocateId());
         Assertions.assertEquals("assocId", eIpAttributes.getAssociationId());
+        ArgumentCaptor<AllocateAddressRequest> allocateAddressRequestArgumentCaptor = ArgumentCaptor.forClass(AllocateAddressRequest.class);
+        verify(amazonEc2Client).allocateAddress(allocateAddressRequestArgumentCaptor.capture());
+        AllocateAddressRequest allocateAddressRequest = allocateAddressRequestArgumentCaptor.getValue();
+        assertThat(allocateAddressRequest.getTagSpecifications().get(0)).matches(ts -> ts.getTags().stream()
+                .anyMatch(t -> "Name".equals(t.getKey()) && "name".equals(t.getValue())));
+    }
+
+    @Test
+    public void testBuildWhenExistingNameTagShouldNotOverride() throws Exception {
+        CloudResource cloudResource = CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_RESERVED_IP)
+                .withStatus(CommonStatus.CREATED)
+                .withParameters(emptyMap())
+                .build();
+
+        CloudResource instanceResource = CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withInstanceId("instanceId")
+                .withParameters(emptyMap())
+                .build();
+
+        when(awsTaggingService.prepareEc2TagSpecification(any(), any())).thenReturn(new TagSpecification().withTags(new Tag("Name", "doNotOverride")));
+        when(amazonEc2Client.allocateAddress(any())).thenReturn(new AllocateAddressResult().withAllocationId("allocId"));
+        when(awsElasticIpService.associateElasticIpsToInstances(any(), any(), any()))
+                .thenReturn(List.of(new AssociateAddressResult().withAssociationId("assocId")));
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getId()).thenReturn(0L);
+        when(persistenceRetriever.notifyRetrieve(0L, "0", CommonStatus.CREATED, ResourceType.AWS_INSTANCE))
+                .thenReturn(Optional.of(instanceResource));
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+
+        List<CloudResource> actual = underTest.build(awsContext, cloudInstance, 0L, ac, group, List.of(cloudResource), cloudStack);
+
+        ArgumentCaptor<AllocateAddressRequest> allocateAddressRequestArgumentCaptor = ArgumentCaptor.forClass(AllocateAddressRequest.class);
+        verify(amazonEc2Client).allocateAddress(allocateAddressRequestArgumentCaptor.capture());
+        AllocateAddressRequest allocateAddressRequest = allocateAddressRequestArgumentCaptor.getValue();
+        assertThat(allocateAddressRequest.getTagSpecifications().get(0)).matches(ts -> ts.getTags().stream()
+                .anyMatch(t -> "Name".equals(t.getKey()) && "doNotOverride".equals(t.getValue())));
     }
 }
