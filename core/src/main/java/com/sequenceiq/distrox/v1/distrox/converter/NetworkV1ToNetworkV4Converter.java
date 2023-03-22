@@ -8,7 +8,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -139,8 +138,7 @@ public class NetworkV1ToNetworkV4Converter {
             response.setResourceGroupName(networkAzureParams.getResourceGroupName());
             response.setDatabasePrivateDnsZoneId(networkAzureParams.getDatabasePrivateDnsZoneId());
             response.setAksPrivateDnsZoneId(networkAzureParams.getAksPrivateDnsZoneId());
-            response.setNoOutboundLoadBalancer(BooleanUtils.toBooleanDefaultIfNull(networkAzureParams.getNoOutboundLoadBalancer(),
-                    networkResponse.isExistingNetwork()));
+            response.setNoOutboundLoadBalancer(networkAzureParams.isNoOutboundLoadBalancer());
             String subnetId = azureNetworkV1Parameters.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(subnetId);
