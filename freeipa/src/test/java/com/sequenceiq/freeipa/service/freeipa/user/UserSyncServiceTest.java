@@ -109,7 +109,7 @@ public class UserSyncServiceTest {
     public void testSyncUsers() {
         Stack stack = mock(Stack.class);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
         Operation operation = createRunningOperation();
         when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
                 .thenReturn(operation);
@@ -160,7 +160,7 @@ public class UserSyncServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(stack2.getEnvironmentCrn()).thenReturn(ENV_CRN_2);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Set.of(ENV_CRN, ENV_CRN_2), ACCOUNT_ID))
+        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(ENV_CRN, ENV_CRN_2), ACCOUNT_ID))
                 .thenReturn(List.of(stack, stack2));
         Operation operation = createRunningOperation();
         when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
@@ -209,7 +209,7 @@ public class UserSyncServiceTest {
     public void testSyncUsersWithCustomPermissionCheck() {
         Stack stack = mock(Stack.class);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
         Operation operation = createRunningOperation();
         when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
                 .thenReturn(operation);
@@ -265,7 +265,7 @@ public class UserSyncServiceTest {
     public void testSyncUsersWithTimeoutCheckTaskFinished() {
         Stack stack = mock(Stack.class);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
         Operation operation = createRunningOperation();
         when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
                 .thenReturn(operation);
@@ -315,7 +315,7 @@ public class UserSyncServiceTest {
     public void testSyncUsersWithTimeoutCheckTaskRunnable() {
         Stack stack = mock(Stack.class);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
         Operation operation = createRunningOperation();
         when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
                 .thenReturn(operation);

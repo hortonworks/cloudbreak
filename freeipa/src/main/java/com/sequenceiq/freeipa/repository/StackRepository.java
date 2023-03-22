@@ -30,6 +30,41 @@ import com.sequenceiq.freeipa.entity.Stack;
 @EntityType(entityClass = Stack.class)
 public interface StackRepository extends AccountAwareResourceRepository<Stack, Long>, JobResourceRepository<Stack, Long> {
 
+    @Override
+    @Query("SELECT s FROM Stack s WHERE s.id = :id")
+    Optional<Stack> findById(@Param("id") Long id);
+
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
+            "FROM Stack s " +
+            "WHERE s.id = :resourceId")
+    Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name, s.environmentCrn as environmentCrn " +
+            "FROM Stack s " +
+            "WHERE s.terminated = -1 " +
+            "AND s.resourceCrn = :resourceCrn")
+    Optional<ResourceBasicView> findResourceBasicViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name, s.environmentCrn as environmentCrn " +
+            "FROM Stack s " +
+            "WHERE s.terminated = -1 " +
+            "AND s.resourceCrn in (:resourceCrns)")
+    List<ResourceBasicView> findAllResourceBasicViewByResourceCrns(@Param("resourceCrns") Collection<String> resourceCrns);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name, s.environmentCrn as environmentCrn " +
+            "FROM Stack s " +
+            "WHERE s.terminated = -1 " +
+            "AND s.name = :name " +
+            "AND s.accountId = :accountId")
+    Optional<ResourceBasicView> findResourceBasicViewByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name, s.environmentCrn as environmentCrn " +
+            "FROM Stack s " +
+            "WHERE s.terminated = -1 " +
+            "AND s.name in (:names) " +
+            "AND s.accountId = :accountId")
+    List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
+
     @Query("SELECT s FROM Stack s WHERE s.terminated = -1")
     List<Stack> findAllRunning();
 
@@ -41,9 +76,6 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id ")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.resourceCrn = :resourceCrn")
-    Optional<Stack> findOneWithListsByResourceCrn(@Param("resourceCrn") String resourceCrn);
-
     @Query("SELECT s FROM Stack s "
             + "LEFT JOIN FETCH s.instanceGroups ig "
             + "LEFT JOIN FETCH ig.instanceMetaData "
@@ -53,17 +85,13 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
             @Param("accountId") String accountId,
             @Param("resourceCrn") String resourceCrn);
 
-    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.name = :name AND s.terminated = -1")
-    Optional<Stack> findByAccountIdEnvironmentCrnAndName(
-            @Param("accountId") String accountId,
-            @Param("environmentCrn") String environmentCrn,
-            @Param("name") String name);
-
     @Query("SELECT s FROM Stack s " +
-            "LEFT JOIN FETCH s.instanceGroups ig " +
-            "LEFT JOIN FETCH ig.instanceMetaData " +
             "WHERE s.accountId = :accountId AND s.terminated = -1")
     Set<Stack> findByAccountId(@Param("accountId") String accountId);
+
+    @Query("SELECT s.resourceCrn as resourceCrn, s.id as id, s.name as name, s.environmentCrn as environmentCrn " +
+            "FROM Stack s WHERE s.accountId = :accountId AND s.terminated = -1")
+    List<ResourceBasicView> findAllResourceBasicViewByAccountId(@Param("accountId") String accountId);
 
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
     Optional<Stack> findByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
@@ -79,17 +107,16 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
             @Param("environmentCrn") String environmentCrn,
             @Param("accountId") String accountId);
 
-    @Query("SELECT s FROM Stack s LEFT JOIN ChildEnvironment c ON c.stack.id = s.id WHERE s.accountId = :accountId "
+    @Query("SELECT s.resourceCrn as resourceCrn, s.id as id, s.name as name, s.environmentCrn as environmentCrn "
+            + "FROM Stack s LEFT JOIN ChildEnvironment c ON c.stack.id = s.id WHERE s.accountId = :accountId "
             + "AND (s.environmentCrn IN :environmentCrns OR c.environmentCrn IN :environmentCrns) AND s.terminated = -1")
-    List<Stack> findMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(
+    List<ResourceBasicView> findMultipleResourceBasicViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(
             @Param("environmentCrns") Collection<String> environmentCrns,
             @Param("accountId") String accountId);
 
-    @Query("SELECT DISTINCT s FROM Stack s "
-            + "LEFT JOIN FETCH s.instanceGroups ig "
-            + "LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.accountId = :accountId AND s.environmentCrn IN :environmentCrns AND s.terminated = -1")
-    List<Stack> findMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(
+    @Query("SELECT s FROM Stack s LEFT JOIN ChildEnvironment c ON c.stack.id = s.id WHERE s.accountId = :accountId "
+            + "AND (s.environmentCrn IN :environmentCrns OR c.environmentCrn IN :environmentCrns) AND s.terminated = -1")
+    List<Stack> findMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(
             @Param("environmentCrns") Collection<String> environmentCrns,
             @Param("accountId") String accountId);
 
@@ -103,9 +130,6 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
 
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
     List<Stack> findAllByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
-
-    @Query("SELECT s.id FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
-    List<Long> findAllIdByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
     @Query("SELECT s.resourceCrn as resourceCrn, s.id as id, s.name as name, s.environmentCrn as environmentCrn " +
             "FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
@@ -123,30 +147,11 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT new com.sequenceiq.freeipa.dto.StackIdWithStatus(s.id,s.stackStatus.status) FROM Stack s WHERE s.id IN (:ids)")
     List<StackIdWithStatus> findStackStatusesWithoutAuth(@Param("ids") Set<Long> ids);
 
-    @Override
-    @Query("SELECT s FROM Stack s WHERE s.id = :id")
-    Optional<Stack> findById(@Param("id") Long id);
-
-    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status IN :stackStatuses AND s.terminated = -1 ")
-    List<Stack> findAllWithStatuses(@Param("stackStatuses") Collection<Status> stackStatuses);
-
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.detailedStackStatus IN :detailedStackStatuses AND s.terminated = -1 ")
     List<Stack> findAllWithDetailedStackStatuses(@Param("detailedStackStatuses") Collection<DetailedStackStatus> detailedStackStatuses);
 
-    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.stackStatus.status IN :stackStatuses AND s.terminated = -1 ")
-    List<Stack> findByAccountIdWithStatuses(@Param("accountId") String accountId, @Param("stackStatuses") Collection<Status> stackStatuses);
-
     @Query("SELECT s.id FROM Stack s WHERE s.accountId = :accountId AND s.terminated = -1")
     List<Long> findStackIdsByAccountId(@Param("accountId") String accountId);
-
-    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn IN :environmentCrns " +
-            "AND s.stackStatus.status IN :stackStatuses AND s.terminated = -1 ")
-    List<Stack> findMultipleByEnvironmentCrnAndAccountIdWithStatuses(
-            @Param("environmentCrns") Collection<String> environmentCrns, @Param("accountId") String accountId,
-            @Param("stackStatuses") Collection<Status> stackStatuses);
-
-    @Query("SELECT s.environmentCrn FROM Stack s WHERE s.accountId = :accountId AND s.terminated = -1")
-    List<String> findAllEnvironmentCrnsByTenantId(@Param("accountId") String accountId);
 
     @Query("SELECT s.name as name, s.resourceCrn as crn FROM Stack s" +
             " WHERE s.accountId = :accountId AND s.terminated = -1 AND s.environmentCrn IN (:environmentCrns)")
@@ -162,37 +167,6 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
             "FROM Stack s " +
             "WHERE s.id = :id")
     Optional<PayloadContext> getStackAsPayloadContextById(@Param("id") Long id);
-
-    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
-            "FROM Stack s " +
-            "WHERE s.id = :resourceId")
-    Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
-
-    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
-            "FROM Stack s " +
-            "WHERE s.terminated = -1 " +
-            "AND s.resourceCrn = :resourceCrn")
-    Optional<ResourceBasicView> findResourceBasicViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
-
-    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
-            "FROM Stack s " +
-            "WHERE s.terminated = -1 " +
-            "AND s.resourceCrn in (:resourceCrns)")
-    List<ResourceBasicView> findAllResourceBasicViewByResourceCrns(@Param("resourceCrns") Collection<String> resourceCrns);
-
-    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
-            "FROM Stack s " +
-            "WHERE s.terminated = -1 " +
-            "AND s.name = :name " +
-            "AND s.accountId = :accountId")
-    Optional<ResourceBasicView> findResourceBasicViewByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
-
-    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
-            "FROM Stack s " +
-            "WHERE s.terminated = -1 " +
-            "AND s.name in (:names) " +
-            "AND s.accountId = :accountId")
-    List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
 
     @Modifying
     @Query("UPDATE Stack s SET s.ccmV2AgentCrn = :ccmV2AgentCrn WHERE s.id = :id")

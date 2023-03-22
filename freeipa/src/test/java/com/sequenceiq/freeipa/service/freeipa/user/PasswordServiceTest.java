@@ -1,13 +1,19 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,9 +22,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
+import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
+import com.sequenceiq.freeipa.entity.Operation;
+import com.sequenceiq.freeipa.service.operation.OperationService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class PasswordServiceTest {
@@ -39,11 +54,33 @@ class PasswordServiceTest {
             .build()
             .toString();
 
+    private static final String ENVIRONMENT_CRN = "environmentCrn";
+
+    private static final String PASSWORD = "password";
+
     @Mock
     private GrpcUmsClient grpcUmsClient;
 
     @Mock
     private Clock clock;
+
+    @Mock
+    private FreeIpaPasswordValidator freeIpaPasswordValidator;
+
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private CustomCheckUtil customCheckUtil;
+
+    @Mock
+    private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
+
+    @Mock
+    private OperationService operationService;
+
+    @Mock
+    private ExecutorService usersyncExternalTaskExecutor;
 
     @InjectMocks
     private PasswordService underTest;
@@ -115,6 +152,66 @@ class PasswordServiceTest {
         when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochMilli(MOCK_TIME));
 
         assertEquals(Optional.of(Instant.ofEpochMilli(MOCK_TIME + machineUserLifetime)), underTest.calculateExpirationTime(MACHINE_USER_CRN, ACCOUNT_ID));
+    }
+
+    @Test
+    void testSetPasswordWithCustomPermissionCheckShouldSetTheNewPasswordWhenTheOperationIsRunning() {
+        Set<String> environmentCrns = Collections.singleton(ENVIRONMENT_CRN);
+        List<ResourceBasicView> stack = createStack();
+        when(stackService.findAllResourceBasicViewByEnvironmentAccountId(environmentCrns, ACCOUNT_ID)).thenReturn(stack);
+        Operation expectedOperation = createOperation(OperationState.RUNNING);
+        when(operationService.startOperation(ACCOUNT_ID, OperationType.SET_PASSWORD, environmentCrns, List.of(USER_CRN))).thenReturn(expectedOperation);
+
+        AuthorizationResourceAction action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
+        Operation actual = underTest.setPasswordWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, PASSWORD, environmentCrns, action);
+
+        assertEquals(expectedOperation, actual);
+        verify(freeIpaPasswordValidator).validate(PASSWORD);
+        verify(stackService).findAllResourceBasicViewByEnvironmentAccountId(environmentCrns, ACCOUNT_ID);
+    }
+
+    @Test
+    void testSetPasswordWithCustomPermissionCheckShouldSetTheNewPasswordWhenTheOperationIsRequested() {
+        Set<String> environmentCrns = Collections.emptySet();
+        List<ResourceBasicView> stack = createStack();
+        when(stackService.findAllResourceBasicViewByAccountId(ACCOUNT_ID)).thenReturn(stack);
+        Operation expectedOperation = createOperation(OperationState.REQUESTED);
+        when(operationService.startOperation(ACCOUNT_ID, OperationType.SET_PASSWORD, environmentCrns, List.of(USER_CRN))).thenReturn(expectedOperation);
+
+        AuthorizationResourceAction action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
+        Operation actual = underTest.setPasswordWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, PASSWORD, environmentCrns, action);
+
+        assertEquals(expectedOperation, actual);
+        verify(freeIpaPasswordValidator).validate(PASSWORD);
+        verify(stackService).findAllResourceBasicViewByAccountId(ACCOUNT_ID);
+        verifyNoInteractions(usersyncExternalTaskExecutor);
+    }
+
+    private Operation createOperation(OperationState operationState) {
+        Operation operation = new Operation();
+        operation.setStatus(operationState);
+        return operation;
+    }
+
+    private List<ResourceBasicView> createStack() {
+        ResourceBasicView resourceBasicView = new ResourceBasicView() {
+            @Override public Long getId() {
+                return null;
+            }
+
+            @Override public String getResourceCrn() {
+                return null;
+            }
+
+            @Override public String getName() {
+                return null;
+            }
+
+            @Override public String getEnvironmentCrn() {
+                return ENVIRONMENT_CRN;
+            }
+        };
+        return Collections.singletonList(resourceBasicView);
     }
 
     private void setupAccount(Optional<Long> globalMaxLifetime, Optional<Long> machineUserMaxLifetime) {

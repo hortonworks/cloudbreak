@@ -39,7 +39,6 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
@@ -141,16 +140,12 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         return stacks;
     }
 
-    public List<Stack> getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
+    public List<Stack> getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
         if (environmentCrns.isEmpty()) {
             return Lists.newArrayList(getAllByAccountId(accountId));
         } else {
             return stackRepository.findMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrns, accountId);
         }
-    }
-
-    public List<Stack> getMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(Collection<String> environmentCrns, String accountId) {
-        return stackRepository.findMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(environmentCrns, accountId);
     }
 
     public List<Stack> getByEnvironmentCrnsAndCloudPlatforms(Collection<String> environmentCrns, Collection<CloudPlatform> cloudPlatforms) {
@@ -160,21 +155,6 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
 
     public List<Stack> findAllByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
         return stackRepository.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
-    }
-
-    public List<Long> findAllIdByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
-        return stackRepository.findAllIdByEnvironmentCrnAndAccountId(environmentCrn, accountId);
-    }
-
-    public Long getIdByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
-        List<Long> ids = stackRepository.findAllIdByEnvironmentCrnAndAccountId(environmentCrn, accountId);
-        if (ids.isEmpty()) {
-            throw new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn));
-        } else if (ids.size() > 1) {
-            throw new BadRequestException(String.format("Multiple FreeIPA stack by environment [%s] found", environmentCrn));
-        } else {
-            return ids.get(0);
-        }
     }
 
     public ResourceBasicView getResourceBasicViewByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
@@ -203,28 +183,21 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         return stackRepository.findByAccountId(accountId);
     }
 
+    public List<ResourceBasicView> findAllResourceBasicViewByAccountId(String accountId) {
+        return stackRepository.findAllResourceBasicViewByAccountId(accountId);
+    }
+
+    public List<ResourceBasicView> findAllResourceBasicViewByEnvironmentAccountId(Collection<String> environmentCrns,
+            String accountId) {
+        return stackRepository.findMultipleResourceBasicViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrns, accountId);
+    }
+
     public List<StackIdWithStatus> getStatuses(Set<Long> stackIds) {
         return stackRepository.findStackStatusesWithoutAuth(stackIds);
     }
 
-    public List<Stack> findAllWithStatuses(Collection<Status> statuses) {
-        return stackRepository.findAllWithStatuses(statuses);
-    }
-
     public List<Stack> findAllWithDetailedStackStatuses(Collection<DetailedStackStatus> detailedStackStatuses) {
         return stackRepository.findAllWithDetailedStackStatuses(detailedStackStatuses);
-    }
-
-    public List<Stack> findAllByAccountIdWithStatuses(String accountId, Collection<Status> statuses) {
-        return stackRepository.findByAccountIdWithStatuses(accountId, statuses);
-    }
-
-    public List<Stack> findMultipleByEnvironmentCrnAndAccountIdWithStatuses(Collection<String> environmentCrns, String accountId, Collection<Status> statuses) {
-        if (environmentCrns.isEmpty()) {
-            return findAllByAccountIdWithStatuses(accountId, statuses);
-        } else {
-            return stackRepository.findMultipleByEnvironmentCrnAndAccountIdWithStatuses(environmentCrns, accountId, statuses);
-        }
     }
 
     @Override

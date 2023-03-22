@@ -176,7 +176,7 @@ public class UserSyncService {
         userSyncRequestValidator.validateParameters(accountId, actorCrn, environmentCrnFilter, userSyncRequestFilter);
         LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, user sync filter {}", accountId, environmentCrnFilter, userSyncRequestFilter);
 
-        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(environmentCrnFilter, accountId);
+        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
         if (stacks.isEmpty()) {
             throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s",
                     accountId, environmentCrnFilter));
