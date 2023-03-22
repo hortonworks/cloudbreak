@@ -96,7 +96,7 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
             LOGGER.info("Trying to create EIp for instance with privateId: {}, resource name: {}", privateId, buildableResource.get(0).getName());
             AmazonEc2Client amazonEC2Client = context.getAmazonEc2Client();
             Map<String, String> tags = new HashMap<>(cloudStack.getTags());
-            tags.put("Name", buildableResource.get(0).getName());
+            tags.putIfAbsent("Name", buildableResource.get(0).getName());
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(tags,
                     software.amazon.awssdk.services.ec2.model.ResourceType.ELASTIC_IP);
 
