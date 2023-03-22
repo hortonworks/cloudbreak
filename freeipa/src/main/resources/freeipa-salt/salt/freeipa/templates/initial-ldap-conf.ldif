@@ -4,6 +4,12 @@ replace: nsslapd-db-locks
 nsslapd-db-locks: 200000
 
 
+dn: cn=config,cn=ldbm database,cn=plugins,cn=config
+changetype: modify
+replace: nsslapd-db-deadlock-policy
+nsslapd-db-deadlock-policy: 6
+
+
 dn: cn=config
 changetype: modify
 replace: nsslapd-sizelimit
