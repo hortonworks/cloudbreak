@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
 import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
@@ -54,7 +57,6 @@ import software.amazon.awssdk.services.ec2.model.InstanceState;
 import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
-import software.amazon.awssdk.services.ec2.model.TagSpecification;
 
 @ExtendWith(MockitoExtension.class)
 class AwsNativeInstanceResourceBuilderTest {
@@ -68,7 +70,7 @@ class AwsNativeInstanceResourceBuilderTest {
     @Mock
     private AwsMethodExecutor awsMethodExecutor;
 
-    @Mock
+    @Spy
     private AwsTaggingService awsTaggingService;
 
     @Mock
@@ -132,8 +134,6 @@ class AwsNativeInstanceResourceBuilderTest {
 
         long privateId = 0;
         when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.empty());
-        when(awsTaggingService.prepareEc2TagSpecification(cloudStack.getTags(), software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE))
-                .thenReturn(TagSpecification.builder().build());
         when(amazonEc2Client.createInstance(any())).thenReturn(runInstancesResponse);
         when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(group.getName()).thenReturn("groupName");
@@ -150,6 +150,43 @@ class AwsNativeInstanceResourceBuilderTest {
         RunInstancesRequest runInstancesRequest = runInstancesRequestArgumentCaptor.getValue();
         Assertions.assertEquals(actual.get(0).getInstanceId(), "instanceId");
         Assertions.assertEquals("sg-id", runInstancesRequest.securityGroupIds().get(0));
+        assertThat(runInstancesRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()
+                .anyMatch(t -> "Name".equals(t.key()) && "stackname".equals(t.value())));
+    }
+
+    @Test
+    void testBuildWhenExistingNameTagShouldNotOverride() throws Exception {
+        Instance instance = Instance.builder().instanceId("instanceId").build();
+        RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
+        InstanceAuthentication authentication = mock(InstanceAuthentication.class);
+        CloudResource cloudResource = CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("groupName")
+                .withParameters(emptyMap())
+                .build();
+
+        Image image = mock(Image.class);
+
+        long privateId = 0;
+        when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.empty());
+        when(amazonEc2Client.createInstance(any())).thenReturn(runInstancesResponse);
+        when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
+        when(group.getName()).thenReturn("groupName");
+        when(cloudStack.getImage()).thenReturn(image);
+        when(cloudStack.getTags()).thenReturn(Map.of("Name", "doNotOverride"));
+        when(image.getImageName()).thenReturn("img-name");
+        when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
+
+        ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
+        underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+        verify(amazonEc2Client).createInstance(runInstancesRequestArgumentCaptor.capture());
+        RunInstancesRequest runInstancesRequest = runInstancesRequestArgumentCaptor.getValue();
+        assertThat(runInstancesRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()
+                .anyMatch(t -> "Name".equals(t.key()) && "doNotOverride".equals(t.value())));
     }
 
     @Test
@@ -215,8 +252,6 @@ class AwsNativeInstanceResourceBuilderTest {
 
         long privateId = 0;
         when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.of(terminatedInstance));
-        when(awsTaggingService.prepareEc2TagSpecification(cloudStack.getTags(), software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE))
-                .thenReturn(TagSpecification.builder().build());
         when(amazonEc2Client.createInstance(any())).thenReturn(runInstancesResponse);
         when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(cloudStack.getImage()).thenReturn(image);

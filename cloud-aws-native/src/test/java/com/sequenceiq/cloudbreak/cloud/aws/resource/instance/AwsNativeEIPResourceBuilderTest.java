@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
 import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -8,13 +9,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
@@ -37,9 +41,9 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.services.ec2.model.AllocateAddressRequest;
 import software.amazon.awssdk.services.ec2.model.AllocateAddressResponse;
 import software.amazon.awssdk.services.ec2.model.AssociateAddressResponse;
-import software.amazon.awssdk.services.ec2.model.TagSpecification;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsNativeEIPResourceBuilderTest {
@@ -53,7 +57,7 @@ public class AwsNativeEIPResourceBuilderTest {
     @Mock
     private AwsResourceNameService resourceNameService;
 
-    @Mock
+    @Spy
     private AwsTaggingService awsTaggingService;
 
     @Mock
@@ -169,7 +173,6 @@ public class AwsNativeEIPResourceBuilderTest {
                 .withParameters(emptyMap())
                 .build();
 
-        when(awsTaggingService.prepareEc2TagSpecification(any(), any())).thenReturn(TagSpecification.builder().build());
         when(amazonEc2Client.allocateAddress(any())).thenReturn(AllocateAddressResponse.builder().allocationId("allocId").build());
         when(awsElasticIpService.associateElasticIpsToInstances(any(), any(), any()))
                 .thenReturn(List.of(AssociateAddressResponse.builder().associationId("assocId").build()));
@@ -185,5 +188,46 @@ public class AwsNativeEIPResourceBuilderTest {
         EIpAttributes eIpAttributes = actual.get(0).getParameter(CloudResource.ATTRIBUTES, EIpAttributes.class);
         Assertions.assertEquals("allocId", eIpAttributes.getAllocateId());
         Assertions.assertEquals("assocId", eIpAttributes.getAssociationId());
+        ArgumentCaptor<AllocateAddressRequest> allocateAddressRequestArgumentCaptor = ArgumentCaptor.forClass(AllocateAddressRequest.class);
+        verify(amazonEc2Client).allocateAddress(allocateAddressRequestArgumentCaptor.capture());
+        AllocateAddressRequest allocateAddressRequest = allocateAddressRequestArgumentCaptor.getValue();
+        assertThat(allocateAddressRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()
+                .anyMatch(t -> "Name".equals(t.key()) && "name".equals(t.value())), "contains tag with Name=name");
+    }
+
+    @Test
+    public void testBuildWhenExistingNameTagShouldNotOverride() throws Exception {
+        CloudResource cloudResource = CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_RESERVED_IP)
+                .withStatus(CommonStatus.CREATED)
+                .withParameters(emptyMap())
+                .build();
+
+        CloudResource instanceResource = CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withInstanceId("instanceId")
+                .withParameters(emptyMap())
+                .build();
+
+        when(cloudStack.getTags()).thenReturn(Map.of("Name", "doNotOverride"));
+        when(amazonEc2Client.allocateAddress(any())).thenReturn(AllocateAddressResponse.builder().allocationId("allocId").build());
+        when(awsElasticIpService.associateElasticIpsToInstances(any(), any(), any()))
+                .thenReturn(List.of(AssociateAddressResponse.builder().associationId("assocId").build()));
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getId()).thenReturn(0L);
+        when(persistenceRetriever.notifyRetrieve(0L, "0", CommonStatus.CREATED, ResourceType.AWS_INSTANCE))
+                .thenReturn(Optional.of(instanceResource));
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+
+        underTest.build(awsContext, cloudInstance, 0L, ac, group, List.of(cloudResource), cloudStack);
+
+        ArgumentCaptor<AllocateAddressRequest> allocateAddressRequestArgumentCaptor = ArgumentCaptor.forClass(AllocateAddressRequest.class);
+        verify(amazonEc2Client).allocateAddress(allocateAddressRequestArgumentCaptor.capture());
+        AllocateAddressRequest allocateAddressRequest = allocateAddressRequestArgumentCaptor.getValue();
+        assertThat(allocateAddressRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()
+                .anyMatch(t -> "Name".equals(t.key()) && "doNotOverride".equals(t.value())), "contains tag with Name=doNotOverride");
     }
 }

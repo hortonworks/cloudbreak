@@ -236,24 +236,24 @@ public class AmazonEc2Client extends AmazonClient {
         return client.createSecurityGroup(request);
     }
 
-    public AuthorizeSecurityGroupIngressResponse addIngress(AuthorizeSecurityGroupIngressRequest reguest) {
-        return client.authorizeSecurityGroupIngress(reguest);
+    public AuthorizeSecurityGroupIngressResponse addIngress(AuthorizeSecurityGroupIngressRequest request) {
+        return client.authorizeSecurityGroupIngress(request);
     }
 
-    public AuthorizeSecurityGroupEgressResponse addEgress(AuthorizeSecurityGroupEgressRequest reguest) {
-        return client.authorizeSecurityGroupEgress(reguest);
+    public AuthorizeSecurityGroupEgressResponse addEgress(AuthorizeSecurityGroupEgressRequest request) {
+        return client.authorizeSecurityGroupEgress(request);
     }
 
-    public AllocateAddressResponse allocateAddress(AllocateAddressRequest reguest) {
-        return client.allocateAddress(reguest);
+    public AllocateAddressResponse allocateAddress(AllocateAddressRequest request) {
+        return client.allocateAddress(request);
     }
 
-    public ReleaseAddressResponse releaseAddress(ReleaseAddressRequest reguest) {
-        return client.releaseAddress(reguest);
+    public ReleaseAddressResponse releaseAddress(ReleaseAddressRequest request) {
+        return client.releaseAddress(request);
     }
 
-    public DisassociateAddressResponse disassociateAddress(DisassociateAddressRequest reguest) {
-        return client.disassociateAddress(reguest);
+    public DisassociateAddressResponse disassociateAddress(DisassociateAddressRequest request) {
+        return client.disassociateAddress(request);
     }
 
     public RunInstancesResponse createInstance(RunInstancesRequest request) {

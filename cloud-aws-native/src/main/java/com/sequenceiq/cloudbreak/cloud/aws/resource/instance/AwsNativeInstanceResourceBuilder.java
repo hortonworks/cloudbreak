@@ -7,7 +7,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,7 +58,6 @@ import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.TagSpecification;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
@@ -125,12 +126,11 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             }
         } else {
             LOGGER.info("Create new instance with name: {}", cloudResource.getName());
-            TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
+            Map<String, String> tags = new HashMap<>(awsCloudStackView.getTags());
+            tags.putIfAbsent("Name", awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId));
+            tags.putIfAbsent("instanceGroup", group.getName());
+            TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(tags,
                     software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE);
-            tagSpecification.toBuilder().tags(
-                    Tag.builder().key("Name").value(awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId)).build(),
-                    Tag.builder().key("instanceGroup").value(group.getName()).build()
-            );
             RunInstancesRequest request = RunInstancesRequest.builder()
                     .instanceType(instanceTemplate.getFlavor())
                     .imageId(cloudStack.getImage().getImageName())
