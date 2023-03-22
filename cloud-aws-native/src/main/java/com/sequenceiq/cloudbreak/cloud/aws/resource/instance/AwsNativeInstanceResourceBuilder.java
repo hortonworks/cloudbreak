@@ -127,10 +127,10 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             LOGGER.info("Create new instance with name: {}", cloudResource.getName());
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
                     com.amazonaws.services.ec2.model.ResourceType.Instance);
-            tagSpecification.withTags(
-                    new Tag().withKey("Name").withValue(awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId)),
-                    new Tag().withKey("instanceGroup").withValue(group.getName())
-            );
+            tagSpecification.withTags(new Tag().withKey("instanceGroup").withValue(group.getName()));
+            if (tagSpecification.getTags().stream().noneMatch(tag -> "Name".equals(tag.getKey()))) {
+                tagSpecification.withTags(new Tag().withKey("Name").withValue(awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId)));
+            }
             RunInstancesRequest request = new RunInstancesRequest()
                     .withInstanceType(instanceTemplate.getFlavor())
                     .withImageId(cloudStack.getImage().getImageName())
