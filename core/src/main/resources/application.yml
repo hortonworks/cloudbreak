@@ -911,6 +911,7 @@ clusterdns:
 sssd:
   entry.cache.timeout: 300
   memcache.timeout: 300
+  heartbeat.timeout: 60
 
 cdp:
   structuredevent:
