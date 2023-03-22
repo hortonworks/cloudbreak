@@ -25,3 +25,5 @@ ldap_tls_cacert = /etc/ipa/ca.crt
 ipa_hostname = {{ salt['grains.get']('fqdn') }}
 enumerate = {{ pillar['sssd-ipa']['enumerate'] }}
 entry_cache_timeout = {{ pillar['sssd-ipa']['entryCacheTimeout'] }}
+timeout = {{ pillar['sssd-ipa']['heartbeatTimeout'] | default(60, true) }}
+
