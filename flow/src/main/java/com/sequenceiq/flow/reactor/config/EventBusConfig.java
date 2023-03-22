@@ -135,7 +135,11 @@ public class EventBusConfig {
 
     private void closeFlow(String flowId) {
         flowLogDBService.findFirstByFlowIdOrderByCreatedDesc(flowId).ifPresent(flowLog -> {
-            applicationFlowInformation.handleFlowFail(flowLog);
+            try {
+                applicationFlowInformation.handleFlowFail(flowLog);
+            } catch (Exception e) {
+                LOGGER.error("Exception occurred while handled {} flow failure. Message: {}", flowId, e.getMessage(), e);
+            }
             flowLogDBService.updateLastFlowLogStatus(flowLog, true);
             flowLogDBService.finalize(flowLog.getFlowId());
         });
