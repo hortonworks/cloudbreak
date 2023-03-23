@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -50,6 +52,9 @@ class AwsCloudWatchServiceTest {
     @Mock
     private AwsCloudFormationClient awsClient;
 
+    @Mock
+    private AwsTaggingService awsTaggingService;
+
     @InjectMocks
     private AwsCloudWatchService underTest;
 
@@ -69,7 +74,7 @@ class AwsCloudWatchServiceTest {
 
         AmazonCloudWatchClient cloudWatchClient = mock(AmazonCloudWatchClient.class);
         when(awsClient.createCloudWatchClient(eq(credentialView), eq(REGION))).thenReturn(cloudWatchClient);
-        underTest.addCloudWatchAlarmsForSystemFailures(List.of(firstInst, secondInst), REGION, credentialView);
+        underTest.addCloudWatchAlarmsForSystemFailures(List.of(firstInst, secondInst), REGION, credentialView, Collections.emptyMap());
 
         ArgumentCaptor<PutMetricAlarmRequest> captorPut = ArgumentCaptor.forClass(PutMetricAlarmRequest.class);
         verify(cloudWatchClient, times(2)).putMetricAlarm(captorPut.capture());
@@ -89,7 +94,7 @@ class AwsCloudWatchServiceTest {
 
         AmazonCloudWatchClient cloudWatchClient = mock(AmazonCloudWatchClient.class);
         when(awsClient.createCloudWatchClient(eq(credentialView), eq(REGION))).thenReturn(cloudWatchClient);
-        underTest.addCloudWatchAlarmsForSystemFailures(List.of(firstInst, secondInst), REGION, credentialView);
+        underTest.addCloudWatchAlarmsForSystemFailures(List.of(firstInst, secondInst), REGION, credentialView, Collections.emptyMap());
 
         ArgumentCaptor<PutMetricAlarmRequest> captorPut = ArgumentCaptor.forClass(PutMetricAlarmRequest.class);
         verify(cloudWatchClient, times(1)).putMetricAlarm(captorPut.capture());
