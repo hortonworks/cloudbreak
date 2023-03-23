@@ -159,6 +159,10 @@ public class SaltStateService {
 
     private Multimap<String, Map<String, String>> applyStateJidInfo(SaltConnector sc, String jid) {
         JidInfoResponse jidInfo = sc.run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jid);
+        if (jidInfo.isEmpty()) {
+            LOGGER.error("jobs.lookup_jid returns an empty response: {}", jidInfo);
+            throw new SaltEmptyResponseException("jobs.lookup_jid returns an empty response. Please check the salt log.");
+        }
         LOGGER.debug("Salt apply state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
@@ -166,6 +170,10 @@ public class SaltStateService {
 
     private Multimap<String, Map<String, String>> highStateJidInfo(SaltConnector sc, String jid) {
         JidInfoResponse jidInfo = sc.run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jid, "missing", "True");
+        if (jidInfo.isEmpty()) {
+            LOGGER.error("jobs.lookup_jid returns an empty response: {}", jidInfo);
+            throw new SaltEmptyResponseException("jobs.lookup_jid returns an empty response. Please check the salt log.");
+        }
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }
