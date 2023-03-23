@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
  */
 @Component
 public class RangerRazDatalakeConfigProvider extends RangerRazBaseConfigProvider {
+    private static final Set<String> ADDITIONAL_SERVICE_HOSTGROUPS = Set.of("master", "razhg");
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
@@ -34,7 +35,7 @@ public class RangerRazDatalakeConfigProvider extends RangerRazBaseConfigProvider
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
 
             return hostgroupViews.stream()
-                    .filter(hg -> hg.getName().toLowerCase().equals("master"))
+                    .filter(hg -> ADDITIONAL_SERVICE_HOSTGROUPS.contains(hg.getName().toLowerCase()))
                     .collect(Collectors.toMap(HostgroupView::getName, v -> coreSettings));
         }
         return Map.of();

@@ -16,4 +16,8 @@ public enum SdxClusterShape {
     public boolean isMultiAzEnabledByDefault() {
         return multiAzEnabledByDefault;
     }
+
+    public boolean isHA() {
+        return MEDIUM_DUTY_HA.equals(this) || SCALABLE.equals(this);
+    }
 }

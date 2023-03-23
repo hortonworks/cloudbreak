@@ -332,6 +332,28 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
+    public void testNoErrorWithScalableShape() {
+        sdxCluster.setClusterShape(SdxClusterShape.SCALABLE);
+        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
+        when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
+        when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(sdxUpgradeRequest)).thenCallRealMethod();
+        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(any(UpgradeV4Response.class))).thenReturn(sdxUpgradeResponse);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(true);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        response.setUpgradeCandidates(List.of(imageInfo));
+        sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
+
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false)));
+        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+    }
+
+    @Test
     public void testPrepare() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);

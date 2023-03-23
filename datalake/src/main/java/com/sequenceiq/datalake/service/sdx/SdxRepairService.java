@@ -29,7 +29,6 @@ import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Service
@@ -70,20 +69,14 @@ public class SdxRepairService {
     public FlowIdentifier triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
-        if (SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape()) && !entitlementService.haRepairEnabled(cluster.getAccountId())) {
-            LOGGER.error("Cluster {} is Medium Duty and is not allowed to be repaired", cluster.getClusterName());
-            throw new BadRequestException("Cannot repair Medium Duty cluster " + cluster.getClusterName() + " at this time");
-        }
+        verifyIfRepairIsPossible(cluster);
         return sdxReactorFlowManager.triggerSdxRepairFlow(cluster, clusterRepairRequest);
     }
 
     public FlowIdentifier triggerRepairByName(String userCrn, String clusterName, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
         MDCBuilder.buildMdcContext(cluster);
-        if (SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape()) && !entitlementService.haRepairEnabled(cluster.getAccountId())) {
-            LOGGER.error("Cluster {} is Medium Duty and is not allowed to be repaired", cluster.getClusterName());
-            throw new BadRequestException("Cannot repair Medium Duty cluster " + cluster.getClusterName() + " at this time");
-        }
+        verifyIfRepairIsPossible(cluster);
         return sdxReactorFlowManager.triggerSdxRepairFlow(cluster, clusterRepairRequest);
     }
 
@@ -129,6 +122,13 @@ public class SdxRepairService {
         }
         repairRequest.setRestartServices(true);
         return repairRequest;
+    }
+
+    private void verifyIfRepairIsPossible(SdxCluster cluster) {
+        if (cluster.getClusterShape().isHA() && !entitlementService.haRepairEnabled(cluster.getAccountId())) {
+            LOGGER.error("Cluster {} is {} and is not allowed to be repaired", cluster.getClusterName(), cluster.getClusterShape().name());
+            throw new BadRequestException("Cannot repair " + cluster.getClusterShape().name() + " cluster " + cluster.getClusterName() + " at this time");
+        }
     }
 
     public void waitCloudbreakClusterRepair(Long id, PollingConfig pollingConfig) {
