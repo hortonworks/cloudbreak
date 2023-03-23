@@ -184,7 +184,7 @@ class AwsUpscaleServiceTest {
                         eq(adjustmentTypeWithThreshold));
         verify(awsTaggingService, times(1)).tagRootVolumes(eq(authenticatedContext), any(AmazonEc2Client.class), eq(allInstances), eq(tags));
         verify(awsCloudWatchService, times(1)).addCloudWatchAlarmsForSystemFailures(any(), eq("eu-west-1"),
-                any(AwsCredentialView.class));
+                any(AwsCredentialView.class), any());
         List<CloudResource> newInstances = captor.getValue();
         assertEquals("Two new instances should be created", 2, newInstances.size());
         assertThat(newInstances, hasItem(workerInstance4));

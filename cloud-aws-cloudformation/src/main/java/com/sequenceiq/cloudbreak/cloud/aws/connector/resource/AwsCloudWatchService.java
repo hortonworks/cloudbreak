@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -56,7 +57,11 @@ public class AwsCloudWatchService {
     @Inject
     private AwsCloudFormationClient awsClient;
 
-    public void addCloudWatchAlarmsForSystemFailures(List<CloudResource> instances, String regionName, AwsCredentialView credentialView) {
+    @Inject
+    private AwsTaggingService awsTaggingService;
+
+    public void addCloudWatchAlarmsForSystemFailures(List<CloudResource> instances, String regionName, AwsCredentialView credentialView,
+            Map<String, String> userDefinedTags) {
         AmazonCloudWatchClient amazonCloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
 
         instances.stream().filter(instance -> {
@@ -81,6 +86,7 @@ public class AwsCloudWatchService {
                         .evaluationPeriods(cloudwatchEvaluationPeriods)
                         .threshold(cloudwatchThreshhold)
                         .comparisonOperator("GreaterThanOrEqualToThreshold")
+                        .tags(awsTaggingService.prepareCloudWatchTags(userDefinedTags))
                         .build();
                 amazonCloudWatchClient.putMetricAlarm(metricAlarmRequest);
                 LOGGER.debug("Created cloudwatch alarm for instanceId {}.", instance.getInstanceId());

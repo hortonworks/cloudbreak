@@ -140,7 +140,7 @@ public class AwsUpscaleService {
                 throw new RuntimeException("Additional resource creation failed: " + failedResources);
             }
             awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
-            awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView);
+            awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView, stack.getTags());
 
             for (CloudLoadBalancer loadBalancer : stack.getLoadBalancers()) {
                 cfStackUtil.addLoadBalancerTargets(ac, loadBalancer, newInstances);
