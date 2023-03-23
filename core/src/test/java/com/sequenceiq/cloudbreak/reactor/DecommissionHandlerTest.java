@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
@@ -157,7 +159,8 @@ class DecommissionHandlerTest {
     }
 
     @Test
-    public void shouldContinueSingleHostDecommissionIfForcedAndFailed() throws CloudbreakException, ClusterClientInitException {
+    public void shouldContinueSingleHostDecommissionIfForcedAndFailed()
+            throws CloudbreakException, ClusterClientInitException, CloudbreakOrchestratorFailedException {
         when(entitlementService.bulkHostsRemovalFromCMSupported(any())).thenReturn(Boolean.FALSE);
         when(stackDto.getNotDeletedInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
@@ -177,13 +180,15 @@ class DecommissionHandlerTest {
         assertEquals("", decommissionResult.getErrorPhase());
         assertNull(decommissionResult.getErrorDetails());
         assertEquals(Set.of(FQDN), decommissionResult.getHostNames());
+        verify(hostOrchestrator).stopClusterManagerAgent(any(), any(), anySet(), anySet(), any(), any());
         verify(clusterDecomissionService, never()).removeHostsFromCluster(anyList());
         verify(clusterDecomissionService, never()).decommissionClusterNodes(anyMap());
         verify(clusterDecomissionService, times(1)).deleteHostFromCluster(any());
     }
 
     @Test
-    public void shouldContinueSingleHostDecommissionFailIfNotForced() throws CloudbreakException, ClusterClientInitException {
+    public void shouldContinueSingleHostDecommissionFailIfNotForced()
+            throws CloudbreakException, ClusterClientInitException, CloudbreakOrchestratorFailedException {
         when(entitlementService.bulkHostsRemovalFromCMSupported(any())).thenReturn(Boolean.FALSE);
         when(stackDto.getNotDeletedInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
@@ -204,13 +209,14 @@ class DecommissionHandlerTest {
         assertEquals("", decommissionResult.getErrorPhase());
         assertEquals(cloudbreakException, decommissionResult.getErrorDetails());
         assertEquals(Set.of(FQDN), decommissionResult.getHostNames());
+        verify(hostOrchestrator).stopClusterManagerAgent(any(), any(), anySet(), anySet(), any(), any());
         verify(clusterDecomissionService, never()).removeHostsFromCluster(anyList());
         verify(clusterDecomissionService, times(1)).decommissionClusterNodes(anyMap());
         verify(clusterDecomissionService, times(1)).deleteHostFromCluster(any());
     }
 
     @Test
-    public void testBulkHostDecommission() throws ClusterClientInitException {
+    public void testBulkHostDecommission() throws ClusterClientInitException, CloudbreakOrchestratorFailedException {
         when(entitlementService.bulkHostsRemovalFromCMSupported(any())).thenReturn(Boolean.TRUE);
         when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of(CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_14.getVersion()));
         when(stackDto.getNotDeletedInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
@@ -228,6 +234,7 @@ class DecommissionHandlerTest {
         assertNull(decommissionResult.getStatusReason());
         assertNotNull(decommissionResult.getErrorPhase());
         assertEquals(Set.of(FQDN), decommissionResult.getHostNames());
+        verify(hostOrchestrator).stopClusterManagerAgent(any(), any(), anySet(), anySet(), any(), any());
         verify(clusterDecomissionService, times(1)).removeHostsFromCluster(List.of(instance));
         verify(clusterDecomissionService, never()).decommissionClusterNodes(anyMap());
         verify(clusterDecomissionService, never()).deleteHostFromCluster(any());

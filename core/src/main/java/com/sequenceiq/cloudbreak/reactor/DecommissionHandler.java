@@ -142,6 +142,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             }
 
             Optional<String> runtimeVersion = runtimeVersionService.getRuntimeVersion(cluster.getId());
+            stopClusterManagerAgent(stackDto, hostsToRemove.keySet(), forced);
             if (entitlementService.bulkHostsRemovalFromCMSupported(Crn.fromString(stack.getResourceCrn()).getAccountId()) &&
                     CMRepositoryVersionUtil.isCmBulkHostsRemovalAllowed(runtimeVersion)) {
                 result = bulkHostsRemoval(request, hostNames, forced, stackDto, clusterDecomissionService, hostsToRemove);
@@ -166,14 +167,13 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
 
     private DecommissionResult bulkHostsRemoval(DecommissionRequest request, Set<String> hostNames, boolean forced, StackDto stackDto,
             ClusterDecomissionService clusterDecomissionService, Map<String, InstanceMetadataView> hostsToRemove)
-            throws CloudbreakOrchestratorFailedException, CloudbreakException {
+            throws CloudbreakException {
         try {
             clusterDecomissionService.removeHostsFromCluster(Lists.newArrayList(hostsToRemove.values()));
         } catch (ClusterClientInitException e) {
             LOGGER.warn("Bulk host removal was unsuccessful, fallback to single host removal.");
             return singleHostsRemoval(request, hostNames, forced, stackDto, clusterDecomissionService, hostsToRemove);
         }
-        stopClusterManagerAgent(stackDto, hostsToRemove.keySet(), forced);
         cleanUpFreeIpa(stackDto.getStack(), hostsToRemove);
         clusterDecomissionService.deleteUnusedCredentialsFromCluster();
         updateInstancesToDecommissioned(hostsToRemove.values());
@@ -183,7 +183,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
 
     private DecommissionResult singleHostsRemoval(DecommissionRequest request, Set<String> hostNames, boolean forced, StackDto stackDto,
             ClusterDecomissionService clusterDecomissionService, Map<String, InstanceMetadataView> hostsToRemove)
-            throws CloudbreakOrchestratorFailedException, CloudbreakException {
+            throws CloudbreakException {
         Set<String> decommissionedHostNames;
         if (hostsToRemove.isEmpty() || forced) {
             decommissionedHostNames = hostNames;
@@ -191,7 +191,6 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             decommissionedHostNames = clusterDecomissionService.decommissionClusterNodes(hostsToRemove);
         }
         if (!decommissionedHostNames.isEmpty()) {
-            stopClusterManagerAgent(stackDto, decommissionedHostNames, forced);
             cleanUpFreeIpa(stackDto.getStack(), hostsToRemove);
             List<InstanceMetadataView> deletedHosts = deleteHosts(decommissionedHostNames, clusterDecomissionService, hostsToRemove);
             clusterDecomissionService.deleteUnusedCredentialsFromCluster();
