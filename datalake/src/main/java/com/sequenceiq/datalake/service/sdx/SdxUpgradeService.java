@@ -35,7 +35,6 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.upgrade.OrderedOSUpgradeRequestProvider;
 import com.sequenceiq.datalake.service.upgrade.SdxUpgradeValidationResultProvider;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class SdxUpgradeService {
@@ -171,7 +170,7 @@ public class SdxUpgradeService {
     }
 
     private FlowIdentifier callOsUpgrade(SdxCluster cluster, String initiatorUserCrn, String targetImageId, boolean rollingUpgradeEnabled, boolean keepVariant) {
-        if (rollingUpgradeEnabled && SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape())) {
+        if (rollingUpgradeEnabled && cluster.getClusterShape().isHA()) {
             OrderedOSUpgradeSetRequest request = createOrderedOSUpgradeSetRequest(cluster, targetImageId);
             return stackV4Endpoint.upgradeOsByUpgradeSetsInternal(0L, cluster.getCrn(), request);
         } else {

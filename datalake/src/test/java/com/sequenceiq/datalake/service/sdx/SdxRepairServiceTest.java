@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -24,21 +25,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class SdxRepairServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
+
+    private static final String CLUSTER_CRN = "crn:cdp:iam:us-west-1:cloudera:datalake";
 
     private static final String CLUSTER_NAME = "dummyCluster";
 
@@ -70,6 +77,12 @@ public class SdxRepairServiceTest {
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private SdxReactorFlowManager sdxReactorFlowManager;
 
     @InjectMocks
     private SdxRepairService underTest;
@@ -115,5 +128,65 @@ public class SdxRepairServiceTest {
         assertEquals(deleteVolumes, captor.getValue().getNodes().isDeleteVolumes());
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", cluster);
+    }
+
+    @Test
+    public void testTriggerRepairByCRNNotAllowedForHAWithoutEntitlement() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setAccountId(USER_CRN);
+        when(entitlementService.haRepairEnabled(USER_CRN)).thenReturn(false);
+
+        cluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
+        assertThrows(BadRequestException.class, () -> underTest.triggerRepairByCrn(USER_CRN, CLUSTER_CRN, null));
+
+        cluster.setClusterShape(SdxClusterShape.SCALABLE);
+        when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
+        assertThrows(BadRequestException.class, () -> underTest.triggerRepairByCrn(USER_CRN, CLUSTER_CRN, null));
+    }
+
+    @Test
+    public void testTriggerRepairByCRNAllowedForHAWithEntitlement() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setAccountId(USER_CRN);
+        when(entitlementService.haRepairEnabled(USER_CRN)).thenReturn(true);
+
+        cluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
+        underTest.triggerRepairByCrn(USER_CRN, CLUSTER_CRN, null);
+
+        cluster.setClusterShape(SdxClusterShape.SCALABLE);
+        when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
+        underTest.triggerRepairByCrn(USER_CRN, CLUSTER_CRN, null);
+    }
+
+    @Test
+    public void testTriggerRepairByNameNotAllowedForHAWithoutEntitlement() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setAccountId(USER_CRN);
+        when(entitlementService.haRepairEnabled(USER_CRN)).thenReturn(false);
+
+        cluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        when(sdxService.getByNameInAccount(USER_CRN, CLUSTER_NAME)).thenReturn(cluster);
+        assertThrows(BadRequestException.class, () -> underTest.triggerRepairByName(USER_CRN, CLUSTER_NAME, null));
+
+        cluster.setClusterShape(SdxClusterShape.SCALABLE);
+        when(sdxService.getByNameInAccount(USER_CRN, CLUSTER_NAME)).thenReturn(cluster);
+        assertThrows(BadRequestException.class, () -> underTest.triggerRepairByName(USER_CRN, CLUSTER_NAME, null));
+    }
+
+    @Test
+    public void testTriggerRepairByNameAllowedForHAWithEntitlement() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setAccountId(USER_CRN);
+        when(entitlementService.haRepairEnabled(USER_CRN)).thenReturn(true);
+
+        cluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        when(sdxService.getByNameInAccount(USER_CRN, CLUSTER_NAME)).thenReturn(cluster);
+        underTest.triggerRepairByName(USER_CRN, CLUSTER_NAME, null);
+
+        cluster.setClusterShape(SdxClusterShape.SCALABLE);
+        when(sdxService.getByNameInAccount(USER_CRN, CLUSTER_NAME)).thenReturn(cluster);
+        underTest.triggerRepairByName(USER_CRN, CLUSTER_NAME, null);
     }
 }

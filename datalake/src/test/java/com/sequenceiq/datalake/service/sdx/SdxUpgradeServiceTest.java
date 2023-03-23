@@ -196,8 +196,31 @@ public class SdxUpgradeServiceTest {
     }
 
     @Test
-    public void testOsUpgradeShouldCallRollingOsUpgrade() {
+    public void testOsUpgradeShouldCallRollingOsUpgradeForMediumDutyShape() {
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        StackV4Response stackV4Response = getStackV4Response();
+        FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
+        OrderedOSUpgradeSetRequest orderedOSUpgradeSetRequest = new OrderedOSUpgradeSetRequest();
+        when(sdxService.getById(STACK_ID)).thenReturn(sdxCluster);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
+        when(orderedOSUpgradeRequestProvider.createMediumDutyOrderedOSUpgradeSetRequest(stackV4Response, TARGET_IMAGE_ID))
+                .thenReturn(orderedOSUpgradeSetRequest);
+        when(stackV4Endpoint.upgradeOsByUpgradeSetsInternal(0L, sdxCluster.getCrn(), orderedOSUpgradeSetRequest)).thenReturn(flowIdentifier);
+
+        underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, true, true);
+
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS,
+                ResourceEvent.DATALAKE_ROLLING_OS_UPGRADE_STARTED, "Rolling OS upgrade started", sdxCluster);
+        verify(stackV4Endpoint).get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString());
+        verify(stackV4Endpoint).upgradeOsByUpgradeSetsInternal(0L, sdxCluster.getCrn(), orderedOSUpgradeSetRequest);
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+    }
+
+    @Test
+    public void testOsUpgradeShouldCallRollingOsUpgradeForScalableShape() {
+        sdxCluster.setClusterShape(SdxClusterShape.SCALABLE);
         StackV4Response stackV4Response = getStackV4Response();
         FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
         OrderedOSUpgradeSetRequest orderedOSUpgradeSetRequest = new OrderedOSUpgradeSetRequest();

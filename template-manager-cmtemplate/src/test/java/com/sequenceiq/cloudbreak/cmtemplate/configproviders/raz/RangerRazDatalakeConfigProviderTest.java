@@ -171,6 +171,45 @@ public class RangerRazDatalakeConfigProviderTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("razCloudPlatformAndCmVersionDataProvider")
+    @DisplayName("DL is used with the right CM and Raz is requested and Raz hostgroup is present, Raz service needs to be added to the template")
+    void getAdditionalServicesWhenRazIsEnabledAndRAZHGPresentWithRightCm(String testCaseName, CloudPlatform cloudPlatform, String cmVersion) {
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion(cmVersion);
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setEnableRangerRaz(true);
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView idbroker = new HostgroupView("idbroker", 0, InstanceGroupType.CORE, List.of());
+        HostgroupView razHG = new HostgroupView("razhg", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.DATALAKE)
+                .withCloudPlatform(cloudPlatform)
+                .withProductDetails(cmRepo, List.of())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withHostgroupViews(Set.of(master, idbroker, razHG))
+                .build();
+        Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
+
+        ApiClusterTemplateService razHGService = additionalServices.get("razhg");
+        List<ApiClusterTemplateRoleConfigGroup> razHGRoleConfigGroups = razHGService.getRoleConfigGroups();
+        ApiClusterTemplateService masterService = additionalServices.get("master");
+        List<ApiClusterTemplateRoleConfigGroup> masterRoleConfigGroups = masterService.getRoleConfigGroups();
+        Assertions.assertAll(
+                () -> assertEquals(2, additionalServices.size()),
+
+                () -> assertEquals("RANGER_RAZ", razHGService.getServiceType()),
+                () -> assertEquals("ranger-RANGER_RAZ", razHGService.getRefName()),
+                () -> assertEquals("RANGER_RAZ_SERVER", razHGRoleConfigGroups.get(0).getRoleType()),
+                () -> assertEquals("ranger-RANGER_RAZ_SERVER", razHGRoleConfigGroups.get(0).getRefName()),
+
+                () -> assertEquals("RANGER_RAZ", masterService.getServiceType()),
+                () -> assertEquals("ranger-RANGER_RAZ", masterService.getRefName()),
+                () -> assertEquals("RANGER_RAZ_SERVER", masterRoleConfigGroups.get(0).getRoleType()),
+                () -> assertEquals("ranger-RANGER_RAZ_SERVER", masterRoleConfigGroups.get(0).getRefName())
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformAndCmVersionDataProvider")
     @DisplayName("DH is used with the right CM and Raz is requested, no additional service needs to be added to the template")
     void getAdditionalServicesWhenRazIsEnabledWithRightCmButDataHub(String testCaseName, CloudPlatform cloudPlatform, String cmVersion) {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
