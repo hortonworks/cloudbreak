@@ -30,6 +30,7 @@ import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.StsClientBuilder;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
@@ -47,6 +48,9 @@ public class AwsSessionCredentialClient {
 
     @Value("${cb.aws.role.session.name:}")
     private String roleSessionName;
+
+    @Value("${aws.use.fips.endpoint:false}")
+    private boolean fipsEnabled;
 
     @Inject
     private AwsDefaultZoneProvider awsDefaultZoneProvider;
@@ -123,12 +127,16 @@ public class AwsSessionCredentialClient {
 
     public StsClient awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {
         String defaultZone = awsDefaultZoneProvider.getDefaultZone(awsCredential);
-        return StsClient.builder()
+        StsClientBuilder stsClientBuilder = StsClient.builder()
                 .region(Region.of(defaultZone))
-                .endpointOverride(getEndpointConfiguration(defaultZone))
-                .overrideConfiguration(getDefaultClientConfiguration())
                 .credentialsProvider(getCredential(awsCredential))
-                .build();
+                .overrideConfiguration(getDefaultClientConfiguration());
+        if (!fipsEnabled || !awsCredential.isGovernmentCloudEnabled()) {
+            URI endpointConfiguration = getEndpointConfiguration(defaultZone);
+            LOGGER.info("Configuring STS endpoint override to: '{}'", endpointConfiguration);
+            stsClientBuilder.endpointOverride(endpointConfiguration);
+        }
+        return stsClientBuilder.build();
     }
 
     private AwsCredentialsProvider getCredential(AwsCredentialView awsCredential) {
@@ -155,7 +163,7 @@ public class AwsSessionCredentialClient {
                 .build();
     }
 
-    private URI getEndpointConfiguration(String defaultZone) {
+    URI getEndpointConfiguration(String defaultZone) {
         return URI.create(String.format("https://sts.%s.amazonaws.com", defaultZone));
     }
 
