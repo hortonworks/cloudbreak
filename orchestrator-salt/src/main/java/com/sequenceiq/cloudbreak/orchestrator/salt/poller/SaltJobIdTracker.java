@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SaltJobFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltEmptyResponseException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public class SaltJobIdTracker implements OrchestratorBootstrap {
@@ -139,6 +140,9 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
                 LOGGER.debug("The job (jid: {}) completed successfully on every node.", jobId);
                 saltJobRunner.setJobState(JobState.FINISHED);
             }
+        } catch (SaltEmptyResponseException e) {
+            LOGGER.debug("Jid info is empty (jid: {}), this usually occurs due to salt not working properly", jobId, e);
+            saltJobRunner.setJobState(JobState.IN_PROGRESS);
         } catch (RuntimeException e) {
             LOGGER.debug("Fail while checking the result (jid: {}), this usually occurs due to concurrency", jobId, e);
             saltJobRunner.setJobState(JobState.AMBIGUOUS);

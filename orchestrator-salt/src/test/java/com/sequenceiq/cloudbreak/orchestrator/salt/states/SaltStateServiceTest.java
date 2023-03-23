@@ -607,4 +607,24 @@ class SaltStateServiceTest {
         assertEquals("Salt run command failed", actionFailedException.getMessage());
     }
 
+    @Test
+    void testSaltJobsLookupJidReturnsEmptyResponseWithHighState() {
+        String jobId = "2";
+        JidInfoResponse emptyJidInfo = new JidInfoResponse();
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any(), any(), any())).thenReturn(emptyJidInfo);
+        SaltEmptyResponseException saltEmptyResponseException = Assertions.assertThrows(
+                SaltEmptyResponseException.class, () -> underTest.jidInfo(saltConnector, jobId, StateType.HIGH));
+        assertTrue(saltEmptyResponseException.getMessage().contains("jobs.lookup_jid returns an empty response"));
+    }
+
+    @Test
+    void testSaltJobsLookupJidReturnsEmptyResponseWithSimpleState() {
+        String jobId = "2";
+        JidInfoResponse emptyJidInfo = new JidInfoResponse();
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(emptyJidInfo);
+        SaltEmptyResponseException saltEmptyResponseException = Assertions.assertThrows(
+                SaltEmptyResponseException.class, () -> underTest.jidInfo(saltConnector, jobId, StateType.SIMPLE));
+        assertTrue(saltEmptyResponseException.getMessage().contains("jobs.lookup_jid returns an empty response"));
+    }
+
 }
