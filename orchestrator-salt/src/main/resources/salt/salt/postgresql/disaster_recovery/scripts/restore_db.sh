@@ -65,6 +65,11 @@ export PGSSLMODE=verify-full
 {%- endif %}
 
 errorExit() {
+  limit_incomming_connection $SERVICE -1
+  if [ -d "$BACKUPS_DIR" ] && [[ $BACKUPS_DIR == /var/tmp/postgres_restore_staging* ]]; then
+      rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
+      doLog "Removed directory $BACKUPS_DIR"
+  fi
   doLog "ERROR $1"
   exit 1
 }
