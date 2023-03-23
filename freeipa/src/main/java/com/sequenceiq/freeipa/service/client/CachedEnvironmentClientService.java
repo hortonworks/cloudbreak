@@ -10,14 +10,14 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionHandler;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v2.environment.endpoint.EnvironmentV2Endpoint;
 
 @Service
 public class CachedEnvironmentClientService {
 
     @Inject
-    private EnvironmentEndpoint environmentEndpoint;
+    private EnvironmentV2Endpoint environmentEndpoint;
 
     @Inject
     private WebApplicationExceptionHandler webApplicationExceptionHandler;
@@ -43,4 +43,5 @@ public class CachedEnvironmentClientService {
     @CacheEvict(value = FREEIPA_ENVIRONMENT_CACHE, key = "#environmentCrn")
     public void evictCache(String environmentCrn) {
     }
+
 }

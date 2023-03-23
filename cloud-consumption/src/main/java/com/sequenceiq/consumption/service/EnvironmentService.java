@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionHandler;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v2.environment.endpoint.EnvironmentV2Endpoint;
 
 @Service
 public class EnvironmentService {
@@ -17,7 +17,7 @@ public class EnvironmentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
     @Inject
-    private EnvironmentEndpoint environmentEndpoint;
+    private EnvironmentV2Endpoint environmentEndpoint;
 
     @Inject
     private WebApplicationExceptionHandler webApplicationExceptionHandler;

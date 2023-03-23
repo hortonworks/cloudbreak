@@ -14,10 +14,10 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.platformresource.CredentialPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
+import com.sequenceiq.environment.api.v2.environment.endpoint.EnvironmentV2Endpoint;
 
 @Service
 public class EnvironmentClientService {
@@ -25,7 +25,7 @@ public class EnvironmentClientService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentClientService.class);
 
     @Inject
-    private EnvironmentEndpoint environmentEndpoint;
+    private EnvironmentV2Endpoint environmentEndpoint;
 
     @Inject
     private CredentialEndpoint credentialEndpoint;
@@ -58,6 +58,7 @@ public class EnvironmentClientService {
 
     /**
      * Get the backup location.
+     *
      * @param envCrn Environemnt CRN.
      * @return backuplocation configured for the environment, If not, returns the log location.
      */

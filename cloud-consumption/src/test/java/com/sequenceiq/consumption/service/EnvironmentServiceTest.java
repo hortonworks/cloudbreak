@@ -16,8 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionHandler;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v2.environment.endpoint.EnvironmentV2Endpoint;
 
 @ExtendWith(MockitoExtension.class)
 public class EnvironmentServiceTest {
@@ -25,7 +25,7 @@ public class EnvironmentServiceTest {
     private static final String ENV_CRN = "env-crn";
 
     @Mock
-    private EnvironmentEndpoint environmentEndpoint;
+    private EnvironmentV2Endpoint environmentEndpoint;
 
     @Mock
     private WebApplicationExceptionHandler webApplicationExceptionHandler;

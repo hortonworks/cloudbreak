@@ -19,6 +19,7 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
+import com.sequenceiq.common.api.telemetry.request.v2.TelemetryV2Request;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.MonitoringResponse;
@@ -50,6 +51,19 @@ public class TelemetryApiConverter {
     }
 
     public EnvironmentTelemetry convert(TelemetryRequest request, Features accountFeatures, String accountId) {
+        EnvironmentTelemetry telemetry = null;
+        if (request != null) {
+            telemetry = new EnvironmentTelemetry();
+            telemetry.setLogging(createLoggingFromRequest(request.getLogging()));
+            telemetry.setMonitoring(createMonitoringFromRequest(request.getMonitoring(), accountId));
+            telemetry.setWorkloadAnalytics(createWorkloadAnalyticsFromRequest(request.getWorkloadAnalytics()));
+            telemetry.setFeatures(createEnvironmentFeaturesFromRequest(request.getFeatures(), accountFeatures, accountId));
+            telemetry.setFluentAttributes(new HashMap<>(request.getFluentAttributes()));
+        }
+        return telemetry;
+    }
+
+    public EnvironmentTelemetry convert(TelemetryV2Request request, Features accountFeatures, String accountId) {
         EnvironmentTelemetry telemetry = null;
         if (request != null) {
             telemetry = new EnvironmentTelemetry();

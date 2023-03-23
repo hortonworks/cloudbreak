@@ -44,6 +44,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.Resourc
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.v2.EnvironmentV2Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
@@ -116,7 +117,7 @@ public class EnvironmentApiConverter {
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
-        LOGGER.debug("Creating EnvironmentCreationDto from EnvironmentRequest: {}", request);
+        LOGGER.debug("Creating EnvironmentCreationDto from EnvironmentVRequest: {}", request);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String cloudPlatform = credentialService.getCloudPlatformByCredential(request.getCredentialName(), accountId, ENVIRONMENT);
         Builder builder = EnvironmentCreationDto.builder()
@@ -153,13 +154,59 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
 
         // TODO temporary until CCM not really integrated
-        if (request.getSecurityAccess() == null && !CloudPlatform.GCP.name().equals(cloudPlatform)) {
+        setUpSecurityAccessDtoForAnythingOtherThanGcp(builder, request.getSecurityAccess(), cloudPlatform);
+        return builder.build();
+    }
+
+    public EnvironmentCreationDto initCreationDto(EnvironmentV2Request request) {
+        LOGGER.debug("Creating EnvironmentCreationDto from EnvironmentV2Request: {}", request);
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String cloudPlatform = credentialService.getCloudPlatformByCredential(request.getCredentialName(), accountId, ENVIRONMENT);
+        Builder builder = EnvironmentCreationDto.builder()
+                .withAccountId(accountId)
+                .withCreator(ThreadBasedUserCrnProvider.getUserCrn())
+                .withName(request.getName())
+                .withDescription(request.getDescription())
+                .withCloudPlatform(cloudPlatform)
+                .withCredential(request)
+                .withCreated(System.currentTimeMillis())
+                .withFreeIpaCreation(freeIpaConverter.convert(request.getFreeIpa(), accountId, cloudPlatform))
+                .withLocation(locationRequestToDto(request.getLocation()))
+                .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
+                        accountTelemetryService.getOrDefault(accountId).getFeatures(), accountId))
+                .withBackup((request.getBackup() != null && isNotEmpty(request.getBackup().getStorageLocation())) ?
+                        backupConverter.convert(request.getBackup()) : backupConverter.convert(request.getTelemetry()))
+                .withRegions(locationRequestToRegions(request.getLocation(), cloudPlatform))
+                .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
+                .withAdminGroupName(request.getAdminGroupName())
+                .withTags(request.getTags())
+                .withCrn(createCrn(ThreadBasedUserCrnProvider.getAccountId()))
+                .withExperimentalFeatures(ExperimentalFeatures.builder()
+                        .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
+                        .withCloudStorageValidation(request.getCloudStorageValidation())
+                        .withTunnel(tunnelConverter.convert(request.getTunnel()))
+                        .withOverrideTunnel(request.getOverrideTunnel())
+                        .withCcmV2TlsType(request.getCcmV2TlsType())
+                        .build())
+                .withParameters(paramsToParametersDto(request, cloudPlatform))
+                .withParentEnvironmentName(request.getParentEnvironmentName())
+                .withProxyConfigName(request.getProxyConfigName());
+
+        NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
+        NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
+
+        // TODO temporary until CCM not really integrated
+        setUpSecurityAccessDtoForAnythingOtherThanGcp(builder, request.getSecurityAccess(), cloudPlatform);
+        return builder.build();
+    }
+
+    private void setUpSecurityAccessDtoForAnythingOtherThanGcp(Builder builder, SecurityAccessRequest securityAccessRequest, String cloudPlatform) {
+        if (securityAccessRequest == null && !GCP.name().equals(cloudPlatform)) {
             SecurityAccessDto securityAccess = SecurityAccessDto.builder()
                     .withCidr("0.0.0.0/0")
                     .build();
             builder.withSecurityAccess(securityAccess);
         }
-        return builder.build();
     }
 
     private NetworkDto networkRequestToDto(EnvironmentNetworkRequest network) {
@@ -171,12 +218,21 @@ public class EnvironmentApiConverter {
     }
 
     private ParametersDto paramsToParametersDto(EnvironmentRequest request, String cloudPlatform) {
+        return convertBasedOnProvider(cloudPlatform, request.getAws(), request.getFreeIpa(), request.getAzure(), request.getGcp());
+    }
+
+    private ParametersDto paramsToParametersDto(EnvironmentV2Request request, String cloudPlatform) {
+        return convertBasedOnProvider(cloudPlatform, request.getAws(), request.getFreeIpa(), request.getAzure(), request.getGcp());
+    }
+
+    private ParametersDto convertBasedOnProvider(String cloudPlatform, AwsEnvironmentParameters aws, AttachedFreeIpaRequest attachedFreeIpa,
+            AzureEnvironmentParameters azure, GcpEnvironmentParameters gcp) {
         if (AWS.name().equals(cloudPlatform)) {
-            return awsParamsToParametersDto(request.getAws(), Optional.ofNullable(request.getFreeIpa()).map(AttachedFreeIpaRequest::getAws).orElse(null));
+            return awsParamsToParametersDto(aws, Optional.ofNullable(attachedFreeIpa).map(AttachedFreeIpaRequest::getAws).orElse(null));
         } else if (AZURE.name().equals(cloudPlatform)) {
-            return azureParamsToParametersDto(request.getAzure());
+            return azureParamsToParametersDto(azure);
         } else if (GCP.name().equals(cloudPlatform)) {
-            return gcpParamsToParametersDto(request.getGcp());
+            return gcpParamsToParametersDto(gcp);
         }
         return null;
     }

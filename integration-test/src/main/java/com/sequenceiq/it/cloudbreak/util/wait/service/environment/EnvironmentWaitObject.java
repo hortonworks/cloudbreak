@@ -120,4 +120,5 @@ public class EnvironmentWaitObject implements WaitObject {
     public boolean isFailedCheck() {
         return desiredStatus.isFailed();
     }
+
 }

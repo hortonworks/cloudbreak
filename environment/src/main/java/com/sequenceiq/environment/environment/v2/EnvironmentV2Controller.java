@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.v1;
+package com.sequenceiq.environment.environment.v2;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
@@ -50,17 +50,18 @@ import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.v2.EnvironmentV2Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
+import com.sequenceiq.environment.api.v2.environment.endpoint.EnvironmentV2Endpoint;
 import com.sequenceiq.environment.authorization.EnvironmentFiltering;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -93,12 +94,11 @@ import com.sequenceiq.flow.service.FlowProgressService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 @Controller
-@Deprecated
 @Transactional(TxType.NEVER)
 @AccountEntityType(Environment.class)
-public class EnvironmentController implements EnvironmentEndpoint {
+public class EnvironmentV2Controller implements EnvironmentV2Endpoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentV2Controller.class);
 
     private final EnvironmentApiConverter environmentApiConverter;
 
@@ -138,7 +138,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public EnvironmentController(
+    public EnvironmentV2Controller(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
             EnvironmentService environmentService,
@@ -183,7 +183,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "credentialName", type = NAME, action = DESCRIBE_CREDENTIAL)
     @CheckPermissionByRequestProperty(path = "freeIpa.recipes", type = NAME_LIST, action = DESCRIBE_RECIPE, skipOnNull = true)
-    public DetailedEnvironmentResponse post(@RequestObject @Valid EnvironmentRequest request) {
+    public DetailedEnvironmentResponse post(@RequestObject @Valid EnvironmentV2Request request) {
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
         EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);
         return environmentResponseConverter.dtoToDetailedResponse(envDto);

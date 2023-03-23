@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.api.v1.environment.endpoint;
+package com.sequenceiq.environment.api.v2.environment.endpoint;
 
 import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.ENVIRONMENT_NOTES;
 
@@ -35,6 +35,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEd
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.v2.EnvironmentV2Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -46,18 +47,17 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequ
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@Path("/v2/env")
 @RetryAndMetrics
-@Path("/v1/env")
 @Consumes(MediaType.APPLICATION_JSON)
-@Deprecated(forRemoval = true, since = "2023.03.21")
-@Api(value = "/v1/env", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
-public interface EnvironmentEndpoint {
+@Api(value = "/v2/env", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+public interface EnvironmentV2Endpoint {
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "createEnvironmentV1")
-    DetailedEnvironmentResponse post(@Valid EnvironmentRequest request);
+    @ApiOperation(value = EnvironmentOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "createEnvironmentV2")
+    DetailedEnvironmentResponse post(@Valid EnvironmentV2Request request);
 
     @GET
     @Path("/name/{name}")
@@ -86,8 +86,8 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1ByName")
     SimpleEnvironmentResponse deleteByName(@PathParam("name") String environmentName,
-        @QueryParam("cascading") @DefaultValue("false") boolean cascading,
-        @QueryParam("forced") @DefaultValue("false") boolean forced);
+            @QueryParam("cascading") @DefaultValue("false") boolean cascading,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
     @Path("/name")
@@ -95,8 +95,8 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentsByName", httpMethod = "DELETE")
     SimpleEnvironmentResponses deleteMultipleByNames(Set<String> names,
-        @QueryParam("cascading") @DefaultValue("false") boolean cascading,
-        @QueryParam("forced") @DefaultValue("false") boolean forced);
+            @QueryParam("cascading") @DefaultValue("false") boolean cascading,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @PUT
     @Path("/name/{name}")
@@ -167,8 +167,8 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1ByCrn")
     SimpleEnvironmentResponse deleteByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
-        @QueryParam("cascading") @DefaultValue("false") boolean cascading,
-        @QueryParam("forced") @DefaultValue("false") boolean forced);
+            @QueryParam("cascading") @DefaultValue("false") boolean cascading,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
     @Path("/crn")
@@ -176,8 +176,8 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentsByCrn", httpMethod = "DELETE")
     SimpleEnvironmentResponses deleteMultipleByCrns(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) Set<String> crns,
-        @QueryParam("cascading") @DefaultValue("false") boolean cascading,
-        @QueryParam("forced") @DefaultValue("false") boolean forced);
+            @QueryParam("cascading") @DefaultValue("false") boolean cascading,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @PUT
     @Path("/crn/{crn}")
@@ -266,21 +266,21 @@ public interface EnvironmentEndpoint {
     @Path("/crn/{crn}/update_config")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.UPDATE_CONFIG_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
-        nickname = "updateConfigsInEnvironmentByCrnV1")
+            nickname = "updateConfigsInEnvironmentByCrnV1")
     FlowIdentifier updateConfigsInEnvironmentByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @PUT
     @Path("/name/{name}/update_load_balancers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.UPDATE_LOAD_BALANCERS_BY_ENV_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
-        nickname = "updateEnvironmentLoadBalancersByNameV11")
+            nickname = "updateEnvironmentLoadBalancersByNameV11")
     FlowIdentifier updateEnvironmentLoadBalancersByName(@PathParam("name") String envName, @NotNull EnvironmentLoadBalancerUpdateRequest request);
 
     @PUT
     @Path("/crn/{crn}/update_load_balancers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.UPDATE_LOAD_BALANCERS_BY_ENV_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
-        nickname = "updateEnvironmentLoadBalancersByCrnV1")
+            nickname = "updateEnvironmentLoadBalancersByCrnV1")
     FlowIdentifier updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
             @NotNull EnvironmentLoadBalancerUpdateRequest request);
 
@@ -330,7 +330,7 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.VERTICAL_SCALING, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "verticalScalingByCrn")
     FlowIdentifier verticalScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
-        @Valid VerticalScaleRequest updateRequest);
+            @Valid VerticalScaleRequest updateRequest);
 
     @GET
     @Path("/crn/{crn}/upgrade_ccm_available")

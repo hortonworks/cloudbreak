@@ -14,11 +14,11 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v2.environment.endpoint.EnvironmentV2Endpoint;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnvironmentClientServiceTest {
@@ -32,7 +32,7 @@ public class EnvironmentClientServiceTest {
     private static final String CLOUD_PLATFORM = "Azure";
 
     @Mock
-    private EnvironmentEndpoint environmentEndpoint;
+    private EnvironmentV2Endpoint environmentEndpoint;
 
     @InjectMocks
     private EnvironmentClientService underTest;

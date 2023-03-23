@@ -22,6 +22,7 @@ import com.sequenceiq.environment.environment.v1.EnvironmentController;
 import com.sequenceiq.environment.environment.v1.EnvironmentInternalV1Controller;
 import com.sequenceiq.environment.environment.v1.co2.EnvironmentCO2Controller;
 import com.sequenceiq.environment.environment.v1.cost.EnvironmentCostController;
+import com.sequenceiq.environment.environment.v2.EnvironmentV2Controller;
 import com.sequenceiq.environment.operation.v1.OperationController;
 import com.sequenceiq.environment.platformresource.v1.CredentialPlatformResourceController;
 import com.sequenceiq.environment.platformresource.v1.EnvironmentPlatformResourceController;
@@ -48,6 +49,7 @@ public class EndpointConfig extends ResourceConfig {
             AccountTelemetryController.class,
             ProxyController.class,
             EnvironmentController.class,
+            EnvironmentV2Controller.class,
             EnvironmentInternalV1Controller.class,
             OperationController.class,
             CredentialPlatformResourceController.class,
@@ -115,4 +117,5 @@ public class EndpointConfig extends ResourceConfig {
             register(CDPStructuredEventFilter.class);
         }
     }
+
 }

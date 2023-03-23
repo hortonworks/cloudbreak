@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEven
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
@@ -40,6 +39,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnviro
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.environment.api.v2.environment.endpoint.EnvironmentV2Endpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -332,7 +332,7 @@ public class EnvironmentTestDto
 
     @Override
     public List<SimpleEnvironmentResponse> getAll(EnvironmentClient client) {
-        EnvironmentEndpoint environmentEndpoint = client.getDefaultClient().environmentV1Endpoint();
+        EnvironmentV2Endpoint environmentEndpoint = client.getDefaultClient().environmentV2Endpoint();
         return new ArrayList<>(environmentEndpoint.list().getResponses()).stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
@@ -357,7 +357,7 @@ public class EnvironmentTestDto
     public void deleteForCleanup() {
         try {
             EnvironmentClient client = getClientForCleanup();
-            client.getDefaultClient().environmentV1Endpoint().deleteByCrn(getCrn(), true, getCloudProvider().getGovCloud());
+            client.getDefaultClient().environmentV2Endpoint().deleteByCrn(getCrn(), true, getCloudProvider().getGovCloud());
             getTestContext().awaitWithClient(this, Map.of("status", ARCHIVED), client);
         } catch (NotFoundException nfe) {
             LOGGER.info("resource not found, thus cleanup not needed.");
@@ -367,7 +367,7 @@ public class EnvironmentTestDto
     @Override
     public void delete(TestContext testContext, SimpleEnvironmentResponse entity, EnvironmentClient client) {
         LOGGER.info("Delete resource with name: {}", entity.getName());
-        EnvironmentEndpoint credentialEndpoint = client.getDefaultClient().environmentV1Endpoint();
+        EnvironmentV2Endpoint credentialEndpoint = client.getDefaultClient().environmentV2Endpoint();
         credentialEndpoint.deleteByName(entity.getName(), true, false);
         setName(entity.getName());
         testContext.await(this, Map.of("status", ARCHIVED));

@@ -17,6 +17,7 @@ import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformRes
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
 import com.sequenceiq.environment.api.v1.telemetry.endpoint.AccountTelemetryEndpoint;
+import com.sequenceiq.environment.api.v2.environment.endpoint.EnvironmentV2Endpoint;
 
 @Configuration
 public class EnvironmentApiClientConfig {
@@ -55,6 +56,12 @@ public class EnvironmentApiClientConfig {
     @ConditionalOnBean(name = "environmentApiClientWebTarget")
     EnvironmentEndpoint environmentApiEndpoint(WebTarget environmentApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, EnvironmentEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "environmentApiClientWebTarget")
+    EnvironmentV2Endpoint environmentV2ApiEndpoint(WebTarget environmentApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, EnvironmentV2Endpoint.class);
     }
 
     @Bean

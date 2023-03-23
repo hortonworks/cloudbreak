@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.v1;
+package com.sequenceiq.environment.environment.v2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,24 +20,23 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.v2.EnvironmentV2Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentControllerBaseTest;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 
-@Deprecated
 @ExtendWith(MockitoExtension.class)
-class EnvironmentControllerTest extends EnvironmentControllerBaseTest {
+class EnvironmentV2ControllerTest extends EnvironmentControllerBaseTest {
 
     @InjectMocks
-    private EnvironmentController underTest;
+    private EnvironmentV2Controller underTest;
 
     @Test
     void testEndpointGatewayOptionsPreserved() {
         EnvironmentNetworkRequest networkRequest = setupNetworkRequestWithEndpointGatway();
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
+        EnvironmentV2Request environmentRequest = new EnvironmentV2Request();
         environmentRequest.setNetwork(networkRequest);
 
         setupServiceResponses();
@@ -76,7 +75,7 @@ class EnvironmentControllerTest extends EnvironmentControllerBaseTest {
 
     @Override
     protected void setupServiceResponses() {
-        when(getMockEnvironmentApiConverter().initCreationDto(any(EnvironmentRequest.class))).thenReturn(EnvironmentCreationDto.builder().build());
+        when(getMockEnvironmentApiConverter().initCreationDto(any(EnvironmentV2Request.class))).thenReturn(EnvironmentCreationDto.builder().build());
         when(getMockEnvironmentCreationService().create(any())).thenReturn(EnvironmentDto.builder().build());
         when(getMockEnvironmentResponseConverter().dtoToDetailedResponse(any())).thenReturn(new DetailedEnvironmentResponse());
     }

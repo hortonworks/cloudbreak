@@ -11,20 +11,26 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.telemetry.request.v2.TelemetryV2Request;
 import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
 
 @Component
 public class BackupConverter {
 
-    public BackupConverter() {
-    }
-
     public EnvironmentBackup convert(BackupRequest request) {
         return createBackupFromRequest(request);
     }
 
     public EnvironmentBackup convert(TelemetryRequest request) {
+        EnvironmentBackup backup = null;
+        if (request != null) {
+            return createBackupFromRequest(request.getLogging());
+        }
+        return backup;
+    }
+
+    public EnvironmentBackup convert(TelemetryV2Request request) {
         EnvironmentBackup backup = null;
         if (request != null) {
             return createBackupFromRequest(request.getLogging());

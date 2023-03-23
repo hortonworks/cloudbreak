@@ -6,6 +6,7 @@ import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndp
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
+import com.sequenceiq.environment.api.v2.environment.endpoint.EnvironmentV2Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 
@@ -16,7 +17,10 @@ public interface EnvironmentClient {
 
     ProxyEndpoint proxyV1Endpoint();
 
+    @Deprecated
     EnvironmentEndpoint environmentV1Endpoint();
+
+    EnvironmentV2Endpoint environmentV2Endpoint();
 
     FlowEndpoint flowEndpoint();
 

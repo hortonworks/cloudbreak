@@ -9,6 +9,7 @@ import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndp
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
+import com.sequenceiq.environment.api.v2.environment.endpoint.EnvironmentV2Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 
@@ -34,8 +35,14 @@ public class EnvironmentServiceCrnEndpoints extends AbstractUserCrnServiceEndpoi
     }
 
     @Override
+    @Deprecated
     public EnvironmentEndpoint environmentV1Endpoint() {
         return getEndpoint(EnvironmentEndpoint.class);
+    }
+
+    @Override
+    public EnvironmentV2Endpoint environmentV2Endpoint() {
+        return getEndpoint(EnvironmentV2Endpoint.class);
     }
 
     @Override
