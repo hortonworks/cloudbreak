@@ -40,4 +40,8 @@ public class RangerRazDatalakeConfigProvider extends RangerRazBaseConfigProvider
         }
         return Map.of();
     }
+
+    public Set<String> getHostGroups(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return getAdditionalServices(cmTemplateProcessor, source).keySet();
+    }
 }
