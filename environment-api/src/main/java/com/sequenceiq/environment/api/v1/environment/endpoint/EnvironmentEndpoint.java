@@ -66,6 +66,20 @@ public interface EnvironmentEndpoint {
     DetailedEnvironmentResponse getByName(@PathParam("name") String environmentName);
 
     @GET
+    @Path("/name/{envCrn}/image/urn/{urn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "getEnvironmentV1ByName")
+    Boolean isImageSigned(@PathParam("envCrn") String environmentCrn, @PathParam("urn") String imageUrn);
+
+    @POST
+    @Path("/name/{envCrn}/image/urn/{urn}/sign")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "getEnvironmentV1ByName")
+    void signImage(@PathParam("envCrn") String environmentCrn, @PathParam("urn") String imageUrn);
+
+    @GET
     @Path("/xp/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.GET_XP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,

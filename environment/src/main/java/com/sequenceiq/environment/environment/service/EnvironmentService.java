@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
 
@@ -36,6 +37,9 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.azure.AzurePlatformResources;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
@@ -46,6 +50,10 @@ import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareReso
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.CredentialType;
+import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.service.CredentialService;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -177,6 +185,26 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             setRegionsFromCloudRegions(requestedRegions, cloudRegions, regionSet);
         }
         environment.setRegions(regionSet);
+    }
+
+    @Inject
+    private AzurePlatformResources azurePlatformResources;
+    @Inject
+    private CredentialService credentialService;
+    @Inject
+    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+    public Boolean isImageSigned(String imageUrn, String environmentCrn, String userAccountId) {
+        Credential credential = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, userAccountId, CredentialType.ENVIRONMENT);
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+        AzureMarketplaceImage azureMarketplaceImage = AzureMarketplaceImage.from(imageUrn);
+        return azurePlatformResources.isImageSigned(azureMarketplaceImage, cloudCredential);
+    }
+
+    public void signImage(String imageUrn, String environmentCrn, String userAccountId) {
+        Credential credential = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, userAccountId, CredentialType.ENVIRONMENT);
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+        AzureMarketplaceImage azureMarketplaceImage = AzureMarketplaceImage.from(imageUrn);
+        azurePlatformResources.signImage(azureMarketplaceImage, cloudCredential);
     }
 
     public Map<String, Set<String>> collectExperiences(NameOrCrn environmentNameOrCrn) {

@@ -40,11 +40,15 @@ import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -134,6 +138,20 @@ public class AzurePlatformResources implements PlatformResources {
             result.put(region.value(), new HashSet<>());
         }
         return new CloudNetworks(result);
+    }
+
+    @Inject
+    private AzureImageTermsSignerService azureImageTermsSignerService;
+    public Boolean isImageSigned(AzureMarketplaceImage azureMarketplaceImage, CloudCredential cloudCredential) {
+        AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
+        AzureClient client = azureClientService.getClient(cloudCredential);
+        return azureImageTermsSignerService.isSigned(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
+    }
+
+    public void signImage(AzureMarketplaceImage azureMarketplaceImage, CloudCredential cloudCredential) {
+        AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
+        AzureClient client = azureClientService.getClient(cloudCredential);
+        azureImageTermsSignerService.sign(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
     }
 
     private void addToResultIfRegionsAreMatch(Region region, Map<String, Set<CloudNetwork>> result, Network network) {

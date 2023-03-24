@@ -37,12 +37,16 @@ public class FreeipaUpscaleStackHandler implements CloudPlatformEventHandler<Ups
         return UpscaleStackRequest.class;
     }
 
+    boolean doFail = true;
     @Override
     public void accept(Event<UpscaleStackRequest> upscaleStackRequestEvent) {
         LOGGER.debug("Received event: {}", upscaleStackRequestEvent);
         UpscaleStackRequest<UpscaleStackResult> request = upscaleStackRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
+            if(doFail) {
+                throw new RuntimeException("Upscale fails now!!!");
+            }
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
             List<CloudResourceStatus> resourceStatus = connector.resources().upscale(ac, request.getCloudStack(), request.getResourceList(),
