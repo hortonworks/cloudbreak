@@ -141,7 +141,8 @@ class ExposedServiceCollectorTest {
                 "ZEPPELIN_SERVER",
                 "QUEUEMANAGER_WEBAPP",
                 "KNOX",
-                "QUERY_PROCESSOR");
+                "QUERY_PROCESSOR",
+                "RANGER_RAZ_SERVER");
     }
 
     @Test
@@ -205,7 +206,8 @@ class ExposedServiceCollectorTest {
                 "ZEPPELIN",
                 "QUEUEMANAGER_WEBAPP",
                 "KNOX_TOKEN_INTEGRATOR",
-                "QUERY_PROCESSOR");
+                "QUERY_PROCESSOR",
+                "RANGERRAZ");
     }
 
     @Test
@@ -262,7 +264,8 @@ class ExposedServiceCollectorTest {
                 "ZEPPELIN",
                 "QUEUEMANAGER_WEBAPP",
                 "KNOX_TOKEN_INTEGRATOR",
-                "QUERY_PROCESSOR");
+                "QUERY_PROCESSOR",
+                "RANGERRAZ");
     }
 
     @Test
@@ -321,7 +324,8 @@ class ExposedServiceCollectorTest {
                 "KNOX_TOKEN_INTEGRATOR",
                 "KAFKA_CONNECT",
                 "SSB-SSE-API",
-                "QUERY_PROCESSOR");
+                "QUERY_PROCESSOR",
+                "RANGERRAZ");
     }
 
     @Test
@@ -381,7 +385,8 @@ class ExposedServiceCollectorTest {
             "KNOX_TOKEN_INTEGRATOR",
             "KAFKA_CONNECT",
             "SSB-SSE-API",
-            "QUERY_PROCESSOR");
+            "QUERY_PROCESSOR",
+            "RANGERRAZ");
     }
 
     @Test
@@ -441,7 +446,8 @@ class ExposedServiceCollectorTest {
             "KNOX_TOKEN_INTEGRATOR",
             "KAFKA_CONNECT",
             "SSB-SSE-API",
-            "QUERY_PROCESSOR");
+            "QUERY_PROCESSOR",
+            "RANGERRAZ");
     }
 
     @Test
@@ -492,7 +498,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHDFS", 9870),
                 Map.entry("YARNUIV2", 8088),
                 Map.entry("ZEPPELIN", 8885),
-                Map.entry("QUERY_PROCESSOR", 30700)
+                Map.entry("QUERY_PROCESSOR", 30700),
+                Map.entry("RANGERRAZ", 6082)
         );
     }
 
@@ -548,7 +555,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHDFS", 9870),
                 Map.entry("YARNUIV2", 8088),
                 Map.entry("ZEPPELIN", 8885),
-                Map.entry("QUERY_PROCESSOR", 30700)
+                Map.entry("QUERY_PROCESSOR", 30700),
+                Map.entry("RANGERRAZ", 6082)
         );
     }
 
@@ -607,7 +615,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHDFS", 9870),
                 Map.entry("YARNUIV2", 8088),
                 Map.entry("ZEPPELIN", 8885),
-                Map.entry("QUERY_PROCESSOR", 30700)
+                Map.entry("QUERY_PROCESSOR", 30700),
+                Map.entry("RANGERRAZ", 6082)
         );
     }
 
@@ -666,7 +675,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHDFS", 9870),
                 Map.entry("YARNUIV2", 8088),
                 Map.entry("ZEPPELIN", 8885),
-                Map.entry("QUERY_PROCESSOR", 30700)
+                Map.entry("QUERY_PROCESSOR", 30700),
+                Map.entry("RANGERRAZ", 6082)
         );
     }
 
@@ -718,7 +728,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHDFS", 9871),
                 Map.entry("YARNUIV2", 8090),
                 Map.entry("ZEPPELIN", 8886),
-                Map.entry("QUERY_PROCESSOR", 30700)
+                Map.entry("QUERY_PROCESSOR", 30700),
+                Map.entry("RANGERRAZ", 6082)
         );
     }
 
@@ -774,7 +785,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHDFS", 9871),
                 Map.entry("YARNUIV2", 8090),
                 Map.entry("ZEPPELIN", 8886),
-                Map.entry("QUERY_PROCESSOR", 30700)
+                Map.entry("QUERY_PROCESSOR", 30700),
+                Map.entry("RANGERRAZ", 6082)
         );
     }
 
@@ -833,7 +845,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHDFS", 9871),
                 Map.entry("YARNUIV2", 8090),
                 Map.entry("ZEPPELIN", 8886),
-                Map.entry("QUERY_PROCESSOR", 30700)
+                Map.entry("QUERY_PROCESSOR", 30700),
+                Map.entry("RANGERRAZ", 6082)
         );
     }
 
@@ -892,7 +905,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHDFS", 9871),
                 Map.entry("YARNUIV2", 8090),
                 Map.entry("ZEPPELIN", 8886),
-                Map.entry("QUERY_PROCESSOR", 30700)
+                Map.entry("QUERY_PROCESSOR", 30700),
+                Map.entry("RANGERRAZ", 6082)
         );
     }
 

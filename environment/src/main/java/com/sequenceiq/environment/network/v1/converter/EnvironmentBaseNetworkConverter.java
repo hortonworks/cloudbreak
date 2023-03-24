@@ -98,9 +98,11 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
     }
 
     private Map<String, CloudSubnet> setDefaultDeploymentRestrictionsForEndpointAccessGateway(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
-        endpointGatewaySubnetMetas.entrySet().stream()
-                .filter(m -> CollectionUtils.isEmpty(m.getValue().getDeploymentRestrictions()))
-                .forEach(m -> m.getValue().setDeploymentRestrictions(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS));
+        if (endpointGatewaySubnetMetas != null) {
+            endpointGatewaySubnetMetas.entrySet().stream()
+                    .filter(m -> CollectionUtils.isEmpty(m.getValue().getDeploymentRestrictions()))
+                    .forEach(m -> m.getValue().setDeploymentRestrictions(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS));
+        }
         return endpointGatewaySubnetMetas;
     }
 
