@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -44,6 +45,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Accou
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
@@ -65,12 +67,16 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.model.ServiceLocationMap;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz.RangerRazDatahubConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz.RangerRazDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
@@ -118,6 +124,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterServic
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
@@ -259,6 +266,15 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private JavaPillarDecorator javaPillarDecorator;
+
+    @Inject
+    private RangerRazDatahubConfigProvider rangerRazDatahubConfigProvider;
+
+    @Inject
+    private RangerRazDatalakeConfigProvider rangerRazDatalakeConfigProvider;
+
+    @Inject
+    private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
@@ -730,7 +746,11 @@ public class ClusterHostServiceRunner {
             List<String> rangerGatewayHosts = getRangerFqdn(stackDto, gatewayConfig.getHostname(), rangerLocations);
             serviceLocations.put(rangerService.getServiceName(), rangerGatewayHosts);
         }
+
+        addRangerRazServiceIfAvailable(stackDto, serviceLocations, gatewayConfig);
+
         serviceLocations.put(exposedServiceCollector.getClouderaManagerService().getServiceName(), asList(gatewayConfig.getHostname()));
+
         gateway.put("location", serviceLocations);
         if (stackDto.getNetwork() != null) {
             gateway.put("cidrBlocks", stackDto.getNetwork().getNetworkCidrs());
@@ -1002,6 +1022,48 @@ public class ClusterHostServiceRunner {
             String message = "Creating cron for user home creation failed";
             LOGGER.warn(message, e);
             throw new CloudbreakException(message, e);
+        }
+    }
+
+    private void addRangerRazServiceIfAvailable(StackDto stackDto, Map<String, List<String>> serviceLocations, GatewayConfig gatewayConfig) {
+        TemplatePreparationObject templatePreparationObject = stackToTemplatePreparationObjectConverter.convert(stackDto);
+        final Set<String> hostGroups;
+
+        // Determine list of host groups where RAZ service is going to be configured later
+        if (StackType.DATALAKE.equals(stackDto.getStack().getType())) {
+            hostGroups = rangerRazDatalakeConfigProvider.getHostGroups((CmTemplateProcessor)
+                    templatePreparationObject.getBlueprintView().getProcessor(), templatePreparationObject);
+        } else if (StackType.WORKLOAD.equals(stackDto.getStack().getType())) {
+            hostGroups = rangerRazDatahubConfigProvider.getHostGroups((CmTemplateProcessor)
+                    templatePreparationObject.getBlueprintView().getProcessor(), templatePreparationObject);
+        } else {
+            hostGroups = null;
+        }
+
+        if (!CollectionUtils.isEmpty(hostGroups)) {
+            LOGGER.info("List of host groups for RAZ service  {} ", hostGroups);
+            ExposedService rangerRazService = exposedServiceCollector.getRangerRazService();
+            List<String> rangerRazLocations = new ArrayList<>();
+
+            hostGroupService.getByCluster(stackDto.getCluster().getId())
+                    .stream()
+                    .filter(hg -> hg.getInstanceGroup() != null && hostGroups.contains(hg.getName()))
+                    .forEach(host -> {
+                        List<String> hosts = stackDto.getAliveInstancesInInstanceGroup(host.getInstanceGroup().getGroupName()).stream()
+                                .filter(ig -> ig.isReachable() && ig.getDiscoveryFQDN() != null)
+                                .map(InstanceMetadataView::getDiscoveryFQDN)
+                                .collect(toList());
+                        rangerRazLocations.addAll(hosts);
+                    });
+
+            LOGGER.info("Ranger RAZ Locations {} ", rangerRazLocations);
+
+            if (!CollectionUtils.isEmpty(rangerRazLocations)) {
+                List<String> rangerRazGatewayHosts = getRangerFqdn(stackDto, gatewayConfig.getHostname(), rangerRazLocations);
+                LOGGER.info("Ranger RAZ Gateway Hosts  {} ", rangerRazGatewayHosts);
+                serviceLocations.put(rangerRazService.getServiceName(), rangerRazGatewayHosts);
+            }
+
         }
     }
 }

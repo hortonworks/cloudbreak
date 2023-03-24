@@ -50,6 +50,10 @@ public class RangerRazDatahubConfigProvider extends RangerRazBaseConfigProvider 
         return Map.of();
     }
 
+    public Set<String> getHostGroups(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return getAdditionalServices(cmTemplateProcessor, source).keySet();
+    }
+
     private Set<String> collectZKServers(Map<String, Set<ServiceComponent>> serviceComponentsByHostGroup) {
         return serviceComponentsByHostGroup.entrySet()
                 .stream()

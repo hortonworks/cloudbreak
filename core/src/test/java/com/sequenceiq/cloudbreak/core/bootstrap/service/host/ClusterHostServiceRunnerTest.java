@@ -49,6 +49,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
@@ -62,10 +63,13 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.model.ServiceLocation;
 import com.sequenceiq.cloudbreak.cluster.model.ServiceLocationMap;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz.RangerRazDatahubConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz.RangerRazDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
@@ -74,6 +78,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.Nameserve
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
@@ -108,7 +113,9 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterServic
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -259,6 +266,15 @@ class ClusterHostServiceRunnerTest {
 
     @Mock
     private JavaPillarDecorator javaPillarDecorator;
+
+    @Mock
+    private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
+
+    @Mock
+    private RangerRazDatalakeConfigProvider rangerRazDatalakeConfigProvider;
+
+    @Mock
+    private RangerRazDatahubConfigProvider rangerRazDatahubConfigProvider;
 
     @BeforeEach
     void setUp() {
@@ -573,6 +589,65 @@ class ClusterHostServiceRunnerTest {
 
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
+    void testAddRangerRazPillarForDataLakeToRedeployGateway() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices();
+        setupMockforRangerRaz(StackType.DATALAKE, true);
+
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
+
+        assertTrue(((Map<String, List<String>>) getGatewayProperties(saltConfig.getValue()).get("location")).containsKey("RANGERRAZ"));
+        assertEquals(((Map<String, List<String>>) getGatewayProperties(saltConfig.getValue()).get("location")).get("RANGERRAZ"), List.of("fqdn1"));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testAddRangerRazPillarForDataLakeRazNotEnabledToRedeployGateway() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices();
+        setupMockforRangerRaz(StackType.DATALAKE, false);
+
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
+
+        assertFalse(((Map<String, List<String>>) getGatewayProperties(saltConfig.getValue()).get("location")).containsKey("RANGERRAZ"));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testAddRangerRazPillarForDataLakeNodesNotAvailableToRedeployGateway() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices();
+        setupMockforRangerRaz(StackType.DATALAKE, true);
+        when(stack.getAliveInstancesInInstanceGroup(anyString())).thenReturn(Collections.emptyList());
+
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
+
+        assertFalse(((Map<String, List<String>>) getGatewayProperties(saltConfig.getValue()).get("location")).containsKey("RANGERRAZ"));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testAddRangerRazPillarForDataHubToRedeployGateway() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices();
+        setupMockforRangerRaz(StackType.WORKLOAD, true);
+
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
+
+        assertTrue(((Map<String, List<String>>) getGatewayProperties(saltConfig.getValue()).get("location")).containsKey("RANGERRAZ"));
+        assertEquals(((Map<String, List<String>>) getGatewayProperties(saltConfig.getValue()).get("location")).get("RANGERRAZ"), List.of("fqdn1"));
+    }
+
+    private Map<String, Object> getGatewayProperties(SaltConfig saltConfig) {
+        return (Map<String, Object>) saltConfig.getServicePillarConfig().get("gateway").getProperties().get("gateway");
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void testFloatinIpLoadBalancers() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
         LoadBalancer lbGateway = new LoadBalancer();
@@ -618,7 +693,10 @@ class ClusterHostServiceRunnerTest {
         when(exposedServiceCollector.getRangerService()).thenReturn(mock(ExposedService.class));
         ExposedService cmExposedService = mock(ExposedService.class);
         when(cmExposedService.getServiceName()).thenReturn("CM");
+        ExposedService rangerRazExposedService = mock(ExposedService.class);
+        lenient().when(rangerRazExposedService.getServiceName()).thenReturn("RANGERRAZ");
         when(exposedServiceCollector.getClouderaManagerService()).thenReturn(cmExposedService);
+        lenient().when(exposedServiceCollector.getRangerRazService()).thenReturn(rangerRazExposedService);
 
         Template template = new Template();
         template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
@@ -640,6 +718,12 @@ class ClusterHostServiceRunnerTest {
         when(clusterPreCreationApi.getServiceLocations()).thenReturn(serviceLocationMap);
         ReflectionTestUtils.setField(underTest, "cmHeartbeatInterval", "1");
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "1");
+
+        TemplatePreparationObject templatePreparationObject = TemplatePreparationObject.Builder.builder()
+                .withBlueprintView(new BlueprintView())
+                .build();
+
+        when(stackToTemplatePreparationObjectConverter.convert(any())).thenReturn(templatePreparationObject);
     }
 
     private void createInstanceGroup(Template template, List<InstanceGroupDto> instanceGroups, String fqdn1, String fqdn2,
@@ -669,5 +753,22 @@ class ClusterHostServiceRunnerTest {
 
     private Node node(String fqdn) {
         return new Node(null, null, null, null, fqdn, null);
+    }
+
+    private void setupMockforRangerRaz(StackType stackType, boolean razEnabled) {
+        when(stackView.getType()).thenReturn(stackType);
+        when(rangerRazDatalakeConfigProvider.getHostGroups(any(), any())).thenReturn(Set.of("master"));
+        when(rangerRazDatahubConfigProvider.getHostGroups(any(), any())).thenReturn(Set.of("master"));
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setInstanceGroup(instanceGroup);
+        hostGroup.setName("master");
+
+        when(hostGroupService.getByCluster(anyLong())).thenReturn(razEnabled ? Set.of(hostGroup) : Collections.emptySet());
+
+        List<InstanceMetadataView> instanceMetaDataSet = new ArrayList<>();
+        instanceMetaDataSet.add(createInstanceMetadata("fqdn1", instanceGroup, "0.0.0.0"));
+        when(stack.getAliveInstancesInInstanceGroup(anyString())).thenReturn(instanceMetaDataSet);
     }
 }
