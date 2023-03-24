@@ -228,7 +228,7 @@ class DecommissionHandlerTest {
         assertNull(decommissionResult.getStatusReason());
         assertNotNull(decommissionResult.getErrorPhase());
         assertEquals(Set.of(FQDN), decommissionResult.getHostNames());
-        verify(clusterDecomissionService, times(1)).removeHostsFromCluster(List.of(instance));
+        verify(clusterDecomissionService, times(2)).removeHostsFromCluster(List.of(instance));
         verify(clusterDecomissionService, never()).decommissionClusterNodes(anyMap());
         verify(clusterDecomissionService, never()).deleteHostFromCluster(any());
     }
