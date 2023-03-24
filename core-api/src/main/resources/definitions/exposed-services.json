@@ -211,6 +211,20 @@
       "visibleForDatahub": true
     },
     {
+      "name": "RANGERRAZ",
+      "displayName": "RangerRaz",
+      "serviceName": "RANGER_RAZ_SERVER",
+      "knoxService": "RANGERRAZ",
+      "knoxUrl": "/rangerraz/",
+      "ssoSupported": true,
+      "port": 6082,
+      "tlsPort": 6082,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
+    },
+    {
       "name": "LIVY_SERVER",
       "displayName": "Livy Server",
       "serviceName": "LIVY_SERVER",

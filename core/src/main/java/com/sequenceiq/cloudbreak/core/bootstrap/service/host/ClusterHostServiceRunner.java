@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -33,6 +34,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Accou
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
@@ -107,6 +110,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -129,6 +133,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -255,6 +260,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private RdsViewProvider rdsViewProvider;
+
+    @Inject
+    private SdxClientService sdxClientService;
 
     @Inject
     private JavaPillarDecorator javaPillarDecorator;
@@ -729,7 +737,11 @@ public class ClusterHostServiceRunner {
             List<String> rangerGatewayHosts = getRangerFqdn(stackDto, gatewayConfig.getHostname(), rangerLocations);
             serviceLocations.put(rangerService.getServiceName(), rangerGatewayHosts);
         }
+
+        addRangerRazServiceIfAvailable(stackDto, clouderaManagerRepo.getVersion(), serviceLocations, gatewayConfig);
+
         serviceLocations.put(exposedServiceCollector.getClouderaManagerService().getServiceName(), asList(gatewayConfig.getHostname()));
+
         gateway.put("location", serviceLocations);
         if (stackDto.getNetwork() != null) {
             gateway.put("cidrBlocks", stackDto.getNetwork().getNetworkCidrs());
@@ -1000,6 +1012,40 @@ public class ClusterHostServiceRunner {
             String message = "Creating cron for user home creation failed";
             LOGGER.warn(message, e);
             throw new CloudbreakException(message, e);
+        }
+    }
+
+    private void addRangerRazServiceIfAvailable(StackDto stackDto, String cmVersion, Map<String, List<String>> serviceLocations, GatewayConfig gatewayConfig) {
+        if (stackDto.getCluster() != null && stackDto.getStack() != null
+                && CMRepositoryVersionUtil.isRazConfigurationSupported(
+                cmVersion, CloudPlatform.valueOf(stackDto.getCloudPlatform()), stackDto.getStack().getType())
+        ) {
+            boolean razEnabled = stackDto.getCluster().isRangerRazEnabled();
+
+            if (StringUtils.isNotEmpty(stackDto.getEnvironmentCrn()) && StackType.WORKLOAD.equals(stackDto.getStack().getType())) {
+                List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(stackDto.getEnvironmentCrn());
+                if (!datalakes.isEmpty()) {
+                    razEnabled = datalakes.get(0).getRangerRazEnabled();
+                }
+            }
+
+            if (razEnabled) {
+                ExposedService rangerRazService = exposedServiceCollector.getRangerRazService();
+
+                // Find master nodes since Ranger Raz is only going to be installed on master nodes
+                List<String> rangerRazLocations = stackDto.getAliveInstancesInInstanceGroup("master").stream()
+                        .filter(ig -> ig.isReachable() && ig.getDiscoveryFQDN() != null)
+                        .map(InstanceMetadataView::getDiscoveryFQDN)
+                        .collect(toList());
+
+                LOGGER.info("rangerRazLocations {} ", rangerRazLocations);
+
+                if (!CollectionUtils.isEmpty(rangerRazLocations)) {
+                    List<String> rangerRazGatewayHosts = getRangerFqdn(stackDto, gatewayConfig.getHostname(), rangerRazLocations);
+                    LOGGER.info("rangerRazGatewayHosts {} ", rangerRazGatewayHosts);
+                    serviceLocations.put(rangerRazService.getServiceName(), rangerRazGatewayHosts);
+                }
+            }
         }
     }
 }

@@ -110,6 +110,10 @@ public class ExposedServiceCollector {
         return getFirst("RANGER");
     }
 
+    public ExposedService getRangerRazService() {
+        return getFirst("RANGERRAZ");
+    }
+
     public ExposedService getResourceManagerWebService() {
         return getFirst("RESOURCEMANAGER_WEB");
     }
