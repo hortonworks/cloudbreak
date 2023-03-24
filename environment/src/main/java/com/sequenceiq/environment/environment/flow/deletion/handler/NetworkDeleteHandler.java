@@ -64,6 +64,8 @@ public class NetworkDeleteHandler extends EventSenderAwareHandler<EnvironmentDel
                         environmentNetworkService.deleteNetwork(environmentDtoConverter.environmentToDto(environment));
                     }
                     network.setName(environment.getResourceCrn() + "_network_DELETED_@_" + System.currentTimeMillis());
+                    network.setArchived(true);
+                    network.setDeletionTimestamp(System.currentTimeMillis());
                     environmentService.save(environment);
                 }
             });
