@@ -24,6 +24,8 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFileSystemValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
@@ -92,6 +94,9 @@ public class AzureConnector implements CloudConnector {
 
     @Inject
     private AzureEncryptionResources azureEncryptionResources;
+
+    @Inject
+    private AzureImageTermsSignerService azureImageTermsSignerService;
 
     @Override
     public Authenticator authentication() {

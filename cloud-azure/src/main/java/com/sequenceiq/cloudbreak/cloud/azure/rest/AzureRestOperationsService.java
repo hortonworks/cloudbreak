@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,10 @@ public class AzureRestOperationsService {
     private HttpHeaders getHttpHeaders(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+//        headers.add("CommandName", "vm image terms accept");
+//        headers.add("ParameterSetName", "--publisher --offer --plan");
+//        headers.add("User-Agent", "AZURECLI/2.44.1 (DEB) azsdk-python-mgmt-marketplaceordering/1.1.0 Python/3.10.8 (Linux-5.15.0-67-generic-x86_64-with-glibc2.31)");
         return headers;
     }
 

@@ -31,7 +31,7 @@ public class AzureImageTermsSignerService {
             "documentation at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.";
 
     private static final String SIGN_URL_AZ_TEMPLATE = "https://management.azure.com/subscriptions/%s/providers/Microsoft.MarketplaceOrdering/offerTypes/" +
-            "virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
+            "virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2021-01-01";
 
     private static final String READ_PROBLEM_MESSAGE_TEMPLATE = "Failed to get the status of the Terms and Conditions for image %s. " +
             "Please make sure that Azure Marketplace Terms and Conditions have been accepted for your subscription before proceeding with CDP deployment.";

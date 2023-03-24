@@ -20,7 +20,9 @@ import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -199,6 +201,19 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
         return environmentResponseConverter.dtoToDetailedResponse(environmentDto);
+    }
+
+    @Override
+    public Boolean isImageSigned(String envCrn, String imageUrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return environmentService.isImageSigned(imageUrn, envCrn, accountId);
+    }
+
+    @Override
+    @ResponseStatus(value = HttpStatus.OK)
+    public void signImage(String environmentCrn, String imageUrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        environmentService.signImage(imageUrn, environmentCrn, accountId);
     }
 
     @Override

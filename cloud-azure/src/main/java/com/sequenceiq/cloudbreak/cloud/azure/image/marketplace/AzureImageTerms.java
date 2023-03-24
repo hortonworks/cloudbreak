@@ -58,7 +58,13 @@ public class AzureImageTerms {
 
         private boolean accepted;
 
+        private String marketplaceTermsLink;
+
         private String licenseTextLink;
+
+        private String privacyPolicyLink;
+
+        private String plan;
 
         private String product;
 
@@ -72,8 +78,20 @@ public class AzureImageTerms {
             return accepted;
         }
 
+        public String getMarketplaceTermsLink() {
+            return marketplaceTermsLink;
+        }
+
         public String getLicenseTextLink() {
             return licenseTextLink;
+        }
+
+        public String getPlan() {
+            return plan;
+        }
+
+        public String getPrivacyPolicyLink() {
+            return privacyPolicyLink;
         }
 
         public String getProduct() {
@@ -120,7 +138,10 @@ public class AzureImageTerms {
         public String toString() {
             return new StringJoiner(", ", TermsProperties.class.getSimpleName() + "[", "]")
                     .add("accepted=" + accepted)
+                    .add("marketplaceTermsLink='" + marketplaceTermsLink + "'")
                     .add("licenseTextLink='" + licenseTextLink + "'")
+                    .add("privacyPolicyLink='" + privacyPolicyLink + "'")
+                    .add("plan='" + plan + "'")
                     .add("product='" + product + "'")
                     .add("publisher='" + publisher + "'")
                     .add("retrieveDatetime='" + retrieveDatetime + "'")
