@@ -15,6 +15,7 @@ public class DistroXDeleteAction implements Action<DistroXTestDto, CloudbreakCli
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
+        testContext.skipSafeLogicValidation();
         client.getDefaultClient()
                 .distroXV1Endpoint()
                 .deleteByName(testDto.getName(), false);

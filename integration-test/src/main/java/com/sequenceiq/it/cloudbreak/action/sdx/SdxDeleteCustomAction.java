@@ -19,6 +19,7 @@ public class SdxDeleteCustomAction implements Action<SdxCustomTestDto, SdxClient
 
     @Override
     public SdxCustomTestDto action(TestContext testContext, SdxCustomTestDto testDto, SdxClient client) throws Exception {
+        testContext.skipSafeLogicValidation();
         Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX custom delete request: ", testDto.getRequest());
         FlowIdentifier flowIdentifier = client.getDefaultClient()

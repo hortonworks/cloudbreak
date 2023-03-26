@@ -27,6 +27,10 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
+        // The SafeLogic CryptoComply for Java should be installed on Cloudbreak images. This is validated by default in this test project.
+        // So the SafeLogic validation should be disabled for this test suite.
+        testContext.skipSafeLogicValidation();
+
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);

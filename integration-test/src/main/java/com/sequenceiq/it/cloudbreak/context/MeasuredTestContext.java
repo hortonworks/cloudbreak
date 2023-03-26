@@ -304,6 +304,16 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public void skipSafeLogicValidation() {
+        wrappedTestContext.skipSafeLogicValidation();
+    }
+
+    @Override
+    public String getSafeLogicValidation() {
+        return wrappedTestContext.getSafeLogicValidation();
+    }
+
+    @Override
     public void checkNonEmpty(String name, String value) {
         wrappedTestContext.checkNonEmpty(name, value);
     }
