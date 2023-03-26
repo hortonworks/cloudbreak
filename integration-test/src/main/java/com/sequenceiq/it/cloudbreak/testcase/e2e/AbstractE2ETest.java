@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
@@ -73,9 +74,11 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         if (MapUtils.isEmpty(testContext.getExceptionMap())) {
             LOGGER.info("Validating default tags on the created and tagged test resources...");
             testContext.getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, testContext));
-
-            LOGGER.info("Validating SafeLogic installation of created resources...");
-            safeLogicAssertions.validate(testContext);
+            if (StringUtils.isBlank(testContext.getSafeLogicValidation())
+                    || !StringUtils.equalsIgnoreCase(testContext.getSafeLogicValidation(), "false")) {
+                LOGGER.info("Validating SafeLogic installation of created resources...");
+                safeLogicAssertions.validate(testContext);
+            }
         }
         spotUtil.setUseSpotInstances(Boolean.FALSE);
     }

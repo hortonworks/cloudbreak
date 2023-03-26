@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -1321,6 +1322,26 @@ public abstract class TestContext implements ApplicationContextAware {
             throw new NullPointerException(format("Following variable must be set whether as environment variables or (test) application.yaml: %s",
                     name.replaceAll("\\.", "_").toUpperCase()));
         }
+    }
+
+    /**
+     * The SafeLogic CryptoComply for Java should be installed on Cloudbreak images.
+     * This is validated on VM instances by default, it has been invoked in the E2E tearDown
+     * (after the execution of each E2E test method).
+     *
+     * If the JAVA has been forced (re)installed or SDX, DistroX have been deleted during test execution,
+     * the SafeLogic validation should be disabled for the test tearDown.
+     */
+    public void skipSafeLogicValidation() {
+        MDC.put("safeLogicValidation", "false");
+    }
+
+    /**
+     *
+     * @return SafeLogic Validation value (true or false)
+     */
+    public String getSafeLogicValidation() {
+        return MDC.get("safeLogicValidation");
     }
 
     @Override
