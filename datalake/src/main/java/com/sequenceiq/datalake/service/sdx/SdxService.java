@@ -471,7 +471,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
                 internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request, sdxClusterRequest.getJavaVersion());
-        overrideDefaultTemplateValues(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), accountId);
+        overrideDefaultTemplateValues(stackRequest, sdxClusterRequest.getCustomInstanceGroups());
         validateRecipes(sdxClusterRequest, stackRequest, userCrn);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
@@ -497,11 +497,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return Pair.of(savedSdxCluster, flowIdentifier);
     }
 
-    private void overrideDefaultTemplateValues(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups, String accountId) {
-        if (isCustomInstanceTypeSelected(customInstanceGroups) && !entitlementService.isDatalakeSelectInstanceTypeEnabled(accountId)) {
-            throw new BadRequestException("Datalake instance type selection is not enabled! " +
-                    "Contact Cloudera support to enable CDP_DATALAKE_SELECT_INSTANCE_TYPE entitlement for the account.");
-        }
+    private void overrideDefaultTemplateValues(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups) {
         if (CollectionUtils.isNotEmpty(customInstanceGroups)) {
             LOGGER.debug("Override default template with custom instance groups from request.");
             customInstanceGroups.forEach(customInstanceGroup -> {

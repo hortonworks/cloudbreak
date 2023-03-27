@@ -269,9 +269,6 @@ public class MockUserManagementServiceTest {
                 {"ephemeralDisksForTempDataEnabled false", "ephemeralDisksForTempDataEnabled", false, "EPHEMERAL_DISKS_FOR_TEMP_DATA", false},
                 {"ephemeralDisksForTempDataEnabled true", "ephemeralDisksForTempDataEnabled", true, "EPHEMERAL_DISKS_FOR_TEMP_DATA", true},
 
-                {"enableDatalakeSelectInstanceType false", "enableDatalakeSelectInstanceType", false, "CDP_DATALAKE_SELECT_INSTANCE_TYPE", false},
-                {"enableDatalakeSelectInstanceType true", "enableDatalakeSelectInstanceType", true, "CDP_DATALAKE_SELECT_INSTANCE_TYPE", true},
-
                 {"enableDatalakeZduOSUpgrade false", "enableDatalakeZduOSUpgrade", false, "CDP_DATALAKE_ZDU_OS_UPGRADE", false},
                 {"enableDatalakeZduOSUpgrade true", "enableDatalakeZduOSUpgrade", true, "CDP_DATALAKE_ZDU_OS_UPGRADE", true},
 

@@ -1101,7 +1101,6 @@ class SdxServiceTest {
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
         when(entitlementService.microDutySdxEnabled(anyString())).thenReturn(true);
-        when(entitlementService.isDatalakeSelectInstanceTypeEnabled(anyString())).thenReturn(true);
 
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
