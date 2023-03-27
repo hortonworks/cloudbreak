@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -44,9 +43,6 @@ public class ClusterUpgradeFailedHandler extends ExceptionCatcherEventHandler<Cl
     @Inject
     private ConclusionCheckerService conclusionCheckerService;
 
-    @Inject
-    private ClusterUpgradeService clusterUpgradeService;
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterUpgradeFailedRequest.class);
@@ -61,12 +57,11 @@ public class ClusterUpgradeFailedHandler extends ExceptionCatcherEventHandler<Cl
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeFailedRequest> event) {
         ClusterUpgradeFailedRequest request = event.getData();
-        LOGGER.info("Handle ClusterUpgradeFailedRequest, stackId: {}", request.getResourceId());
+        LOGGER.info("Handle ClusterUpgradeFailedRequest: {}", request);
         if (syncAfterFailureEnabled) {
             syncFromCmToCb(request);
         }
         runConclusionChecking(request);
-        clusterUpgradeService.handleUpgradeClusterFailure(request.getResourceId(), request.getException().getMessage(), request.getDetailedStatus());
         return new ClusterUpgradeFailHandledRequest(request.getResourceId(), request.getException(), request.getDetailedStatus());
     }
 
