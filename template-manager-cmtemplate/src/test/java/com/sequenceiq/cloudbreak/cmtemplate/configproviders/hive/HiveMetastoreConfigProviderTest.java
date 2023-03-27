@@ -108,12 +108,28 @@ class HiveMetastoreConfigProviderTest {
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                         .collect(Collectors.toSet()))
+                .withStackType(StackType.DATALAKE)
                 .withProductDetails(generateCmRepo(cmVersion), null)
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
         verifyDbOnlyMinimalResult(result);
+    }
+
+    private void verifyDbOnlyMinimalResultWorkloadStack(List<ApiClusterTemplateConfig> result) {
+        Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
+        assertThat(configNameToValueMap).containsOnly(
+                entry(HIVE_METASTORE_DATABASE_HOST, "10.1.1.1"),
+                entry(HIVE_METASTORE_DATABASE_NAME, "hive"),
+                entry(HIVE_METASTORE_DATABASE_PASSWORD, "iamsoosecure"),
+                entry(HIVE_METASTORE_DATABASE_PORT, "5432"),
+                entry(HIVE_METASTORE_DATABASE_TYPE, "postgresql"),
+                entry(HIVE_METASTORE_DATABASE_USER, "heyitsme"),
+                entry(HIVE_SERVICE_CONFIG_SAFETY_VALVE, "")
+        );
+        Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
+        assertThat(configNameToVariableNameMap).isEmpty();
     }
 
     private void verifyDbOnlyMinimalResult(List<ApiClusterTemplateConfig> result) {
@@ -124,7 +140,9 @@ class HiveMetastoreConfigProviderTest {
                 entry(HIVE_METASTORE_DATABASE_PASSWORD, "iamsoosecure"),
                 entry(HIVE_METASTORE_DATABASE_PORT, "5432"),
                 entry(HIVE_METASTORE_DATABASE_TYPE, "postgresql"),
-                entry(HIVE_METASTORE_DATABASE_USER, "heyitsme")
+                entry(HIVE_METASTORE_DATABASE_USER, "heyitsme"),
+                entry("hive_service_config_safety_valve", "<property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property>" +
+                        "<property><name>hive.metastore.try.direct.sql</name><value>true</value></property>")
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -137,6 +155,7 @@ class HiveMetastoreConfigProviderTest {
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
                         .collect(Collectors.toSet()))
+                .withStackType(StackType.DATALAKE)
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
@@ -155,7 +174,9 @@ class HiveMetastoreConfigProviderTest {
                 entry(HIVE_METASTORE_DATABASE_PORT, "5432"),
                 entry(HIVE_METASTORE_DATABASE_TYPE, "postgresql"),
                 entry(HIVE_METASTORE_DATABASE_USER, "heyitsme"),
-                entry(JDBC_URL_OVERRIDE, "jdbc:postgresql://10.1.1.1:5432/hive?sslmode=verify-full&sslrootcert=" + SSL_CERTS_FILE_PATH)
+                entry(JDBC_URL_OVERRIDE, "jdbc:postgresql://10.1.1.1:5432/hive?sslmode=verify-full&sslrootcert=" + SSL_CERTS_FILE_PATH),
+                entry("hive_service_config_safety_valve", "<property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property>" +
+                        "<property><name>hive.metastore.try.direct.sql</name><value>true</value></property>")
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -177,6 +198,7 @@ class HiveMetastoreConfigProviderTest {
                     .stream()
                     .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                     .collect(Collectors.toSet()))
+                .withStackType(StackType.DATALAKE)
                 .withProductDetails(generateCmRepo(cmVersion), null)
                 .build();
 
@@ -192,6 +214,7 @@ class HiveMetastoreConfigProviderTest {
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
                         .collect(Collectors.toSet()))
+                .withStackType(StackType.DATALAKE)
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
@@ -215,6 +238,7 @@ class HiveMetastoreConfigProviderTest {
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
                         .collect(Collectors.toSet()))
+                .withStackType(StackType.DATALAKE)
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
@@ -232,6 +256,7 @@ class HiveMetastoreConfigProviderTest {
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
                         .collect(Collectors.toSet()))
+                .withStackType(StackType.DATALAKE)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
         initHmsServiceConfigs(List.of(config("foo", "bar"), config(HIVE_METASTORE_DATABASE_HOST, "customhms.mydomain.com")));
@@ -248,6 +273,7 @@ class HiveMetastoreConfigProviderTest {
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                         .collect(Collectors.toSet()))
+                .withStackType(StackType.DATALAKE)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .withKerberosConfig(kerberosConfigFreeipa())
                 .build();
@@ -262,7 +288,9 @@ class HiveMetastoreConfigProviderTest {
                 entry(HIVE_METASTORE_DATABASE_PORT, "5432"),
                 entry(HIVE_METASTORE_DATABASE_TYPE, "postgresql"),
                 entry(HIVE_METASTORE_DATABASE_USER, "heyitsme"),
-                entry(HIVE_SERVICE_CONFIG_SAFETY_VALVE, "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property>")
+                entry(HIVE_SERVICE_CONFIG_SAFETY_VALVE, "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property>" +
+                        "<property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property>" +
+                        "<property><name>hive.metastore.try.direct.sql</name><value>true</value></property>")
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -275,6 +303,7 @@ class HiveMetastoreConfigProviderTest {
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                         .collect(Collectors.toSet()))
+                .withStackType(StackType.DATALAKE)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .withStackType(StackType.DATALAKE)
                 .build();
@@ -308,7 +337,9 @@ class HiveMetastoreConfigProviderTest {
                 entry(HIVE_METASTORE_DATABASE_USER, "heyitsme"),
                 entry(HIVE_METASTORE_ENABLE_LDAP_AUTH, Boolean.TRUE.toString()),
                 entry(HIVE_METASTORE_LDAP_URI, "ldap://localhost:389"),
-                entry(HIVE_METASTORE_LDAP_BASEDN, "cn=users,dc=example,dc=org")
+                entry(HIVE_METASTORE_LDAP_BASEDN, "cn=users,dc=example,dc=org"),
+                entry("hive_service_config_safety_valve", "<property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property>" +
+                        "<property><name>hive.metastore.try.direct.sql</name><value>true</value></property>")
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -325,7 +356,7 @@ class HiveMetastoreConfigProviderTest {
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
-        verifyDbOnlyMinimalResult(result);
+        verifyDbOnlyMinimalResultWorkloadStack(result);
     }
 
     @Test void getServiceConfigsTestDatahubCm711() {
@@ -347,9 +378,27 @@ class HiveMetastoreConfigProviderTest {
                 entry(HIVE_METASTORE_DATABASE_PORT, "5432"),
                 entry(HIVE_METASTORE_DATABASE_TYPE, "postgresql"),
                 entry(HIVE_METASTORE_DATABASE_USER, "heyitsme"),
-                entry(HIVE_COMPACTOR_INITIATOR_ON, "false"));
+                entry(HIVE_COMPACTOR_INITIATOR_ON, "false"),
+                entry(HIVE_SERVICE_CONFIG_SAFETY_VALVE, ""));
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
+    }
+
+    @Test
+    void getServiceConfigHiveSafetyValve() {
+        TemplatePreparationObject source = new TemplatePreparationObject.Builder()
+                .withRdsViews(Set.of(createRdsConfig(null))
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .collect(Collectors.toSet()))
+                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
+                .withStackType(StackType.DATALAKE)
+                .withLdapConfig(ldapConfig())
+                .build();
+
+        Map<String, String> result = getConfigNameToValueMap(underTest.getServiceConfigs(templateProcessor, source));
+        assertThat(result.get("hive_service_config_safety_valve")).isEqualTo("<property><name>hive.metastore.try.direct.sql.ddl</name><value>true" +
+                "</value></property><property><name>hive.metastore.try.direct.sql</name><value>true</value></property>");
     }
 
     private RdsConfigWithoutCluster createRdsConfig(RdsSslMode sslMode) {

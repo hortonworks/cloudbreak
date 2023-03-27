@@ -165,6 +165,10 @@
         {
           "name": "hive_metastore_database_name",
           "variable": "hive-hive_metastore_database_name"
+        },
+        {
+          "name": "hive_service_config_safety_valve",
+          "variable": ""
         }
       ],
       "roleConfigGroups": [

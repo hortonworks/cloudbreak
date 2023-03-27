@@ -100,10 +100,15 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
         }
 
         Optional<KerberosConfig> kerberosConfigOpt = source.getKerberosConfig();
+        StringBuilder safetyValveValue = new StringBuilder();
         if (kerberosConfigOpt.isPresent()) {
-            String safetyValveValue = getSafetyValveProperty("hive.hook.proto.file.per.event", Boolean.TRUE.toString());
-            configs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, safetyValveValue));
+            safetyValveValue.append(getSafetyValveProperty("hive.hook.proto.file.per.event", Boolean.TRUE.toString()));
         }
+        if (source.getStackType() != null && source.getStackType().equals(StackType.DATALAKE)) {
+            safetyValveValue.append(getSafetyValveProperty("hive.metastore.try.direct.sql.ddl", Boolean.TRUE.toString()));
+            safetyValveValue.append(getSafetyValveProperty("hive.metastore.try.direct.sql", Boolean.TRUE.toString()));
+        }
+        configs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, safetyValveValue.toString()));
 
         if (source.getStackType() == StackType.DATALAKE) {
             source.getLdapConfig().ifPresent(ldap -> {
