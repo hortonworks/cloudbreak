@@ -163,6 +163,10 @@
         {
           "name": "hive_metastore_database_user",
           "value": "heyitsme"
+        },
+        {
+          "name": "hive_service_config_safety_valve",
+          "value": ""
         }
       ],
       "roleConfigGroups": [
