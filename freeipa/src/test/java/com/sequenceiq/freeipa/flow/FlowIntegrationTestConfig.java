@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.flow;
 
 import javax.ws.rs.client.Client;
 
-import org.quartz.Scheduler;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
@@ -66,7 +66,7 @@ public class FlowIntegrationTestConfig {
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
 
     @MockBean
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @MockBean
     private FlowOperationStatisticsService flowOperationStatisticsService;

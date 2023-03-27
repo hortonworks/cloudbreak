@@ -10,8 +10,6 @@ import javax.inject.Inject;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -22,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
@@ -37,7 +36,7 @@ public class ArchiveInstanceMetaDataJobService implements JobSchedulerService {
     private ArchiveInstanceMetaDataConfig properties;
 
     @Inject
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Inject
     private ApplicationContext applicationContext;
@@ -59,7 +58,7 @@ public class ArchiveInstanceMetaDataJobService implements JobSchedulerService {
                 }
                 LOGGER.info("Scheduling instance metadata archiver job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 scheduler.scheduleJob(jobDetail, trigger);
-            } catch (SchedulerException e) {
+            } catch (Exception e) {
                 LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
             }
         }
@@ -75,7 +74,7 @@ public class ArchiveInstanceMetaDataJobService implements JobSchedulerService {
             }
             LOGGER.debug("Scheduling archive InstanceMetaData job for stack {}", resource.getJobResource().getRemoteResourceId());
             scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during scheduling archive InstanceMetaData job: %s", jobDetail), e);
         }
     }
@@ -88,7 +87,7 @@ public class ArchiveInstanceMetaDataJobService implements JobSchedulerService {
             if (scheduler.getJobKeys(GroupMatcher.groupEquals(JOB_GROUP)).isEmpty()) {
                 LOGGER.info("All terminated InstanceMetaData older than a week have been archived, hooray!");
             }
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
         }
     }

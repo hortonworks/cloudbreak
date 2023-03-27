@@ -15,7 +15,6 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.StorageType;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.service.ConsumptionService;
@@ -46,7 +46,7 @@ public class StorageConsumptionJobService implements JobSchedulerService {
     private  ApplicationContext applicationContext;
 
     @Inject
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Inject
     private StorageConsumptionConfig storageConsumptionConfig;
@@ -80,7 +80,7 @@ public class StorageConsumptionJobService implements JobSchedulerService {
                     LOGGER.info("Scheduling storage consumption job for key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                     scheduler.scheduleJob(jobDetail, trigger);
                 }
-            } catch (SchedulerException e) {
+            } catch (Exception e) {
                 LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);
             }
         }
@@ -123,7 +123,7 @@ public class StorageConsumptionJobService implements JobSchedulerService {
         try {
             LOGGER.info("Unscheduling storage consumption job key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.deleteJob(jobKey);
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
         }
     }

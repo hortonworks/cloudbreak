@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.update.userdata;
 
 import javax.ws.rs.client.Client;
 
-import org.quartz.Scheduler;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.CbEventParameterFactory;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -65,7 +65,7 @@ public class FlowIntegrationTestConfig {
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
 
     @MockBean
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @MockBean
     private FlowOperationStatisticsService flowOperationStatisticsService;

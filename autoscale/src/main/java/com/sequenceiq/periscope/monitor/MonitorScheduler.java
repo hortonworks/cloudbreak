@@ -10,14 +10,15 @@ import javax.annotation.PostConstruct;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 
 @Component
 public class MonitorScheduler {
@@ -31,10 +32,10 @@ public class MonitorScheduler {
     private List<Monitor<?>> monitorList;
 
     @Autowired
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @PostConstruct
-    public void scheduleMonitors() throws SchedulerException {
+    public void scheduleMonitors() throws TransactionExecutionException {
         for (Monitor<?> monitor : monitorList) {
             LOGGER.debug("Monitor sceduled: {}, id: {}, cron: {}", monitor.getClass(), monitor.getIdentifier(), monitor.getTriggerExpression());
             JobDataMap jobDataMap = new JobDataMap();
