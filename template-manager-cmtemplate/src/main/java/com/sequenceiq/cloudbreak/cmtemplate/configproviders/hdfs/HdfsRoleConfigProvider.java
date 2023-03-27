@@ -11,9 +11,6 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -31,12 +28,6 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
     private static final String DFS_ENCRYPT_DATA_TRANSFER = "dfs_encrypt_data_transfer";
 
     private static final String DFS_DATA_TRANSFER_PROTECTION = "dfs_data_transfer_protection";
-
-    private final EntitlementService entitlementService;
-
-    public HdfsRoleConfigProvider(EntitlementService entitlementService) {
-        this.entitlementService = entitlementService;
-    }
 
     public static boolean isNamenodeHA(TemplatePreparationObject source) {
         return source.getHostGroupsWithComponent(HdfsRoles.NAMENODE)
@@ -97,12 +88,6 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
             configs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
         }
         return configs;
-    }
-
-    private boolean isSDXOptimizationEnabled(TemplatePreparationObject source) {
-        return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                && source.getStackType() != null
-                && source.getStackType().equals(StackType.DATALAKE);
     }
 
     @Override

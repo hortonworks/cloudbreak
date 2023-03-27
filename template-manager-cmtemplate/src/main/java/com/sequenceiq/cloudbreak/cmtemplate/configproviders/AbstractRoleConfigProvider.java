@@ -13,9 +13,11 @@ import java.util.regex.Pattern;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 public abstract class AbstractRoleConfigProvider implements CmTemplateComponentConfigProvider {
@@ -71,5 +73,10 @@ public abstract class AbstractRoleConfigProvider implements CmTemplateComponentC
     protected Optional<Integer> getPatchFromVersionString(String version) {
         Matcher matcher = Pattern.compile(PATCH_VERSION_REGEX).matcher(version);
         return matcher.find() ? Optional.of(Integer.valueOf(matcher.group(1))) : Optional.empty();
+    }
+
+    public static boolean isSDXOptimizationEnabled(TemplatePreparationObject source) {
+        return  !CloudPlatform.YARN.equals(source.getCloudPlatform())
+                && StackType.DATALAKE.equals(source.getStackType());
     }
 }

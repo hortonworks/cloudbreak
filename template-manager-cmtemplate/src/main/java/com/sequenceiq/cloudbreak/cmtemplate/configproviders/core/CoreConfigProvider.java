@@ -31,8 +31,6 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -83,17 +81,11 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
                 apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
             }
         }
-        if (isSDXOptimizationNeeded(source)) {
+        if (isSDXOptimizationEnabled(source)) {
             apiClusterTemplateConfigs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
         }
 
         return apiClusterTemplateConfigs;
-    }
-
-    private boolean isSDXOptimizationNeeded(TemplatePreparationObject source) {
-        return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                && source.getStackType() != null
-                && source.getStackType().equals(StackType.DATALAKE);
     }
 
     @Override
@@ -144,7 +136,7 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return isCoreSettingsNeededForHdfsNameNode(cmTemplateProcessor, source) || isSDXOptimizationNeeded(source);
+        return isCoreSettingsNeededForHdfsNameNode(cmTemplateProcessor, source) || isSDXOptimizationEnabled(source);
     }
 
     private boolean isCoreSettingsNeededForHdfsNameNode(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {

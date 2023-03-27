@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
@@ -18,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -48,10 +47,10 @@ class HbaseRestKnoxServiceConfigProviderTest extends AbstractHbaseConfigProvider
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
                 .withStackType(StackType.DATALAKE)
+                .withCloudPlatform(CloudPlatform.AWS)
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
-            when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
             List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
             assertEquals(2, serviceConfigs.size());
             assertEquals("hbase_rpc_protection", serviceConfigs.get(1).getName());
@@ -75,7 +74,6 @@ class HbaseRestKnoxServiceConfigProviderTest extends AbstractHbaseConfigProvider
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
-            when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
             List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
             assertEquals(1, serviceConfigs.size());
         });

@@ -2,9 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -30,13 +29,10 @@ class HdfsRoleConfigProviderTest {
 
     private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com";
 
-    private final EntitlementService entitlementService = mock(EntitlementService.class);
-
-    private final HdfsRoleConfigProvider subject = new HdfsRoleConfigProvider(entitlementService);
+    private final HdfsRoleConfigProvider subject = new HdfsRoleConfigProvider();
 
     @Test
     void nameNodeHA() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -61,7 +57,6 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void nonHA() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 1);
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/clouderamanager.bp");
@@ -81,7 +76,6 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void optimizedHDFSReplicaHA() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -90,6 +84,7 @@ class HdfsRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
+                .withCloudPlatform(CloudPlatform.AWS)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
                 .build();
@@ -112,7 +107,6 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void optimizedHDFSReplicaHAServiceConfig() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -121,6 +115,7 @@ class HdfsRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
+                .withCloudPlatform(CloudPlatform.AWS)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
                 .build();
@@ -139,7 +134,6 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void optimizedHDFSDataEncryptHA() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -148,6 +142,7 @@ class HdfsRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
+                .withCloudPlatform(CloudPlatform.AWS)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
                 .build();
@@ -169,8 +164,7 @@ class HdfsRoleConfigProviderTest {
     }
 
     @Test
-    void optimizedHDFSDataEncryptHAEtitlementDisabled() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+    void optimizedHDFSDataEncryptHAYarn() {
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -179,6 +173,7 @@ class HdfsRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
+                .withCloudPlatform(CloudPlatform.YARN)
                 .withHostgroupViews(Set.of(gateway, master, quorum, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
                 .build();

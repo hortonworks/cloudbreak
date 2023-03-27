@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider.isSDXOptimizationEnabled;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.ArrayList;
@@ -11,9 +12,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -36,7 +35,7 @@ public class HbaseRestKnoxServiceConfigProvider implements CmTemplateComponentCo
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(config(RESTSERVER_SECURITY_AUTHENTICATION, "kerberos"));
-        if (isSDXOptimizationNeeded(templatePreparationObject)) {
+        if (isSDXOptimizationEnabled(templatePreparationObject)) {
             configs.add(config(HBASE_RPC_PROTECTION, "privacy"));
         }
         return configs;
@@ -58,11 +57,4 @@ public class HbaseRestKnoxServiceConfigProvider implements CmTemplateComponentCo
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
                 && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getHBaseRestService().getKnoxService());
     }
-
-    private boolean isSDXOptimizationNeeded(TemplatePreparationObject source) {
-        return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                && source.getStackType() != null
-                && source.getStackType().equals(StackType.DATALAKE);
-    }
-
 }

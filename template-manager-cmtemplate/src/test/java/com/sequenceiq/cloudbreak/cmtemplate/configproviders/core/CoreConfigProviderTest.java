@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -62,9 +63,6 @@ public class CoreConfigProviderTest {
     @Mock
     private AdlsGen2ConfigProvider adlsGen2ConfigProvider;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     @BeforeEach
     public void setUp() {
         underTest = new CoreConfigProvider();
@@ -74,7 +72,6 @@ public class CoreConfigProviderTest {
 
     @Test
     public void isConfigurationNeededWhenKafkaPresentedHdfsNotAndStorageConfiguredMustReturnTrue() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
         BaseFileSystemConfigurationsView fileSystemConfiguration = mock(BaseFileSystemConfigurationsView.class);
@@ -121,7 +118,6 @@ public class CoreConfigProviderTest {
 
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(mockTemplateProcessor, templatePreparationObject);
@@ -151,8 +147,8 @@ public class CoreConfigProviderTest {
 
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        when(templatePreparationObject.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(mockTemplateProcessor, templatePreparationObject);
@@ -167,29 +163,7 @@ public class CoreConfigProviderTest {
     }
 
     @Test
-    public void isConfigurationNotNeededWhenNotPresentedHdfsNotAndStorageConfiguredAndDefaultFsNotConfiguredMustReturnFalse() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
-        CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
-        TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
-        BaseFileSystemConfigurationsView fileSystemConfiguration = mock(BaseFileSystemConfigurationsView.class);
-        Optional<BaseFileSystemConfigurationsView> fileSystemConfigurationView = Optional.of(fileSystemConfiguration);
-
-        when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
-        when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
-
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
-            Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(mockTemplateProcessor, templatePreparationObject);
-            Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);
-            List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(mockTemplateProcessor, templatePreparationObject);
-            assertEquals(0, roleConfigs.size());
-            assertEquals(Map.of(), additionalServices);
-            assertEquals(0, serviceConfigs.size());
-        });
-    }
-
-    @Test
     public void isConfigurationNotNeededWhenNotPresentedHdfsNotAndStorageConfiguredAndDefaultFsNotConfiguredMustReturnFalseSDXOptimizationEnabled() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
         BaseFileSystemConfigurationsView fileSystemConfiguration = mock(BaseFileSystemConfigurationsView.class);
@@ -198,6 +172,7 @@ public class CoreConfigProviderTest {
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        when(templatePreparationObject.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(mockTemplateProcessor, templatePreparationObject);
@@ -216,7 +191,6 @@ public class CoreConfigProviderTest {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(true);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(mockTemplateProcessor, templatePreparationObject);
@@ -236,7 +210,6 @@ public class CoreConfigProviderTest {
 
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(mockTemplateProcessor, templatePreparationObject);
@@ -256,8 +229,8 @@ public class CoreConfigProviderTest {
 
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        when(templatePreparationObject.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
             Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(mockTemplateProcessor, templatePreparationObject);
@@ -273,7 +246,6 @@ public class CoreConfigProviderTest {
 
     @Test
     public void isHdfsSecurityGroupCacheReloadPropertyPresent() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
         BaseFileSystemConfigurationsView fileSystemConfiguration = mock(BaseFileSystemConfigurationsView.class);

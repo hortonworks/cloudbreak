@@ -18,10 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -40,14 +37,11 @@ public class AtlasKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private final ExposedServiceCollector exposedServiceCollector;
 
-    private final EntitlementService entitlementService;
 
     private final ObjectMapper objectMapper;
 
-    public AtlasKnoxRoleConfigProvider(EntitlementService entitlementService,
-            ExposedServiceCollector exposedServiceCollector,
+    public AtlasKnoxRoleConfigProvider(ExposedServiceCollector exposedServiceCollector,
             ObjectMapper objectMapper) {
-        this.entitlementService = entitlementService;
         this.exposedServiceCollector = exposedServiceCollector;
         this.objectMapper = objectMapper;
     }
@@ -79,12 +73,6 @@ public class AtlasKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
                 && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getAtlasService().getKnoxService());
-    }
-
-    private boolean isSDXOptimizationEnabled(TemplatePreparationObject source) {
-        return source.getStackType().equals(StackType.DATALAKE)
-                && entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                && isDatalakeVersionSupported(source.getBlueprintView().getBlueprintText());
     }
 
     @VisibleForTesting
