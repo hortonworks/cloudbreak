@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -129,6 +130,9 @@ public class FlowComponentTest {
 
     @MockBean
     private MetricService metricService;
+
+    @MockBean
+    private TransactionalScheduler scheduler;
 
     @BeforeEach
     public void setUp() {

@@ -25,10 +25,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.configuration.repository.ConsumptionRepository;
@@ -42,7 +43,7 @@ public class StorageConsumptionJobServiceTest {
     private ApplicationContext applicationContext;
 
     @Mock
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Mock
     private StorageConsumptionConfig storageConsumptionConfig;
@@ -80,7 +81,7 @@ public class StorageConsumptionJobServiceTest {
     }
 
     @Test
-    public void testScheduleByIdJobAlreadyRunning() throws SchedulerException {
+    public void testScheduleByIdJobAlreadyRunning() throws SchedulerException, TransactionExecutionException {
         when(storageConsumptionConfig.isStorageConsumptionEnabled()).thenReturn(true);
         mockJobResource(1L);
         when(scheduler.getJobDetail(any())).thenReturn(mock(JobDetail.class));
@@ -91,7 +92,7 @@ public class StorageConsumptionJobServiceTest {
     }
 
     @Test
-    public void testScheduleByIdJobNotRunning() throws SchedulerException {
+    public void testScheduleByIdJobNotRunning() throws SchedulerException, TransactionExecutionException {
         when(storageConsumptionConfig.isStorageConsumptionEnabled()).thenReturn(true);
         mockJobResource(1L);
         when(scheduler.getJobDetail(any())).thenReturn(null);
@@ -102,7 +103,7 @@ public class StorageConsumptionJobServiceTest {
     }
 
     @Test
-    public void testScheduleWithAggregationNoJobRunningForGroup() throws SchedulerException {
+    public void testScheduleWithAggregationNoJobRunningForGroup() throws SchedulerException, TransactionExecutionException {
         Consumption consumptionToSchedule = consumption(1L);
         when(consumptionService.isAggregationRequired(consumptionToSchedule)).thenReturn(true);
         when(consumptionService.findAllStorageConsumptionForEnvCrnAndBucketName(
@@ -120,7 +121,7 @@ public class StorageConsumptionJobServiceTest {
     }
 
     @Test
-    public void testScheduleWithAggregationJobAlreadyRunningForGroup() throws SchedulerException {
+    public void testScheduleWithAggregationJobAlreadyRunningForGroup() throws SchedulerException, TransactionExecutionException {
         Consumption consumptionToSchedule = consumption(1L);
         Consumption consumptionOther = consumption(2L);
         when(consumptionService.isAggregationRequired(consumptionToSchedule)).thenReturn(true);
@@ -139,7 +140,7 @@ public class StorageConsumptionJobServiceTest {
     }
 
     @Test
-    public void testUnscheduleWithAggregationNoJobRunningForConsumption() throws SchedulerException {
+    public void testUnscheduleWithAggregationNoJobRunningForConsumption() throws SchedulerException, TransactionExecutionException {
         Consumption consumptionToUnSchedule = consumption(1L);
         when(consumptionService.isAggregationRequired(consumptionToUnSchedule)).thenReturn(true);
         doReturn(null).when(scheduler).getJobDetail(argThat((JobKey jobkey) -> "1".equals(jobkey.getName())));
@@ -150,7 +151,7 @@ public class StorageConsumptionJobServiceTest {
     }
 
     @Test
-    public void testUnscheduleWithAggregationJobRunningForConsumptionNoReschedule() throws SchedulerException {
+    public void testUnscheduleWithAggregationJobRunningForConsumptionNoReschedule() throws SchedulerException, TransactionExecutionException {
         Consumption consumptionToUnSchedule = consumption(1L);
         when(consumptionService.isAggregationRequired(consumptionToUnSchedule)).thenReturn(true);
         doReturn(mock(JobDetail.class)).when(scheduler).getJobDetail(argThat((JobKey jobkey) -> "1".equals(jobkey.getName())));
@@ -169,7 +170,7 @@ public class StorageConsumptionJobServiceTest {
     }
 
     @Test
-    public void testUnscheduleWithAggregationJobRunningForConsumptionWithReschedule() throws SchedulerException {
+    public void testUnscheduleWithAggregationJobRunningForConsumptionWithReschedule() throws SchedulerException, TransactionExecutionException {
         Consumption consumptionToUnSchedule = consumption(1L);
         Consumption consumptionOther = consumption(2L);
         when(consumptionService.isAggregationRequired(consumptionToUnSchedule)).thenReturn(true);

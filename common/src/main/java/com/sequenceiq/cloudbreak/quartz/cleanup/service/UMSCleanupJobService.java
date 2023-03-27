@@ -7,8 +7,6 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
@@ -17,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.cleanup.UMSCleanupConfig;
 import com.sequenceiq.cloudbreak.quartz.cleanup.job.UMSCleanupJob;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 
 public abstract class UMSCleanupJobService<T extends UMSCleanupJob> implements JobSchedulerService {
 
@@ -29,7 +28,7 @@ public abstract class UMSCleanupJobService<T extends UMSCleanupJob> implements J
     private static final String TRIGGER_GROUP = "ums-cleanup-triggers";
 
     @Inject
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Inject
     private UMSCleanupConfig umsCleanupConfig;
@@ -42,7 +41,7 @@ public abstract class UMSCleanupJobService<T extends UMSCleanupJob> implements J
             unschedule();
             LOGGER.info("Scheduling UMS cleanup job with name: '{}' and group: '{}'", JOB_NAME, JOB_GROUP);
             scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);
         }
     }
@@ -74,7 +73,7 @@ public abstract class UMSCleanupJobService<T extends UMSCleanupJob> implements J
             if (scheduler.getJobDetail(jobKey) != null) {
                 scheduler.deleteJob(jobKey);
             }
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
         }
     }

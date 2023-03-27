@@ -12,8 +12,6 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -23,6 +21,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
@@ -39,7 +38,7 @@ public class NodeStatusCheckerJobService implements JobSchedulerService {
     private NodeStatusCheckerConfig properties;
 
     @Inject
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Inject
     private ApplicationContext applicationContext;
@@ -65,7 +64,7 @@ public class NodeStatusCheckerJobService implements JobSchedulerService {
             }
             LOGGER.info("Scheduling node status checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during scheduling quartz job: %s", localId), e);
         }
     }
@@ -85,16 +84,8 @@ public class NodeStatusCheckerJobService implements JobSchedulerService {
             JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
             LOGGER.info("Unscheduling node status checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.deleteJob(jobKey);
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
-        }
-    }
-
-    public void deleteAll() {
-        try {
-            scheduler.clear();
-        } catch (SchedulerException e) {
-            LOGGER.error("Error during clearing quartz jobs", e);
         }
     }
 

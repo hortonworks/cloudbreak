@@ -6,12 +6,13 @@ import java.util.function.ToDoubleFunction;
 import javax.inject.Inject;
 
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 
 @Component
 public class GroupNameToJobCountFunction implements ToDoubleFunction<String> {
@@ -19,7 +20,7 @@ public class GroupNameToJobCountFunction implements ToDoubleFunction<String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupNameToJobCountFunction.class);
 
     @Inject
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Override
     public double applyAsDouble(String groupName) {

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.quartz.Scheduler;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
@@ -47,6 +46,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.authorization.EnvironmentCredentialFiltering;
 import com.sequenceiq.environment.credential.reactor.handler.CredentialExperiencePolicyHandler;
@@ -313,7 +313,7 @@ public class CredentialExperienceTest {
         private EnvironmentService environmentService;
 
         @MockBean
-        private Scheduler scheduler;
+        private TransactionalScheduler scheduler;
 
         @MockBean
         private FlowOperationStatisticsService flowOperationStatisticsService;

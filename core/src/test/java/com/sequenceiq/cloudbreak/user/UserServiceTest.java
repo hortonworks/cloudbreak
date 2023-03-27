@@ -64,7 +64,7 @@ public class UserServiceTest {
 
     @Test
     public void testCreateUser() throws TransactionExecutionException {
-        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).requiresNew(any());
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).requiresNew(any(Supplier.class));
         when(userRepository.findByTenantNameAndUserId(anyString(), anyString())).thenReturn(Optional.empty());
         when(tenantService.findByName(anyString())).thenReturn(Optional.empty());
         when(tenantService.save(any())).thenReturn(createTenant());
@@ -81,7 +81,7 @@ public class UserServiceTest {
 
     @Test
     public void testCreateUserWithDuplicateException() throws TransactionExecutionException {
-        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).requiresNew(any());
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).requiresNew(any(Supplier.class));
         when(tenantService.findByName(anyString())).thenReturn(Optional.empty());
         when(tenantService.save(any())).thenReturn(createTenant());
         when(workspaceService.create(any())).thenReturn(createWorkspace());
@@ -121,7 +121,7 @@ public class UserServiceTest {
 
     @Test
     public void testPersistModifiedInternalUser() throws TransactionExecutionException {
-        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).requiresNew(any());
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).requiresNew(any(Supplier.class));
         when(userRepository.findByTenantNameAndUserId(anyString(), anyString())).thenReturn(Optional.empty());
         when(tenantService.findByName(anyString())).thenReturn(Optional.empty());
         when(tenantService.save(any())).thenReturn(createTenant());

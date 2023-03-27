@@ -32,7 +32,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.quartz.Scheduler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -69,6 +68,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.common.dbmigration.CommonDatabaseMigrationConfig;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.service.TransactionExecutorService;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.workspace.util.CrudRepositoryLookupService;
 import com.sequenceiq.periscope.PeriscopeApplication;
@@ -480,7 +480,7 @@ public class MetricTest {
         private SwaggerResourcesProvider swaggerResourcesProvider;
 
         @MockBean
-        private Scheduler scheduler;
+        private TransactionalScheduler scheduler;
 
         @SpyBean
         private MetricService metricService;

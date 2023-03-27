@@ -10,8 +10,6 @@ import javax.inject.Inject;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -20,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.quartz.JobDataMapProvider;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
@@ -35,7 +34,7 @@ public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?
     private SaltStatusCheckerConfig saltStatusCheckerConfig;
 
     @Inject
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Inject
     private JobDataMapProvider jobDataMapProvider;
@@ -51,7 +50,7 @@ public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?
             }
             LOGGER.info("Scheduling stack salt status job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error("Error during scheduling stack salt status job: {}", jobDetail, e);
         }
     }
@@ -61,7 +60,7 @@ public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?
             if (scheduler.getJobDetail(jobKey) != null) {
                 scheduler.deleteJob(jobKey);
             }
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
         }
     }

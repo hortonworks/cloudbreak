@@ -13,8 +13,6 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -25,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
@@ -47,7 +46,7 @@ public class StatusCheckerJobService implements JobSchedulerService {
     private StatusCheckerConfig statusCheckerConfig;
 
     @Inject
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Inject
     private ApplicationContext applicationContext;
@@ -99,17 +98,8 @@ public class StatusCheckerJobService implements JobSchedulerService {
             LOGGER.info("Unscheduling status checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.deleteJob(jobKey);
             LOGGER.info("Status checker job unscheduled with id: {}", id);
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
-        }
-    }
-
-    public void deleteAll() {
-        try {
-            scheduler.clear();
-            LOGGER.info("All scheduled tasks are cleared");
-        } catch (SchedulerException e) {
-            LOGGER.error("Error during clearing quartz jobs", e);
         }
     }
 
@@ -124,7 +114,7 @@ public class StatusCheckerJobService implements JobSchedulerService {
             scheduler.scheduleJob(jobDetail, trigger);
             LOGGER.info("Status checker job scheduled with id: {}, name: {}, crn: {}, type: {}", jobResource.getLocalId(), jobResource.getName(),
                     jobResource.getRemoteResourceId(), jobDetail.getJobDataMap().get(SYNC_JOB_TYPE));
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error("Error during scheduling quartz job. id: {}, name: {}, crn: {}", jobResource.getLocalId(), jobResource.getName(),
                     jobResource.getRemoteResourceId(), e);
         }

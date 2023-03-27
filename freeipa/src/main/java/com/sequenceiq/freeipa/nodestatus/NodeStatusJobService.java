@@ -12,8 +12,6 @@ import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -23,6 +21,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -39,7 +38,7 @@ public class NodeStatusJobService implements JobSchedulerService {
     private static final String TRIGGER_GROUP = "node-status-check-triggers";
 
     @Inject
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Inject
     private NodeStatusJobConfig nodeStatusJobConfig;
@@ -61,7 +60,7 @@ public class NodeStatusJobService implements JobSchedulerService {
             unschedule(resource.getJobResource().getLocalId());
             LOGGER.info("Scheduling Node status job with name: '{}' and group: '{}'", JOB_NAME, JOB_GROUP);
             scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);
         }
     }
@@ -82,7 +81,7 @@ public class NodeStatusJobService implements JobSchedulerService {
             if (scheduler.getJobDetail(jobKey) != null) {
                 scheduler.deleteJob(jobKey);
             }
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
         }
     }

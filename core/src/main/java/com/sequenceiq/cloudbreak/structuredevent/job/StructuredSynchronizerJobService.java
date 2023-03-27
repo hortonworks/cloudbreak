@@ -11,8 +11,6 @@ import javax.inject.Inject;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -22,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
+import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
@@ -40,7 +39,7 @@ public class StructuredSynchronizerJobService implements JobSchedulerService {
     private StructuredSynchronizerConfig structuredSynchronizerConfig;
 
     @Inject
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Inject
     private ApplicationContext applicationContext;
@@ -73,7 +72,7 @@ public class StructuredSynchronizerJobService implements JobSchedulerService {
                 }
                 LOGGER.info("Scheduling structured event sync job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 scheduler.scheduleJob(jobDetail, trigger);
-            } catch (SchedulerException e) {
+            } catch (Exception e) {
                 LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
             }
         }
@@ -84,7 +83,7 @@ public class StructuredSynchronizerJobService implements JobSchedulerService {
             JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
             LOGGER.info("Unscheduling instance metadata archiver job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.deleteJob(jobKey);
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
         }
     }

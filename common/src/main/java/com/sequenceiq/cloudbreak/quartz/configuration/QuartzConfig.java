@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.quartz.configuration;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -13,7 +12,7 @@ import org.springframework.context.annotation.PropertySource;
 public class QuartzConfig {
 
     @Inject
-    private Scheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Inject
     private JobAppVersionVerifier jobAppVersionVerifier;
