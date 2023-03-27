@@ -223,6 +223,29 @@ public class AzureVirtualMachineServiceTest {
         assertEquals(InstanceStatus.TERMINATED, vmStatus.getStatus());
     }
 
+    @Test
+    public void testGetVmStatusesWhenProviderReturnsNullInstanceIds() {
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        CloudInstance cloudInstance = cloudInstance(null);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
+        AzureListResult<VirtualMachine> virtualMachines = createEmptyPagedList();
+        ApiError apiError = new ApiError();
+        AzureTestUtils.setField(apiError, "code", "ResourceGroupNotFound");
+        HttpResponse httpResponse = mock(HttpResponse.class);
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP))
+                .thenThrow(new ApiErrorException(String.format("Resource group '%s' could not be found.", RESOURCE_GROUP),
+                        httpResponse, apiError));
+
+        AzureVirtualMachinesWithStatuses result = underTest.getVmsAndVmStatusesFromAzure(ac, List.of(cloudInstance));
+
+        assertNotNull(result);
+        assertEquals(1, result.getStatuses().size());
+        CloudVmInstanceStatus vmStatus = result.getStatuses().get(0);
+        assertEquals(cloudInstance, vmStatus.getCloudInstance());
+        assertEquals(InstanceStatus.TERMINATED, vmStatus.getStatus());
+    }
+
     private AzureListResult<VirtualMachine> createPagedList() {
         List<VirtualMachine> list = new ArrayList<>();
         list.add(createVirtualMachine(INSTANCE_1));
