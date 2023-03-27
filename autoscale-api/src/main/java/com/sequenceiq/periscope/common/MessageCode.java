@@ -32,6 +32,8 @@ public class MessageCode {
 
     public static final String AUTOSCALING_ACTIVITY_NODE_LIMIT_EXCEEDED = "autoscale.activity.nodelimitexceeded";
 
+    public static final String AUTOSCALE_STOPSTART_INITIAL_UPSCALE = "autoscale.stopstart.initial.upscale.adjustment";
+
     public static final String AUTOSCALING_TRIGGER_FAILURE = "autoscale.trigger.failure";
 
     public static final String AUTOSCALE_YARN_RECOMMENDATION_SUCCESS = "autoscale.yarn.recommendation.success";

@@ -4,6 +4,7 @@ import static com.sequenceiq.periscope.api.model.ActivityStatus.MANDATORY_DOWNSC
 import static com.sequenceiq.periscope.api.model.ActivityStatus.MANDATORY_UPSCALE;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_MANDATORY_DOWNSCALE;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_MANDATORY_UPSCALE;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALE_STOPSTART_INITIAL_UPSCALE;
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.REGULAR;
 import static com.sequenceiq.periscope.model.ScalingAdjustmentType.STOPSTART;
 import static java.util.Collections.emptyList;
@@ -23,7 +24,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
 import com.sequenceiq.periscope.domain.ScalingActivity;
@@ -32,6 +35,7 @@ import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Response;
 import com.sequenceiq.periscope.monitor.client.YarnMetricsClient;
 import com.sequenceiq.periscope.monitor.evaluator.load.YarnResponseUtils;
 import com.sequenceiq.periscope.monitor.sender.ScalingEventSender;
+import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 @Service
@@ -41,6 +45,12 @@ public class StopStartScalingAdjustmentService implements MandatoryScalingAdjust
 
     @Inject
     private ScalingEventSender scalingEventSender;
+
+    @Inject
+    private HttpNotificationSender notificationSender;
+
+    @Inject
+    private HistoryService historyService;
 
     @Inject
     private StackResponseUtils stackResponseUtils;
@@ -85,6 +95,9 @@ public class StopStartScalingAdjustmentService implements MandatoryScalingAdjust
         if (scalingAdjustmentParameters.getUpscaleAdjustment() != null) {
             Integer targetScaleUpCount = Math.min(scalingAdjustmentParameters.getUpscaleAdjustment(),
                     loadAlert.getLoadAlertConfiguration().getMaxScaleUpStepSize());
+            sendHistoryUpdateForMaxNodeCountAdjustment(cluster, loadAlert.getLoadAlertConfiguration().getMaxResourceValue(),
+                    policyHostGroupInstanceInfo.getPolicyHostGroup());
+
             String mandatoryUpscaleMsg;
             ScalingActivity scalingActivity;
             if (policyHostGroupInstanceInfo.getStoppedHostInstanceIds().isEmpty()) {
@@ -108,6 +121,9 @@ public class StopStartScalingAdjustmentService implements MandatoryScalingAdjust
         } else if (scalingAdjustmentParameters.getDownscaleAdjustment() != null) {
             List<String> hostsToDecommission = collectStopStartDownscaleRecommendations(cluster, policyHostGroupInstanceInfo,
                     pollingUserCrn, stackV4Response, scalingAdjustmentParameters.getDownscaleAdjustment());
+            sendHistoryUpdateForMaxNodeCountAdjustment(cluster, loadAlert.getLoadAlertConfiguration().getMaxResourceValue(),
+                    policyHostGroupInstanceInfo.getPolicyHostGroup());
+
             String mandatoryDownscaleMsg = messagesService.getMessageWithArgs(AUTOSCALE_MANDATORY_DOWNSCALE, hostsToDecommission, REGULAR);
             ScalingActivity scalingActivity = scalingActivityService.create(cluster, MANDATORY_DOWNSCALE, mandatoryDownscaleMsg, clock.getCurrentTimeMillis());
             scalingEventSender.sendScaleDownEvent(loadAlert, policyHostGroupInstanceInfo.getHostFqdnsToInstanceId().size(), hostsToDecommission,
@@ -115,6 +131,12 @@ public class StopStartScalingAdjustmentService implements MandatoryScalingAdjust
             LOGGER.info("Triggered mandatory adjustment ScaleDown for Cluster '{}', HostsToDecommission '{}', HostGroup '{}'",
                     cluster.getStackCrn(), hostsToDecommission, policyHostGroupInstanceInfo.getPolicyHostGroup());
         }
+    }
+
+    private void sendHistoryUpdateForMaxNodeCountAdjustment(Cluster cluster, int maxResourceValue, String policyHostGroup) {
+        History history = historyService.createEntry(ScalingStatus.TRIGGER_INFO,
+                messagesService.getMessageWithArgs(AUTOSCALE_STOPSTART_INITIAL_UPSCALE, maxResourceValue, policyHostGroup), cluster);
+        notificationSender.sendHistoryUpdateNotification(history, cluster);
     }
 
     private List<String> collectStopStartDownscaleRecommendations(Cluster cluster, LoadAlertPolicyHostGroupInstanceInfo policyHostGroupInstanceInfo,

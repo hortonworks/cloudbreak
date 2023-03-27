@@ -44,8 +44,10 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
 import com.sequenceiq.periscope.domain.ScalingActivity;
@@ -58,6 +60,7 @@ import com.sequenceiq.periscope.monitor.evaluator.EventPublisher;
 import com.sequenceiq.periscope.monitor.evaluator.load.YarnResponseUtils;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.sender.ScalingEventSender;
+import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.utils.MockStackResponseGenerator;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
@@ -80,6 +83,12 @@ class StopStartScalingAdjustmentServiceTest {
 
     @Mock
     private YarnMetricsClient yarnMetricsClient;
+
+    @Mock
+    private HistoryService historyService;
+
+    @Mock
+    private HttpNotificationSender notificationSender;
 
     @Mock
     private StackResponseUtils stackResponseUtils;
@@ -176,7 +185,7 @@ class StopStartScalingAdjustmentServiceTest {
                         Optional.of(mandatoryAdjustmentParams.getDownscaleAdjustment()));
             }
         } else {
-            verifyNoInteractions(eventPublisher, yarnMetricsClient);
+            verifyNoInteractions(eventPublisher, yarnMetricsClient, notificationSender);
         }
 
     }
@@ -250,6 +259,7 @@ class StopStartScalingAdjustmentServiceTest {
 
     private void setupBasicMocks(YarnScalingServiceV1Response yarnResponse) throws Exception {
         ScalingActivity scalingActivity = mock(ScalingActivity.class);
+        History history = mock(History.class);
 
         lenient().doCallRealMethod().when(scalingEventSender).sendScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt(), anyInt(), anyLong());
         lenient().doCallRealMethod().when(scalingEventSender).sendStopStartScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt(), anyLong());
@@ -264,5 +274,7 @@ class StopStartScalingAdjustmentServiceTest {
         lenient().doReturn(yarnResponse).when(yarnMetricsClient).getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(),
                 anyString(), any(Optional.class));
         lenient().doCallRealMethod().when(yarnResponseUtils).getYarnRecommendedDecommissionHostsForHostGroup(any(YarnScalingServiceV1Response.class), anyMap());
+        lenient().doReturn(history).when(historyService).createEntry(any(ScalingStatus.class), anyString(), any(Cluster.class));
+        lenient().doNothing().when(notificationSender).sendHistoryUpdateNotification(any(History.class), any(Cluster.class));
     }
 }
