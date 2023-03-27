@@ -172,7 +172,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         createResourceGroup(testContext);
     }
 
-    private void createResourceGroup(TestContext testContext) {
+    protected void createResourceGroup(TestContext testContext) {
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
         if (CloudPlatform.AZURE.name().equalsIgnoreCase(cloudProvider)) {
