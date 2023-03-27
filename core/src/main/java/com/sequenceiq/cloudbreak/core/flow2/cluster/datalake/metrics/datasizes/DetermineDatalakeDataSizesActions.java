@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.metrics.datasizes.DetermineDatalakeDataSizesEvent.DETERMINE_DATALAKE_DATA_SIZES_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.metrics.datasizes.DetermineDatalakeDataSizesEvent.DETERMINE_DATALAKE_DATA_SIZES_SUBMISSION_SUCCESS_EVENT;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -18,12 +19,16 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
+import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesBaseEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesSubmissionEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.GetDatalakeDataSizesRequest;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.CompressUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @Configuration
@@ -40,6 +45,15 @@ public class DetermineDatalakeDataSizesActions {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private OrchestratorMetadataProvider orchestratorMetadataProvider;
+
+    @Inject
+    private CompressUtil compressUtil;
+
+    @Inject
+    private TelemetryOrchestrator telemetryOrchestrator;
+
     @Bean(name = "DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS_STATE")
     public Action<?, ?> determineDatalakeDataSizesAction() {
         return new AbstractDetermineDatalakeDataSizesAction<>(DetermineDatalakeDataSizesBaseEvent.class) {
@@ -48,6 +62,7 @@ public class DetermineDatalakeDataSizesActions {
                 stackUpdater.updateStackStatus(
                         context.getStackId(), DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS, "Determination of datalake data sizes in progress"
                 );
+                performSaltUpdate(context.getStackId());
                 sendEvent(context);
             }
 
@@ -93,5 +108,31 @@ public class DetermineDatalakeDataSizesActions {
                 sendEvent(context, DETERMINE_DATALAKE_DATA_SIZES_FAILURE_HANDLED_EVENT.event(), payload);
             }
         };
+    }
+
+    private void performSaltUpdate(Long stackId) {
+        try {
+            List<String> saltStateDefinitions = orchestratorMetadataProvider.getSaltStateDefinitionBaseFolders();
+            List<String> filteredSaltComponents = List.of("/salt/datalake_metrics");
+            byte[] currentSaltState = orchestratorMetadataProvider.getStoredStates(stackId);
+            byte[] telemetrySaltStateConfigs = compressUtil.generateCompressedOutputFromFolders(saltStateDefinitions, filteredSaltComponents);
+            updateSaltStateForComponents(stackId, telemetrySaltStateConfigs);
+            if (currentSaltState != null) {
+                byte[] newFullSaltState = compressUtil.updateCompressedOutputFolders(saltStateDefinitions, filteredSaltComponents, currentSaltState);
+                orchestratorMetadataProvider.storeNewState(stackId, newFullSaltState);
+            }
+        } catch (Exception ex) {
+
+        }
+    }
+
+    private void updateSaltStateForComponents(Long stackId, byte[] telemetrySaltStateConfigs) {
+        try {
+            List<String> componentNames = List.of("datalake_metrics");
+            OrchestratorMetadata metadata = orchestratorMetadataProvider.getOrchestratorMetadata(stackId);
+            telemetryOrchestrator.updatePartialSaltDefinition(telemetrySaltStateConfigs, componentNames, metadata.getGatewayConfigs(),
+                    metadata.getExitCriteriaModel());
+        } catch (Exception ex) {
+        }
     }
 }
