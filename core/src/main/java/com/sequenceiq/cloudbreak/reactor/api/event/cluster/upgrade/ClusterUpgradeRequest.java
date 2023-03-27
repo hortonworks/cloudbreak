@@ -30,7 +30,8 @@ public class ClusterUpgradeRequest extends StackEvent {
         return rollingUpgradeEnabled;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return new StringJoiner(", ", ClusterUpgradeRequest.class.getSimpleName() + "[", "]")
                 .add("patchUpgrade=" + patchUpgrade)
                 .add("rollingUpgradeEnabled=" + rollingUpgradeEnabled)

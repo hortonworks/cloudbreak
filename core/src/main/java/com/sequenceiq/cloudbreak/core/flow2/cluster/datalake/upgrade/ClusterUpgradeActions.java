@@ -215,9 +215,12 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeFailedEvent payload, Map<Object, Object> variables) {
+                LOGGER.error("Cluster upgrade failed: {}", payload);
                 Set<Image> candidateImages = new HashSet<>();
                 Optional.ofNullable(getCurrentImage(variables)).ifPresent(si -> candidateImages.add(si.getImage()));
                 Optional.ofNullable(getTargetImage(variables)).ifPresent(si -> candidateImages.add(si.getImage()));
+                String exceptionMessage = Optional.ofNullable(payload.getException()).map(Throwable::getMessage).orElse("");
+                clusterUpgradeService.handleUpgradeClusterFailure(payload.getResourceId(), exceptionMessage, payload.getDetailedStatus());
                 ClusterUpgradeFailedRequest cmSyncRequest = new ClusterUpgradeFailedRequest(payload.getResourceId(), payload.getException(),
                         payload.getDetailedStatus(), candidateImages);
                 sendEvent(context, cmSyncRequest);

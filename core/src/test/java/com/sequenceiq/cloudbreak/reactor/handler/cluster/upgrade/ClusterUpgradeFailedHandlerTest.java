@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailHandledRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedRequest;
@@ -43,9 +42,6 @@ class ClusterUpgradeFailedHandlerTest {
     @Mock
     private ConclusionCheckerService conclusionCheckerService;
 
-    @Mock
-    private ClusterUpgradeService clusterUpgradeService;
-
     @InjectMocks
     private ClusterUpgradeFailedHandler underTest;
 
@@ -62,8 +58,6 @@ class ClusterUpgradeFailedHandlerTest {
         assertThat(selectable).isInstanceOf(ClusterUpgradeFailHandledRequest.class);
 
         verify(stackService, times(1)).getByIdWithListsInTransaction(eq(STACK_ID));
-        verify(clusterUpgradeService, times(1)).handleUpgradeClusterFailure(eq(STACK_ID), eq("error"),
-                eq(DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED));
     }
 
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade;
 
 import java.util.Set;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -38,5 +39,15 @@ public class ClusterUpgradeFailedRequest extends StackEvent {
 
     public Set<Image> getCandidateImages() {
         return candidateImages;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ClusterUpgradeFailedRequest.class.getSimpleName() + "[", "]")
+                .add("exception=" + exception)
+                .add("detailedStatus=" + detailedStatus)
+                .add("candidateImages=" + candidateImages)
+                .add(super.toString())
+                .toString();
     }
 }
