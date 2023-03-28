@@ -16,7 +16,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "gp2"
+              "type": "gp3"
             }
           ],
           "aws": {
@@ -37,7 +37,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "gp2"
+              "type": "gp3"
             }
           ],
           "aws": {
@@ -58,7 +58,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "gp2"
+              "type": "gp3"
             }
           ],
           "aws": {
@@ -100,7 +100,7 @@
             {
               "count": 5,
               "size": 500,
-              "type": "gp2"
+              "type": "gp3"
             }
           ],
           "aws": {
