@@ -172,7 +172,7 @@ cb:
     embedded.volume:
       size: 100
       platformVolumeTypeMap:
-        AWS: gp2
+        AWS: gp3
         AZURE: StandardSSD_LRS
         GCP: pd-ssd
         MOCK: magnetic

@@ -162,7 +162,7 @@
                   </#if>
                 </#if>
                 "VolumeSize" : "${group.rootVolumeSize}",
-                "VolumeType" : "gp2"
+                "VolumeType" : "gp3"
               }
             }
           ],

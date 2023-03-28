@@ -73,9 +73,9 @@
     },
     "StorageTypeParameter": {
         "Type": "String",
-        "Default": "gp2",
+        "Default": "gp3",
         "Description": "Storage type",
-        "AllowedValues": [ "standard", "gp2", "io1" ]
+        "AllowedValues": [ "standard", "gp2", "gp3", "io1" ]
     },
     "DeletionProtectionParameter": {
         "Type": "String",

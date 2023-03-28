@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ACCESS_KEY_ECDSA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.AUDIT_ARCHIVING_GCP;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.AWS_GP3_ROOT_VOLUME_AS_DEFAULT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
@@ -605,10 +604,6 @@ public class EntitlementService {
 
     public boolean isCO2CalculationEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_CO2_CALCULATION);
-    }
-
-    public boolean isAwsGp3RootVolumeAsDefaultEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, AWS_GP3_ROOT_VOLUME_AS_DEFAULT);
     }
 
     public boolean isWiamUsersyncRoutingEnabled(String accountId) {
