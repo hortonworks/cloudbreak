@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
@@ -101,8 +102,8 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private boolean isSDXOptimizationEnabled(TemplatePreparationObject source) {
         return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                && source.getStackType() != null
-                && source.getStackType().equals(StackType.DATALAKE);
+                && !CloudPlatform.YARN.equals(source.getCloudPlatform())
+                && StackType.DATALAKE.equals(source.getStackType());
     }
 
     @Override

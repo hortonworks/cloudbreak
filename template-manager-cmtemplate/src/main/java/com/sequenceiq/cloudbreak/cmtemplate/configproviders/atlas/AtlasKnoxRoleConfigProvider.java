@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
@@ -82,7 +83,8 @@ public class AtlasKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     }
 
     private boolean isSDXOptimizationEnabled(TemplatePreparationObject source) {
-        return source.getStackType().equals(StackType.DATALAKE)
+        return !CloudPlatform.YARN.equals(source.getCloudPlatform())
+                && StackType.DATALAKE.equals(source.getStackType())
                 && entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
                 && isDatalakeVersionSupported(source.getBlueprintView().getBlueprintText());
     }
