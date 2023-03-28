@@ -81,7 +81,7 @@
             {
               "count": 1,
               "size": 1000,
-              "type": "gp2"
+              "type": "gp3"
             }
           ]
         },
@@ -99,7 +99,7 @@
             {
               "count": 1,
               "size": 1000,
-              "type": "gp2"
+              "type": "gp3"
             }
           ]
         },

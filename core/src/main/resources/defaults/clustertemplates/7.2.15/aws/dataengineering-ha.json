@@ -30,7 +30,7 @@
         "attachedVolumes": [{
           "size": 150,
           "count": 1,
-          "type": "gp2"
+          "type": "gp3"
         }],
         "cloudPlatform": "AWS"
       },
@@ -70,7 +70,7 @@
           "attachedVolumes": [{
             "size": 150,
             "count": 1,
-            "type": "gp2"
+            "type": "gp3"
           }],
           "cloudPlatform": "AWS"
         },
@@ -94,7 +94,7 @@
           "attachedVolumes": [{
             "size": 500,
             "count": 1,
-            "type": "gp2"
+            "type": "gp3"
           }],
           "cloudPlatform": "AWS"
         },
@@ -119,7 +119,7 @@
           "attachedVolumes": [{
             "size": 150,
             "count": 1,
-            "type": "gp2"
+            "type": "gp3"
           }],
           "cloudPlatform": "AWS"
         },
@@ -144,7 +144,7 @@
           "attachedVolumes": [{
             "size": 150,
             "count": 1,
-            "type": "gp2"
+            "type": "gp3"
           }],
           "cloudPlatform": "AWS"
         },
