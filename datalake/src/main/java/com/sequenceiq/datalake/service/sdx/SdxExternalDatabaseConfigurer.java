@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.DatabaseBase;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -43,32 +46,55 @@ public class SdxExternalDatabaseConfigurer {
         versionComparator = new VersionComparator();
     }
 
-    public void configure(CloudPlatform cloudPlatform, SdxDatabaseRequest databaseRequest, SdxCluster sdxCluster) {
-        SdxDatabaseAvailabilityType databaseAvailabilityType = getDatabaseAvailabilityType(databaseRequest, cloudPlatform, sdxCluster);
+    public void configure(CloudPlatform cloudPlatform, DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest, SdxCluster sdxCluster) {
+        LOGGER.debug("Create database configuration from internal request {} and database request {}", internalDatabaseRequest, databaseRequest);
+        SdxDatabaseAvailabilityType databaseAvailabilityType = getDatabaseAvailabilityType(internalDatabaseRequest, databaseRequest, cloudPlatform, sdxCluster);
         sdxCluster.setDatabaseAvailabilityType(databaseAvailabilityType);
-        String requestedDbEngineVersion = Optional.ofNullable(databaseRequest).map(SdxDatabaseRequest::getDatabaseEngineVersion).orElse(null);
+        String requestedDbEngineVersion = getDbEngineVersion(internalDatabaseRequest, databaseRequest);
         sdxCluster.setDatabaseEngineVersion(databaseDefaultVersionProvider
                 .calculateDbVersionBasedOnRuntimeIfMissing(sdxCluster.getRuntime(), requestedDbEngineVersion));
+        LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxCluster.getDatabaseAvailabilityType(),
+                sdxCluster.getDatabaseEngineVersion());
         validate(cloudPlatform, sdxCluster);
     }
 
-    private SdxDatabaseAvailabilityType getDatabaseAvailabilityType(SdxDatabaseRequest dbRequest, CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
-        if (dbRequest == null || (dbRequest.getCreate() == null && dbRequest.getAvailabilityType() == null)) {
+    private String getDbEngineVersion(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest) {
+        return Optional.ofNullable(databaseRequest)
+                .map(SdxDatabaseRequest::getDatabaseEngineVersion)
+                .orElse(Optional.ofNullable(internalDatabaseRequest)
+                        .map(DatabaseBase::getDatabaseEngineVersion)
+                        .orElse(null));
+    }
+
+    private SdxDatabaseAvailabilityType getDatabaseAvailabilityType(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest dbRequest,
+            CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
+        Optional<SdxDatabaseAvailabilityType> availabilityType = getDatabaseAvailabilityType(internalDatabaseRequest, dbRequest);
+        Optional<Boolean> createDatabase = Optional.ofNullable(dbRequest).map(SdxDatabaseRequest::getCreate);
+        if (createDatabase.isEmpty() && availabilityType.isEmpty()) {
             if (platformConfig.isExternalDatabaseSupportedFor(cloudPlatform) && isCMExternalDbSupported(cloudPlatform, sdxCluster)) {
                 return defaultDatabaseAvailability;
             } else {
                 return SdxDatabaseAvailabilityType.NONE;
             }
         } else {
-            if (dbRequest.getCreate() == null) {
-                return dbRequest.getAvailabilityType();
-            } else {
-                if (Boolean.TRUE.equals(dbRequest.getCreate())) {
-                    return SdxDatabaseAvailabilityType.HA;
-                } else {
-                    return SdxDatabaseAvailabilityType.NONE;
-                }
-            }
+            return createDatabase.map(createDb -> Boolean.TRUE.equals(createDb) ? SdxDatabaseAvailabilityType.HA : SdxDatabaseAvailabilityType.NONE)
+                    .orElseGet(availabilityType::get);
+        }
+    }
+
+    private Optional<SdxDatabaseAvailabilityType> getDatabaseAvailabilityType(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest dbRequest) {
+        return Optional.ofNullable(dbRequest).map(SdxDatabaseRequest::getAvailabilityType)
+                .or(() -> Optional.ofNullable(internalDatabaseRequest).map(DatabaseBase::getAvailabilityType).map(this::convertAvailabilityType));
+    }
+
+    private SdxDatabaseAvailabilityType convertAvailabilityType(DatabaseAvailabilityType dbAvailabilityType) {
+        switch (dbAvailabilityType) {
+        case HA:
+            return SdxDatabaseAvailabilityType.HA;
+        case NON_HA:
+            return SdxDatabaseAvailabilityType.NON_HA;
+        default:
+            return SdxDatabaseAvailabilityType.NONE;
         }
     }
 
