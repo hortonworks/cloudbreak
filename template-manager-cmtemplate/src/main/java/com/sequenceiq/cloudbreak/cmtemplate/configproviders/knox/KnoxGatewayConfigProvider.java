@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_9;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isKnoxCustomTopologyManagementSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isKnoxDatabaseSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +92,11 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String GATEWAY_TOKEN_GENERATION_ENABLE_LIFESPAN_INPUT_TRUE = "true";
 
+    private static final String GATEWAY_READ_ONLY_TOPOLOGIES = "gateway.read.only.override.topologies";
+
+    private static final List<String> CLOUDBREAK_MANAGED_TOPOLOGIES = Arrays.asList(
+            "admin", "cdp-proxy-api", "cdp-proxy-token", "cdp-proxy", "cdp-token", "knoxsso", "manager");
+
     @Inject
     private VirtualGroupService virtualGroupService;
 
@@ -111,7 +118,11 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                 config.add(config(KNOX_MASTER_SECRET, masterSecret));
                 config.add(config(GATEWAY_DEFAULT_TOPOLOGY_NAME, topologyName));
                 config.add(config(GATEWAY_ADMIN_GROUPS, adminGroup));
-                config.add(config(GATEWAY_CM_AUTO_DISCOVERY_ENABLED, "false"));
+                if (isKnoxCustomTopologyManagementSupported(source.getProductDetailsView().getCm(), getCdhProduct(source))) {
+                    config.add(config(GATEWAY_READ_ONLY_TOPOLOGIES, String.join(",", CLOUDBREAK_MANAGED_TOPOLOGIES)));
+                } else {
+                    config.add(config(GATEWAY_CM_AUTO_DISCOVERY_ENABLED, "false"));
+                }
                 if (gateway != null) {
                     config.add(config(GATEWAY_PATH, gateway.getPath()));
                     config.add(config(GATEWAY_SIGNING_KEYSTORE_NAME, SIGNING_JKS));

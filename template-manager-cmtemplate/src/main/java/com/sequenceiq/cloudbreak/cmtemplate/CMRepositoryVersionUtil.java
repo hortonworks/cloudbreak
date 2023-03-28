@@ -67,6 +67,8 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_9_2 = () -> "7.9.2";
 
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_10_0 = () -> "7.10.0";
+
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_7 = () -> "7.2.7";
 
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_9 = () -> "7.2.9";
@@ -173,6 +175,19 @@ public class CMRepositoryVersionUtil {
             }
         }
         LOGGER.info("The current cdh and cm version is supported={}", supported);
+        return supported;
+    }
+
+    public static boolean isKnoxCustomTopologyManagementSupported(ClouderaManagerRepo clouderaManagerRepoDetails,
+                                                            Optional<ClouderaManagerProduct> cdhProduct) {
+        LOGGER.info("ClouderaManagerRepo is compared for knox custom topology management support");
+        boolean supported = cdhProduct.map(product -> {
+            String cdhVersion = cdhProduct.get().getVersion().split("-")[0];
+            LOGGER.info("The cdhVersion is {}. CM version is {}", cdhVersion, clouderaManagerRepoDetails.getVersion());
+            return isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_17)
+                    && isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_10_0);
+        }).orElse(false);
+        LOGGER.info("The current cdh and cm version supports Knox custom topology management: {}", supported);
         return supported;
     }
 

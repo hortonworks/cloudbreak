@@ -271,6 +271,133 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
+    public void cloudbreakManagedTopologiesAreSet() {
+        GatewayTopology topology = new GatewayTopology();
+        topology.setTopologyName("my-topology");
+        topology.setExposedServices(Json.silent(new ExposedServices()));
+
+        Gateway gateway = new Gateway();
+        gateway.setTopologies(Set.of(topology));
+
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setAccountId(Optional.of("1234"));
+
+        TemplatePreparationObject source = Builder.builder()
+                .withGateway(gateway, "key", new HashSet<>())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.10.0"), List.of(new ClouderaManagerProduct()
+                        .withVersion("7.2.17")
+                        .withName("CDH")))
+                .build();
+        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("");
+
+        assertEquals(
+                List.of(
+                        config("gateway_master_secret", gateway.getKnoxMaster()),
+                        config("gateway_default_topology_name",
+                                gateway.getTopologies().iterator().next().getTopologyName()),
+                        config("gateway_knox_admin_groups", ""),
+                        config("gateway.read.only.override.topologies",
+                                "admin,cdp-proxy-api,cdp-proxy-token,cdp-proxy,cdp-token,knoxsso,manager"),
+                        config("gateway_path", gateway.getPath()),
+                        config("gateway_signing_keystore_name", "signing.jks"),
+                        config("gateway_signing_keystore_type", "JKS"),
+                        config("gateway_signing_key_alias", "signing-identity"),
+                        config("gateway_dispatch_whitelist", "^*.*$"),
+                        config("gateway_token_generation_enable_lifespan_input", "true"),
+                        config("gateway_token_generation_knox_token_ttl", "86400000"),
+                        config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
+                ),
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+        );
+    }
+
+    @Test
+    public void cloudbreakManagedTopologiesAreNotSetDueToCmVersion() {
+        GatewayTopology topology = new GatewayTopology();
+        topology.setTopologyName("my-topology");
+        topology.setExposedServices(Json.silent(new ExposedServices()));
+
+        Gateway gateway = new Gateway();
+        gateway.setTopologies(Set.of(topology));
+
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setAccountId(Optional.of("1234"));
+
+        TemplatePreparationObject source = Builder.builder()
+                .withGateway(gateway, "key", new HashSet<>())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.9.0"), List.of(new ClouderaManagerProduct()
+                        .withVersion("7.2.17")
+                        .withName("CDH")))
+                .build();
+        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("");
+
+        assertEquals(
+                List.of(
+                        config("gateway_master_secret", gateway.getKnoxMaster()),
+                        config("gateway_default_topology_name",
+                                gateway.getTopologies().iterator().next().getTopologyName()),
+                        config("gateway_knox_admin_groups", ""),
+                        config("gateway_auto_discovery_enabled", "false"),
+                        config("gateway_path", gateway.getPath()),
+                        config("gateway_signing_keystore_name", "signing.jks"),
+                        config("gateway_signing_keystore_type", "JKS"),
+                        config("gateway_signing_key_alias", "signing-identity"),
+                        config("gateway_dispatch_whitelist", "^*.*$"),
+                        config("gateway_token_generation_enable_lifespan_input", "true"),
+                        config("gateway_token_generation_knox_token_ttl", "86400000"),
+                        config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
+                ),
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+        );
+    }
+
+    @Test
+    public void cloudbreakManagedTopologiesAreNotSetDueToCdhVersion() {
+        GatewayTopology topology = new GatewayTopology();
+        topology.setTopologyName("my-topology");
+        topology.setExposedServices(Json.silent(new ExposedServices()));
+
+        Gateway gateway = new Gateway();
+        gateway.setTopologies(Set.of(topology));
+
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setAccountId(Optional.of("1234"));
+
+        TemplatePreparationObject source = Builder.builder()
+                .withGateway(gateway, "key", new HashSet<>())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.10.0"), List.of(new ClouderaManagerProduct()
+                        .withVersion("7.2.16")
+                        .withName("CDH")))
+                .build();
+        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("");
+        assertEquals(
+                List.of(
+                        config("gateway_master_secret", gateway.getKnoxMaster()),
+                        config("gateway_default_topology_name",
+                                gateway.getTopologies().iterator().next().getTopologyName()),
+                        config("gateway_knox_admin_groups", ""),
+                        config("gateway_auto_discovery_enabled", "false"),
+                        config("gateway_path", gateway.getPath()),
+                        config("gateway_signing_keystore_name", "signing.jks"),
+                        config("gateway_signing_keystore_type", "JKS"),
+                        config("gateway_signing_key_alias", "signing-identity"),
+                        config("gateway_dispatch_whitelist", "^*.*$"),
+                        config("gateway_token_generation_enable_lifespan_input", "true"),
+                        config("gateway_token_generation_knox_token_ttl", "86400000"),
+                        config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
+                ),
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+        );
+    }
+
+
+    @Test
     public void roleConfigsWithoutGateway() {
         GeneralClusterConfigs gcc = new GeneralClusterConfigs();
         gcc.setPassword("secret");
