@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
@@ -81,7 +82,7 @@ public class VolumeBuilderUtil {
     }
 
     public EbsBlockDevice getRootEbs(AwsInstanceView awsInstanceView, Group group, String accountId) {
-        String volumeType = entitlementService.isAwsGp3RootVolumeAsDefaultEnabled(accountId) ? "gp3" : "gp2";
+        String volumeType = AwsDiskType.Gp3.value();
         int rootVolumeSize = group.getRootVolumeSize();
 
         LOGGER.debug("AwsInstanceView: {},  root volume type: {}, size: {}", awsInstanceView, volumeType, rootVolumeSize);

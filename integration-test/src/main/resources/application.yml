@@ -143,13 +143,13 @@ integrationtest:
       rootVolumeSize: 100
       volumeSize: 100
       volumeCount: 1
-      volumeType: gp2
+      volumeType: gp3
     storageOptimizedInstance:
       type: m5d.2xlarge
       rootVolumeSize: 100
       volumeSize: 100
       volumeCount: 1
-      volumeType: gp2
+      volumeType: gp3
     baseimage:
       imageId:
     dynamoTableName: apitesting
@@ -340,7 +340,7 @@ integrationtest:
       type: m5.2xlarge
       volumeSize: 100
       volumeCount: 1
-      volumeType: gp2
+      volumeType: gp3
     baseimage:
       redhat7:
         imageId: f6e778fc-7f17-4535-9021-515351df3691

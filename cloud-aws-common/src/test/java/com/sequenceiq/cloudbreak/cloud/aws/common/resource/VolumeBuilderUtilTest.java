@@ -142,7 +142,7 @@ public class VolumeBuilderUtilTest {
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group, null);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertTrue(actual.encrypted());
-        Assertions.assertEquals("gp2", actual.volumeType().toString());
+        Assertions.assertEquals("gp3", actual.volumeType().toString());
         Assertions.assertEquals(1, actual.volumeSize());
         Assertions.assertEquals("kmsKey", actual.kmsKeyId());
     }
@@ -156,7 +156,7 @@ public class VolumeBuilderUtilTest {
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group, null);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertNull(actual.encrypted());
-        Assertions.assertEquals("gp2", actual.volumeType().toString());
+        Assertions.assertEquals("gp3", actual.volumeType().toString());
         Assertions.assertEquals(1, actual.volumeSize());
         Assertions.assertNull(actual.kmsKeyId());
     }
