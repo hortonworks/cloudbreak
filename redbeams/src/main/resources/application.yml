@@ -53,7 +53,7 @@ redbeams:
       ssl: false
     postgres:
       major:
-        version: 10
+        version: 11
   threadpool:
     core.size: 40
     capacity.size: 4000

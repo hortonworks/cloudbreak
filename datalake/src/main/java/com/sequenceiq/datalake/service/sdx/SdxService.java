@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
@@ -467,7 +468,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw new BadRequestException("Cloud storage parameter is required.");
         }
 
-        externalDatabaseConfigurer.configure(cloudPlatform, sdxClusterRequest.getExternalDatabase(), sdxCluster);
+        DatabaseRequest internalDatabaseRequest = Optional.ofNullable(internalStackV4Request).map(StackV4Request::getExternalDatabase).orElse(null);
+        externalDatabaseConfigurer.configure(cloudPlatform, internalDatabaseRequest, sdxClusterRequest.getExternalDatabase(), sdxCluster);
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
                 internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request, sdxClusterRequest.getJavaVersion());
