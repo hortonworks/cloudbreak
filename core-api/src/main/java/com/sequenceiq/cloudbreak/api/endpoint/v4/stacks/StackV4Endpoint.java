@@ -544,8 +544,9 @@ public interface StackV4Endpoint {
     BackupV4Response backupDatabaseByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
             @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames,
-            @AccountId @QueryParam("accountId") String accountId);
+            @AccountId @QueryParam("accountId") String accountId, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin);
 
+    @SuppressWarnings("ParameterNumber")
     @POST
     @Path("internal/{name}/database_backup")
     @Produces(MediaType.APPLICATION_JSON)
@@ -553,7 +554,8 @@ public interface StackV4Endpoint {
     BackupV4Response backupDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation,
             @QueryParam("closeConnections") boolean closeConnections,
-            @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames, @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin);
 
     @POST
     @Path("{name}/database_restore")
@@ -561,7 +563,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DATABASE_RESTORE, nickname = "databaseRestore")
     RestoreV4Response restoreDatabaseByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
-            @AccountId @QueryParam("accountId") String accountId);
+            @AccountId @QueryParam("accountId") String accountId, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin);
 
     @POST
     @Path("internal/{name}/database_restore")
@@ -569,7 +571,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DATABASE_RESTORE_INTERNAL, nickname = "databaseRestoreInternal")
     RestoreV4Response restoreDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin);
 
     @POST
     @Path("internal/{name}/cluster_recover")

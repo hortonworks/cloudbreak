@@ -40,7 +40,8 @@ public class SdxRestoreInternalAction implements Action<SdxInternalTestDto, SdxC
         LOGGER.info(format(" Internal SDX '%s' restore has been started to '%s'... ", sdxName, backupLocation));
         SdxRestoreResponse sdxRestoreResponse = client.getDefaultClient()
                 .sdxRestoreEndpoint()
-                .restoreDatalakeByName(sdxName, backupId, backupLocation, false, false, false, false);
+                .restoreDatalakeByName(sdxName, backupId, backupLocation, false, false, false, false,
+                        0);
         testDto.setFlow("SDX restore", sdxRestoreResponse.getFlowIdentifier());
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
                 .sdxEndpoint()

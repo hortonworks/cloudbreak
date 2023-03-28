@@ -66,13 +66,15 @@ public class SdxBackupController implements SdxBackupEndpoint {
         }
     }
 
+    @SuppressWarnings("ParameterNumber")
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
     public SdxBackupResponse backupDatalakeByName(@ResourceName String name, String backupLocation,
-            String backupName, boolean skipValidation, boolean skipAtlasMetadata, boolean skipRangerAudits, boolean skipRangerMetadata) {
+            String backupName, boolean skipValidation, boolean skipAtlasMetadata, boolean skipRangerAudits, boolean skipRangerMetadata,
+            int fullDrMaxDurationInMin) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxBackupRestoreService.triggerDatalakeBackup(sdxCluster, backupLocation, backupName,
-                new DatalakeDrSkipOptions(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata));
+                new DatalakeDrSkipOptions(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata), fullDrMaxDurationInMin);
     }
 
     @Override

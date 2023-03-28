@@ -64,10 +64,15 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         Selectable response;
-        int duration = entitlementService.isLongTimeBackupEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                ? longDurationInMinutes : durationInMinutes;
+        int duration;
+        if (request.getFullDrMaxDurationInMin() != 0) {
+            duration = request.getFullDrMaxDurationInMin();
+        } else {
+            duration = entitlementService.isLongTimeBackupEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                    ? longDurationInMinutes : durationInMinutes;
+        }
         try {
-            LOGGER.info("Start polling datalake full backup status for id: {}", sdxId);
+            LOGGER.info("Start polling datalake full backup status for id: {} with timeout duration: {}", sdxId, duration);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration,
                     TimeUnit.MINUTES);
             DatalakeBackupStatusResponse backupStatusResponse = sdxBackupRestoreService.waitForDatalakeDrBackupToComplete(

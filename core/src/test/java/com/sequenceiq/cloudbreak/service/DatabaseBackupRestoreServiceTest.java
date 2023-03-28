@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -91,9 +92,9 @@ public class DatabaseBackupRestoreServiceTest {
         when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
-        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean(), any())).thenReturn(FlowIdentifier.notTriggered());
+        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean(), any(), eq(0))).thenReturn(FlowIdentifier.notTriggered());
 
-        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList());
+        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), 0);
     }
 
     @Test
@@ -103,9 +104,9 @@ public class DatabaseBackupRestoreServiceTest {
         when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
-        when(flowManager.triggerDatalakeDatabaseRestore(anyLong(), any(), any())).thenReturn(FlowIdentifier.notTriggered());
+        when(flowManager.triggerDatalakeDatabaseRestore(anyLong(), any(), any(), eq(0))).thenReturn(FlowIdentifier.notTriggered());
 
-        service.restoreDatabase(WORKSPACE_ID, ofName, null, null);
+        service.restoreDatabase(WORKSPACE_ID, ofName, null, null, 0);
     }
 
     @Test
@@ -131,6 +132,34 @@ public class DatabaseBackupRestoreServiceTest {
         expectedException.expectMessage(MISSING_PARAM_EXCEPTION_MESSAGE);
 
         service.validate(WORKSPACE_ID, ofName, null, null);
+    }
+
+    @Test
+    public void testSuccessfulDatabaseBackupWithCustomizedMaxDurationInMin() {
+        int databaseMaxDurationInMin = 20;
+        Stack stack = getStack();
+
+        when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
+        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
+        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean(), any(), eq(0))).thenReturn(FlowIdentifier.notTriggered());
+
+        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), databaseMaxDurationInMin);
+
+    }
+
+    @Test
+    public void testSuccessfulDatabaseRestoreWithCustomizedMaxDurationInMin() {
+        int databaseMaxDurationInMin = 20;
+        Stack stack = getStack();
+
+        when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
+        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
+        when(flowManager.triggerDatalakeDatabaseRestore(anyLong(), any(), any(), eq(0))).thenReturn(FlowIdentifier.notTriggered());
+
+        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), databaseMaxDurationInMin);
+
     }
 
     private Stack getStack() {

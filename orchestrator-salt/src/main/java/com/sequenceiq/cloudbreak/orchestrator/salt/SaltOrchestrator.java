@@ -112,6 +112,10 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final int SLEEP_TIME_IN_SEC = SLEEP_TIME / 1000;
 
+    private static final int SECONDS_IN_MIN = 60;
+
+    private static final int DATABASE_DR_EACH_RETRY_IN_SEC = 10;
+
     private static final String FREEIPA_MASTER_ROLE = "freeipa_primary";
 
     private static final String FREEIPA_MASTER_REPLACEMENT_ROLE = "freeipa_primary_replacement";
@@ -161,7 +165,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     private int maxRetryRecipeForced;
 
     @Value("${cb.max.salt.database.dr.retry:300}")
-    private int maxDatabaseDrRetry;
+    private int maxDatabaseDrRetryDefault;
 
     @Value("${cb.max.salt.database.dr.retry.onerror:5}")
     private int maxDatabaseDrRetryOnError;
@@ -1325,15 +1329,17 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void backupDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+    public void backupDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel,
+            int databaseMaxDurationInMin)
             throws CloudbreakOrchestratorFailedException {
-        callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_BACKUP);
+        callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_BACKUP, databaseMaxDurationInMin);
     }
 
     @Override
-    public void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+    public void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel,
+            int databaseMaxDurationInMin)
             throws CloudbreakOrchestratorFailedException {
-        callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_RESTORE);
+        callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_RESTORE, databaseMaxDurationInMin);
     }
 
     @Override
@@ -1401,7 +1407,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private void callBackupRestore(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig,
-            ExitCriteriaModel exitModel, String state) throws CloudbreakOrchestratorFailedException {
+            ExitCriteriaModel exitModel, String state, int databaseMaxDurationInMin) throws CloudbreakOrchestratorFailedException {
+        int maxDatabaseDrRetry = databaseMaxDurationInMin == 0 ? maxDatabaseDrRetryDefault :
+                databaseMaxDurationInMin * SECONDS_IN_MIN / DATABASE_DR_EACH_RETRY_IN_SEC;
+        LOGGER.info("Calling salt orchestrator on database backup/restore with retry number: {}", maxDatabaseDrRetry);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave =

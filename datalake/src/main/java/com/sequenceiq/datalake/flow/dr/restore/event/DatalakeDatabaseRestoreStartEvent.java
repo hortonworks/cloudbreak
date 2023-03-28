@@ -19,12 +19,15 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
 
     private final String backupLocation;
 
+    private final int databaseMaxDurationInMin;
+
     public DatalakeDatabaseRestoreStartEvent(String selector, Long sdxId, String userId,
-            String backupId, String restoreId, String backupLocation) {
+            String backupId, String restoreId, String backupLocation, int databaseMaxDurationInMin) {
         super(selector, sdxId, userId, SdxOperationType.RESTORE, Collections.emptyList());
         this.backupId = backupId;
         this.restoreId = restoreId;
         this.backupLocation = backupLocation;
+        this.databaseMaxDurationInMin = databaseMaxDurationInMin;
     }
 
     @JsonCreator
@@ -35,22 +38,25 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
             @JsonProperty("userId") String userId,
             @JsonProperty("backupId") String backupId,
             @JsonProperty("restoreId") String restoreId,
-            @JsonProperty("backupLocation") String backupLocation) {
+            @JsonProperty("backupLocation") String backupLocation,
+            @JsonProperty("databaseMaxDurationInMin") int databaseMaxDurationInMin) {
         super(selector, sdxId, userId, drStatus, Collections.emptyList());
         this.backupId = backupId;
         this.restoreId = restoreId;
         this.backupLocation = backupLocation;
+        this.databaseMaxDurationInMin = databaseMaxDurationInMin;
     }
 
-    public static DatalakeDatabaseRestoreStartEvent from(DatalakeTriggerRestoreEvent trigggerRestoreEvent, Long sdxId,
+    public static DatalakeDatabaseRestoreStartEvent from(DatalakeTriggerRestoreEvent triggerRestoreEvent, Long sdxId,
             String backupId, String restoreId) {
         return new DatalakeDatabaseRestoreStartEvent(DATALAKE_DATABASE_RESTORE_EVENT.event(),
                 sdxId,
-                trigggerRestoreEvent.getDrStatus(),
-                trigggerRestoreEvent.getUserId(),
+                triggerRestoreEvent.getDrStatus(),
+                triggerRestoreEvent.getUserId(),
                 backupId,
                 restoreId,
-                trigggerRestoreEvent.getBackupLocation());
+                triggerRestoreEvent.getBackupLocation(),
+                0);
     }
 
     public String getBackupId() {
@@ -63,6 +69,10 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
 
     public String getBackupLocation() {
         return backupLocation;
+    }
+
+    public int getDatabaseMaxDurationInMin() {
+        return databaseMaxDurationInMin;
     }
 
     @Override

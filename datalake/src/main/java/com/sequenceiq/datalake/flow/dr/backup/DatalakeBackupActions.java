@@ -63,6 +63,10 @@ public class DatalakeBackupActions {
 
     private static final String REASON = "REASON";
 
+    private static final String DATABASE_MAX_DURATION_IN_MIN = "DATABASE_MAX_DURATION_IN_MIN";
+
+    private static final String FULLDR_MAX_DURATION_IN_MIN = "FULLDR_MAX_DURATION_IN_MIN";
+
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
 
@@ -104,6 +108,7 @@ public class DatalakeBackupActions {
                                 payload.getSkipOptions());
                 variables.put(BACKUP_ID, backupStatusResponse.getBackupId());
                 variables.put(OPERATION_ID, backupStatusResponse.getBackupId());
+                variables.put(FULLDR_MAX_DURATION_IN_MIN, payload.getFullDrMaxDurationInMin());
                 payload.getDrStatus().setOperationId(backupStatusResponse.getBackupId());
                 if (backupStatusResponse.getState().isFailed()) {
                     sendEvent(context, DATALAKE_BACKUP_FAILED_EVENT.event(), payload);
@@ -146,6 +151,7 @@ public class DatalakeBackupActions {
                 sdxBackupRestoreService.databaseBackup(payload.getDrStatus(),
                         payload.getResourceId(),
                         payload.getBackupRequest());
+                variables.put(DATABASE_MAX_DURATION_IN_MIN, payload.getBackupRequest().getDatabaseMaxDurationInMin());
                 sendEvent(context, DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT.event(), payload);
             }
 
@@ -169,12 +175,13 @@ public class DatalakeBackupActions {
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake database backup is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
+                int databaseMaxDurationInMin = variables.get(DATABASE_MAX_DURATION_IN_MIN) != null ? (Integer) variables.get(DATABASE_MAX_DURATION_IN_MIN) : 0;
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_BACKUP_INPROGRESS,
                         ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS,
                         "Datalake backup in progress", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_REQUESTED, sdxCluster);
-                sendEvent(context, DatalakeDatabaseBackupWaitRequest.from(context, operationId));
+                sendEvent(context, DatalakeDatabaseBackupWaitRequest.from(context, operationId, databaseMaxDurationInMin));
             }
 
             @Override
@@ -228,13 +235,14 @@ public class DatalakeBackupActions {
                 LOGGER.info("Full datalake backup is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
                 String backupId = (String) variables.get(BACKUP_ID);
+                int fullDrMaxDurationInMin = variables.get(FULLDR_MAX_DURATION_IN_MIN) != null ? (Integer) variables.get(FULLDR_MAX_DURATION_IN_MIN) : 0;
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 SdxDatabaseBackupStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, operationId);
                 if (backupStatusResponse.getStatus().equals(DatalakeDatabaseDrStatus.INPROGRESS)) {
                     sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.SUCCEEDED, null);
                 }
-                sendEvent(context, DatalakeFullBackupWaitRequest.from(context, backupId));
+                sendEvent(context, DatalakeFullBackupWaitRequest.from(context, backupId, fullDrMaxDurationInMin));
             }
 
             @Override
