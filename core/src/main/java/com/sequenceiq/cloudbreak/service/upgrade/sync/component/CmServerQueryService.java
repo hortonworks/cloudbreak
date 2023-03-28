@@ -43,7 +43,7 @@ public class CmServerQueryService {
      * TODO: the call is blocking for some time. Check if it is possible to block for shorter period of time.
      *
      * @param stack The stack, to get the coordinates of the CM to query
-     * @return List of parcels found in the CM
+     * @return Set of parcels found in the CM
      */
     public Set<ParcelInfo> queryActiveParcels(Stack stack) {
         Set<ParcelInfo> activeParcels = apiConnectors.getConnector(stack).gatherInstalledParcels(stack.getName());
@@ -59,7 +59,7 @@ public class CmServerQueryService {
     public Optional<String> queryCmVersion(StackDtoDelegate stack) {
         try {
             Map<String, List<PackageInfo>> packageVersions = cmVersionQueryService.queryCmPackageInfo(stack);
-            PackageInfo cmPackageInfo = cmVersionQueryService.checkCmPackageInfoConsistency(packageVersions);
+            PackageInfo cmPackageInfo = cmVersionQueryService.checkCmPackageInfoConsistency(packageVersions, stack.getId());
             String version = cmPackageInfo.getFullVersionPrettyPrinted();
             LOGGER.debug("Reading CM version info, found version: {}", version);
             return Optional.of(version);

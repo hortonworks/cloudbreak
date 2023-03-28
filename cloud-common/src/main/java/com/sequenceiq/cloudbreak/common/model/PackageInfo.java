@@ -72,6 +72,10 @@ public class PackageInfo {
         }
     }
 
+    public boolean isInvalid() {
+        return "false".equals(version) || "null".equals(buildNumber);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
