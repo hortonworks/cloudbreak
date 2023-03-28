@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-11-runtime-cis:1.15-1-cis-22032023
+FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-11-runtime-cis:1.15-1.1679485252-cis-27032023
 MAINTAINER info@cloudera.com
 
 WORKDIR /
