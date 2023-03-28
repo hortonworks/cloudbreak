@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
@@ -61,6 +62,7 @@ public class HbaseRestKnoxServiceConfigProvider implements CmTemplateComponentCo
 
     private boolean isSDXOptimizationNeeded(TemplatePreparationObject source) {
         return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && !source.getCloudPlatform().equals(CloudPlatform.YARN)
                 && source.getStackType() != null
                 && source.getStackType().equals(StackType.DATALAKE);
     }

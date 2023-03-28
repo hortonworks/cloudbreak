@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigPr
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -92,6 +93,7 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     private boolean isSDXOptimizationNeeded(TemplatePreparationObject source) {
         return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && !source.getCloudPlatform().equals(CloudPlatform.YARN)
                 && source.getStackType() != null
                 && source.getStackType().equals(StackType.DATALAKE);
     }
