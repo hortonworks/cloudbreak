@@ -10,8 +10,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.common.api.type.LoadBalancerType;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -67,6 +65,7 @@ public class SdxAzureOutboundLoadBalancerTest extends PreconditionSdxE2ETest {
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withClusterShape(SdxClusterShape.CUSTOM)
                 .withTelemetry("telemetry")
+                .withEnvironmentName(testContext.get(EnvironmentTestDto.class).getResponse().getName())
                 .when(sdxTestClient.createInternal(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
@@ -91,11 +90,9 @@ public class SdxAzureOutboundLoadBalancerTest extends PreconditionSdxE2ETest {
                 .withLogging()
                 .withReportClusterLogs()
                 .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED)
-                .withServiceEndpoints(ServiceEndpointCreation.ENABLED)
-                .withSubnetIDs(null)
                 .withNetworkCIDR("10.0.0.0/16")
                 .withPrivateSubnets()
+                .withServiceEndpoints()
                 .withAzure(EnvironmentNetworkAzureParamsBuilder
                         .anEnvironmentNetworkAzureParams()
                         .withNoPublicIp(true)
@@ -105,11 +102,9 @@ public class SdxAzureOutboundLoadBalancerTest extends PreconditionSdxE2ETest {
                 .withCreateFreeIpa(Boolean.TRUE)
                 .withOneFreeIpaNode()
                 .withNetwork(networkKey)
-                .withTunnel(testContext.getTunnel())
-                .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
-                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
                 .validate();
+
         waitForEnvironmentCreation(testContext);
         waitForUserSync(testContext);
     }
