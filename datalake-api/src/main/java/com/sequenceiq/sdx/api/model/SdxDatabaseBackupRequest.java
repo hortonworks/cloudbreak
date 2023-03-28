@@ -30,6 +30,9 @@ public class SdxDatabaseBackupRequest {
     @ApiModelProperty(value = ModelDescriptions.SKIP_DATABASE_NAMES, required = false)
     private List<String> skipDatabaseNames;
 
+    @ApiModelProperty(value = ModelDescriptions.DATABASE_BACKUP_RESTORE_MAX_DURATION, required = false)
+    private int databaseMaxDurationInMin;
+
     public String getBackupId() {
         return backupId;
     }
@@ -62,6 +65,14 @@ public class SdxDatabaseBackupRequest {
         this.skipDatabaseNames = skipDatabaseNames;
     }
 
+    public int getDatabaseMaxDurationInMin() {
+        return databaseMaxDurationInMin;
+    }
+
+    public void setDatabaseMaxDurationInMin(int databaseMaxDurationInMin) {
+        this.databaseMaxDurationInMin = databaseMaxDurationInMin;
+    }
+
     @Override
     public String toString() {
         return "SdxDatabaseBackupRequest{" +
@@ -69,6 +80,7 @@ public class SdxDatabaseBackupRequest {
                 ", backupLocation='" + backupLocation + '\'' +
                 ", closeConnections=" + closeConnections +
                 ", skipDatabaseNames='" + skipDatabaseNames + '\'' +
+                ", databaseMaxDurationInMin='" + databaseMaxDurationInMin + '\'' +
                 '}';
     }
 }

@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -152,8 +153,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerClusterUpgradePreparation(STACK_ID, imageChangeDto, false);
         underTest.triggerSaltUpdate(STACK_ID);
         underTest.triggerPillarConfigurationUpdate(STACK_ID);
-        underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null, true, Collections.emptyList());
-        underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null);
+        underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null, true, Collections.emptyList(), 0);
+        underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null, 0);
         underTest.triggerAutoTlsCertificatesRotation(STACK_ID, new CertificatesRotationV4Request());
         underTest.triggerStackLoadBalancerUpdate(STACK_ID);
         underTest.triggerSyncComponentVersionsFromCm(STACK_ID, Set.of());
@@ -270,7 +271,7 @@ public class ReactorFlowManagerTest {
     public void testTriggerDatabaseBackupFlowchain() {
         long stackId = 1L;
         String backupId = UUID.randomUUID().toString();
-        underTest.triggerDatalakeDatabaseBackup(stackId, BACKUP_LOCATION, backupId, true, Collections.emptyList());
+        underTest.triggerDatalakeDatabaseBackup(stackId, BACKUP_LOCATION, backupId, true, Collections.emptyList(), 0);
         ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
         verify(reactorNotifier).notify(eq(stackId), eq(FlowChainTriggers.DATALAKE_DATABASE_BACKUP_CHAIN_TRIGGER_EVENT), captor.capture());
         DatabaseBackupTriggerEvent event = (DatabaseBackupTriggerEvent) captor.getValue();
@@ -278,6 +279,30 @@ public class ReactorFlowManagerTest {
         assertEquals(backupId, event.getBackupId());
         assertEquals(BACKUP_LOCATION, event.getBackupLocation());
         assertEquals(FlowChainTriggers.DATALAKE_DATABASE_BACKUP_CHAIN_TRIGGER_EVENT, event.selector());
+    }
+
+    @Test
+    public void testTriggerDatabaseBackupFlowchainWithCustomizedMaxDuration() {
+        long stackId = 1L;
+        int databaseMaxDurationInMin = 20;
+        String backupId = UUID.randomUUID().toString();
+        underTest.triggerDatalakeDatabaseBackup(stackId, BACKUP_LOCATION, backupId, true, Collections.emptyList(), databaseMaxDurationInMin);
+        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
+        verify(reactorNotifier).notify(eq(stackId), eq(FlowChainTriggers.DATALAKE_DATABASE_BACKUP_CHAIN_TRIGGER_EVENT), captor.capture());
+        DatabaseBackupTriggerEvent event = (DatabaseBackupTriggerEvent) captor.getValue();
+        assertEquals(databaseMaxDurationInMin, event.getDatabaseMaxDurationInMin());
+    }
+
+    @Test
+    public void testTriggerDatabaseBackupRestoreWithCustomizedMaxDuration() {
+        long stackId = 1L;
+        int databaseMaxDurationInMin = 20;
+        String backupId = UUID.randomUUID().toString();
+        underTest.triggerDatalakeDatabaseRestore(stackId, BACKUP_LOCATION, backupId, databaseMaxDurationInMin);
+        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
+        verify(reactorNotifier).notify(eq(stackId), eq("DATABASE_RESTORE_EVENT"), captor.capture());
+        DatabaseRestoreTriggerEvent event = (DatabaseRestoreTriggerEvent) captor.getValue();
+        assertEquals(databaseMaxDurationInMin, event.getDatabaseMaxDurationInMin());
     }
 
     private static class TestAcceptable implements Acceptable {

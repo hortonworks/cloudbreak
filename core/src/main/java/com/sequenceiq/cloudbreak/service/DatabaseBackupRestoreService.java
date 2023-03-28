@@ -45,17 +45,17 @@ public class DatabaseBackupRestoreService {
     }
 
     public FlowIdentifier backupDatabase(Long workspaceId, NameOrCrn nameOrCrn, String location, String backupId,
-            boolean closeConnections, List<String> skipDatabaseNames) {
+            boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Initiating database backup flow for stack {}", stack.getId());
-        return flowManager.triggerDatalakeDatabaseBackup(stack.getId(), location, backupId, closeConnections, skipDatabaseNames);
+        return flowManager.triggerDatalakeDatabaseBackup(stack.getId(), location, backupId, closeConnections, skipDatabaseNames, databaseMaxDurationInMin);
     }
 
-    public FlowIdentifier restoreDatabase(Long workspaceId, NameOrCrn nameOrCrn, String location, String backupId) {
+    public FlowIdentifier restoreDatabase(Long workspaceId, NameOrCrn nameOrCrn, String location, String backupId, int databaseMaxDurationInMin) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Initiating database restore flow for stack {}", stack.getId());
-        return flowManager.triggerDatalakeDatabaseRestore(stack.getId(), location, backupId);
+        return flowManager.triggerDatalakeDatabaseRestore(stack.getId(), location, backupId, databaseMaxDurationInMin);
     }
 }

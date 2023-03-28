@@ -18,19 +18,22 @@ public class BackupRestoreContext extends CommonContext {
 
     private final List<String> skipDatabaseNames;
 
+    private final int databaseMaxDurationInMin;
+
     public BackupRestoreContext(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId,
-                                boolean closeConnections, List<String> skipDatabaseNames) {
+                                boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin) {
         super(flowParameters);
         this.stackId = event.getResourceId();
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = closeConnections;
         this.skipDatabaseNames = skipDatabaseNames;
+        this.databaseMaxDurationInMin = databaseMaxDurationInMin;
     }
 
     public static BackupRestoreContext from(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId,
-                                            boolean closeConnections, List<String> skipDatabaseNames) {
-        return new BackupRestoreContext(flowParameters, event, backupLocation, backupId, closeConnections, skipDatabaseNames);
+                                            boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin) {
+        return new BackupRestoreContext(flowParameters, event, backupLocation, backupId, closeConnections, skipDatabaseNames, databaseMaxDurationInMin);
     }
 
     public Long getStackId() {
@@ -51,5 +54,9 @@ public class BackupRestoreContext extends CommonContext {
 
     public List<String> getSkipDatabaseNames() {
         return skipDatabaseNames;
+    }
+
+    public int getDatabaseMaxDurationInMin() {
+        return databaseMaxDurationInMin;
     }
 }

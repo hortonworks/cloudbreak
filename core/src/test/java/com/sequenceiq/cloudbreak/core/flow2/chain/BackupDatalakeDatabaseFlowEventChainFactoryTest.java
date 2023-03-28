@@ -33,11 +33,13 @@ public class BackupDatalakeDatabaseFlowEventChainFactoryTest {
 
     private static final Boolean CLOSE_CONNECTIONS = false;
 
+    private static final Integer DATABASE_MAX_DURATION_IN_MIN = 0;
+
     private static final List<String> SKIP_DB_NAMES = Collections.singletonList("atlas");
 
     private static final DatabaseBackupTriggerEvent TRIGGER_EVENT = new DatabaseBackupTriggerEvent(
             FlowChainTriggers.DATALAKE_DATABASE_BACKUP_CHAIN_TRIGGER_EVENT, STACK_ID,
-            BACKUP_LOCATION, BACKUP_ID, CLOSE_CONNECTIONS, SKIP_DB_NAMES
+            BACKUP_LOCATION, BACKUP_ID, CLOSE_CONNECTIONS, SKIP_DB_NAMES, DATABASE_MAX_DURATION_IN_MIN
     );
 
     @Mock

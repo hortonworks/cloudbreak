@@ -78,7 +78,7 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
             String rangerAdminGroup = rangerVirtualGroupService.getRangerVirtualGroup(stack);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup,
                     true, Collections.emptyList(), stack);
-            hostOrchestrator.restoreDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel);
+            hostOrchestrator.restoreDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
 
             result = new DatabaseRestoreSuccess(stackId);
         } catch (Exception e) {

@@ -53,10 +53,11 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
         DatalakeDatabaseRestoreWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
+        int duration = request.getDatabaseMaxDurationInMin() == 0 ? durationInMinutes : request.getDatabaseMaxDurationInMin();
         Selectable response;
         try {
-            LOGGER.info("Start polling datalake database restore for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
+            LOGGER.info("Start polling datalake database restore for id: {} with timeout duration: {}", sdxId, duration);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration, TimeUnit.MINUTES);
             sdxBackupRestoreService.waitCloudbreakFlow(sdxId, pollingConfig, "Database restore");
             response = new DatalakeFullRestoreInProgressEvent(sdxId, userId, request.getOperationId());
         } catch (UserBreakException userBreakException) {
