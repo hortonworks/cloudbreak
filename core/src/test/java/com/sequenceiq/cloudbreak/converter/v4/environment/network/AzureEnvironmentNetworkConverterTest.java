@@ -93,7 +93,7 @@ class AzureEnvironmentNetworkConverterTest {
         when(azure.getResourceGroupName()).thenReturn(RESOURCE_GROUP_NAME);
         when(azure.getNoPublicIp()).thenReturn(true);
         when(azure.getDatabasePrivateDnsZoneId()).thenReturn(DATABASE_PRIVATE_DNS_ZONE_ID);
-        when(azure.isNoOutboundLoadBalancer()).thenReturn(true);
+        when(azure.getNoOutboundLoadBalancer()).thenReturn(true);
 
         Map<String, Object> result = converter.getAttributesForLegacyNetwork(environmentNetworkResponse);
 
@@ -122,7 +122,7 @@ class AzureEnvironmentNetworkConverterTest {
         when(azure.getResourceGroupName()).thenReturn(RESOURCE_GROUP_NAME);
         when(azure.getNoPublicIp()).thenReturn(true);
         when(azure.getDatabasePrivateDnsZoneId()).thenReturn(DATABASE_PRIVATE_DNS_ZONE_ID);
-        when(azure.isNoOutboundLoadBalancer()).thenReturn(true);
+        when(azure.getNoOutboundLoadBalancer()).thenReturn(true);
         when(environmentNetworkResponse.getAzure()).thenReturn(azure);
         CloudSubnet cloudSubnet = mock(CloudSubnet.class);
         when(subnetSelector.chooseSubnet(any(), any(), any(), any())).thenReturn(Optional.of(cloudSubnet));

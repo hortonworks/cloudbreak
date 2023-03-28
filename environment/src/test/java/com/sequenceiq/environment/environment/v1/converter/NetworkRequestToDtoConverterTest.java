@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
 
@@ -64,7 +65,7 @@ public class NetworkRequestToDtoConverterTest {
         assertEquals(network.getAzure().getNoPublicIp(), actual.getAzure().isNoPublicIp());
         assertEquals(network.getAzure().getDatabasePrivateDnsZoneId(), actual.getAzure().getDatabasePrivateDnsZoneId());
         assertEquals(network.getAzure().getAksPrivateDnsZoneId(), actual.getAzure().getAksPrivateDnsZoneId());
-        assertEquals(network.getAzure().isNoOutboundLoadBalancer(), actual.getAzure().isNoOutboundLoadBalancer());
+        assertEquals(network.getAzure().getNoOutboundLoadBalancer(), actual.getAzure().isNoOutboundLoadBalancer());
         assertCommonFields(network, actual);
     }
 
@@ -90,6 +91,23 @@ public class NetworkRequestToDtoConverterTest {
         assertEquals(network.getMock().getVpcId(), actual.getMock().getVpcId());
         assertEquals(network.getMock().getInternetGatewayId(), actual.getMock().getInternetGatewayId());
         assertCommonFields(network, actual);
+    }
+
+    @Test
+    void testExistingNetworkShouldNotEnableOutboundLoadBalancerByDefault() {
+        EnvironmentNetworkRequest network = createNetworkRequest();
+        EnvironmentNetworkAzureParams azureParams = new EnvironmentNetworkAzureParams();
+        network.setAzure(azureParams);
+        azureParams.setNetworkId(NETWORK_ID);
+        azureParams.setResourceGroupName("resource-group");
+        azureParams.setNoPublicIp(true);
+        azureParams.setDatabasePrivateDnsZoneId("database-private-dns-zone-id");
+        azureParams.setAksPrivateDnsZoneId("aks-private-dns-zone-id");
+        azureParams.setNoOutboundLoadBalancer(null);
+
+        NetworkDto actual = underTest.convert(network);
+
+        assertTrue(actual.getAzure().isNoOutboundLoadBalancer());
     }
 
     private EnvironmentNetworkRequest createNetworkRequest() {
