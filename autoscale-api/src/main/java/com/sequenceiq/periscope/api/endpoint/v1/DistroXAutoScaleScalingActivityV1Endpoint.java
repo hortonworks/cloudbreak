@@ -36,7 +36,7 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
             produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
-    Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInDurationByClusterName(
+    Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInGivenDurationByClusterName(
             @PathParam("clusterName") @NotNull String clusterName,
             @QueryParam("durationInMinutes") @DefaultValue("60") long durationInMinutes,
             @QueryParam("page") @DefaultValue("0") Integer page,
@@ -53,7 +53,7 @@ public interface DistroXAutoScaleScalingActivityV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES,
             produces = MediaType.APPLICATION_JSON, notes = ApiDescription.DistroXClusterNotes.NOTES)
-    Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInDurationByClusterCrn(
+    Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInGivenDurationByClusterCrn(
             @PathParam("clusterCrn") @NotNull String clusterCrn,
             @QueryParam("durationInMinutes") @DefaultValue("60") long durationInMinutes,
             @QueryParam("page") @DefaultValue("0") Integer page,

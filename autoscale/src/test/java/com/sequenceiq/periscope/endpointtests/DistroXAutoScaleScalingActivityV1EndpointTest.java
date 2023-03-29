@@ -158,15 +158,15 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
     }
 
     @Test
-    public void testGetScalingActivitiesInDurationByClusterNameWithNameAsNull() {
+    public void testGetScalingActivitiesInGivenDurationByClusterNameWithNameAsNull() {
         assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesInDurationByClusterName(TEST_CLUSTER_NAME_NULL, 60, 0, 10).getContent());
+                .getScalingActivitiesInGivenDurationByClusterName(TEST_CLUSTER_NAME_NULL, 60, 0, 10).getContent());
     }
 
     @Test
-    public void testGetScalingActivitiesInDurationByClusterCrnWithCrnAsNull() {
+    public void testGetScalingActivitiesInGivenDurationByClusterCrnWithCrnAsNull() {
         assertThrows(IllegalStateException.class, () -> distroXAutoScaleScalingActivityV1Endpoint
-                .getScalingActivitiesInDurationByClusterCrn(TEST_CLUSTER_CRN_NULL, 60, 0, 10).getContent());
+                .getScalingActivitiesInGivenDurationByClusterCrn(TEST_CLUSTER_CRN_NULL, 60, 0, 10).getContent());
     }
 
     @Test
