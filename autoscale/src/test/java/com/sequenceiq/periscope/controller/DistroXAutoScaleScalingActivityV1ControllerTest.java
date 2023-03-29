@@ -93,7 +93,7 @@ public class DistroXAutoScaleScalingActivityV1ControllerTest {
     }
 
     @Test
-    public void testGetScalingActivitiesInDurationByClusterName() {
+    public void testGetScalingActivitiesInGivenDurationByClusterName() {
         Cluster testCluster = getACluster();
         ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.UPSCALE_TRIGGER_FAILED,
                 Instant.now().minus(50, MINUTES).toEpochMilli(), TEST_OPERATION_ID_3);
@@ -104,13 +104,13 @@ public class DistroXAutoScaleScalingActivityV1ControllerTest {
         doReturn(convert(scalingActivity3)).when(distroXAutoscaleScalingActivityResponseConverter).convert(scalingActivity3);
 
         List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Controller
-                .getScalingActivitiesInDurationByClusterName(TEST_CLUSTER_NAME, 60, 5, 1).getContent()
+                .getScalingActivitiesInGivenDurationByClusterName(TEST_CLUSTER_NAME, 60, 5, 1).getContent()
                 .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
         assertEquals(distroXAutoscaleScalingActivityResponse, List.of(TEST_OPERATION_ID_3));
     }
 
     @Test
-    public void testGetScalingActivitiesInDurationByClusterCrn() {
+    public void testGetScalingActivitiesInGivenDurationByClusterCrn() {
         Cluster testCluster = getACluster();
         ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
                 Instant.now().minus(30, MINUTES).toEpochMilli(), TEST_OPERATION_ID);
@@ -124,7 +124,7 @@ public class DistroXAutoScaleScalingActivityV1ControllerTest {
         doReturn(convert(scalingActivity2)).when(distroXAutoscaleScalingActivityResponseConverter).convert(scalingActivity2);
 
         List<String> distroXAutoscaleScalingActivityResponse = distroXAutoScaleScalingActivityV1Controller
-                .getScalingActivitiesInDurationByClusterCrn(TEST_CLUSTER_CRN, 60, 1, 2)
+                .getScalingActivitiesInGivenDurationByClusterCrn(TEST_CLUSTER_CRN, 60, 1, 2)
                 .stream().map(DistroXAutoscaleScalingActivityResponse::getOperationId).collect(Collectors.toList());
         assertEquals(distroXAutoscaleScalingActivityResponse, List.of(TEST_OPERATION_ID, TEST_OPERATION_ID_2));
     }

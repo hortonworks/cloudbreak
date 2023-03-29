@@ -52,7 +52,7 @@ public class DistroXAutoScaleScalingActivityV1Controller implements DistroXAutoS
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInDurationByClusterName(@ResourceName String clusterName,
+    public Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInGivenDurationByClusterName(@ResourceName String clusterName,
             long durationInMinutes, Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startTime").descending());
         Page<ScalingActivity> scalingActivityPage = scalingActivityService
@@ -62,7 +62,7 @@ public class DistroXAutoScaleScalingActivityV1Controller implements DistroXAutoS
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInDurationByClusterCrn(@ResourceCrn String clusterCrn,
+    public Page<DistroXAutoscaleScalingActivityResponse> getScalingActivitiesInGivenDurationByClusterCrn(@ResourceCrn String clusterCrn,
             long durationInMinutes, Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startTime").descending());
         Page<ScalingActivity> scalingActivityPage = scalingActivityService
