@@ -168,7 +168,7 @@ public class ImageServiceTest {
                 .thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
-        when(imageConverter.convert(image)).thenReturn(new ImageEntity());
+        when(imageConverter.convert(any(), any())).thenReturn(new ImageEntity());
 
         ImageEntity imageEntity = underTest.create(stack, imageRequest);
 
@@ -190,7 +190,7 @@ public class ImageServiceTest {
         currentImage.setId(2L);
         when(imageRepository.findById(2L)).thenReturn(Optional.of(currentImage));
 
-        underTest.revertImageToRevision(2L, 3L);
+        underTest.revertImageToRevision("accountId", 2L, 3L);
 
         ArgumentCaptor<ImageEntity> captor = ArgumentCaptor.forClass(ImageEntity.class);
         verify(imageRepository).save(captor.capture());

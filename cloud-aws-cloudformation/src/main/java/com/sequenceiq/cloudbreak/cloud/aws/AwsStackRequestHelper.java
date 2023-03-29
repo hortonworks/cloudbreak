@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import software.amazon.awssdk.services.cloudformation.model.CreateStackRequest;
 import software.amazon.awssdk.services.cloudformation.model.DeleteStackRequest;
@@ -130,10 +129,10 @@ public class AwsStackRequestHelper {
         }
 
         Collection<Parameter> parameters = new ArrayList<>();
-        if (stack.getImage().getUserDataByType(InstanceGroupType.CORE) != null) {
-            addParameterChunks(parameters, "CBUserData", stack.getImage().getUserDataByType(InstanceGroupType.CORE), CHUNK_COUNT);
+        if (stack.getCoreUserData() != null) {
+            addParameterChunks(parameters, "CBUserData", stack.getCoreUserData(), CHUNK_COUNT);
         }
-        addParameterChunks(parameters, "CBGateWayUserData", stack.getImage().getUserDataByType(InstanceGroupType.GATEWAY), CHUNK_COUNT);
+        addParameterChunks(parameters, "CBGateWayUserData", stack.getGatewayUserData(), CHUNK_COUNT);
         parameters.addAll(asList(
                 Parameter.builder().parameterKey("StackName").parameterValue(stackName).build(),
                 Parameter.builder().parameterKey("KeyName").parameterValue(keyPairName).build(),

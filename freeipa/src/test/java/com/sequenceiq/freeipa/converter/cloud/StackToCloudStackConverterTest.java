@@ -161,6 +161,8 @@ public class StackToCloudStackConverterTest {
                 null,
                 null,
                 null,
+                null,
+                null,
                 null
         );
 
