@@ -526,9 +526,6 @@ public class AwsPlatformResources implements PlatformResources {
         for (SecurityGroup securityGroup : fetchSecurityGroups(ec2Client, describeSecurityGroupsRequestBuilder.build())) {
             Map<String, Object> properties = new HashMap<>();
             properties.put("vpcId", securityGroup.vpcId());
-            properties.put("description", securityGroup.description());
-            properties.put("ipPermissions", securityGroup.ipPermissions());
-            properties.put("ipPermissionsEgress", securityGroup.ipPermissionsEgress());
             cloudSecurityGroups.add(new CloudSecurityGroup(securityGroup.groupName(), securityGroup.groupId(), properties));
         }
         result.put(region.value(), cloudSecurityGroups);
