@@ -204,6 +204,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         List<SaltConnector> saltConnectors = saltService.createSaltConnector(allGatewayConfigs);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            uploadSaltMasterConfig(sc, params, gatewayTargets, exitModel);
             uploadSaltConfig(sc, gatewayTargets, exitModel);
             Set<String> allTargets = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             uploadSignKey(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
@@ -217,6 +218,12 @@ public class SaltOrchestrator implements HostOrchestrator {
             saltConnectors.forEach(SaltConnector::close);
         }
         LOGGER.debug("SaltBootstrap finished");
+    }
+
+    private void uploadSaltMasterConfig(SaltConnector sc, BootstrapParams params, Set<String> gatewayTargets, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        String masterConfig = "worker_threads: " + params.getMasterWorkerThreads();
+        uploadFileToTargets(sc, gatewayTargets, exitModel, "/etc/salt/master.d", "worker_threads.conf", masterConfig.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
@@ -415,6 +422,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             if (!gatewayTargets.isEmpty()) {
                 LOGGER.info("Gateway targets are not empty, upload salt config: {}", gatewayTargets);
+                uploadSaltMasterConfig(sc, params, gatewayTargets, exitModel);
                 uploadSaltConfig(sc, gatewayTargets, stateConfigZip, exitModel);
                 params.setRestartNeeded(true);
             }

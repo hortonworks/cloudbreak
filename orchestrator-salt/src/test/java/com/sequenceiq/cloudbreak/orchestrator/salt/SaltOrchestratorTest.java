@@ -189,14 +189,14 @@ class SaltOrchestratorTest {
 
     @Test
     void bootstrapTest() throws Exception {
-        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[]{});
+        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[] {});
 
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
 
         saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel);
 
-        verify(saltRunner, times(4)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(5)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         // salt.zip, master_sign.pem, master_sign.pub
         verify(saltBootstrapFactory, times(1)).of(eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets),
                 eq(bootstrapParams));
@@ -266,12 +266,12 @@ class SaltOrchestratorTest {
     @Test
     void bootstrapNewNodesTest() throws Exception {
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
-        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[]{});
+        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[] {});
 
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verify(saltRunner, times(1)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
-        verify(saltRunner, times(3)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(4)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verify(saltBootstrapFactory, times(1))
                 .of(eq(saltConnector), eq(saltConnectors), eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }

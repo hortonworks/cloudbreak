@@ -24,19 +24,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.PricingCache;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
@@ -50,6 +54,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -63,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -70,6 +76,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -141,6 +148,15 @@ public class ClusterBootstrapper {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private List<PricingCache> pricingCaches;
+
+    @Inject
+    private CredentialClientService credentialClientService;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
 
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
@@ -288,7 +304,7 @@ public class ClusterBootstrapper {
         orchestratorService.save(orchestrator);
     }
 
-    private BootstrapParams createBootstrapParams(StackDtoDelegate stack) {
+    private BootstrapParams createBootstrapParams(StackDto stack) {
         LOGGER.debug("Create bootstrap params");
         BootstrapParams params = new BootstrapParams();
         params.setCloud(stack.getCloudPlatform());
@@ -302,8 +318,34 @@ public class ClusterBootstrapper {
         boolean saltBootstrapRestartNeededSupported = isSaltBootstrapRestartNeededSupported(stack);
         params.setSaltBootstrapFpSupported(saltBootstrapFpSupported);
         params.setRestartNeededFlagSupported(saltBootstrapRestartNeededSupported);
+        getMasterInstanceType(stack).ifPresent(instanceType -> params.setMasterWorkerThreads(calcMasterWorkerThreads(stack, instanceType)));
         LOGGER.debug("Created bootstrap params: {}", params);
         return params;
+    }
+
+    private Optional<String> getMasterInstanceType(StackDto stackDto) {
+        return stackDto.getInstanceGroupDtos()
+                .stream()
+                .filter(instanceGroup -> InstanceGroupType.isGateway(instanceGroup.getInstanceGroup().getInstanceGroupType()))
+                .map(instanceGroup -> instanceGroup.getInstanceGroup().getTemplate().getInstanceType())
+                .findFirst();
+    }
+
+    private int calcMasterWorkerThreads(StackDtoDelegate stack, String masterInstanceType) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
+        Optional<PricingCache> pricingCache = pricingCaches.stream().filter(p -> cloudPlatform.equals(p.getCloudPlatform())).findFirst();
+        int result = BootstrapParams.DEFAULT_WORKER_THREADS;
+        if (pricingCache.isPresent()) {
+            Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
+            ExtendedCloudCredential extendedCloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential,
+                    Optional.ofNullable(stack.getCreator()));
+            Optional<Integer> cpuCountForInstanceType =
+                    pricingCache.get().getCpuCountForInstanceType(stack.getRegion(), masterInstanceType, extendedCloudCredential);
+            if (cpuCountForInstanceType.isPresent()) {
+                result = cpuCountForInstanceType.get() - BootstrapParams.WORKER_THREAD_REDUCTION_COUNT;
+            }
+        }
+        return Math.max(BootstrapParams.DEFAULT_WORKER_THREADS, result);
     }
 
     private boolean isSaltBootstrapRestartNeededSupported(StackDtoDelegate stack) {
@@ -413,7 +455,7 @@ public class ClusterBootstrapper {
         List<GatewayConfig> saltMastersToCorrect = allGatewayConfigs.stream()
                 .filter(gc -> nodes.stream().noneMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
                 .collect(Collectors.toList());
-        for  (GatewayConfig masterToCorrect: saltMastersToCorrect) {
+        for (GatewayConfig masterToCorrect : saltMastersToCorrect) {
             LOGGER.info("Remove dead salt minions on master: {}", masterToCorrect);
             hostOrchestrator.removeDeadSaltMinions(masterToCorrect);
         }
@@ -445,14 +487,7 @@ public class ClusterBootstrapper {
             validatePollingResultForCancellation(bootstrapApiPolling.getPollingResult(), "Polling of bootstrap API was cancelled.");
         }
 
-        byte[] stateZip = null;
-        ClusterComponent stateComponent = clusterComponentProvider.getComponent(cluster.getId(), ComponentType.SALT_STATE);
-        if (stateComponent != null) {
-            String content = (String) stateComponent.getAttributes().getMap().getOrDefault(ComponentType.SALT_STATE.name(), "");
-            if (!content.isEmpty()) {
-                stateZip = Base64.decodeBase64(content);
-            }
-        }
+        byte[] stateZip = getSaltStateZip(cluster);
         BootstrapParams params = createBootstrapParams(stack);
 
         hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, stateZip, params, clusterDeletionBasedModel(stack.getId(), null));
@@ -501,5 +536,17 @@ public class ClusterBootstrapper {
         if (EXIT.equals(pollingResult)) {
             throw new CancellationException(cancelledMessage);
         }
+    }
+
+    private byte[] getSaltStateZip(ClusterView cluster) {
+        byte[] stateZip = null;
+        ClusterComponent stateComponent = clusterComponentProvider.getComponent(cluster.getId(), ComponentType.SALT_STATE);
+        if (stateComponent != null) {
+            String content = (String) stateComponent.getAttributes().getMap().getOrDefault(ComponentType.SALT_STATE.name(), "");
+            if (!content.isEmpty()) {
+                stateZip = Base64.decodeBase64(content);
+            }
+        }
+        return stateZip;
     }
 }
