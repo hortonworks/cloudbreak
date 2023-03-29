@@ -79,6 +79,16 @@ class ServiceStatusCheckerLogLocationDecoratorTest {
     }
 
     @Test
+    void testDecorateWithServiceFailureNullPointer() throws IOException {
+        lenient().when(attributes.get(Telemetry.class)).thenReturn(null);
+        when(extendedHostStatuses.hasHostUnhealthyServices(any())).thenReturn(true);
+        Map<InstanceMetadataView, Optional<String>> result = underTest.decorate(getInstanceMetadataWithReason(), extendedHostStatuses, stackDto);
+        assertEquals("DefaultMessage.",
+                result.entrySet().stream().findFirst().flatMap(Map.Entry::getValue).orElse(""));
+        verify(componentConfigProviderService, times(1)).getComponent(anyLong(), any(), any());
+    }
+
+    @Test
     void testDecorateWithServiceFailureButInstanceAlreadyInServiceFailure() {
         when(extendedHostStatuses.hasHostUnhealthyServices(any())).thenReturn(true);
         when(instanceMetadataView.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_UNHEALTHY);

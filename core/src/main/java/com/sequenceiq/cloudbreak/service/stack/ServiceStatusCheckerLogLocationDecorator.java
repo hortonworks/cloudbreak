@@ -15,11 +15,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 import io.micrometer.core.instrument.util.StringUtils;
@@ -65,11 +67,27 @@ public class ServiceStatusCheckerLogLocationDecorator {
             LOGGER.warn(String.format("Telemetry component is null for stack: %d", stackId));
             return result;
         }
+        Json attributes = component.getAttributes();
+        if (attributes == null) {
+            LOGGER.warn(String.format("Attributes in the telemetry component is null for stack: %d", stackId));
+            return result;
+        }
+        Telemetry telemetry = null;
         try {
-            result = component.getAttributes().get(Telemetry.class).getLogging().getStorageLocation();
+            telemetry = attributes.get(Telemetry.class);
         } catch (IOException e) {
             LOGGER.warn(String.format("Cannot get Telemetry from Components for stack: %d", stackId), e);
         }
-        return result;
+        if (telemetry == null) {
+            LOGGER.warn(String.format("Telemetry in the telemetry component attributes is null for stack: %d", stackId));
+            return result;
+        }
+        Logging logging = telemetry.getLogging();
+        if (logging == null) {
+            LOGGER.warn(String.format("Logging configuration in the telemetry component is null for stack: %d", stackId));
+            return result;
+        }
+
+        return logging.getStorageLocation();
     }
 }
