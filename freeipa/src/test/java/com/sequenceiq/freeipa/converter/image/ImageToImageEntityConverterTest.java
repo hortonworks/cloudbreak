@@ -17,7 +17,7 @@ class ImageToImageEntityConverterTest {
     void testConversion() {
         Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of("freeipa-ldap-agent", "1.2.3"), false);
 
-        ImageEntity result = underTest.convert(source);
+        ImageEntity result = underTest.convert("accountId", source);
 
         assertEquals(source.getUuid(), result.getImageId());
         assertEquals(source.getOs(), result.getOs());

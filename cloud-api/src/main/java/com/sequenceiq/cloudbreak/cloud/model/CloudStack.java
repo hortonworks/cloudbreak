@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 /**
  * Class that describes complete structure of infrastructure that needs to be started on the Cloud Provider
@@ -40,16 +41,22 @@ public class CloudStack {
 
     private final List<CloudLoadBalancer> loadBalancers;
 
+    private final String gatewayUserData;
+
+    private final String coreUserData;
+
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
-            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem) {
-        this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem, Collections.emptyList());
+            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
+            String gatewayUserData, String coreUserData) {
+        this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
+                Collections.emptyList(), gatewayUserData, coreUserData);
     }
 
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags,
             String template, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
-            List<CloudLoadBalancer> loadBalancers) {
-        this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem, loadBalancers,
-                null);
+            List<CloudLoadBalancer> loadBalancers, String gatewayUserData, String coreUserData) {
+        this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
+                loadBalancers, null, gatewayUserData, coreUserData);
     }
 
     @JsonCreator
@@ -65,8 +72,9 @@ public class CloudStack {
             @JsonProperty("publicKey") String publicKey,
             @JsonProperty("fileSystem") SpiFileSystem fileSystem,
             @JsonProperty("loadBalancers") List<CloudLoadBalancer> loadBalancers,
-            @JsonProperty("additionalFileSystem") SpiFileSystem additionalFileSystem) {
-
+            @JsonProperty("additionalFileSystem") SpiFileSystem additionalFileSystem,
+            @JsonProperty("gatewayUserData") String gatewayUserData,
+            @JsonProperty("coreUserData") String coreUserData) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
@@ -79,11 +87,13 @@ public class CloudStack {
         this.fileSystem = Optional.ofNullable(fileSystem);
         this.loadBalancers = loadBalancers != null ? loadBalancers : Collections.emptyList();
         this.additionalFileSystem = Optional.ofNullable(additionalFileSystem);
+        this.gatewayUserData = gatewayUserData;
+        this.coreUserData = coreUserData;
     }
 
     public CloudStack replaceImage(Image newImage) {
         return new CloudStack(groups, network, newImage, parameters, tags, template, instanceAuthentication, loginUserName, publicKey,
-                fileSystem.orElse(null), loadBalancers, additionalFileSystem.orElse(null));
+                fileSystem.orElse(null), loadBalancers, additionalFileSystem.orElse(null), gatewayUserData, coreUserData);
     }
 
     public List<Group> getGroups() {
@@ -136,6 +146,22 @@ public class CloudStack {
 
     public List<CloudLoadBalancer> getLoadBalancers() {
         return loadBalancers;
+    }
+
+    public String getGatewayUserData() {
+        return gatewayUserData;
+    }
+
+    public String getCoreUserData() {
+        return coreUserData;
+    }
+
+    public String getUserDataByType(InstanceGroupType key) {
+        if (key.equals(InstanceGroupType.CORE)) {
+            return coreUserData;
+        } else {
+            return gatewayUserData;
+        }
     }
 
     @Override
