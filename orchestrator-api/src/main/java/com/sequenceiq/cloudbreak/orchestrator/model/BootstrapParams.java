@@ -1,6 +1,11 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
 public class BootstrapParams {
+
+    public static final int DEFAULT_WORKER_THREADS = 5;
+
+    public static final int WORKER_THREAD_REDUCTION_COUNT = 4;
+
     private String cloud;
 
     private String os;
@@ -10,6 +15,8 @@ public class BootstrapParams {
     private boolean restartNeededFlagSupported;
 
     private boolean restartNeeded;
+
+    private int masterWorkerThreads = DEFAULT_WORKER_THREADS;
 
     public String getCloud() {
         return cloud;
@@ -51,12 +58,23 @@ public class BootstrapParams {
         this.restartNeeded = restartNeeded;
     }
 
+    public int getMasterWorkerThreads() {
+        return masterWorkerThreads;
+    }
+
+    public void setMasterWorkerThreads(int masterWorkerThreads) {
+        this.masterWorkerThreads = masterWorkerThreads;
+    }
+
     @Override
     public String toString() {
         return "BootstrapParams{" +
                 "cloud='" + cloud + '\'' +
                 ", os='" + os + '\'' +
                 ", saltBootstrapFpSupported=" + saltBootstrapFpSupported +
+                ", restartNeededFlagSupported=" + restartNeededFlagSupported +
+                ", restartNeeded=" + restartNeeded +
+                ", masterWorkerThreads=" + masterWorkerThreads +
                 '}';
     }
 }
