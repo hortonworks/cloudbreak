@@ -396,7 +396,6 @@ public class KnoxGatewayConfigProviderTest {
         );
     }
 
-
     @Test
     public void roleConfigsWithoutGateway() {
         GeneralClusterConfigs gcc = new GeneralClusterConfigs();
