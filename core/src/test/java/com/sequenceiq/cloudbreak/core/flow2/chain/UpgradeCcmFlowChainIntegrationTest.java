@@ -272,6 +272,9 @@ class UpgradeCcmFlowChainIntegrationTest {
         mockStackService();
         Image image = new Image("alma", USER_DATA_MAP, "", "", "", "", "", null);
         when(imageService.getImage(STACK_ID)).thenReturn(image);
+        when(userDataService.getUserData(anyLong())).thenReturn(Map.of(
+                InstanceGroupType.CORE, "core",
+                InstanceGroupType.GATEWAY, "gateway"));
 
         CloudConnector connector = mock(CloudConnector.class);
         AuthenticatedContext context = mock(AuthenticatedContext.class);
@@ -281,6 +284,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         when(connector.resources()).thenReturn(resourcesApi);
         when(authApi.authenticate(any(), any())).thenReturn(context);
         when(clusterApiConnectors.getConnector(any(), any())).thenReturn(clusterApi);
+        when(userDataService.getUserData(anyLong())).thenReturn(USER_DATA_MAP);
     }
 
     @Test

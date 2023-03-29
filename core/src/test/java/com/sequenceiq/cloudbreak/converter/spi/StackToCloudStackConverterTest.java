@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.marketplace.AzureMarketplaceTermsClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.TargetGroupPortProvider;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
@@ -200,6 +201,9 @@ public class StackToCloudStackConverterTest {
     @Mock
     private AzureMarketplaceTermsClientService azureMarketplaceTermsClientService;
 
+    @Mock
+    private UserDataService userDataService;
+
     @BeforeEach
     public void setUp() {
         when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
@@ -212,6 +216,7 @@ public class StackToCloudStackConverterTest {
         when(cluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getComponentsByHostGroup()).thenReturn(mock(Map.class));
+        when(userDataService.getUserData(anyLong())).thenReturn(mock(Map.class));
         when(cloudFileSystemViewProvider.getCloudFileSystemView(any(), any(), any())).thenReturn(Optional.empty());
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform(CloudPlatform.AWS.name());

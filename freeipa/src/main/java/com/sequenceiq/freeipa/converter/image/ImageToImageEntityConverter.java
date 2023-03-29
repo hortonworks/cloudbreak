@@ -8,8 +8,9 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 @Component
 public class ImageToImageEntityConverter {
 
-    public ImageEntity convert(Image source) {
+    public ImageEntity convert(String accountId, Image source) {
         ImageEntity imageEntity = new ImageEntity();
+        imageEntity.setAccountId(accountId);
         imageEntity.setImageId(source.getUuid());
         imageEntity.setOs(source.getOs());
         imageEntity.setOsType(source.getOsType());

@@ -17,8 +17,8 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdate
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -46,6 +47,9 @@ public class UserDataUpdateActions {
 
     @Inject
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
+
+    @Inject
+    private UserDataService userDataService;
 
     @Bean(name = "UPDATE_USERDATA_STATE")
     public AbstractUserDataUpdateAction<?> updateUserData() {
@@ -71,8 +75,8 @@ public class UserDataUpdateActions {
                 StackDtoDelegate stack = context.getStack();
                 Map<InstanceGroupType, String> userData;
                 try {
-                    userData = imageService.getImage(stack.getId()).getUserdata();
-                } catch (CloudbreakImageNotFoundException e) {
+                    userData = userDataService.getUserData(stack.getId());
+                } catch (CloudbreakServiceException e) {
                     return new UserDataUpdateFailed(stack.getId(), e);
                 }
                 List<CloudResource> cloudResources = getCloudResources(stack.getId());

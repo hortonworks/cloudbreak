@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DE
 import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
+import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -95,6 +97,9 @@ public class ImageService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private UserDataService userDataService;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProviderService.getImage(stackId);
@@ -342,7 +347,7 @@ public class ImageService {
 
     private void addImage(Stack stack, Map<InstanceGroupType, String> userData, StatedImage statedImage, String imageName,
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage, Set<Component> components) {
-        Image image = new Image(imageName, userData, catalogBasedImage.getOs(), catalogBasedImage.getOsType(),
+        Image image = new Image(imageName, new HashMap<>(), catalogBasedImage.getOs(), catalogBasedImage.getOsType(),
                 statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), catalogBasedImage.getUuid(),
                 catalogBasedImage.getPackageVersions());
         components.add(new Component(IMAGE, IMAGE.name(), new Json(image), stack));
@@ -411,13 +416,6 @@ public class ImageService {
                 withName(stackInfo.get(StackRepoDetails.REPO_ID_TAG).split("-")[0]).
                 withParcel(stackInfo.get(osType));
         return cmProduct;
-    }
-
-    public void decorateImageWithUserDataForStack(Stack stack, Map<InstanceGroupType, String> userData) throws CloudbreakImageNotFoundException {
-        Image image = componentConfigProviderService.getImage(stack.getId());
-        image.setUserdata(userData);
-        Component imageComponent = new Component(IMAGE, IMAGE.name(), new Json(image), stack);
-        componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
     }
 
 }

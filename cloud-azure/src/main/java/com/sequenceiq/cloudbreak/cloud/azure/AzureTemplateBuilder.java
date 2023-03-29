@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -112,8 +111,8 @@ public class AzureTemplateBuilder {
             model.put("igs", armStack.getInstanceGroups());
             model.put("securities", armSecurityView.getPorts());
             model.put("securityGroups", armSecurityView.getSecurityGroupIds());
-            model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserDataByType(InstanceGroupType.CORE)));
-            model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getImage().getUserDataByType(InstanceGroupType.GATEWAY)));
+            model.put("corecustomData", base64EncodedUserData(cloudStack.getCoreUserData()));
+            model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getGatewayUserData()));
             model.put("disablePasswordAuthentication", !azureInstanceCredentialView.passwordAuthenticationRequired());
             model.put("existingVPC", azureUtils.isExistingNetwork(network));
             model.put("resourceGroupName", azureUtils.getCustomResourceGroupName(network));
