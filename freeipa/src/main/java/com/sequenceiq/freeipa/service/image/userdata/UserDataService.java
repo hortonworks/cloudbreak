@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigUserDataReplacer;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.dto.Credential;
@@ -62,6 +63,9 @@ public class UserDataService {
     private ImageService imageService;
 
     @Inject
+    private SecretService secretService;
+
+    @Inject
     private CcmUserDataService ccmUserDataService;
 
     @Inject
@@ -85,22 +89,33 @@ public class UserDataService {
     public void updateJumpgateFlagOnly(Long stackId) {
         LOGGER.debug("Updating Jumpgate flag in user data for stack {}", stackId);
         ImageEntity image = imageService.getByStackId(stackId);
-        String userData = new UserDataReplacer(image.getUserdata())
+        String userData = new UserDataReplacer(image.getUserdataWrapper())
                 .replace("IS_CCM_ENABLED", false)
                 .replace("IS_CCM_V2_ENABLED", true)
                 .replace("IS_CCM_V2_JUMPGATE_ENABLED", true)
                 .getUserData();
-        image.setUserdata(userData);
-        imageService.save(image);
+        updateUserData(stackId, userData);
     }
 
     public void updateProxyConfig(Long stackId) {
         LOGGER.debug("Updating proxy config in user data for stack {}", stackId);
         Stack stack = getStack(stackId);
         ImageEntity image = imageService.getByStackId(stackId);
-        String userData = proxyConfigUserDataReplacer.replaceProxyConfigInUserDataByEnvCrn(image.getUserdata(), stack.getEnvironmentCrn());
-        image.setUserdata(userData);
-        imageService.save(image);
+        String userData = proxyConfigUserDataReplacer.replaceProxyConfigInUserDataByEnvCrn(image.getUserdataWrapper(), stack.getEnvironmentCrn());
+        updateUserData(stackId, userData);
+    }
+
+    public ImageEntity updateUserData(Long stackId, String userdata) {
+        ImageEntity image = imageService.getByStackId(stackId);
+
+        String gatewayUserdataSecret = image.getGatewayUserdataSecret().getSecret();
+
+        image.setUserdata(null);
+        image.setGatewayUserdata(userdata);
+
+        secretService.delete(gatewayUserdataSecret);
+
+        return imageService.save(image);
     }
 
     private void createUserData(Stack stack, Supplier<CcmConnectivityParameters> ccmParametersSupplier) {
@@ -121,7 +136,7 @@ public class UserDataService {
             Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             String userData = userDataBuilder.buildUserData(stack.getAccountId(), environment, Platform.platform(stack.getCloudPlatform()),
                     cbSshKeyDer, sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
-            imageService.decorateImageWithUserDataForStack(stack, userData);
+            updateUserData(stack.getId(), userData);
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parameters", e);
             throw new GetCloudParameterException("Failed to get Platform parameters", e);

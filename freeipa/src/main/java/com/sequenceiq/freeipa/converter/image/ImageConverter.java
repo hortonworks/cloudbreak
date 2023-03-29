@@ -16,7 +16,10 @@ public class ImageConverter implements Converter<ImageEntity, Image> {
     @Override
     public Image convert(ImageEntity source) {
         return new Image(source.getImageName(),
-                Map.of(InstanceGroupType.GATEWAY, Optional.ofNullable(source.getUserdata()).orElse("")),
+                Map.of(
+                        InstanceGroupType.GATEWAY, Optional.ofNullable(source.getUserdataWrapper()).orElse(""),
+                        InstanceGroupType.CORE, Optional.ofNullable(source.getUserdataWrapper()).orElse("")
+                ),
                 source.getOs(),
                 source.getOsType(),
                 source.getImageCatalogUrl(),
