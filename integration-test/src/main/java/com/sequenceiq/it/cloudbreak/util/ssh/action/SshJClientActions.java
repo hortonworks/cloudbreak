@@ -311,43 +311,53 @@ public class SshJClientActions extends SshJClient {
         return quantity.get();
     }
 
+    private  <T extends CloudbreakTestDto> T eventCountsValidation(T testDto, Map<String, Pair<Integer, String>> statusReportByIp, String eventName) {
+        for (Entry<String, Pair<Integer, String>> statusReport : statusReportByIp.entrySet()) {
+            List<Integer> eventCounts = new Json(statusReport.getValue().getValue()).getMap().entrySet().stream()
+                    .filter(status -> String.valueOf(status.getKey()).contains(eventName))
+                    .map(Entry::getValue).collect(Collectors.toList())
+                    .stream()
+                    .map(countObject -> (Integer) countObject)
+                    .collect(Collectors.toList());
+            Log.log(LOGGER, format(" Found '%s' %s events at '%s' instance. ", eventCounts, eventName, statusReport.getKey()));
+            if (CollectionUtils.isEmpty(eventCounts) || eventCounts.contains(0)) {
+                Log.error(LOGGER, format(" %s does NOT generated on '%s' instance! ", eventName, statusReport.getKey()));
+                throw new TestFailException(format("%s does NOT generated on '%s' instance!", eventName, statusReport.getKey()));
+            }
+        }
+        return testDto;
+    }
+
+    private  <T extends CloudbreakTestDto> T eventStatusesNotOkValidation(T testDto, Map<String, Pair<Integer, String>> statusReportByIp,
+            String acceptableNokEventName) {
+        for (Entry<String, Pair<Integer, String>> statusReport : statusReportByIp.entrySet()) {
+            List<String> statusesNotOk = new Json(statusReport.getValue().getValue()).getMap().entrySet().stream()
+                    .filter(status -> String.valueOf(status.getValue()).contains("NOK"))
+                    .map(Entry::getKey).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(statusesNotOk)) {
+                statusesNotOk.forEach(event -> {
+                    if (StringUtils.isNotBlank(acceptableNokEventName) && StringUtils.containsIgnoreCase(event, acceptableNokEventName)) {
+                        Log.log(LOGGER, format(" Found '%s' status is not OK at '%s' instance. However this is acceptable!", acceptableNokEventName,
+                                statusReport.getKey()));
+                    } else {
+                        Log.error(LOGGER, format(" There is 'Not OK' status %s is present on '%s' instance! ", event,
+                                statusReport.getKey()));
+                        throw new TestFailException(format("There is 'Not OK' status %s is present on '%s' instance!", event,
+                                statusReport.getKey()));
+                    }
+                });
+            }
+        }
+        return testDto;
+    }
+
     public DistroXTestDto checkMeteringStatus(DistroXTestDto testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         String meteringStatusCommand = "sudo cdp-doctor metering status --format json";
         Map<String, Pair<Integer, String>> meteringStatusReportByIp = getInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, meteringStatusCommand)));
 
-        for (Entry<String, Pair<Integer, String>> meteringStatusReport : meteringStatusReportByIp.entrySet()) {
-            List<Integer> heartbeatEventCounts = new Json(meteringStatusReport.getValue().getValue()).getMap().entrySet().stream()
-                    .filter(status -> String.valueOf(status.getKey()).contains("heartbeatEventCount"))
-                    .map(Entry::getValue).collect(Collectors.toList())
-                        .stream()
-                        .map(countObject -> (Integer) countObject)
-                        .collect(Collectors.toList());
-            Log.log(LOGGER, format(" Found '%s' Metering Heartbeat Events at '%s' instance. ", heartbeatEventCounts, meteringStatusReport.getKey()));
-            if (CollectionUtils.isEmpty(heartbeatEventCounts) || heartbeatEventCounts.contains(0)) {
-                Log.error(LOGGER, format(" Metering Heartbeat Events does NOT generated on '%s' instance! ", meteringStatusReport.getKey()));
-                throw new TestFailException(format("Metering Heartbeat Events does NOT generated on '%s' instance!", meteringStatusReport.getKey()));
-            }
-        }
-
-        for (Entry<String, Pair<Integer, String>> meteringStatusReport : meteringStatusReportByIp.entrySet()) {
-            List<String> heartbeatStatusesNotOk = new Json(meteringStatusReport.getValue().getValue()).getMap().entrySet().stream()
-                    .filter(status -> String.valueOf(status.getValue()).contains("NOK"))
-                    .map(Entry::getKey).collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(heartbeatStatusesNotOk)) {
-                heartbeatStatusesNotOk.forEach(event -> {
-                    if (StringUtils.containsIgnoreCase(event, "databusReachable")) {
-                        Log.log(LOGGER, format(" Found 'databusReachable' status is not OK at '%s' instance. However this is acceptable!",
-                                meteringStatusReport.getKey()));
-                    } else {
-                        Log.error(LOGGER, format(" There is 'Not OK' Metering Heartbeat status %s is present on '%s' instance! ", event,
-                                meteringStatusReport.getKey()));
-                        throw new TestFailException(format("There is 'Not OK' Metering Heartbeat status %s is present on '%s' instance!", event,
-                                meteringStatusReport.getKey()));
-                    }
-                });
-            }
-        }
+        eventCountsValidation(testDto, meteringStatusReportByIp, "heartbeatEventCount");
+        eventStatusesNotOkValidation(testDto, meteringStatusReportByIp, "databusReachable");
         return testDto;
     }
 
@@ -510,6 +520,88 @@ public class SshJClientActions extends SshJClient {
             }
         });
 
+        return testDto;
+    }
+
+    public FreeIpaTestDto checkNetworkStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        return checkCdpNetworkStatus(testDto, instanceIps);
+    }
+
+    public <T extends CloudbreakTestDto> T checkNetworkStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        List<String> instanceIps = getInstanceGroupIps(instanceGroups, hostGroupNames, false);
+        return checkCdpNetworkStatus(testDto, instanceIps);
+    }
+
+    private <T extends CloudbreakTestDto> T checkCdpNetworkStatus(T testDto, List<String> instanceIps) {
+        String networkStatusCommand = "sudo cdp-doctor network status --format json";
+        Map<String, Pair<Integer, String>> networkStatusReportByIp = instanceIps.stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, networkStatusCommand)));
+
+        eventCountsValidation(testDto, networkStatusReportByIp, "numberOfNeighbours");
+        eventStatusesNotOkValidation(testDto, networkStatusReportByIp, null);
+        return testDto;
+    }
+
+    public FreeIpaTestDto checkFluentdStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        return checkFluentdStatus(testDto, instanceIps);
+    }
+
+    public <T extends CloudbreakTestDto> T checkFluentdStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        List<String> instanceIps = getInstanceGroupIps(instanceGroups, hostGroupNames, false);
+        return checkFluentdStatus(testDto, instanceIps);
+    }
+
+    private <T extends CloudbreakTestDto> T checkFluentdStatus(T testDto, List<String> instanceIps) {
+        String fluentdStatusCommand =
+                "sudo cdp-doctor fluentd status --format json";
+        String fluentdNokStatusCommand =
+                "sudo cdp-doctor fluentd status --format json | jq -r '.. | objects | to_entries | map(select(.value == \"NOK\"))[] | \"\\(.key) \\(.value)\"'";
+        Map<String, Pair<Integer, String>> fluentdNokStatusReportByIp = instanceIps.stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, fluentdNokStatusCommand)));
+
+        for (Entry<String, Pair<Integer, String>> statusReport : fluentdNokStatusReportByIp.entrySet()) {
+            String fluentdNotOkStatuses = StringUtils.trimToNull(statusReport.getValue().getValue());
+            if (StringUtils.isNotBlank(fluentdNotOkStatuses)) {
+                Map<String, Pair<Integer, String>> fluentdStatusReportByIp = instanceIps.stream()
+                        .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, fluentdStatusCommand)));
+                Log.error(LOGGER, format(" There is 'Not OK' CDP Fluentd status %s is present on '%s' instance! ", fluentdNotOkStatuses,
+                        statusReport.getKey()));
+                throw new TestFailException(format("There is 'Not OK' CDP Fluentd status %s is present on '%s' instance!", fluentdNotOkStatuses,
+                        statusReport.getKey()));
+            }
+        }
+        return testDto;
+    }
+
+    public FreeIpaTestDto checkServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        return checkCdpServiceStatus(testDto, instanceIps, List.of("infraServices", "freeipaServices"));
+    }
+
+    public <T extends CloudbreakTestDto> T checkServiceStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        List<String> instanceIps = getInstanceGroupIps(instanceGroups, hostGroupNames, false);
+        return checkCdpServiceStatus(testDto, instanceIps, List.of("infraServices", "cmServices"));
+    }
+
+    private <T extends CloudbreakTestDto> T checkCdpServiceStatus(T testDto, List<String> instanceIps, List<String> statusCategories) {
+        statusCategories.forEach(statusCategory -> {
+            String cdpServiceStatusCommand =
+                    format("sudo cdp-doctor service status --format json | jq -r '.%s[] | \"\\(.name) \\(.status)\"'", statusCategory);
+            Map<String, Pair<Integer, String>> cdpServiceStatusReportByIp = instanceIps.stream()
+                    .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, cdpServiceStatusCommand)));
+
+            for (Entry<String, Pair<Integer, String>> statusReport : cdpServiceStatusReportByIp.entrySet()) {
+                String servicesStatuses = statusReport.getValue().getValue();
+                if (StringUtils.containsIgnoreCase(" NOK", servicesStatuses)) {
+                    Log.error(LOGGER, format(" There is 'Not OK' CDP Services status %s is present on '%s' instance! ", servicesStatuses,
+                            statusReport.getKey()));
+                    throw new TestFailException(format("There is 'Not OK' CDP Services status %s is present on '%s' instance!", servicesStatuses,
+                            statusReport.getKey()));
+                }
+            }
+        });
         return testDto;
     }
 }

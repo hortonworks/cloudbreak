@@ -139,6 +139,9 @@ public class MonitoringTests extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
+                .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getEnvironmentCrn(), client))
+                .then((tc, testDto, client) -> sshJUtil.checkFluentdStatus(testDto, testDto.getEnvironmentCrn(), client))
+                .then((tc, testDto, client) -> sshJUtil.checkServiceStatus(testDto, testDto.getEnvironmentCrn(), client))
                 .then((tc, testDto, client) -> {
                     sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
                             List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer"));
@@ -155,6 +158,12 @@ public class MonitoringTests extends AbstractE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .when(sdxTestClient.describeInternal())
+                .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                        List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJUtil.checkFluentdStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                        List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJUtil.checkServiceStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                        List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> {
                     sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
                             List.of(MASTER.getName()), List.of("node_filesystem_free_bytes", "cm_health_check_info"), List.of("cdp-request-signer"));
@@ -169,6 +178,9 @@ public class MonitoringTests extends AbstractE2ETest {
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.get())
+                .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJUtil.checkFluentdStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJUtil.checkServiceStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> {
                     sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getInstanceGroups(),
                             List.of(MASTER.getName()), List.of("node_filesystem_free_bytes", "cm_health_check_info"), List.of("cdp-request-signer"));

@@ -71,4 +71,28 @@ public class SshJUtil {
     public FreeIpaTestDto checkFilesystemFreeBytesGeneratedMetric(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
         return sshJClientActions.checkFilesystemFreeBytesGeneratedMetric(testDto, environmentCrn, freeipaClient);
     }
+
+    public <T extends CloudbreakTestDto> T checkNetworkStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        return sshJClientActions.checkNetworkStatus(testDto, instanceGroups, hostGroupNames);
+    }
+
+    public FreeIpaTestDto checkNetworkStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        return sshJClientActions.checkNetworkStatus(testDto, environmentCrn, freeipaClient);
+    }
+
+    public <T extends CloudbreakTestDto> T checkFluentdStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        return sshJClientActions.checkFluentdStatus(testDto, instanceGroups, hostGroupNames);
+    }
+
+    public FreeIpaTestDto checkFluentdStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        return sshJClientActions.checkFluentdStatus(testDto, environmentCrn, freeipaClient);
+    }
+
+    public <T extends CloudbreakTestDto> T checkServiceStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        return sshJClientActions.checkServiceStatus(testDto, instanceGroups, hostGroupNames);
+    }
+
+    public FreeIpaTestDto checkServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        return sshJClientActions.checkServiceStatus(testDto, environmentCrn, freeipaClient);
+    }
 }
