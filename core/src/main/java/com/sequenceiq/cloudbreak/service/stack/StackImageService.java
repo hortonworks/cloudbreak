@@ -77,7 +77,7 @@ public class StackImageService {
                     stack.getPlatformVariant());
             String cloudPlatform = platform(stack.getCloudPlatform()).value().toLowerCase();
             String newImageName = imageService.determineImageName(cloudPlatform, platformString, stack.getRegion(), targetImage.getImage());
-            userDataService.updateUserData(stack.getId(), currentImage.getUserdata());
+            userDataService.createOrUpdateUserData(stack.getId(), currentImage.getUserdata());
             return new Image(newImageName, new HashMap<>(), targetImage.getImage().getOs(), targetImage.getImage().getOsType(),
                     targetImage.getImageCatalogUrl(), targetImage.getImageCatalogName(), targetImage.getImage().getUuid(),
                     targetImage.getImage().getPackageVersions());

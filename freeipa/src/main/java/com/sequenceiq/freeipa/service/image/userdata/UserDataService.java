@@ -94,7 +94,7 @@ public class UserDataService {
                 .replace("IS_CCM_V2_ENABLED", true)
                 .replace("IS_CCM_V2_JUMPGATE_ENABLED", true)
                 .getUserData();
-        updateUserData(stackId, userData);
+        createOrUpdateUserData(stackId, userData);
     }
 
     public void updateProxyConfig(Long stackId) {
@@ -102,10 +102,11 @@ public class UserDataService {
         Stack stack = getStack(stackId);
         ImageEntity image = imageService.getByStackId(stackId);
         String userData = proxyConfigUserDataReplacer.replaceProxyConfigInUserDataByEnvCrn(image.getUserdataWrapper(), stack.getEnvironmentCrn());
-        updateUserData(stackId, userData);
+        createOrUpdateUserData(stackId, userData);
     }
 
-    public ImageEntity updateUserData(Long stackId, String userdata) {
+    public ImageEntity createOrUpdateUserData(Long stackId, String userdata) {
+        LOGGER.debug("Updating user data for stack {}", stackId);
         ImageEntity image = imageService.getByStackId(stackId);
 
         String gatewayUserdataSecret = image.getGatewayUserdataSecret().getSecret();
@@ -136,7 +137,7 @@ public class UserDataService {
             Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             String userData = userDataBuilder.buildUserData(stack.getAccountId(), environment, Platform.platform(stack.getCloudPlatform()),
                     cbSshKeyDer, sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
-            updateUserData(stack.getId(), userData);
+            createOrUpdateUserData(stack.getId(), userData);
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parameters", e);
             throw new GetCloudParameterException("Failed to get Platform parameters", e);
