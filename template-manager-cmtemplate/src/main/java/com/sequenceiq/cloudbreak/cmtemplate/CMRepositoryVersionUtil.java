@@ -224,6 +224,11 @@ public class CMRepositoryVersionUtil {
         return false;
     }
 
+    public static boolean isS3SslChannelModeSupported(String cdhVersion, CloudPlatform cloudPlatform) {
+        LOGGER.info("Cloud Platform {} is checked for S3 SSL Channel Mode configuration in {} for cdhVersion {}", cloudPlatform, cdhVersion);
+        return cloudPlatform == CloudPlatform.AWS && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_16);
+    }
+
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
         LOGGER.info("isVersionNewerOrEqualThanLimited Compared: Versioned {} with Versioned {}", currentVersion.getVersion(), limitedAPIVersion.getVersion());
         Comparator<Versioned> versionComparator = new VersionComparator();

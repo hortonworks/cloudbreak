@@ -90,10 +90,6 @@
               {
                 "name": "role_config_suppression_hdfs_trash_disabled_validator",
                 "value": "true"
-              },
-              {
-                "name": "hdfs_client_env_safety_valve",
-                "value": "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\""
               }
             ]
           }
@@ -154,13 +150,7 @@
           {
             "refName": "yarn-GATEWAY-BASE",
             "roleType": "GATEWAY",
-            "base": true,
-            "configs": [
-              {
-                "name": "mapreduce_client_env_safety_valve",
-                "value": "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\""
-              }
-            ]
+            "base": true
           }
         ]
       },
@@ -180,7 +170,7 @@
             "configs": [
               {
                 "name": "spark-conf/spark-defaults.conf_client_config_safety_valve",
-                "value": "spark.hadoop.fs.s3a.ssl.channel.mode=openssl\nspark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1"
+                "value": "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1"
               }
             ]
           }
@@ -291,7 +281,7 @@
           },
           {
             "name": "hive_service_config_safety_valve",
-            "value": "<property><name>fs.s3a.ssl.channel.mode</name><value>openssl</value></property><property><name>hive.txn.acid.dir.cache.duration</name><value>0</value></property><property><name>hive.server2.tez.session.lifetime</name><value>30m</value></property>
+            "value": "<property><name>hive.txn.acid.dir.cache.duration</name><value>0</value></property><property><name>hive.server2.tez.session.lifetime</name><value>30m</value></property>
                         <property><name>hive.blobstore.supported.schemes</name><value>s3,s3a,s3n,abfs,gs</value></property><property><name>hive.orc.splits.include.fileid</name><value>false</value></property><property><name>hive.hook.proto.events.clean.freq</name><value>1h</value></property>
                         <property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property><property><name>parquet.compression</name><value>SNAPPY</value></property><property><name>hive.privilege.synchronizer</name><value>false</value></property>"
           }

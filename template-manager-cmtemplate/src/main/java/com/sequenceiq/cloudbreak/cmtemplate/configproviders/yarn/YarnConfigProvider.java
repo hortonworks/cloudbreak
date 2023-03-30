@@ -12,16 +12,20 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveRoles;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
-public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
+public class YarnConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String YARN_SITE_SERVICE_SAFETY_VALVE = "yarn_service_config_safety_valve";
+
+    private static final String MAPREDUCE_CLIENT_ENV_SAFETY_VALVE = "mapreduce_client_env_safety_valve";
+
+    private static final String HADOOP_OPTS = "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\"";
 
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
@@ -36,13 +40,23 @@ public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
     }
 
     @Override
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+        switch (roleType) {
+            case YarnRoles.GATEWAY:
+                return List.of(config(MAPREDUCE_CLIENT_ENV_SAFETY_VALVE, HADOOP_OPTS));
+            default:
+                return List.of();
+        }
+    }
+
+    @Override
     public String getServiceType() {
         return YarnRoles.YARN;
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(YarnRoles.YARN);
+        return List.of(YarnRoles.YARN, YarnRoles.GATEWAY);
     }
 
     @Override
