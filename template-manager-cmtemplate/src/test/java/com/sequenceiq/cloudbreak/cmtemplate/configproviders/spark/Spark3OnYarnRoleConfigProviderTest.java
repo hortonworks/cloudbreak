@@ -13,11 +13,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
@@ -44,7 +46,7 @@ public class Spark3OnYarnRoleConfigProviderTest {
 
     @Test
     public void testGetSpark3OnYarnRoleConfigsWhenNoStorageConfigured() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject();
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.GCP);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -54,19 +56,21 @@ public class Spark3OnYarnRoleConfigProviderTest {
     }
 
     protected void validateClientConfig(String hmsExternalDirLocation, String clientConfigDirLocation) {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(hmsExternalDirLocation);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, hmsExternalDirLocation);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> sparkOnYarnConfigs = roleConfigs.get("spark3_on_yarn-GATEWAY-BASE");
 
-        assertEquals(1, sparkOnYarnConfigs.size());
+        assertEquals(2, sparkOnYarnConfigs.size());
         assertEquals("spark3-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
         assertEquals("spark.kerberos.access.hadoopFileSystems=" + clientConfigDirLocation, sparkOnYarnConfigs.get(0).getValue());
+        assertEquals("spark3-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(1).getName());
+        assertEquals("spark.hadoop.fs.s3a.ssl.channel.mode=openssl", sparkOnYarnConfigs.get(1).getValue());
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(String... locations) {
+    private TemplatePreparationObject getTemplatePreparationObject(CloudPlatform cloudPlatform, String... locations) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
@@ -79,9 +83,15 @@ public class Spark3OnYarnRoleConfigProviderTest {
         }
         S3FileSystemConfigurationsView fileSystemConfigurationsView =
                 new S3FileSystemConfigurationsView(new S3FileSystem(), storageLocations, false);
+        String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        cmTemplateProcessor.setCdhVersion("7.2.16");
 
         return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withHostgroupViews(Set.of(master, worker)).build();
+                .withHostgroupViews(Set.of(master, worker))
+                .withBlueprintView(new BlueprintView(null, null, null, cmTemplateProcessor))
+                .withCloudPlatform(cloudPlatform)
+                .build();
     }
 
     private String getBlueprintText(String path) {

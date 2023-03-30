@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -36,11 +37,13 @@ class HiveKnoxConfigProviderTest {
 
     private static final String V7_1_0 = "7.1.0";
 
-    private static final String V7_X_0 = "7.x.0";
+    private static final String V7_16_0 = "7.16.0";
 
     private static final Iterable<String> KERBEROS_SAFETY_VALVE_VERSIONS = Lists.newArrayList(null, V7_0_1, V7_0_2, V7_0_99);
 
-    private static final Iterable<String> NO_KERBEROS_SAFETY_VALVE_VERSIONS = Set.of(V7_1_0, V7_X_0);
+    private static final Iterable<String> NO_KERBEROS_SAFETY_VALVE_VERSIONS = Set.of(V7_1_0);
+
+    private static final Iterable<String> NO_KERBEROS_SAFETY_VALVE_WITH_SSL_CHANNEL_MODE = Set.of(V7_16_0);
 
     private static final Set<ApiClusterTemplateConfig> KERBEROS_SAFETY_VALVE_EXPECTED_CONFIGS = Set.of(
             config(HIVE_SERVICE_CONFIG_SAFETY_VALVE,
@@ -50,6 +53,11 @@ class HiveKnoxConfigProviderTest {
 
     private static final Set<ApiClusterTemplateConfig> NO_KERBEROS_SAFETY_VALVE_EXPECTED_CONFIGS = Set.of(
             config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty("hive.hook.proto.file.per.event", "true")));
+
+    private static final Set<ApiClusterTemplateConfig> NO_KERBEROS_SAFETY_VALVE_WITH_SSL_CHANNEL_MODE_EXPECTED_CONFIGS = Set.of(
+            config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty("hive.hook.proto.file.per.event", "true")),
+            config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, "<property><name>fs.s3a.ssl.channel.mode</name><value>openssl</value></property>")
+            );
 
     private HiveKnoxConfigProvider underTest;
 
@@ -73,6 +81,7 @@ class HiveKnoxConfigProviderTest {
                 .withKerberosConfig(KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
                         .withRealm("EXAMPLE.COM")
                         .build())
+                .withCloudPlatform(CloudPlatform.AWS)
                 .build();
     }
 
@@ -84,6 +93,11 @@ class HiveKnoxConfigProviderTest {
     @Test
     void getServiceConfigsNoKerberosSafetyValve() {
         testGetServiceConfigs(NO_KERBEROS_SAFETY_VALVE_VERSIONS, NO_KERBEROS_SAFETY_VALVE_EXPECTED_CONFIGS);
+    }
+
+    @Test
+    void getServiceConfigsNoKerberosSafetyValveWithSslChannelMode() {
+        testGetServiceConfigs(NO_KERBEROS_SAFETY_VALVE_WITH_SSL_CHANNEL_MODE, NO_KERBEROS_SAFETY_VALVE_WITH_SSL_CHANNEL_MODE_EXPECTED_CONFIGS);
     }
 
     private void testGetServiceConfigs(Iterable<String> versions, Iterable<ApiClusterTemplateConfig> expectedConfigs) {

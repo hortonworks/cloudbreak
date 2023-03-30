@@ -44,4 +44,18 @@ public class YarnConfigProviderTest {
         assertFalse(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "yarn_service_config_safety_valve")));
     }
 
+    @Test
+    public void testGetRoleConfigsForGatewayRole() {
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(YarnRoles.GATEWAY, null);
+        assertEquals(1, roleConfigs.size());
+        assertEquals("mapreduce_client_env_safety_valve", roleConfigs.get(0).getName());
+        assertEquals("HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\"", roleConfigs.get(0).getValue());
+    }
+
+    @Test
+    public void testGetRoleConfigsForNonGatewayRole() {
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(YarnRoles.JOBHISTORY, null);
+        assertEquals(0, roleConfigs.size());
+    }
+
 }
