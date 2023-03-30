@@ -118,7 +118,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                 config.add(config(KNOX_MASTER_SECRET, masterSecret));
                 config.add(config(GATEWAY_DEFAULT_TOPOLOGY_NAME, topologyName));
                 config.add(config(GATEWAY_ADMIN_GROUPS, adminGroup));
-                if (isKnoxCustomTopologyManagementSupported(source.getProductDetailsView().getCm(), getCdhProduct(source))) {
+                if (source.getProductDetailsView() != null
+                        && isKnoxCustomTopologyManagementSupported(source.getProductDetailsView().getCm(), getCdhProduct(source))) {
                     config.add(config(GATEWAY_READ_ONLY_TOPOLOGIES, String.join(",", CLOUDBREAK_MANAGED_TOPOLOGIES)));
                 } else {
                     config.add(config(GATEWAY_CM_AUTO_DISCOVERY_ENABLED, "false"));
