@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.IN
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -61,6 +62,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -412,6 +414,87 @@ class AwsDownscaleServiceTest {
         DescribeInstancesRequest secondDescribeInstancesRequest = (DescribeInstancesRequest) waiterParametersList.get(1).getRequest();
         assertEquals(1, secondDescribeInstancesRequest.getInstanceIds().size());
         assertTrue(secondDescribeInstancesRequest.getInstanceIds().contains("i-worker4"));
+
+        assertEquals(describeAutoScalingGroupsRequest.getValue().getAutoScalingGroupNames(), List.of("autoscalegroup-1"));
+    }
+
+    @Test
+    public void checkTerminationRecursionDoNotCauseStackOverflow() {
+        CloudStack stack = mock(CloudStack.class);
+        List<CloudResource> resources = List.of(new CloudResource.Builder().withName("i-1").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-2").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-3").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-4").withType(ResourceType.AWS_INSTANCE).build());
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        List<CloudInstance> cloudInstances = new ArrayList<>();
+        InstanceTemplate workerTemplate = mock(InstanceTemplate.class);
+        when(workerTemplate.getGroupName()).thenReturn("worker");
+        CloudInstance workerInstance1 = new CloudInstance("i-worker1", workerTemplate, instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance2 = new CloudInstance("i-worker2", workerTemplate, instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance3 = new CloudInstance("i-worker3", workerTemplate, instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance4 = new CloudInstance("i-worker4", workerTemplate, instanceAuthentication, "subnet-1", "az1");
+        cloudInstances.add(workerInstance1);
+        cloudInstances.add(workerInstance2);
+        cloudInstances.add(workerInstance3);
+        cloudInstances.add(workerInstance4);
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("teststack")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
+                .withAccountId("1")
+                .build();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());
+        AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
+        when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);
+        AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
+        when(awsClient.createEc2Client(any(), anyString())).thenReturn(amazonEC2Client);
+
+        when(cfStackUtil.getAutoscalingGroupName(any(), (String) any(), any())).thenReturn("autoscalegroup-1");
+
+        AmazonServiceException amazonServiceException = new AmazonServiceException("Cannot execute method: terminateInstances. Invalid id: " +
+                "\"i-worker1\",\"i-worker2\"");
+        amazonServiceException.setErrorCode(INSTANCE_NOT_FOUND_ERROR_CODE);
+        when(amazonEC2Client.terminateInstances(any())).thenThrow(amazonServiceException);
+
+        AmazonServiceException amazonServiceExceptionForWaiter = new AmazonServiceException("Cannot execute method: terminateInstances. Invalid id: " +
+                "\"i-worker3\"");
+        amazonServiceExceptionForWaiter.setErrorCode(INSTANCE_NOT_FOUND_ERROR_CODE);
+
+        DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
+        AutoScalingGroup autoScalingGroup = new AutoScalingGroup();
+        autoScalingGroup.setInstances(List.of());
+        describeAutoScalingGroupsResult.setAutoScalingGroups(List.of(autoScalingGroup));
+        ArgumentCaptor<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequest = ArgumentCaptor.forClass(DescribeAutoScalingGroupsRequest.class);
+        when(amazonAutoScalingClient.describeAutoScalingGroups(describeAutoScalingGroupsRequest.capture()))
+                .thenReturn(describeAutoScalingGroupsResult);
+        mockDescribeInstances(amazonEC2Client);
+
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.downscale(authenticatedContext, stack, resources, cloudInstances));
+
+        assertEquals(cloudbreakServiceException.getMessage(), "AWS instance termination failed, instance termination list is not shrinking");
+
+        verify(amazonAutoScalingClient, never()).detachInstances(any());
+
+        ArgumentCaptor<TerminateInstancesRequest> terminateInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(TerminateInstancesRequest.class);
+
+        verify(amazonEC2Client, times(2)).terminateInstances(terminateInstancesRequestArgumentCaptor.capture());
+
+        List<TerminateInstancesRequest> allValues = terminateInstancesRequestArgumentCaptor.getAllValues();
+        List<String> firstTerminateInstanceIds = allValues.get(0).getInstanceIds();
+        assertEquals(4, firstTerminateInstanceIds.size());
+        assertTrue(firstTerminateInstanceIds.contains("i-worker1"));
+        assertTrue(firstTerminateInstanceIds.contains("i-worker2"));
+        assertTrue(firstTerminateInstanceIds.contains("i-worker3"));
+        assertTrue(firstTerminateInstanceIds.contains("i-worker4"));
+
+        List<String> secondTerminateInstanceIds = allValues.get(1).getInstanceIds();
+        assertEquals(2, secondTerminateInstanceIds.size());
+        assertTrue(firstTerminateInstanceIds.contains("i-worker3"));
+        assertTrue(firstTerminateInstanceIds.contains("i-worker4"));
 
         assertEquals(describeAutoScalingGroupsRequest.getValue().getAutoScalingGroupNames(), List.of("autoscalegroup-1"));
     }
