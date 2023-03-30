@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryConfig.QUARTZ_EXECUTOR_THEAD_NAME_PREFIX;
+
 import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,6 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.common.api.credential.AppAuthenticationType;
 
 public class AzureClientFactory {
+
+    public static final int DEFAULT_RETRY_COUNT = 3;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClientFactory.class);
 
@@ -116,12 +120,19 @@ public class AzureClientFactory {
         LOGGER.info("Creating Azure credentials with certificate and private key: {}", credentialView.getName());
         Objects.requireNonNull(credentialView.getCertificate(), "'certificate' cannot be null.");
         Objects.requireNonNull(credentialView.getPrivateKeyForCertificate(), "'privateKey' cannot be null.");
+        String threadName = Thread.currentThread().getName();
+        int retryCount = DEFAULT_RETRY_COUNT;
+        if (threadName.startsWith(QUARTZ_EXECUTOR_THEAD_NAME_PREFIX)) {
+            LOGGER.info("Retry count will be 1 because it is a quartz thread");
+            retryCount = 1;
+        }
         return new CloudbreakClientCertificateCredential(
                 new IdentityClientBuilder()
                         .tenantId(credentialView.getTenantId())
                         .clientId(credentialView.getAccessKey())
                         .certificate(new ByteArrayInputStream((credentialView.getPrivateKeyForCertificate() + credentialView.getCertificate()).getBytes()))
                         .identityClientOptions(new IdentityClientOptions()
+                                .setMaxRetry(retryCount)
                                 .setExecutorService(mdcCopyingThreadPoolExecutor)
                                 .setHttpClient(azureHttpClientConfigurer.newHttpClient()))
                         .build());
