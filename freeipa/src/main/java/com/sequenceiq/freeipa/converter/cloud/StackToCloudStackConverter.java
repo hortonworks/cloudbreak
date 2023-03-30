@@ -111,7 +111,8 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
-        Image image = imageConverter.convert(imageService.getByStack(stack));
+        ImageEntity imageEntity = imageService.getByStack(stack);
+        Image image = imageConverter.convert(imageEntity);
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
         List<Group> instanceGroups = buildInstanceGroups(
                 stack,
@@ -126,7 +127,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return new CloudStack(instanceGroups, network, image, parameters,
                 getUserDefinedTags(stack), stack.getTemplate(), instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(), null,
-                image.getUserdata().get(InstanceGroupType.GATEWAY), null);
+                imageEntity.getUserdataWrapper(), null);
     }
 
     public CloudInstance buildInstance(Stack stack, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,

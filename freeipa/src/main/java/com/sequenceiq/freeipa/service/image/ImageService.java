@@ -154,10 +154,6 @@ public class ImageService {
         return imageRepository.save(imageEntity);
     }
 
-    public ImageEntity decorateImageWithUserDataForStack(Stack stack, String userdata) {
-        return userDataService.updateUserData(stack.getId(), userdata);
-    }
-
     public ImageWrapper getImage(ImageSettingsRequest imageSettings, String region, String platform) {
         return imageProviderFactory.getImageProvider(imageSettings.getCatalog())
                 .getImage(imageSettings, region, platform)
