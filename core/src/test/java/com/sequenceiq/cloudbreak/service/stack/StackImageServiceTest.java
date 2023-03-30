@@ -161,7 +161,7 @@ public class StackImageServiceTest {
                 stack.getRegion(), targetStatedImage.getImage())).thenReturn(IMAGE_NAME);
         when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
                 .thenReturn(imageCatalogPlatform);
-        when(userDataService.updateUserData(anyLong(), any())).thenReturn(new Userdata());
+        when(userDataService.createOrUpdateUserData(anyLong(), any())).thenReturn(new Userdata());
 
         victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG);
 
