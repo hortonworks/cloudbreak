@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryConfig.QUARTZ_EXECUTOR_THREAD_NAME_PREFIX;
+
 import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,6 +37,8 @@ public class AzureClientFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClientFactory.class);
 
     private static final String RESOURCE_MANAGER_ENDPOINT_URL = "resourceManagerEndpointUrl";
+
+    private static final int MAX_AZURE_CLIENT_QUARTZ_RETRY = 1;
 
     private final AzureCredentialView credentialView;
 
@@ -116,26 +120,33 @@ public class AzureClientFactory {
         LOGGER.info("Creating Azure credentials with certificate and private key: {}", credentialView.getName());
         Objects.requireNonNull(credentialView.getCertificate(), "'certificate' cannot be null.");
         Objects.requireNonNull(credentialView.getPrivateKeyForCertificate(), "'privateKey' cannot be null.");
+        IdentityClientOptions identityClientOptions = new IdentityClientOptions()
+                .setExecutorService(mdcCopyingThreadPoolExecutor)
+                .setHttpClient(azureHttpClientConfigurer.newHttpClient());
+        if (Thread.currentThread().getName().contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
+            identityClientOptions.setMaxRetry(MAX_AZURE_CLIENT_QUARTZ_RETRY);
+        }
         return new CloudbreakClientCertificateCredential(
                 new IdentityClientBuilder()
                         .tenantId(credentialView.getTenantId())
                         .clientId(credentialView.getAccessKey())
                         .certificate(new ByteArrayInputStream((credentialView.getPrivateKeyForCertificate() + credentialView.getCertificate()).getBytes()))
-                        .identityClientOptions(new IdentityClientOptions()
-                                .setExecutorService(mdcCopyingThreadPoolExecutor)
-                                .setHttpClient(azureHttpClientConfigurer.newHttpClient()))
+                        .identityClientOptions(identityClientOptions)
                         .build());
     }
 
     private TokenCredential newSecretCredential() {
         LOGGER.info("Creating Azure credentials with secret: {}", credentialView.getName());
-        return new ClientSecretCredentialBuilder()
+        ClientSecretCredentialBuilder clientSecretCredentialBuilder = new ClientSecretCredentialBuilder()
                 .clientId(credentialView.getAccessKey())
                 .tenantId(credentialView.getTenantId())
                 .clientSecret(credentialView.getSecretKey())
                 .httpClient(azureHttpClientConfigurer.newHttpClient())
-                .executorService(mdcCopyingThreadPoolExecutor)
-                .build();
+                .executorService(mdcCopyingThreadPoolExecutor);
+        if (Thread.currentThread().getName().contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
+            clientSecretCredentialBuilder.maxRetry(MAX_AZURE_CLIENT_QUARTZ_RETRY);
+        }
+        return clientSecretCredentialBuilder.build();
     }
 
     private AzureEnvironment getAzureEnvironment(Optional<Region> region) {
