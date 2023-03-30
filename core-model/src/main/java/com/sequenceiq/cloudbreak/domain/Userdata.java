@@ -117,6 +117,7 @@ public class Userdata implements ProvisionEntity, AccountIdAwareResource {
         return "Userdata{" +
                 "id=" + id +
                 ", accountId='" + accountId + '\'' +
+                ", stackId='" + stack.getId() + '\'' +
                 '}';
     }
 }
