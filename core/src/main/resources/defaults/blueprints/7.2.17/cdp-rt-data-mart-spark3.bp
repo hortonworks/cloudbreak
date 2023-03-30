@@ -94,7 +94,7 @@
             "configs": [
               {
                 "name": "spark3-conf/spark-defaults.conf_client_config_safety_valve",
-                "value": "spark.hadoop.fs.s3a.ssl.channel.mode=openssl\nspark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1"
+                "value": "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1"
               }
             ]
           }

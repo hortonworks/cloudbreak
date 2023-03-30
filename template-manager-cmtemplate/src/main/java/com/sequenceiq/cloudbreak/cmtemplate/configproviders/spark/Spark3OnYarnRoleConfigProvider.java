@@ -3,15 +3,19 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreCloudStorageServiceConfigProvider.HMS_METASTORE_EXTERNAL_DIR;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 
 @Component
 public class Spark3OnYarnRoleConfigProvider extends AbstractRoleConfigProvider {
@@ -20,15 +24,23 @@ public class Spark3OnYarnRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String SPARK3_YARN_ACCESS_DIR_PARAM = "spark.kerberos.access.hadoopFileSystems=";
 
+    private static final String SPARK3_HADOOP_S3_SSL_CHANNEL_MODE = "spark.hadoop.fs.s3a.ssl.channel.mode=openssl";
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case SparkRoles.GATEWAY:
-                return ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_EXTERNAL_DIR)
-                        .map(location -> ConfigUtils.getBasePathFromStorageLocation(location.getValue()))
-                        .map(basePath -> List.of(config(SPARK3_CONF_CLIENT_SAFETY_VALVE,
-                                SPARK3_YARN_ACCESS_DIR_PARAM + basePath)))
-                        .orElseGet(List::of);
+                List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
+                Optional<StorageLocationView> storageLocationView = ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_EXTERNAL_DIR);
+                if (storageLocationView.isPresent()) {
+                    roleConfigs.add(config(SPARK3_CONF_CLIENT_SAFETY_VALVE,
+                            SPARK3_YARN_ACCESS_DIR_PARAM + ConfigUtils.getBasePathFromStorageLocation(storageLocationView.get().getValue())));
+                }
+                if (CMRepositoryVersionUtil.isS3SslChannelModeSupported(source.getBlueprintView()
+                        .getProcessor().getVersion().orElse(""), source.getCloudPlatform())) {
+                    roleConfigs.add(config(SPARK3_CONF_CLIENT_SAFETY_VALVE, SPARK3_HADOOP_S3_SSL_CHANNEL_MODE));
+                }
+                return roleConfigs;
             default:
                 return List.of();
         }

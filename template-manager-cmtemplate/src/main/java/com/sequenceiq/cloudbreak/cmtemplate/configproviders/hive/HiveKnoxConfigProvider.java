@@ -4,11 +4,13 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
@@ -23,17 +25,22 @@ public class HiveKnoxConfigProvider implements CmTemplateComponentConfigProvider
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         String filePerEvent = ConfigUtils.getSafetyValveProperty("hive.hook.proto.file.per.event", "true");
-
+        List<ApiClusterTemplateConfig> serviceConfigs = new ArrayList<>();
         String cdhVersion = templateProcessor.getVersion().orElse("");
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
-            return List.of(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, filePerEvent));
+            serviceConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, filePerEvent));
         } else {
             KerberosConfig kerberosConfigOpt = templatePreparationObject.getKerberosConfig().get();
             String realm = kerberosConfigOpt.getRealm();
             String principal = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.principal", "HTTP/_HOST@" + realm);
             String keytab = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.keytab", "hive.keytab");
-            return List.of(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, principal + keytab + filePerEvent));
+            serviceConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, principal + keytab + filePerEvent));
         }
+        if (CMRepositoryVersionUtil.isS3SslChannelModeSupported(cdhVersion, templatePreparationObject.getCloudPlatform())) {
+            String sslChannelMode = ConfigUtils.getSafetyValveProperty("fs.s3a.ssl.channel.mode", "openssl");
+            serviceConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, sslChannelMode));
+        }
+        return serviceConfigs;
     }
 
     @Override
