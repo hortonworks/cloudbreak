@@ -9,7 +9,9 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DOWNSCALE_SUCC
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -101,7 +105,8 @@ public class StackDownscaleService {
         stackScalingService.updateInstancesToTerminated(privateIds, stack.getId());
         List<InstanceMetadataView> instanceMetaDatas = instanceMetaDataService.getInstanceMetadataViewsByStackIdAndPrivateIds(stack.getId(), privateIds);
         if (context.isRepair()) {
-            fillDiscoveryFQDNForRepair(stack, instanceMetaDatas);
+            fillDiscoveryFQDNForRepairAndPutToDetachedIfNeeded(stack, instanceMetaDatas);
+            putDanglingVolumeSetsToFailedState(stack);
         }
         cleanupDnsRecords(stack, instanceMetaDatas);
         List<String> deletedInstanceIds = instanceMetaDatas.stream()
@@ -113,7 +118,32 @@ public class StackDownscaleService {
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_DOWNSCALE_SUCCESS, String.join(",", deletedInstanceIds));
     }
 
-    private void fillDiscoveryFQDNForRepair(StackView stack, List<InstanceMetadataView> removableInstances) {
+    private void putDanglingVolumeSetsToFailedState(StackView stack) {
+        List<Resource> diskResources = resourceService.findByStackIdAndType(stack.getId(), stack.getDiskResourceType());
+        Map<Resource, Optional<VolumeSetAttributes>> volumeSetAttributesOptionalMap = diskResources.stream().collect(Collectors.toMap(volumeSet -> volumeSet,
+                volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class)));
+        LinkedListMultimap<String, Resource> fqdnVolumeSetMultiMap = volumeSetAttributesOptionalMap.entrySet().stream()
+                .filter(entry -> entry.getValue().isPresent()
+                        && entry.getValue().get().getDiscoveryFQDN() != null)
+                .collect(Multimaps.toMultimap(entry -> entry.getValue().get().getDiscoveryFQDN(), Map.Entry::getKey, LinkedListMultimap::create));
+        fqdnVolumeSetMultiMap.asMap().forEach((fqdn, volumeSetsForFqdn) -> {
+            if (volumeSetsForFqdn.size() > 1) {
+                LOGGER.warn("We have multiple volumesets for this FQDN: {}", fqdn);
+                volumeSetsForFqdn.stream().max(Comparator.comparing(Resource::getId)).ifPresent(latestVolumeSet -> {
+                    LOGGER.info("The latest volumeset for {} is {}", fqdn, latestVolumeSet.getResourceName());
+                    for (Resource volumeSet : volumeSetsForFqdn) {
+                        if (!volumeSet.getId().equals(latestVolumeSet.getId())) {
+                            LOGGER.info("The volumeset is not the latest, let's put it to FAILED state: {}", volumeSet.getResourceName());
+                            volumeSet.setResourceStatus(CommonStatus.FAILED);
+                            resourceService.save(volumeSet);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void fillDiscoveryFQDNForRepairAndPutToDetachedIfNeeded(StackView stack, List<InstanceMetadataView> removableInstances) {
         List<Resource> diskResources = resourceService.findByStackIdAndType(stack.getId(), stack.getDiskResourceType());
         List<String> removableInstanceIds = removableInstances
                 .stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList());
@@ -124,7 +154,7 @@ public class StackDownscaleService {
                 fillDiscoveryFQDNInVolumeSetIfEmpty(removableInstances, removableInstanceIds, volumeSet, volumeSetAttributes);
                 if (removableFQDNs.contains(volumeSetAttributes.getDiscoveryFQDN()) && CommonStatus.CREATED.equals(volumeSet.getResourceStatus())) {
                     LOGGER.warn("Volume for {} is in CREATED state, but we are repairing the related node, so we set the status to DETACHED. VolumeSet: {}",
-                            volumeSetAttributes.getDiscoveryFQDN(), volumeSet);
+                            volumeSetAttributes.getDiscoveryFQDN(), volumeSet.getResourceName());
                     volumeSet.setResourceStatus(CommonStatus.DETACHED);
                 }
             });
