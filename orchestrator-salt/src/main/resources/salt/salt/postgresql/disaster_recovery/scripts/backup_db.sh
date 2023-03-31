@@ -74,7 +74,7 @@ errorExit() {
   if [[ "$CLOSECONNECTIONS" == "true" ]]; then
     limit_incomming_connection $SERVICE -1
   fi
-  if [ -d "$DATE_DIR" ]; then
+  if [ -d "$DATE_DIR" ] && [[ $DATE_DIR == /var/tmp/* ]]; then
     rm -rf -v "$DATE_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
     doLog "Removed directory $DATE_DIR"
   fi
