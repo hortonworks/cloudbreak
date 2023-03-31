@@ -134,7 +134,7 @@ dependencies {
     exclude group: 'com.google.guava',  module: 'guava'
   }
   implementation group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev20220705-2.0.0'
-  implementation group: 'com.google.auth',               name: 'google-auth-library-oauth2-http',            version: '1.15.0'
+  implementation group: 'com.google.auth',               name: 'google-auth-library-oauth2-http',            version: '1.16.0'
   implementation group: 'com.google.http-client',        name: 'google-http-client-jackson2',                version: '1.43.0'
   implementation (group: 'com.google.cloud',              name: 'google-cloud-storage',           version: '2.20.1') {
     exclude group: "io.grpc"

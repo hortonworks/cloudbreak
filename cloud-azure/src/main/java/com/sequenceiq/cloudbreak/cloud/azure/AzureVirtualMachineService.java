@@ -166,7 +166,10 @@ public class AzureVirtualMachineService {
             } catch (ManagementException e) {
                 LOGGER.debug("Exception occurred during the list of Virtual Machines by resource group", e);
                 for (String instance : resourceGroupInstanceIdsMap.getValue()) {
-                    cloudInstances.stream().filter(cloudInstance -> instance.equals(cloudInstance.getInstanceId())).findFirst().ifPresent(cloudInstance -> {
+                    cloudInstances.stream()
+                            .filter(cloudInstance -> instance != null && instance.equals(cloudInstance.getInstanceId()))
+                            .findFirst()
+                            .ifPresent(cloudInstance -> {
                         if (azureExceptionHandler.isNotFound(e)) {
                             statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED));
                         } else {

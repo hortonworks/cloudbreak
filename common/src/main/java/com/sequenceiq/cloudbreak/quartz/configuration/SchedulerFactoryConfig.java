@@ -22,6 +22,8 @@ import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 @Configuration
 public class SchedulerFactoryConfig {
 
+    public static final String QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = "quartzExecutor-";
+
     private static final String QUARTZ_TASK_EXECUTOR = "quartzTaskExecutor";
 
     @Value("${quartz.threadpool.core.size:10}")
@@ -77,7 +79,7 @@ public class SchedulerFactoryConfig {
         executor.setMaxPoolSize(quartzMaxPoolSize);
         executor.setQueueCapacity(quartzQueueCapacity == -1 ? Integer.MAX_VALUE : quartzQueueCapacity);
         executor.setThreadPriority(quartzThreadPriority);
-        executor.setThreadNamePrefix("quartzExecutor-");
+        executor.setThreadNamePrefix(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX);
         executor.initialize();
         return ExecutorServiceMetrics.monitor(meterRegistry, executor.getThreadPoolExecutor(), QUARTZ_TASK_EXECUTOR, "threadpool");
     }
