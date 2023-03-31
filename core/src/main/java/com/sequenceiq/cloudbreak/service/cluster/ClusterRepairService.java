@@ -241,11 +241,11 @@ public class ClusterRepairService {
         List<InstanceMetadataView> unhealthyGWs = gatewayInstances.stream().filter(gatewayInstance -> !gatewayInstance.isHealthy()).collect(toList());
         if (ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
             LOGGER.info("Host group based repair mode, so GW hostgroup should be selected if any GW is not healthy. Unhealthy GWs: {}. Selected instances: {}",
-                    unhealthyGWs, selectedParts);
+                    unhealthyGWs.stream().map(InstanceMetadataView::getInstanceId).collect(toSet()), selectedParts);
             return unhealthyGWs.stream().anyMatch(unhealthyGW -> !selectedParts.contains(unhealthyGW.getInstanceGroupName()));
         } else if (ManualClusterRepairMode.NODE_ID.equals(repairMode)) {
             LOGGER.info("Node id based repair mode, so GW instance should be selected if it is not healthy. Unhealthy GWs: {}. Selected hostgroups: {}",
-                    unhealthyGWs, selectedParts);
+                    unhealthyGWs.stream().map(InstanceMetadataView::getInstanceId).collect(toSet()), selectedParts);
             return unhealthyGWs.stream().anyMatch(unhealthyGW -> !selectedParts.contains(unhealthyGW.getInstanceId()));
         } else {
             LOGGER.info("Repair mode is not host group or node id based: {}", repairMode);

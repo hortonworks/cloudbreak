@@ -59,10 +59,10 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerApi
         List<String> hostIpsFromManager = fetchHeartbeatedHostIpsFromManager(pollerObject);
         List<InstanceMetadataView> notKnownInstancesByManager = collectNotKnownInstancesByManager(pollerObject, hostIpsFromManager);
         if (!notKnownInstancesByManager.isEmpty()) {
-            LOGGER.warn("there are missing nodes from cloudera manager, not known instances: {}", notKnownInstancesByManager);
             notKnownInstanceIds = notKnownInstancesByManager.stream()
                     .map(InstanceMetadataView::getId)
                     .collect(Collectors.toSet());
+            LOGGER.warn("there are missing nodes from cloudera manager, not known instances: {}", notKnownInstanceIds);
             return false;
         } else {
             return true;

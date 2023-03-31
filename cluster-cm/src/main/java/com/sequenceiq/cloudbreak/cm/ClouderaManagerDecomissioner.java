@@ -207,7 +207,10 @@ public class ClouderaManagerDecomissioner {
                     .collect(Collectors.toSet());
             instancesToRemove.addAll(clouderaManagerNodesToRemove);
 
-            LOGGER.debug("Downscale candidates: [{}]", instancesToRemove);
+            LOGGER.debug("Downscale candidates: [{}]", instancesToRemove
+                    .stream()
+                    .map(InstanceMetadataView::getInstanceId)
+                    .collect(Collectors.toSet()));
             return instancesToRemove;
         } catch (ApiException e) {
             LOGGER.error("Failed to get host list for cluster: {}", stack.getName(), e);
@@ -234,7 +237,10 @@ public class ClouderaManagerDecomissioner {
                         .noneMatch(apiHostRef -> instanceMetaData.getDiscoveryFQDN().equals(apiHostRef.getHostname())))
                 .collect(Collectors.toSet());
 
-        LOGGER.warn("Instances not known by CM: {}", instancesNotKnownByCM);
+        LOGGER.warn("Instances not known by CM: {}", instancesNotKnownByCM
+                .stream()
+                .map(InstanceMetadataView::getInstanceId)
+                .collect(Collectors.toSet()));
         return instancesNotKnownByCM;
     }
 
@@ -278,7 +284,10 @@ public class ClouderaManagerDecomissioner {
             Sets.newHashSet(hostsToRemove.keySet()).stream()
                     .filter(hostName -> !matchingCmHostSet.contains(hostName))
                     .forEach(hostsToRemove::remove);
-            LOGGER.debug("Collected hosts to remove: [{}]", hostsToRemove);
+            LOGGER.debug("Collected hosts to remove: [{}]", hostsToRemove.values()
+                    .stream()
+                    .map(InstanceMetadataView::getInstanceId)
+                    .collect(Collectors.toSet()));
             return hostsToRemove;
         } catch (ApiException e) {
             LOGGER.error("Failed to get host list for cluster: {}", stack.getName(), e);

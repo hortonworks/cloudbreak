@@ -72,8 +72,14 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
         StopStartUpscaleCommissionViaCMRequest request = event.getData();
         LOGGER.info("StopStartUpscaleCommissionViaCMHandler for: {}, {}", event.getData().getResourceId(), event);
         LOGGER.debug("StartedInstancesToCommission: {}, servicesNotRunningInstancesToCommission: {}",
-                request.getStartedInstancesToCommission(),
-                request.getServicesNotRunningInstancesToCommission());
+                request.getStartedInstancesToCommission()
+                        .stream()
+                        .map(InstanceMetadataView::getInstanceId)
+                        .collect(Collectors.toSet()),
+                request.getServicesNotRunningInstancesToCommission()
+                        .stream()
+                        .map(InstanceMetadataView::getInstanceId)
+                        .collect(Collectors.toSet()));
 
         List<InstanceMetadataView> allInstancesToCommission = new LinkedList<>();
         allInstancesToCommission.addAll(request.getStartedInstancesToCommission());

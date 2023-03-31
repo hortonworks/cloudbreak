@@ -121,7 +121,7 @@ public class TlsSecurityService {
             SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
         Long stackId = stack.getId();
         LOGGER.info("Build gateway config for stack with id: {}, gatewayInstance: {}, gatewayPort: {}, knoxGatewayEnabled: {}",
-                stackId, gatewayInstance, gatewayPort, knoxGatewayEnabled);
+                stackId, gatewayInstance.getInstanceId(), gatewayPort, knoxGatewayEnabled);
         SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance, stack);
         HttpClientConfig conf = buildTLSClientConfig(stackId, stack.getCloudPlatform(), connectionIp, gatewayInstance);

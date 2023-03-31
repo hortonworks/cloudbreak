@@ -164,7 +164,11 @@ public class StopStartDownscaleActions {
                         toStopInstanceMetadataList.add(instanceMetaData);
                     }
                 }
-                LOGGER.debug("toStopInstanceMetadata: count={}, metadata=[{}]", toStopInstanceMetadataList.size(), toStopInstanceMetadataList);
+                LOGGER.debug("toStopInstanceMetadata: count={}, metadata=[{}]", toStopInstanceMetadataList.size(),
+                        toStopInstanceMetadataList
+                                .stream()
+                                .map(InstanceMetadataView::getInstanceId)
+                                .collect(Collectors.toSet()));
 
                 List<CloudInstance> cloudInstancesToStop = instanceMetaDataToCloudInstanceConverter.convert(toStopInstanceMetadataList,
                         context.getStack().getStack());

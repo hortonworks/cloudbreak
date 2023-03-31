@@ -70,4 +70,15 @@ public class ClusterComponentView implements ProvisionEntity {
     public void setClusterId(Long clusterId) {
         this.clusterId = clusterId;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterComponentView{" +
+                "id=" + id +
+                ", componentType=" + componentType +
+                ", name='" + name + '\'' +
+                ", clusterId=" + clusterId +
+                ", attributes=" + attributes +
+                '}';
+    }
 }
