@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,6 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -37,8 +37,11 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxRepairTests extends PreconditionSdxE2ETest {
-
     private static final String CRONTAB_LIST = "sudo crontab -l";
+
+    private static final String MINIMAL_MEDIUM_DUTY_RUNTIME = "7.2.7";
+
+    private static final String MINIMAL_ENTERPRISE_RUNTIME = "7.2.17";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -57,15 +60,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Inject
     private SshJClientActions sshJClientActions;
-
-    @Override
-    protected void setupTest(TestContext testContext) {
-        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
-        createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
-        createDefaultCredential(testContext);
-        createEnvironmentWithFreeIpa(testContext);
-    }
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -115,10 +109,10 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     private SdxTestDto assertCronCreatedOnMasterNodesForUserHomeCreation(SdxTestDto testDto) {
         Map<String, Pair<Integer, String>> crontabListResultByIpsMap =
                 sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                        List.of(HostGroupType.MASTER.getName()), CRONTAB_LIST, false);
+                        List.of(MASTER.getName()), CRONTAB_LIST, false);
         Set<String> nodesWithoutCrontabForUserHomeCreation = crontabListResultByIpsMap.entrySet().stream()
                 .filter(entry -> !entry.getValue().getValue().contains("createuserhome.sh"))
-                .map(entry -> entry.getKey())
+                .map(Entry::getKey)
                 .collect(Collectors.toSet());
         if (!nodesWithoutCrontabForUserHomeCreation.isEmpty()) {
             throw new TestFailException("Missing crontab for user home creation for nodes: " + nodesWithoutCrontabForUserHomeCreation);
@@ -166,10 +160,24 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak, and an SDX medium Duty cluster in available state",
-            when = "",
-            then = "SDX creation should be successful, the cluster should be up and running"
+            when = "repair is run",
+            then = "SDX repair should be successful, the cluster should be up and running"
     )
     public void testSDXMediumDutyRepair(TestContext testContext) {
+        repairHA(testContext, SdxClusterShape.MEDIUM_DUTY_HA, MINIMAL_MEDIUM_DUTY_RUNTIME);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running Cloudbreak, and a Scalable SDX cluster in available state",
+            when = "repair is run",
+            then = "SDX repair should be successful, the cluster should be up and running"
+    )
+    public void testSDXEnterpriseRepair(TestContext testContext) {
+        repairHA(testContext, SdxClusterShape.ENTERPRISE, MINIMAL_ENTERPRISE_RUNTIME);
+    }
+
+    private void repairHA(TestContext testContext, SdxClusterShape sdxClusterShape, String runtime) {
         String sdx = resourcePropertyProvider().getName();
 
         List<String> actualVolumeIds = new ArrayList<>();
@@ -178,7 +186,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
         testContext
                 .given(EnvironmentTestDto.class)
                 .given(sdx, SdxTestDto.class).withCloudStorage()
-                .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
+                .withRuntimeVersion(runtime)
+                .withClusterShape(sdxClusterShape)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
@@ -205,7 +214,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                 .validate();
-
     }
 
     private void repair(SdxTestDto sdxTestDto, String sdx, String hostgroupName, Set<SdxClusterStatusResponse> ignoredFailedStatuses) {
