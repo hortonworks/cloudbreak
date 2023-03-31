@@ -88,7 +88,7 @@ public class LeaderElectionService {
         if (periscopeNodeConfig.isNodeIdSpecified()) {
             long leaders = periscopeNodeRepository.countByLeaderIsTrueAndLastUpdatedIsGreaterThan(clock.getCurrentTimeMillis() - heartbeatThresholdRate);
             if (leaders == 0L) {
-                metricService.submit(MetricType.LEADER, 0);
+                metricService.gauge(MetricType.LEADER, 0);
                 LOGGER.info("There is no active leader available");
                 resetTimer();
                 try {
@@ -104,7 +104,7 @@ public class LeaderElectionService {
                     LOGGER.error("Failed to select node as leader, something went wrong. Message: {}", e.getMessage());
                     return;
                 }
-                metricService.submit(MetricType.LEADER, 1);
+                metricService.gauge(MetricType.LEADER, 1);
                 LOGGER.info("Selected {} as leader", periscopeNodeConfig.getId());
                 timer.schedule(new TimerTask() {
                     @Override

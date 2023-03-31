@@ -313,9 +313,9 @@ public class ClusterService {
     }
 
     private void calculateClusterStateMetrics() {
-        periscopeMetricService.submit(MetricType.CLUSTER_STATE_ACTIVE,
+        periscopeMetricService.gauge(MetricType.CLUSTER_STATE_ACTIVE,
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(RUNNING, true, periscopeNodeConfig.getId()));
-        periscopeMetricService.submit(MetricType.CLUSTER_STATE_SUSPENDED,
+        periscopeMetricService.gauge(MetricType.CLUSTER_STATE_SUSPENDED,
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(SUSPENDED, true, periscopeNodeConfig.getId()));
     }
 }

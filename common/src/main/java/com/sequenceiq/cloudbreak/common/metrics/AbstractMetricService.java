@@ -33,15 +33,15 @@ public abstract class AbstractMetricService implements MetricService {
      * @param value  Metric value
      */
     @Override
-    public void submit(Metric metric, double value) {
-        submit(metric, value, Collections.emptyMap());
+    public void gauge(Metric metric, double value) {
+        gauge(metric, value, Collections.emptyMap());
     }
 
     @Override
-    public void submit(Metric metric, double value, Map<String, String> labels) {
+    public void gauge(Metric metric, double value, Map<String, String> tagsMap) {
         String metricName = getMetricName(metric);
         gaugeMetricMap.computeIfAbsent(metricName, name -> {
-            Iterable<Tag> tags = labels.entrySet().stream().map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase())).collect(Collectors.toList());
+            Iterable<Tag> tags = tagsMap.entrySet().stream().map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase())).collect(Collectors.toList());
             return Metrics.gauge(name, tags, new AtomicDouble(value));
         }).set(value);
     }
@@ -58,17 +58,23 @@ public abstract class AbstractMetricService implements MetricService {
 
     @Override
     public void incrementMetricCounter(Metric metric, String... tags) {
-        incrementMetricCounter(getMetricName(metric), tags);
+        incrementMetricCounter(getMetricName(metric), 1.0, tags);
+    }
+
+    @Override
+    public void incrementMetricCounter(String metric, String... tags) {
+        incrementMetricCounter(metric, 1.0, tags);
+    }
+
+    @Override
+    public void incrementMetricCounter(String metric, double amount, String... tags) {
+        Counter counter = Metrics.counter(metric, tags);
+        counter.increment(amount);
     }
 
     @Override
     public <T, U> Map<T, U> gaugeMapSize(Metric metric, Map<T, U> map) {
         return Metrics.gaugeMapSize(getMetricName(metric), Tags.empty(), map);
-    }
-
-    protected void incrementMetricCounter(String metric, String... tags) {
-        Counter counter = Metrics.counter(metric, tags);
-        counter.increment();
     }
 
     protected boolean gaugeMetric(Metric metric) {
@@ -93,6 +99,12 @@ public abstract class AbstractMetricService implements MetricService {
     @Override
     public void recordTimerMetric(Metric metric, Duration duration, String... tags) {
         Timer timer = Metrics.timer(getMetricName(metric), tags);
+        timer.record(duration);
+    }
+
+    @Override
+    public void recordTimerMetric(String metric, Duration duration, String... tags) {
+        Timer timer = Metrics.timer(metric, tags);
         timer.record(duration);
     }
 

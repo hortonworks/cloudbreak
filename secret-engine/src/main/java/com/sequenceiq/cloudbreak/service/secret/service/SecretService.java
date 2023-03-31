@@ -68,7 +68,7 @@ public class SecretService {
         long start = System.currentTimeMillis();
         boolean exists = vaultRetryService.tryReadingVault(() -> persistentEngine.exists(key));
         long duration = System.currentTimeMillis() - start;
-        metricService.submit(MetricType.VAULT_READ, duration);
+        metricService.gauge(MetricType.VAULT_READ, duration);
         LOGGER.trace("Secret read took {} ms", duration);
         if (exists) {
             throw new InvalidKeyException(format("Key: %s already exists!", key));
@@ -76,7 +76,7 @@ public class SecretService {
         start = System.currentTimeMillis();
         String secret = vaultRetryService.tryWritingVault(() -> persistentEngine.put(key, value));
         duration = System.currentTimeMillis() - start;
-        metricService.submit(MetricType.VAULT_WRITE, duration);
+        metricService.gauge(MetricType.VAULT_WRITE, duration);
         LOGGER.trace("Secret write took {} ms", duration);
         metricService.incrementMetricCounter(() -> "secret.write." + convertSecretToMetric(secret));
         return secret;
@@ -103,7 +103,7 @@ public class SecretService {
                     .orElse(null);
         });
         long duration = System.currentTimeMillis() - start;
-        metricService.submit(MetricType.VAULT_READ, duration);
+        metricService.gauge(MetricType.VAULT_READ, duration);
         LOGGER.trace("Secret read took {} ms", duration);
         return "null".equals(response) ? null : response;
     }
@@ -142,7 +142,7 @@ public class SecretService {
                 .filter(e -> e.isSecret(secret))
                 .forEach(e -> e.delete(secret));
         long duration = System.currentTimeMillis() - start;
-        metricService.submit(MetricType.VAULT_WRITE, duration);
+        metricService.gauge(MetricType.VAULT_WRITE, duration);
         LOGGER.trace("Secret delete took {} ms", duration);
     }
 
@@ -155,7 +155,7 @@ public class SecretService {
         long start = System.currentTimeMillis();
         persistentEngine.cleanup(pathPrefix);
         long duration = System.currentTimeMillis() - start;
-        metricService.submit(MetricType.VAULT_WRITE, duration);
+        metricService.gauge(MetricType.VAULT_WRITE, duration);
         LOGGER.trace("Secret cleanup took {} ms", duration);
     }
 

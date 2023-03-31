@@ -22,9 +22,9 @@ public class MetricUtils {
 
     public void submitThreadPoolExecutorParameters(ExecutorService executorService) {
         MDCCleanerScheduledExecutor threadPoolExecutor = (MDCCleanerScheduledExecutor) executorService;
-        metricService.submit(THREADPOOL_THREADS_TOTAL, threadPoolExecutor.getCorePoolSize());
-        metricService.submit(THREADPOOL_QUEUE_SIZE, threadPoolExecutor.getQueue().size());
-        metricService.submit(THREADPOOL_TASKS_COMPLETED, threadPoolExecutor.getCompletedTaskCount());
-        metricService.submit(THREADPOOL_ACTIVE_THREADS, threadPoolExecutor.getActiveCount());
+        metricService.gauge(THREADPOOL_THREADS_TOTAL, threadPoolExecutor.getCorePoolSize());
+        metricService.gauge(THREADPOOL_QUEUE_SIZE, threadPoolExecutor.getQueue().size());
+        metricService.gauge(THREADPOOL_TASKS_COMPLETED, threadPoolExecutor.getCompletedTaskCount());
+        metricService.gauge(THREADPOOL_ACTIVE_THREADS, threadPoolExecutor.getActiveCount());
     }
 }

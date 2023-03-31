@@ -294,7 +294,7 @@ public class StackCreatorService {
 
         recipeService.sendClusterCreationUsageReport(savedStack);
 
-        metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
+        metricService.gauge(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
     }

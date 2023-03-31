@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.metrics.AwsMetricPublisher;
 import com.sequenceiq.cloudbreak.cloud.aws.common.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
@@ -109,6 +110,9 @@ class AwsInstanceConnectorTest {
 
     @MockBean
     private AwsPageCollector awsPageCollector;
+
+    @MockBean
+    private AwsMetricPublisher awsMetricPublisher;
 
     private AuthenticatedContext authenticatedContext;
 

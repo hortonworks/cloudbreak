@@ -70,7 +70,7 @@ public class SecretServiceTest {
         try {
             underTest.put("key", "value");
         } catch (InvalidKeyException e) {
-            verify(metricService, times(1)).submit(eq(MetricType.VAULT_READ), anyDouble());
+            verify(metricService, times(1)).gauge(eq(MetricType.VAULT_READ), anyDouble());
             throw e;
         }
     }
@@ -82,9 +82,9 @@ public class SecretServiceTest {
 
         String result = underTest.put("key", "value");
 
-        verify(metricService, times(1)).submit(eq(MetricType.VAULT_READ), anyDouble());
+        verify(metricService, times(1)).gauge(eq(MetricType.VAULT_READ), anyDouble());
         verify(persistentEngine, times(1)).put(eq("key"), eq("value"));
-        verify(metricService, times(1)).submit(eq(MetricType.VAULT_WRITE), anyDouble());
+        verify(metricService, times(1)).gauge(eq(MetricType.VAULT_WRITE), anyDouble());
         verify(metricService, times(1)).incrementMetricCounter(any(Metric.class));
 
         Assert.assertEquals("secret", result);
@@ -103,7 +103,7 @@ public class SecretServiceTest {
 
         verify(metricService, times(1)).incrementMetricCounter(any(Metric.class));
         verify(persistentEngine, times(1)).isSecret(anyString());
-        verify(metricService, times(1)).submit(eq(MetricType.VAULT_READ), anyDouble());
+        verify(metricService, times(1)).gauge(eq(MetricType.VAULT_READ), anyDouble());
 
         Assert.assertNull(result);
     }
@@ -126,7 +126,7 @@ public class SecretServiceTest {
         verify(metricService, times(1)).incrementMetricCounter(any(Metric.class));
         verify(persistentEngine, times(1)).isSecret(any());
         verify(persistentEngine, times(0)).delete(anyString());
-        verify(metricService, times(1)).submit(eq(MetricType.VAULT_WRITE), anyDouble());
+        verify(metricService, times(1)).gauge(eq(MetricType.VAULT_WRITE), anyDouble());
     }
 
     @Test
@@ -136,6 +136,6 @@ public class SecretServiceTest {
         verify(metricService, times(1)).incrementMetricCounter(any(Metric.class));
         verify(persistentEngine, times(1)).isSecret(anyString());
         verify(persistentEngine, times(1)).delete(anyString());
-        verify(metricService, times(1)).submit(eq(MetricType.VAULT_WRITE), anyDouble());
+        verify(metricService, times(1)).gauge(eq(MetricType.VAULT_WRITE), anyDouble());
     }
 }
