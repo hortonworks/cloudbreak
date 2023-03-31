@@ -310,7 +310,10 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private void updateStates(StackDto stack, Collection<InstanceMetadataView> failedInstances, Map<String, Optional<String>> newFailedNodeNamesWithReason,
             Set<String> newHealthyHostNames, boolean hostCertExpiring) {
         LOGGER.info("Updating status: Failed instances: {} New failed node names: {} New healthy host name: {} Host cert expiring: {}",
-                failedInstances, newFailedNodeNamesWithReason.keySet(), newHealthyHostNames, hostCertExpiring);
+                failedInstances.stream().map(s -> s.getDiscoveryFQDN()).collect(toSet()),
+                newFailedNodeNamesWithReason.keySet(),
+                newHealthyHostNames,
+                hostCertExpiring);
         clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
         if (!failedInstances.isEmpty()) {
             if (stackUtil.stopStartScalingEntitlementEnabled(stack.getStack())) {

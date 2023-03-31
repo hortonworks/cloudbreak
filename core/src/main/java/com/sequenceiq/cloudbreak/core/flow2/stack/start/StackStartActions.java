@@ -79,7 +79,7 @@ public class StackStartActions {
             protected Selectable createRequest(StackStartStopContext context) {
                 StackDto stackDto = context.getStack();
                 StackView stack = stackDto.getStack();
-                LOGGER.debug("Assembling start request for stack: {}", stack);
+                LOGGER.debug("Assembling start request for stack: {}", stack.getId());
                 List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(stackDto.getInstanceGroupDtos(),
                         stack.getEnvironmentCrn(), stack.getStackAuthentication());
                 List<CloudResource> resources = resourceService.getAllByStackId(stack.getId()).stream()

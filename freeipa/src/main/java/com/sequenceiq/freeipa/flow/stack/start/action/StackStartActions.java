@@ -78,7 +78,7 @@ public class StackStartActions {
             @Override
             protected Selectable createRequest(StackStartContext context) {
                 Stack stack = context.getStack();
-                LOGGER.debug("Assembling start request for stack: {}", stack);
+                LOGGER.debug("Assembling start request for stack: {}", stack.getId());
                 List<CloudInstance> cloudInstances = stack.getNotDeletedInstanceMetaDataSet().stream()
                         .sorted(new PrimaryGatewayFirstThenSortByFqdnComparator())
                         .map(i -> metadataConverter.convert(i))
