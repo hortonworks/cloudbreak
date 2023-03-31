@@ -80,7 +80,7 @@ public class KeytabConfigurationHandlerTest {
 
     @Test
     public void shouldUpdateKeytabs() throws Exception {
-        KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(STACK_ID);
+        KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(STACK_ID, Boolean.FALSE);
         Stack stack = aStack();
         Optional<KerberosConfig> kerberosConfig = of(mock(KerberosConfig.class));
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
@@ -90,7 +90,7 @@ public class KeytabConfigurationHandlerTest {
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(true);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, true, kerberosConfig)).thenReturn(true);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
-        when(keytabProvider.getServiceKeytabResponse(stack, gatewayConfig)).thenReturn(mock(ServiceKeytabResponse.class));
+        when(keytabProvider.getServiceKeytabResponse(stack, gatewayConfig, false)).thenReturn(mock(ServiceKeytabResponse.class));
         when(secretService.getByResponse(any())).thenReturn(KEYTABS_IN_BASE64);
 
         victim.accept(new Event<>(keytabConfigurationRequest));
@@ -101,7 +101,7 @@ public class KeytabConfigurationHandlerTest {
 
     @Test
     public void shouldNotUpdateKeytabs() throws Exception {
-        KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(STACK_ID);
+        KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(STACK_ID, Boolean.FALSE);
         Stack stack = mock(Stack.class);
 
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);

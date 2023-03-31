@@ -36,8 +36,8 @@ public class KeytabProvider {
     @Inject
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
-    public ServiceKeytabResponse getServiceKeytabResponse(Stack stack, GatewayConfig primaryGatewayConfig) {
-        ServiceKeytabRequest request = cmServiceKeytabRequestFactory.create(stack, primaryGatewayConfig);
+    public ServiceKeytabResponse getServiceKeytabResponse(Stack stack, GatewayConfig primaryGatewayConfig, boolean repair) {
+        ServiceKeytabRequest request = cmServiceKeytabRequestFactory.create(stack, primaryGatewayConfig, repair);
         try {
             String accountId = getAccountId(stack);
             return ThreadBasedUserCrnProvider.doAsInternalActor(

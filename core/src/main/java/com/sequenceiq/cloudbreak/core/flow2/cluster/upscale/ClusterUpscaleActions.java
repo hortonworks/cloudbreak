@@ -117,7 +117,7 @@ public class ClusterUpscaleActions {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UploadUpscaleRecipesResult payload, Map<Object, Object> variables) {
                 if (context.isSinglePrimaryGateway() && ClusterManagerType.CLOUDERA_MANAGER.equals(context.getClusterManagerType())) {
-                    KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(context.getStackId());
+                    KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(context.getStackId(), context.isRepair());
                     sendEvent(context, keytabConfigurationRequest.selector(), keytabConfigurationRequest);
                 } else {
                     KeytabConfigurationSuccess keytabConfigurationSuccess = new KeytabConfigurationSuccess(context.getStackId());
