@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.handler.kerberos;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,12 +26,25 @@ public class CmServiceKeytabRequestFactoryTest {
         Stack stack = TestUtil.stack();
         GatewayConfig primaryGatewayConfig = create("fqdn.stest.cloudera.site");
 
-        ServiceKeytabRequest request = underTest.create(stack, primaryGatewayConfig);
+        ServiceKeytabRequest request = underTest.create(stack, primaryGatewayConfig, false);
 
         assertEquals("CM", request.getServiceName());
         assertEquals("fqdn.stest.cloudera.site", request.getServerHostName());
         assertEquals("fqdn", request.getServerHostNameAlias());
+        assertTrue(request.getDoNotRecreateKeytab());
+    }
 
+    @Test
+    public void testAliasCreationWithFQDNWithRepairFlag() {
+        Stack stack = TestUtil.stack();
+        GatewayConfig primaryGatewayConfig = create("fqdn.stest.cloudera.site");
+
+        ServiceKeytabRequest request = underTest.create(stack, primaryGatewayConfig, true);
+
+        assertEquals("CM", request.getServiceName());
+        assertEquals("fqdn.stest.cloudera.site", request.getServerHostName());
+        assertEquals("fqdn", request.getServerHostNameAlias());
+        assertFalse(request.getDoNotRecreateKeytab());
     }
 
     @Test
@@ -37,7 +52,7 @@ public class CmServiceKeytabRequestFactoryTest {
         Stack stack = TestUtil.stack();
         GatewayConfig primaryGatewayConfig = create("fqdn");
 
-        ServiceKeytabRequest request = underTest.create(stack, primaryGatewayConfig);
+        ServiceKeytabRequest request = underTest.create(stack, primaryGatewayConfig, false);
 
         assertEquals("CM", request.getServiceName());
         assertEquals("fqdn", request.getServerHostName());

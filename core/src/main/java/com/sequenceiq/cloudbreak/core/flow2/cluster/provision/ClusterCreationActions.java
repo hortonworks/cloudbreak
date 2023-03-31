@@ -308,7 +308,7 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(ClusterCreationViewContext context) {
-                return new KeytabConfigurationRequest(context.getStackId());
+                return new KeytabConfigurationRequest(context.getStackId(), Boolean.FALSE);
             }
         };
     }

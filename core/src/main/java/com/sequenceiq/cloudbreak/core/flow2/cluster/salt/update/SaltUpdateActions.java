@@ -75,7 +75,7 @@ public class SaltUpdateActions {
 
             @Override
             protected Selectable createRequest(ClusterViewContext context) {
-                return new KeytabConfigurationRequest(context.getStackId());
+                return new KeytabConfigurationRequest(context.getStackId(), Boolean.FALSE);
             }
         };
     }

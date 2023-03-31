@@ -75,6 +75,7 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
     @Override
     public void accept(Event<KeytabConfigurationRequest> keytabConfigurationRequestEvent) {
         Long stackId = keytabConfigurationRequestEvent.getData().getResourceId();
+        boolean repair = keytabConfigurationRequestEvent.getData().getRepair();
         Selectable response;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -83,7 +84,7 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
 
             if (kerberosDetailService.keytabsShouldBeUpdated(stack.cloudPlatform(), childEnvironment, kerberosConfigOptional)) {
                 GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-                ServiceKeytabResponse serviceKeytabResponse = keytabProvider.getServiceKeytabResponse(stack, primaryGatewayConfig);
+                ServiceKeytabResponse serviceKeytabResponse = keytabProvider.getServiceKeytabResponse(stack, primaryGatewayConfig, repair);
                 KeytabModel keytabModel = buildKeytabModel(serviceKeytabResponse);
                 hostOrchestrator.uploadKeytabs(List.of(primaryGatewayConfig), Set.of(keytabModel),
                         ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, stack.getCluster().getId()));

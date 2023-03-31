@@ -13,7 +13,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 @Component
 public class CmServiceKeytabRequestFactory {
 
-    public ServiceKeytabRequest create(Stack stack, GatewayConfig primaryGatewayConfig) {
+    public ServiceKeytabRequest create(Stack stack, GatewayConfig primaryGatewayConfig, boolean repair) {
         ServiceKeytabRequest request = new ServiceKeytabRequest();
         request.setEnvironmentCrn(stack.getEnvironmentCrn());
         request.setClusterCrn(stack.getResourceCrn());
@@ -24,7 +24,7 @@ public class CmServiceKeytabRequestFactory {
             request.setServerHostNameAlias(hostname);
         }
         request.setServiceName("CM");
-        request.setDoNotRecreateKeytab(Boolean.TRUE);
+        request.setDoNotRecreateKeytab(!repair);
         RoleRequest roleRequest = new RoleRequest();
         roleRequest.setRoleName("hadoopadminrole-" + stack.getName());
         roleRequest.setPrivileges(Set.of("Service Administrators", "Certificate Administrators", "Host Administrators", "CA Administrator"));
