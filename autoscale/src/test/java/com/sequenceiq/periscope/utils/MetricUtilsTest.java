@@ -42,10 +42,10 @@ public class MetricUtilsTest {
 
         underTest.submitThreadPoolExecutorParameters(threadPoolExecutor);
 
-        verify(metricService).submit(MetricType.THREADPOOL_ACTIVE_THREADS, 8);
-        verify(metricService).submit(MetricType.THREADPOOL_TASKS_COMPLETED, 7L);
-        verify(metricService).submit(MetricType.THREADPOOL_QUEUE_SIZE, 6);
-        verify(metricService).submit(MetricType.THREADPOOL_THREADS_TOTAL, 5);
+        verify(metricService).gauge(MetricType.THREADPOOL_ACTIVE_THREADS, 8);
+        verify(metricService).gauge(MetricType.THREADPOOL_TASKS_COMPLETED, 7L);
+        verify(metricService).gauge(MetricType.THREADPOOL_QUEUE_SIZE, 6);
+        verify(metricService).gauge(MetricType.THREADPOOL_THREADS_TOTAL, 5);
     }
 
 }

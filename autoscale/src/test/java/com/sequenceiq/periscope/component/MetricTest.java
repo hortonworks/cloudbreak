@@ -241,8 +241,8 @@ public class MetricTest {
 
     @Test
     public void testMetricsWhenSuspendActiveCluster() {
-        metricService.submit(MetricType.CLUSTER_STATE_ACTIVE, 1);
-        metricService.submit(MetricType.CLUSTER_STATE_SUSPENDED, 0);
+        metricService.gauge(MetricType.CLUSTER_STATE_ACTIVE, 1);
+        metricService.gauge(MetricType.CLUSTER_STATE_SUSPENDED, 0);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.RUNNING));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
@@ -265,7 +265,7 @@ public class MetricTest {
 
     @Test
     public void testMetricsWhenRunSuspendedCluster() {
-        metricService.submit(MetricType.CLUSTER_STATE_SUSPENDED, 1);
+        metricService.gauge(MetricType.CLUSTER_STATE_SUSPENDED, 1);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.SUSPENDED));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.SUSPENDED)));
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
@@ -288,7 +288,7 @@ public class MetricTest {
 
     @Test
     public void testMetricsWhenAutofailSuspendsCluster() {
-        metricService.submit(MetricType.CLUSTER_STATE_ACTIVE, 2);
+        metricService.gauge(MetricType.CLUSTER_STATE_ACTIVE, 2);
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
         when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString()))
@@ -318,7 +318,7 @@ public class MetricTest {
 
     @Test
     public void testDeleteActiveCluster() {
-        metricService.submit(MetricType.CLUSTER_STATE_ACTIVE, 1);
+        metricService.gauge(MetricType.CLUSTER_STATE_ACTIVE, 1);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.RUNNING));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
@@ -341,7 +341,7 @@ public class MetricTest {
 
     @Test
     public void testLeaderElection() {
-        metricService.submit(MetricType.LEADER, 0);
+        metricService.gauge(MetricType.LEADER, 0);
         PeriscopeNode periscopeNode = new PeriscopeNode();
         when(periscopeNodeRepository.findById(periscopeNodeConfig.getId())).thenReturn(Optional.of(periscopeNode));
 

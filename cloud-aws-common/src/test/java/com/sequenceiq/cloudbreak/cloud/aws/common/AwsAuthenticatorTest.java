@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.metrics.AwsMetricPublisher;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -63,6 +64,9 @@ class AwsAuthenticatorTest {
 
     @MockBean
     private AwsPageCollector awsPageCollector;
+
+    @MockBean
+    private AwsMetricPublisher awsMetricPublisher;
 
     @BeforeEach
     void awsClientSetup() {

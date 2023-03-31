@@ -99,7 +99,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             String resourceId = getResourceId(payload, flowStateName);
             LOGGER.debug("Resource ID: {}, flow state: {}, phase: {}, execution time {} sec", resourceId,
                     flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
-            metricService.submit(FlowMetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
+            metricService.gauge(FlowMetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
         }
         variables.put(FLOW_STATE_NAME, context.getStateMachine().getState().getId());
         variables.put(FLOW_START_EXEC_TIME, System.currentTimeMillis());

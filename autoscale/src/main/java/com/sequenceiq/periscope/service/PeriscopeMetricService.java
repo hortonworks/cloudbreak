@@ -25,7 +25,7 @@ public class PeriscopeMetricService extends AbstractMetricService {
 
         Arrays.stream(MetricType.values())
                 .filter(this::gaugeMetric)
-                .forEach(m -> submit(m, 0));
+                .forEach(m -> gauge(m, 0));
     }
 
     @Override

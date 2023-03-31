@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import javax.inject.Inject;
 
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonClientExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.metrics.AwsMetricPublisher;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -68,6 +70,9 @@ public abstract class AwsClient {
 
     public static final int MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING = 200;
 
+    @Value("${cb.aws.metrics.enabled:true}")
+    private boolean awsMetricsEnabled;
+
     @Inject
     private AwsSessionCredentialClient credentialClient;
 
@@ -85,6 +90,9 @@ public abstract class AwsClient {
 
     @Inject
     private SdkClientExceptionMapper sdkClientExceptionMapper;
+
+    @Inject
+    private AwsMetricPublisher awsMetricPublisher;
 
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
@@ -280,11 +288,14 @@ public abstract class AwsClient {
     }
 
     protected ClientOverrideConfiguration getDefaultClientConfiguration() {
-        return ClientOverrideConfiguration.builder()
+        ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder = ClientOverrideConfiguration.builder()
                 .retryPolicy(RetryPolicy.builder()
                         .numRetries(MAX_CLIENT_RETRIES)
-                        .build())
-                .build();
+                        .build());
+        if (awsMetricsEnabled) {
+            clientOverrideConfigurationBuilder.addMetricPublisher(awsMetricPublisher);
+        }
+        return clientOverrideConfigurationBuilder.build();
     }
 
     private ClientOverrideConfiguration getClientConfigurationWithMinimalRetries() {

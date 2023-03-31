@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.metrics.AwsMetricPublisher;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -212,6 +213,9 @@ public class AwsRepairTest {
 
     @MockBean
     private AwsMetadataCollector awsMetadataCollector;
+
+    @MockBean
+    private AwsMetricPublisher awsMetricPublisher;
 
     @Test
     public void repairStack() throws Exception {

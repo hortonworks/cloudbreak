@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProv
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.metrics.AwsMetricPublisher;
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyMultiplePreferPrivate;
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyMultiplePreferPublic;
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetSelectorService;
@@ -110,6 +111,9 @@ class AwsValidatorsTest {
 
     @MockBean
     private AwsPageCollector awsPageCollector;
+
+    @MockBean
+    private AwsMetricPublisher awsMetricPublisher;
 
     private AuthenticatedContext authenticatedContext;
 

@@ -50,7 +50,7 @@ public class FlowRegister {
     public Flow remove(String flowId) {
         LOGGER.info("Remove flow {} from running flows", flowId);
         Pair<Flow, String> pair = runningFlows.remove(flowId);
-        metricService.submit(FlowMetricType.ACTIVE_FLOWS, runningFlows.size());
+        metricService.gauge(FlowMetricType.ACTIVE_FLOWS, runningFlows.size());
         LOGGER.info("Running flows after removal: {}", runningFlows.keySet());
         return pair == null ? null : pair.getLeft();
     }
