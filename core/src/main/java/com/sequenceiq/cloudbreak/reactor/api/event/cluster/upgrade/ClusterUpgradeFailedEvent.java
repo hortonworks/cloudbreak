@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FAILED_EVENT;
 
+import java.util.StringJoiner;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -38,5 +40,14 @@ public class ClusterUpgradeFailedEvent extends StackEvent {
 
     public DetailedStackStatus getDetailedStatus() {
         return detailedStatus;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ClusterUpgradeFailedEvent.class.getSimpleName() + "[", "]")
+                .add("exception=" + exception)
+                .add("detailedStatus=" + detailedStatus)
+                .add(super.toString())
+                .toString();
     }
 }
