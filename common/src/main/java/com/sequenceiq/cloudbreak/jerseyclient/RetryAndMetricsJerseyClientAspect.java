@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.jerseyclient;
 
+import static com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryConfig.QUARTZ_EXECUTOR_THREAD_NAME_PREFIX;
+
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
@@ -26,6 +28,9 @@ public class RetryAndMetricsJerseyClientAspect {
     private RetryTemplate jerseyClientRetryTemplate;
 
     @Inject
+    private RetryTemplate quartzJerseyClientRetryTemplate;
+
+    @Inject
     private MetricService metricService;
 
     @Pointcut("within(@com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics *)")
@@ -47,7 +52,12 @@ public class RetryAndMetricsJerseyClientAspect {
         String invokedApi = proceedingJoinPoint.getSignature().getDeclaringType().getSimpleName();
         String invokedMethod = proceedingJoinPoint.getSignature().getName();
         try {
-            Object result = jerseyClientRetryTemplate.execute(context -> proceedingJoinPoint.proceed());
+            Object result;
+            if (Thread.currentThread().getName().contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
+                result = quartzJerseyClientRetryTemplate.execute(context -> proceedingJoinPoint.proceed());
+            } else {
+                result = jerseyClientRetryTemplate.execute(context -> proceedingJoinPoint.proceed());
+            }
             metricService.incrementMetricCounter(MetricType.REST_OPERATION,
                     MetricTag.TARGET_API.name(), invokedApi,
                     MetricTag.TARGET_METHOD.name(), invokedMethod);
