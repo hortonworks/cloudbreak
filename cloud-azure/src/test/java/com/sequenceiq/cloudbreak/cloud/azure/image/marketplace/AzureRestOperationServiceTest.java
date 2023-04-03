@@ -33,7 +33,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestOperationsService;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestResponseException;
-import com.sequenceiq.cloudbreak.cloud.azure.rest.RestTemplateFactory;
+import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestTemplateFactory;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureRestOperationServiceTest {
@@ -45,7 +45,7 @@ public class AzureRestOperationServiceTest {
     private static final MyResponse RESPONSE_BODY = new MyResponse("WORLD");
 
     @Mock
-    private RestTemplateFactory restTemplateFactory;
+    private AzureRestTemplateFactory azureRestTemplateFactory;
 
     @Mock
     private RestTemplate restTemplate;
@@ -65,7 +65,7 @@ public class AzureRestOperationServiceTest {
 
     @BeforeEach
     void setup() {
-        when(restTemplateFactory.create()).thenReturn(restTemplate);
+        when(azureRestTemplateFactory.create()).thenReturn(restTemplate);
     }
 
     @ParameterizedTest

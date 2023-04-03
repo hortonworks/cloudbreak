@@ -19,17 +19,17 @@ public class AzureRestOperationsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureRestOperationsService.class);
 
     @Inject
-    private RestTemplateFactory restTemplateFactory;
+    private AzureRestTemplateFactory azureRestTemplateFactory;
 
     public <T> T httpGet(URI uri, Class<T> responseClass, String token) {
-        RestTemplate restTemplate = restTemplateFactory.create();
+        RestTemplate restTemplate = azureRestTemplateFactory.create();
         HttpHeaders headers = getHttpHeaders(token);
         RequestEntity requestEntity = new RequestEntity(headers, HttpMethod.GET, uri);
         return executeHttpCall(responseClass, restTemplate, requestEntity, HttpMethod.GET);
     }
 
     public <T> T httpPut(URI uri, Object body, Class<T> responseClass, String token) {
-        RestTemplate restTemplate = restTemplateFactory.create();
+        RestTemplate restTemplate = azureRestTemplateFactory.create();
         HttpHeaders headers = getHttpHeaders(token);
         RequestEntity requestEntity = new RequestEntity(body, headers, HttpMethod.PUT, uri);
         return executeHttpCall(responseClass, restTemplate, requestEntity, HttpMethod.PUT);
