@@ -34,7 +34,6 @@ public enum UpscaleFlowEvent implements FlowEvent {
     UPSCALE_EXTEND_METADATA_FAILED_EVENT(CloudPlatformResult.failureSelector(CollectMetadataResult.class)),
     UPSCALE_SAVE_METADATA_FINISHED_EVENT("UPSCALE_SAVE_METADATA_FINISHED_EVENT"),
     UPSCALE_TLS_SETUP_FINISHED_EVENT("UPSCALE_TLS_SETUP_FINISHED_EVENT"),
-    UPSCALE_TLS_SETUP_FAILED_EVENT(EventSelectorUtil.selector(UpscaleFailureEvent.class)),
     UPSCALE_CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterProxyRegistrationSuccess.class)),
     UPSCALE_CLUSTER_PROXY_REGISTRATION_FAILED_EVENT(EventSelectorUtil.selector(ClusterProxyRegistrationFailed.class)),
     UPSCALE_BOOTSTRAP_MACHINES_FINISHED_EVENT(EventSelectorUtil.selector(BootstrapMachinesSuccess.class)),
@@ -59,7 +58,7 @@ public enum UpscaleFlowEvent implements FlowEvent {
     UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT("UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT"),
     UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT("UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT"),
     UPSCALE_FINISHED_EVENT("UPSCALE_FINISHED_EVENT"),
-    FAILURE_EVENT("UPSCALE_FAILURE_EVENT"),
+    FAILURE_EVENT(EventSelectorUtil.selector(UpscaleFailureEvent.class)),
     FAIL_HANDLED_EVENT("UPSCALE_FAIL_HANDLED_EVENT");
 
     private final String event;
