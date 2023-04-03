@@ -42,7 +42,7 @@ class TelemetryFeatureServiceTest {
         Map<String, String> packages = new HashMap(generatePackageVersions());
         packages.remove("cdp-logging-agent");
         boolean result = undertest.isECDSAAccessKeyTypeSupported(packages);
-        assertFalse(result);
+        assertTrue(result);
     }
 
     private Map<String, String> generatePackageVersions() {
