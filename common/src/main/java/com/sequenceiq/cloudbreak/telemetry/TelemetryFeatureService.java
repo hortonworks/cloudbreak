@@ -29,17 +29,17 @@ public class TelemetryFeatureService {
             String packageName = packageWithVersion.getKey();
             Versioned minimumVersion = packageWithVersion.getValue();
             if (!packages.containsKey(packageName)) {
-                LOGGER.info("Image doesn't contain {} package which is required for ECDSA.", packageName);
-                return false;
-            }
-            String packageVersion = packages.get(packageName);
-            if (new VersionComparator().compare(() -> packageVersion, minimumVersion) < 0) {
-                LOGGER.info("{} package's version {} is smaller than {}. Therefore ECDSA based access key is not enabled.",
-                        packageName, packageVersion, minimumVersion.getVersion());
-                return false;
+                LOGGER.warn("Image doesn't contain {} package.", packageName);
+            } else {
+                String packageVersion = packages.get(packageName);
+                if (new VersionComparator().compare(() -> packageVersion, minimumVersion) < 0) {
+                    LOGGER.info("{} package's version {} is smaller than {}. Therefore ECDSA based access key is not enabled.",
+                            packageName, packageVersion, minimumVersion.getVersion());
+                    return false;
+                }
             }
         }
-        LOGGER.info("ECDSA based access key type is enabled by package versions.");
+        LOGGER.info("ECDSA based access key type is enabled by package versions. {}", packages);
         return true;
     }
 }
