@@ -1748,7 +1748,7 @@ class SdxServiceTest {
     }
 
     @Test
-    void testCreateEnterprise() throws IOException, TransactionExecutionException {
+    void testCreateEnterpriseDatalake() throws IOException, TransactionExecutionException {
         final String runtime = "7.2.17";
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/enterprise.json");
@@ -1773,6 +1773,7 @@ class SdxServiceTest {
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
+        when(entitlementService.enterpriseSdxDisabled(anyString())).thenReturn(false);
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
@@ -1785,15 +1786,29 @@ class SdxServiceTest {
     }
 
     @Test
-    void testCreateEnterpriseWrongVersion() {
+    void testCreateEnterpriseDatalakeWrongVersion() {
         final String runtime = "7.2.11";
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, ENTERPRISE);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE, null);
+        when(entitlementService.enterpriseSdxDisabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("Provisioning an Enterprise SDX shape is only valid for CM version greater than or equal to 7.2.17 and not 7.2.11",
                 badRequestException.getMessage());
+    }
+
+    @Test
+    void testCreateEnterpriseDatalakeWithDisabledEntitlement() {
+        final String runtime = "7.2.17";
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, ENTERPRISE);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        mockEnvironmentCall(sdxClusterRequest, AZURE, null);
+        when(entitlementService.enterpriseSdxDisabled(anyString())).thenReturn(true);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
+        assertEquals("Provisioning an enterprise data lake cluster is disabled. " +
+                "Contact Cloudera support to enable this scale for the account.", badRequestException.getMessage());
     }
 
     @Test

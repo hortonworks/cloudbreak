@@ -1007,6 +1007,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                         + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + runtime);
             }
         } else if (SdxClusterShape.ENTERPRISE.equals(shape)) {
+            if (entitlementService.enterpriseSdxDisabled(ThreadBasedUserCrnProvider.getAccountId())) {
+                validationBuilder.error("Provisioning an enterprise data lake cluster is disabled. " +
+                        "Contact Cloudera support to enable this scale for the account.");
+            }
             if (!isShapeVersionSupportedByRuntime(runtime, ENTERPRISE_DATALAKE_REQUIRED_VERSION)) {
                 validationBuilder.error("Provisioning an Enterprise SDX shape is only valid for CM version greater than or equal to "
                         + ENTERPRISE_DATALAKE_REQUIRED_VERSION + " and not " + runtime);
