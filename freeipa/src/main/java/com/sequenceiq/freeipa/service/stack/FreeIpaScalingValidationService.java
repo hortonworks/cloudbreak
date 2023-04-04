@@ -13,8 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScalingPath;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
@@ -42,9 +44,32 @@ public class FreeIpaScalingValidationService {
         verticalScalingValidatorService.validateRequest(stack, request);
     }
 
-    public void validateStackForDownscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {
+    public void validateStackForDownscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath, Set<String> instanceIdsToDelete) {
         validateScalingIsDownscale(scalingPath);
+        validateInstanceIdsToDelete(allInstances, instanceIdsToDelete);
         executeCommonValidations(allInstances, stack, scalingPath, OperationType.DOWNSCALE);
+    }
+
+    private void validateInstanceIdsToDelete(Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDelete) {
+        if (Objects.nonNull(instanceIdsToDelete)) {
+            validateInstanceIdsAreNotEmpty(instanceIdsToDelete);
+            validateInstanceIdsArePartOfAllInstances(allInstances, instanceIdsToDelete);
+            validateInstanceIdToDeleteAreNotPrimaryGateways(allInstances, instanceIdsToDelete);
+        }
+    }
+
+    private void validateInstanceIdToDeleteAreNotPrimaryGateways(Set<InstanceMetaData> allInstances, Set<String> instanceIds) {
+        Set<String> primaryGatewayInstanceMetadata = allInstances.stream()
+                .filter(imd -> instanceIds.contains(imd.getInstanceId()))
+                .filter(imd -> InstanceMetadataType.GATEWAY_PRIMARY == imd.getInstanceMetadataType())
+                .map(InstanceMetaData::getInstanceId)
+                .collect(Collectors.toSet());
+        if (!primaryGatewayInstanceMetadata.isEmpty()) {
+            String message = String.format("Refusing %s as instance ids contains an instance that is a primary gateway. Please select another " +
+                    "instance. Primary gateway instance: %s.", OperationType.DOWNSCALE.getLowerCaseName(), primaryGatewayInstanceMetadata);
+            LOGGER.warn(message);
+            throw new BadRequestException(message);
+        }
     }
 
     private void validateScalingIsUpscale(ScalingPath scalingPath) {
@@ -60,6 +85,21 @@ public class FreeIpaScalingValidationService {
             throw new BadRequestException(String.format("Refusing %s as target node count is higher than current. Current node count: %d, " +
                             "target node count: %d.", OperationType.DOWNSCALE.getLowerCaseName(), scalingPath.getOriginalAvailabilityType().getInstanceCount(),
                     scalingPath.getTargetAvailabilityType().getInstanceCount()));
+        }
+    }
+
+    private void validateInstanceIdsAreNotEmpty(Set<String> instanceIdsToDownscale) {
+        if (instanceIdsToDownscale.isEmpty()) {
+            throwErrorForEmptyDownscaleCandidates();
+        }
+    }
+
+    private void validateInstanceIdsArePartOfAllInstances(Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDownscale) {
+        Set<String> allInstanceIds = allInstances.stream()
+                .map(InstanceMetaData::getInstanceId).collect(Collectors.toSet());
+        Set<String> unknownInstanceIds = Sets.difference(instanceIdsToDownscale, allInstanceIds);
+        if (!unknownInstanceIds.isEmpty()) {
+            throwErrorForUnknownDownscaleCandidates(unknownInstanceIds);
         }
     }
 
@@ -130,6 +170,20 @@ public class FreeIpaScalingValidationService {
                 scalingPath.getOriginalAvailabilityType().getInstanceCount(),
                 scalingPath.getTargetAvailabilityType().getInstanceCount(),
                 generateAlternativeTargetString(scaleType.getLowerCaseName(), allowedScalingPaths.getPaths().get(scalingPath.getOriginalAvailabilityType())));
+        LOGGER.warn(message);
+        throw new BadRequestException(message);
+    }
+
+    private void throwErrorForEmptyDownscaleCandidates() {
+        String message = String.format("Refusing %s as you specified an empty list of downscale candidates. Please specify at least one instance " +
+                        "id to downscale", OperationType.DOWNSCALE.getLowerCaseName());
+        LOGGER.warn(message);
+        throw new BadRequestException(message);
+    }
+
+    private void throwErrorForUnknownDownscaleCandidates(Set<String> unknownInstanceIds) {
+        String message = String.format("Refusing %s as some of the selected instance ids are not part of the cluster. Unknown instance ids: %s.",
+                OperationType.DOWNSCALE.getLowerCaseName(), unknownInstanceIds);
         LOGGER.warn(message);
         throw new BadRequestException(message);
     }

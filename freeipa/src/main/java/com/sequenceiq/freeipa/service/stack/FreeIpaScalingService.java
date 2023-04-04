@@ -6,7 +6,6 @@ import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVer
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,7 +17,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityInfo;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScaleRequestBase;
@@ -56,6 +54,9 @@ public class FreeIpaScalingService {
     @Inject
     private FreeIpaScalingValidationService validationService;
 
+    @Inject
+    private FreeipaDownscaleNodeCalculatorService freeipaDownscaleNodeCalculatorService;
+
     public UpscaleResponse upscale(String accountId, UpscaleRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
         Set<InstanceMetaData> allInstances = stack.getNotDeletedInstanceMetaDataSet();
@@ -78,13 +79,15 @@ public class FreeIpaScalingService {
     }
 
     public DownscaleResponse downscale(String accountId, DownscaleRequest request) {
+        LOGGER.debug("Freeipa downscale request: {}", request);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
         Set<InstanceMetaData> allInstances = stack.getNotDeletedInstanceMetaDataSet();
         AvailabilityInfo originalAvailabilityInfo = new AvailabilityInfo(allInstances.size());
+        AvailabilityType targetAvailabilityType = freeipaDownscaleNodeCalculatorService.calculateTargetAvailabilityType(request, allInstances.size());
+        ScalingPath scalingPath = new ScalingPath(originalAvailabilityInfo.getAvailabilityType(), targetAvailabilityType);
         logRequest(OperationType.DOWNSCALE, request, originalAvailabilityInfo);
-        validationService.validateStackForDownscale(allInstances, stack,
-                new ScalingPath(originalAvailabilityInfo.getAvailabilityType(), request.getTargetAvailabilityType()));
-        return triggerDownscale(request, stack, originalAvailabilityInfo);
+        validationService.validateStackForDownscale(allInstances, stack, scalingPath, request.getInstanceIds());
+        return triggerDownscale(request, stack, originalAvailabilityInfo, targetAvailabilityType, request.getInstanceIds());
     }
 
     private UpscaleResponse triggerUpscale(UpscaleRequest request, Stack stack, AvailabilityInfo originalAvailabilityType) {
@@ -135,33 +138,26 @@ public class FreeIpaScalingService {
         return message;
     }
 
-    private DownscaleResponse triggerDownscale(DownscaleRequest request, Stack stack, AvailabilityInfo originalAvailabilityInfo) {
+    private DownscaleResponse triggerDownscale(DownscaleRequest request, Stack stack, AvailabilityInfo originalAvailabilityInfo,
+            AvailabilityType targetAvailabilityType, Set<String> instanceIdsToDelete) {
         Operation operation = startScalingOperation(stack.getAccountId(), request.getEnvironmentCrn(), OperationType.DOWNSCALE);
-        ArrayList<String> instanceIdList = getDownscaleCandidates(stack, originalAvailabilityInfo, request.getTargetAvailabilityType());
+        ArrayList<String> downscaleCandidates = freeipaDownscaleNodeCalculatorService
+                .calculateDownscaleCandidates(stack, originalAvailabilityInfo, request.getTargetAvailabilityType(), instanceIdsToDelete);
         DownscaleEvent downscaleEvent = new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
-                stack.getId(), instanceIdList, request.getTargetAvailabilityType().getInstanceCount(), false, false, false, operation.getOperationId());
+                stack.getId(), downscaleCandidates, targetAvailabilityType.getInstanceCount(), false, false, false, operation.getOperationId());
         try {
             LOGGER.info("Trigger downscale flow with event: {}", downscaleEvent);
             FlowIdentifier flowIdentifier = flowManager.notify(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent);
             DownscaleResponse response = new DownscaleResponse();
             response.setOperationId(operation.getOperationId());
             response.setOriginalAvailabilityType(originalAvailabilityInfo.getAvailabilityType());
-            response.setTargetAvailabilityType(request.getTargetAvailabilityType());
+            response.setTargetAvailabilityType(targetAvailabilityType);
             response.setFlowIdentifier(flowIdentifier);
             return response;
         } catch (Exception e) {
             String exception = handleFlowException(operation, e, stack);
             throw new BadRequestException(exception);
         }
-    }
-
-    private ArrayList<String> getDownscaleCandidates(Stack stack, AvailabilityInfo originalAvailabilityInfo, AvailabilityType targetAvailabilityType) {
-        int instancesToRemove = originalAvailabilityInfo.getActualNodeCount() - targetAvailabilityType.getInstanceCount();
-        return stack.getNotDeletedInstanceMetaDataSet().stream()
-                .filter(imd -> imd.getInstanceMetadataType() != InstanceMetadataType.GATEWAY_PRIMARY)
-                .limit(instancesToRemove)
-                .map(InstanceMetaData::getInstanceId)
-                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private Operation startScalingOperation(String accountId, String envCrn, OperationType operationType) {
