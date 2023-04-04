@@ -9,18 +9,14 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
-import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
@@ -28,21 +24,14 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
-import com.sequenceiq.cloudbreak.template.views.HostgroupView;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
-public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
-
-    private static final String KNOX_SERVICE_REF_NAME = "knox";
-
-    private static final String KNOX_GATEWAY_REF_NAME = "knox-KNOX_GATEWAY-BASE";
+public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implements BaseKnoxConfigProvider {
 
     private static final String KNOX_MASTER_SECRET = "gateway_master_secret";
 
@@ -139,6 +128,11 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
         }
     }
 
+    @Override
+    public List<String> getRoleTypes() {
+        return List.of(KnoxRoles.KNOX_GATEWAY, KnoxRoles.IDBROKER);
+    }
+
     @VisibleForTesting
     ApiClusterTemplateConfig getGatewayWhitelistConfig(TemplatePreparationObject source) {
         String whitelist;
@@ -157,18 +151,6 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
             whitelist = "^*.*$";
         }
         return config(GATEWAY_WHITELIST, whitelist);
-    }
-
-    @Override
-    public Map<String, ApiClusterTemplateService> getAdditionalServices(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        if (source.getGatewayView() != null && cmTemplateProcessor.getServiceByType(KnoxRoles.KNOX).isEmpty()) {
-            ApiClusterTemplateService knox = createBaseKnoxService();
-            Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
-            return hostgroupViews.stream()
-                    .filter(hg -> InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType()))
-                    .collect(Collectors.toMap(HostgroupView::getName, v -> knox));
-        }
-        return Map.of();
     }
 
     private Set<ApiClusterTemplateConfig> getDefaultsIfRequired(TemplatePreparationObject source) {
@@ -201,21 +183,4 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
         return false;
     }
 
-    private ApiClusterTemplateService createBaseKnoxService() {
-        ApiClusterTemplateService knox = new ApiClusterTemplateService().serviceType(KnoxRoles.KNOX).refName(KNOX_SERVICE_REF_NAME);
-        ApiClusterTemplateRoleConfigGroup knoxGateway = new ApiClusterTemplateRoleConfigGroup()
-                .roleType(KnoxRoles.KNOX_GATEWAY).base(true).refName(KNOX_GATEWAY_REF_NAME);
-        knox.roleConfigGroups(List.of(knoxGateway));
-        return knox;
-    }
-
-    @Override
-    public String getServiceType() {
-        return KnoxRoles.KNOX;
-    }
-
-    @Override
-    public List<String> getRoleTypes() {
-        return List.of(KnoxRoles.KNOX_GATEWAY, KnoxRoles.IDBROKER);
-    }
 }
