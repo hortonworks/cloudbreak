@@ -48,18 +48,28 @@ public class AzureHttpClientConfigurer {
     }
 
     public <T extends HttpTrait<T>> T configureDefault(T configurable) {
-        return configurable.httpLogOptions(new HttpLogOptions().setLogLevel(logLevel)).httpClient(newHttpClient());
+        T client = configurable.httpLogOptions(getHttpLogOptions()).httpClient(newHttpClient());
+        AzureQuartzRetryUtils.reconfigureHttpClientIfNeeded(client::retryOptions);
+        return client;
     }
 
     public <T extends AzureConfigurable<T>> T configureDefault(T configurable) {
-        return configurable.withLogLevel(logLevel).withHttpClient(newHttpClient());
+        T client = configurable.withLogOptions(getHttpLogOptions()).withHttpClient(newHttpClient());
+        AzureQuartzRetryUtils.reconfigureHttpClientIfNeeded(client::withRetryOptions);
+        return client;
     }
 
     public MarketplaceOrderingManager.Configurable configureDefault(MarketplaceOrderingManager.Configurable configurable) {
-        return configurable.withLogOptions(new HttpLogOptions().setLogLevel(logLevel)).withHttpClient(newHttpClient());
+        MarketplaceOrderingManager.Configurable client = configurable.withLogOptions(getHttpLogOptions()).withHttpClient(newHttpClient());
+        AzureQuartzRetryUtils.reconfigureHttpClientIfNeeded(client::withRetryOptions);
+        return client;
     }
 
     public HttpClient newHttpClient() {
         return new OkHttpAsyncHttpClientBuilder(okHttpClient).build();
+    }
+
+    private HttpLogOptions getHttpLogOptions() {
+        return new HttpLogOptions().setLogLevel(logLevel);
     }
 }
