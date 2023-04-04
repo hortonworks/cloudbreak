@@ -13,6 +13,7 @@ import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.SCALABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -1744,6 +1745,55 @@ class SdxServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals(String.format("Provisioning a micro duty data lake cluster is not enabled for %s. ", AZURE.name()) +
                 "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testCreateMediumDutyScalable() throws IOException, TransactionExecutionException {
+        final String runtime = "7.2.17";
+        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        String scalableJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/scalable.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(scalableJson, StackV4Request.class));
+        when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, SCALABLE);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        withCloudStorage(sdxClusterRequest);
+        withRecipe(sdxClusterRequest);
+        RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
+        RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
+        recipeViewV4Response.setName("post-service-deployment");
+        recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
+        when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        when(clock.getCurrentTimeMillis()).thenReturn(1L);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        SdxCluster createdSdxCluster = result.getLeft();
+        assertEquals(id, createdSdxCluster.getId());
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        verify(recipeV4Endpoint, times(1)).listInternal(anyLong(), anyString());
+        SdxCluster capturedSdx = captor.getValue();
+        assertEquals(SCALABLE, capturedSdx.getClusterShape());
+    }
+
+    @Test
+    void testCreateMediumDutyScalableWrongVersion() {
+        final String runtime = "7.2.11";
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, SCALABLE);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE, null);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
+        assertEquals("Provisioning a Scalable SDX shape is only valid for CM version greater than or equal to 7.2.17 and not 7.2.11",
+                badRequestException.getMessage());
     }
 
     @Test
