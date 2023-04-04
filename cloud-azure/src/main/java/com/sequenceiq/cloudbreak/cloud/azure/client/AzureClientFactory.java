@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
-import static com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryConfig.QUARTZ_EXECUTOR_THREAD_NAME_PREFIX;
-
 import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,8 +35,6 @@ public class AzureClientFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClientFactory.class);
 
     private static final String RESOURCE_MANAGER_ENDPOINT_URL = "resourceManagerEndpointUrl";
-
-    private static final int MAX_AZURE_CLIENT_QUARTZ_RETRY = 1;
 
     private final AzureCredentialView credentialView;
 
@@ -123,9 +119,7 @@ public class AzureClientFactory {
         IdentityClientOptions identityClientOptions = new IdentityClientOptions()
                 .setExecutorService(mdcCopyingThreadPoolExecutor)
                 .setHttpClient(azureHttpClientConfigurer.newHttpClient());
-        if (Thread.currentThread().getName().contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
-            identityClientOptions.setMaxRetry(MAX_AZURE_CLIENT_QUARTZ_RETRY);
-        }
+        AzureQuartzRetryUtils.reconfigureAzureClientIfNeeded(identityClientOptions::setMaxRetry);
         return new CloudbreakClientCertificateCredential(
                 new IdentityClientBuilder()
                         .tenantId(credentialView.getTenantId())
@@ -143,9 +137,7 @@ public class AzureClientFactory {
                 .clientSecret(credentialView.getSecretKey())
                 .httpClient(azureHttpClientConfigurer.newHttpClient())
                 .executorService(mdcCopyingThreadPoolExecutor);
-        if (Thread.currentThread().getName().contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
-            clientSecretCredentialBuilder.maxRetry(MAX_AZURE_CLIENT_QUARTZ_RETRY);
-        }
+        AzureQuartzRetryUtils.reconfigureAzureClientIfNeeded(clientSecretCredentialBuilder::maxRetry);
         return clientSecretCredentialBuilder.build();
     }
 
