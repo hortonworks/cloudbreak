@@ -88,6 +88,8 @@ cb:
   dependentHostGroups:
     cache.ttl: 10
     max.entries: 500
+  userSync:
+    version.threshold: 2.70.0
 
 rest:
   debug: false

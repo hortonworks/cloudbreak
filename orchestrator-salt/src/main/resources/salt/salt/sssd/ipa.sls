@@ -155,14 +155,14 @@ restore_systemctl:
 {% endif %}
 
 dns_resolution_fix:
-  file.append:
+  file.replace:
     - name: /etc/resolv.conf
-    - onlyif:
-      - ! grep -q '^domain .*' /etc/resolv.conf
-{% if metadata.platform != 'YARN' %}
-      - java -version |& grep 'openjdk version "11.0'
-{% endif %}
-    - text: "domain {{ salt['grains.get']('domain') }}"
+    - pattern: "^domain.*"
+    - repl: "domain {{ salt['grains.get']('domain') }}"
+    - append_if_not_found: True
+{%- if metadata.platform != 'YARN' %}
+    - onlyif: java -version |& grep 'openjdk version "11.0'
+{%- endif %}
 
 include:
     - sssd.ssh
