@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -66,22 +67,32 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
                 .orElseThrow(() -> new AzureResourceException("Volume set resource not found"));
 
         VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(volumeSet);
-        volumeSetAttributes.getVolumes()
-                .forEach(volume -> {
-                    Disk disk = client.getDiskById(volume.getId());
-                    if (!diskIds.contains(disk.id())) {
-                        if (disk.isAttachedToVirtualMachine()) {
-                            detachDiskFromVmByVmId(client, disk);
-                        }
-                        attachDiskToVm(client, disk, vm);
-                    } else {
-                        LOGGER.info("Managed disk {} is already attached to VM {}", disk, vm);
-                    }
-                });
+        volumeSetAttributes.getVolumes().forEach(volume -> attachVolumeIfNeeded(client, vm, diskIds, volume,
+                volumeSetAttributes.getDiscoveryFQDN(), instance.getParameters().get(CloudInstance.FQDN)));
         volumeSet.setInstanceId(cloudResourceInstance.getInstanceId());
         volumeSet.setStatus(CommonStatus.CREATED);
         LOGGER.info("Volume set {} attached successfully", volumeSet);
         return List.of(volumeSet);
+    }
+
+    private void attachVolumeIfNeeded(AzureClient client, VirtualMachine vm, Set<String> diskIds, VolumeSetAttributes.Volume volume,
+            String volumeFqdn, Object instanceFqdn) {
+        Disk disk = client.getDiskById(volume.getId());
+        if (!diskIds.contains(disk.id())) {
+            validateVolumeFqdnBeforeAttachment(volumeFqdn, instanceFqdn);
+            if (disk.isAttachedToVirtualMachine()) {
+                detachDiskFromVmByVmId(client, disk);
+            }
+            attachDiskToVm(client, disk, vm);
+        } else {
+            LOGGER.info("Managed disk {} is already attached to VM {}", disk, vm);
+        }
+    }
+
+    private void validateVolumeFqdnBeforeAttachment(String volumeFqdn, Object instanceFqdn) {
+        if (volumeFqdn != null && instanceFqdn != null && !StringUtils.equals(volumeFqdn, (String) instanceFqdn)) {
+            throw new AzureResourceException(String.format("Not possible to attach volume with FQDN %s to instance with FQDN %s", volumeFqdn, instanceFqdn));
+        }
     }
 
     private void detachDiskFromVmByVmId(AzureClient client, Disk disk) {
