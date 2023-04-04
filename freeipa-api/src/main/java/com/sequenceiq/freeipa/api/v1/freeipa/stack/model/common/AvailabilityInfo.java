@@ -27,4 +27,28 @@ public class AvailabilityInfo {
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        AvailabilityInfo that = (AvailabilityInfo) o;
+
+        if (getActualNodeCount() != that.getActualNodeCount()) {
+            return false;
+        }
+        return getAvailabilityType() == that.getAvailabilityType();
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getAvailabilityType().hashCode();
+        result = 31 * result + getActualNodeCount();
+        return result;
+    }
+
 }
