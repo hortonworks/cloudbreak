@@ -167,8 +167,9 @@ class UserDataBuilderTest {
     }
 
     @Test
-    @DisplayName("test if NO CCM parameters are passed the user data does not contain them")
+    @DisplayName("test if NO CCM parameters are passed the user data does not contain them. Should also pass the API Endpoint URL.")
     void testBuildUserDataWithoutCCMParams() throws IOException {
+        ReflectionTestUtils.setField(underTest, "cdpApiEndpointUrl", "endpointUrl");
         PlatformParameters platformParameters = mock(PlatformParameters.class);
         ScriptParams scriptParams = mock(ScriptParams.class);
         when(scriptParams.getDiskPrefix()).thenReturn("sd");

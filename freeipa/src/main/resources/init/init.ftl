@@ -6,6 +6,7 @@ exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 set -x
 
 export ENVIRONMENT_CRN="${environmentCrn}"
+export CDP_API_ENDPOINT_URL="${cdpApiEndpointUrl}"
 export CLOUD_PLATFORM="${cloudPlatform}"
 export START_LABEL=${platformDiskStartLabel}
 export PLATFORM_DISK_PREFIX=${platformDiskPrefix}

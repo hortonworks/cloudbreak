@@ -12,9 +12,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityMode;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
@@ -40,6 +42,9 @@ import freemarker.template.TemplateException;
 public class UserDataBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDataBuilder.class);
+
+    @Value("${cdp.apiendpoint.url:}")
+    private String cdpApiEndpointUrl;
 
     @Inject
     private UserDataBuilderParams userDataBuilderParams;
@@ -75,6 +80,7 @@ public class UserDataBuilder {
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
         model.put("cbCert", cbCert);
+        model.put("cdpApiEndpointUrl", Strings.nullToEmpty(cdpApiEndpointUrl));
         extendModelWithCcmConnectivity(InstanceGroupType.GATEWAY, ccmConnectivityParameters, accountId, environment, model);
         extendModelWithProxyParams(proxyConfig, model);
         return build(model);
