@@ -94,6 +94,9 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     private InstanceGroupNetwork instanceGroupNetwork;
 
+//    @Column(columnDefinition="TEXT[]")
+    private String groups;
+
     public String getGroupName() {
         return groupName;
     }
@@ -304,6 +307,14 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     public void setInstanceGroupNetwork(InstanceGroupNetwork instanceGroupNetwork) {
         this.instanceGroupNetwork = instanceGroupNetwork;
+    }
+
+    public List<String> getGroups() {
+        return List.of(groups.split(","));
+    }
+
+    public void setGroups(String groups) {
+        this.groups = groups;
     }
 
     @Override

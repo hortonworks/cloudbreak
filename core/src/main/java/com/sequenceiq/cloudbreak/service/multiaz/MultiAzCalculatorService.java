@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class MultiAzCalculatorService {
@@ -247,5 +249,132 @@ public class MultiAzCalculatorService {
     private boolean isPreferredSubnetsSpecifiedForScaling(NetworkScaleDetails networkScaleDetails) {
         return networkScaleDetails != null
                 && CollectionUtils.isNotEmpty(networkScaleDetails.getPreferredSubnetIds());
+    }
+
+    public void calculate(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacementList,
+            SdxClusterShape sdxClusterShape) {
+        if (isGroupMultiAZ(sdxClusterShape)) {
+            calculateByGroup(instanceGroup, groupPlacementList);
+        } else {
+            calculateByRoundRobin(subnetAzPairs, instanceGroup);
+        }
+    }
+
+    private boolean isGroupMultiAZ(SdxClusterShape sdxClusterShape) {
+        return sdxClusterShape == SdxClusterShape.SCALABLE || sdxClusterShape == SdxClusterShape.MEDIUM_DUTY_HA;
+    }
+
+    private void calculateByGroup(InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacementList) {
+        LOGGER.trace("Calculate the subnet by group");
+        List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>(instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
+        groupPlacementList.stream().forEach(groupPlacement -> collectCurrentSubnetUsage(instanceMetadataViews, groupPlacement.getSubnetUsage()));
+
+        if (multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
+                if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
+                    GroupPlacement groupPlacement = getGroupPlacementForComponent(instanceMetaData.getInstanceGroupName(),
+                            instanceMetaData.getInstanceGroup().getGroups(), groupPlacementList);
+                    Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(groupPlacement.getSubnetUsage());
+                    String leastUsedSubnetId = searchTheSmallestUsedID(groupPlacement.getSubnetUsage(), numberOfInstanceInASubnet);
+
+                    instanceMetaData.setSubnetId(leastUsedSubnetId);
+                    instanceMetaData.setAvailabilityZone(groupPlacement.getAvailabilityZone());
+
+                    groupPlacement.increaseSubnetUsage(leastUsedSubnetId);
+                }
+            }
+        }
+    }
+
+    private GroupPlacement getGroupPlacementForComponent(String componentName, List<String> groups, Set<GroupPlacement> groupPlacementList) {
+        return groupPlacementList
+                .stream()
+                .filter(gp -> groups.contains(gp.getName()))
+                .filter(gp -> !gp.containsComponent(componentName))
+                .findFirst()
+                .orElseThrow(() -> new CloudbreakServiceException("Error")); //TODO
+    }
+
+    public Set<GroupPlacement> prepareGroupAzMap(Map<String, String> subnetAzPairs, Set<InstanceGroup> instanceGroups) {
+        Set<String> groups = getGroups(instanceGroups);
+        List<String> availabilityZones = getAvailabilityZones(subnetAzPairs);
+        Set<GroupPlacement> groupPlacements = new HashSet<>();
+
+        if (availabilityZones.size() < 3 || groups.size() != 3) {
+            return Collections.emptySet();
+        }
+
+        groups.forEach(gp -> {
+            String az = availabilityZones.stream().findFirst().get();
+            GroupPlacement groupPlacement = new GroupPlacement(gp, az);
+            groupPlacements.add(groupPlacement);
+
+            subnetAzPairs
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue().equals(az))
+                    .map(Map.Entry::getKey)
+                    .forEach(subnet -> groupPlacement.addSubnet(subnet));
+        });
+        return groupPlacements;
+    }
+
+    private List<String> getAvailabilityZones(Map<String, String> subnetAzPairs) {
+        return subnetAzPairs
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+    }
+
+    private Set<String> getGroups(Set<InstanceGroup> instanceGroups) {
+        return instanceGroups
+                .stream()
+                .filter(ig -> Objects.nonNull(ig.getGroups()))
+                .map(InstanceGroup::getGroups)
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
+    }
+
+    public static class GroupPlacement {
+        private final String name;
+        private final String availabilityZone;
+        private final Set<String> components;
+        private final Map<String, Integer> subnetUsage;
+
+        public GroupPlacement(String name, String availabilityZone) {
+            this.name = name;
+            this.availabilityZone = availabilityZone;
+            this.components = new HashSet<>();
+            this.subnetUsage = new HashMap<>();
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getAvailabilityZone() {
+            return availabilityZone;
+        }
+
+        public boolean containsComponent(String componentName) {
+            return components.contains(componentName);
+        }
+
+        public void addComponent(String componentName) {
+            components.add(componentName);
+        }
+
+        public void addSubnet(String subnet) {
+            subnetUsage.put(subnet, 0);
+        }
+
+        public void increaseSubnetUsage(String subnet) {
+            subnetUsage.put(subnet, subnetUsage.getOrDefault(subnet, 0) + 1);
+        }
+
+        public Map<String, Integer> getSubnetUsage() {
+            return subnetUsage;
+        }
     }
 }
