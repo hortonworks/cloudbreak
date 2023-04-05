@@ -61,7 +61,7 @@ public class CmDiagnosticsFlowServiceTest {
         Stack stack = mock(Stack.class);
         given(stackService.getByIdWithListsInTransaction(STACK_ID)).willReturn(stack);
         given(stack.getCluster()).willReturn(mock(Cluster.class));
-        given(stack.getAllNodes()).willReturn(nodes());
+        given(stack.getAllFunctioningNodes()).willReturn(nodes());
         given(gatewayConfigService.getAllGatewayConfigs(stack)).willReturn(new ArrayList<>());
         given(gatewayConfigService.getPrimaryGatewayIp(stack)).willReturn("hostA");
         doNothing().when(telemetryOrchestrator).initDiagnosticCollection(any(), anySet(), any(), any());
@@ -77,7 +77,7 @@ public class CmDiagnosticsFlowServiceTest {
         Stack stack = mock(Stack.class);
         given(stackService.getByIdWithListsInTransaction(STACK_ID)).willReturn(stack);
         given(stack.getCluster()).willReturn(mock(Cluster.class));
-        given(stack.getAllNodes()).willReturn(nodes());
+        given(stack.getAllFunctioningNodes()).willReturn(nodes());
         given(gatewayConfigService.getAllGatewayConfigs(stack)).willReturn(new ArrayList<>());
         given(gatewayConfigService.getPrimaryGatewayIp(stack)).willReturn("hostA");
         doThrow(new CloudbreakOrchestratorFailedException("ex")).when(telemetryOrchestrator).initDiagnosticCollection(any(), anySet(), any(), any());
@@ -94,7 +94,7 @@ public class CmDiagnosticsFlowServiceTest {
         Stack stack = mock(Stack.class);
         given(stackService.getByIdWithListsInTransaction(STACK_ID)).willReturn(stack);
         given(stack.getCluster()).willReturn(mock(Cluster.class));
-        given(stack.getAllNodes()).willReturn(Set.of());
+        given(stack.getAllFunctioningNodes()).willReturn(Set.of());
         given(gatewayConfigService.getAllGatewayConfigs(stack)).willReturn(new ArrayList<>());
         given(gatewayConfigService.getPrimaryGatewayIp(stack)).willReturn("hostA");
         // WHEN
@@ -109,7 +109,7 @@ public class CmDiagnosticsFlowServiceTest {
         Stack stack = mock(Stack.class);
         given(stackService.getByIdWithListsInTransaction(STACK_ID)).willReturn(stack);
         given(stack.getCluster()).willReturn(mock(Cluster.class));
-        given(stack.getAllNodes()).willReturn(nodes());
+        given(stack.getAllFunctioningNodes()).willReturn(nodes());
         given(gatewayConfigService.getAllGatewayConfigs(stack)).willReturn(new ArrayList<>());
         given(gatewayConfigService.getPrimaryGatewayIp(stack)).willReturn("hostA");
         doNothing().when(telemetryOrchestrator).uploadCollectedDiagnostics(any(), anySet(), any(), any());
@@ -125,7 +125,7 @@ public class CmDiagnosticsFlowServiceTest {
         Stack stack = mock(Stack.class);
         given(stackService.getByIdWithListsInTransaction(STACK_ID)).willReturn(stack);
         given(stack.getCluster()).willReturn(mock(Cluster.class));
-        given(stack.getAllNodes()).willReturn(nodes());
+        given(stack.getAllFunctioningNodes()).willReturn(nodes());
         given(gatewayConfigService.getAllGatewayConfigs(stack)).willReturn(new ArrayList<>());
         given(gatewayConfigService.getPrimaryGatewayIp(stack)).willReturn("hostA");
         doNothing().when(telemetryOrchestrator).cleanupCollectedDiagnostics(any(), anySet(), any(), any());
