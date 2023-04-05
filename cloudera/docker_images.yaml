@@ -6,6 +6,5 @@ docker_images:
   cloudbreak-consumption: hortonworks/cloudbreak-consumption
   cloudbreak-freeipa: hortonworks/cloudbreak-freeipa
   cloudbreak-redbeams: hortonworks/cloudbreak-redbeams
-  periscope-mock: hortonworks/periscope-mock
   cloudbreak-mock-thunderhead: hortonworks/cloudbreak-mock-thunderhead
   cloudbreak-mock-infrastructure: hortonworks/cloudbreak-mock-infrastructure
