@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
+public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider implements BaseKnoxConfigProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KnoxServiceConfigProvider.class);
 
@@ -43,16 +43,6 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
     private static final String GATEWAY_DATABASE_SSL_TRUSTSTORE_FILE = "gateway_database_ssl_truststore_file";
 
     @Override
-    public String getServiceType() {
-        return KnoxRoles.KNOX;
-    }
-
-    @Override
-    public List<String> getRoleTypes() {
-        return List.of(KnoxRoles.KNOX_GATEWAY, KnoxRoles.IDBROKER);
-    }
-
-    @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
         LOGGER.info("The productDetailsView is: {} ", source.getProductDetailsView());
@@ -72,6 +62,11 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
         }
         configList.add(config(KNOX_AUTORESTART_ON_STOP, Boolean.TRUE.toString()));
         return configList;
+    }
+
+    @Override
+    public List<String> getRoleTypes() {
+        return List.of(KnoxRoles.KNOX_GATEWAY, KnoxRoles.IDBROKER);
     }
 
     @Override

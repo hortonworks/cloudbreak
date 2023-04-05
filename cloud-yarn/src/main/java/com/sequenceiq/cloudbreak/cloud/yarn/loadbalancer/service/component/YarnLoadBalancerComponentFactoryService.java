@@ -34,7 +34,7 @@ public class YarnLoadBalancerComponentFactoryService {
     /**
      * Must match an existing Docker image in the primary Cloudbreak repository.
      */
-    private final String loadBalancerImageName = "docker-sandbox.infra.cloudera.com/cloudbreak/yarn-loadbalancer:2021-03-23-12-02-09";
+    private final String loadBalancerImageName = "docker-private.infra.cloudera.com/cloudera_thirdparty/yarn-loadbalancer:v2.cldr.1";
 
     private final String loadBalancerImageNameForDEHA = "docker-sandbox.infra.cloudera.com/cloudbreak/yarn-loadbalancer:2021-11-24-16-14-09";
 

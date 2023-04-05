@@ -78,6 +78,9 @@ public class AutoscaleStackV4Response {
     @ApiModelProperty(StackModelDescription.TUNNEL)
     private Tunnel tunnel;
 
+    @ApiModelProperty(StackModelDescription.SALT_CB_VERSION)
+    private String saltCbVersion;
+
     public String getStackCrn() {
         return stackCrn;
     }
@@ -228,5 +231,13 @@ public class AutoscaleStackV4Response {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    public String getSaltCbVersion() {
+        return saltCbVersion;
+    }
+
+    public void setSaltCbVersion(String saltCbVersion) {
+        this.saltCbVersion = saltCbVersion;
     }
 }
