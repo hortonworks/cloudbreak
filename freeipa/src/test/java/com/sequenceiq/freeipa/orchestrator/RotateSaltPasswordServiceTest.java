@@ -132,7 +132,7 @@ class RotateSaltPasswordServiceTest {
         lenient().when(stack.isStopped()).thenReturn(false);
         Node node = mock(Node.class);
         lenient().when(node.getHostname()).thenReturn(FQDN);
-        lenient().when(stack.getAllNodes()).thenReturn(Set.of(node));
+        lenient().when(stack.getAllFunctioningNodes()).thenReturn(Set.of(node));
 
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
         saltSecurityConfig.setSaltPassword(OLD_PASSWORD);

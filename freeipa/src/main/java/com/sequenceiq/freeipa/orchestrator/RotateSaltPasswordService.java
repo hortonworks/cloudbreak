@@ -137,7 +137,7 @@ public class RotateSaltPasswordService {
 
     private void tryRemoveSaltuserFromGateways(Stack stack, List<GatewayConfig> allGatewayConfig) {
         try {
-            Set<String> targets = stack.getAllNodes().stream().map(Node::getHostname).collect(Collectors.toSet());
+            Set<String> targets = stack.getAllFunctioningNodes().stream().map(Node::getHostname).collect(Collectors.toSet());
             Map<String, String> response = hostOrchestrator.runCommandOnHosts(allGatewayConfig, targets, SALTUSER_DELETE_COMMAND);
             LOGGER.debug("Saltuser delete command response: {}", response);
         } catch (CloudbreakOrchestratorException e) {

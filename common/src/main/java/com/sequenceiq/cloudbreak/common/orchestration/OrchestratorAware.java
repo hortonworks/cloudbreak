@@ -11,7 +11,7 @@ public interface OrchestratorAware {
         throw new NotImplementedException("Needs to be implemented for the default operation or override the `getAllNodes()`");
     }
 
-    default Set<Node> getAllNodes() {
+    default Set<Node> getAllFunctioningNodes() {
         return getAllNodesForOrchestration().stream().map(OrchestrationNode::getNode).collect(Collectors.toSet());
     }
 }

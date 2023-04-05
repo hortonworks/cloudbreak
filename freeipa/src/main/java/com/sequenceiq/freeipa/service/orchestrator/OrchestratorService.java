@@ -33,7 +33,7 @@ public class OrchestratorService implements OrchestratorMetadataProvider {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
         StackBasedExitCriteriaModel exitCriteriaModel = new StackBasedExitCriteriaModel(stackId);
-        return new OrchestratorMetadata(gatewayConfigs, stack.getAllNodes(), exitCriteriaModel, stack);
+        return new OrchestratorMetadata(gatewayConfigs, stack.getAllFunctioningNodes(), exitCriteriaModel, stack);
     }
 
     @Override

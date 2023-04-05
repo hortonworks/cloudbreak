@@ -47,7 +47,7 @@ public class OrchestratorService implements OrchestratorMetadataProvider {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
-        return new OrchestratorMetadata(gatewayConfigs, stack.getAllNodes(), exitModel, stack);
+        return new OrchestratorMetadata(gatewayConfigs, stack.getAllFunctioningNodes(), exitModel, stack);
     }
 
     @Override
