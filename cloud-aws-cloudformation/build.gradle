@@ -24,7 +24,7 @@ dependencies {
   implementation group: 'com.dyngr', name: 'polling', version: dyngrPollingVersion
 
     // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.12.22'
+  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.14.3'
   implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLangVersion
   implementation group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
