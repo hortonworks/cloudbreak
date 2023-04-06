@@ -23,7 +23,8 @@
       "nodeCount": 2,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["1","2"]
     },
     {
       "name": "gateway",
@@ -40,7 +41,8 @@
       "nodeCount": 2,
       "type": "GATEWAY",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["2","3"]
     },
     {
       "name": "core",
@@ -57,7 +59,8 @@
       "nodeCount": 3,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["1","2","3"]
     },
     {
       "name": "auxiliary",
@@ -74,7 +77,8 @@
       "nodeCount": 1,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["1"]
     },
     {
       "name": "solrHG",
@@ -91,7 +95,8 @@
       "nodeCount": 0,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["3"]
     },
     {
       "name":"storageHG",
@@ -108,7 +113,8 @@
       "nodeCount": 0,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["3"]
     },
     {
       "name": "kafkaHG",
@@ -125,7 +131,8 @@
       "nodeCount": 0,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["3"]
     },
     {
       "name": "razHG",
@@ -142,7 +149,8 @@
       "nodeCount": 0,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["3"]
     },
     {
       "name": "atlasHG",
@@ -159,7 +167,8 @@
       "nodeCount": 0,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["3"]
     },
     {
       "name": "hmsHG",
@@ -176,7 +185,8 @@
       "nodeCount": 0,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["3"]
     },
     {
       "name": "idbroker",
@@ -192,7 +202,8 @@
       "nodeCount": 2,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": []
+      "recipeNames": [],
+      "hints": ["3"]
     }
   ]
 }

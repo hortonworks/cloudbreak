@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup.IDEN
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -34,6 +35,8 @@ public interface InstanceGroupView {
     InstanceGroupNetwork getInstanceGroupNetwork();
 
     ScalabilityOption getScalabilityOption();
+
+    Set<String> getHints();
 
     default Optional<CloudIdentityType> getCloudIdentityType() {
         Json attributes = getAttributes();

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
@@ -39,6 +41,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 public class MultiAzCalculatorService {
 
     private static final String DEFAULT_RACK = "default-rack";
+
+    private static final int NUMBER_OF_GROUPS = 3;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiAzCalculatorService.class);
 
@@ -265,47 +269,53 @@ public class MultiAzCalculatorService {
     }
 
     private void calculateByGroup(InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacementList) {
-        LOGGER.trace("Calculate the subnet by group");
+        LOGGER.trace("?????????????????????? Calculate the subnet by group");
         List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>(instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
         groupPlacementList.stream().forEach(groupPlacement -> collectCurrentSubnetUsage(instanceMetadataViews, groupPlacement.getSubnetUsage()));
 
         if (multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
+                LOGGER.info("################## XXXXXXXXXXXXXXXX #####################");
                 if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
+                    LOGGER.info("################## YYYYYYYYYYYYYYYYYYY #####################");
+
                     GroupPlacement groupPlacement = getGroupPlacementForComponent(instanceMetaData.getInstanceGroupName(),
-                            instanceMetaData.getInstanceGroup().getGroups(), groupPlacementList);
+                            instanceMetaData.getInstanceGroup().getHints(), groupPlacementList);
                     Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(groupPlacement.getSubnetUsage());
                     String leastUsedSubnetId = searchTheSmallestUsedID(groupPlacement.getSubnetUsage(), numberOfInstanceInASubnet);
 
                     instanceMetaData.setSubnetId(leastUsedSubnetId);
                     instanceMetaData.setAvailabilityZone(groupPlacement.getAvailabilityZone());
 
+                    groupPlacement.addComponent(instanceMetaData.getInstanceGroupName());
                     groupPlacement.increaseSubnetUsage(leastUsedSubnetId);
+//                    instanceMetaData.getInstanceGroup().getTemplate().getAttributes().get(VolumeSetAttributes.class).
                 }
             }
         }
     }
 
-    private GroupPlacement getGroupPlacementForComponent(String componentName, List<String> groups, Set<GroupPlacement> groupPlacementList) {
+    private GroupPlacement getGroupPlacementForComponent(String componentName, Set<String> hints, Set<GroupPlacement> groupPlacementList) {
         return groupPlacementList
                 .stream()
-                .filter(gp -> groups.contains(gp.getName()))
+                .filter(gp -> hints.contains(gp.getName()))
                 .filter(gp -> !gp.containsComponent(componentName))
                 .findFirst()
-                .orElseThrow(() -> new CloudbreakServiceException("Error")); //TODO
+                .orElseThrow(() -> new CloudbreakServiceException(String.format("Node placement not found for %s", componentName)));
     }
 
     public Set<GroupPlacement> prepareGroupAzMap(Map<String, String> subnetAzPairs, Set<InstanceGroup> instanceGroups) {
         Set<String> groups = getGroups(instanceGroups);
-        List<String> availabilityZones = getAvailabilityZones(subnetAzPairs);
-        Set<GroupPlacement> groupPlacements = new HashSet<>();
+        Set<String> availabilityZones = getAvailabilityZones(subnetAzPairs);
 
-        if (availabilityZones.size() < 3 || groups.size() != 3) {
+        if (availabilityZones.size() < NUMBER_OF_GROUPS || groups.size() != NUMBER_OF_GROUPS) {
             return Collections.emptySet();
         }
 
+        Set<GroupPlacement> groupPlacements = new HashSet<>();
+        Iterator<String> availabilityZonesIt = availabilityZones.iterator();
         groups.forEach(gp -> {
-            String az = availabilityZones.stream().findFirst().get();
+            String az = availabilityZonesIt.next();
             GroupPlacement groupPlacement = new GroupPlacement(gp, az);
             groupPlacements.add(groupPlacement);
 
@@ -319,27 +329,30 @@ public class MultiAzCalculatorService {
         return groupPlacements;
     }
 
-    private List<String> getAvailabilityZones(Map<String, String> subnetAzPairs) {
+    private Set<String> getAvailabilityZones(Map<String, String> subnetAzPairs) {
         return subnetAzPairs
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     private Set<String> getGroups(Set<InstanceGroup> instanceGroups) {
         return instanceGroups
                 .stream()
-                .filter(ig -> Objects.nonNull(ig.getGroups()))
-                .map(InstanceGroup::getGroups)
-                .flatMap(List::stream)
+                .filter(ig -> Objects.nonNull(ig.getHints()))
+                .map(InstanceGroup::getHints)
+                .flatMap(Set::stream)
                 .collect(Collectors.toSet());
     }
 
     public static class GroupPlacement {
         private final String name;
+
         private final String availabilityZone;
+
         private final Set<String> components;
+
         private final Map<String, Integer> subnetUsage;
 
         public GroupPlacement(String name, String availabilityZone) {

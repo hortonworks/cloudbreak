@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.converter.InstanceGroupTypeConverter;
 import com.sequenceiq.cloudbreak.converter.ScalabilityOptionConverter;
+import com.sequenceiq.cloudbreak.converter.StringSetConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -94,8 +95,8 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     private InstanceGroupNetwork instanceGroupNetwork;
 
-//    @Column(columnDefinition="TEXT[]")
-    private String groups;
+    @Convert(converter = StringSetConverter.class)
+    private Set<String> hints;
 
     public String getGroupName() {
         return groupName;
@@ -309,12 +310,12 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
         this.instanceGroupNetwork = instanceGroupNetwork;
     }
 
-    public List<String> getGroups() {
-        return List.of(groups.split(","));
+    public Set<String> getHints() {
+        return hints;
     }
 
-    public void setGroups(String groups) {
-        this.groups = groups;
+    public void setHints(Set<String> hints) {
+        this.hints = hints;
     }
 
     @Override

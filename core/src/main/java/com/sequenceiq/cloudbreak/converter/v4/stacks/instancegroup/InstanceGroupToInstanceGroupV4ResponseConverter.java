@@ -65,6 +65,7 @@ public class InstanceGroupToInstanceGroupV4ResponseConverter {
         }
         instanceGroupResponse.setAvailabilityZones(source.getAvailabilityZones());
         instanceGroupResponse.setScalabilityOption(source.getScalabilityOption() == null ? ScalabilityOption.ALLOWED : source.getScalabilityOption());
+        instanceGroupResponse.setHints(source.getHints());
         return instanceGroupResponse;
     }
 
