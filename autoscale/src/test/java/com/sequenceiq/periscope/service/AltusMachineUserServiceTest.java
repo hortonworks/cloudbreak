@@ -4,8 +4,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.google.common.collect.LinkedHashMultimap;
@@ -51,9 +54,14 @@ class AltusMachineUserServiceTest {
     private FreeIpaCommunicator freeIpaCommunicator;
 
     @Mock
+    private CloudbreakVersionService cloudbreakVersionService;
+
+    @Mock
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     private String testEnvironmentCrn;
+
+    private String testClusterCrn;
 
     private String testAccountId;
 
@@ -65,17 +73,22 @@ class AltusMachineUserServiceTest {
 
     private String testOperationId;
 
+    private String testCbSaltVersion;
+
     private String internalActorCrn;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
+        ReflectionTestUtils.setField(underTest, "cloudbreakVersionThreshold", "2.70.0");
         testEnvironmentCrn = "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:1584cdfa-ad2f-45ff-b3d9-414b5b013001";
+        testClusterCrn = "crn:cdp:datahub:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:77a21ecf-ee77-4098-aa41-503ea75a7b8e";
         testAccountId = "testTenant";
         autoscaleMachineUserName = "as5fca7da5aef81a50a8d49732";
         autoscaleMachineUserCrn = "testMachineUserCrn";
         environmentRoleCrn = "environmentuserRoleCrn";
         testOperationId = "testOperationId";
+        testCbSaltVersion = "2.69.0";
         internalActorCrn = "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__";
     }
 
@@ -90,6 +103,7 @@ class AltusMachineUserServiceTest {
         when(grpcUmsClient.listAssignedResourceRoles(anyString(), any(RegionAwareInternalCrnGeneratorFactory.class)))
                 .thenReturn(LinkedHashMultimap.create());
         when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(anyString())).thenReturn(environmentRoleCrn);
+        when(cloudbreakVersionService.getCloudbreakSaltStateVersionByStackCrn(anyString())).thenReturn(testCbSaltVersion);
         when(freeIpaCommunicator.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenReturn(getSyncOpStatus(SynchronizationStatus.COMPLETED));
 
         underTest.initializeMachineUserForEnvironment(cluster);
@@ -121,6 +135,7 @@ class AltusMachineUserServiceTest {
         when(machineUser.getCrn()).thenReturn(autoscaleMachineUserCrn);
         when(grpcUmsClient.listAssignedResourceRoles(anyString(), any(RegionAwareInternalCrnGeneratorFactory.class))).thenReturn(rolesMap);
         when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(anyString())).thenReturn(environmentRoleCrn);
+        when(cloudbreakVersionService.getCloudbreakSaltStateVersionByStackCrn(anyString())).thenReturn(testCbSaltVersion);
         when(freeIpaCommunicator.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenReturn(getSyncOpStatus(SynchronizationStatus.COMPLETED));
 
         underTest.initializeMachineUserForEnvironment(cluster);
@@ -137,6 +152,24 @@ class AltusMachineUserServiceTest {
         Assertions.assertEquals(synchronizeAllUsersRequest.getEnvironments(), Set.of(testEnvironmentCrn), "Environment Crn Should match");
         Assertions.assertEquals(synchronizeAllUsersRequest.getMachineUsers(), Set.of(autoscaleMachineUserCrn), "Machine User Crn Should match");
         Assertions.assertEquals(synchronizeAllUsersRequest.getAccountId(), cluster.getClusterPertain().getTenant(), "Account Id Should match");
+    }
+
+    @Test
+    void testInitializeMachineUserForClusterWithCBVersionGreaterThanCbThreshold() {
+        Cluster cluster = getACluster();
+        MachineUser machineUser = mock(MachineUser.class);
+
+        when(machineUser.getCrn()).thenReturn(autoscaleMachineUserCrn);
+        when(grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(autoscaleMachineUserName, testAccountId))
+                .thenReturn(machineUser);
+        when(cloudbreakVersionService.getCloudbreakSaltStateVersionByStackCrn(anyString())).thenReturn("2.71.0");
+
+        underTest.initializeMachineUserForEnvironment(cluster);
+
+        verify(clusterService, times(1)).setMachineUserCrn(cluster.getId(), autoscaleMachineUserCrn);
+        verify(grpcUmsClient, never()).assignResourceRole(anyString(), anyString(), anyString(), any(RegionAwareInternalCrnGeneratorFactory.class));
+        verify(grpcUmsClient, never()).listAssignedResourceRoles(anyString(), any(RegionAwareInternalCrnGeneratorFactory.class));
+        verifyNoInteractions(freeIpaCommunicator);
     }
 
     @Test
@@ -167,6 +200,7 @@ class AltusMachineUserServiceTest {
 
     protected Cluster getACluster() {
         Cluster cluster = new Cluster();
+        cluster.setStackCrn(testClusterCrn);
         cluster.setEnvironmentCrn(testEnvironmentCrn);
         cluster.setId(10);
 

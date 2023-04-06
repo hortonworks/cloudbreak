@@ -1,8 +1,0 @@
-{
-  "name": "testing",
-  "adjustmentType": "NODE_COUNT",
-  "scalingAdjustment": 1,
-  "alertId": 1,
-  "hostGroup": "worker",
-  "id": 4
-}
