@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles.IDBROKER;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles.KNOX;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Component
-public class KnoxIdBrokerConfigProvider extends AbstractRoleConfigProvider {
+public class KnoxIdBrokerConfigProvider extends AbstractRoleConfigProvider implements BaseKnoxConfigProvider {
 
     private static final Map<String, CloudPlatform> FILE_SYSTEM_TYPE_TO_CLOUD_PLATFORM_MAP = Map.ofEntries(
             Map.entry(FileSystemType.S3.name(), CloudPlatform.AWS),
@@ -96,11 +95,6 @@ public class KnoxIdBrokerConfigProvider extends AbstractRoleConfigProvider {
 
     private String getIdBrokerManagedIdentity(Optional<BaseFileSystemConfigurationsView> fileSystemConfigurationsView) {
         return fileSystemConfigurationsView.map(BaseFileSystemConfigurationsView::getIdBrokerIdentityId).orElse(null);
-    }
-
-    @Override
-    public String getServiceType() {
-        return KNOX;
     }
 
     @Override

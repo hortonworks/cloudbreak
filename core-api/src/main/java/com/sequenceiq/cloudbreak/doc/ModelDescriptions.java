@@ -209,6 +209,7 @@ public class ModelDescriptions {
         public static final String AMBARI_VERSION = "specific version of ambari";
         public static final String HDP_VERSION = "specific version of HDP";
         public static final String CLOUDBREAK_DETAILS = "details of the Cloudbreak that provisioned the stack";
+        public static final String SALT_CB_VERSION = "cloudbreak version stored by the salt state component of the cluster";
         public static final String S3_ACCESS_ROLE_ARN = "S3 access role arn";
         public static final String VPC_ID = "cluster vpc id";
         public static final String SUBNET_ID = "cluster subnet id";
