@@ -13,13 +13,11 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -101,6 +99,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     @Value("${cb.image.catalog.legacy.enabled}")
     private boolean legacyCatalogEnabled;
+
+    @Inject
+    private ImageComparator imageComparator;
 
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
@@ -685,12 +686,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private Optional<Image> getLatestImageDefaultPreferred(List<Image> images) {
         List<Image> defaultImages = images.stream().filter(Image::isDefaultImage).collect(toList());
-        return defaultImages.isEmpty() ? images.stream().max(getImageComparing(images)) : defaultImages.stream().max(getImageComparing(defaultImages));
-    }
-
-    private Comparator<Image> getImageComparing(List<Image> images) {
-        return images.stream().map(Image::getCreated).anyMatch(Objects::isNull) ? Comparator.comparing(Image::getDate)
-                : Comparator.comparing(Image::getCreated);
+        List<Image> comparableImages = !defaultImages.isEmpty() ? defaultImages : images;
+        return comparableImages.stream().max(imageComparator);
     }
 
     @Override

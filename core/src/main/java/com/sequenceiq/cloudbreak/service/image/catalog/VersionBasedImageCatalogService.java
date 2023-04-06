@@ -105,7 +105,7 @@ public class VersionBasedImageCatalogService implements ImageCatalogService {
         List<CloudbreakVersion> cbVersionsFromImageCatalog = cloudbreakVersionListProvider.getVersions(imageCatalogV3);
         String currentCbVersion = getCurrentCBVersion(cbVersionsFromImageCatalog);
 
-        List<CloudbreakVersion> exactMatchedImages = getExtractMatchedImages(cbVersionsFromImageCatalog, currentCbVersion);
+        List<CloudbreakVersion> exactMatchedImages = getExactMatchedImages(cbVersionsFromImageCatalog, currentCbVersion);
         if (!exactMatchedImages.isEmpty()) {
             for (CloudbreakVersion exactMatchedImg : exactMatchedImages) {
                 imageIds.addAll(exactMatchedImg.getImageIds());
@@ -118,7 +118,7 @@ public class VersionBasedImageCatalogService implements ImageCatalogService {
         return imageIds;
     }
 
-    private List<CloudbreakVersion> getExtractMatchedImages(List<CloudbreakVersion> cloudbreakVersions, String currentCbVersion) {
+    private List<CloudbreakVersion> getExactMatchedImages(List<CloudbreakVersion> cloudbreakVersions, String currentCbVersion) {
         return cloudbreakVersions.stream()
                 .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(currentCbVersion))
                 .collect(toList());

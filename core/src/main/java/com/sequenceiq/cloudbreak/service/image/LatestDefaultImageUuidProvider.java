@@ -33,7 +33,7 @@ public class LatestDefaultImageUuidProvider {
         Collection<String> latestDefaultImageUuids = platforms.stream()
                 .flatMap(p -> defaultImages.stream()
                         .filter(isPlatformMatching(p.nameToLowerCase()))
-                        .collect(Collectors.toMap(Image::getVersion, Function.identity(), BinaryOperator.maxBy(comparator)))
+                        .collect(Collectors.toMap(this::getImageGroupingKey, Function.identity(), BinaryOperator.maxBy(comparator)))
                         .values().stream())
                 .map(Image::getUuid)
                 .collect(Collectors.toList());
@@ -41,6 +41,10 @@ public class LatestDefaultImageUuidProvider {
         LOGGER.info("The following images are the latest default ones: {}", latestDefaultImageUuids);
 
         return latestDefaultImageUuids;
+    }
+
+    private String getImageGroupingKey(Image image) {
+        return image.getOs() + ";" + image.getVersion();
     }
 
     private Predicate<Image> isPlatformMatching(String platform) {

@@ -77,64 +77,59 @@ public class ClouderaManagerClusterCreationSetupService {
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
     public List<ClusterComponent> prepareClouderaManagerCluster(ClusterV4Request request, Cluster cluster,
-            Optional<Component> stackClouderaManagerRepoConfig,
+            Component stackClouderaManagerRepoConfig,
             List<Component> stackCdhRepoConfig,
-            Optional<Component> stackImageComponent) throws IOException, CloudbreakImageCatalogException {
+            Component stackImageComponent) throws IOException, CloudbreakImageCatalogException {
         List<ClusterComponent> components = new ArrayList<>();
         long start = System.currentTimeMillis();
         String blueprintCdhVersion = blueprintUtils.getCDHStackVersion(JsonUtil.readTree(cluster.getBlueprint().getBlueprintText()));
         LOGGER.debug("blueprintUtils.getCDHStackVersion took {} ms", System.currentTimeMillis() - start);
 
-        Optional<ClouderaManagerRepositoryV4Request> cmRepoRequest = measure(() ->
-                Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getRepository),
+        ClouderaManagerRepositoryV4Request cmRepoRequest = measure(() ->
+                Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getRepository).orElse(null),
                 LOGGER,
                 "ClouderaManagerV4Request::getRepository {} ms");
 
         start = System.currentTimeMillis();
-        String osType = getOsType(stackImageComponent);
-        String imageCatalogName = getImageCatalogName(stackImageComponent);
+        Optional<Image> image = getImage(stackImageComponent);
+        String os = image.map(Image::getOs).orElse("");
+        String osType = image.map(Image::getOsType).orElse("");
+        String imageCatalogName = image.map(Image::getImageCatalogName).orElse(null);
         LOGGER.debug("getImageCatalogName took {} ms", System.currentTimeMillis() - start);
 
         start = System.currentTimeMillis();
         ClusterComponent cmRepoConfig = getCmRepoConfiguration(cluster, stackClouderaManagerRepoConfig, components,
-                blueprintCdhVersion, cmRepoRequest, osType);
+                blueprintCdhVersion, cmRepoRequest, osType, os);
         LOGGER.debug("getCmRepoConfiguration took {} ms", System.currentTimeMillis() - start);
 
         start = System.currentTimeMillis();
-        checkCmStackRepositories(cmRepoConfig, stackImageComponent.get());
+        checkCmStackRepositories(cmRepoConfig, stackImageComponent);
         LOGGER.debug("checkCmStackRepositories took {} ms", System.currentTimeMillis() - start);
 
         start = System.currentTimeMillis();
-        addProductComponentsToCluster(request, cluster, stackCdhRepoConfig, components, blueprintCdhVersion, osType, imageCatalogName);
+        List<ClusterComponent> productComponents =
+                getProductComponents(request, cluster, stackCdhRepoConfig, blueprintCdhVersion, osType, os, imageCatalogName);
+        components.addAll(productComponents);
         LOGGER.debug("addProductComponentsToCluster took {} ms", System.currentTimeMillis() - start);
 
         return components;
     }
 
-    private String getOsType(Optional<Component> stackImageComponent) throws IOException {
-        if (Objects.nonNull(stackImageComponent) && stackImageComponent.isPresent()) {
-            Image image = stackImageComponent.get().getAttributes().get(Image.class);
-            return image.getOsType();
+    private Optional<Image> getImage(Component stackImageComponent) throws IOException {
+        if (Objects.nonNull(stackImageComponent)) {
+            Image image = stackImageComponent.getAttributes().get(Image.class);
+            return Optional.of(image);
         } else {
-            return "";
+            return Optional.empty();
         }
     }
 
-    private String getImageCatalogName(Optional<Component> stackImageComponent) throws IOException {
-        if (Objects.nonNull(stackImageComponent) && stackImageComponent.isPresent()) {
-            Image image = stackImageComponent.get().getAttributes().get(Image.class);
-            return image.getImageCatalogName();
-        } else {
-            return null;
-        }
-    }
-
-    private ClusterComponent getCmRepoConfiguration(Cluster cluster, Optional<Component> stackClouderaManagerRepoConfig,
-            List<ClusterComponent> components, String blueprintCdhVersion, Optional<ClouderaManagerRepositoryV4Request> cmRepoRequest, String osType)
+    private ClusterComponent getCmRepoConfiguration(Cluster cluster, Component stackClouderaManagerRepoConfig,
+            List<ClusterComponent> components, String blueprintCdhVersion, ClouderaManagerRepositoryV4Request cmRepoRequest, String osType, String os)
     throws CloudbreakImageCatalogException {
         ClusterComponent cmRepoConfig;
-        if (cmRepoRequest.isEmpty()) {
-            cmRepoConfig = determineCmRepoConfig(stackClouderaManagerRepoConfig, osType, cluster, blueprintCdhVersion);
+        if (Objects.isNull(cmRepoRequest)) {
+            cmRepoConfig = determineCmRepoConfig(stackClouderaManagerRepoConfig, osType, os, cluster, blueprintCdhVersion);
             components.add(cmRepoConfig);
         } else {
             cmRepoConfig = cluster.getComponents().stream().
@@ -143,12 +138,14 @@ public class ClouderaManagerClusterCreationSetupService {
         return cmRepoConfig;
     }
 
-    private void addProductComponentsToCluster(ClusterV4Request request, Cluster cluster, List<Component> stackCdhRepoConfig,
-            List<ClusterComponent> components, String blueprintCdhVersion, String osType, String imageCatalogName) throws CloudbreakImageCatalogException {
+    private List<ClusterComponent> getProductComponents(ClusterV4Request request, Cluster cluster, List<Component> stackCdhRepoConfig,
+            String blueprintCdhVersion, String osType, String os, String imageCatalogName)
+            throws CloudbreakImageCatalogException {
+        List<ClusterComponent> components = new ArrayList<>();
         List<ClouderaManagerProductV4Request> products = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getProducts)
                 .orElse(Collections.emptyList());
         if (products.isEmpty()) {
-            Set<ClouderaManagerProduct> filteredProducts = determineCdhRepoConfig(cluster, stackCdhRepoConfig, osType,
+            Set<ClouderaManagerProduct> filteredProducts = determineCdhRepoConfig(cluster, stackCdhRepoConfig, osType, os,
                     blueprintCdhVersion, imageCatalogName);
             components.addAll(convertParcelsToClusterComponents(cluster, filteredProducts));
         }
@@ -157,6 +154,7 @@ public class ClouderaManagerClusterCreationSetupService {
                     + "If parcels are provided in the request, CDH parcel must be specified too.");
         }
         components.addAll(cluster.getComponents());
+        return components;
     }
 
     private List<ClusterComponent> convertParcelsToClusterComponents(Cluster cluster, Set<ClouderaManagerProduct> filteredProducts) {
@@ -174,6 +172,7 @@ public class ClouderaManagerClusterCreationSetupService {
                     platformStringTransformer.getPlatformStringForImageCatalog(
                             cmRepoConfig.getCluster().getStack().getCloudPlatform(),
                             cmRepoConfig.getCluster().getStack().getPlatformVariant()),
+                    image.getOs(),
                     image.getImageCatalogName());
             Map<String, ClouderaManagerStackDescriptorV4Response> stackDescriptorMap = stackMatrixV4Response.getCdh();
             ClouderaManagerStackDescriptorV4Response clouderaManagerStackDescriptor = stackDescriptorMap.get(clouderaManagerRepo.getVersion());
@@ -189,29 +188,29 @@ public class ClouderaManagerClusterCreationSetupService {
         }
     }
 
-    private ClusterComponent determineCmRepoConfig(Optional<Component> stackClouderaManagerRepoConfig,
-            String osType, Cluster cluster, String cdhStackVersion) throws CloudbreakImageCatalogException {
+    private ClusterComponent determineCmRepoConfig(Component stackClouderaManagerRepoConfig,
+            String osType, String os, Cluster cluster, String cdhStackVersion) throws CloudbreakImageCatalogException {
         Json json;
-        if (Objects.isNull(stackClouderaManagerRepoConfig) || stackClouderaManagerRepoConfig.isEmpty()) {
+        if (Objects.isNull(stackClouderaManagerRepoConfig)) {
             ImageCatalogPlatform platform = platformStringTransformer
                     .getPlatformStringForImageCatalog(cluster.getStack().getCloudPlatform(), cluster.getStack().getPlatformVariant());
 
             ClouderaManagerRepo clouderaManagerRepo = defaultClouderaManagerRepoService.getDefault(
-                    osType, StackType.CDH.name(), cdhStackVersion, platform);
+                    osType, os, StackType.CDH.name(), cdhStackVersion, platform);
             if (clouderaManagerRepo == null) {
                 throw new BadRequestException(String.format("Couldn't determine Cloudera Manager repo for the stack: %s", cluster.getStack().getName()));
             }
             json = new Json(clouderaManagerRepo);
         } else {
-            json = stackClouderaManagerRepoConfig.get().getAttributes();
+            json = stackClouderaManagerRepoConfig.getAttributes();
         }
         return new ClusterComponent(ComponentType.CM_REPO_DETAILS, json, cluster);
     }
 
     private Set<ClouderaManagerProduct> determineCdhRepoConfig(Cluster cluster, List<Component> stackCdhRepoConfig,
-            String osType, String blueprintCdhVersion, String imageCatalogName) throws CloudbreakImageCatalogException {
+            String osType, String os, String blueprintCdhVersion, String imageCatalogName) throws CloudbreakImageCatalogException {
         if (Objects.isNull(stackCdhRepoConfig) || stackCdhRepoConfig.isEmpty()) {
-            DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(cluster, blueprintCdhVersion, osType, imageCatalogName);
+            DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(cluster, blueprintCdhVersion, osType, os, imageCatalogName);
             Map<String, String> stack = defaultCDHInfo.getRepo().getStack();
             Set<ClouderaManagerProduct> cdhProduct = Set.of(new ClouderaManagerProduct()
                     .withVersion(defaultCDHInfo.getVersion())
@@ -241,13 +240,13 @@ public class ClouderaManagerClusterCreationSetupService {
         }
     }
 
-    private DefaultCDHInfo getDefaultCDHInfo(Cluster cluster, String blueprintCdhVersion, String osType, String imageCatalogName)
+    private DefaultCDHInfo getDefaultCDHInfo(Cluster cluster, String blueprintCdhVersion, String osType, String os, String imageCatalogName)
             throws CloudbreakImageCatalogException {
         DefaultCDHInfo defaultCDHInfo = null;
         Stack stack = cluster.getStack();
         ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant());
         Map<String, ImageBasedDefaultCDHInfo> entries = imageBasedDefaultCDHEntries.getEntries(cluster.getWorkspace().getId(), platformString,
-                imageCatalogName);
+                os, imageCatalogName);
         if (blueprintCdhVersion != null && entries.containsKey(blueprintCdhVersion)) {
             defaultCDHInfo = entries.get(blueprintCdhVersion).getDefaultCDHInfo();
         }

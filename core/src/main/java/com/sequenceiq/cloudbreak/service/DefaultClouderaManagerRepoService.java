@@ -31,10 +31,10 @@ public class DefaultClouderaManagerRepoService {
 
     private Map<String, RepositoryInfo> entries = new HashMap<>();
 
-    public ClouderaManagerRepo getDefault(String osType, String clusterType, String clusterVersion,
+    public ClouderaManagerRepo getDefault(String osType, String os, String clusterType, String clusterVersion,
         ImageCatalogPlatform platform) throws CloudbreakImageCatalogException {
         if (StackType.CDH.name().equals(clusterType)) {
-            StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix(platform);
+            StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix(platform, os);
             Map<String, ClouderaManagerStackDescriptorV4Response> stackDescriptorMap = stackMatrixV4Response.getCdh();
 
             if (stackDescriptorMap != null) {

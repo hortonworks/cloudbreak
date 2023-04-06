@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -65,6 +66,7 @@ public class ImageBasedDefaultCDHEntriesTest {
     @BeforeEach
     public void initTests() {
         MockitoAnnotations.initMocks(this);
+        ReflectionTestUtils.setField(victim, "defaultOs", OS);
     }
 
     @Test
@@ -87,7 +89,7 @@ public class ImageBasedDefaultCDHEntriesTest {
         StatedImages statedImages = StatedImages.statedImages(images, null, null);
         when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, imageCatalogPlatform)).thenReturn(statedImages);
 
-        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, IMAGE_CATALOG_NAME);
+        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, null, IMAGE_CATALOG_NAME);
 
         Image image = imageList.stream().filter(Image::isDefaultImage).findFirst().get();
 
@@ -107,7 +109,7 @@ public class ImageBasedDefaultCDHEntriesTest {
         when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, imageCatalogPlatform)).thenReturn(emptyStatedImages);
         when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, imageCatalogPlatform)).thenReturn(statedImages);
 
-        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, IMAGE_CATALOG_NAME);
+        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, null, IMAGE_CATALOG_NAME);
 
         Image image = imageList.stream().filter(Image::isDefaultImage).findFirst().get();
 

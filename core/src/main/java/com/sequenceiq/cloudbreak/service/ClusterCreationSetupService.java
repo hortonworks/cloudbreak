@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.multiCheckedMeasure;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -112,16 +111,19 @@ public class ClusterCreationSetupService {
                         Set<Component> allComponent = componentConfigProviderService.getAllComponentsByStackIdAndType(stack.getId(),
                                 Sets.newHashSet(ComponentType.CM_REPO_DETAILS, ComponentType.CDH_PRODUCT_DETAILS, ComponentType.IMAGE));
 
-                        Optional<Component> stackCmRepoConfig = allComponent.stream()
+                        Component stackCmRepoConfig = allComponent.stream()
                                 .filter(c -> c.getComponentType().equals(ComponentType.CM_REPO_DETAILS))
-                                .findAny();
+                                .findAny()
+                                .orElse(null);
 
                         List<Component> stackCdhRepoConfig = allComponent.stream()
                                 .filter(c -> c.getComponentType().equals(ComponentType.CDH_PRODUCT_DETAILS))
                                 .collect(Collectors.toList());
 
-                        Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
-                                && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
+                        Component stackImageComponent = allComponent.stream()
+                                .filter(c -> c.getComponentType().equals(ComponentType.IMAGE) && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name()))
+                                .findAny()
+                                .orElse(null);
                         return clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(
                                 request, cluster, stackCmRepoConfig, stackCdhRepoConfig, stackImageComponent);
                     }

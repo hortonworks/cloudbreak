@@ -52,7 +52,8 @@ public interface UtilV4Endpoint {
     StackMatrixV4Response getStackMatrix(
         @QueryParam("imageCatalogName") String imageCatalogName,
         @QueryParam("platform") String platform,
-        @QueryParam("govCloud") boolean govCloud) throws Exception;
+        @QueryParam("govCloud") boolean govCloud,
+        @QueryParam("os") String os) throws Exception;
 
     @GET
     @Path("cloud_storage_matrix")

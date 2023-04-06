@@ -41,6 +41,8 @@ public class StackMatrixServiceTest {
 
     private static final String IMAGE_CATALOG_NAME = "image catalog name";
 
+    private static final String OS = "centos7";
+
     @Mock
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
@@ -59,7 +61,7 @@ public class StackMatrixServiceTest {
 
         when(repositoryInfoToClouderaManagerInfoV4ResponseConverter.convert(any(RepositoryInfo.class))).thenReturn(new ClouderaManagerInfoV4Response());
 
-        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix(WORKSPACE_ID, IMAGECATALOGPLATFORM, IMAGE_CATALOG_NAME);
+        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix(WORKSPACE_ID, IMAGECATALOGPLATFORM, OS, IMAGE_CATALOG_NAME);
 
         assertEquals(1L, stackMatrixV4Response.getCdh().size());
 
@@ -76,6 +78,6 @@ public class StackMatrixServiceTest {
         when(stackInfoToClouderaManagerStackDescriptorV4ResponseConverter.convert(cdhInfo))
                 .thenReturn(getCMStackDescriptorResponse("6.1.0-1.cdh6.1.0.p0.770702"));
 
-        when(imageBasedDefaultCDHEntries.getEntries(WORKSPACE_ID, IMAGECATALOGPLATFORM, IMAGE_CATALOG_NAME)).thenReturn(cdhEntries);
+        when(imageBasedDefaultCDHEntries.getEntries(WORKSPACE_ID, IMAGECATALOGPLATFORM, OS, IMAGE_CATALOG_NAME)).thenReturn(cdhEntries);
     }
 }

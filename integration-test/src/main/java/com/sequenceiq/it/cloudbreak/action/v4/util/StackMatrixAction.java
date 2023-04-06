@@ -20,7 +20,8 @@ public class StackMatrixAction implements Action<StackMatrixTestDto, CloudbreakC
         testDto.setResponse(cloudbreakClient.getDefaultClient().utilV4Endpoint().getStackMatrix(
                 imageCatalogTestDto != null ? imageCatalogTestDto.getName() : null,
                 testDto.getCloudPlatform().name(),
-                false));
+                testDto.isGovCloud(),
+                testDto.getOs()));
         Log.whenJson(LOGGER, "Obtaining stack matrix response:\n", testDto.getResponse());
 
         return testDto;

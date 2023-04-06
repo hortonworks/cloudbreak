@@ -61,6 +61,8 @@ public class YcloudHybridCloudTest extends AbstractMockTest {
 
     private static final String CDH = "CDH";
 
+    private static final String CENTOS7 = "centos7";
+
     private static final String REDHAT7 = "redhat7";
 
     private static final String CM_VERSION_KEY = "cmVersion";
@@ -145,6 +147,7 @@ public class YcloudHybridCloudTest extends AbstractMockTest {
 
         testContext
                 .given(StackMatrixTestDto.class)
+                    .withOs(CENTOS7)
                 .when(utilTestClient.stackMatrixV4())
                 .then((tc, dto, client) -> {
                     ClouderaManagerStackDescriptorV4Response response = dto.getResponse().getCdh().get(commonClusterManagerProperties().getRuntimeVersion());

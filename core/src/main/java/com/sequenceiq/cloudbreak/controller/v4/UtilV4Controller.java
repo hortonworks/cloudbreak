@@ -93,9 +93,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Override
     @DisableCheckPermissions
-    public StackMatrixV4Response getStackMatrix(String imageCatalogName, String platform, boolean govCloud) throws Exception {
+    public StackMatrixV4Response getStackMatrix(String imageCatalogName, String platform, boolean govCloud, String os) throws Exception {
         return stackMatrixService.getStackMatrix(restRequestThreadLocalService.getRequestedWorkspaceId(),
-                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), imageCatalogName);
+                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), os, imageCatalogName);
     }
 
     @Override
