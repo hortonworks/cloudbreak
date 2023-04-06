@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
@@ -45,6 +46,9 @@ public class ImageFallbackService {
 
     @Inject
     private UserDataService userDataService;
+
+    @Inject
+    private StackService stackService;
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
@@ -76,7 +80,7 @@ public class ImageFallbackService {
                 currentImage.getImageId(),
                 currentImage.getPackageVersions())));
 
-        userDataService.createOrUpdateUserData(stackId, userData);
+        userDataService.updateUserData(stackId, userData);
         componentConfigProviderService.store(component);
     }
 }
