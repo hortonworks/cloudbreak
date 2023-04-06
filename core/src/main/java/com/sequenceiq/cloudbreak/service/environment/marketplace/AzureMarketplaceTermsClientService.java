@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.environment.marketplace;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
@@ -26,14 +27,19 @@ public class AzureMarketplaceTermsClientService {
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public Boolean getAccepted() {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         try {
-            String accountId = ThreadBasedUserCrnProvider.getAccountId();
             AzureMarketplaceTermsResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> azureMarketplaceTermsEndpoint.getInAccount(accountId));
             return response.getAccepted();
+        } catch (NotFoundException e) {
+            String message = String.format("Azure Marketplace Terms acceptance setting not found for account id: %s", accountId);
+            LOGGER.warn(message, e);
+            return false;
         } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
-            String message = String.format("Failed to GET Azure Marketplace Terms acceptance setting with account id, due to: '%s'", e.getMessage());
+            String message = String.format("Failed to GET Azure Marketplace Terms acceptance setting for account id: %s, due to: '%s'",
+                    accountId, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
