@@ -97,6 +97,7 @@ import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.Tunnel;
+
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "workspace_id", "name", "resourceCrn" }))
 public class Stack implements ProvisionEntity, WorkspaceAwareResource, OrchestratorAware, StackView, StackDtoDelegate, IdAware {

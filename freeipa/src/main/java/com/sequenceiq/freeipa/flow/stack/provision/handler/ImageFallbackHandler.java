@@ -82,7 +82,6 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
                     .orElseThrow(() -> new ImageNotFoundException(imgNotFoundMsg));
             String newImageName = imageService.determineImageNameByRegion(stack.getCloudPlatform(), stack.getRegion(), imageWrapper.getImage());
             currentImage.setImageName(newImageName);
-            currentImage.setAccountId(stack.getAccountId());
             imageService.save(currentImage);
             LOGGER.info("Selected image to fallback to: {}", currentImage);
         } catch (Exception e) {

@@ -35,9 +35,7 @@ class ImageChangeFailureHandlerAction extends AbstractStackFailureAction<ImageCh
         LOGGER.error("Image change failed", payload.getException());
         if (variables.containsKey(ImageChangeActions.ORIGINAL_IMAGE_REVISION) && variables.containsKey(ImageChangeActions.IMAGE_CHANGED_IN_DB)) {
             LOGGER.info("Reverting to original image using revision [{}]", variables.get(ImageChangeActions.ORIGINAL_IMAGE_REVISION));
-            imageService.revertImageToRevision(
-                    context.getStack().getAccountId(),
-                    (Long) variables.get(ImageChangeActions.IMAGE_ENTITY_ID),
+            imageService.revertImageToRevision((Long) variables.get(ImageChangeActions.IMAGE_ENTITY_ID),
                     (Number) variables.get(ImageChangeActions.ORIGINAL_IMAGE_REVISION));
         } else if (variables.containsKey(ImageChangeActions.ORIGINAL_IMAGE) && variables.containsKey(ImageChangeActions.IMAGE_CHANGED_IN_DB)) {
             LOGGER.info("Reverting to original image using entity stored in variables");
