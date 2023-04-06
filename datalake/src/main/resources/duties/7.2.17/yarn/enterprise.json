@@ -17,7 +17,8 @@
         }
       },
       "nodeCount": 2,
-      "type": "CORE"
+      "type": "CORE",
+      "hints": ["az1","az2"]
     },
     {
       "name": "gateway",
@@ -28,7 +29,8 @@
         }
       },
       "nodeCount": 2,
-      "type": "GATEWAY"
+      "type": "GATEWAY",
+      "hints": ["az2","az3"]
     },
     {
       "name": "core",
@@ -39,7 +41,8 @@
         }
       },
       "nodeCount": 3,
-      "type": "CORE"
+      "type": "CORE",
+      "hints": ["az1","az2","az3"]
     },
     {
       "name": "auxiliary",
@@ -50,7 +53,8 @@
         }
       },
       "nodeCount": 1,
-      "type": "CORE"
+      "type": "CORE",
+      "hints": ["az1"]
     },
     {
       "name": "idbroker",
@@ -61,7 +65,8 @@
         }
       },
       "nodeCount": 2,
-      "type": "CORE"
+      "type": "CORE",
+      "hints": ["az1","az2"]
     }
   ]
 }
