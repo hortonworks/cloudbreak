@@ -18,7 +18,6 @@ import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigUserDataReplacer;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
@@ -73,9 +72,6 @@ class UserDataServiceTest {
     @Mock
     private Stack stack;
 
-    @Mock
-    private SecretService secretService;
-
     @BeforeEach
     void setUp() {
         lenient().when(stackService.getStackById(STACK_ID)).thenReturn(stack);
@@ -108,12 +104,11 @@ class UserDataServiceTest {
     private void setUserData(String userData) {
         ImageEntity image = new ImageEntity();
         image.setUserdata(userData);
-        image.setGatewayUserdata(userData);
         when(imageService.getByStackId(STACK_ID)).thenReturn(image);
     }
 
     private AbstractStringAssert<?> assertThatUserData() {
         verify(imageService).save(imageCaptor.capture());
-        return assertThat(imageCaptor.getValue().getGatewayUserdata());
+        return assertThat(imageCaptor.getValue().getUserdata());
     }
 }

@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -74,9 +73,6 @@ public class InstanceMetadataUpdater {
     @Inject
     private StackService stackService;
 
-    @Inject
-    private UserDataService userDataService;
-
     public void updatePackageVersionsOnAllInstances(Long stackId) throws Exception {
         Stack stack = getStackForFreshInstanceStatuses(stackId);
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
@@ -89,7 +85,7 @@ public class InstanceMetadataUpdater {
 
         Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedAndNotZombieInstanceMetaDataSet();
 
-        updateInstanceMetaDataWithPackageVersions(stackId, packageVersionsByNameByHost, instanceMetaDataSet);
+        updateInstanceMetaDataWithPackageVersions(packageVersionsByNameByHost, instanceMetaDataSet);
 
         List<String> packagesWithMultipleVersions = collectPackagesWithMultipleVersions(instanceMetaDataSet);
         notifyIfPackagesHaveDifferentVersions(stack, packagesWithMultipleVersions);
@@ -122,8 +118,8 @@ public class InstanceMetadataUpdater {
         return failedVersionQueriesByHost;
     }
 
-    private Map<String, Multimap<String, String>> updateInstanceMetaDataWithPackageVersions(Long stackId, Map<String,
-            Map<String, String>> packageVersionsByNameByHost, Set<InstanceMetaData> instanceMetaDataSet) throws IOException {
+    private Map<String, Multimap<String, String>> updateInstanceMetaDataWithPackageVersions(Map<String, Map<String, String>> packageVersionsByNameByHost,
+            Set<InstanceMetaData> instanceMetaDataSet) throws IOException {
         Map<String, Multimap<String, String>> changedVersionsByHost = new HashMap<>();
         for (InstanceMetaData im : instanceMetaDataSet) {
             Map<String, String> packageVersionsOnHost = packageVersionsByNameByHost.get(im.getDiscoveryFQDN());
@@ -136,7 +132,7 @@ public class InstanceMetadataUpdater {
                     pkgVersionsMMap.putAll(Multimaps.forMap(Maps.transformValues(image.getPackageVersions(), this::removeBuildVersion)));
                     changedVersionsByHost.put(im.getDiscoveryFQDN(), pkgVersionsMMap);
                 }
-                image = updatePackageVersions(stackId, image, packageVersionsOnHost);
+                image = updatePackageVersions(image, packageVersionsOnHost);
                 im.setImage(new Json(image));
                 instanceMetaDataService.save(im);
             }
@@ -322,9 +318,8 @@ public class InstanceMetadataUpdater {
         return version.split("-")[0];
     }
 
-    private Image updatePackageVersions(Long stackId, Image image, Map<String, String> packageVersionsOnHost) {
-        userDataService.updateUserData(stackId, image.getUserdata());
-        return new Image(image.getImageName(), new HashMap<>(), image.getOs(), image.getOsType(), image.getImageCatalogUrl(),
+    private Image updatePackageVersions(Image image, Map<String, String> packageVersionsOnHost) {
+        return new Image(image.getImageName(), image.getUserdata(), image.getOs(), image.getOsType(), image.getImageCatalogUrl(),
                 image.getImageCatalogName(), image.getImageId(), packageVersionsOnHost);
     }
 

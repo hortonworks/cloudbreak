@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,15 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.Userdata;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.UserdataRepository;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigUserDataReplacer;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,12 +41,6 @@ public class UserDataServiceTest {
     private UserDataService underTest;
 
     @Mock
-    private UserdataRepository userdataRepository;
-
-    @Mock
-    private SecretService secretService;
-
-    @Mock
     private ImageService imageService;
 
     @Mock
@@ -65,26 +53,13 @@ public class UserDataServiceTest {
     private Stack stack;
 
     @Mock
-    private Workspace workspace;
-
-    @Mock
-    private Tenant tenant;
-
-    @Mock
     private Image image;
 
     @Captor
     private ArgumentCaptor<Map<InstanceGroupType, String>> imageCaptor;
 
-    @Captor
-    private ArgumentCaptor<Userdata> userdataCaptor;
-
     @BeforeEach
     void setUp() throws Exception {
-        lenient().when(tenant.getName()).thenReturn("tenant");
-        lenient().when(workspace.getTenant()).thenReturn(tenant);
-        lenient().when(stack.getWorkspace()).thenReturn(workspace);
-        lenient().when(stackService.get(any())).thenReturn(stack);
         lenient().when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
         lenient().when(imageService.getImage(STACK_ID)).thenReturn(image);
         lenient().when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
@@ -92,15 +67,14 @@ public class UserDataServiceTest {
 
     @Test
     void updateJumpgateFlagOnly() throws CloudbreakImageNotFoundException {
-        Userdata userdata = new Userdata();
-        userdata.setGatewayUserdata("export FLAG=foo\nexport IS_CCM_ENABLED=true\nexport IS_CCM_V2_ENABLED=false\nexport IS_CCM_V2_JUMPGATE_ENABLED=false\n" +
-                "export OTHER_FLAG=bar");
-        when(userdataRepository.findByStackId(any())).thenReturn(Optional.of(userdata));
+        when(image.getUserdata()).thenReturn(Map.of(InstanceGroupType.GATEWAY,
+                "export FLAG=foo\nexport IS_CCM_ENABLED=true\nexport IS_CCM_V2_ENABLED=false\nexport IS_CCM_V2_JUMPGATE_ENABLED=false\n" +
+                        "export OTHER_FLAG=bar"));
 
         underTest.updateJumpgateFlagOnly(STACK_ID);
 
-        verify(userdataRepository, times(1)).save(userdataCaptor.capture());
-        assertThat(userdataCaptor.getValue().getGatewayUserdata())
+        verify(imageService, times(1)).decorateImageWithUserDataForStack(any(), imageCaptor.capture());
+        assertThat(imageCaptor.getValue().get(InstanceGroupType.GATEWAY))
                 .isEqualTo("export FLAG=foo\nexport IS_CCM_ENABLED=false\nexport IS_CCM_V2_ENABLED=true\nexport IS_CCM_V2_JUMPGATE_ENABLED=true\n" +
                         "export OTHER_FLAG=bar");
     }
@@ -108,17 +82,16 @@ public class UserDataServiceTest {
     @Test
     void updateProxyConfig() throws CloudbreakImageNotFoundException {
         String gwUserData = "gwUserData";
-        Userdata userdata = new Userdata();
-        userdata.setGatewayUserdata(gwUserData);
-        when(userdataRepository.findByStackId(any())).thenReturn(Optional.of(userdata));
+        Map<InstanceGroupType, String> userData = Map.of(InstanceGroupType.GATEWAY, gwUserData);
+        when(image.getUserdata()).thenReturn(userData);
         String replacedGwUserData = "replacedGwUserData";
         when(proxyConfigUserDataReplacer.replaceProxyConfigInUserDataByEnvCrn(gwUserData, ENV_CRN)).thenReturn(replacedGwUserData);
 
         underTest.updateProxyConfig(STACK_ID);
 
         verify(proxyConfigUserDataReplacer).replaceProxyConfigInUserDataByEnvCrn(gwUserData, ENV_CRN);
-        verify(userdataRepository).save(userdataCaptor.capture());
-        assertThat(userdataCaptor.getValue().getGatewayUserdata())
+        verify(imageService).decorateImageWithUserDataForStack(any(), imageCaptor.capture());
+        assertThat(imageCaptor.getValue().get(InstanceGroupType.GATEWAY))
                 .isEqualTo(replacedGwUserData);
     }
 }

@@ -67,7 +67,7 @@ public class AzureImageFormatValidatorTest {
     @Test
     void testImageHasValidVhdFormat() {
         Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null);
+        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(false);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack));
@@ -79,7 +79,7 @@ public class AzureImageFormatValidatorTest {
     @Test
     void testVhdImageOnlyAzureMarketplaceImageAllowed() {
         Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null);
+        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
 
         CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
@@ -97,7 +97,7 @@ public class AzureImageFormatValidatorTest {
     void testImageHasValidMarketplaceFormatNoEntitlement() {
         Image image = new Image(MARKETPLACE_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
                 "default-id", new HashMap<>());
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null);
+        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
 
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(false);
 
@@ -111,7 +111,7 @@ public class AzureImageFormatValidatorTest {
     void testImageHasValidMarketplaceFormatEntitlement() {
         Image image = new Image(MARKETPLACE_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
                 "default-id", new HashMap<>());
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null);
+        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
 
         setupAuthenticatedContext();
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
@@ -127,7 +127,7 @@ public class AzureImageFormatValidatorTest {
     void testImageHasValidMarketplaceFormatEntitlementNoTermsAccepted() {
         Image image = new Image(MARKETPLACE_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
                 "default-id", new HashMap<>());
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null);
+        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
         setupAuthenticatedContext();
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
         when(azureImageTermsSignerService.isSigned(anyString(), any(), any())).thenReturn(false);
@@ -148,7 +148,7 @@ public class AzureImageFormatValidatorTest {
     void testImageHasInvalidFormat() {
         Image image = new Image(INVALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
                 "default-id", new HashMap<>());
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null);
+        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
 
         CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));

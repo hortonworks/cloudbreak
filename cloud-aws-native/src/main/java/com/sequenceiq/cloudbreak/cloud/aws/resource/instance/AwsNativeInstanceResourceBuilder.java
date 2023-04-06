@@ -258,7 +258,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     }
 
     private String getUserData(CloudStack cloudStack, Group group) {
-        String userdata = cloudStack.getUserDataByType(group.getType());
+        String userdata = cloudStack.getImage().getUserDataByType(group.getType());
         String base64EncodedUserData = "";
         if (StringUtils.isNotEmpty(userdata)) {
             base64EncodedUserData = Base64.getEncoder().encodeToString(userdata.getBytes());

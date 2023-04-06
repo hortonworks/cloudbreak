@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Userdata;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -45,7 +44,6 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.Package;
 import com.sequenceiq.cloudbreak.service.cluster.PackageName;
-import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -71,9 +69,6 @@ public class InstanceMetadataUpdaterTest {
     @Mock
     private StackService stackService;
 
-    @Mock
-    private UserDataService userDataService;
-
     @InjectMocks
     private InstanceMetadataUpdater underTest;
 
@@ -81,7 +76,6 @@ public class InstanceMetadataUpdaterTest {
     public void setUp() throws CloudbreakException, JsonProcessingException, CloudbreakOrchestratorFailedException {
         MockitoAnnotations.openMocks(this);
         when(gatewayConfigService.getPrimaryGatewayConfig(any(Stack.class))).thenReturn(gatewayConfig);
-        when(userDataService.updateUserData(anyLong(), any())).thenReturn(new Userdata());
 
         Package packageByName = new Package();
         packageByName.setName("packageByName");

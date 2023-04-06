@@ -141,7 +141,7 @@ public class YarnResourceConnectorTest {
         when(stackMock.getGroups()).thenReturn(groupList);
         when(stackMock.getLoginUserName()).thenReturn(LOGIN_USER_NAME);
         when(stackMock.getPublicKey()).thenReturn(PUBLIC_KEY);
-        when(stackMock.getUserDataByType(InstanceGroupType.CORE)).thenReturn(USER_DATA);
+        when(imageMock.getUserDataByType(InstanceGroupType.CORE)).thenReturn(USER_DATA);
         when(cloudInstanceMock.getTemplate()).thenReturn(instanceTemplateMock);
         when(instanceTemplateMock.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, Integer.class)).thenReturn(2);
         when(instanceTemplateMock.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class)).thenReturn(4096);

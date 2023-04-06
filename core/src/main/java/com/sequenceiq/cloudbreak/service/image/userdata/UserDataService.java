@@ -25,16 +25,12 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
-import com.sequenceiq.cloudbreak.domain.Userdata;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.repository.UserdataRepository;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigUserDataReplacer;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
-import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
@@ -44,9 +40,6 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 public class UserDataService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDataService.class);
-
-    @Inject
-    private UserdataRepository userdataRepository;
 
     @Inject
     private UserDataBuilder userDataBuilder;
@@ -67,12 +60,6 @@ public class UserDataService {
     private ImageService imageService;
 
     @Inject
-    private StackDtoService stackDtoService;
-
-    @Inject
-    private SecretService secretService;
-
-    @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
 
     @Inject
@@ -91,7 +78,8 @@ public class UserDataService {
                 .replace("IS_CCM_ENABLED",  false)
                 .getUserData();
         userdata.put(InstanceGroupType.GATEWAY, result);
-        updateUserData(stackId, userdata);
+        Stack stack = stackService.getByIdWithLists(stackId);
+        updateUserData(stack, userdata);
     }
 
     public void updateProxyConfig(Long stackId) {
@@ -101,54 +89,24 @@ public class UserDataService {
         String gatewayUserData = userDataByInstanceGroup.get(InstanceGroupType.GATEWAY);
         String result = proxyConfigUserDataReplacer.replaceProxyConfigInUserDataByEnvCrn(gatewayUserData, stack.getEnvironmentCrn());
         userDataByInstanceGroup.put(InstanceGroupType.GATEWAY, result);
-        updateUserData(stack.getId(), userDataByInstanceGroup);
+        updateUserData(stack, userDataByInstanceGroup);
     }
 
-    public Map<InstanceGroupType, String> getUserData(Long stackId) {
+    private Map<InstanceGroupType, String> getUserData(Long stackId) {
         try {
             Image image = imageService.getImage(stackId);
-            if (image.getUserdata() == null || image.getUserdata().isEmpty()) {
-                Map<InstanceGroupType, String> map = new HashMap<>();
-                Optional<Userdata> userdataOptional = userdataRepository.findByStackId(stackId);
-                if (userdataOptional.isPresent()) {
-                    map.put(InstanceGroupType.CORE, userdataOptional.get().getCoreUserdata());
-                    map.put(InstanceGroupType.GATEWAY, userdataOptional.get().getGatewayUserdata());
-                }
-                return map;
-            } else {
-                return new HashMap<>(image.getUserdata());
-            }
+            return new HashMap<>(image.getUserdata());
         } catch (CloudbreakImageNotFoundException e) {
             throw convertToServiceException(e);
         }
     }
 
-    public Userdata updateUserData(Long stackId, Map<InstanceGroupType, String> userdata) {
-        Stack stack = stackService.get(stackId);
-        Userdata result;
-
-        Optional<Userdata> userdataOptional = userdataRepository.findByStackId(stackId);
-
-        if (userdataOptional.isPresent()) {
-            Userdata existingUserData = userdataOptional.get();
-            String coreUserdataSecret = existingUserData.getCoreUserdataSecret();
-            String gatewayUserdataSecret = existingUserData.getGatewayUserdataSecret();
-
-            existingUserData.setCoreUserdata(userdata.get(InstanceGroupType.CORE));
-            existingUserData.setGatewayUserdata(userdata.get(InstanceGroupType.GATEWAY));
-            result = userdataRepository.save(existingUserData);
-
-            secretService.delete(coreUserdataSecret);
-            secretService.delete(gatewayUserdataSecret);
-        } else {
-            Userdata newUserdata = new Userdata();
-            newUserdata.setAccountId(stack.getWorkspace().getTenant().getName());
-            newUserdata.setCoreUserdata(userdata.get(InstanceGroupType.CORE));
-            newUserdata.setGatewayUserdata(userdata.get(InstanceGroupType.GATEWAY));
-            newUserdata.setStack(stack);
-            result = userdataRepository.save(newUserdata);
+    private void updateUserData(Stack stack, Map<InstanceGroupType, String> userdata) {
+        try {
+            imageService.decorateImageWithUserDataForStack(stack, userdata);
+        } catch (CloudbreakImageNotFoundException e) {
+            throw convertToServiceException(e);
         }
-        return result;
     }
 
     private static CloudbreakServiceException convertToServiceException(CloudbreakImageNotFoundException e) {
@@ -179,7 +137,7 @@ public class UserDataService {
             Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer,
                     sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
-            updateUserData(stackId, userData);
+            imageService.decorateImageWithUserDataForStack(stack, userData);
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);
             throw new GetCloudParameterException("Failed to get Platform parmaters", e);
