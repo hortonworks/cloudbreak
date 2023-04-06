@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.event;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -25,6 +26,8 @@ public class InstanceGroupDetails implements Serializable {
     private Integer rootVolumeSize;
 
     private Map<String, Object> attributes;
+
+    private Set<String> hints;
 
     public String getGroupName() {
         return groupName;
@@ -88,5 +91,13 @@ public class InstanceGroupDetails implements Serializable {
 
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
+    }
+
+    public Set<String> getHints() {
+        return hints;
+    }
+
+    public void setHints(Set<String> hints) {
+        this.hints = hints;
     }
 }

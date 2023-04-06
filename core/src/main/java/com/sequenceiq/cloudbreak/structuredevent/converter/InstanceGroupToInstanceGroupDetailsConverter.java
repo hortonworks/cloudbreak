@@ -19,6 +19,7 @@ public class InstanceGroupToInstanceGroupDetailsConverter {
         instanceGroupDetails.setGroupName(source.getGroupName());
         instanceGroupDetails.setGroupType(source.getInstanceGroupType().name());
         instanceGroupDetails.setNodeCount(nodeCount);
+        instanceGroupDetails.setHints(source.getHints());
         Template template = source.getTemplate();
         if (template != null) {
             instanceGroupDetails.setInstanceType(template.getInstanceType());

@@ -34,6 +34,7 @@ public class InstanceGroupToInstanceGroupV4RequestConverter {
                 .convert(source.getTemplate()));
         instanceGroupRequest.setSecurityGroup(securityGroupToSecurityGroupV4RequestConverter
                 .convert(source.getSecurityGroup()));
+        instanceGroupRequest.setHints(source.getHints());
         return instanceGroupRequest;
     }
 
