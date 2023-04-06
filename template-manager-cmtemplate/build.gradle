@@ -43,7 +43,7 @@ dependencies {
   testImplementation project(path: ':common', configuration: 'tests')
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation     group: "net.bytebuddy",             name: "byte-buddy",                     version: "1.12.22"
+  implementation     group: "net.bytebuddy",             name: "byte-buddy",                     version: "1.14.4"
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
