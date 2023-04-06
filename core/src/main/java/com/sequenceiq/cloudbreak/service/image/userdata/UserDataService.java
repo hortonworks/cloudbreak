@@ -87,11 +87,11 @@ public class UserDataService {
         String gatewayUserdata = userdata.get(InstanceGroupType.GATEWAY);
         String result = new UserDataReplacer(gatewayUserdata)
                 .replace("IS_CCM_V2_JUMPGATE_ENABLED", true)
-                .replace("IS_CCM_V2_ENABLED", true)
-                .replace("IS_CCM_ENABLED", false)
+                .replace("IS_CCM_V2_ENABLED",  true)
+                .replace("IS_CCM_ENABLED",  false)
                 .getUserData();
         userdata.put(InstanceGroupType.GATEWAY, result);
-        createOrUpdateUserData(stackId, userdata);
+        updateUserData(stackId, userdata);
     }
 
     public void updateProxyConfig(Long stackId) {
@@ -101,7 +101,7 @@ public class UserDataService {
         String gatewayUserData = userDataByInstanceGroup.get(InstanceGroupType.GATEWAY);
         String result = proxyConfigUserDataReplacer.replaceProxyConfigInUserDataByEnvCrn(gatewayUserData, stack.getEnvironmentCrn());
         userDataByInstanceGroup.put(InstanceGroupType.GATEWAY, result);
-        createOrUpdateUserData(stack.getId(), userDataByInstanceGroup);
+        updateUserData(stack.getId(), userDataByInstanceGroup);
     }
 
     public Map<InstanceGroupType, String> getUserData(Long stackId) {
@@ -111,7 +111,6 @@ public class UserDataService {
                 Map<InstanceGroupType, String> map = new HashMap<>();
                 Optional<Userdata> userdataOptional = userdataRepository.findByStackId(stackId);
                 if (userdataOptional.isPresent()) {
-                    LOGGER.debug("Collecting user data from UserData table with stack id: {}", stackId);
                     map.put(InstanceGroupType.CORE, userdataOptional.get().getCoreUserdata());
                     map.put(InstanceGroupType.GATEWAY, userdataOptional.get().getGatewayUserdata());
                 }
@@ -124,35 +123,30 @@ public class UserDataService {
         }
     }
 
-    public Userdata createOrUpdateUserData(Long stackId, Map<InstanceGroupType, String> userdata) {
+    public Userdata updateUserData(Long stackId, Map<InstanceGroupType, String> userdata) {
         Stack stack = stackService.get(stackId);
         Userdata result;
+
         Optional<Userdata> userdataOptional = userdataRepository.findByStackId(stackId);
-        if (!userdata.isEmpty() && userdata.containsKey(InstanceGroupType.CORE) && userdata.containsKey(InstanceGroupType.GATEWAY)) {
-            if (userdataOptional.isPresent()) {
-                LOGGER.debug("Updating existing user data in the user data table for stack: {}", stackId);
-                Userdata existingUserData = userdataOptional.get();
-                String coreUserdataSecret = existingUserData.getCoreUserdataSecret();
-                String gatewayUserdataSecret = existingUserData.getGatewayUserdataSecret();
 
-                existingUserData.setCoreUserdata(userdata.get(InstanceGroupType.CORE));
-                existingUserData.setGatewayUserdata(userdata.get(InstanceGroupType.GATEWAY));
-                result = userdataRepository.save(existingUserData);
+        if (userdataOptional.isPresent()) {
+            Userdata existingUserData = userdataOptional.get();
+            String coreUserdataSecret = existingUserData.getCoreUserdataSecret();
+            String gatewayUserdataSecret = existingUserData.getGatewayUserdataSecret();
 
-                secretService.delete(coreUserdataSecret);
-                secretService.delete(gatewayUserdataSecret);
-            } else {
-                LOGGER.info("Creating new user data entry and stop managing user data in the image component for stack: {}", stackId);
-                Userdata newUserdata = new Userdata();
-                newUserdata.setAccountId(stack.getWorkspace().getTenant().getName());
-                newUserdata.setCoreUserdata(userdata.get(InstanceGroupType.CORE));
-                newUserdata.setGatewayUserdata(userdata.get(InstanceGroupType.GATEWAY));
-                newUserdata.setStack(stack);
-                result = userdataRepository.save(newUserdata);
-            }
+            existingUserData.setCoreUserdata(userdata.get(InstanceGroupType.CORE));
+            existingUserData.setGatewayUserdata(userdata.get(InstanceGroupType.GATEWAY));
+            result = userdataRepository.save(existingUserData);
+
+            secretService.delete(coreUserdataSecret);
+            secretService.delete(gatewayUserdataSecret);
         } else {
-            LOGGER.info("No need for user data update in case of stack '{}' as the provided user data is empty", stackId);
-            result = userdataOptional.orElse(null);
+            Userdata newUserdata = new Userdata();
+            newUserdata.setAccountId(stack.getWorkspace().getTenant().getName());
+            newUserdata.setCoreUserdata(userdata.get(InstanceGroupType.CORE));
+            newUserdata.setGatewayUserdata(userdata.get(InstanceGroupType.GATEWAY));
+            newUserdata.setStack(stack);
+            result = userdataRepository.save(newUserdata);
         }
         return result;
     }
@@ -185,7 +179,7 @@ public class UserDataService {
             Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer,
                     sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
-            createOrUpdateUserData(stackId, userData);
+            updateUserData(stackId, userData);
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);
             throw new GetCloudParameterException("Failed to get Platform parmaters", e);

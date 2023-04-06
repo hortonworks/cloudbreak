@@ -81,7 +81,7 @@ public class InstanceMetadataUpdaterTest {
     public void setUp() throws CloudbreakException, JsonProcessingException, CloudbreakOrchestratorFailedException {
         MockitoAnnotations.openMocks(this);
         when(gatewayConfigService.getPrimaryGatewayConfig(any(Stack.class))).thenReturn(gatewayConfig);
-        when(userDataService.createOrUpdateUserData(anyLong(), any())).thenReturn(new Userdata());
+        when(userDataService.updateUserData(anyLong(), any())).thenReturn(new Userdata());
 
         Package packageByName = new Package();
         packageByName.setName("packageByName");
