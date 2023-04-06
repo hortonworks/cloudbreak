@@ -50,6 +50,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter {
         instanceGroup.setInstanceGroupType(source.getType());
         instanceGroup.setInitialNodeCount(source.getNodeCount());
         instanceGroup.setScalabilityOption(getScalabilityOption(source));
+        instanceGroup.setHints(source.getHints());
         setNetwork(source, instanceGroup);
         if (source.getNodeCount() > 0) {
             addInstanceMetadatas(source, instanceGroup, variant);

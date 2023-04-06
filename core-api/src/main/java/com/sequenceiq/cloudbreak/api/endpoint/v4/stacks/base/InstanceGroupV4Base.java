@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
+import java.util.Set;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
@@ -67,6 +69,8 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
+
+    private Set<String> hints;
 
     public int getNodeCount() {
         return nodeCount;
@@ -191,5 +195,13 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     public void setScalabilityOption(ScalabilityOption scalabilityOption) {
         this.scalabilityOption = scalabilityOption;
+    }
+
+    public Set<String> getHints() {
+        return hints;
+    }
+
+    public void setHints(Set<String> hints) {
+        this.hints = hints;
     }
 }

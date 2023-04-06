@@ -281,6 +281,7 @@ public class TestUtil {
         instanceGroup.setSecurityGroup(securityGroup(1L));
         instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork());
         instanceGroup.setInstanceMetaData(generateInstanceMetaDatas(nodeCount, id, instanceGroup));
+        instanceGroup.setHints(Set.of("1", "2"));
         return instanceGroup;
     }
 
