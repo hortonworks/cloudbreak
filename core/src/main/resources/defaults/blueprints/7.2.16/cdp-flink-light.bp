@@ -142,7 +142,7 @@
               },
               {
                 "name": "yarn_scheduler_capacity_resource_calculator",
-                "value": "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+                "value": "org.apache.hadoop.yarn.util.resource.DominantResourceCalculator"
               },
               {
                 "name": "resourcemanager_capacity_scheduler_configuration",
