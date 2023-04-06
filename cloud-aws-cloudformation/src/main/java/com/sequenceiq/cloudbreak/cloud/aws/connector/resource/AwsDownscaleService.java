@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -222,29 +223,36 @@ public class AwsDownscaleService {
     }
 
     private List<String> terminateInstances(Long stackId, List<String> instanceIdsToDelete, AmazonEc2Client amazonEC2Client) {
-        LOGGER.debug("Terminated instances. [stack: {}, instances: {}]", stackId, instanceIdsToDelete);
-        try {
-            List<String> existingInstances = getExistingInstances(instanceIdsToDelete, amazonEC2Client);
-            if (!existingInstances.isEmpty()) {
-                amazonEC2Client.terminateInstances(TerminateInstancesRequest.builder().instanceIds(existingInstances).build());
-            }
-            return existingInstances;
-        } catch (AwsServiceException e) {
-            LOGGER.info("Termination failed, lets check if it is because instance was not found", e);
-            if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(e.awsErrorDetails().errorCode())) {
-                throw e;
-            } else {
-                LOGGER.info("Instance was not found, lets terminate others");
-                List<String> runningInstances = instanceIdsToDelete.stream()
-                        .filter(instanceId -> !e.awsErrorDetails().errorMessage().contains(instanceId))
-                        .collect(Collectors.toList());
-                LOGGER.info("Running instances on AWS to terminate: {}", runningInstances);
-                if (!runningInstances.isEmpty()) {
-                    amazonEC2Client.terminateInstances(TerminateInstancesRequest.builder().instanceIds(runningInstances).build());
+        List<String> instanceIdsForTermination = new ArrayList<>(instanceIdsToDelete);
+        while (instanceIdsForTermination.size() > 0) {
+            int originalDeletableInstanceIdsSize = instanceIdsForTermination.size();
+            LOGGER.debug("Terminate the following instances: [stack: {}, instances: {}]", stackId, instanceIdsForTermination);
+            try {
+                List<String> existingInstances = getExistingInstances(instanceIdsForTermination, amazonEC2Client);
+                if (!existingInstances.isEmpty()) {
+                    amazonEC2Client.terminateInstances(TerminateInstancesRequest.builder().instanceIds(existingInstances).build());
                 }
-                return runningInstances;
+                return existingInstances;
+            } catch (AwsServiceException e) {
+                LOGGER.info("Termination failed, lets check if it is failed because instance was not found", e);
+                if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(e.awsErrorDetails().errorCode())) {
+                    throw e;
+                } else {
+                    LOGGER.info("Instance was not found, lets filter out the non existing instances");
+                    instanceIdsForTermination = instanceIdsForTermination.stream()
+                            .filter(instanceId -> !e.awsErrorDetails().errorMessage().contains(instanceId))
+                            .collect(Collectors.toList());
+                    LOGGER.info("Collected instances from AWS for termination in next round: {}", instanceIdsForTermination);
+                    if (instanceIdsForTermination.size() < originalDeletableInstanceIdsSize) {
+                        LOGGER.info("We removed instances from the original set, instance list size is smaller than the original");
+                    } else {
+                        LOGGER.error("Element numbers are the same, it should not happen, let's cancel from the loop with exception.");
+                        throw new CloudbreakServiceException("AWS instance termination failed, instance termination list is not shrinking", e);
+                    }
+                }
             }
         }
+        return instanceIdsForTermination;
     }
 
     private List<String> getExistingInstances(List<String> instanceIdsToDelete, AmazonEc2Client amazonEC2Client) {
