@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -74,6 +73,8 @@ class ClouderaManagerClusterCreationSetupServiceTest {
     private static final String DEFAULT_CM_VERSION = "2.0.0";
 
     private static final String REDHAT_7 = "redhat7";
+
+    private static final String CENTOS_7 = "centos7";
 
     private static final String IMAGE_CATALOG_NAME = "imgcatname";
 
@@ -129,7 +130,7 @@ class ClouderaManagerClusterCreationSetupServiceTest {
         blueprint.setBlueprintText("{}");
         Map<InstanceGroupType, String> userData = new HashMap<>();
         userData.put(InstanceGroupType.CORE, "userdata");
-        Image image = new Image("imagename", userData, "centos7", REDHAT_7, "url", IMAGE_CATALOG_NAME,
+        Image image = new Image("imagename", userData, CENTOS_7, REDHAT_7, "url", IMAGE_CATALOG_NAME,
                 "id", Collections.emptyMap());
         imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
 
@@ -147,11 +148,11 @@ class ClouderaManagerClusterCreationSetupServiceTest {
                         mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class)),
                 NEWER_CDH_VERSION, new ImageBasedDefaultCDHInfo(getDefaultCDHInfo(NEWER_CDH_VERSION),
                         mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class)));
-        lenient().when(imageBasedDefaultCDHEntries.getEntries(workspace.getId(), imageCatalogPlatform("AWS"), IMAGE_CATALOG_NAME))
+        lenient().when(imageBasedDefaultCDHEntries.getEntries(workspace.getId(), imageCatalogPlatform("AWS"), CENTOS_7, IMAGE_CATALOG_NAME))
                 .thenReturn(defaultCDHInfoMap);
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setCdh(Collections.singletonMap(OLDER_CDH_VERSION, null));
-        lenient().when(stackMatrixService.getStackMatrix(eq(workspace.getId()), eq(imageCatalogPlatform("AWS")), anyString()))
+        lenient().when(stackMatrixService.getStackMatrix(eq(workspace.getId()), eq(imageCatalogPlatform("AWS")), eq(CENTOS_7), anyString()))
                 .thenReturn(stackMatrixV4Response);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
     }
@@ -161,7 +162,7 @@ class ClouderaManagerClusterCreationSetupServiceTest {
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(OLDER_CDH_VERSION);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
-                Optional.empty(), List.of(), Optional.of(imageComponent));
+                null, List.of(), imageComponent);
 
         assertVersionsMatch(clusterComponents, DEFAULT_CM_VERSION, OLDER_CDH_VERSION);
     }
@@ -171,7 +172,7 @@ class ClouderaManagerClusterCreationSetupServiceTest {
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(null);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
-                Optional.empty(), List.of(), Optional.of(imageComponent));
+                null, List.of(), imageComponent);
 
         assertVersionsMatch(clusterComponents, DEFAULT_CM_VERSION, NEWER_CDH_VERSION);
     }
@@ -182,7 +183,7 @@ class ClouderaManagerClusterCreationSetupServiceTest {
 
         assertThrows(BadRequestException.class, () ->
                 underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
-                        Optional.empty(), List.of(), Optional.of(imageComponent)));
+                        null, List.of(), imageComponent));
     }
 
     @Test
@@ -198,8 +199,8 @@ class ClouderaManagerClusterCreationSetupServiceTest {
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
         when(parcelFilterService.filterParcelsByBlueprint(eq(WORKSPACE_ID), eq(STACK_ID), anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
-        List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, Optional.of(cmRepoComponent),
-                productComponentList, Optional.of(imageComponent));
+        List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, cmRepoComponent,
+                productComponentList, imageComponent);
 
         assertVersionsMatch(clusterComponents, CM_VERSION, SOME_CDH_VERSION);
         verify(parcelFilterService, times(1)).filterParcelsByBlueprint(eq(WORKSPACE_ID), eq(STACK_ID), anySet(), any(Blueprint.class));
@@ -218,8 +219,8 @@ class ClouderaManagerClusterCreationSetupServiceTest {
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
         when(clouderaManagerProductsProvider.getCdhProducts(anySet())).thenReturn(cdhProduct);
 
-        List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, Optional.of(cmRepoComponent),
-                productComponentList, Optional.of(imageComponent));
+        List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, cmRepoComponent,
+                productComponentList, imageComponent);
 
         assertVersionsMatch(clusterComponents, CM_VERSION, SOME_CDH_VERSION);
         verify(clouderaManagerProductsProvider).getCdhProducts(anySet());
@@ -261,13 +262,13 @@ class ClouderaManagerClusterCreationSetupServiceTest {
 
     private void setupDefaultClouderaManagerEntries() throws CloudbreakImageCatalogException {
         ClouderaManagerRepo clouderaManagerRepo = getClouderaManagerRepo(true);
-        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(REDHAT_7), eq("CDH"), eq(SOME_CDH_VERSION), eq(imageCatalogPlatform("AWS"))))
+        lenient().when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, CENTOS_7, "CDH", SOME_CDH_VERSION, imageCatalogPlatform("AWS")))
                 .thenReturn(clouderaManagerRepo);
-        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(REDHAT_7), eq("CDH"), eq(NEWER_CDH_VERSION), eq(imageCatalogPlatform("AWS"))))
+        lenient().when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, CENTOS_7, "CDH", NEWER_CDH_VERSION, (imageCatalogPlatform("AWS"))))
                 .thenReturn(clouderaManagerRepo);
-        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(REDHAT_7), eq("CDH"), eq(OLDER_CDH_VERSION), eq(imageCatalogPlatform("AWS"))))
+        lenient().when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, CENTOS_7, "CDH", OLDER_CDH_VERSION, imageCatalogPlatform("AWS")))
                 .thenReturn(clouderaManagerRepo);
-        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(REDHAT_7), eq("CDH"), eq(null), eq(imageCatalogPlatform("AWS"))))
+        lenient().when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, CENTOS_7, "CDH", null, imageCatalogPlatform("AWS")))
                 .thenReturn(clouderaManagerRepo);
     }
 

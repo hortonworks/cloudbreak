@@ -20,11 +20,9 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -50,24 +48,11 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
-@RunWith(Parameterized.class)
 public class ImageCatalogServiceDefaultTest {
 
     private static final String[] PROVIDERS = { "aws", "azure", "gcp" };
 
     private static final String DEFAULT_CDH_IMAGE_CATALOG = "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json";
-
-    private final String catalogFile;
-
-    private final String provider;
-
-    private final String expectedImageId;
-
-    private final String cbVersion;
-
-    private final String clusterVersion;
-
-    private final String os;
 
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
@@ -117,6 +102,9 @@ public class ImageCatalogServiceDefaultTest {
     @Mock
     private CloudbreakVersionListProvider cloudbreakVersionListProvider;
 
+    @Mock
+    private ImageComparator imageComparator;
+
     @InjectMocks
     private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
@@ -129,17 +117,6 @@ public class ImageCatalogServiceDefaultTest {
     @InjectMocks
     private ImageCatalogService underTest;
 
-    public ImageCatalogServiceDefaultTest(String catalogFile, String provider,
-            String clusterVersion, String expectedImageId, String cbVersion, String os) {
-        this.catalogFile = catalogFile;
-        this.provider = provider;
-        this.expectedImageId = expectedImageId;
-        this.cbVersion = cbVersion;
-        this.clusterVersion = clusterVersion;
-        this.os = os;
-    }
-
-    @Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 {DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "5.0.0", "" },
@@ -151,21 +128,19 @@ public class ImageCatalogServiceDefaultTest {
         });
     }
 
-    @Before
-    public void beforeTest() throws Exception {
+    @BeforeEach
+    public void beforeTest() {
         MockitoAnnotations.initMocks(this);
-        String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
-        CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
-        when(imageCatalogProvider.getImageCatalogV3(catalogFile)).thenReturn(catalog);
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
 
         when(userProfileService.getOrCreate(user)).thenReturn(new UserProfile());
         when(userProfileService.getOrCreate(user)).thenReturn(new UserProfile());
-        when(imageCatalog.getImageCatalogUrl()).thenReturn(catalogFile);
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
         when(userService.getOrCreate(any())).thenReturn(user);
         when(entitlementService.baseImageEnabled(anyString())).thenReturn(true);
         when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
+
+        lenient().when(imageComparator.compare(any(), any())).thenReturn(1);
 
         ReflectionTestUtils.setField(underTest, "imageCatalogServiceProxy", imageCatalogServiceProxy);
         ReflectionTestUtils.setField(imageCatalogServiceProxy, "advertisedImageCatalogService", advertisedImageCatalogService);
@@ -173,9 +148,15 @@ public class ImageCatalogServiceDefaultTest {
         ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
     }
 
-    @Test
-    public void testGetDefaultImageShouldReturnProperDefaultImage() throws Exception {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testGetDefaultImageShouldReturnProperDefaultImage(String catalogFile, String provider, String clusterVersion, String expectedImageId,
+            String cbVersion, String os) throws Exception {
         // GIVEN
+        String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
+        CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
+        when(imageCatalogProvider.getImageCatalogV3(catalogFile)).thenReturn(catalog);
+        when(imageCatalog.getImageCatalogUrl()).thenReturn(catalogFile);
         ReflectionTestUtils.setField(underTest, "cbVersion", cbVersion);
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
 

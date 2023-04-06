@@ -52,7 +52,7 @@ public class LatestDefaultImageUuidProviderTest {
 
     @BeforeClass
     public static void beforeClass() {
-        underTest = new LatestDefaultImageUuidProvider(new ImageComparator());
+        underTest = new LatestDefaultImageUuidProvider(new ImageComparator("redhat8"));
         defaultImages = createTestImageList();
     }
 

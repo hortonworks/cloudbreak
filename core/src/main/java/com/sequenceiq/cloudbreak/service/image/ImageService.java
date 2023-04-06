@@ -202,12 +202,13 @@ public class ImageService {
     private Set<String> getSupportedOperatingSystems(Long workspaceId, ImageSettingsV4Request imageSettings, String clusterVersion, ImageCatalogPlatform platform)
             throws Exception {
         String imageCatalogName = imageSettings != null ? imageSettings.getCatalog() : null;
-        Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(workspaceId, clusterVersion, platform, imageCatalogName);
-        if (imageSettings != null && StringUtils.isNotEmpty(imageSettings.getOs())) {
+        String os = imageSettings != null ? imageSettings.getOs() : null;
+        Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(workspaceId, clusterVersion, platform, os, imageCatalogName);
+        if (StringUtils.isNotEmpty(os)) {
             if (operatingSystems.isEmpty()) {
-                operatingSystems = Collections.singleton(imageSettings.getOs());
+                operatingSystems = Collections.singleton(os);
             } else {
-                operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(imageSettings.getOs())).collect(Collectors.toSet());
+                operatingSystems = operatingSystems.stream().filter(o -> o.equalsIgnoreCase(os)).collect(Collectors.toSet());
             }
         }
         return operatingSystems;

@@ -7,13 +7,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -33,13 +37,16 @@ public class ImageBasedDefaultCDHEntries {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageBasedDefaultCDHEntries.class);
 
+    @Value("${cb.image.catalog.default.os}")
+    private String defaultOs;
+
     @Inject
     private ImageCatalogService imageCatalogService;
 
     @Inject
     private PreWarmParcelParser preWarmParcelParser;
 
-    public Map<String, ImageBasedDefaultCDHInfo> getEntries(Long workspaceId, ImageCatalogPlatform platform, String imageCatalogName)
+    public Map<String, ImageBasedDefaultCDHInfo> getEntries(Long workspaceId, ImageCatalogPlatform platform, String os, String imageCatalogName)
             throws CloudbreakImageCatalogException {
         String catalogName = Optional.ofNullable(imageCatalogName).orElse(ImageCatalogService.CDP_DEFAULT_CATALOG_NAME);
         StatedImages images = imageCatalogService.getImages(workspaceId, catalogName, platform);
@@ -48,25 +55,27 @@ public class ImageBasedDefaultCDHEntries {
             images = imageCatalogService.getImages(workspaceId, catalogName, imageCatalogPlatform(CloudPlatform.AWS.name()));
         }
 
-        return getEntries(images.getImages());
+        return getEntries(images.getImages(), os);
     }
 
     public Map<String, ImageBasedDefaultCDHInfo> getEntries(Images images) {
-        return images.getCdhImages().stream()
-                .filter(Image::isDefaultImage)
-                .collect(Collectors.toMap(Image::getVersion, i -> new ImageBasedDefaultCDHInfo(getDefaultCDHInfo(i), i),
-                        //The generated CDHInfo should be the same for the same version so it does not matter which one is used.
-                        //It can happend when calling for an image catalog with images.
-                        (i1, i2) -> i1));
+        return getEntries(images, null);
     }
 
-    private DefaultCDHInfo getDefaultCDHInfo(Image image) {
+    public Map<String, ImageBasedDefaultCDHInfo> getEntries(Images images, String os) {
+        return images.getCdhImages().stream()
+                .filter(Image::isDefaultImage)
+                .filter(image -> ObjectUtils.isEmpty(os) || os.equalsIgnoreCase(image.getOs()))
+                .collect(Collectors.toMap(Image::getVersion, this::createImageBasedDefaultCDHInfo, preferDefaultOs()));
+    }
+
+    private ImageBasedDefaultCDHInfo createImageBasedDefaultCDHInfo(Image image) {
         DefaultCDHInfo defaultCdhInfo = new DefaultCDHInfo();
         defaultCdhInfo.setVersion(image.getStackDetails().getRepo().getStack().get(StackRepoDetails.REPOSITORY_VERSION));
         defaultCdhInfo.setRepo(getRepoDetails(image));
         defaultCdhInfo.setParcels(getParcels(image));
         defaultCdhInfo.setCsd(image.getPreWarmCsd());
-        return defaultCdhInfo;
+        return new ImageBasedDefaultCDHInfo(defaultCdhInfo, image);
     }
 
     private List<ClouderaManagerProduct> getParcels(Image image) {
@@ -79,10 +88,17 @@ public class ImageBasedDefaultCDHEntries {
 
     private ClouderaManagerDefaultStackRepoDetails getRepoDetails(Image image) {
         ClouderaManagerDefaultStackRepoDetails repoDetails = new ClouderaManagerDefaultStackRepoDetails();
-        Map<String, String> repoStack = new HashMap(image.getStackDetails().getRepo().getStack());
+        Map<String, String> repoStack = new HashMap<>(image.getStackDetails().getRepo().getStack());
         repoStack.remove(StackRepoDetails.REPOSITORY_VERSION);
         repoDetails.setStack(repoStack);
 
         return repoDetails;
+    }
+
+    private BinaryOperator<ImageBasedDefaultCDHInfo> preferDefaultOs() {
+        return (i1, i2) -> Stream.of(i1, i2)
+                .filter(i -> defaultOs.equalsIgnoreCase(i.getImage().getOs()))
+                .findFirst()
+                .orElse(i1);
     }
 }

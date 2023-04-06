@@ -44,19 +44,19 @@ public class StackMatrixService {
     @Inject
     private StackInfoToClouderaManagerStackDescriptorV4ResponseConverter stackInfoToClouderaManagerStackDescriptorV4ResponseConverter;
 
-    public StackMatrixV4Response getStackMatrix(ImageCatalogPlatform platform) throws CloudbreakImageCatalogException {
-        return getStackMatrix(0L, platform, null);
+    public StackMatrixV4Response getStackMatrix(ImageCatalogPlatform platform, String os) throws CloudbreakImageCatalogException {
+        return getStackMatrix(0L, platform, os, null);
     }
 
     public StackMatrixV4Response getStackMatrix(Long workspaceId,
-        ImageCatalogPlatform platform, String imageCatalogName) throws CloudbreakImageCatalogException {
-        LOGGER.debug("Generate stack matrix from images using '{}' image catalog and '{}' platform.", imageCatalogName, platform);
-        return getImageBasedStackMatrix(workspaceId, platform, imageCatalogName);
+        ImageCatalogPlatform platform, String os, String imageCatalogName) throws CloudbreakImageCatalogException {
+        LOGGER.debug("Generate stack matrix from images using '{}' image catalog for '{}' platform and '{}' os.", imageCatalogName, platform, os);
+        return getImageBasedStackMatrix(workspaceId, platform, os, imageCatalogName);
     }
 
     private StackMatrixV4Response getImageBasedStackMatrix(Long workspaceId,
-        ImageCatalogPlatform platform, String imageCatalogName) throws CloudbreakImageCatalogException {
-        Map<String, ImageBasedDefaultCDHInfo> cdhEntries = imageBasedDefaultCDHEntries.getEntries(workspaceId, platform, imageCatalogName);
+        ImageCatalogPlatform platform, String os, String imageCatalogName) throws CloudbreakImageCatalogException {
+        Map<String, ImageBasedDefaultCDHInfo> cdhEntries = imageBasedDefaultCDHEntries.getEntries(workspaceId, platform, os, imageCatalogName);
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
 
         Map<String, ClouderaManagerStackDescriptorV4Response> cdhStackDescriptors = new HashMap<>();
@@ -72,9 +72,9 @@ public class StackMatrixService {
     }
 
     public Set<String> getSupportedOperatingSystems(Long workspaceId, String clusterVersion,
-        ImageCatalogPlatform platform, String imageCatalogName) throws Exception {
-        StackMatrixV4Response stackMatrix = getStackMatrix(workspaceId, platform, imageCatalogName);
-        LOGGER.debug("Get Cloudera Manager stack info for determinigetSupportedOperationSystemsng the supported OS types for version: {}", clusterVersion);
+        ImageCatalogPlatform platform, String os, String imageCatalogName) throws Exception {
+        StackMatrixV4Response stackMatrix = getStackMatrix(workspaceId, platform, os, imageCatalogName);
+        LOGGER.debug("Get Cloudera Manager stack info for getSupportedOperatingSystems the supported OS types for version: {} and os: {}", clusterVersion, os);
         ClouderaManagerStackDescriptorV4Response cmStackDescriptor = stackMatrix.getCdh().get(clusterVersion);
         return cmStackDescriptor != null ? cmStackDescriptor.getClouderaManager().getRepository().keySet() : Collections.emptySet();
     }

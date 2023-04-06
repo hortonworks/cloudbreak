@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -59,30 +60,30 @@ public class DefaultClouderaManagerRepoServiceTest {
         cdhMap.put("6.2.0", cdhDescriptor620);
 
         stackMatrixV4Response.setCdh(cdhMap);
-        when(stackMatrixService.getStackMatrix(null)).thenReturn(stackMatrixV4Response);
+        when(stackMatrixService.getStackMatrix(any(), any())).thenReturn(stackMatrixV4Response);
     }
 
     @Test
     public void testDefaultRepoWithCDHWhichDoesNotExists() throws Exception {
-        ClouderaManagerRepo repo = defaultClouderaManagerRepoService.getDefault("redhat7", CDH, "2.6", null);
+        ClouderaManagerRepo repo = defaultClouderaManagerRepoService.getDefault("redhat7", "centos7", CDH, "2.6", null);
         assertNull(repo);
     }
 
     @Test
     public void testDefaultRepoWithOSWhichDoesNotExists() throws Exception {
-        ClouderaManagerRepo repo = defaultClouderaManagerRepoService.getDefault("ubuntu", CDH, "6.1.0", null);
+        ClouderaManagerRepo repo = defaultClouderaManagerRepoService.getDefault("ubuntu", "ubuntu", CDH, "6.1.0", null);
         assertNull(repo);
     }
 
     @Test
     public void testDefaultRepoWithStackTypeWhichDoesNotExists() throws Exception {
-        ClouderaManagerRepo repo = defaultClouderaManagerRepoService.getDefault("redhat7", "NA", "6.1.0", null);
+        ClouderaManagerRepo repo = defaultClouderaManagerRepoService.getDefault("redhat7", "centos7", "NA", "6.1.0", null);
         assertNull(repo);
     }
 
     @Test
     public void testDefaultRepoWithCDHWhichExists() throws Exception {
-        ClouderaManagerRepo repo = defaultClouderaManagerRepoService.getDefault("redhat7", CDH, "6.1.0", null);
+        ClouderaManagerRepo repo = defaultClouderaManagerRepoService.getDefault("redhat7", "centos7", CDH, "6.1.0", null);
         assertEquals("6.1.0", repo.getVersion());
         assertEquals("http://redhat7-base/6.1.0", repo.getBaseUrl());
         assertEquals("http://redhat7-gpg/6.1.0", repo.getGpgKeyUrl());

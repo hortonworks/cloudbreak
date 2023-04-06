@@ -2,13 +2,14 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static java.util.Collections.emptySet;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -39,17 +40,15 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.ImmutableSet;
@@ -104,7 +103,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.ImageType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ImageCatalogServiceTest {
 
     private static final String DEFAULT_CATALOG_URL = "http://localhost/imagecatalog-url";
@@ -137,8 +136,7 @@ public class ImageCatalogServiceTest {
 
     private static final ImageCatalogPlatform IMAGE_CATALOG_PLATFORM = imageCatalogPlatform("aws");
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    private static final ImageComparator IMAGE_COMPARATOR = new ImageComparator("amazonlinux");
 
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
@@ -239,15 +237,15 @@ public class ImageCatalogServiceTest {
     @Mock
     private ProviderSpecificImageFilter providerSpecificImageFilter;
 
-    @Before
+    @BeforeEach
     public void beforeTest() throws Exception {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
 
-        when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
-        when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP")));
+        lenient().when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
+        lenient().when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP")));
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
-        when(userService.getOrCreate(any())).thenReturn(user);
-        when(entitlementService.baseImageEnabled(anyString())).thenReturn(true);
+        lenient().when(userService.getOrCreate(any())).thenReturn(user);
+        lenient().when(entitlementService.baseImageEnabled(anyString())).thenReturn(true);
 
         constants.add(new AwsCloudConstant());
 
@@ -263,6 +261,8 @@ public class ImageCatalogServiceTest {
         ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
 
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
+
+        ReflectionTestUtils.setField(underTest, "imageComparator", IMAGE_COMPARATOR);
     }
 
     private void setMockedCbVersion(String cbVersion, String versionValue) {
@@ -360,7 +360,7 @@ public class ImageCatalogServiceTest {
         StatedImages images = underTest.getStatedImagesFilteredByOperatingSystems(imageFilter, i -> true);
 
         boolean allMatch = images.getImages().getBaseImages().stream().allMatch(image -> operatingSystems.contains(image.getOsType()));
-        assertTrue("All images should be based on supported OS", allMatch);
+        assertTrue(allMatch, "All images should be based on supported OS");
     }
 
     @Test
@@ -372,7 +372,7 @@ public class ImageCatalogServiceTest {
 
         boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required image with id.", exactImageIdMatch);
+        assertTrue(exactImageIdMatch, "Result doesn't contain the required image with id.");
     }
 
     @Test
@@ -385,7 +385,7 @@ public class ImageCatalogServiceTest {
         for (Image image : images.getImages().getBaseImages()) {
             boolean containsAws = image.getImageSetsByProvider().entrySet().stream().anyMatch(platformImages -> "aws".equals(platformImages.getKey()));
             boolean containsAzure = image.getImageSetsByProvider().entrySet().stream().anyMatch(platformImages -> "azure_rm".equals(platformImages.getKey()));
-            assertTrue("Result doesn't contain the required image with id.", containsAws || containsAzure);
+            assertTrue(containsAws || containsAzure, "Result doesn't contain the required image with id.");
         }
     }
 
@@ -400,7 +400,7 @@ public class ImageCatalogServiceTest {
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "0f575e42-9d90-4f85-5f8a-bdced2221dc3".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required base image with id.", match);
+        assertTrue(match, "Result doesn't contain the required base image with id.");
     }
 
     @Test
@@ -420,7 +420,7 @@ public class ImageCatalogServiceTest {
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "cab28152-f5e1-43e1-5107-9e7bbed33eef".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required base image with id.", match);
+        assertTrue(match, "Result doesn't contain the required base image with id.");
     }
 
     @Test
@@ -434,7 +434,7 @@ public class ImageCatalogServiceTest {
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "0f575e42-9d90-4f85-5f8a-bdced2221dc3".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required base image with id.", match);
+        assertTrue(match, "Result doesn't contain the required base image with id.");
     }
 
     @Test
@@ -454,7 +454,7 @@ public class ImageCatalogServiceTest {
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> img.getUuid().equals("0f575e42-9d90-4f85-5f8a-bdced2221dc3"));
-        assertTrue("Result doesn't contain the required base image with id.", match);
+        assertTrue(match, "Result doesn't contain the required base image with id.");
     }
 
     @Test
@@ -472,7 +472,7 @@ public class ImageCatalogServiceTest {
 
         boolean match = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required image with id.", match);
+        assertTrue(match, "Result doesn't contain the required image with id.");
     }
 
     @Test
@@ -491,7 +491,7 @@ public class ImageCatalogServiceTest {
 
         boolean match = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required image with id.", match);
+        assertTrue(match, "Result doesn't contain the required image with id.");
     }
 
     @Test
@@ -510,7 +510,7 @@ public class ImageCatalogServiceTest {
 
         boolean baseImgMatch = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "f6e778fc-7f17-4535-9021-515351df3691".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required image with id.", baseImgMatch);
+        assertTrue(baseImgMatch, "Result doesn't contain the required image with id.");
     }
 
     @Test
@@ -528,7 +528,7 @@ public class ImageCatalogServiceTest {
 
         boolean match = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required image with id.", match);
+        assertTrue(match, "Result doesn't contain the required image with id.");
     }
 
     @Test
@@ -540,17 +540,16 @@ public class ImageCatalogServiceTest {
 
         boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required image with id for the platform.", exactImageIdMatch);
+        assertTrue(exactImageIdMatch, "Result doesn't contain the required image with id for the platform.");
     }
 
     @Test
     public void testGetImagesWhenExactVersionDoesnotExistInCatalogForPlatform() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        thrown.expectMessage("Platform(s) owncloud are not supported by the current catalog");
-        thrown.expect(CloudbreakImageCatalogException.class);
-
-        underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton(imageCatalogPlatform("owncloud")), "1.16.4"));
+        assertThatThrownBy(() -> underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton(imageCatalogPlatform("owncloud")), "1.16.4")))
+                .isInstanceOf(CloudbreakImageCatalogException.class)
+                .hasMessage("Platform(s) owncloud are not supported by the current catalog");
     }
 
     @Test
@@ -569,14 +568,11 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenCustomImageCatalogDoesNotExists() throws Exception {
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenThrow(new NotFoundException("no no"));
 
-        thrown.expectMessage("The verycool catalog does not exist or does not belongs to your account.");
-        thrown.expect(CloudbreakImageCatalogException.class);
+        assertThatThrownBy(() -> underTest.getImages(WORKSPACE_ID, "verycool", IMAGE_CATALOG_PLATFORM))
+                .isInstanceOf(CloudbreakImageCatalogException.class)
+                .hasMessage("The verycool catalog does not exist or does not belongs to your account.");
 
-        underTest.getImages(WORKSPACE_ID, "verycool", IMAGE_CATALOG_PLATFORM).getImages();
-
-        verify(entitlementService, times(1))
-                .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
+        verify(entitlementService, never()).baseImageEnabled(any());
         verify(imageCatalogProvider, times(0)).getImageCatalogV3("");
     }
 
@@ -602,10 +598,9 @@ public class ImageCatalogServiceTest {
     public void testDeleteImageCatalogWhenEnvDefault() {
         String name = "cdp-default";
 
-        thrown.expectMessage("cdp-default cannot be deleted because it is an environment default image catalog.");
-        thrown.expect(BadRequestException.class);
-
-        underTest.delete(WORKSPACE_ID, name);
+        assertThatThrownBy(() -> underTest.delete(WORKSPACE_ID, name))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("cdp-default cannot be deleted because it is an environment default image catalog.");
     }
 
     @Test
@@ -635,28 +630,21 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesFromDefaultWithEmptyInput() throws CloudbreakImageCatalogException {
         setupUserProfileService();
-        thrown.expect(BadRequestException.class);
 
-        underTest.getImagesFromDefault(WORKSPACE_ID, null, null, emptySet(), false);
+        assertThatThrownBy(() -> underTest.getImagesFromDefault(WORKSPACE_ID, null, null, emptySet(), false))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Either platform or stackName should be filled in request.");
 
-        verify(entitlementService, times(1))
-                .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
-
-        thrown.expectMessage("Either platform or stackName should be filled in request");
+        verify(entitlementService, never()).baseImageEnabled(any());
     }
 
     @Test
     public void testGetImagesFromDefaultGivenBothInput() throws CloudbreakImageCatalogException {
-        thrown.expect(BadRequestException.class);
+        assertThatThrownBy(() -> underTest.getImagesFromDefault(WORKSPACE_ID, "stack", imageCatalogPlatform("AWS"), emptySet(), false))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Platform or stackName cannot be filled in the same request.");
 
-        underTest.getImagesFromDefault(WORKSPACE_ID, "stack", imageCatalogPlatform("AWS"), emptySet(), false);
-
-        verify(entitlementService, times(1))
-                .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
-
-        thrown.expectMessage("Platform or stackName cannot be filled in the same request");
+        verify(entitlementService, never()).baseImageEnabled(any());
     }
 
     @Test
@@ -687,28 +675,20 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWithEmptyInput() throws CloudbreakImageCatalogException {
-        thrown.expect(BadRequestException.class);
+        assertThatThrownBy(() -> underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, null, false))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Either platform or stack name must be present in the request.");
 
-        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, null, false);
-
-        verify(entitlementService, times(1))
-                .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
-
-        thrown.expectMessage("Either platform or stackName should be filled in request");
+        verify(entitlementService, never()).baseImageEnabled(any());
     }
 
     @Test
     public void testGetImagesGivenBothInput() throws CloudbreakImageCatalogException {
-        thrown.expect(BadRequestException.class);
+        assertThatThrownBy(() -> underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", "stack", imageCatalogPlatform("AWS"), false))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Both platform and existing stack name could not be present in the request.");
 
-        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", "stack", imageCatalogPlatform("AWS"), false);
-
-        verify(entitlementService, times(1))
-                .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
-
-        thrown.expectMessage("Platform or stackName cannot be filled in the same request");
+        verify(entitlementService, never()).baseImageEnabled(any());
     }
 
     @Test
@@ -848,13 +828,11 @@ public class ImageCatalogServiceTest {
     public void testGetImageByCatalogNameWithCustomCatalogNameAndUnknownImageType()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
 
-        thrown.expect(CloudbreakImageCatalogException.class);
-
         setupCustomImageCatalog(ImageType.UNKNOWN, "3b6ae396-df40-4e2b-7c2b-54b15822614c", CUSTOM_BASE_PARCEL_URL);
 
-        underTest.getImageByCatalogName(WORKSPACE_ID, CUSTOM_IMAGE_ID, CUSTOM_CATALOG_NAME);
-
-        thrown.expectMessage("Image type is not supported.");
+        assertThatThrownBy(() -> underTest.getImageByCatalogName(WORKSPACE_ID, CUSTOM_IMAGE_ID, CUSTOM_CATALOG_NAME))
+                .isInstanceOf(CloudbreakImageCatalogException.class)
+                .hasMessage("Image type is not supported.");
     }
 
     @Test
@@ -1019,10 +997,10 @@ public class ImageCatalogServiceTest {
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
-        when(imageCatalog.getImageCatalogUrl()).thenReturn(catalogUrl);
-        when(imageCatalogProvider.getImageCatalogV3(catalogUrl)).thenReturn(catalog);
-        when(imageCatalogProvider.getImageCatalogV3(catalogUrl, true)).thenReturn(catalog);
-        when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(catalog.getVersions().getCloudbreakVersions());
+        lenient().when(imageCatalog.getImageCatalogUrl()).thenReturn(catalogUrl);
+        lenient().when(imageCatalogProvider.getImageCatalogV3(catalogUrl)).thenReturn(catalog);
+        lenient().when(imageCatalogProvider.getImageCatalogV3(catalogUrl, true)).thenReturn(catalog);
+        lenient().when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(catalog.getVersions().getCloudbreakVersions());
     }
 
     private void setupImageCatalogProviderWithoutVersions(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {
@@ -1035,7 +1013,7 @@ public class ImageCatalogServiceTest {
 
     private void setupUserProfileService() {
         UserProfile userProfile = new UserProfile();
-        when(userProfileService.getOrCreate(any(User.class))).thenReturn(userProfile);
+        lenient().when(userProfileService.getOrCreate(any(User.class))).thenReturn(userProfile);
     }
 
     private void setupLatestDefaultImageUuidProvider(String uuid) {
@@ -1057,7 +1035,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
 
         StatedImage statedImage = StatedImage.statedImage(getImage(), CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
-        when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
+        lenient().when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
     }
 
     private ImageCatalog getImageCatalog() {

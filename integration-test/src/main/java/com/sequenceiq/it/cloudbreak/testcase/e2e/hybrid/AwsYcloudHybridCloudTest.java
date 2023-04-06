@@ -86,6 +86,8 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     private static final String CDH = "CDH";
 
+    private static final String CENTOS7 = "centos7";
+
     private static final String REDHAT7 = "redhat7";
 
     private static final Map<String, InstanceStatus> INSTANCES_HEALTHY = new HashMap<>() {{
@@ -168,6 +170,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
         testContext
                 .given(StackMatrixTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withOs(CENTOS7)
                 .when(utilTestClient.stackMatrixV4())
                 .then((tc, dto, client) -> {
                     ClouderaManagerStackDescriptorV4Response response = dto.getResponse().getCdh().get(runtimeVersion);

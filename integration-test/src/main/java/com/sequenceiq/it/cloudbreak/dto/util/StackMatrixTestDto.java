@@ -13,6 +13,10 @@ public class StackMatrixTestDto extends AbstractCloudbreakTestDto<Object, StackM
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackMatrixTestDto.class);
 
+    private boolean govCloud;
+
+    private String os;
+
     protected StackMatrixTestDto(TestContext testContext) {
         super(null, testContext);
     }
@@ -20,6 +24,24 @@ public class StackMatrixTestDto extends AbstractCloudbreakTestDto<Object, StackM
     @Override
     public StackMatrixTestDto valid() {
         return this;
+    }
+
+    public StackMatrixTestDto withGovCloud(boolean govCloud) {
+        this.govCloud = govCloud;
+        return this;
+    }
+
+    public StackMatrixTestDto withOs(String os) {
+        this.os = os;
+        return this;
+    }
+
+    public boolean isGovCloud() {
+        return govCloud;
+    }
+
+    public String getOs() {
+        return os;
     }
 
     @Override
