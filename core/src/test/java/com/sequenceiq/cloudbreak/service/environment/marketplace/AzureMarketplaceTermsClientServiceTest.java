@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.service.environment.marketplace;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +60,13 @@ class AzureMarketplaceTermsClientServiceTest {
         when(azureMarketplaceTermsEndpoint.getInAccount(any())).thenThrow(new WebApplicationException());
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR, () -> underTest.getAccepted()));
-        assertEquals("Failed to GET Azure Marketplace Terms acceptance setting with account id, due to: 'HTTP 500 Internal Server Error'",
+        assertEquals("Failed to GET Azure Marketplace Terms acceptance setting for account id: altus, due to: 'HTTP 500 Internal Server Error'",
                 exception.getMessage());
+    }
+
+    @Test
+    void getAcceptedNotFound() {
+        when(azureMarketplaceTermsEndpoint.getInAccount(any())).thenThrow(new NotFoundException());
+        assertFalse(ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR, () -> underTest.getAccepted()));
     }
 }

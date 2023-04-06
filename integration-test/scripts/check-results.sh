@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 #please don't add this property to Jenkins
+#this value changed 2023.04.06 from 4.8 to 4.9
 #this value changed 2023.02.08 from 4.68 to 4.8 (added test for certificate swap test)
 #this value changed 2023.02.02 from 4.6 to 4.65 (additional FreeIPA creation in MockSdxBlueprintLoadTests, MockSdxResizeTests, MockSdxRetryTests, MockSdxTests)
 #this value changed 2022.11.24 from 4.5 to 4.6 (new test was added: DistroXUpgradeTests.testDistroXOsUpgradeByUpgradeSets)
-: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="4.8GB"}
+: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="4.9GB"}
 
 status_code=0
 
