@@ -74,7 +74,7 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 }
                 return List.of();
             case HdfsRoles.GATEWAY:
-                if (isSDXOptimizationEnabled(source) && isNamenodeHA(source)) {
+                if (isNamenodeHA(source)) {
                     //CHECKSTYLE:OFF
                     return List.of(config(
                             "hdfs_client_config_safety_valve",
@@ -92,8 +92,8 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         if (isSDXOptimizationEnabled(source)) {
-            configs.add(config(DFS_ENCRYPT_DATA_TRANSFER, "true"));
             configs.add(config(DFS_DATA_TRANSFER_PROTECTION, "privacy"));
+            configs.add(config(DFS_ENCRYPT_DATA_TRANSFER, "true"));
             configs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
         }
         return configs;
