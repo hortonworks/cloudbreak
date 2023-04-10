@@ -92,7 +92,6 @@ public class CloudFormationTemplateBuilder {
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.getStack()));
         model.put("availabilitySetNeeded", context.getAc().getCloudContext().getLocation().getAvailabilityZone() != null
                 && context.getAc().getCloudContext().getLocation().getAvailabilityZone().value() != null);
-        model.put("AvailabilitySet", getAvailabilityZones(context));
         model.put("mapPublicIpOnLaunch", context.isMapPublicIpOnLaunch());
         model.put("outboundInternetTraffic", context.getOutboundInternetTraffic());
         model.put("vpcCidrs", context.getVpcCidrs());
@@ -100,6 +99,7 @@ public class CloudFormationTemplateBuilder {
         model.put("loadBalancers", Optional.ofNullable(context.getLoadBalancers()).orElse(Collections.emptyList()));
         model.put("enableEfs", context.isEnableEfs());
         model.put("efsFileSystem", context.getEfsFileSystem());
+        model.put("defaultAvailabilityZone", context.getAc().getCloudContext().getLocation().getAvailabilityZone().value());
 
         try {
             String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-template", context.getTemplate(), freemarkerConfiguration),
@@ -108,17 +108,6 @@ public class CloudFormationTemplateBuilder {
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process CloudFormation freemarker template", e);
         }
-    }
-
-    private Set<String> getAvailabilityZones(ModelContext context) {
-        return context
-                .getStack()
-                .getGroups()
-                .stream()
-                .map(Group::getInstances)
-                .flatMap(List::stream)
-                .map(CloudInstance::getAvailabilityZone)
-                .collect(Collectors.toSet());
     }
 
     private String getInstanceProfile(Group group) {
