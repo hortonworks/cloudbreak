@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MultiAzConverter {
 
-    @Value("${cb.multiaz.supported.variants:AWS_NATIVE,AWS_NATIVE_GOV}")
+    @Value("${cb.multiaz.supported.variants:AWS,AWS_NATIVE,AWS_NATIVE_GOV}")
     private Set<String> supportedMultiAzVariants;
 
     public boolean convert(String variant) {

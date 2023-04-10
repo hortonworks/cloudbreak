@@ -23,11 +23,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
+import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
@@ -71,11 +71,10 @@ public class MultiAzCalculatorService {
             for (Map.Entry<String, CloudSubnet> entry : environment.getNetwork().getSubnetMetas().entrySet()) {
                 CloudSubnet value = entry.getValue();
                 if (needToAddAZ(value, availabilityZone)) {
-                    if (!isNullOrEmpty(value.getName())) {
-                        subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
-                    }
                     if (!isNullOrEmpty(value.getId())) {
                         subnetAzPairs.put(value.getId(), value.getAvailabilityZone());
+                    } else if (!isNullOrEmpty(value.getName())) {
+                        subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
                     }
                 }
             }
@@ -257,15 +256,16 @@ public class MultiAzCalculatorService {
 
     public void calculate(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacementList,
             SdxClusterShape sdxClusterShape) {
-        if (isGroupMultiAZ(sdxClusterShape)) {
+        if (isGroupMultiAZ(sdxClusterShape, groupPlacementList)) {
             calculateByGroup(instanceGroup, groupPlacementList);
         } else {
             calculateByRoundRobin(subnetAzPairs, instanceGroup);
         }
     }
 
-    private boolean isGroupMultiAZ(SdxClusterShape sdxClusterShape) {
-        return sdxClusterShape == SdxClusterShape.SCALABLE || sdxClusterShape == SdxClusterShape.MEDIUM_DUTY_HA;
+    private boolean isGroupMultiAZ(SdxClusterShape sdxClusterShape, Set<GroupPlacement> groupPlacementList) {
+        return !groupPlacementList.isEmpty() &&
+                (sdxClusterShape == SdxClusterShape.SCALABLE || sdxClusterShape == SdxClusterShape.MEDIUM_DUTY_HA);
     }
 
     private void calculateByGroup(InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacementList) {
@@ -274,6 +274,8 @@ public class MultiAzCalculatorService {
         groupPlacementList.stream().forEach(groupPlacement -> collectCurrentSubnetUsage(instanceMetadataViews, groupPlacement.getSubnetUsage()));
 
         if (multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
+            List<String> subnetIds = new ArrayList<>();
+            Set<String> availabilityZones = new HashSet<>();
             for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                 LOGGER.info("################## XXXXXXXXXXXXXXXX #####################");
                 if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
@@ -286,12 +288,25 @@ public class MultiAzCalculatorService {
 
                     instanceMetaData.setSubnetId(leastUsedSubnetId);
                     instanceMetaData.setAvailabilityZone(groupPlacement.getAvailabilityZone());
-
                     groupPlacement.addComponent(instanceMetaData.getInstanceGroupName());
                     groupPlacement.increaseSubnetUsage(leastUsedSubnetId);
-//                    instanceMetaData.getInstanceGroup().getTemplate().getAttributes().get(VolumeSetAttributes.class).
+                    subnetIds.add(leastUsedSubnetId);
+                    availabilityZones.add(groupPlacement.getAvailabilityZone());
                 }
             }
+            Map<String, Object> map = instanceGroup.getInstanceGroupNetwork().getAttributes().getMap();
+            map.put(SUBNET_IDS, subnetIds);
+            instanceGroup.getInstanceGroupNetwork().setAttributes(new Json(map));
+            Set<AvailabilityZone> azs = new HashSet<>();
+            availabilityZones.stream().forEach(azS -> {
+                AvailabilityZone az = new AvailabilityZone();
+                az.setAvailabilityZone(azS);
+                az.setInstanceGroup(instanceGroup);
+                azs.add(az);
+
+            });
+            instanceGroup.setAvailabilityZones(azs);
+            LOGGER.info(instanceGroup.getInstanceGroupNetwork().getAttributes().toString());
         }
     }
 

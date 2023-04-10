@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.resource.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
@@ -62,6 +64,7 @@ public class CloudFormationTemplateBuilder {
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityIds(),
                     getSubnetIds(context.getExistingSubnetIds(), subnetCounter, group, multigw),
+                    group.getInstances().stream().map(CloudInstance::getAvailabilityZone).collect(Collectors.toSet()),
                     awsInstanceView.isKmsCustom(),
                     awsInstanceView.getKmsKey(),
                     encryptedAMI,
@@ -89,6 +92,7 @@ public class CloudFormationTemplateBuilder {
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.getStack()));
         model.put("availabilitySetNeeded", context.getAc().getCloudContext().getLocation().getAvailabilityZone() != null
                 && context.getAc().getCloudContext().getLocation().getAvailabilityZone().value() != null);
+        model.put("AvailabilitySet", getAvailabilityZones(context));
         model.put("mapPublicIpOnLaunch", context.isMapPublicIpOnLaunch());
         model.put("outboundInternetTraffic", context.getOutboundInternetTraffic());
         model.put("vpcCidrs", context.getVpcCidrs());
@@ -104,6 +108,17 @@ public class CloudFormationTemplateBuilder {
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process CloudFormation freemarker template", e);
         }
+    }
+
+    private Set<String> getAvailabilityZones(ModelContext context) {
+        return context
+                .getStack()
+                .getGroups()
+                .stream()
+                .map(Group::getInstances)
+                .flatMap(List::stream)
+                .map(CloudInstance::getAvailabilityZone)
+                .collect(Collectors.toSet());
     }
 
     private String getInstanceProfile(Group group) {
@@ -131,9 +146,10 @@ public class CloudFormationTemplateBuilder {
         }
     }
 
-    private String getSubnetIds(List<String> existingSubnetIds, int subnetCounter, Group group, boolean multigw) {
-        return (multigw && group.getType() == InstanceGroupType.GATEWAY && !isNullOrEmptyList(existingSubnetIds))
-                ? existingSubnetIds.get(subnetCounter % existingSubnetIds.size()) : null;
+    private List<String> getSubnetIds(List<String> existingSubnetIds, int subnetCounter, Group group, boolean multigw) {
+        return group.getInstances().stream().map(CloudInstance::getSubnetId).collect(Collectors.toList());
+//        return (multigw && group.getType() == InstanceGroupType.GATEWAY && !isNullOrEmptyList(existingSubnetIds))
+//                ? existingSubnetIds.get(subnetCounter % existingSubnetIds.size()) : null;
     }
 
     private boolean isNullOrEmptyList(Collection<?> list) {
