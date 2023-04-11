@@ -75,6 +75,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
         Optional<CloudResource> volumeSetOpt = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AWS_VOLUMESET))
+                .filter(cloudResource -> cloudResource.getAvailabilityZone().equals(instance.getAvailabilityZone()))
                 .findFirst();
 
         if (volumeSetOpt.isEmpty()) {

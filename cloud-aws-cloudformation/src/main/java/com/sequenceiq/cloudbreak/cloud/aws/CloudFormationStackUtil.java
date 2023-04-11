@@ -140,17 +140,22 @@ public class CloudFormationStackUtil {
                             .collect(Collectors.toList());
                     List<String> newInstanceIds = entry.getValue().stream().filter(s -> !knownInstanceIds.contains(s)).collect(Collectors.toList());
                     for (String instanceId : newInstanceIds) {
+                        CloudInstance cloudInstance = null;
+                        if (groupInstancesIterator.hasNext()) {
+                            cloudInstance = groupInstancesIterator.next();
+                        }
                         CloudResource cloudResource = CloudResource.builder()
                                 .withType(ResourceType.AWS_INSTANCE)
                                 .withInstanceId(instanceId)
                                 .withName(instanceId)
                                 .withGroup(group.getName())
                                 .withStatus(CommonStatus.CREATED)
-                                .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
+                                .withAvailabilityZone(cloudInstance.getAvailabilityZone() != null ?
+                                        cloudInstance.getAvailabilityZone() :
+                                        ac.getCloudContext().getLocation().getAvailabilityZone().value())
                                 .withPersistent(false)
                                 .build();
-                        if (groupInstancesIterator.hasNext()) {
-                            CloudInstance cloudInstance = groupInstancesIterator.next();
+                        if (cloudInstance != null) {
                             cloudResource.putParameter(PRIVATE_ID, cloudInstance.getTemplate().getPrivateId());
                             cloudResource.putParameter(INSTANCE_TYPE, cloudInstance.getTemplate().getFlavor());
                         }

@@ -338,15 +338,16 @@
       "DependsOn" : [ "PublicSubnetRouteTableAssociation", "PublicRoute" ],
       </#if>
       "Properties" : {
-        <#if !existingSubnet>
-        "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
+        <#if group.availabilityZones?size != 0>
+        "AvailabilityZones" : [<#list group.availabilityZones as availabilityZone> "${availabilityZone}" <#sep>,</#sep> </#list>],
+        </#if>
+        <#if group.subnetIds?size != 0>
+        "VPCZoneIdentifier" :
+                    [ <#list group.subnetIds as subnetId> "${subnetId}" <#sep>,</#sep> </#list> ],
+        <#elseif !existingSubnet>
         "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
         <#else>
-        <#if group.subnetId??>
-        "VPCZoneIdentifier" : [ "${group.subnetId}" ],
-        <#else>
         "VPCZoneIdentifier" : [{ "Ref" : "SubnetId" }],
-        </#if>
         </#if>
         "MixedInstancesPolicy": {
           "LaunchTemplate" : {

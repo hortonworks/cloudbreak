@@ -52,7 +52,7 @@ public class AwsAttachmentResourceBuilderTest {
     private VolumeResourceCollector volumeResourceCollector;
 
     @InjectMocks
-    private AwsAttachmentResourceBuilder awsAttachmentResourceBuilder;
+        private AwsAttachmentResourceBuilder awsAttachmentResourceBuilder;
 
     @Test
     public void testBuildIfFutureGetFailsButVolumesAreSuccessfullyAttached() throws Exception {

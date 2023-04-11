@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.resource.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
@@ -62,6 +64,7 @@ public class CloudFormationTemplateBuilder {
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityIds(),
                     getSubnetIds(context.getExistingSubnetIds(), subnetCounter, group, multigw),
+                    getAvailabilityZones(group),
                     awsInstanceView.isKmsCustom(),
                     awsInstanceView.getKmsKey(),
                     encryptedAMI,
@@ -106,6 +109,14 @@ public class CloudFormationTemplateBuilder {
         }
     }
 
+    private Set<String> getAvailabilityZones(Group group) {
+        return group
+                .getInstances()
+                .stream()
+                .map(CloudInstance::getAvailabilityZone)
+                .collect(Collectors.toSet());
+    }
+
     private String getInstanceProfile(Group group) {
         return group.getIdentity().map(cloudFileSystemView -> {
                     CloudS3View cloudS3View = (CloudS3View) cloudFileSystemView;
@@ -131,9 +142,17 @@ public class CloudFormationTemplateBuilder {
         }
     }
 
-    private String getSubnetIds(List<String> existingSubnetIds, int subnetCounter, Group group, boolean multigw) {
+    private Set<String> getSubnetIds(List<String> existingSubnetIds, int subnetCounter, Group group, boolean multigw) {
+        Set<String> subnetIds = group
+                .getInstances()
+                .stream()
+                .map(CloudInstance::getSubnetId)
+                .collect(Collectors.toSet());
+        if (!subnetIds.isEmpty()) {
+            return subnetIds;
+        }
         return (multigw && group.getType() == InstanceGroupType.GATEWAY && !isNullOrEmptyList(existingSubnetIds))
-                ? existingSubnetIds.get(subnetCounter % existingSubnetIds.size()) : null;
+                ? Set.of(existingSubnetIds.get(subnetCounter % existingSubnetIds.size())) : Collections.emptySet();
     }
 
     private boolean isNullOrEmptyList(Collection<?> list) {

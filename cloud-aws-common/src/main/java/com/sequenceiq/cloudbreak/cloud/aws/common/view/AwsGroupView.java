@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.view;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.common.model.AwsDiskType;
@@ -36,7 +37,9 @@ public class AwsGroupView {
 
     private final List<String> cloudSecurityIds;
 
-    private final String subnetId;
+    private final Set<String> subnetIds;
+
+    private final Set<String> availabilityZones;
 
     private final String encryptedAMI;
 
@@ -59,9 +62,9 @@ public class AwsGroupView {
     private final String placementGroupStrategy;
 
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted, Integer rootVolumeSize,
-            Map<String, Long> volumeCounts, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, Boolean kmsKeyDefined,
-            String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile, int onDemandPercentage,
-            Double spotMaxPrice, String placementGroupStrategy) {
+            Map<String, Long> volumeCounts, List<SecurityRule> rules, List<String> cloudSecurityIds, Set<String> subnetIds, Set<String> availabilityZones,
+            Boolean kmsKeyDefined, String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile,
+            int onDemandPercentage, Double spotMaxPrice, String placementGroupStrategy) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -70,7 +73,8 @@ public class AwsGroupView {
         this.rootVolumeSize = rootVolumeSize;
         this.rules = rules;
         this.cloudSecurityIds = cloudSecurityIds;
-        this.subnetId = subnetId;
+        this.subnetIds = subnetIds;
+        this.availabilityZones = availabilityZones;
         this.kmsKeyDefined = kmsKeyDefined;
         this.kmsKey = kmsKey;
         this.encryptedAMI = encryptedAMI;
@@ -146,8 +150,12 @@ public class AwsGroupView {
         return cloudSecurityIds.isEmpty() ? null : cloudSecurityIds.get(0);
     }
 
-    public String getSubnetId() {
-        return subnetId;
+    public Set<String> getSubnetId() {
+        return subnetIds;
+    }
+
+    public Set<String> getAvailabilityZones() {
+        return availabilityZones;
     }
 
     public Boolean getKmsKeyDefined() {

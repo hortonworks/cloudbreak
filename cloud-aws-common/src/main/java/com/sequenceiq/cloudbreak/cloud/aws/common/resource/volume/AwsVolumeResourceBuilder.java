@@ -189,8 +189,13 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     protected String getSubnetId(AwsContext context, CloudInstance cloudInstance) {
-        return context.getNetworkResources().stream()
-                .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())).findFirst().get().getName();
+        return context.getNetworkResources()
+                .stream()
+                .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType()))
+                .filter(cloudResource -> cloudResource.getAvailabilityZone().equals(cloudInstance.getAvailabilityZone()))
+                .findFirst()
+                .get()
+                .getName();
     }
 
     protected Optional<String> getAvailabilityZone(AwsContext context, CloudInstance cloudInstance) {
@@ -300,7 +305,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                         resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).setVolumes(volumes);
                     }
                 })
-                .map(copyResourceWithCreatedStatus(defaultAvailabilityZone))
+                .map(copyResourceWithCreatedStatus(instance, defaultAvailabilityZone))
                 .collect(Collectors.toList());
     }
 
@@ -320,14 +325,14 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         }
     }
 
-    private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus(String defaultAvailabilityZone) {
+    private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus(CloudInstance instance, String defaultAvailabilityZone) {
         return resource -> CloudResource.builder()
                 .withPersistent(true)
                 .withGroup(resource.getGroup())
                 .withType(resource.getType())
                 .withStatus(CommonStatus.CREATED)
                 .withName(resource.getName())
-                .withAvailabilityZone(resource.getAvailabilityZone() == null ? defaultAvailabilityZone : resource.getAvailabilityZone())
+                .withAvailabilityZone(instance.getAvailabilityZone() == null ? defaultAvailabilityZone : instance.getAvailabilityZone())
                 .withParameters(resource.getParameters())
                 .build();
     }
