@@ -681,7 +681,7 @@ class SdxServiceTest {
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(List.of(11));
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11));
 
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         sdxClusterRequest.setJavaVersion(11);
@@ -1941,7 +1941,7 @@ class SdxServiceTest {
 
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(
                 anyString(), anyString())).thenReturn(Collections.emptyList());
-        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Collections.emptyList());
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Collections.emptySet());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->

@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +41,7 @@ class JavaVersionValidatorTest {
 
     @Test
     public void shouldNotFailInCaseOfImageSupportsJavaVersion() {
-        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(List.of(JAVA_VERSION_11));
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(JAVA_VERSION_11));
         when(image.getPackageVersions()).thenReturn(Map.of(String.format("java%d", JAVA_VERSION_11), "anyvalue"));
 
         victim.validateImage(image, JAVA_VERSION_11, ACCOUNT_ID);
@@ -49,7 +49,7 @@ class JavaVersionValidatorTest {
 
     @Test
     public void shouldFailInCaseOfJavaVersionNotSupportedByTheVirtualMachineConfiguration() {
-        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(List.of());
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of());
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> victim.validateImage(image, JAVA_VERSION_11, ACCOUNT_ID));
@@ -59,7 +59,7 @@ class JavaVersionValidatorTest {
 
     @Test
     public void shoudlFailOnJavaVersionIsNotSupportedByTheImage() {
-        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(List.of(JAVA_VERSION_11));
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(JAVA_VERSION_11));
         when(image.getPackageVersions()).thenReturn(Collections.emptyMap());
         when(image.getUuid()).thenReturn("imageuuid");
 
