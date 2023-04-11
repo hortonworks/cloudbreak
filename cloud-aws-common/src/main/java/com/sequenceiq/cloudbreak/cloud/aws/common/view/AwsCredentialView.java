@@ -107,4 +107,8 @@ public class AwsCredentialView {
     public String getDefaultRegion() {
         return (String) cloudCredential.getParameter(AWS, Map.class).get(DEFAULT_REGION_KEY);
     }
+
+    public boolean isSkipOrgPolicyDecisions() {
+        return cloudCredential.getCredentialSettings().isSkipOrgPolicyDecisions();
+    }
 }

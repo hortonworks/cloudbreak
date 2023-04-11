@@ -47,7 +47,7 @@ public class CreateCredentialRequestToCredentialConverter {
         credential.setDescription(source.getDescription());
         credential.setCloudPlatform(source.getCloudPlatform());
         credential.setVerificationStatusText(source.getVerificationStatusText());
-        credential.setCredentialSettings(new CredentialSettings(source.isVerifyPermissions(), false));
+        credential.setCredentialSettings(new CredentialSettings(source.isVerifyPermissions(), source.isSkipOrgPolicyDecisions()));
         convertAttributes(source, credential);
         if (source.getAws() != null) {
             credential.setGovCloud(source.getAws().getGovCloud());

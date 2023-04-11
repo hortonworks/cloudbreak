@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.validator.AbstractAwsSimulatePolicyValidator.DENIED_BY_ORGANIZATION_RULE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.validator.AbstractAwsSimulatePolicyValidator.DENIED_BY_ORGANIZATION_RULE_ERROR_MESSAGE;
 import static java.util.stream.Collectors.joining;
 
 import java.io.IOException;
@@ -30,6 +32,8 @@ import software.amazon.awssdk.core.auth.policy.Statement;
 import software.amazon.awssdk.core.auth.policy.internal.JsonPolicyReader;
 import software.amazon.awssdk.services.iam.model.ContextEntry;
 import software.amazon.awssdk.services.iam.model.ContextKeyTypeEnum;
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
 import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyRequest;
 import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyResponse;
 import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest;
@@ -66,26 +70,42 @@ public class AwsCredentialVerifier {
                 LOGGER.debug("Simulate policy request: {}", simulatePrincipalPolicyRequest);
                 SimulatePrincipalPolicyResponse simulatePrincipalPolicyResponse = amazonIdentityManagement.simulatePrincipalPolicy(
                         simulatePrincipalPolicyRequest);
-                LOGGER.debug("Simulate policy result: {}", simulatePrincipalPolicyResponse);
+                boolean skipOrgPolicyDecisions = awsCredential.isSkipOrgPolicyDecisions();
+                LOGGER.debug("Simulate policy response: {}, skipOrgPolicyDecisions: {}", simulatePrincipalPolicyResponse, skipOrgPolicyDecisions);
                 simulatePrincipalPolicyResponse.evaluationResults().stream()
-                        .filter(evaluationResponse -> evaluationResponse.evalDecisionAsString().toLowerCase().contains("deny"))
-                        .map(evaluationResponse -> {
-                            if (evaluationResponse.organizationsDecisionDetail() != null && !evaluationResponse.organizationsDecisionDetail()
-                                    .allowedByOrganizations()) {
-                                return evaluationResponse.evalActionName() + " : " + evaluationResponse.evalResourceName() + " -> Denied by Organization Rule";
+                        .filter(evaluationResult -> evaluationResult.evalDecisionAsString().toLowerCase().contains("deny"))
+                        .filter(evaluationResult -> shouldCheckEvaluationResult(evaluationResult, skipOrgPolicyDecisions))
+                        .map(evaluationResult -> {
+                            OrganizationsDecisionDetail organizationsDecisionDetail = evaluationResult.organizationsDecisionDetail();
+                            if (organizationsDecisionDetail != null && !organizationsDecisionDetail.allowedByOrganizations()) {
+                                return evaluationResult.evalActionName() + " : " + evaluationResult.evalResourceName() + DENIED_BY_ORGANIZATION_RULE;
                             } else {
-                                return evaluationResponse.evalActionName() + " : " + evaluationResponse.evalResourceName();
+                                return evaluationResult.evalActionName() + " : " + evaluationResult.evalResourceName();
                             }
                         })
                         .forEach(failedActionList::add);
             }
             if (!failedActionList.isEmpty()) {
-                throw new AwsPermissionMissingException(String.format("CDP Credential '%s' doesn't have permission for these actions which are required: %s",
-                        awsCredential.getName(), failedActionList.stream().collect(joining(", ", "[ ", " ]"))));
+                String errorMessage = String.format("CDP Credential '%s' doesn't have permission for these actions which are required: %s",
+                        awsCredential.getName(), failedActionList.stream().collect(joining(", ", "[ ", " ]")));
+                if (errorMessage.contains(DENIED_BY_ORGANIZATION_RULE)) {
+                    errorMessage = errorMessage.concat(DENIED_BY_ORGANIZATION_RULE_ERROR_MESSAGE);
+                }
+                throw new AwsPermissionMissingException(errorMessage);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Can not parse aws policy json", e);
         }
+    }
+
+    private boolean shouldCheckEvaluationResult(EvaluationResult evaluationResult, boolean skipOrgPolicyDecisions) {
+        return !skipOrgPolicyDecisions || !shouldSkipOrgPolicyDeny(evaluationResult, skipOrgPolicyDecisions);
+    }
+
+    private boolean shouldSkipOrgPolicyDeny(EvaluationResult evaluationResult, boolean skipOrgPolicyDecisions) {
+        return skipOrgPolicyDecisions
+                && evaluationResult.organizationsDecisionDetail() != null
+                && !evaluationResult.organizationsDecisionDetail().allowedByOrganizations();
     }
 
     private String getString(AwsCredentialView awsCredential, AmazonSecurityTokenServiceClient awsSecurityTokenService) {

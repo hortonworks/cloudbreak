@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServ
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialSettings;
 
 import software.amazon.awssdk.services.iam.model.EvaluationResult;
 import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
@@ -60,7 +61,7 @@ public class AwsCredentialVerifierTest {
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
-        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc");
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc", new CloudCredentialSettings(true, false));
 
         AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
@@ -118,7 +119,7 @@ public class AwsCredentialVerifierTest {
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
-        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc");
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc", new CloudCredentialSettings(true, false));
 
         AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
@@ -158,7 +159,7 @@ public class AwsCredentialVerifierTest {
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
-        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc");
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc", new CloudCredentialSettings(true, false));
 
         AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
@@ -206,7 +207,53 @@ public class AwsCredentialVerifierTest {
                 "expect if " + simulateRequestNumber + " simulate request has been sent");
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
                 assertEquals("arn", simulatePrincipalPolicyRequest.policySourceArn()));
+    }
 
+    @Test
+    public void verifyCredentialAndSkipOrganizationErrorsWhenSkipOrgPolicyDecisionsIsTrue() throws IOException, AwsPermissionMissingException {
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        Map<String, Object> awsParameters = new HashMap<>();
+        awsParameters.put("accessKey", "a");
+        awsParameters.put("secretKey", "b");
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc", new CloudCredentialSettings(true, true));
+
+        AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
+        when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
+
+        AmazonSecurityTokenServiceClient awsSecurityTokenService = mock(AmazonSecurityTokenServiceClient.class);
+        GetCallerIdentityResponse getCallerIdentityResult = GetCallerIdentityResponse.builder()
+                .arn("arn").build();
+        when(awsSecurityTokenService.getCallerIdentity(any(GetCallerIdentityRequest.class))).thenReturn(getCallerIdentityResult);
+        when(awsClient.createSecurityTokenService(any(AwsCredentialView.class))).thenReturn(awsSecurityTokenService);
+
+        ArgumentCaptor<SimulatePrincipalPolicyRequest> requestArgumentCaptor = ArgumentCaptor.forClass(SimulatePrincipalPolicyRequest.class);
+        AtomicInteger i = new AtomicInteger();
+        when(amazonIdentityManagement.simulatePrincipalPolicy(requestArgumentCaptor.capture())).thenAnswer(invocation -> {
+            ArrayList<EvaluationResult> evaluationResults = new ArrayList<>();
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(false).build())
+                    .evalActionName("denied_action2_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(false).build())
+                    .evalActionName("denied_action3_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("accept")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                    .evalActionName("accepted_action_" + i).evalResourceName("*").build());
+            SimulatePrincipalPolicyResponse simulatePrincipalPolicyResult = SimulatePrincipalPolicyResponse.builder()
+                    .evaluationResults(evaluationResults).build();
+            i.getAndIncrement();
+            return simulatePrincipalPolicyResult;
+        });
+
+        awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential), encodedAwsEnvPolicy);
+        List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
+        int simulateRequestNumber = 5;
+        assertEquals(simulateRequestNumber, allSimulatePrincipalPolicyRequest.size(),
+                "expect if " + simulateRequestNumber + " simulate request has been sent");
+        allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
+                assertEquals("arn", simulatePrincipalPolicyRequest.policySourceArn()));
     }
 
     @Test
@@ -217,7 +264,7 @@ public class AwsCredentialVerifierTest {
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
-        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc");
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc", new CloudCredentialSettings(true, false));
 
         AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);

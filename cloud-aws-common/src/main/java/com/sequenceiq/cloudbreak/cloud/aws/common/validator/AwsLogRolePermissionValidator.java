@@ -107,10 +107,7 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
                     String.join("\n", failedActions));
 
             if (validationErrorMessage.contains(AbstractAwsSimulatePolicyValidator.DENIED_BY_ORGANIZATION_RULE)) {
-                validationErrorMessage = validationErrorMessage.concat(
-                        "\nPlease note SCPs with global condition keys and whitelisted accounts are not supported in the AWS Policy Simulator " +
-                                "and may cause validation to fail. Please check the SCPs! You can skip organizational policy related errors at  " +
-                                "credential settings, but please note that this may hide valid errors!");
+                validationErrorMessage = validationErrorMessage.concat(DENIED_BY_ORGANIZATION_RULE_ERROR_MESSAGE);
             }
 
             LOGGER.info(validationErrorMessage);

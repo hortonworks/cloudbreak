@@ -28,6 +28,10 @@ public abstract class AbstractAwsSimulatePolicyValidator {
 
     public static final String DENIED_BY_ORGANIZATION_RULE = " -> Denied by Organization Rule";
 
+    public static final String DENIED_BY_ORGANIZATION_RULE_ERROR_MESSAGE = "\nPlease note SCPs with global condition keys and whitelisted accounts are " +
+            "not supported in the AWS Policy Simulator and may cause validation to fail. Please check the SCPs! You can skip organizational policy" +
+            " related errors at credential settings, but please note that this may hide valid errors!";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAwsSimulatePolicyValidator.class);
 
     @Inject
