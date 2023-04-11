@@ -385,10 +385,19 @@ public class StackCreatorService {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
-            SdxClusterShape sdxClusterShape = sdxClientService.getByEnvironmentCrn(environment.getCrn()).stream().findFirst().get().getClusterShape();
+            SdxClusterShape sdxClusterShape = getClusterShape(environment);
             multiAzCalculatorService.calculate(subnetAzPairs, instanceGroup, groupPlacements, sdxClusterShape);
             prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup);
         }
+    }
+
+    private SdxClusterShape getClusterShape(DetailedEnvironmentResponse environment) {
+        return sdxClientService
+                .getByEnvironmentCrn(environment.getCrn())
+                .stream()
+                .findFirst()
+                .get()
+                .getClusterShape();
     }
 
     private String getStackSubnetIdIfExists(Stack stack) {

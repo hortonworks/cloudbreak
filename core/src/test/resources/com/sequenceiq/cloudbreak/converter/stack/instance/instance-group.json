@@ -13,6 +13,7 @@
       "id"
     ]
   },
+  "hints": ["1", "2"],
   "network": {
     "subnetIds": ["subnet-123"]
   },

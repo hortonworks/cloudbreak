@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.SCALABLE;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -435,7 +434,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request, ImageSettingsV4Request imageSettingsV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);
-        sdxClusterRequest.setClusterShape(SCALABLE);
+//        sdxClusterRequest.setClusterShape(SCALABLE);
         String accountId = getAccountIdFromCrn(userCrn);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
         validateJavaVersion(sdxClusterRequest.getJavaVersion(), accountId);

@@ -340,18 +340,14 @@
       "Properties" : {
         <#if group.availabilityZones?size != 0>
         "AvailabilityZones" : [<#list group.availabilityZones as availabilityZone> "${availabilityZone}" <#sep>,</#sep> </#list>],
-        <#else>
-        "AvailabilityZones" : [ "${defaultAvailabilityZone}" ],
         </#if>
         <#if group.subnetIds?size != 0>
-            "VPCZoneIdentifier" :
-                        [ <#list group.subnetIds as subnetId> "${subnetId}" <#sep>,</#sep> </#list> ],
+        "VPCZoneIdentifier" :
+                    [ <#list group.subnetIds as subnetId> "${subnetId}" <#sep>,</#sep> </#list> ],
+        <#elseif !existingSubnet>
+        "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
         <#else>
-            <#if !existingSubnet>
-            "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
-            <#else>
-            "VPCZoneIdentifier" : [{ "Ref" : "SubnetId" }],
-            </#if>
+        "VPCZoneIdentifier" : [{ "Ref" : "SubnetId" }],
         </#if>
         "MixedInstancesPolicy": {
           "LaunchTemplate" : {

@@ -254,17 +254,17 @@ public class MultiAzCalculatorService {
                 && CollectionUtils.isNotEmpty(networkScaleDetails.getPreferredSubnetIds());
     }
 
-    public void calculate(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacementList,
+    public void calculate(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacements,
             SdxClusterShape sdxClusterShape) {
-        if (isGroupMultiAZ(sdxClusterShape, groupPlacementList)) {
-            calculateByGroup(instanceGroup, groupPlacementList);
+        if (isGroupMultiAZ(sdxClusterShape, groupPlacements)) {
+            calculateByGroup(instanceGroup, groupPlacements);
         } else {
             calculateByRoundRobin(subnetAzPairs, instanceGroup);
         }
     }
 
-    private boolean isGroupMultiAZ(SdxClusterShape sdxClusterShape, Set<GroupPlacement> groupPlacementList) {
-        return !groupPlacementList.isEmpty() &&
+    private boolean isGroupMultiAZ(SdxClusterShape sdxClusterShape, Set<GroupPlacement> groupPlacements) {
+        return !groupPlacements.isEmpty() &&
                 (sdxClusterShape == SdxClusterShape.SCALABLE || sdxClusterShape == SdxClusterShape.MEDIUM_DUTY_HA);
     }
 
