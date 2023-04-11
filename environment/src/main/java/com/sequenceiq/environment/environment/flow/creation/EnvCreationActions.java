@@ -27,33 +27,26 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
-import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
-import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
-import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class EnvCreationActions {
@@ -331,34 +324,6 @@ public class EnvCreationActions {
                 sendEvent(context, HANDLED_FAILED_ENV_CREATION_EVENT.event(), payload);
             }
         };
-    }
-
-    private abstract static class AbstractEnvironmentCreationAction<P extends ResourceCrnPayload>
-            extends AbstractAction<EnvCreationState, EnvCreationStateSelectors, CommonContext, P> {
-
-        protected AbstractEnvironmentCreationAction(Class<P> payloadClass) {
-            super(payloadClass);
-        }
-
-        @Override
-        protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<EnvCreationState, EnvCreationStateSelectors> stateContext,
-                P payload) {
-            return new CommonContext(flowParameters);
-        }
-
-        @Override
-        protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
-            return payload;
-        }
-
-        @Override
-        protected void prepareExecution(P payload, Map<Object, Object> variables) {
-            if (payload != null) {
-                MdcContext.builder().resourceCrn(payload.getResourceCrn()).buildMdc();
-            } else {
-                LOGGER.warn("Payload was null in prepareExecution so resourceCrn cannot be added to the MdcContext!");
-            }
-        }
     }
 
 }
