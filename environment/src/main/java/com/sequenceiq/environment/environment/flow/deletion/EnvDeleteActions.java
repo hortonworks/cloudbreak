@@ -17,19 +17,15 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MdcContext;
-import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -37,7 +33,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors;
 import com.sequenceiq.environment.environment.flow.start.EnvStartState;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
@@ -45,9 +40,7 @@ import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseCo
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
-import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class EnvDeleteActions {
@@ -283,39 +276,6 @@ public class EnvDeleteActions {
                 .withForceDelete(forceDelete)
                 .withId(resourceId)
                 .build();
-    }
-
-    private abstract static class AbstractEnvDeleteAction<P extends ResourceCrnPayload>
-            extends AbstractAction<EnvDeleteState, EnvDeleteStateSelectors, CommonContext, P> {
-
-        protected AbstractEnvDeleteAction(Class<P> payloadClass) {
-            super(payloadClass);
-        }
-
-        @Override
-        protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<EnvDeleteState, EnvDeleteStateSelectors> stateContext,
-                P payload) {
-            return new CommonContext(flowParameters);
-        }
-
-        @Override
-        protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
-            return EnvDeleteFailedEvent.builder()
-                    .withException(ex)
-                    .withEnvironmentId(NullUtil.getIfNotNullOtherwise(payload, ResourceCrnPayload::getResourceId, -1L))
-                    .withResourceCrn(NullUtil.getIfNotNullOtherwise(payload, ResourceCrnPayload::getResourceCrn, "null CRN"))
-                    .build();
-        }
-
-        @Override
-        protected void prepareExecution(P payload, Map<Object, Object> variables) {
-            if (payload != null) {
-                MdcContext.builder().resourceCrn(payload.getResourceCrn()).buildMdc();
-            } else {
-                LOGGER.warn("Payload was null in prepareExecution so resourceCrn cannot be added to the MdcContext!");
-            }
-        }
-
     }
 
 }
