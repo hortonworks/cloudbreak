@@ -38,7 +38,7 @@ public class StartDatahubHandler extends EventSenderAwareHandler<EnvironmentStar
             if (START_ALL == environmentStartDtoEvent.getData().getDataHubStart()) {
                 datahubPollerService.startAttachedDatahubClusters(environmentDto.getId(), environmentDto.getResourceCrn());
             }
-            EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
+            EnvStartEvent envStartEvent = EnvStartEvent.builder()
                     .withSelector(EnvStartStateSelectors.ENV_START_SYNCHRONIZE_USERS_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())

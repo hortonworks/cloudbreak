@@ -25,11 +25,14 @@ public class LocationAwareCredential {
         return new Builder();
     }
 
-    public static class Builder {
+    public static final class Builder {
 
         private Credential credential;
 
         private String location;
+
+        private Builder() {
+        }
 
         public Builder withCredential(Credential credential) {
             this.credential = credential;

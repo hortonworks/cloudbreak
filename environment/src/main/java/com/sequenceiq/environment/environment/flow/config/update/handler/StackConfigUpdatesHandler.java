@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent;
-import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent.EnvStackConfigUpdatesEventBuilder;
+import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent.Builder;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesFailedEvent;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
@@ -36,7 +36,7 @@ public class StackConfigUpdatesHandler extends EventSenderAwareHandler<Environme
             stackPollerService.updateStackConfigurations(event.getData().getResourceId(),
                 event.getData().getResourceCrn(), event.getHeaders().get(FlowConstants.FLOW_ID));
 
-            EnvStackConfigUpdatesEvent envStackConfigUpdatesEvent = EnvStackConfigUpdatesEventBuilder
+            EnvStackConfigUpdatesEvent envStackConfigUpdatesEvent = Builder
                 .anEnvStackConfigUpdatesEvent()
                 .withSelector(
                     EnvStackConfigUpdatesStateSelectors.FINISH_ENV_STACK_CONFIG_UPDATES_EVENT

@@ -71,6 +71,9 @@ public class EnvironmentLoadBalancerDto implements Payload {
 
         private Set<String> endpointGatewaySubnetIds;
 
+        private Builder() {
+        }
+
         public Builder withId(Long id) {
             this.id = id;
             return this;

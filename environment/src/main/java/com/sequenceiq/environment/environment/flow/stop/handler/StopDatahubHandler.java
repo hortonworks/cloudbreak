@@ -33,7 +33,7 @@ public class StopDatahubHandler extends EventSenderAwareHandler<EnvironmentDto> 
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             datahubPollerService.stopAttachedDatahubClusters(environmentDto.getId(), environmentDto.getResourceCrn());
-            EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
+            EnvStopEvent envStopEvent = EnvStopEvent.builder()
                     .withSelector(EnvStopStateSelectors.ENV_STOP_DATALAKE_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())

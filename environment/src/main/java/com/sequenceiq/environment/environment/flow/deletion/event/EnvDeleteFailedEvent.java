@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
 
-@JsonDeserialize(builder = EnvDeleteFailedEvent.EnvDeleteFailedEventBuilder.class)
+@JsonDeserialize(builder = EnvDeleteFailedEvent.Builder.class)
 public class EnvDeleteFailedEvent extends BaseFailedFlowEvent {
 
     public EnvDeleteFailedEvent(Long environmentId, String resourceName, Exception exception, String resourceCrn) {
@@ -18,12 +18,12 @@ public class EnvDeleteFailedEvent extends BaseFailedFlowEvent {
         return FAILED_ENV_DELETE_EVENT.name();
     }
 
-    public static EnvDeleteFailedEventBuilder builder() {
-        return new EnvDeleteFailedEventBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     @JsonPOJOBuilder
-    public static final class EnvDeleteFailedEventBuilder {
+    public static final class Builder {
         private Long environmentId;
 
         private String resourceName;
@@ -32,25 +32,25 @@ public class EnvDeleteFailedEvent extends BaseFailedFlowEvent {
 
         private Exception exception;
 
-        private EnvDeleteFailedEventBuilder() {
+        private Builder() {
         }
 
-        public EnvDeleteFailedEventBuilder withEnvironmentId(Long environmentId) {
+        public Builder withEnvironmentId(Long environmentId) {
             this.environmentId = environmentId;
             return this;
         }
 
-        public EnvDeleteFailedEventBuilder withException(Exception exception) {
+        public Builder withException(Exception exception) {
             this.exception = exception;
             return this;
         }
 
-        public EnvDeleteFailedEventBuilder withResourceName(String resourceName) {
+        public Builder withResourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }
 
-        public EnvDeleteFailedEventBuilder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }

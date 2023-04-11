@@ -75,7 +75,7 @@ public class SynchronizeUsersHandler extends EventSenderAwareHandler<Environment
                     freeIpaPollerService.waitForSynchronizeUsers(environmentDto.getId(), environmentDto.getResourceCrn());
                 }
             }
-            EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
+            EnvStartEvent envStartEvent = EnvStartEvent.builder()
                     .withSelector(EnvStartStateSelectors.FINISH_ENV_START_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())

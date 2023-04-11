@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
-@JsonDeserialize(builder = EnvStopEvent.EnvStopEventBuilder.class)
+@JsonDeserialize(builder = EnvStopEvent.Builder.class)
 public class EnvStopEvent extends BaseNamedFlowEvent {
 
     public EnvStopEvent(String selector, Long resourceId, String resourceName, String resourceCrn) {
@@ -23,8 +23,12 @@ public class EnvStopEvent extends BaseNamedFlowEvent {
         return isClassAndEqualsEvent(EnvStopEvent.class, other);
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     @JsonPOJOBuilder
-    public static final class EnvStopEventBuilder {
+    public static final class Builder {
         private String resourceName;
 
         private String resourceCrn;
@@ -35,34 +39,30 @@ public class EnvStopEvent extends BaseNamedFlowEvent {
 
         private Promise<AcceptResult> accepted;
 
-        private EnvStopEventBuilder() {
+        private Builder() {
         }
 
-        public static EnvStopEventBuilder anEnvStopEvent() {
-            return new EnvStopEventBuilder();
-        }
-
-        public EnvStopEventBuilder withResourceName(String resourceName) {
+        public Builder withResourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }
 
-        public EnvStopEventBuilder withSelector(String selector) {
+        public Builder withSelector(String selector) {
             this.selector = selector;
             return this;
         }
 
-        public EnvStopEventBuilder withResourceId(Long resourceId) {
+        public Builder withResourceId(Long resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public EnvStopEventBuilder withAccepted(Promise<AcceptResult> accepted) {
+        public Builder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
         }
 
-        public EnvStopEventBuilder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }

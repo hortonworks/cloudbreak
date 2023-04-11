@@ -12,11 +12,11 @@ public class EnvironmentExperienceDto {
 
     private final String cloudPlatform;
 
-    private EnvironmentExperienceDto(String name, String crn, String accountId, String cloudPlatform) {
-        this.crn = crn;
-        this.name = name;
-        this.accountId = accountId;
-        this.cloudPlatform = cloudPlatform;
+    private EnvironmentExperienceDto(Builder builder) {
+        this.crn = builder.crn;
+        this.name = builder.name;
+        this.accountId = builder.accountId;
+        this.cloudPlatform = builder.cloudPlatform;
     }
 
     public String getName() {
@@ -53,6 +53,10 @@ public class EnvironmentExperienceDto {
                 '}';
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static final class Builder {
 
         private String name;
@@ -63,7 +67,7 @@ public class EnvironmentExperienceDto {
 
         private String cloudPlatform;
 
-        public Builder() {
+        private Builder() {
         }
 
         public Builder withName(String name) {
@@ -87,7 +91,7 @@ public class EnvironmentExperienceDto {
         }
 
         public EnvironmentExperienceDto build() {
-            return new EnvironmentExperienceDto(name, crn, accountId, cloudPlatform);
+            return new EnvironmentExperienceDto(this);
         }
 
         public EnvironmentExperienceDto fromEnvironment(Environment environment) {

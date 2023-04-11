@@ -36,33 +36,20 @@ public class EnvironmentEditDto {
 
     private final ProxyConfig proxyConfig;
 
-    public EnvironmentEditDto(
-            String description,
-            String accountId,
-            NetworkDto network,
-            AuthenticationDto authentication,
-            EnvironmentTelemetry telemetry,
-            EnvironmentBackup backup,
-            SecurityAccessDto securityAccess,
-            Tunnel tunnel,
-            IdBrokerMappingSource idBrokerMappingSource,
-            CloudStorageValidation cloudStorageValidation,
-            String adminGroupName,
-            ParametersDto parameters,
-            ProxyConfig proxyConfig) {
-        this.description = description;
-        this.accountId = accountId;
-        this.network = network;
-        this.authentication = authentication;
-        this.telemetry = telemetry;
-        this.backup = backup;
-        this.securityAccess = securityAccess;
-        this.tunnel = tunnel;
-        this.idBrokerMappingSource = idBrokerMappingSource;
-        this.cloudStorageValidation = cloudStorageValidation;
-        this.adminGroupName = adminGroupName;
-        this.parameters = parameters;
-        this.proxyConfig = proxyConfig;
+    public EnvironmentEditDto(Builder builder) {
+        this.description = builder.description;
+        this.accountId = builder.accountId;
+        this.network = builder.network;
+        this.authentication = builder.authentication;
+        this.telemetry = builder.telemetry;
+        this.backup = builder.backup;
+        this.securityAccess = builder.securityAccess;
+        this.tunnel = builder.tunnel;
+        this.idBrokerMappingSource = builder.idBrokerMappingSource;
+        this.cloudStorageValidation = builder.cloudStorageValidation;
+        this.adminGroupName = builder.adminGroupName;
+        this.parameters = builder.parameters;
+        this.proxyConfig = builder.proxyConfig;
     }
 
     public String getDescription() {
@@ -117,8 +104,8 @@ public class EnvironmentEditDto {
         return proxyConfig;
     }
 
-    public static EnvironmentEditDtoBuilder builder() {
-        return new EnvironmentEditDtoBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     @Override
@@ -140,7 +127,7 @@ public class EnvironmentEditDto {
                 '}';
     }
 
-    public static final class EnvironmentEditDtoBuilder {
+    public static final class Builder {
         private String description;
 
         private String accountId;
@@ -167,77 +154,76 @@ public class EnvironmentEditDto {
 
         private ProxyConfig proxyConfig;
 
-        private EnvironmentEditDtoBuilder() {
+        private Builder() {
         }
 
-        public EnvironmentEditDtoBuilder withDescription(String description) {
+        public Builder withDescription(String description) {
             this.description = description;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withAccountId(String accountId) {
+        public Builder withAccountId(String accountId) {
             this.accountId = accountId;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withNetwork(NetworkDto network) {
+        public Builder withNetwork(NetworkDto network) {
             this.network = network;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withAuthentication(AuthenticationDto authentication) {
+        public Builder withAuthentication(AuthenticationDto authentication) {
             this.authentication = authentication;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withTelemetry(EnvironmentTelemetry telemetry) {
+        public Builder withTelemetry(EnvironmentTelemetry telemetry) {
             this.telemetry = telemetry;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withBackup(EnvironmentBackup backup) {
+        public Builder withBackup(EnvironmentBackup backup) {
             this.backup = backup;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withSecurityAccess(SecurityAccessDto securityAccess) {
+        public Builder withSecurityAccess(SecurityAccessDto securityAccess) {
             this.securityAccess = securityAccess;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withTunnel(Tunnel tunnel) {
+        public Builder withTunnel(Tunnel tunnel) {
             this.tunnel = tunnel;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+        public Builder withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
             this.idBrokerMappingSource = idBrokerMappingSource;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withCloudStorageValidation(CloudStorageValidation cloudStorageValidation) {
+        public Builder withCloudStorageValidation(CloudStorageValidation cloudStorageValidation) {
             this.cloudStorageValidation = cloudStorageValidation;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withAdminGroupName(String adminGroupName) {
+        public Builder withAdminGroupName(String adminGroupName) {
             this.adminGroupName = adminGroupName;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withParameters(ParametersDto parameters) {
+        public Builder withParameters(ParametersDto parameters) {
             this.parameters = parameters;
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withProxyConfig(ProxyConfig proxyConfig) {
+        public Builder withProxyConfig(ProxyConfig proxyConfig) {
             this.proxyConfig = proxyConfig;
             return this;
         }
 
         public EnvironmentEditDto build() {
-            return new EnvironmentEditDto(description, accountId, network, authentication, telemetry, backup, securityAccess, tunnel, idBrokerMappingSource,
-                    cloudStorageValidation, adminGroupName, parameters, proxyConfig);
+            return new EnvironmentEditDto(this);
         }
     }
 }

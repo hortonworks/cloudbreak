@@ -43,7 +43,7 @@ public class CredentialExperiencePolicyHandler implements CloudPlatformEventHand
         try {
             LOGGER.info("Gathering credential experience policies for platform: '{}'", cloudContext.getPlatform());
 
-            EnvironmentExperienceDto dto = new EnvironmentExperienceDto.Builder()
+            EnvironmentExperienceDto dto = EnvironmentExperienceDto.builder()
                     .withCloudPlatform(cloudContext.getPlatform().value())
                     .withAccountId(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString())
                     .build();

@@ -55,7 +55,7 @@ public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> 
                     }
                 }, () -> LOGGER.info("FreeIPA cannot be found by environment crn"));
             }
-            EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
+            EnvStopEvent envStopEvent = EnvStopEvent.builder()
                     .withSelector(EnvStopStateSelectors.FINISH_ENV_STOP_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())

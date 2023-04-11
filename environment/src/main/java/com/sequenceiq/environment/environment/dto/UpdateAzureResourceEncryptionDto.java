@@ -6,6 +6,10 @@ public class UpdateAzureResourceEncryptionDto {
 
     private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto;
 
+    public UpdateAzureResourceEncryptionDto(Builder builder) {
+        this.azureResourceEncryptionParametersDto = builder.azureResourceEncryptionParametersDto;
+    }
+
     public AzureResourceEncryptionParametersDto getAzureResourceEncryptionParametersDto() {
         return azureResourceEncryptionParametersDto;
     }
@@ -14,8 +18,8 @@ public class UpdateAzureResourceEncryptionDto {
         this.azureResourceEncryptionParametersDto = azureResourceEncryptionParametersDto;
     }
 
-    public static UpdateAzureResourceEncryptionDto.Builder builder() {
-        return new UpdateAzureResourceEncryptionDto.Builder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     @Override
@@ -29,15 +33,16 @@ public class UpdateAzureResourceEncryptionDto {
 
         private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto;
 
+        private Builder() {
+        }
+
         public Builder withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto) {
             this.azureResourceEncryptionParametersDto = azureResourceEncryptionParametersDto;
             return this;
         }
 
         public UpdateAzureResourceEncryptionDto build() {
-            UpdateAzureResourceEncryptionDto updateAzureResourceEncryptionDto = new UpdateAzureResourceEncryptionDto();
-            updateAzureResourceEncryptionDto.setAzureResourceEncryptionParametersDto(azureResourceEncryptionParametersDto);
-            return updateAzureResourceEncryptionDto;
+            return new UpdateAzureResourceEncryptionDto(this);
         }
     }
 }

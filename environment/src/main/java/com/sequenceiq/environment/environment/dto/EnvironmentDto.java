@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.Pro
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
-@JsonDeserialize(builder = EnvironmentDto.EnvironmentDtoBuilder.class)
+@JsonDeserialize(builder = EnvironmentDto.Builder.class)
 public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDetails {
 
     private Credential credential;
@@ -54,8 +54,8 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
         this.credentialDetails = credentialDetails;
     }
 
-    public static EnvironmentDtoBuilder builder() {
-        return new EnvironmentDtoBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
     }
 
     @JsonPOJOBuilder
-    public static final class EnvironmentDtoBuilder extends EnvironmentDtoBase.EnvironmentDtoBaseBuilder<EnvironmentDto, EnvironmentDtoBuilder> {
+    public static final class Builder extends EnvironmentDtoBase.EnvironmentDtoBaseBuilder<EnvironmentDto, Builder> {
 
         private Credential credential;
 
@@ -72,20 +72,20 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
 
         private CredentialDetails credentialDetails;
 
-        private EnvironmentDtoBuilder() {
+        private Builder() {
         }
 
-        public EnvironmentDtoBuilder withCredential(Credential credential) {
+        public Builder withCredential(Credential credential) {
             this.credential = credential;
             return this;
         }
 
-        public EnvironmentDtoBuilder withProxyConfig(ProxyConfig proxyConfig) {
+        public Builder withProxyConfig(ProxyConfig proxyConfig) {
             this.proxyConfig = proxyConfig;
             return this;
         }
 
-        public EnvironmentDtoBuilder withCredentialDetails(CredentialDetails credentialDetails) {
+        public Builder withCredentialDetails(CredentialDetails credentialDetails) {
             this.credentialDetails = credentialDetails;
             return this;
         }

@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
-@JsonDeserialize(builder = EnvDeleteEvent.EnvDeleteEventBuilder.class)
+@JsonDeserialize(builder = EnvDeleteEvent.Builder.class)
 public class EnvDeleteEvent extends BaseNamedFlowEvent {
 
     private final boolean forceDelete;
@@ -32,12 +32,12 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
                 event -> forceDelete == event.forceDelete);
     }
 
-    public static EnvDeleteEventBuilder builder() {
-        return new EnvDeleteEventBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     @JsonPOJOBuilder
-    public static final class EnvDeleteEventBuilder {
+    public static final class Builder {
         private String resourceName;
 
         private String resourceCrn;
@@ -50,35 +50,35 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
 
         private Promise<AcceptResult> accepted;
 
-        private EnvDeleteEventBuilder() {
+        private Builder() {
         }
 
-        public EnvDeleteEventBuilder withResourceName(String resourceName) {
+        public Builder withResourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }
 
-        public EnvDeleteEventBuilder withForceDelete(boolean forceDelete) {
+        public Builder withForceDelete(boolean forceDelete) {
             this.forceDelete = forceDelete;
             return this;
         }
 
-        public EnvDeleteEventBuilder withSelector(String selector) {
+        public Builder withSelector(String selector) {
             this.selector = selector;
             return this;
         }
 
-        public EnvDeleteEventBuilder withResourceId(Long resourceId) {
+        public Builder withResourceId(Long resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public EnvDeleteEventBuilder withAccepted(Promise<AcceptResult> accepted) {
+        public Builder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
         }
 
-        public EnvDeleteEventBuilder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }

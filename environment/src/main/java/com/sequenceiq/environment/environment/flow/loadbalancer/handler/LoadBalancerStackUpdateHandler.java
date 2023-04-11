@@ -45,7 +45,7 @@ public class LoadBalancerStackUpdateHandler extends EventSenderAwareHandler<Envi
                     CollectionUtils.isNotEmpty(environmentLoadBalancerDto.getEndpointGatewaySubnetIds()));
 
             LOGGER.debug("Stack load balancer update complete.");
-            LoadBalancerUpdateEvent loadBalancerUpdateEvent = LoadBalancerUpdateEvent.LoadBalancerUpdateEventBuilder.aLoadBalancerUpdateEvent()
+            LoadBalancerUpdateEvent loadBalancerUpdateEvent = LoadBalancerUpdateEvent.Builder.aLoadBalancerUpdateEvent()
                 .withSelector(LoadBalancerUpdateStateSelectors.FINISH_LOAD_BALANCER_UPDATE_EVENT.selector())
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())

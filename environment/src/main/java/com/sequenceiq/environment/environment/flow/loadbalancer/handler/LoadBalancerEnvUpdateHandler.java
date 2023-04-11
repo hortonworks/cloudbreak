@@ -99,7 +99,7 @@ public class LoadBalancerEnvUpdateHandler extends EventSenderAwareHandler<Enviro
             }
 
             LOGGER.debug("Environment network load balancer update complete.");
-            LoadBalancerUpdateEvent loadBalancerUpdateEvent = LoadBalancerUpdateEvent.LoadBalancerUpdateEventBuilder.aLoadBalancerUpdateEvent()
+            LoadBalancerUpdateEvent loadBalancerUpdateEvent = LoadBalancerUpdateEvent.Builder.aLoadBalancerUpdateEvent()
                 .withSelector(LoadBalancerUpdateStateSelectors.LOAD_BALANCER_STACK_UPDATE_EVENT.selector())
                 .withResourceId(environment.getId())
                 .withResourceName(environment.getResourceName())

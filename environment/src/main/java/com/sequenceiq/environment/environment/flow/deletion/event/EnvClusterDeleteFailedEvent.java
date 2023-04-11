@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
-@JsonDeserialize(builder = EnvClusterDeleteFailedEvent.EnvClusterDeleteFailedEventBuilder.class)
+@JsonDeserialize(builder = EnvClusterDeleteFailedEvent.Builder.class)
 public class EnvClusterDeleteFailedEvent extends BaseNamedFlowEvent implements Selectable {
 
     private final Exception exception;
@@ -33,12 +33,12 @@ public class EnvClusterDeleteFailedEvent extends BaseNamedFlowEvent implements S
         return message;
     }
 
-    public static EnvClusterDeleteFailedEventBuilder builder() {
-        return new EnvClusterDeleteFailedEventBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     @JsonPOJOBuilder
-    public static final class EnvClusterDeleteFailedEventBuilder {
+    public static final class Builder {
         private Long environmentId;
 
         private String resourceName;
@@ -49,30 +49,30 @@ public class EnvClusterDeleteFailedEvent extends BaseNamedFlowEvent implements S
 
         private String message;
 
-        private EnvClusterDeleteFailedEventBuilder() {
+        private Builder() {
         }
 
-        public EnvClusterDeleteFailedEventBuilder withEnvironmentId(Long environmentId) {
+        public Builder withEnvironmentId(Long environmentId) {
             this.environmentId = environmentId;
             return this;
         }
 
-        public EnvClusterDeleteFailedEventBuilder withException(Exception exception) {
+        public Builder withException(Exception exception) {
             this.exception = exception;
             return this;
         }
 
-        public EnvClusterDeleteFailedEventBuilder withResourceName(String resourceName) {
+        public Builder withResourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }
 
-        public EnvClusterDeleteFailedEventBuilder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
-        public EnvClusterDeleteFailedEventBuilder withMessage(String message) {
+        public Builder withMessage(String message) {
             this.message = message;
             return this;
         }

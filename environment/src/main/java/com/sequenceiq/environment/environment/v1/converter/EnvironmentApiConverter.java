@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
-import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Objects;
@@ -51,7 +50,6 @@ import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
-import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto.Builder;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
@@ -119,7 +117,7 @@ public class EnvironmentApiConverter {
         LOGGER.debug("Creating EnvironmentCreationDto from EnvironmentRequest: {}", request);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String cloudPlatform = credentialService.getCloudPlatformByCredential(request.getCredentialName(), accountId, ENVIRONMENT);
-        Builder builder = EnvironmentCreationDto.builder()
+        EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.builder()
                 .withAccountId(accountId)
                 .withCreator(ThreadBasedUserCrnProvider.getUserCrn())
                 .withName(request.getName())
@@ -373,7 +371,7 @@ public class EnvironmentApiConverter {
 
     public EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        EnvironmentEditDto.EnvironmentEditDtoBuilder builder = EnvironmentEditDto.builder()
+        EnvironmentEditDto.Builder builder = EnvironmentEditDto.builder()
                 .withDescription(request.getDescription())
                 .withAccountId(accountId)
                 .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
@@ -391,7 +389,7 @@ public class EnvironmentApiConverter {
     }
 
     public EnvironmentChangeCredentialDto convertEnvironmentChangeCredentialDto(EnvironmentChangeCredentialRequest request) {
-        return anEnvironmentChangeCredentialDto()
+        return EnvironmentChangeCredentialDto.builder()
                 .withCredentialName(request.getCredential() != null ? request.getCredential().getName() : request.getCredentialName())
                 .build();
     }

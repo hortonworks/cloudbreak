@@ -22,7 +22,6 @@ import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent;
-import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent.EnvStackConfigUpdatesEventBuilder;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
@@ -114,7 +113,7 @@ public class EnvironmentReactorFlowManager {
 
     public FlowIdentifier triggerStopFlow(long envId, String envName, String userCrn) {
         LOGGER.info("Environment stop flow triggered.");
-        EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
+        EnvStopEvent envStopEvent = EnvStopEvent.builder()
                 .withAccepted(new Promise<>())
                 .withSelector(EnvStopStateSelectors.ENV_STOP_DATAHUB_EVENT.selector())
                 .withResourceId(envId)
@@ -126,7 +125,7 @@ public class EnvironmentReactorFlowManager {
 
     public FlowIdentifier triggerStartFlow(long envId, String envName, String userCrn, DataHubStartAction dataHubStartAction) {
         LOGGER.info("Environment start flow triggered.");
-        EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
+        EnvStartEvent envStartEvent = EnvStartEvent.builder()
                 .withAccepted(new Promise<>())
                 .withSelector(EnvStartStateSelectors.ENV_START_FREEIPA_EVENT.selector())
                 .withResourceId(envId)
@@ -141,7 +140,7 @@ public class EnvironmentReactorFlowManager {
         stackService.cancelRunningStackConfigUpdates(environment);
 
         LOGGER.info("Environment stack configurations update flow triggered.");
-        EnvStackConfigUpdatesEvent envStackConfigUpdatesEvent = EnvStackConfigUpdatesEventBuilder
+        EnvStackConfigUpdatesEvent envStackConfigUpdatesEvent = EnvStackConfigUpdatesEvent.Builder
                 .anEnvStackConfigUpdatesEvent()
                 .withAccepted(new Promise<>())
                 .withSelector(
@@ -180,7 +179,7 @@ public class EnvironmentReactorFlowManager {
                 LOGGER.debug("Adding Endpoint Gateway using environment subnets.");
             }
         }
-        LoadBalancerUpdateEvent loadBalancerUpdateEvent = LoadBalancerUpdateEvent.LoadBalancerUpdateEventBuilder.aLoadBalancerUpdateEvent()
+        LoadBalancerUpdateEvent loadBalancerUpdateEvent = LoadBalancerUpdateEvent.Builder.aLoadBalancerUpdateEvent()
                 .withAccepted(new Promise<>())
                 .withSelector(LoadBalancerUpdateStateSelectors.LOAD_BALANCER_UPDATE_START_EVENT.selector())
                 .withResourceId(envId)

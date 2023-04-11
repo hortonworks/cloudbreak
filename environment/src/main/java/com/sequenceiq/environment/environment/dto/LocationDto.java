@@ -2,10 +2,11 @@ package com.sequenceiq.environment.environment.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
+@JsonDeserialize(builder = LocationDto.Builder.class)
 public class LocationDto {
 
     private final String name;
@@ -16,16 +17,11 @@ public class LocationDto {
 
     private final Double longitude;
 
-    @JsonCreator
-    public LocationDto(
-            @JsonProperty("name") String name,
-            @JsonProperty("displayName") String displayName,
-            @JsonProperty("latitude") Double latitude,
-            @JsonProperty("longitude") Double longitude) {
-        this.name = name;
-        this.displayName = displayName;
-        this.latitude = latitude;
-        this.longitude = longitude;
+    public LocationDto(Builder builder) {
+        this.name = builder.name;
+        this.displayName = builder.displayName;
+        this.latitude = builder.latitude;
+        this.longitude = builder.longitude;
     }
 
     @JsonIgnore
@@ -59,11 +55,12 @@ public class LocationDto {
             '}';
     }
 
-    public static LocationDtoBuilder builder() {
-        return new LocationDtoBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public static final class LocationDtoBuilder {
+    @JsonPOJOBuilder
+    public static final class Builder {
         private String name;
 
         private String displayName;
@@ -72,31 +69,31 @@ public class LocationDto {
 
         private Double longitude;
 
-        private LocationDtoBuilder() {
+        private Builder() {
         }
 
-        public LocationDtoBuilder withName(String name) {
+        public Builder withName(String name) {
             this.name = name;
             return this;
         }
 
-        public LocationDtoBuilder withDisplayName(String displayName) {
+        public Builder withDisplayName(String displayName) {
             this.displayName = displayName;
             return this;
         }
 
-        public LocationDtoBuilder withLatitude(Double latitude) {
+        public Builder withLatitude(Double latitude) {
             this.latitude = latitude;
             return this;
         }
 
-        public LocationDtoBuilder withLongitude(Double longitude) {
+        public Builder withLongitude(Double longitude) {
             this.longitude = longitude;
             return this;
         }
 
         public LocationDto build() {
-            return new LocationDto(name, displayName, latitude, longitude);
+            return new LocationDto(this);
         }
     }
 }

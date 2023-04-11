@@ -49,10 +49,6 @@ public class EnvironmentVerticalScaleFailedEvent extends BaseFailedFlowEvent imp
         private Builder() {
         }
 
-        public static Builder anBuilder() {
-            return new Builder();
-        }
-
         public Builder withVerticalScaleFreeIPAEvent(EnvironmentVerticalScaleEvent verticalScaleFreeIPAEvent) {
             this.verticalScaleFreeIPAEvent = verticalScaleFreeIPAEvent;
             return this;

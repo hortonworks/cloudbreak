@@ -10,7 +10,7 @@ class UpdateAzureResourceEncryptionDtoTest {
 
     @Test
     void builderTest() {
-        UpdateAzureResourceEncryptionDto underTest = new UpdateAzureResourceEncryptionDto();
+        UpdateAzureResourceEncryptionDto underTest = UpdateAzureResourceEncryptionDto.builder().build();
         underTest.setAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build());
 
         assertThat(underTest.getAzureResourceEncryptionParametersDto()).isNotNull();
