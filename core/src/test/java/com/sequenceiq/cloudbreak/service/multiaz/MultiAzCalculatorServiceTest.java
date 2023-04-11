@@ -66,16 +66,16 @@ public class MultiAzCalculatorServiceTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
         environmentNetworkResponse.setSubnetMetas(Map.of(
-                cloudSubnetName(1), cloudSubnet(1),
-                cloudSubnetName(2), cloudSubnet(2)
+                "1", cloudSubnet(1),
+                "2", cloudSubnet(2)
         ));
         detailedEnvironmentResponse.setNetwork(environmentNetworkResponse);
 
         Map<String, String> result = underTest.prepareSubnetAzMap(detailedEnvironmentResponse);
 
-        Assertions.assertEquals(result.size(), 4);
-        Assertions.assertEquals(result.get(cloudSubnetName(1)), cloudSubnetAz(1));
-        Assertions.assertEquals(result.get(cloudSubnetName(2)), cloudSubnetAz(2));
+        Assertions.assertEquals(result.size(), 2);
+        Assertions.assertEquals(result.get("1"), cloudSubnetAz(1));
+        Assertions.assertEquals(result.get("2"), cloudSubnetAz(2));
     }
 
     @Test
@@ -83,14 +83,13 @@ public class MultiAzCalculatorServiceTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
         environmentNetworkResponse.setSubnetMetas(Map.of(
-                cloudSubnetName(1), cloudSubnet(1),
-                cloudSubnetName(2), cloudSubnet(2)
+                "1", cloudSubnet(1),
+                "2", cloudSubnet(2)
         ));
         detailedEnvironmentResponse.setNetwork(environmentNetworkResponse);
 
         Map<String, String> actual = underTest.prepareSubnetAzMap(detailedEnvironmentResponse, "az-1");
-        Assertions.assertEquals(2, actual.size());
-        Assertions.assertEquals("az-1", actual.get("name-1"));
+        Assertions.assertEquals(1, actual.size());
         Assertions.assertEquals("az-1", actual.get("1"));
     }
 

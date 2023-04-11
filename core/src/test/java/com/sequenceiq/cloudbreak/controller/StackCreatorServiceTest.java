@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
@@ -75,6 +78,8 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
 public class StackCreatorServiceTest {
@@ -173,6 +178,9 @@ public class StackCreatorServiceTest {
 
     @Mock
     private JavaVersionValidator javaVersionValidator;
+
+    @Mock
+    private SdxClientService sdxClientService;
 
     @Test
     public void shouldThrowBadRequestWhenRecipeIsMissing() {
@@ -341,8 +349,11 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 2, InstanceGroupType.CORE);
         InstanceGroup computeGroup = getARequestGroup("compute", 4, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup));
+        SdxClusterResponse sdxClusterResponse = mock(SdxClusterResponse.class);
         when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(Map.of());
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
+        when(sdxClientService.getByEnvironmentCrn(environmentResponse.getCrn())).thenReturn(List.of(sdxClusterResponse));
+        when(sdxClusterResponse.getClusterShape()).thenReturn(SdxClusterShape.LIGHT_DUTY);
+        doNothing().when(multiAzCalculatorService).calculate(anyMap(), any(InstanceGroup.class), anySet(), any());
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
@@ -369,9 +380,13 @@ public class StackCreatorServiceTest {
         InstanceGroup computeGroup = getARequestGroup("compute", 0, InstanceGroupType.CORE);
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
+        SdxClusterResponse sdxClusterResponse = mock(SdxClusterResponse.class);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup, managerGroup, gatewayGroup));
+
+        when(sdxClientService.getByEnvironmentCrn(environmentResponse.getCrn())).thenReturn(List.of(sdxClusterResponse));
+        when(sdxClusterResponse.getClusterShape()).thenReturn(SdxClusterShape.LIGHT_DUTY);
         when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(Map.of());
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
+        doNothing().when(multiAzCalculatorService).calculate(anyMap(), any(InstanceGroup.class), anySet(), any());
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
@@ -414,6 +429,9 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(workerGroup));
         Map<String, String> subnetAzPairs = Map.of();
+        SdxClusterResponse sdxClusterResponse = mock(SdxClusterResponse.class);
+        when(sdxClientService.getByEnvironmentCrn(environmentResponse.getCrn())).thenReturn(List.of(sdxClusterResponse));
+        when(sdxClusterResponse.getClusterShape()).thenReturn(SdxClusterShape.LIGHT_DUTY);
         when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzPairs);
         doAnswer(invocation -> {
             InstanceGroup instanceGroup = invocation.getArgument(1, InstanceGroup.class);
@@ -422,7 +440,7 @@ public class StackCreatorServiceTest {
                 instanceMetaData.setAvailabilityZone(availabilityZone);
             });
             return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, workerGroup);
+        }).when(multiAzCalculatorService).calculate(subnetAzPairs, workerGroup, Collections.emptySet(), SdxClusterShape.LIGHT_DUTY);
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn("/fooRack");
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
@@ -444,8 +462,12 @@ public class StackCreatorServiceTest {
         network.setAttributes(Json.silent(Map.of("subnetId", "subnet-1")));
         stack.setNetwork(network);
         Map<String, String> subnetAzPairs = Map.of("subnet-1", "az-1");
+        SdxClusterResponse sdxClusterResponse = mock(SdxClusterResponse.class);
+
         when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzPairs);
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, workerGroup);
+        when(sdxClientService.getByEnvironmentCrn(environmentResponse.getCrn())).thenReturn(List.of(sdxClusterResponse));
+        when(sdxClusterResponse.getClusterShape()).thenReturn(SdxClusterShape.LIGHT_DUTY);
+        doNothing().when(multiAzCalculatorService).calculate(subnetAzPairs, workerGroup, Collections.emptySet(), SdxClusterShape.LIGHT_DUTY);
         when(multiAzCalculatorService.determineRackId("subnet-1", "az-1")).thenReturn("/fooRack");
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
