@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.validator.AbstractAwsSimulatePolicyValidator.DENIED_BY_ORGANIZATION_RULE_ERROR_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -99,7 +100,7 @@ class AwsLogRolePermissionValidatorTest {
         verify(awsIamService, times(1)).validateRolePolicies(eq(amazonIdentityManagementClient), any(), any());
         ValidationResult result = resultBuilder.build();
         assertTrue(result.hasError());
-        assertTrue(result.getFormattedErrors().contains("Please note SCPs with global condition keys and whitelisted accounts are not supported"));
+        assertTrue(result.getFormattedErrors().contains(DENIED_BY_ORGANIZATION_RULE_ERROR_MESSAGE));
     }
 
     private InstanceProfile instanceProfile() {
