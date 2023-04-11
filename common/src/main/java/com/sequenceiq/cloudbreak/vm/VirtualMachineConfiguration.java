@@ -1,21 +1,27 @@
 package com.sequenceiq.cloudbreak.vm;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties("vm")
 public class VirtualMachineConfiguration {
 
-    private List<Integer> supportedJavaVersions;
+    private final Set<Integer> supportedJavaVersions;
 
-    public List<Integer> getSupportedJavaVersions() {
-        return supportedJavaVersions;
+    public VirtualMachineConfiguration(@Value("${vm.supportedJavaVersions}") String supportedJavaVersions) {
+        this.supportedJavaVersions = Arrays.stream(supportedJavaVersions.split(","))
+                .map(String::trim)
+                .filter(Predicate.not(String::isEmpty))
+                .map(Integer::parseInt)
+                .collect(Collectors.toSet());
     }
 
-    public void setSupportedJavaVersions(List<Integer> supportedJavaVersions) {
-        this.supportedJavaVersions = supportedJavaVersions;
+    public Set<Integer> getSupportedJavaVersions() {
+        return supportedJavaVersions;
     }
 }
