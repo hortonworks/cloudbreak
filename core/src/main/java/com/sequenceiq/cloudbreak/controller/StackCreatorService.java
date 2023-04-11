@@ -75,12 +75,14 @@ import com.sequenceiq.cloudbreak.service.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
+import com.sequenceiq.cloudbreak.service.multiaz.GroupPlacement;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -92,6 +94,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class StackCreatorService {
@@ -170,6 +173,9 @@ public class StackCreatorService {
 
     @Inject
     private JavaVersionValidator javaVersionValidator;
+
+    @Inject
+    private SdxClientService sdxClientService;
 
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
@@ -372,6 +378,7 @@ public class StackCreatorService {
     void fillInstanceMetadata(DetailedEnvironmentResponse environment, Stack stack) {
         long privateIdNumber = 0;
         Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(environment);
+        Set<GroupPlacement> groupPlacements = multiAzCalculatorService.prepareGroupAzMap(subnetAzPairs, stack.getInstanceGroups());
         String stackSubnetId = getStackSubnetIdIfExists(stack);
         String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
         for (InstanceGroup instanceGroup : sortInstanceGroups(stack)) {
@@ -379,9 +386,19 @@ public class StackCreatorService {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
-            multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup);
+            SdxClusterShape sdxClusterShape = getClusterShape(environment);
+            multiAzCalculatorService.calculate(subnetAzPairs, instanceGroup, groupPlacements, sdxClusterShape);
             prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup);
         }
+    }
+
+    private SdxClusterShape getClusterShape(DetailedEnvironmentResponse environment) {
+        return sdxClientService
+                .getByEnvironmentCrn(environment.getCrn())
+                .stream()
+                .findFirst()
+                .get()
+                .getClusterShape();
     }
 
     private String getStackSubnetIdIfExists(Stack stack) {
