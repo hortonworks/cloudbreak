@@ -58,11 +58,11 @@ public class EnvProxyModificationDefaultEvent extends BaseNamedFlowEvent impleme
         return Objects.hash(getResourceId(), proxyConfigCrn, previousProxyConfigCrn);
     }
 
-    public static EnvProxyModificationDefaultEventBuilder builder() {
-        return new EnvProxyModificationDefaultEventBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public static final class EnvProxyModificationDefaultEventBuilder {
+    public static final class Builder {
         private String proxyConfigCrn;
 
         private String previousProxyConfigCrn;
@@ -77,44 +77,40 @@ public class EnvProxyModificationDefaultEvent extends BaseNamedFlowEvent impleme
 
         private String resourceName;
 
-        private EnvProxyModificationDefaultEventBuilder() {
+        private Builder() {
         }
 
-        public static EnvProxyModificationDefaultEventBuilder anEnvProxyModificationDefaultEvent() {
-            return new EnvProxyModificationDefaultEventBuilder();
-        }
-
-        public EnvProxyModificationDefaultEventBuilder withProxyConfigCrn(String proxyConfigCrn) {
+        public Builder withProxyConfigCrn(String proxyConfigCrn) {
             this.proxyConfigCrn = proxyConfigCrn;
             return this;
         }
 
-        public EnvProxyModificationDefaultEventBuilder withPreviousProxyConfigCrn(String previousProxyConfigCrn) {
+        public Builder withPreviousProxyConfigCrn(String previousProxyConfigCrn) {
             this.previousProxyConfigCrn = previousProxyConfigCrn;
             return this;
         }
 
-        public EnvProxyModificationDefaultEventBuilder withSelector(String selector) {
+        public Builder withSelector(String selector) {
             this.selector = selector;
             return this;
         }
 
-        public EnvProxyModificationDefaultEventBuilder withResourceId(Long resourceId) {
+        public Builder withResourceId(Long resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public EnvProxyModificationDefaultEventBuilder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
-        public EnvProxyModificationDefaultEventBuilder withAccepted(Promise<AcceptResult> accepted) {
+        public Builder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
         }
 
-        public EnvProxyModificationDefaultEventBuilder withResourceName(String resourceName) {
+        public Builder withResourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }

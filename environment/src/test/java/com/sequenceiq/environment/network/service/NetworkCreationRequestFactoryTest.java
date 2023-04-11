@@ -159,7 +159,7 @@ class NetworkCreationRequestFactoryTest {
         assertEquals(serviceEndpointCreation == ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT, request.isPrivateEndpointsEnabled());
     }
 
-    private EnvironmentDto.EnvironmentDtoBuilder createEnvironmentDtoWithoutAzureParams() {
+    private EnvironmentDto.Builder createEnvironmentDtoWithoutAzureParams() {
         return EnvironmentDto.builder()
                 .withName(ENV_NAME)
                 .withTags(new EnvironmentTags(new HashMap<>(), new HashMap<>()))
@@ -170,8 +170,8 @@ class NetworkCreationRequestFactoryTest {
                 .withNetwork(NetworkDto.builder().withId(NETWORK_ID).withNetworkCidr(NETWORK_CIDR).build());
     }
 
-    private EnvironmentDto.EnvironmentDtoBuilder createEnvironmentDtoWithAzureParams(ServiceEndpointCreation serviceEndpointCreation) {
-        EnvironmentDto.EnvironmentDtoBuilder builder = createEnvironmentDtoWithoutAzureParams();
+    private EnvironmentDto.Builder createEnvironmentDtoWithAzureParams(ServiceEndpointCreation serviceEndpointCreation) {
+        EnvironmentDto.Builder builder = createEnvironmentDtoWithoutAzureParams();
         builder.withNetwork(NetworkDto.builder()
                 .withId(NETWORK_ID)
                 .withServiceEndpointCreation(serviceEndpointCreation)
@@ -185,7 +185,7 @@ class NetworkCreationRequestFactoryTest {
         return builder;
     }
 
-    private EnvironmentDto.EnvironmentDtoBuilder createAzureParametersDto(ServiceEndpointCreation serviceEndpointCreation) {
+    private EnvironmentDto.Builder createAzureParametersDto(ServiceEndpointCreation serviceEndpointCreation) {
         return createEnvironmentDtoWithAzureParams(serviceEndpointCreation)
                 .withParameters(ParametersDto.builder()
                         .withAzureParametersDto(

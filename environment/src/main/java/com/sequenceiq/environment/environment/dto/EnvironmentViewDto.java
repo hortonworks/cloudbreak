@@ -25,8 +25,8 @@ public class EnvironmentViewDto extends EnvironmentDtoBase {
         this.proxyConfig = proxyConfig;
     }
 
-    public static EnvironmentViewDtoBuilder builder() {
-        return new EnvironmentViewDtoBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     @Override
@@ -34,18 +34,21 @@ public class EnvironmentViewDto extends EnvironmentDtoBase {
         return super.toString();
     }
 
-    public static final class EnvironmentViewDtoBuilder extends EnvironmentDtoBaseBuilder<EnvironmentViewDto, EnvironmentViewDtoBuilder> {
+    public static final class Builder extends EnvironmentDtoBaseBuilder<EnvironmentViewDto, Builder> {
 
         private CredentialView credentialView;
 
         private ProxyConfigView proxyConfig;
 
-        public EnvironmentViewDtoBuilder withCredentialView(CredentialView credential) {
+        private Builder() {
+        }
+
+        public Builder withCredentialView(CredentialView credential) {
             this.credentialView = credential;
             return this;
         }
 
-        public EnvironmentViewDtoBuilder withProxyConfig(ProxyConfigView proxyConfig) {
+        public Builder withProxyConfig(ProxyConfigView proxyConfig) {
             this.proxyConfig = proxyConfig;
             return this;
         }

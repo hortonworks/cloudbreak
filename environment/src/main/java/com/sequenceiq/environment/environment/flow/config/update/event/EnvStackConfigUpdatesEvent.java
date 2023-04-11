@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
-@JsonDeserialize(builder = EnvStackConfigUpdatesEvent.EnvStackConfigUpdatesEventBuilder.class)
+@JsonDeserialize(builder = EnvStackConfigUpdatesEvent.Builder.class)
 public class EnvStackConfigUpdatesEvent extends BaseNamedFlowEvent {
 
     public EnvStackConfigUpdatesEvent(String selector, Long resourceId, String resourceName,
@@ -25,8 +25,12 @@ public class EnvStackConfigUpdatesEvent extends BaseNamedFlowEvent {
         return isClassAndEqualsEvent(EnvStackConfigUpdatesEvent.class, other);
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     @JsonPOJOBuilder
-    public static final class EnvStackConfigUpdatesEventBuilder {
+    public static final class Builder {
 
         private String resourceName;
 
@@ -38,34 +42,34 @@ public class EnvStackConfigUpdatesEvent extends BaseNamedFlowEvent {
 
         private Promise<AcceptResult> accepted;
 
-        private EnvStackConfigUpdatesEventBuilder() {
+        private Builder() {
         }
 
-        public static EnvStackConfigUpdatesEventBuilder anEnvStackConfigUpdatesEvent() {
-            return new EnvStackConfigUpdatesEventBuilder();
+        public static Builder anEnvStackConfigUpdatesEvent() {
+            return new Builder();
         }
 
-        public EnvStackConfigUpdatesEventBuilder withResourceName(String resourceName) {
+        public Builder withResourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }
 
-        public EnvStackConfigUpdatesEventBuilder withSelector(String selector) {
+        public Builder withSelector(String selector) {
             this.selector = selector;
             return this;
         }
 
-        public EnvStackConfigUpdatesEventBuilder withResourceId(Long resourceId) {
+        public Builder withResourceId(Long resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public EnvStackConfigUpdatesEventBuilder withAccepted(Promise<AcceptResult> accepted) {
+        public Builder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
         }
 
-        public EnvStackConfigUpdatesEventBuilder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }

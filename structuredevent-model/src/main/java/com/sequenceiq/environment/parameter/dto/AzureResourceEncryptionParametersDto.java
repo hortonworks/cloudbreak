@@ -11,7 +11,7 @@ public class AzureResourceEncryptionParametersDto {
 
     private final String diskEncryptionSetId;
 
-    private AzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.Builder builder) {
+    private AzureResourceEncryptionParametersDto(Builder builder) {
         encryptionKeyUrl = builder.encryptionKeyUrl;
         encryptionKeyResourceGroupName = builder.encryptionKeyResourceGroupName;
         diskEncryptionSetId = builder.diskEncryptionSetId;
@@ -29,8 +29,8 @@ public class AzureResourceEncryptionParametersDto {
         return diskEncryptionSetId;
     }
 
-    public static AzureResourceEncryptionParametersDto.Builder builder() {
-        return new AzureResourceEncryptionParametersDto.Builder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     @Override
@@ -49,6 +49,9 @@ public class AzureResourceEncryptionParametersDto {
         private String diskEncryptionSetId;
 
         private String encryptionKeyResourceGroupName;
+
+        private Builder() {
+        }
 
         public AzureResourceEncryptionParametersDto.Builder withEncryptionKeyUrl(String encryptionKeyUrl) {
             this.encryptionKeyUrl = encryptionKeyUrl;

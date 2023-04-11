@@ -461,8 +461,7 @@ class EnvironmentModificationServiceTest {
     void changeCredentialByEnvironmentName() {
         String credentialName = "credentialName";
         final Credential value = new Credential();
-        EnvironmentChangeCredentialDto environmentChangeDto = EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder
-                .anEnvironmentChangeCredentialDto()
+        EnvironmentChangeCredentialDto environmentChangeDto = EnvironmentChangeCredentialDto.builder()
                 .withCredentialName(credentialName)
                 .build();
         when(environmentService
@@ -479,9 +478,8 @@ class EnvironmentModificationServiceTest {
     @Test
     void changeCredentialByEnvironmentCrn() {
         String credentialName = "credentialName";
-        final Credential value = new Credential();
-        EnvironmentChangeCredentialDto environmentChangeDto = EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder
-                .anEnvironmentChangeCredentialDto()
+        Credential value = new Credential();
+        EnvironmentChangeCredentialDto environmentChangeDto = EnvironmentChangeCredentialDto.builder()
                 .withCredentialName(credentialName)
                 .build();
         when(environmentService

@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
-@JsonDeserialize(builder = EnvCreationEvent.EnvCreationEventBuilder.class)
+@JsonDeserialize(builder = EnvCreationEvent.Builder.class)
 public class EnvCreationEvent extends BaseNamedFlowEvent {
 
     public EnvCreationEvent(String selector, Long resourceId, String resourceName, String resourceCrn) {
@@ -23,12 +23,12 @@ public class EnvCreationEvent extends BaseNamedFlowEvent {
         return isClassAndEqualsEvent(EnvCreationEvent.class, other);
     }
 
-    public static EnvCreationEventBuilder builder() {
-        return new EnvCreationEventBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     @JsonPOJOBuilder
-    public static final class EnvCreationEventBuilder {
+    public static final class Builder {
         private String resourceName;
 
         private String resourceCrn;
@@ -39,30 +39,30 @@ public class EnvCreationEvent extends BaseNamedFlowEvent {
 
         private Promise<AcceptResult> accepted;
 
-        private EnvCreationEventBuilder() {
+        private Builder() {
         }
 
-        public EnvCreationEventBuilder withResourceName(String resourceName) {
+        public Builder withResourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }
 
-        public EnvCreationEventBuilder withSelector(String selector) {
+        public Builder withSelector(String selector) {
             this.selector = selector;
             return this;
         }
 
-        public EnvCreationEventBuilder withResourceId(Long resourceId) {
+        public Builder withResourceId(Long resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public EnvCreationEventBuilder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
-        public EnvCreationEventBuilder withAccepted(Promise<AcceptResult> accepted) {
+        public Builder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
         }

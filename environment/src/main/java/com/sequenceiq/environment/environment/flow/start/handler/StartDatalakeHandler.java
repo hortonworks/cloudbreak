@@ -34,7 +34,7 @@ public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentSta
         EnvironmentDto environmentDto = environmentStartDtoEvent.getData().getEnvironmentDto();
         try {
             sdxPollerService.startAttachedDatalake(environmentDto.getId(), environmentDto.getName());
-            EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
+            EnvStartEvent envStartEvent = EnvStartEvent.builder()
                     .withSelector(EnvStartStateSelectors.ENV_START_DATAHUB_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())

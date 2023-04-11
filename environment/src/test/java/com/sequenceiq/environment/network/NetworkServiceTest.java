@@ -118,20 +118,21 @@ public class NetworkServiceTest {
         environment.setCloudPlatform("AWS");
         environment.setCredential(credential);
 
-        EnvironmentEditDto environmentEditDto = new EnvironmentEditDto(
-                "description",
-                "accountId",
-                networkDto,
-                authenticationDto,
-                environmentTelemetry,
-                environmentBackup,
-                securityAccessDto,
-                Tunnel.CCMV2,
-                IdBrokerMappingSource.MOCK,
-                CloudStorageValidation.ENABLED,
-                "adminGroupName",
-                parametersDto,
-                new ProxyConfig());
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withDescription("description")
+                .withAccountId("accountId")
+                .withNetwork(networkDto)
+                .withAuthentication(authenticationDto)
+                .withTelemetry(environmentTelemetry)
+                .withBackup(environmentBackup)
+                .withSecurityAccess(securityAccessDto)
+                .withTunnel(Tunnel.CCMV2)
+                .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
+                .withCloudStorageValidation(CloudStorageValidation.ENABLED)
+                .withAdminGroupName("adminGroupName")
+                .withParameters(parametersDto)
+                .withProxyConfig(new ProxyConfig())
+                .build();
 
         when(environmentNetworkConverterMap.get(any(CloudPlatform.class)))
                 .thenReturn(environmentNetworkConverter);
@@ -172,20 +173,21 @@ public class NetworkServiceTest {
         environment.setCloudPlatform("GCP");
         environment.setCredential(credential);
 
-        EnvironmentEditDto environmentEditDto = new EnvironmentEditDto(
-                "description",
-                "accountId",
-                networkDto,
-                authenticationDto,
-                environmentTelemetry,
-                environmentBackup,
-                securityAccessDto,
-                Tunnel.CCMV2,
-                IdBrokerMappingSource.MOCK,
-                CloudStorageValidation.ENABLED,
-                "adminGroupName",
-                parametersDto,
-                new ProxyConfig());
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withDescription("description")
+                .withAccountId("accountId")
+                .withNetwork(networkDto)
+                .withAuthentication(authenticationDto)
+                .withTelemetry(environmentTelemetry)
+                .withBackup(environmentBackup)
+                .withSecurityAccess(securityAccessDto)
+                .withTunnel(Tunnel.CCMV2)
+                .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
+                .withCloudStorageValidation(CloudStorageValidation.ENABLED)
+                .withAdminGroupName("adminGroupName")
+                .withParameters(parametersDto)
+                .withProxyConfig(new ProxyConfig())
+                .build();
 
         when(environmentNetworkConverterMap.get(any(CloudPlatform.class)))
                 .thenReturn(environmentNetworkConverter);

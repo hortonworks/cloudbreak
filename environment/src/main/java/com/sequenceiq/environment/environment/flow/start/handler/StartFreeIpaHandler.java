@@ -54,7 +54,7 @@ public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentStar
                     freeIpaPollerService.startAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
                 }
             }, () -> LOGGER.info("FreeIPA cannot be found by environment crn"));
-            EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
+            EnvStartEvent envStartEvent = EnvStartEvent.builder()
                     .withSelector(EnvStartStateSelectors.ENV_START_DATALAKE_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())

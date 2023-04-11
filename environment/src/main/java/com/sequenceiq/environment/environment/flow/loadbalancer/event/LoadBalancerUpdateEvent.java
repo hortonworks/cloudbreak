@@ -13,7 +13,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
-@JsonDeserialize(builder = LoadBalancerUpdateEvent.LoadBalancerUpdateEventBuilder.class)
+@JsonDeserialize(builder = LoadBalancerUpdateEvent.Builder.class)
 public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
 
     private final Environment environment;
@@ -66,7 +66,7 @@ public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
     }
 
     @JsonPOJOBuilder
-    public static final class LoadBalancerUpdateEventBuilder {
+    public static final class Builder {
 
         private Environment environment;
 
@@ -86,54 +86,54 @@ public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
 
         private Set<String> subnetIds;
 
-        private LoadBalancerUpdateEventBuilder() {
+        private Builder() {
         }
 
-        public static LoadBalancerUpdateEventBuilder aLoadBalancerUpdateEvent() {
-            return new LoadBalancerUpdateEventBuilder();
+        public static Builder aLoadBalancerUpdateEvent() {
+            return new Builder();
         }
 
-        public LoadBalancerUpdateEventBuilder withEnvironment(Environment environment) {
+        public Builder withEnvironment(Environment environment) {
             this.environment = environment;
             return this;
         }
 
-        public LoadBalancerUpdateEventBuilder withEnvironmentDto(EnvironmentDto environmentDto) {
+        public Builder withEnvironmentDto(EnvironmentDto environmentDto) {
             this.environmentDto = environmentDto;
             return this;
         }
 
-        public LoadBalancerUpdateEventBuilder withResourceName(String resourceName) {
+        public Builder withResourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }
 
-        public LoadBalancerUpdateEventBuilder withSelector(String selector) {
+        public Builder withSelector(String selector) {
             this.selector = selector;
             return this;
         }
 
-        public LoadBalancerUpdateEventBuilder withResourceId(Long resourceId) {
+        public Builder withResourceId(Long resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public LoadBalancerUpdateEventBuilder withAccepted(Promise<AcceptResult> accepted) {
+        public Builder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
         }
 
-        public LoadBalancerUpdateEventBuilder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
-        public LoadBalancerUpdateEventBuilder withEndpointAccessGateway(PublicEndpointAccessGateway endpointAccessGateway) {
+        public Builder withEndpointAccessGateway(PublicEndpointAccessGateway endpointAccessGateway) {
             this.endpointAccessGateway = endpointAccessGateway;
             return this;
         }
 
-        public LoadBalancerUpdateEventBuilder withSubnetIds(Set<String> subnetIds) {
+        public Builder withSubnetIds(Set<String> subnetIds) {
             this.subnetIds = subnetIds;
             return this;
         }

@@ -95,7 +95,7 @@ public class EnvironmentDtoConverter {
     }
 
     public EnvironmentViewDto environmentViewToViewDto(EnvironmentView environmentView) {
-        EnvironmentViewDto.EnvironmentViewDtoBuilder builder = EnvironmentViewDto.builder()
+        EnvironmentViewDto.Builder builder = EnvironmentViewDto.builder()
                 .withId(environmentView.getId())
                 .withResourceCrn(environmentView.getResourceCrn())
                 .withName(environmentView.getName())
@@ -139,7 +139,7 @@ public class EnvironmentDtoConverter {
     }
 
     public EnvironmentDto environmentToDto(Environment environment) {
-        EnvironmentDto.EnvironmentDtoBuilder builder = EnvironmentDto.builder()
+        EnvironmentDto.Builder builder = EnvironmentDto.builder()
                 .withId(environment.getId())
                 .withResourceCrn(environment.getResourceCrn())
                 .withName(environment.getName())

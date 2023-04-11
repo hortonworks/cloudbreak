@@ -61,7 +61,12 @@ class AwsParameterValidatorTest {
         credential.setCloudPlatform("platform");
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(ENV_ID);
-        environmentDto.setLocation(new LocationDto("location", "location", 1.0, 1.0));
+        environmentDto.setLocation(LocationDto.builder()
+                .withName("location")
+                .withDisplayName("location")
+                .withLatitude(1.0)
+                .withLongitude(1.0)
+                .build());
         environmentDto.setCredential(credential);
         environmentValidationDto = new EnvironmentValidationDto();
         environmentValidationDto.setValidationType(ValidationType.ENVIRONMENT_CREATION);

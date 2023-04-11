@@ -91,6 +91,9 @@ public class ExperienceCluster {
 
         private String publicName;
 
+        private Builder() {
+        }
+
         public Builder withName(String name) {
             this.name = name;
             return this;

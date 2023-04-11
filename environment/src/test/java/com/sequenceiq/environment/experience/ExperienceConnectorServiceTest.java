@@ -182,7 +182,7 @@ class ExperienceConnectorServiceTest {
     }
 
     private EnvironmentExperienceDto createEnvironmentExperienceDto() {
-        return new EnvironmentExperienceDto.Builder()
+        return EnvironmentExperienceDto.builder()
                 .withCloudPlatform(TEST_CLOUD_PLATFORM)
                 .withAccountId(TEST_ACCOUNT_ID)
                 .withName(TEST_ENV_NAME)

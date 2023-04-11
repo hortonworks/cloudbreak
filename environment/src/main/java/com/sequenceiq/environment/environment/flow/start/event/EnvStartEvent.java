@@ -10,7 +10,7 @@ import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
-@JsonDeserialize(builder = EnvStartEvent.EnvStartEventBuilder.class)
+@JsonDeserialize(builder = EnvStartEvent.Builder.class)
 public class EnvStartEvent extends BaseNamedFlowEvent {
 
     private final DataHubStartAction dataHubStartAction;
@@ -36,8 +36,12 @@ public class EnvStartEvent extends BaseNamedFlowEvent {
         return dataHubStartAction;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     @JsonPOJOBuilder
-    public static final class EnvStartEventBuilder {
+    public static final class Builder {
         private String resourceName;
 
         private String resourceCrn;
@@ -50,39 +54,35 @@ public class EnvStartEvent extends BaseNamedFlowEvent {
 
         private DataHubStartAction dataHubStartAction;
 
-        private EnvStartEventBuilder() {
+        private Builder() {
         }
 
-        public static EnvStartEventBuilder anEnvStartEvent() {
-            return new EnvStartEventBuilder();
-        }
-
-        public EnvStartEventBuilder withResourceName(String resourceName) {
+        public Builder withResourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }
 
-        public EnvStartEventBuilder withSelector(String selector) {
+        public Builder withSelector(String selector) {
             this.selector = selector;
             return this;
         }
 
-        public EnvStartEventBuilder withResourceId(Long resourceId) {
+        public Builder withResourceId(Long resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public EnvStartEventBuilder withAccepted(Promise<AcceptResult> accepted) {
+        public Builder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
         }
 
-        public EnvStartEventBuilder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
-        public EnvStartEventBuilder withDataHubStartAction(DataHubStartAction dataHubStartAction) {
+        public Builder withDataHubStartAction(DataHubStartAction dataHubStartAction) {
             this.dataHubStartAction = dataHubStartAction;
             return this;
         }

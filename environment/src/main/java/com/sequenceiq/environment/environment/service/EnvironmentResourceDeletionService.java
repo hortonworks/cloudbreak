@@ -98,7 +98,7 @@ public class EnvironmentResourceDeletionService {
     }
 
     public int getConnectedExperienceAmount(EnvironmentView environment) {
-        EnvironmentExperienceDto dto = new EnvironmentExperienceDto.Builder()
+        EnvironmentExperienceDto dto = EnvironmentExperienceDto.builder()
                 .withName(environment.getName())
                 .withCrn(environment.getResourceCrn())
                 .withAccountId(environment.getAccountId())

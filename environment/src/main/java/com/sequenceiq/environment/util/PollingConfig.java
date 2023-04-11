@@ -60,6 +60,9 @@ public class PollingConfig {
 
         private boolean stopPollingIfExceptionOccured;
 
+        private Builder() {
+        }
+
         public Builder withSleepTime(long sleepTime) {
             this.sleepTime = sleepTime;
             return this;

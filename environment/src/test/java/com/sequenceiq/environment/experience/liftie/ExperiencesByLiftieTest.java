@@ -349,7 +349,7 @@ class ExperiencesByLiftieTest {
     }
 
     private EnvironmentExperienceDto createEnvironmentExperienceDto() {
-        return new EnvironmentExperienceDto.Builder()
+        return EnvironmentExperienceDto.builder()
                 .withCloudPlatform(TEST_CLOUD_PLATFORM)
                 .withAccountId(TEST_TENANT)
                 .withName(TEST_ENV_NAME)

@@ -4,8 +4,8 @@ public class EnvironmentChangeCredentialDto {
 
     private String credentialName;
 
-    public EnvironmentChangeCredentialDto(String credentialName) {
-        this.credentialName = credentialName;
+    public EnvironmentChangeCredentialDto(Builder builder) {
+        this.credentialName = builder.credentialName;
     }
 
     public String getCredentialName() {
@@ -23,24 +23,24 @@ public class EnvironmentChangeCredentialDto {
                 '}';
     }
 
-    public static final class EnvironmentChangeCredentialDtoBuilder {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
 
         private String credentialName;
 
-        private EnvironmentChangeCredentialDtoBuilder() {
+        private Builder() {
         }
 
-        public static EnvironmentChangeCredentialDtoBuilder anEnvironmentChangeCredentialDto() {
-            return new EnvironmentChangeCredentialDtoBuilder();
-        }
-
-        public EnvironmentChangeCredentialDtoBuilder withCredentialName(String credentialName) {
+        public Builder withCredentialName(String credentialName) {
             this.credentialName = credentialName;
             return this;
         }
 
         public EnvironmentChangeCredentialDto build() {
-            return new EnvironmentChangeCredentialDto(credentialName);
+            return new EnvironmentChangeCredentialDto(this);
         }
 
     }
