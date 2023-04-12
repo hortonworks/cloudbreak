@@ -323,7 +323,7 @@ public interface StackV4Endpoint {
     @POST
     @Path("internal/{crn}/os_upgrade_by_upgrade_sets")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UPGRADE_OS_IN_WORKSPACE, nickname = "osUpgradeByUpgradeSetsInternal")
+    @ApiOperation(value = UPGRADE_OS_IN_WORKSPACE, nickname = "osUpgradeByUpgradeSetsInternalStack")
     FlowIdentifier upgradeOsByUpgradeSetsInternal(@PathParam("workspaceId") Long workspaceId,
             @PathParam("crn") String crn, OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest);
 
