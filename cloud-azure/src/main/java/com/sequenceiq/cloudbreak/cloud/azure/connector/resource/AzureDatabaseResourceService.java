@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.ResourceGroupUsage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -66,6 +67,9 @@ public class AzureDatabaseResourceService {
 
     @Inject
     private AzureUtils azureUtils;
+
+    @Inject
+    private AzureExceptionHandler azureExceptionHandler;
 
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
@@ -354,7 +358,27 @@ public class AzureDatabaseResourceService {
     private void deployDatabaseServer(String stackName, String resourceGroupName, String template, AzureClient client) {
         LOGGER.debug("Re-deploying database server {} in resource group {}", stackName, resourceGroupName);
         String parametersMapAsString = new Json(Map.of()).getValue();
-        client.createTemplateDeployment(resourceGroupName, stackName, template, parametersMapAsString);
+        try {
+            createTemplateDeploymentWithRetryInCaseOfConflict(stackName, resourceGroupName, template, client, parametersMapAsString);
+        } catch (Retry.ActionFailedException e) {
+            throw (ManagementException) e.getCause();
+        }
+    }
+
+    private void createTemplateDeploymentWithRetryInCaseOfConflict(String stackName, String resourceGroupName, String template, AzureClient client,
+            String parametersMapAsString) {
+        retryService.testWith2SecDelayMax5Times(() -> {
+            try {
+                client.createTemplateDeployment(resourceGroupName, stackName, template, parametersMapAsString);
+            } catch (ManagementException e) {
+                if (azureExceptionHandler.isExceptionCodeConflict(e)) {
+                    LOGGER.info("Database server deployment failed with a conflict. It's retried 5 times before failing.", e);
+                    throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Database server deployment");
+                } else {
+                    throw e;
+                }
+            }
+        });
     }
 
     private void deleteDatabaseServer(AzureClient client, CloudResource resource, PersistenceNotifier persistenceNotifier, CloudContext cloudContext) {

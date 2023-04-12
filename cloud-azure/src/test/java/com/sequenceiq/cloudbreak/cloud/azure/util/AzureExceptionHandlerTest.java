@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import com.azure.core.http.HttpResponse;
+import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
@@ -159,6 +162,19 @@ public class AzureExceptionHandlerTest {
         when(msalServiceException.statusCode()).thenReturn(httpStatus.value());
         when(msalServiceException.getSuppressed()).thenReturn(new Throwable[]{});
         return msalServiceException;
+    }
+
+    @Test
+    void testManagementExceptionIsConflict() {
+        assertTrue(underTest.isExceptionCodeConflict(
+                new ManagementException("asdf", mock(HttpResponse.class), new ManagementError("conflict", "asdffda"))));
+        assertFalse(underTest.isExceptionCodeConflict(
+                new ManagementException("asdf", mock(HttpResponse.class), new ManagementError("nope", "asdffda"))));
+        assertFalse(underTest.isExceptionCodeConflict(
+                new ManagementException("asdf", mock(HttpResponse.class), new ManagementError(null, "asdffda"))));
+        assertFalse(underTest.isExceptionCodeConflict(
+                new ManagementException("asdf", mock(HttpResponse.class))));
+        assertFalse(underTest.isExceptionCodeConflict(null));
     }
 
 }

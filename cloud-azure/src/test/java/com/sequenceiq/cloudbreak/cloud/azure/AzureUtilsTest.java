@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,7 +37,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -173,8 +173,8 @@ public class AzureUtilsTest {
                         List.of(
                                 new CloudVmInstanceStatus(createCloudInstance("instance1"), InstanceStatus.STARTED),
                                 new CloudVmInstanceStatus(createCloudInstance("instance2"), InstanceStatus.STARTED))));
-        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString(), any())).thenReturn(Mono.empty());
 
@@ -194,8 +194,8 @@ public class AzureUtilsTest {
                         List.of(
                                 new CloudVmInstanceStatus(createCloudInstance("instance1"), InstanceStatus.STARTED),
                                 new CloudVmInstanceStatus(createCloudInstance("instance2"), InstanceStatus.STOPPED))));
-        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString(), any())).thenReturn(Mono.empty());
 
@@ -216,8 +216,8 @@ public class AzureUtilsTest {
                                 new CloudVmInstanceStatus(createCloudInstance("instance1"), InstanceStatus.STARTED),
                                 new CloudVmInstanceStatus(createCloudInstance("instance2"), InstanceStatus.IN_PROGRESS),
                                 new CloudVmInstanceStatus(createCloudInstance("instance3"), InstanceStatus.DELETE_REQUESTED))));
-        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance1"), any())).thenReturn(Mono.empty());
         when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance2"), any())).thenReturn(Mono.error(new RuntimeException("failed1")));
@@ -240,8 +240,8 @@ public class AzureUtilsTest {
                         List.of(
                                 new CloudVmInstanceStatus(createCloudInstance("instance1"), InstanceStatus.STARTED),
                                 new CloudVmInstanceStatus(createCloudInstance("instance2"), InstanceStatus.STARTED))));
-        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.deleteVirtualMachine(anyString(), anyString())).thenReturn(Mono.empty());
 
@@ -262,8 +262,8 @@ public class AzureUtilsTest {
                                 new CloudVmInstanceStatus(createCloudInstance("instance1"), InstanceStatus.STARTED),
                                 new CloudVmInstanceStatus(createCloudInstance("instance2"), InstanceStatus.TERMINATED),
                                 new CloudVmInstanceStatus(createCloudInstance("instance3"), InstanceStatus.TERMINATED_BY_PROVIDER))));
-        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.deleteVirtualMachine(anyString(), anyString())).thenReturn(Mono.empty());
 
@@ -285,8 +285,8 @@ public class AzureUtilsTest {
                                 new CloudVmInstanceStatus(createCloudInstance("instance1"), InstanceStatus.STARTED),
                                 new CloudVmInstanceStatus(createCloudInstance("instance2"), InstanceStatus.IN_PROGRESS),
                                 new CloudVmInstanceStatus(createCloudInstance("instance3"), InstanceStatus.DELETE_REQUESTED))));
-        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.deleteVirtualMachine(anyString(), eq("instance1"))).thenReturn(Mono.empty());
         when(azureClient.deleteVirtualMachine(anyString(), eq("instance2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
@@ -303,8 +303,8 @@ public class AzureUtilsTest {
 
     @Test
     public void deleteInstancesByNameShouldSucceed() {
-        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.deleteVirtualMachine(anyString(), anyString())).thenReturn(Mono.empty());
 
@@ -315,8 +315,8 @@ public class AzureUtilsTest {
 
     @Test
     public void deleteInstancesByNameShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestFinished() {
-        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.deleteVirtualMachine(anyString(), eq("instance1"))).thenReturn(Mono.empty());
         when(azureClient.deleteVirtualMachine(anyString(), eq("instance2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
@@ -331,7 +331,7 @@ public class AzureUtilsTest {
 
     @Test
     public void deleteNetworkInterfacesShouldSucceed() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(azureClient.deleteNetworkInterfaceAsync(anyString(), anyString())).thenReturn(Mono.empty());
 
         underTest.deleteNetworkInterfaces(azureClient, "resourceGroup", List.of("network1", "network2"));
@@ -341,7 +341,7 @@ public class AzureUtilsTest {
 
     @Test
     public void deleteNetworkInterfacesShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestFinished() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(azureClient.deleteNetworkInterfaceAsync(anyString(), eq("network1"))).thenReturn(Mono.empty());
         when(azureClient.deleteNetworkInterfaceAsync(anyString(), eq("network2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
         when(azureClient.deleteNetworkInterfaceAsync(anyString(), eq("network3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
@@ -355,7 +355,7 @@ public class AzureUtilsTest {
 
     @Test
     public void deletePublicIpsShouldSucceed() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(azureClient.deletePublicIpAddressByNameAsync(anyString(), anyString())).thenReturn(Mono.empty());
 
         underTest.deletePublicIps(azureClient, "resourceGroup", List.of("ip1", "ip2"));
@@ -365,7 +365,7 @@ public class AzureUtilsTest {
 
     @Test
     public void deletePublicIpsShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestFinished() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(azureClient.deletePublicIpAddressByNameAsync(anyString(), eq("ip1"))).thenReturn(Mono.empty());
         when(azureClient.deletePublicIpAddressByNameAsync(anyString(), eq("ip2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
         when(azureClient.deletePublicIpAddressByNameAsync(anyString(), eq("ip3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
@@ -379,7 +379,7 @@ public class AzureUtilsTest {
 
     @Test
     public void deleteLoadBalancersShouldSucceed() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(azureClient.deleteLoadBalancerAsync(anyString(), anyString())).thenReturn(Mono.empty());
 
         underTest.deleteLoadBalancers(azureClient, "resourceGroup", List.of("loadbalancer1", "loadbalancer2"));
@@ -389,7 +389,7 @@ public class AzureUtilsTest {
 
     @Test
     public void deleteLoadBalancersShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestsFinish() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer1"))).thenReturn(Mono.empty());
         when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer2"))).thenReturn(Mono.error(new RuntimeException("failure message 1")));
         when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer3"))).thenReturn(Mono.error(new RuntimeException("failure message 2")));
@@ -402,7 +402,7 @@ public class AzureUtilsTest {
 
     @Test
     public void deleteAvailabilitySetsShouldSucceed() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(azureClient.deleteAvailabilitySetAsync(anyString(), anyString())).thenReturn(Mono.empty());
 
         underTest.deleteAvailabilitySets(azureClient, "resourceGroup", List.of("availabilitySet1", "availabilitySet2"));
@@ -412,7 +412,7 @@ public class AzureUtilsTest {
 
     @Test
     public void deleteAvailabilitySetsShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestFinished() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(azureClient.deleteAvailabilitySetAsync(anyString(), eq("availabilitySet1"))).thenReturn(Mono.empty());
         when(azureClient.deleteAvailabilitySetAsync(anyString(), eq("availabilitySet2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
         when(azureClient.deleteAvailabilitySetAsync(anyString(), eq("availabilitySet3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
@@ -427,7 +427,7 @@ public class AzureUtilsTest {
 
     @Test
     public void deleteGenericResourcesShouldSucceed() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(azureClient.deleteGenericResourceByIdAsync(anyString())).thenReturn(Mono.empty());
 
         underTest.deleteGenericResources(azureClient, List.of("genericResource1", "genericResource2"));
@@ -437,7 +437,7 @@ public class AzureUtilsTest {
 
     @Test
     public void deleteGenericResourcesShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestFinished() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(azureClient.deleteGenericResourceByIdAsync(eq("genericResource1"))).thenReturn(Mono.empty());
         when(azureClient.deleteGenericResourceByIdAsync(eq("genericResource2"))).thenReturn(Mono.error(new RuntimeException("failed1")));
         when(azureClient.deleteGenericResourceByIdAsync(eq("genericResource3"))).thenReturn(Mono.error(new RuntimeException("failed2")));
@@ -638,7 +638,7 @@ public class AzureUtilsTest {
 
     @Test
     void testCheckResourceGroupExistenceWithRetryNoException() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(retryService.testWith2SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         when(azureClient.resourceGroupExists("rg-name")).thenReturn(true);
 
@@ -650,7 +650,7 @@ public class AzureUtilsTest {
 
     @Test
     void testCheckResourceGroupExistenceWithRetryExhausted() {
-        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        AzureClient azureClient = mock(AzureClient.class);
         when(retryService.testWith2SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         when(azureClient.resourceGroupExists("rg-name")).thenThrow(new RuntimeException("error"));
 
@@ -665,7 +665,7 @@ public class AzureUtilsTest {
     @ParameterizedTest
     @MethodSource("getCustomEndpointGatewaySubnetIdsScenarios")
     void getCustomEndpointGatewaySubnetIds(String subnets, List<String> expectedItems) {
-        Network network = Mockito.mock(Network.class);
+        Network network = mock(Network.class);
         when(network.getStringParameter(ENDPOINT_GATEWAY_SUBNET_ID)).thenReturn(subnets);
         List<String> result = underTest.getCustomEndpointGatewaySubnetIds(network);
         assertThat(result).containsExactlyInAnyOrderElementsOf(expectedItems);
