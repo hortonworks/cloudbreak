@@ -23,8 +23,7 @@
       "nodeCount": 2,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": [],
-      "hints": ["az1","az2"]
+      "recipeNames": []
     },
     {
       "name": "gateway",
@@ -41,8 +40,7 @@
       "nodeCount": 2,
       "type": "GATEWAY",
       "recoveryMode": "MANUAL",
-      "recipeNames": [],
-      "hints": ["az2","az3"]
+      "recipeNames": []
     },
     {
       "name": "core",
@@ -59,8 +57,7 @@
       "nodeCount": 3,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": [],
-      "hints": ["az1","az2","az3"]
+      "recipeNames": []
     },
     {
       "name": "auxiliary",
@@ -77,8 +74,7 @@
       "nodeCount": 1,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": [],
-      "hints": ["az1"]
+      "recipeNames": []
     },
     {
       "name": "solrHG",
@@ -196,8 +192,7 @@
       "nodeCount": 2,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": [],
-      "hints": ["az1","az2"]
+      "recipeNames": []
     }
   ]
 }

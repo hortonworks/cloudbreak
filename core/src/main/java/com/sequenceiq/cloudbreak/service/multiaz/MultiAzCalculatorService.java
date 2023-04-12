@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class MultiAzCalculatorService {
@@ -46,7 +45,7 @@ public class MultiAzCalculatorService {
 
     private static final String DEFAULT_RACK = "default-rack";
 
-    private static final int NUMBER_OF_GROUPS = 3;
+    private static final int MINIMUM_NUMBER_OF_HINTS = 3;
 
     @Inject
     private MultiAzValidator multiAzValidator;
@@ -256,19 +255,19 @@ public class MultiAzCalculatorService {
                 && CollectionUtils.isNotEmpty(networkScaleDetails.getPreferredSubnetIds());
     }
 
-    public Set<GroupPlacement> prepareGroupAzMap(Map<String, String> subnetAzPairs, Set<InstanceGroup> instanceGroups) {
-        Set<String> groups = getGroups(instanceGroups);
+    public Set<GroupPlacement> prepareGroupPlacementSet(Map<String, String> subnetAzPairs, Set<InstanceGroup> instanceGroups) {
+        Set<String> hints = getHints(instanceGroups);
         Set<String> availabilityZones = getAvailabilityZones(subnetAzPairs);
 
-        if (availabilityZones.size() < NUMBER_OF_GROUPS || groups.size() != NUMBER_OF_GROUPS) {
+        if (hints.size() <  MINIMUM_NUMBER_OF_HINTS || availabilityZones.size() < hints.size()) {
             return Collections.emptySet();
         }
 
         Set<GroupPlacement> groupPlacements = new HashSet<>();
         Iterator<String> availabilityZonesIt = availabilityZones.iterator();
-        groups.forEach(gp -> {
+        hints.forEach(hint -> {
             String availabilityZone = availabilityZonesIt.next();
-            GroupPlacement groupPlacement = new GroupPlacement(gp, availabilityZone);
+            GroupPlacement groupPlacement = new GroupPlacement(hint, availabilityZone);
             groupPlacements.add(groupPlacement);
 
             subnetAzPairs
@@ -283,13 +282,12 @@ public class MultiAzCalculatorService {
 
     private Set<String> getAvailabilityZones(Map<String, String> subnetAzPairs) {
         return subnetAzPairs
-                .entrySet()
+                .values()
                 .stream()
-                .map(Entry::getValue)
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> getGroups(Set<InstanceGroup> instanceGroups) {
+    private Set<String> getHints(Set<InstanceGroup> instanceGroups) {
         return instanceGroups
                 .stream()
                 .filter(ig -> Objects.nonNull(ig.getHints()))
@@ -298,22 +296,20 @@ public class MultiAzCalculatorService {
                 .collect(Collectors.toSet());
     }
 
-    public void calculate(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacements,
-            SdxClusterShape sdxClusterShape) {
-        if (isGroupPlacement(sdxClusterShape, groupPlacements)) {
-            calculateByGroup(instanceGroup, groupPlacements);
+    public void calculate(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacements) {
+        if (isGroupPlacement(groupPlacements)) {
+            calculateByHints(instanceGroup, groupPlacements);
         } else {
             calculateByRoundRobin(subnetAzPairs, instanceGroup);
         }
     }
 
-    private boolean isGroupPlacement(SdxClusterShape sdxClusterShape, Set<GroupPlacement> groupPlacements) {
-        return !groupPlacements.isEmpty() &&
-                sdxClusterShape == SdxClusterShape.SCALABLE;
+    private boolean isGroupPlacement(Set<GroupPlacement> groupPlacements) {
+        return !groupPlacements.isEmpty();
     }
 
-    private void calculateByGroup(InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacementList) {
-        LOGGER.trace("Calculate the subnet by group");
+    private void calculateByHints(InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacementList) {
+        LOGGER.info("Calculate the subnet by group");
         List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>(instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
         groupPlacementList.forEach(groupPlacement -> collectCurrentSubnetUsage(instanceMetadataViews, groupPlacement.getSubnetUsage()));
 

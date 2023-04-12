@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -26,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.TestException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -695,76 +697,111 @@ public class MultiAzCalculatorServiceTest {
         assertThat(actual.getMessage()).isEqualTo("The following subnets are missing from the Environment, you may have removed them during an environment " +
                 "update previously? Missing subnets: [name-0]");
     }
-//    static Object[][] XXXXXXXXXXXXXXXXXXXXXX() {
-//        return new Object[][]{
-//                // cloudPlatform, subnetCount, instanceCount, existingCounts, supported, expectedPermissibleSubnetIdIndexes
-//                {CloudPlatform.YARN, 0, 0, List.of(), false, Set.of()},
-//                {CloudPlatform.AWS, 1, 0, List.of(), true, Set.of(0)},
-//                {CloudPlatform.AWS, 1, 1, List.of(1), true, Set.of(0)},
-//                {CloudPlatform.AWS, 1, 2, List.of(2), true, Set.of(0)},
-//                {CloudPlatform.AWS, 2, 0, List.of(), true, Set.of(0, 1)},
-//                {CloudPlatform.AWS, 2, 1, List.of(1, 0), true, Set.of(1)},
-//                {CloudPlatform.AWS, 2, 1, List.of(0, 1), true, Set.of(0)},
-//                {CloudPlatform.AWS, 2, 2, List.of(2, 0), true, Set.of(1)},
-//                {CloudPlatform.AWS, 2, 2, List.of(1, 1), true, Set.of(0, 1)},
-//                {CloudPlatform.AWS, 2, 2, List.of(0, 2), true, Set.of(0)},
-//                {CloudPlatform.AWS, 2, 3, List.of(3, 0), true, Set.of(1)},
-//                {CloudPlatform.AWS, 2, 3, List.of(0, 3), true, Set.of(0)},
-//                {CloudPlatform.AWS, 2, 3, List.of(2, 1), true, Set.of(1)},
-//                {CloudPlatform.AWS, 2, 3, List.of(1, 2), true, Set.of(0)},
-//                {CloudPlatform.AWS, 3, 0, List.of(), true, Set.of(0, 1, 2)},
-//                {CloudPlatform.AWS, 3, 1, List.of(1, 0, 0), true, Set.of(1, 2)},
-//                {CloudPlatform.AWS, 3, 1, List.of(0, 1, 0), true, Set.of(0, 2)},
-//                {CloudPlatform.AWS, 3, 1, List.of(0, 0, 1), true, Set.of(0, 1)},
-//                {CloudPlatform.AWS, 3, 2, List.of(2, 0, 0), true, Set.of(1, 2)},
-//                {CloudPlatform.AWS, 3, 2, List.of(0, 2, 0), true, Set.of(0, 2)},
-//                {CloudPlatform.AWS, 3, 2, List.of(0, 0, 2), true, Set.of(0, 1)},
-//                {CloudPlatform.AWS, 3, 2, List.of(1, 1, 0), true, Set.of(2)},
-//                {CloudPlatform.AWS, 3, 2, List.of(0, 1, 1), true, Set.of(0)},
-//                {CloudPlatform.AWS, 3, 2, List.of(1, 0, 1), true, Set.of(1)},
-//                {CloudPlatform.AWS, 3, 3, List.of(3, 0, 0), true, Set.of(1, 2)},
-//                {CloudPlatform.AWS, 3, 3, List.of(0, 3, 0), true, Set.of(0, 2)},
-//                {CloudPlatform.AWS, 3, 3, List.of(0, 0, 3), true, Set.of(0, 1)},
-//                {CloudPlatform.AWS, 3, 3, List.of(2, 1, 0), true, Set.of(2)},
-//                {CloudPlatform.AWS, 3, 3, List.of(0, 1, 2), true, Set.of(0)},
-//                {CloudPlatform.AWS, 3, 3, List.of(2, 0, 1), true, Set.of(1)},
-//                {CloudPlatform.AWS, 3, 3, List.of(1, 1, 1), true, Set.of(0, 1, 2)},
-//                {CloudPlatform.AWS, 3, 4, List.of(4, 0, 0), true, Set.of(1, 2)},
-//                {CloudPlatform.AWS, 3, 4, List.of(0, 4, 0), true, Set.of(0, 2)},
-//                {CloudPlatform.AWS, 3, 4, List.of(0, 0, 4), true, Set.of(0, 1)},
-//                {CloudPlatform.AWS, 3, 4, List.of(3, 1, 0), true, Set.of(2)},
-//                {CloudPlatform.AWS, 3, 4, List.of(1, 3, 0), true, Set.of(2)},
-//                {CloudPlatform.AWS, 3, 4, List.of(3, 0, 1), true, Set.of(1)},
-//                {CloudPlatform.AWS, 3, 4, List.of(1, 0, 3), true, Set.of(1)},
-//                {CloudPlatform.AWS, 3, 4, List.of(0, 3, 1), true, Set.of(0)},
-//                {CloudPlatform.AWS, 3, 4, List.of(0, 1, 3), true, Set.of(0)},
-//                {CloudPlatform.AWS, 3, 4, List.of(2, 2, 0), true, Set.of(2)},
-//                {CloudPlatform.AWS, 3, 4, List.of(2, 0, 2), true, Set.of(1)},
-//                {CloudPlatform.AWS, 3, 4, List.of(0, 2, 2), true, Set.of(0)},
-//                {CloudPlatform.AWS, 3, 4, List.of(2, 1, 1), true, Set.of(1, 2)},
-//                {CloudPlatform.AWS, 3, 4, List.of(1, 2, 1), true, Set.of(0, 2)},
-//                {CloudPlatform.AWS, 3, 4, List.of(1, 1, 2), true, Set.of(0, 1)},
-//        };
-//    }
-//
-//    @ParameterizedTest(name = "calculateByRoundRobinTestWhenCloudInstance " +
-//            "with {0} platform when {1} subnets and {2} instances and {3} subnet counts should result in {5} subnet / AZ")
-//    @MethodSource("calculateByRoundRobinTestWhenCloudInstanceData")
-//    public void yyyyyyyyyyyyyyyyyyy(Map<String, String> subnetAzPairs, Set<InstanceGroup> instanceGroups) {
-//        if (supported) {
-//            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
-//        }
-//
-//        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
-//        initSubnetIdAndAvailabilityZoneForInstances(existingCounts, instanceGroup);
-//
-//        InstanceMetaData instanceMetaData = new InstanceMetaData();
-//
-//        underTest.prepareGroupAzMap(subnetAzPairs, instanceGroups);
-//
-//        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
-//        verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, Set.of());
-//    }
+
+    static Object[][] prepareGroupPlacementSetTestDataProvider() {
+        return new Object[][]{
+                // subnetAzPairs, hintsSet, expectedSubnetsByAz
+                {Map.of("subnet-1", "az-1", "subnet-2", "az-2", "subnet-3", "az-3", "subnet-4", "az-1", "subnet-5", "az-2"),
+                        List.of(Set.of("1", "2"), Set.of("2", "3"), Set.of("1"), Set.of("3", "2", "1")),
+                        Map.of("az-1", Set.of("subnet-1", "subnet-4"),
+                                "az-2", Set.of("subnet-2", "subnet-5"),
+                                "az-3", Set.of("subnet-3"))},
+                {Map.of("subnet-1", "az-1", "subnet-2", "az-2", "subnet-3", "az-3", "subnet-4", "az-1", "subnet-5", "az-2"),
+                        List.of(Set.of("A"), Set.of("B"), Set.of("C")),
+                        Map.of("az-1", Set.of("subnet-1", "subnet-4"),
+                                "az-2", Set.of("subnet-2", "subnet-5"),
+                                "az-3", Set.of("subnet-3"))},
+                {Map.of("subnet-a", "az-1", "subnet-b", "az-2", "subnet-c", "az-3", "subnet-d", "az-1", "subnet-e", "az-2",
+                        "subnet-f", "az-3", "subnet-g", "az-3", "subnet-h", "az-3", "subnet-i", "az-3", "subnet-j", "az-3"),
+                        List.of(Set.of("A"), Set.of("B"), Set.of("C")),
+                        Map.of("az-1", Set.of("subnet-a", "subnet-d"),
+                                "az-2", Set.of("subnet-b", "subnet-e"),
+                                "az-3", Set.of("subnet-c", "subnet-f", "subnet-g", "subnet-h", "subnet-i", "subnet-j"))},
+        };
+    }
+
+    static Object[][] prepareCalculateByHintsTestDataProvider() {
+        return new Object[][]{
+                // hints, numberOfMetaInstaces
+                {Set.of("hint-1"), 1},
+                {Set.of("hint-1", "hint-2", "hint-3"), 3},
+                {Set.of("hint-1", "hint-3"), 2},
+        };
+    }
+
+    @ParameterizedTest(name = "prepareGroupPlacementSetTest " +
+            "with {0} subnetAzPairs when {1} hints are used should result in {2} subnet / AZ")
+    @MethodSource("prepareGroupPlacementSetTestDataProvider")
+    public void prepareGroupPlacementSetTest(Map<String, String> subnetAzPairs, List<Set<String>> hintsSet, Map<String, Set<String>> expectedSubnetsByAz) {
+        Set<InstanceGroup> instanceGroups = createInstanceGroupsBasedOnHints(hintsSet);
+
+        Set<GroupPlacement> result = underTest.prepareGroupPlacementSet(subnetAzPairs, instanceGroups);
+
+        result.forEach(gp -> {
+            Set<String> expectedSubnets = expectedSubnetsByAz.get(gp.getAvailabilityZone());
+            assertThat(gp.getSubnetUsage().size()).isEqualTo(expectedSubnets.size());
+            assertThat(gp.getSubnetUsage().keySet())
+                    .containsAll(expectedSubnetsByAz.get(gp.getAvailabilityZone()));
+        });
+    }
+
+    @ParameterizedTest(name = "testCalculateByHints " +
+            "with {0} hints and {1} number of InstanceMetaData")
+    @MethodSource("prepareCalculateByHintsTestDataProvider")
+    public void testCalculateByHints(Set<String> hints, int numberOfMetaInstaces) {
+        InstanceGroup instanceGroup = createInstaceGroup("instanceGroupName", hints, numberOfMetaInstaces);
+        Set<GroupPlacement> groupPlacements = createGroupPlacements();
+
+        when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
+
+        underTest.calculate(Collections.emptyMap(), instanceGroup, groupPlacements);
+
+        instanceGroup.getAllInstanceMetaData().forEach(instanceMetaData -> {
+            GroupPlacement groupPlacement = groupPlacements.stream()
+                    .filter(gp -> gp.getAvailabilityZone().equals(instanceMetaData.getAvailabilityZone()))
+                    .findFirst()
+                    .orElseThrow(() -> new TestException("GroupPlacement not found for AZ: " + instanceMetaData.getAvailabilityZone()));
+            List<String> subnetIds = (List<String>) instanceGroup.getInstanceGroupNetwork().getAttributes().getMap().get(SUBNET_IDS);
+
+            assertThat(groupPlacement.getSubnetUsage().get(instanceMetaData.getSubnetId())).isEqualTo(1);
+            assertThat(groupPlacement.containsInstanceGroupName(instanceMetaData.getInstanceGroupName()));
+            assertThat(subnetIds.contains(instanceMetaData.getSubnetId()));
+            assertThat(instanceGroup.getAvailabilityZones().contains(instanceMetaData.getAvailabilityZone()));
+        });
+    }
+
+    private Set<GroupPlacement> createGroupPlacements() {
+        GroupPlacement groupPlacementOne = new GroupPlacement("hint-1", "az-1");
+        GroupPlacement groupPlacementTwo = new GroupPlacement("hint-2", "az-2");
+        GroupPlacement groupPlacementThree = new GroupPlacement("hint-3", "az-3");
+        groupPlacementOne.addSubnet("subnet-1a");
+        groupPlacementTwo.addSubnet("subnet-2a");
+        groupPlacementThree.addSubnet("subnet-3a");
+        return Set.of(groupPlacementOne, groupPlacementTwo, groupPlacementThree);
+    }
+
+    private InstanceGroup createInstaceGroup(String groupName, Set<String> hints, int numberOfMetaInstaces) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName(groupName);
+        instanceGroup.setHints(hints);
+        instanceGroup.setInstanceGroupNetwork(new InstanceGroupNetwork());
+        for (int i = 0; i < numberOfMetaInstaces; i++) {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setInstanceGroup(instanceGroup);
+            instanceGroup.getAllInstanceMetaData().add(instanceMetaData);
+        }
+        return instanceGroup;
+    }
+
+    private Set<InstanceGroup> createInstanceGroupsBasedOnHints(List<Set<String>> hintsSet) {
+        return hintsSet
+                .stream()
+                .map(hints -> {
+                    InstanceGroup instanceGroup = new InstanceGroup();
+                    instanceGroup.setHints(hints);
+                    return instanceGroup;
+                }).collect(Collectors.toSet());
+    }
 
     private InstanceGroupDto instanceGroup(CloudPlatform cloudPlatform, int instanceNumber, int subnetCount) {
         InstanceGroup instanceGroup = new InstanceGroup();
