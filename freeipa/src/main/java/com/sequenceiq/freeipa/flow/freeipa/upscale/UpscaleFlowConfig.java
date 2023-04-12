@@ -27,7 +27,6 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_RECORD_HOSTNAMES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_SAVE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_STARTING_FINISHED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_TLS_SETUP_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_TLS_SETUP_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_CLUSTER_PROXY_REGISTRATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT;
@@ -104,11 +103,11 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
 
                     .from(UPSCALE_SAVE_METADATA_STATE).to(UPSCALE_TLS_SETUP_STATE)
                     .event(UPSCALE_SAVE_METADATA_FINISHED_EVENT)
-                    .failureEvent(UPSCALE_TLS_SETUP_FAILED_EVENT)
+                    .defaultFailureEvent()
 
                     .from(UPSCALE_TLS_SETUP_STATE).to(UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_PRE_BOOTSTRAP_STATE)
                     .event(UPSCALE_TLS_SETUP_FINISHED_EVENT)
-                    .failureEvent(UPSCALE_TLS_SETUP_FAILED_EVENT)
+                    .defaultFailureEvent()
 
                     .from(UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_PRE_BOOTSTRAP_STATE).to(UPSCALE_BOOTSTRAPPING_MACHINES_STATE)
                     .event(UPSCALE_CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT)
