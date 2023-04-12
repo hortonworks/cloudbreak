@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
+import static java.util.function.Function.identity;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -24,14 +28,17 @@ public class AzureContextService {
 
     public void addInstancesToContext(List<CloudResource> instances, ResourceBuilderContext context, List<Group> groups) {
         groups.forEach(group -> {
-            List<Long> ids = group.getInstances().stream()
+            List<Long> privateIds = group.getInstances().stream()
                     .filter(instance -> Objects.isNull(instance.getInstanceId()))
                     .map(CloudInstance::getTemplate)
                     .map(InstanceTemplate::getPrivateId)
                     .collect(Collectors.toList());
-            List<CloudResource> groupInstances = instances.stream().filter(inst -> inst.getGroup().equals(group.getName())).collect(Collectors.toList());
-            for (int i = 0; i < ids.size(); i++) {
-                context.addComputeResources(ids.get(i), List.of(groupInstances.get(i)));
+            Map<Long, CloudResource> groupInstances = instances.stream()
+                    .filter(instance -> instance.getGroup().equals(group.getName()))
+                    .collect(Collectors.toMap(instance -> (Long) instance.getParameters().get(PRIVATE_ID), identity()));
+            for (int i = 0; i < privateIds.size(); i++) {
+                Long privateId = privateIds.get(i);
+                context.addComputeResources(privateId, List.of(groupInstances.get(privateId)));
             }
         });
     }

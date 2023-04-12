@@ -76,13 +76,13 @@ public class ResourceBuilderContext extends DynamicModel {
         list.addAll(resources.stream().filter(cloudResource -> groupName.equals(cloudResource.getGroup())).collect(Collectors.toList()));
     }
 
-    public synchronized void addComputeResources(Long index, Collection<CloudResource> resources) {
-        List<CloudResource> list = computeResources.computeIfAbsent(index, k -> new ArrayList<>());
+    public synchronized void addComputeResources(Long privateId, Collection<CloudResource> resources) {
+        List<CloudResource> list = computeResources.computeIfAbsent(privateId, k -> new ArrayList<>());
         list.addAll(resources);
     }
 
-    public List<CloudResource> getComputeResources(Long index) {
-        return computeResources.get(index);
+    public List<CloudResource> getComputeResources(Long privateId) {
+        return computeResources.get(privateId);
     }
 
     public synchronized void addLoadBalancerResources(LoadBalancerType type, Collection<CloudResource> resources) {
