@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS_NATIVE_GOV;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -224,9 +225,11 @@ public class CMRepositoryVersionUtil {
         return false;
     }
 
-    public static boolean isS3SslChannelModeSupported(String cdhVersion, CloudPlatform cloudPlatform) {
-        LOGGER.info("Cloud Platform {} is checked for S3 SSL Channel Mode configuration in {} for cdhVersion {}", cloudPlatform, cdhVersion);
-        return cloudPlatform == CloudPlatform.AWS && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_16);
+    public static boolean isS3SslChannelModeSupported(String cdhVersion, CloudPlatform cloudPlatform, String platformVariant) {
+        LOGGER.info("Cloud Platform {} with platformVariant {} is checked for S3 SSL Channel Mode configuration for cdhVersion {}",
+                cloudPlatform, platformVariant, cdhVersion);
+        return cloudPlatform == CloudPlatform.AWS && !AWS_NATIVE_GOV.equalsIgnoreCase(platformVariant)
+                && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_16);
     }
 
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
