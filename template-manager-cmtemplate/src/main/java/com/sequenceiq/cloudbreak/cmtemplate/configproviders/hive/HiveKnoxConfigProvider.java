@@ -36,7 +36,8 @@ public class HiveKnoxConfigProvider implements CmTemplateComponentConfigProvider
             String keytab = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.keytab", "hive.keytab");
             serviceConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, principal + keytab + filePerEvent));
         }
-        if (CMRepositoryVersionUtil.isS3SslChannelModeSupported(cdhVersion, templatePreparationObject.getCloudPlatform())) {
+        if (CMRepositoryVersionUtil.isS3SslChannelModeSupported(cdhVersion, templatePreparationObject.getCloudPlatform(),
+                templatePreparationObject.getGeneralClusterConfigs().getVariant())) {
             String sslChannelMode = ConfigUtils.getSafetyValveProperty("fs.s3a.ssl.channel.mode", "openssl");
             serviceConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, sslChannelMode));
         }
