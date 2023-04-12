@@ -19,9 +19,11 @@ import com.sequenceiq.cloudbreak.auth.altus.model.MachineUserRequest;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -176,14 +178,21 @@ public class AltusMachineUserService {
     }
 
     public CdpAccessKeyType getCdpAccessKeyType(StackDto stackDto) {
-        if (!entitlementService.isECDSABasedAccessKeyEnabled(stackDto.getAccountId())) {
-            return CdpAccessKeyType.ED25519;
-        }
-        Optional<Image> image = componentConfigProviderService.findImage(stackDto.getId());
-        if (image.isEmpty()) {
-            return CdpAccessKeyType.ED25519;
+        if (AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value().equals(stackDto.getPlatformVariant())) {
+            Optional<Image> image = componentConfigProviderService.findImage(stackDto.getId());
+            if (image.isEmpty()) {
+                throw new CloudbreakRuntimeException("ECDSA is mandatory on AWS gov deployment, but we could not get image package versions, " +
+                        "so we can't decide if the selected image supports it.");
+            } else {
+                if (telemetryFeatureService.isECDSAAccessKeyTypeSupported(image.get().getPackageVersions())) {
+                    return CdpAccessKeyType.ECDSA;
+                } else {
+                    throw new CloudbreakRuntimeException("ECDSA is mandatory on AWS gov deployment, " +
+                            "but the image contains packages which can't support ECDSA key");
+                }
+            }
         } else {
-            return telemetryFeatureService.isECDSAAccessKeyTypeSupported(image.get().getPackageVersions()) ? CdpAccessKeyType.ECDSA : CdpAccessKeyType.ED25519;
+            return CdpAccessKeyType.ED25519;
         }
     }
 

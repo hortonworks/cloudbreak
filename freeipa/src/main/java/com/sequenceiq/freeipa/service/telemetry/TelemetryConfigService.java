@@ -25,9 +25,11 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
@@ -288,12 +290,16 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         }
     }
 
-    private CdpAccessKeyType getCdpAccessKeyType(Stack stack) {
-        if (!entitlementService.isECDSABasedAccessKeyEnabled(stack.getAccountId())) {
+    public CdpAccessKeyType getCdpAccessKeyType(Stack stack) {
+        if (AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value().equals(stack.getPlatformvariant())) {
+            Image image = imageService.getImageForStack(stack);
+            if (telemetryFeatureService.isECDSAAccessKeyTypeSupported(image.getPackageVersions())) {
+                return CdpAccessKeyType.ECDSA;
+            } else {
+                throw new CloudbreakRuntimeException("The image contains packages which can't support ECDSA key, but ECDSA is mandatory on Gov environment");
+            }
+        } else {
             return CdpAccessKeyType.ED25519;
         }
-
-        Image image = imageService.getImageForStack(stack);
-        return telemetryFeatureService.isECDSAAccessKeyTypeSupported(image.getPackageVersions()) ? CdpAccessKeyType.ECDSA : CdpAccessKeyType.ED25519;
     }
 }

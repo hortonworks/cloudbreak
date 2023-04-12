@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -11,9 +12,11 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,9 +38,12 @@ import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
@@ -50,8 +56,10 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
+import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -91,6 +99,12 @@ public class TelemetryConfigServiceTest {
 
     @Mock
     private MonitoringUrlResolver monitoringUrlResolver;
+
+    @Mock
+    private ImageService imageService;
+
+    @Mock
+    private TelemetryFeatureService telemetryFeatureService;
 
     @BeforeEach
     public void setUp() throws TransactionService.TransactionExecutionException {
@@ -243,6 +257,40 @@ public class TelemetryConfigServiceTest {
         TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry));
         // THEN
         assertFalse(result.getLogShipperContext().isEnabled());
+    }
+
+    @Test
+    public void testGetGovAndCdpAccessKeyButNotGov() {
+        Stack stack = mock(Stack.class);
+        when(stack.getPlatformvariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
+
+        CdpAccessKeyType cdpAccessKeyType = underTest.getCdpAccessKeyType(stack);
+        assertEquals(CdpAccessKeyType.ED25519, cdpAccessKeyType);
+    }
+
+    @Test
+    public void testGetGovAndCdpAccessKeyButBadImage() {
+        Stack stack = mock(Stack.class);
+        when(stack.getPlatformvariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
+        Image image = mock(Image.class);
+        when(imageService.getImageForStack(stack)).thenReturn(image);
+        when(telemetryFeatureService.isECDSAAccessKeyTypeSupported(any())).thenReturn(false);
+
+        CloudbreakRuntimeException cloudbreakRuntimeException = assertThrows(CloudbreakRuntimeException.class, () -> underTest.getCdpAccessKeyType(stack));
+        assertEquals("The image contains packages which can't support ECDSA key, but ECDSA is mandatory on Gov environment",
+                cloudbreakRuntimeException.getMessage());
+    }
+
+    @Test
+    public void testGetGovAndCdpAccessKeyAndGoodImage() {
+        Stack stack = mock(Stack.class);
+        when(stack.getPlatformvariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
+        Image image = mock(Image.class);
+        when(imageService.getImageForStack(stack)).thenReturn(image);
+        when(telemetryFeatureService.isECDSAAccessKeyTypeSupported(any())).thenReturn(true);
+
+        CdpAccessKeyType cdpAccessKeyType = underTest.getCdpAccessKeyType(stack);
+        assertEquals(CdpAccessKeyType.ECDSA, cdpAccessKeyType);
     }
 
     private Stack createStack() {
