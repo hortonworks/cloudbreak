@@ -44,7 +44,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setCloudbreakAmbariPassword(cluster.getCloudbreakAmbariPassword());
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount().intValue());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
-        generalClusterConfigs.setVariant(cluster.getVariant());
+        generalClusterConfigs.setVariant(stack.getPlatformVariant());
         generalClusterConfigs.setAutoTlsEnabled(cluster.getAutoTlsEnabled());
         boolean userFacingCertHasBeenGenerated = StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingKey())
                 && StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingCert());

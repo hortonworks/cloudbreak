@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -46,7 +47,7 @@ public class Spark3OnYarnRoleConfigProviderTest {
 
     @Test
     public void testGetSpark3OnYarnRoleConfigsWhenNoStorageConfigured() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.GCP);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.GCP, null);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -56,7 +57,7 @@ public class Spark3OnYarnRoleConfigProviderTest {
     }
 
     protected void validateClientConfig(String hmsExternalDirLocation, String clientConfigDirLocation) {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, hmsExternalDirLocation);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS", hmsExternalDirLocation);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -70,7 +71,21 @@ public class Spark3OnYarnRoleConfigProviderTest {
         assertEquals("spark.hadoop.fs.s3a.ssl.channel.mode=openssl", sparkOnYarnConfigs.get(1).getValue());
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(CloudPlatform cloudPlatform, String... locations) {
+    @Test
+    public void testGetSpark3OnYarnRoleConfigsForAwsGov() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS_NATIVE_GOV", "s3a://bucket/hive/warehouse/external");
+        String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> sparkOnYarnConfigs = roleConfigs.get("spark3_on_yarn-GATEWAY-BASE");
+
+        assertEquals(1, sparkOnYarnConfigs.size());
+        assertEquals("spark3-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
+        assertEquals("spark.kerberos.access.hadoopFileSystems=s3a://bucket", sparkOnYarnConfigs.get(0).getValue());
+    }
+
+    private TemplatePreparationObject getTemplatePreparationObject(CloudPlatform cloudPlatform, String platformVariant, String... locations) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
@@ -87,10 +102,15 @@ public class Spark3OnYarnRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         cmTemplateProcessor.setCdhVersion("7.2.16");
 
-        return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setVariant(platformVariant);
+
+        return Builder.builder()
+                .withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withBlueprintView(new BlueprintView(null, null, null, cmTemplateProcessor))
                 .withCloudPlatform(cloudPlatform)
+                .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
 
