@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.validation;
 
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.ws.rs.core.Response.Status.Family;
@@ -10,6 +11,7 @@ import javax.ws.rs.core.Response.StatusType;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
 
+@Component
 public class ImageCatalogValidator implements ConstraintValidator<ValidImageCatalog, String> {
 
     public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response by the specified URL '%s' due to: '%s'!";
@@ -32,9 +35,10 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private static final HttpContentSizeValidator HTTP_CONTENT_SIZE_VALIDATOR = new HttpContentSizeValidator();
-
     private static final HttpHelper HTTP_HELPER = HttpHelper.getInstance();
+
+    @Inject
+    private HttpContentSizeValidator httpContentSizeValidator;
 
     @Override
     public void initialize(ValidImageCatalog constraintAnnotation) {
@@ -44,7 +48,7 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
     public boolean isValid(String value, ConstraintValidatorContext context) {
         LOGGER.info("Image Catalog validation was called: {}", value);
         try {
-            if (value == null || !HTTP_CONTENT_SIZE_VALIDATOR.isValid(value, context)) {
+            if (value == null || !httpContentSizeValidator.isValid(value, context)) {
                 return false;
             }
             Pair<StatusType, String> content = HTTP_HELPER.getContent(value);
