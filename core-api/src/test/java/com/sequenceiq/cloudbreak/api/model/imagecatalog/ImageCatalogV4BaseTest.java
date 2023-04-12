@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.api.model.imagecatalog;
 import static com.sequenceiq.cloudbreak.validation.ImageCatalogValidator.FAILED_TO_GET_WITH_EXCEPTION;
 import static com.sequenceiq.cloudbreak.validation.ImageCatalogValidator.INVALID_JSON_IN_RESPONSE;
 import static com.sequenceiq.cloudbreak.validation.ImageCatalogValidator.INVALID_JSON_STRUCTURE_IN_RESPONSE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -15,22 +15,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.validation.Configuration;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.base.ImageCatalogV4Base;
@@ -38,8 +35,8 @@ import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
 import com.sequenceiq.cloudbreak.validation.HttpContentSizeValidator;
 import com.sequenceiq.cloudbreak.validation.ImageCatalogValidator;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ImageCatalogV4BaseTest {
+@ExtendWith(MockitoExtension.class)
+public class ImageCatalogV4BaseTest extends ValidatorTestHelper {
 
     public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response by the specified URL '%s' due to: '%s'!";
 
@@ -51,18 +48,12 @@ public class ImageCatalogV4BaseTest {
     @Mock
     private HttpHelper httpHelper;
 
-    @Mock
+    @MockBean
     private HttpContentSizeValidator httpContentSizeValidator;
 
-    private Validator validator;
-
-    @Before
+    @BeforeEach
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        Configuration<?> cfg = Validation.byDefaultProvider().configure();
-        cfg.messageInterpolator(new ParameterMessageInterpolator());
-        validator = cfg.buildValidatorFactory().getValidator();
-
-        for (Entry<String, Object> entry : Map.of("HTTP_CONTENT_SIZE_VALIDATOR", httpContentSizeValidator, "HTTP_HELPER", httpHelper).entrySet()) {
+        for (Entry<String, HttpHelper> entry : Map.of("HTTP_HELPER", httpHelper).entrySet()) {
             Field field = ReflectionUtils.findField(ImageCatalogValidator.class, entry.getKey());
             ReflectionUtils.makeAccessible(field);
             Field modifiersField = Field.class.getDeclaredField("modifiers");
@@ -72,7 +63,6 @@ public class ImageCatalogV4BaseTest {
         }
 
         when(httpContentSizeValidator.isValid(anyString(), any(ConstraintValidatorContext.class))).thenReturn(true);
-        when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
     }
 
     @Test
@@ -87,7 +77,7 @@ public class ImageCatalogV4BaseTest {
         i.setName("testname");
         i.setUrl(url);
 
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = getValidator().validate(i);
 
         assertEquals(2L, violations.size());
         String failedToGetMessage = String.format(FAILED_TO_GET_BY_FAMILY_TYPE, url, reasonPhrase);
@@ -97,26 +87,29 @@ public class ImageCatalogV4BaseTest {
     @Test
     public void testContentStructureNotValid() {
         when(httpHelper.getContent(anyString())).thenReturn(new ImmutablePair<>(statusType, "{}"));
+        when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("http://protocol.com");
 
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = getValidator().validate(i);
 
         assertEquals(2L, violations.size());
-        assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(INVALID_JSON_STRUCTURE_IN_RESPONSE)));
+        assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) ||
+                cv.getMessage().equals(INVALID_JSON_STRUCTURE_IN_RESPONSE)));
     }
 
     @Test
     public void testContentNotAValidJSON() {
         when(httpHelper.getContent(anyString())).thenReturn(new ImmutablePair<>(statusType, "{[]}"));
+        when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
         i.setUrl("http://protocol.com");
 
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = getValidator().validate(i);
 
         assertEquals(2L, violations.size());
         assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(INVALID_JSON_IN_RESPONSE)));
@@ -130,7 +123,7 @@ public class ImageCatalogV4BaseTest {
         i.setName("testname");
         i.setUrl("http://protocol.com");
 
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = getValidator().validate(i);
 
         assertEquals(2L, violations.size());
         String failsWithExceptionMessage = String.format(FAILED_TO_GET_WITH_EXCEPTION, i.getUrl());
@@ -145,7 +138,7 @@ public class ImageCatalogV4BaseTest {
         i.setName("testname");
         i.setUrl("http://protocol.com");
 
-        Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
+        Set<ConstraintViolation<ImageCatalogV4Base>> violations = getValidator().validate(i);
 
         assertEquals(1L, violations.size());
         assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE)));

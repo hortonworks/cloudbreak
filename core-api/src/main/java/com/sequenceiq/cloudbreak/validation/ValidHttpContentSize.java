@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Constraint(validatedBy = HttpContentSizeValidator.class)
 public @interface ValidHttpContentSize {
 
-    String message() default "The content of the given URL must be less than " + HttpContentSizeValidator.MAX_SIZE + " Mb";
+    String message() default "The content of the given URL must be less than {" + HttpContentSizeValidator.MESSAGE_VARIABLE + "}.";
 
     Class<?>[] groups() default {};
 

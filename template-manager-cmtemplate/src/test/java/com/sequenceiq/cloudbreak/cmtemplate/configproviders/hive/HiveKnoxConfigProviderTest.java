@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 
 @ExtendWith(MockitoExtension.class)
 class HiveKnoxConfigProviderTest {
@@ -76,12 +77,15 @@ class HiveKnoxConfigProviderTest {
         return cfg;
     }
 
-    private static TemplatePreparationObject createTemplatePreparationObject() {
+    private static TemplatePreparationObject createTemplatePreparationObject(String platformVariant) {
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setVariant(platformVariant);
         return Builder.builder()
                 .withKerberosConfig(KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
                         .withRealm("EXAMPLE.COM")
                         .build())
                 .withCloudPlatform(CloudPlatform.AWS)
+                .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
 
@@ -96,6 +100,14 @@ class HiveKnoxConfigProviderTest {
     }
 
     @Test
+    void getServiceConfigsKerberosSafetyValveForAWSGov() {
+        when(cmTemplateProcessor.getVersion()).thenReturn(Optional.ofNullable(V7_16_0));
+        TemplatePreparationObject tpo = createTemplatePreparationObject("AWS_NATIVE_GOV");
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, tpo);
+        assertThat(serviceConfigs).as("Expected configs for cdh version: %s", V7_16_0).hasSameElementsAs(NO_KERBEROS_SAFETY_VALVE_EXPECTED_CONFIGS);
+    }
+
+    @Test
     void getServiceConfigsNoKerberosSafetyValveWithSslChannelMode() {
         testGetServiceConfigs(NO_KERBEROS_SAFETY_VALVE_WITH_SSL_CHANNEL_MODE, NO_KERBEROS_SAFETY_VALVE_WITH_SSL_CHANNEL_MODE_EXPECTED_CONFIGS);
     }
@@ -103,7 +115,7 @@ class HiveKnoxConfigProviderTest {
     private void testGetServiceConfigs(Iterable<String> versions, Iterable<ApiClusterTemplateConfig> expectedConfigs) {
         for (String version: versions) {
             when(cmTemplateProcessor.getVersion()).thenReturn(Optional.ofNullable(version));
-            TemplatePreparationObject tpo = createTemplatePreparationObject();
+            TemplatePreparationObject tpo = createTemplatePreparationObject(null);
             List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, tpo);
             assertThat(serviceConfigs).as("Expected configs for cdh version: %s", version).hasSameElementsAs(expectedConfigs);
         }
