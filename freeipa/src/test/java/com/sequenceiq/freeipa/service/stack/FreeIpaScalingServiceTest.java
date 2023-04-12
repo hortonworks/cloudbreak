@@ -1,27 +1,19 @@
 package com.sequenceiq.freeipa.service.stack;
 
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType.HA;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType.NON_HA;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType.TWO_NODE_BASED;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityInfo;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
@@ -43,7 +35,6 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -72,9 +63,6 @@ class FreeIpaScalingServiceTest {
     @Mock
     private FreeIpaScalingValidationService validationService;
 
-    @Mock
-    private FreeipaDownscaleNodeCalculatorService freeipaDownscaleNodeCalculatorService;
-
     @InjectMocks
     private FreeIpaScalingService underTest;
 
@@ -87,7 +75,7 @@ class FreeIpaScalingServiceTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
         UpscaleRequest request = createUpscaleRequest();
         doThrow(new BadRequestException("validation failed")).when(validationService).validateStackForUpscale(allInstances, stack,
-                new ScalingPath(TWO_NODE_BASED, HA));
+                new ScalingPath(AvailabilityType.TWO_NODE_BASED, AvailabilityType.HA));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.upscale(ACCOUNT_ID, request));
 
@@ -125,8 +113,8 @@ class FreeIpaScalingServiceTest {
         UpscaleResponse response = underTest.upscale(ACCOUNT_ID, request);
 
         assertEquals(response.getOperationId(), OPERATION_ID);
-        assertEquals(response.getOriginalAvailabilityType(), TWO_NODE_BASED);
-        assertEquals(response.getTargetAvailabilityType(), HA);
+        assertEquals(response.getOriginalAvailabilityType(), AvailabilityType.TWO_NODE_BASED);
+        assertEquals(response.getTargetAvailabilityType(), AvailabilityType.HA);
         assertEquals(response.getFlowIdentifier(), flowIdentifier);
     }
 
@@ -151,12 +139,12 @@ class FreeIpaScalingServiceTest {
     public void testDownscaleIfValidationFailsThenErrorThrown() {
         Stack stack = mock(Stack.class);
         Set<InstanceMetaData> allInstances = createValidImSet();
+
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
         DownscaleRequest request = createDownscaleRequest();
-        when(freeipaDownscaleNodeCalculatorService.calculateTargetAvailabilityType(request, allInstances.size())).thenReturn(NON_HA);
         doThrow(new BadRequestException("validation failed")).when(validationService).validateStackForDownscale(allInstances, stack,
-                new ScalingPath(TWO_NODE_BASED, NON_HA), null);
+                new ScalingPath(AvailabilityType.TWO_NODE_BASED, AvailabilityType.NON_HA));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.downscale(ACCOUNT_ID, request));
 
@@ -176,46 +164,13 @@ class FreeIpaScalingServiceTest {
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
         when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
         DownscaleRequest request = createDownscaleRequest();
-        when(freeipaDownscaleNodeCalculatorService.calculateTargetAvailabilityType(request, allInstances.size())).thenCallRealMethod();
 
         DownscaleResponse response = underTest.downscale(ACCOUNT_ID, request);
 
         assertEquals(response.getOperationId(), OPERATION_ID);
-        assertEquals(response.getOriginalAvailabilityType(), TWO_NODE_BASED);
-        assertEquals(response.getTargetAvailabilityType(), NON_HA);
+        assertEquals(response.getOriginalAvailabilityType(), AvailabilityType.TWO_NODE_BASED);
+        assertEquals(response.getTargetAvailabilityType(), AvailabilityType.NON_HA);
         assertEquals(response.getFlowIdentifier(), flowIdentifier);
-    }
-
-    @Test
-    public void testDownscaleWithInstanceIdsIfValidationPassesAndOperationRunningThenSucceed() {
-        Stack stack = mock(Stack.class);
-        Set<InstanceMetaData> allInstances = createValidImSet();
-        AvailabilityInfo originalAvailabilityInfo = new AvailabilityInfo(allInstances.size());
-        Operation operation = createOperation(true);
-
-        when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
-        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
-        when(operationService.startOperation(ACCOUNT_ID, OperationType.DOWNSCALE, List.of(ENV_CRN), List.of())).thenReturn(operation);
-        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
-        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
-        Set<String> instanceIdsToDelete = Set.of("im2");
-        DownscaleRequest request = createDownscaleRequest(instanceIdsToDelete);
-        when(freeipaDownscaleNodeCalculatorService.calculateTargetAvailabilityType(request, allInstances.size())).thenCallRealMethod();
-        when(freeipaDownscaleNodeCalculatorService.calculateDownscaleCandidates(stack, originalAvailabilityInfo, request.getTargetAvailabilityType(),
-                instanceIdsToDelete)).thenReturn(new ArrayList<>(instanceIdsToDelete));
-
-        DownscaleResponse response = underTest.downscale(ACCOUNT_ID, request);
-
-        assertEquals(response.getOperationId(), OPERATION_ID);
-        assertEquals(response.getOriginalAvailabilityType(), TWO_NODE_BASED);
-        assertEquals(response.getTargetAvailabilityType(), NON_HA);
-        assertEquals(response.getFlowIdentifier(), flowIdentifier);
-
-        ArgumentCaptor<DownscaleEvent> downscaleEventArgumentCaptor = ArgumentCaptor.forClass(DownscaleEvent.class);
-        verify(flowManager).notify(eq("DOWNSCALE_EVENT"), downscaleEventArgumentCaptor.capture());
-        DownscaleEvent downscaleEvent = downscaleEventArgumentCaptor.getValue();
-        assertThat(downscaleEvent.getInstanceIds()).asList().hasSize(1).hasSameElementsAs(Set.of("im2"));
     }
 
     @Test
@@ -236,24 +191,16 @@ class FreeIpaScalingServiceTest {
     }
 
     private DownscaleRequest createDownscaleRequest() {
-        return createDownscaleRequest(Set.of());
-    }
-
-    private DownscaleRequest createDownscaleRequest(Set<String> instanceIds) {
         DownscaleRequest request = new DownscaleRequest();
         request.setEnvironmentCrn(ENV_CRN);
-        if (instanceIds.isEmpty()) {
-            request.setTargetAvailabilityType(NON_HA);
-        } else {
-            request.setInstanceIds(instanceIds);
-        }
+        request.setTargetAvailabilityType(AvailabilityType.NON_HA);
         return request;
     }
 
     private UpscaleRequest createUpscaleRequest() {
         UpscaleRequest request = new UpscaleRequest();
         request.setEnvironmentCrn(ENV_CRN);
-        request.setTargetAvailabilityType(HA);
+        request.setTargetAvailabilityType(AvailabilityType.HA);
         return request;
     }
 

@@ -45,7 +45,7 @@ class FreeIpaScalingValidationServiceTest {
     private FreeIpaScalingValidationService underTest;
 
     @Test
-    void testUpscaleIfNoInstanceExistsThenValidationFails() {
+    public void testUpscaleIfNoInstanceExistsThenValidationFails() {
         Stack stack = mock(Stack.class);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
@@ -54,11 +54,11 @@ class FreeIpaScalingValidationServiceTest {
     }
 
     @Test
-    void testDownscaleIfNoInstanceExistsThenValidationFails() {
+    public void testDownscaleIfNoInstanceExistsThenValidationFails() {
         Stack stack = mock(Stack.class);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateStackForDownscale(Set.of(), stack, new ScalingPath(HA, NON_HA), null));
+                () -> underTest.validateStackForDownscale(Set.of(), stack, new ScalingPath(HA, NON_HA)));
         assertEquals("There are no instances available for scaling!", exception.getMessage());
     }
 
@@ -72,7 +72,7 @@ class FreeIpaScalingValidationServiceTest {
     }
 
     @Test
-    void testUpscaleIfUnavailableInstanceExistsThenValidationFails() {
+    public void testUpscaleIfUnavailableInstanceExistsThenValidationFails() {
         Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
         validImSet.removeIf(instanceMetaData -> instanceMetaData.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
@@ -85,7 +85,7 @@ class FreeIpaScalingValidationServiceTest {
     }
 
     @Test
-    void testDownscaleIfUnavailableInstanceExistsThenValidationFails() {
+    public void testDownscaleIfUnavailableInstanceExistsThenValidationFails() {
         Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
         validImSet.removeIf(instanceMetaData -> instanceMetaData.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
@@ -93,14 +93,15 @@ class FreeIpaScalingValidationServiceTest {
         validImSet.add(pgw);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), null));
+                () -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA)));
         assertEquals("Some of the instances is not available. Please fix them first! Instances: [pgw]", exception.getMessage());
     }
 
     @Test
-    void testUpscaleIfStackIsUnavailableThenValidationFails() {
-        Stack stack = getStack(false);
+    public void testUpscaleIfStackIsUnavailableThenValidationFails() {
+        Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
+        when(stack.isAvailable()).thenReturn(false);
         when(stack.getStackStatus()).thenReturn(createStackStatus(false));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
@@ -109,36 +110,39 @@ class FreeIpaScalingValidationServiceTest {
     }
 
     @Test
-    void testDownscaleIfStackIsUnavailableThenValidationFails() {
-        Stack stack = getStack(false);
+    public void testDownscaleIfStackIsUnavailableThenValidationFails() {
+        Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
+        when(stack.isAvailable()).thenReturn(false);
         when(stack.getStackStatus()).thenReturn(createStackStatus(false));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), null));
+                () -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA)));
         assertEquals("Stack is not in available state, refusing to downscale. Current state: UNHEALTHY", exception.getMessage());
     }
 
     @Test
-    void testUpscaleIfPathIsPermittedThenValidationPasses() {
-        Stack stack = getStack(true);
+    public void testUpscaleIfPathIsPermittedThenValidationPasses() {
+        Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
+        when(stack.isAvailable()).thenReturn(true);
         when(allowedScalingPaths.getPaths()).thenReturn(Map.of(NON_HA, List.of(HA)));
 
         assertDoesNotThrow(() -> underTest.validateStackForUpscale(validImSet, stack, new ScalingPath(NON_HA, HA)));
     }
 
     @Test
-    void testDownscaleIfPathIsPermittedThenValidationPasses() {
-        Stack stack = getStack(true);
+    public void testDownscaleIfPathIsPermittedThenValidationPasses() {
+        Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(3);
+        when(stack.isAvailable()).thenReturn(true);
         when(allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED)));
 
-        assertDoesNotThrow(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, TWO_NODE_BASED), null));
+        assertDoesNotThrow(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, TWO_NODE_BASED)));
     }
 
     @Test
-    void testUpscaleIfTargetNodeCountSmallerThenValidationFails() {
+    public void testUpscaleIfTargetNodeCountSmallerThenValidationFails() {
         Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(3);
 
@@ -148,19 +152,20 @@ class FreeIpaScalingValidationServiceTest {
     }
 
     @Test
-    void testDownscaleIfTargetNodeCountHigherThenValidationFails() {
+    public void testDownscaleIfTargetNodeCountHigherThenValidationFails() {
         Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
 
-        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(TWO_NODE_BASED, HA), null))
+        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(TWO_NODE_BASED, HA)))
                 .isExactlyInstanceOf(BadRequestException.class)
                 .hasMessage("Refusing downscale as target node count is higher than current. Current node count: 2, target node count: 3.");
     }
 
     @Test
-    void testUpscaleIfPathIsNotPermittedAndNoAlternativeThenValidationFails() {
-        Stack stack = getStack(true);
+    public void testUpscaleIfPathIsNotPermittedAndNoAlternativeThenValidationFails() {
+        Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
+        when(stack.isAvailable()).thenReturn(true);
         when(allowedScalingPaths.getPaths()).thenReturn(Map.of());
 
         BadRequestException exception = assertThrows(BadRequestException.class,
@@ -169,20 +174,22 @@ class FreeIpaScalingValidationServiceTest {
     }
 
     @Test
-    void testDownscaleIfPathIsNotPermittedAndNoAlternativeThenValidationFails() {
-        Stack stack = getStack(true);
+    public void testDownscaleIfPathIsNotPermittedAndNoAlternativeThenValidationFails() {
+        Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
+        when(stack.isAvailable()).thenReturn(true);
         when(allowedScalingPaths.getPaths()).thenReturn(Map.of());
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), null));
+                () -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA)));
         assertEquals("Refusing downscale as scaling from 3 node to 1 is not supported.", exception.getMessage());
     }
 
     @Test
-    void testUpscaleIfPathNotPermittedAndAlternativeExistsThenValidationFails() {
-        Stack stack = getStack(true);
+    public void testUpscaleIfPathNotPermittedAndAlternativeExistsThenValidationFails() {
+        Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
+        when(stack.isAvailable()).thenReturn(true);
         when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(NON_HA, List.of(TWO_NODE_BASED)));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
@@ -191,20 +198,22 @@ class FreeIpaScalingValidationServiceTest {
     }
 
     @Test
-    void testDownscaleIfPathNotPermittedAndAlternativeExistsThenValidationFails() {
-        Stack stack = getStack(true);
+    public void testDownscaleIfPathNotPermittedAndAlternativeExistsThenValidationFails() {
+        Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
+        when(stack.isAvailable()).thenReturn(true);
         when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED)));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), null));
+                () -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA)));
         assertEquals("Refusing downscale as scaling from 3 node to 1 is not supported. Supported downscale targets: [TWO_NODE_BASED]", exception.getMessage());
     }
 
     @Test
-    void testUpscaleIfNodeCountWouldNotChangeThenValidationFails() {
-        Stack stack = getStack(true);
+    public void testUpscaleIfNodeCountWouldNotChangeThenValidationFails() {
+        Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
+        when(stack.isAvailable()).thenReturn(true);
 
         assertThatCode(() -> underTest.validateStackForUpscale(validImSet, stack, new ScalingPath(TWO_NODE_BASED, TWO_NODE_BASED)))
                 .isExactlyInstanceOf(BadRequestException.class)
@@ -214,61 +223,16 @@ class FreeIpaScalingValidationServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = AvailabilityType.class)
-    void testDownscaleIfNodeCountWouldNotChangeThenValidationFails(AvailabilityType availabilityType) {
-        Stack stack = getStack(true);
+    public void testDownscaleIfNodeCountWouldNotChangeThenValidationFails(AvailabilityType availabilityType) {
+        Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(availabilityType.getInstanceCount());
+        when(stack.isAvailable()).thenReturn(true);
 
-        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(availabilityType, availabilityType), null))
+        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(availabilityType, availabilityType)))
                 .isExactlyInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("Refusing DOWNSCALE as the current node count already matches the node count of the requested availability type. " +
                         "Current node count: %d, target availability type: %s and node count: %d.",
                         availabilityType.getInstanceCount(), availabilityType.name(), availabilityType.getInstanceCount()));
-    }
-
-    @Test
-    void testDownscaleIfInstanceIdsEmptyThenValidationPasses() {
-        Stack stack = getStack(true);
-        Set<InstanceMetaData> validImSet = createValidImSet(3);
-        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED)));
-
-        underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, TWO_NODE_BASED), null);
-    }
-
-    @Test
-    void testDownscaleIfInstanceIdsAmongAllNodesThenValidationPasses() {
-        Stack stack = getStack(true);
-        Set<InstanceMetaData> validImSet = createValidImSet(3);
-        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED)));
-
-        underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, TWO_NODE_BASED), Set.of("im2"));
-    }
-
-    private Stack getStack(boolean available) {
-        Stack stack = mock(Stack.class);
-        when(stack.isAvailable()).thenReturn(available);
-        return stack;
-    }
-
-    @Test
-    void testDownscaleIfInstanceIdsNotAmongAllNodesThenValidationFails() {
-        Stack stack = mock(Stack.class);
-        Set<InstanceMetaData> validImSet = createValidImSet(3);
-
-        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, TWO_NODE_BASED), Set.of("unknownNode")))
-                .isExactlyInstanceOf(BadRequestException.class)
-                .hasMessage("Refusing downscale as some of the selected instance ids are not part of the cluster. Unknown instance ids: [unknownNode].");
-    }
-
-    @Test
-    void testDownscaleIfInstanceIdToDeleteContainsPrimaryGatewayThenValidationFails() {
-        Stack stack = mock(Stack.class);
-        Set<InstanceMetaData> validImSet = createValidImSet(3);
-
-        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, TWO_NODE_BASED), Set.of("pgw")))
-                .isExactlyInstanceOf(BadRequestException.class)
-                .hasMessage("Refusing downscale as instance ids contains an instance that is a primary gateway. Please select another instance. Primary " +
-                        "gateway instance: [pgw].");
-
     }
 
     private InstanceMetaData createPrimaryGateway() {
