@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class FreeipaDownscaleNodeCalculatorService {
 
     public ArrayList<String> calculateDownscaleCandidates(Stack stack, AvailabilityInfo originalAvailabilityInfo, AvailabilityType targetAvailabilityType,
             Set<String> instanceIdsToDelete) {
-        ArrayList<String> downscaleCandidates = instanceIdsToDelete.isEmpty()
+        ArrayList<String> downscaleCandidates = CollectionUtils.isEmpty(instanceIdsToDelete)
                 ? calculateDownscaleCandidates(stack, originalAvailabilityInfo, targetAvailabilityType)
                 : new ArrayList<>(instanceIdsToDelete);
         LOGGER.debug("Freeipa downscale candidates are: {}", downscaleCandidates);
