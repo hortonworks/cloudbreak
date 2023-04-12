@@ -242,6 +242,7 @@ public class StackToTemplatePreparationObjectConverter {
 
             Builder builder = Builder.builder()
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
+                    .withPlatformVariant(source.getPlatformVariant())
                     .withRdsViews(rdsViews)
                     .withRdsSslCertificateFilePath(sslCertsFilePath)
                     .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed(version))

@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
-import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 
 @ExtendWith(MockitoExtension.class)
 class HiveKnoxConfigProviderTest {
@@ -78,14 +77,12 @@ class HiveKnoxConfigProviderTest {
     }
 
     private static TemplatePreparationObject createTemplatePreparationObject(String platformVariant) {
-        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setVariant(platformVariant);
         return Builder.builder()
                 .withKerberosConfig(KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
                         .withRealm("EXAMPLE.COM")
                         .build())
                 .withCloudPlatform(CloudPlatform.AWS)
-                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withPlatformVariant(platformVariant)
                 .build();
     }
 

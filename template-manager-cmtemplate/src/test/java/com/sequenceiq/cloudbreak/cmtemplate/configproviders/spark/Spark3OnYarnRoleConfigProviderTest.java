@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -19,14 +19,13 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
-import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class Spark3OnYarnRoleConfigProviderTest {
 
     private final Spark3OnYarnRoleConfigProvider underTest = new Spark3OnYarnRoleConfigProvider();
@@ -102,15 +101,12 @@ public class Spark3OnYarnRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         cmTemplateProcessor.setCdhVersion("7.2.16");
 
-        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setVariant(platformVariant);
-
         return Builder.builder()
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withBlueprintView(new BlueprintView(null, null, null, cmTemplateProcessor))
                 .withCloudPlatform(cloudPlatform)
-                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withPlatformVariant(platformVariant)
                 .build();
     }
 

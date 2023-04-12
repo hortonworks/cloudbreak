@@ -48,6 +48,8 @@ public class TemplatePreparationObject {
 
     private final CloudPlatform cloudPlatform;
 
+    private final String platformVariant;
+
     private final GatewayView gatewayView;
 
     private final GeneralClusterConfigs generalClusterConfigs;
@@ -96,6 +98,7 @@ public class TemplatePreparationObject {
 
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
+        platformVariant = builder.platformVariant;
         rdsViews = builder.rdsViews.stream().collect(Collectors.toMap(
                 rdsConfig -> rdsConfig.getType().toLowerCase(),
                 Function.identity()
@@ -133,6 +136,10 @@ public class TemplatePreparationObject {
 
     public CloudPlatform getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    public String getPlatformVariant() {
+        return platformVariant;
     }
 
     public Optional<CustomConfigurationsView> getCustomConfigurationsView() {
@@ -235,6 +242,8 @@ public class TemplatePreparationObject {
 
         private CloudPlatform cloudPlatform;
 
+        private String platformVariant;
+
         private Set<RdsView> rdsViews = new HashSet<>();
 
         private String rdsSslCertificateFilePath;
@@ -287,6 +296,11 @@ public class TemplatePreparationObject {
 
         public Builder withCloudPlatform(CloudPlatform cloudPlatform) {
             this.cloudPlatform = cloudPlatform;
+            return this;
+        }
+
+        public Builder withPlatformVariant(String platformVariant) {
+            this.platformVariant = platformVariant;
             return this;
         }
 
