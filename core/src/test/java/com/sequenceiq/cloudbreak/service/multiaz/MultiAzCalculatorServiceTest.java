@@ -695,6 +695,76 @@ public class MultiAzCalculatorServiceTest {
         assertThat(actual.getMessage()).isEqualTo("The following subnets are missing from the Environment, you may have removed them during an environment " +
                 "update previously? Missing subnets: [name-0]");
     }
+//    static Object[][] XXXXXXXXXXXXXXXXXXXXXX() {
+//        return new Object[][]{
+//                // cloudPlatform, subnetCount, instanceCount, existingCounts, supported, expectedPermissibleSubnetIdIndexes
+//                {CloudPlatform.YARN, 0, 0, List.of(), false, Set.of()},
+//                {CloudPlatform.AWS, 1, 0, List.of(), true, Set.of(0)},
+//                {CloudPlatform.AWS, 1, 1, List.of(1), true, Set.of(0)},
+//                {CloudPlatform.AWS, 1, 2, List.of(2), true, Set.of(0)},
+//                {CloudPlatform.AWS, 2, 0, List.of(), true, Set.of(0, 1)},
+//                {CloudPlatform.AWS, 2, 1, List.of(1, 0), true, Set.of(1)},
+//                {CloudPlatform.AWS, 2, 1, List.of(0, 1), true, Set.of(0)},
+//                {CloudPlatform.AWS, 2, 2, List.of(2, 0), true, Set.of(1)},
+//                {CloudPlatform.AWS, 2, 2, List.of(1, 1), true, Set.of(0, 1)},
+//                {CloudPlatform.AWS, 2, 2, List.of(0, 2), true, Set.of(0)},
+//                {CloudPlatform.AWS, 2, 3, List.of(3, 0), true, Set.of(1)},
+//                {CloudPlatform.AWS, 2, 3, List.of(0, 3), true, Set.of(0)},
+//                {CloudPlatform.AWS, 2, 3, List.of(2, 1), true, Set.of(1)},
+//                {CloudPlatform.AWS, 2, 3, List.of(1, 2), true, Set.of(0)},
+//                {CloudPlatform.AWS, 3, 0, List.of(), true, Set.of(0, 1, 2)},
+//                {CloudPlatform.AWS, 3, 1, List.of(1, 0, 0), true, Set.of(1, 2)},
+//                {CloudPlatform.AWS, 3, 1, List.of(0, 1, 0), true, Set.of(0, 2)},
+//                {CloudPlatform.AWS, 3, 1, List.of(0, 0, 1), true, Set.of(0, 1)},
+//                {CloudPlatform.AWS, 3, 2, List.of(2, 0, 0), true, Set.of(1, 2)},
+//                {CloudPlatform.AWS, 3, 2, List.of(0, 2, 0), true, Set.of(0, 2)},
+//                {CloudPlatform.AWS, 3, 2, List.of(0, 0, 2), true, Set.of(0, 1)},
+//                {CloudPlatform.AWS, 3, 2, List.of(1, 1, 0), true, Set.of(2)},
+//                {CloudPlatform.AWS, 3, 2, List.of(0, 1, 1), true, Set.of(0)},
+//                {CloudPlatform.AWS, 3, 2, List.of(1, 0, 1), true, Set.of(1)},
+//                {CloudPlatform.AWS, 3, 3, List.of(3, 0, 0), true, Set.of(1, 2)},
+//                {CloudPlatform.AWS, 3, 3, List.of(0, 3, 0), true, Set.of(0, 2)},
+//                {CloudPlatform.AWS, 3, 3, List.of(0, 0, 3), true, Set.of(0, 1)},
+//                {CloudPlatform.AWS, 3, 3, List.of(2, 1, 0), true, Set.of(2)},
+//                {CloudPlatform.AWS, 3, 3, List.of(0, 1, 2), true, Set.of(0)},
+//                {CloudPlatform.AWS, 3, 3, List.of(2, 0, 1), true, Set.of(1)},
+//                {CloudPlatform.AWS, 3, 3, List.of(1, 1, 1), true, Set.of(0, 1, 2)},
+//                {CloudPlatform.AWS, 3, 4, List.of(4, 0, 0), true, Set.of(1, 2)},
+//                {CloudPlatform.AWS, 3, 4, List.of(0, 4, 0), true, Set.of(0, 2)},
+//                {CloudPlatform.AWS, 3, 4, List.of(0, 0, 4), true, Set.of(0, 1)},
+//                {CloudPlatform.AWS, 3, 4, List.of(3, 1, 0), true, Set.of(2)},
+//                {CloudPlatform.AWS, 3, 4, List.of(1, 3, 0), true, Set.of(2)},
+//                {CloudPlatform.AWS, 3, 4, List.of(3, 0, 1), true, Set.of(1)},
+//                {CloudPlatform.AWS, 3, 4, List.of(1, 0, 3), true, Set.of(1)},
+//                {CloudPlatform.AWS, 3, 4, List.of(0, 3, 1), true, Set.of(0)},
+//                {CloudPlatform.AWS, 3, 4, List.of(0, 1, 3), true, Set.of(0)},
+//                {CloudPlatform.AWS, 3, 4, List.of(2, 2, 0), true, Set.of(2)},
+//                {CloudPlatform.AWS, 3, 4, List.of(2, 0, 2), true, Set.of(1)},
+//                {CloudPlatform.AWS, 3, 4, List.of(0, 2, 2), true, Set.of(0)},
+//                {CloudPlatform.AWS, 3, 4, List.of(2, 1, 1), true, Set.of(1, 2)},
+//                {CloudPlatform.AWS, 3, 4, List.of(1, 2, 1), true, Set.of(0, 2)},
+//                {CloudPlatform.AWS, 3, 4, List.of(1, 1, 2), true, Set.of(0, 1)},
+//        };
+//    }
+//
+//    @ParameterizedTest(name = "calculateByRoundRobinTestWhenCloudInstance " +
+//            "with {0} platform when {1} subnets and {2} instances and {3} subnet counts should result in {5} subnet / AZ")
+//    @MethodSource("calculateByRoundRobinTestWhenCloudInstanceData")
+//    public void yyyyyyyyyyyyyyyyyyy(Map<String, String> subnetAzPairs, Set<InstanceGroup> instanceGroups) {
+//        if (supported) {
+//            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
+//        }
+//
+//        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+//        initSubnetIdAndAvailabilityZoneForInstances(existingCounts, instanceGroup);
+//
+//        InstanceMetaData instanceMetaData = new InstanceMetaData();
+//
+//        underTest.prepareGroupAzMap(subnetAzPairs, instanceGroups);
+//
+//        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
+//        verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, Set.of());
+//    }
 
     private InstanceGroupDto instanceGroup(CloudPlatform cloudPlatform, int instanceNumber, int subnetCount) {
         InstanceGroup instanceGroup = new InstanceGroup();

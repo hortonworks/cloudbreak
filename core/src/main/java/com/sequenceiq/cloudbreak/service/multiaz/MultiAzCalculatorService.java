@@ -276,7 +276,7 @@ public class MultiAzCalculatorService {
                     .stream()
                     .filter(entry -> entry.getValue().equals(availabilityZone))
                     .map(Entry::getKey)
-                    .forEach(subnet -> groupPlacement.addSubnet(subnet));
+                    .forEach(groupPlacement::addSubnet);
         });
         return groupPlacements;
     }
@@ -300,14 +300,14 @@ public class MultiAzCalculatorService {
 
     public void calculate(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, Set<GroupPlacement> groupPlacements,
             SdxClusterShape sdxClusterShape) {
-        if (isGroupMultiAZ(sdxClusterShape, groupPlacements)) {
+        if (isGroupPlacement(sdxClusterShape, groupPlacements)) {
             calculateByGroup(instanceGroup, groupPlacements);
         } else {
             calculateByRoundRobin(subnetAzPairs, instanceGroup);
         }
     }
 
-    private boolean isGroupMultiAZ(SdxClusterShape sdxClusterShape, Set<GroupPlacement> groupPlacements) {
+    private boolean isGroupPlacement(SdxClusterShape sdxClusterShape, Set<GroupPlacement> groupPlacements) {
         return !groupPlacements.isEmpty() &&
                 sdxClusterShape == SdxClusterShape.SCALABLE;
     }
@@ -322,7 +322,7 @@ public class MultiAzCalculatorService {
             Set<String> availabilityZones = new HashSet<>();
             for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                 if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
-                    GroupPlacement groupPlacement = getGroupPlacementForComponent(instanceMetaData.getInstanceGroupName(),
+                    GroupPlacement groupPlacement = getGroupPlacementForInstanceGroupName(instanceMetaData.getInstanceGroupName(),
                             instanceMetaData.getInstanceGroup().getHints(), groupPlacementList);
                     Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(groupPlacement.getSubnetUsage());
                     String leastUsedSubnetId = searchTheSmallestUsedID(groupPlacement.getSubnetUsage(), numberOfInstanceInASubnet);
@@ -331,7 +331,8 @@ public class MultiAzCalculatorService {
                             groupPlacement.getAvailabilityZone());
                     instanceMetaData.setSubnetId(leastUsedSubnetId);
                     instanceMetaData.setAvailabilityZone(groupPlacement.getAvailabilityZone());
-                    groupPlacement.addComponent(instanceMetaData.getInstanceGroupName());
+
+                    groupPlacement.addInstanceGroupName(instanceMetaData.getInstanceGroupName());
                     groupPlacement.increaseSubnetUsage(leastUsedSubnetId);
                     subnetIds.add(leastUsedSubnetId);
                     availabilityZones.add(groupPlacement.getAvailabilityZone());
@@ -341,7 +342,7 @@ public class MultiAzCalculatorService {
         }
     }
 
-    private static void updateInstanceGroup(InstanceGroup instanceGroup, List<String> subnetIds, Set<String> azNames) {
+    private void updateInstanceGroup(InstanceGroup instanceGroup, List<String> subnetIds, Set<String> azNames) {
         Map<String, Object> networkAttributes = Optional
                 .of(instanceGroup.getInstanceGroupNetwork())
                 .map(InstanceGroupNetwork::getAttributes)
@@ -361,12 +362,19 @@ public class MultiAzCalculatorService {
         instanceGroup.setAvailabilityZones(availabilityZones);
     }
 
-    private GroupPlacement getGroupPlacementForComponent(String componentName, Set<String> hints, Set<GroupPlacement> groupPlacements) {
+    private GroupPlacement getGroupPlacementForInstanceGroupName(String instanceGroupName, Set<String> hints, Set<GroupPlacement> groupPlacements) {
+        if (hints == null || hints.isEmpty()) {
+            return groupPlacements
+                    .stream()
+                    .findFirst()
+                    .get();
+        }
+
         return groupPlacements
                 .stream()
                 .filter(gp -> hints.contains(gp.getName()))
-                .filter(gp -> !gp.containsComponent(componentName))
+                .filter(gp -> !gp.containsInstanceGroupName(instanceGroupName))
                 .findFirst()
-                .orElseThrow(() -> new CloudbreakServiceException(String.format("Node placement not found for %s", componentName)));
+                .orElseThrow(() -> new CloudbreakServiceException(String.format("Node placement not found for %s", instanceGroupName)));
     }
 }
