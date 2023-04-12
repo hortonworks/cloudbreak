@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 public class AzureExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureExceptionHandler.class);
 
+    private static final String MGMT_ERROR_CODE_CONFLICT = "Conflict";
+
     private static final AzureExceptionHandlerParameters DEFAULT_EXCEPTION_HANDLER_PARAMETERS = AzureExceptionHandlerParameters.builder()
             .withHandleNotFound(true)
             .build();
@@ -94,6 +96,10 @@ public class AzureExceptionHandler {
 
     private boolean hasStatusCode(ManagementException exception, int statusCode) {
         return exception.getResponse() != null && statusCode == exception.getResponse().getStatusCode();
+    }
+
+    public boolean isExceptionCodeConflict(ManagementException e) {
+        return e != null && e.getValue() != null && MGMT_ERROR_CODE_CONFLICT.equalsIgnoreCase(e.getValue().getCode());
     }
 
 }
