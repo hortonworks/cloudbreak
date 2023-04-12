@@ -23,10 +23,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
@@ -37,6 +35,7 @@ import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollecti
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.telemetry.TelemetryConfigService;
 
 @ExtendWith(MockitoExtension.class)
 public class DiagnosticsEnsureMachineUserHandlerTest {
@@ -56,10 +55,7 @@ public class DiagnosticsEnsureMachineUserHandlerTest {
     private AltusMachineUserService altusMachineUserService;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
-    private TelemetryFeatureService telemetryFeatureService;
+    private TelemetryConfigService telemetryConfigService;
 
     @BeforeEach
     public void setUp() {
@@ -83,6 +79,7 @@ public class DiagnosticsEnsureMachineUserHandlerTest {
         underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
         // THEN
         verify(altusMachineUserService, times(1)).getOrCreateDataBusCredentialIfNeeded(anyLong(), any());
+        verify(telemetryConfigService, times(1)).getCdpAccessKeyType(stack);
     }
 
     @Test

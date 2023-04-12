@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.altus;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -25,10 +26,12 @@ import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -129,38 +132,41 @@ public class AltusMachineUserServiceTest {
     }
 
     @Test
-    public void testGetCdpAccessKeyTypeNoEntitlement() {
-        when(entitlementService.isECDSABasedAccessKeyEnabled(any())).thenReturn(false);
-        CdpAccessKeyType result = underTest.getCdpAccessKeyType(stackDto);
-        assertEquals(CdpAccessKeyType.ED25519, result);
+    public void testGetGovAndCdpAccessKeyButNotGov() {
+        when(stackDto.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
+
+        CdpAccessKeyType cdpAccessKeyType = underTest.getCdpAccessKeyType(stackDto);
+        assertEquals(CdpAccessKeyType.ED25519, cdpAccessKeyType);
     }
 
     @Test
-    public void testGetCdpAccessKeyTypeGoodPackageVersions() {
-        when(entitlementService.isECDSABasedAccessKeyEnabled(any())).thenReturn(true);
-        when(componentConfigProviderService.findImage(anyLong())).thenReturn(Optional.of(image));
-        when(telemetryFeatureService.isECDSAAccessKeyTypeSupported(any())).thenReturn(true);
+    public void testGetGovAndCdpAccessKeyTypeNoImage() {
+        when(stackDto.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
+        when(componentConfigProviderService.findImage(anyLong())).thenReturn(Optional.empty());
 
-        CdpAccessKeyType result = underTest.getCdpAccessKeyType(stackDto);
-        assertEquals(CdpAccessKeyType.ECDSA, result);
+        CloudbreakRuntimeException cloudbreakRuntimeException = assertThrows(CloudbreakRuntimeException.class, () -> underTest.getCdpAccessKeyType(stackDto));
+        assertEquals("ECDSA is mandatory on AWS gov deployment, but we could not get image package versions, " +
+                        "so we can't decide if the selected image supports it.", cloudbreakRuntimeException.getMessage());
     }
 
     @Test
-    public void testGetCdpAccessKeyTypeBadPackageVersions() {
-        when(entitlementService.isECDSABasedAccessKeyEnabled(any())).thenReturn(true);
+    public void testGetGovAndCdpAccessKeyButBadImage() {
+        when(stackDto.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(componentConfigProviderService.findImage(anyLong())).thenReturn(Optional.of(image));
         when(telemetryFeatureService.isECDSAAccessKeyTypeSupported(any())).thenReturn(false);
 
-        CdpAccessKeyType result = underTest.getCdpAccessKeyType(stackDto);
-        assertEquals(CdpAccessKeyType.ED25519, result);
+        CloudbreakRuntimeException cloudbreakRuntimeException = assertThrows(CloudbreakRuntimeException.class, () -> underTest.getCdpAccessKeyType(stackDto));
+        assertEquals("ECDSA is mandatory on AWS gov deployment, but the image contains packages which can't support ECDSA key",
+                cloudbreakRuntimeException.getMessage());
     }
 
     @Test
-    public void testGetCdpAccessKeyTypeNoImage() {
-        when(entitlementService.isECDSABasedAccessKeyEnabled(any())).thenReturn(true);
-        when(componentConfigProviderService.findImage(anyLong())).thenReturn(Optional.empty());
+    public void testGetGovAndCdpAccessKeyAndGoodImage() {
+        when(stackDto.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
+        when(componentConfigProviderService.findImage(anyLong())).thenReturn(Optional.of(image));
+        when(telemetryFeatureService.isECDSAAccessKeyTypeSupported(any())).thenReturn(true);
 
-        CdpAccessKeyType result = underTest.getCdpAccessKeyType(stackDto);
-        assertEquals(CdpAccessKeyType.ED25519, result);
+        CdpAccessKeyType cdpAccessKeyType = underTest.getCdpAccessKeyType(stackDto);
+        assertEquals(CdpAccessKeyType.ECDSA, cdpAccessKeyType);
     }
 }

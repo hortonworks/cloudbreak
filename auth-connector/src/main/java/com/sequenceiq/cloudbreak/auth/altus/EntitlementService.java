@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ACCESS_KEY_ECDSA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.AUDIT_ARCHIVING_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
@@ -575,10 +574,6 @@ public class EntitlementService {
 
     public boolean isUpgradeAttachedDatahubsCheckSkipped(String accountId) {
         return isEntitlementRegistered(accountId, CDP_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK);
-    }
-
-    public boolean isECDSABasedAccessKeyEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, ACCESS_KEY_ECDSA);
     }
 
     public boolean isEditProxyConfigEnabled(String accountId) {
