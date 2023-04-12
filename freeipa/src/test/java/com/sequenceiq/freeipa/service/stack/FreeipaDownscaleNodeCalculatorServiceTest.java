@@ -26,14 +26,24 @@ public class FreeipaDownscaleNodeCalculatorServiceTest {
     private final FreeipaDownscaleNodeCalculatorService underTest = new FreeipaDownscaleNodeCalculatorService();
 
     @Test
-    void testCalculateDownscaleCandidatesWhenInstanceIdsToDeleteNotProvided() {
+    void testCalculateDownscaleCandidatesWhenInstanceIdsToDeleteIsNull() {
         Stack stack = mock(Stack.class);
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(getNotDeletedInstanceMetadataSet(3));
         AvailabilityInfo availabilityInfo = new AvailabilityInfo(3);
-        Set<String> instanceIdsToDelete = Set.of();
 
-        ArrayList<String> downscaleCandidates = underTest.calculateDownscaleCandidates(stack, availabilityInfo, AvailabilityType.TWO_NODE_BASED,
-                instanceIdsToDelete);
+        ArrayList<String> downscaleCandidates = underTest.calculateDownscaleCandidates(stack, availabilityInfo, AvailabilityType.TWO_NODE_BASED, null);
+
+        assertThat(downscaleCandidates).asList()
+                .hasSize(1);
+    }
+
+    @Test
+    void testCalculateDownscaleCandidatesWhenInstanceIdsToDeleteIsEmpty() {
+        Stack stack = mock(Stack.class);
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(getNotDeletedInstanceMetadataSet(3));
+        AvailabilityInfo availabilityInfo = new AvailabilityInfo(3);
+
+        ArrayList<String> downscaleCandidates = underTest.calculateDownscaleCandidates(stack, availabilityInfo, AvailabilityType.TWO_NODE_BASED, Set.of());
 
         assertThat(downscaleCandidates).asList()
                 .hasSize(1);
