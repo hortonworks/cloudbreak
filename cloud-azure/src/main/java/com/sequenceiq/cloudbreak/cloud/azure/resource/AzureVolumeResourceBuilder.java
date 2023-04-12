@@ -96,8 +96,8 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 reattachableVolumeSet.map(cloudResource -> "is present with name:" + cloudResource.getName())
                         .orElse("is not present"));
 
-        return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, vm,
-                context.getStringParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER))));
+        return List.of(reattachableVolumeSet.orElseGet(
+                createVolumeSet(privateId, auth, group, vm, context.getStringParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER))));
     }
 
     private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource vm, String stackCrn) {
