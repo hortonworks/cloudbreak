@@ -58,6 +58,8 @@ public class AwsDownscaleService {
 
     private static final int MAX_DETACH_INSTANCE_SIZE = 20;
 
+    private static final String INVALID_INSTANCE_ID_MALFORMED_CODE = "InvalidInstanceID.Malformed";
+
     @Inject
     private AwsComputeResourceService awsComputeResourceService;
 
@@ -235,7 +237,8 @@ public class AwsDownscaleService {
                 return existingInstances;
             } catch (AwsServiceException e) {
                 LOGGER.info("Termination failed, lets check if it is failed because instance was not found", e);
-                if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(e.awsErrorDetails().errorCode())) {
+                if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(e.awsErrorDetails().errorCode())
+                        && !INVALID_INSTANCE_ID_MALFORMED_CODE.equals(e.awsErrorDetails().errorCode())) {
                     throw e;
                 } else {
                     LOGGER.info("Instance was not found, lets filter out the non existing instances");

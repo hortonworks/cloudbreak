@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -19,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
@@ -36,6 +39,8 @@ import com.sequenceiq.freeipa.service.stack.StackUpdater;
 public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStatusCheckerJob.class);
+
+    private static final String AUTO_SYNC_LOG_PREFIX = ":::Auto sync::: ";
 
     @Inject
     private FlowLogService flowLogService;
@@ -99,20 +104,20 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     public void syncAStack(Stack stack, boolean updateStatusFromFlow) {
         try {
             checkedMeasure(() -> {
-                ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        () -> {
+                ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
                     // Exclude terminated but include deleted
                     Set<InstanceMetaData> notTerminatedForStack = stack.getAllInstanceMetaDataList().stream()
                             .filter(Predicate.not(InstanceMetaData::isTerminated))
-                            .collect(Collectors.toSet());
-                    Set<InstanceMetaData> checkableInstances = notTerminatedForStack.stream()
                             .filter(Predicate.not(InstanceMetaData::isDeletedOnProvider))
                             .collect(Collectors.toSet());
 
+                    Set<InstanceMetaData> unusableInstances = collectAndUpdateUnusableInstances(notTerminatedForStack);
+
+                    Set<InstanceMetaData> checkableInstances = Sets.newHashSet(Sets.difference(notTerminatedForStack, unusableInstances));
+
                     int alreadyDeletedCount = notTerminatedForStack.size() - checkableInstances.size();
                     if (alreadyDeletedCount > 0) {
-                        LOGGER.info(":::Auto sync::: Count of already in deleted on provider side state: {}", alreadyDeletedCount);
+                        LOGGER.info(AUTO_SYNC_LOG_PREFIX + "Count of already in deleted on provider side state: {}", alreadyDeletedCount);
                     }
                     if (!checkableInstances.isEmpty()) {
                         SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
@@ -127,21 +132,37 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                             if (!results.isEmpty()) {
                                 updateStackStatus(stack, syncResult, results, alreadyDeletedCount, updateStatusFromFlow);
                             } else {
-                                LOGGER.debug("results is empty, skip update");
+                                LOGGER.debug(AUTO_SYNC_LOG_PREFIX + "results is empty, skip update");
                             }
                         }
                     } else if (alreadyDeletedCount > 0) {
-                        SyncResult syncResult =  new SyncResult("FreeIpa is " + DetailedStackStatus.DELETED_ON_PROVIDER_SIDE,
+                        SyncResult syncResult = new SyncResult("FreeIpa is " + DetailedStackStatus.DELETED_ON_PROVIDER_SIDE,
                                 DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, null);
                         updateStackStatus(stack, syncResult, null, alreadyDeletedCount, updateStatusFromFlow);
                     }
                     freeipaStatusInfoLogger.logFreeipaStatus(stack.getId(), checkableInstances);
                 });
                 return null;
-            }, LOGGER, ":::Auto sync::: freeipa stack sync in {}ms");
+            }, LOGGER, AUTO_SYNC_LOG_PREFIX + "freeipa stack sync in {}ms");
         } catch (Exception e) {
-            LOGGER.info(":::Auto sync::: Error occurred during freeipa sync: {}", e.getMessage(), e);
+            LOGGER.info(AUTO_SYNC_LOG_PREFIX + "Error occurred during freeipa sync: {}", e.getMessage(), e);
         }
+    }
+
+    @NotNull
+    private Set<InstanceMetaData> collectAndUpdateUnusableInstances(Set<InstanceMetaData> notTerminatedForStack) {
+        Set<InstanceMetaData> unusableInstances = notTerminatedForStack.stream()
+                .filter(im -> StringUtils.isAnyBlank(im.getDiscoveryFQDN(), im.getPrivateIp()))
+                .collect(Collectors.toSet());
+        LOGGER.info(AUTO_SYNC_LOG_PREFIX + "Unusable instances due to missing FQDN or IP: {}", unusableInstances);
+        unusableInstances.forEach(im -> {
+            if (StringUtils.isBlank(im.getInstanceId())) {
+                setStatusIfNotTheSame(im, InstanceStatus.TERMINATED);
+            } else {
+                setStatusIfNotTheSame(im, InstanceStatus.FAILED);
+            }
+        });
+        return unusableInstances;
     }
 
     private void updateInstanceStatus(InstanceMetaData instanceMetaData, DetailedStackStatus detailedStackStatus) {
@@ -156,7 +177,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 setStatusIfNotTheSame(instanceMetaData, InstanceStatus.UNREACHABLE);
                 break;
             default:
-                LOGGER.info(":::Auto sync::: the '{}' status is not converted", detailedStackStatus);
+                LOGGER.info(AUTO_SYNC_LOG_PREFIX + "the '{}' status is not converted", detailedStackStatus);
         }
     }
 
@@ -166,13 +187,13 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         if (status != stack.getStackStatus().getDetailedStackStatus()) {
             if (autoSyncConfig.isUpdateStatus()) {
                 if (!updateStatusFromFlow && flowLogService.isOtherFlowRunning(stack.getId())) {
-                    throw new InterruptSyncingException(":::Auto sync::: interrupt syncing in updateStackStatus, flow is running on freeipa stack " +
+                    throw new InterruptSyncingException(AUTO_SYNC_LOG_PREFIX + "interrupt syncing in updateStackStatus, flow is running on freeipa stack " +
                             stack.getName());
                 } else {
                     stackUpdater.updateStackStatus(stack, status, result.getMessage());
                 }
             } else {
-                LOGGER.info(":::Auto sync::: The stack status would be had to update from {} to {}",
+                LOGGER.info(AUTO_SYNC_LOG_PREFIX + "The stack status would be had to update from {} to {}",
                         stack.getStackStatus().getDetailedStackStatus(), status);
             }
         }
@@ -204,9 +225,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         if (oldStatus != newStatus) {
             if (updateStatus) {
                 instanceMetaData.setInstanceStatus(newStatus);
-                LOGGER.info(":::Auto sync::: The instance status updated from {} to {}", oldStatus, newStatus);
+                LOGGER.info(AUTO_SYNC_LOG_PREFIX + "The instance status updated from {} to {}", oldStatus, newStatus);
             } else {
-                LOGGER.info(":::Auto sync::: The instance status would be had to update from {} to {}",
+                LOGGER.info(AUTO_SYNC_LOG_PREFIX + "The instance status would be had to update from {} to {}",
                         oldStatus, newStatus);
             }
         }

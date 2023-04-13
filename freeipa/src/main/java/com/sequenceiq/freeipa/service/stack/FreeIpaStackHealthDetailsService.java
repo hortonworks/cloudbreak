@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class FreeIpaStackHealthDetailsService {
         List<InstanceMetaData> instances = stack.getAllInstanceMetaDataList();
 
         HealthDetailsFreeIpaResponse response = new HealthDetailsFreeIpaResponse();
-        for (InstanceMetaData instance: instances) {
+        for (InstanceMetaData instance : instances) {
             NodeHealthDetails nodeResponse;
             if (shouldRunHealthCheck(instance)) {
                 nodeResponse = healthDetailsService.getInstanceHealthDetails(stack, instance);
@@ -91,8 +92,10 @@ public class FreeIpaStackHealthDetailsService {
 
     private void updateResponseWithInstanceIds(HealthDetailsFreeIpaResponse response, Stack stack) {
         Map<String, String> nameIdMap = getNameIdMap(stack);
-        for (NodeHealthDetails node: response.getNodeHealthDetails()) {
-            node.setInstanceId(nameIdMap.get(node.getName()));
+        for (NodeHealthDetails node : response.getNodeHealthDetails()) {
+            if (nameIdMap.containsKey(node.getName()) && StringUtils.isNotBlank(nameIdMap.get(node.getName()))) {
+                node.setInstanceId(nameIdMap.get(node.getName()));
+            }
         }
     }
 

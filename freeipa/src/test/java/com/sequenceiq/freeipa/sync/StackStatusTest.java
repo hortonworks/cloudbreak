@@ -1,9 +1,11 @@
 package com.sequenceiq.freeipa.sync;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -124,13 +126,13 @@ class StackStatusTest {
         InstanceGroup instanceGroup1 = new InstanceGroup();
         Set<InstanceMetaData> instances = new HashSet<>();
         if (instanceCount >= 1) {
-            instances.add(createInstance(INSTANCE_1));
+            instances.add(createInstance(INSTANCE_1, "10.0.0.1"));
         }
         if (instanceCount >= 2) {
-            instances.add(createInstance(INSTANCE_2));
+            instances.add(createInstance(INSTANCE_2, "10.0.0.2"));
         }
         if (instanceCount >= 3) {
-            instances.add(createInstance(INSTANCE_3));
+            instances.add(createInstance(INSTANCE_3, "10.0.0.3"));
         }
         instanceGroup1.setInstanceMetaData(instances);
         stack.setInstanceGroups(Set.of(instanceGroup1));
@@ -141,11 +143,12 @@ class StackStatusTest {
         when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(eq(stack), any())).thenReturn(rpcResponse);
     }
 
-    private InstanceMetaData createInstance(String instanceName) {
+    private InstanceMetaData createInstance(String instanceName, String ip) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(InstanceStatus.CREATED);
         instanceMetaData.setInstanceId(instanceName);
         instanceMetaData.setDiscoveryFQDN(instanceName);
+        instanceMetaData.setPrivateIp(ip);
         return instanceMetaData;
     }
 
@@ -171,6 +174,83 @@ class StackStatusTest {
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater, never()).updateStackStatus(eq(stack), any(), any());
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an available stack " +
+            "WHEN FreeIpa instance is available another is requested without IP and FQDN but with instance id" +
+            "THEN stack status should change to unhealthy and instance updated to failed"
+    )
+    void availableToUnhealthyForRequestedInstance() throws Exception {
+        setUp(1);
+        InstanceGroup instanceGroup1 = new InstanceGroup();
+        Set<InstanceMetaData> instances = new HashSet<>();
+        InstanceMetaData instance1 = createInstance(INSTANCE_1, "10.0.0.1");
+        instances.add(instance1);
+        InstanceMetaData instance2 = createInstance(INSTANCE_2, "10.0.0.2");
+        instance2.setInstanceStatus(InstanceStatus.REQUESTED);
+        instance2.setPrivateIp(null);
+        instance2.setDiscoveryFQDN(null);
+        instances.add(instance2);
+        instanceGroup1.setInstanceMetaData(instances);
+        stack.setInstanceGroups(Set.of(instanceGroup1));
+        notTerminatedInstances = instances;
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(notTerminatedInstances);
+        setUpFreeIpaAvailabilityResponse(true);
+        when(stackInstanceProviderChecker.checkStatus(stack, Set.of(instance1))).thenReturn(List.of(
+                createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
+        ));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackStatus stackStatus = new StackStatus();
+        stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
+        stack.setStackStatus(stackStatus);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UNHEALTHY), any());
+        assertEquals(InstanceStatus.FAILED, instance2.getInstanceStatus());
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an available stack " +
+            "WHEN FreeIpa instance is available another is requested without IP, FQDN and instance id" +
+            "THEN stack status should change to unhealthy and instance updated to failed"
+    )
+    void availableForRequestedInstanceWithoutId() throws Exception {
+        setUp(1);
+        InstanceGroup instanceGroup1 = new InstanceGroup();
+        Set<InstanceMetaData> instances = new HashSet<>();
+        InstanceMetaData instance1 = createInstance(INSTANCE_1, "10.0.0.1");
+        instances.add(instance1);
+        InstanceMetaData instance2 = createInstance(INSTANCE_2, "10.0.0.2");
+        instance2.setInstanceStatus(InstanceStatus.REQUESTED);
+        instance2.setPrivateIp(null);
+        instance2.setDiscoveryFQDN(null);
+        instance2.setInstanceId(null);
+        instances.add(instance2);
+        instanceGroup1.setInstanceMetaData(instances);
+        stack.setInstanceGroups(Set.of(instanceGroup1));
+        notTerminatedInstances = instances;
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(notTerminatedInstances);
+        setUpFreeIpaAvailabilityResponse(true);
+        when(stackInstanceProviderChecker.checkStatus(stack, Set.of(instance1))).thenReturn(List.of(
+                createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
+        ));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackStatus stackStatus = new StackStatus();
+        stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
+        stack.setStackStatus(stackStatus);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verifyNoInteractions(stackUpdater);
+        assertEquals(InstanceStatus.TERMINATED, instance2.getInstanceStatus());
     }
 
     @Test
