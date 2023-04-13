@@ -34,30 +34,32 @@ public class DiagnosticCloudStorageConverter {
     private GcsConfigGenerator gcsConfigGenerator;
 
     public CloudStorageDiagnosticsParameters loggingResponseToCloudStorageDiagnosticsParameters(LoggingResponse logging, String region) {
-        if (logging.getS3() != null) {
-            return loggingResponseToS3(logging, region);
-        } else if (logging.getAdlsGen2() != null) {
-            return loggingResponseToAdlsGen2(logging);
-        } else if (logging.getGcs() != null) {
-            return loggingResponseToGcs(logging);
-        } else {
-            return null;
+        if (logging != null) {
+            if (logging.getS3() != null) {
+                return loggingResponseToS3(logging, region);
+            } else if (logging.getAdlsGen2() != null) {
+                return loggingResponseToAdlsGen2(logging);
+            } else if (logging.getGcs() != null) {
+                return loggingResponseToGcs(logging);
+            }
         }
+        return null;
     }
 
     public CloudStorageDiagnosticsParameters loggingToCloudStorageDiagnosticsParameters(Logging logging, String region) {
-        if (logging.getS3() != null) {
-            return loggingToS3(logging, region);
-        } else if (logging.getAdlsGen2() != null) {
-            return loggingToAdlsGen2(logging);
-        } else if (logging.getGcs() != null) {
-            return loggingToGcs(logging);
-        } else {
-            return null;
+        if (logging != null) {
+            if (logging.getS3() != null) {
+                return loggingToS3(logging, region);
+            } else if (logging.getAdlsGen2() != null) {
+                return loggingToAdlsGen2(logging);
+            } else if (logging.getGcs() != null) {
+                return loggingToGcs(logging);
+            }
         }
+        return null;
     }
 
-    public AwsDiagnosticParameters loggingToS3(Logging logging, String region) {
+    private AwsDiagnosticParameters loggingToS3(Logging logging, String region) {
         AwsDiagnosticParameters.AwsDiagnosticParametersBuilder awsBuilder = AwsDiagnosticParameters.builder();
         S3Config s3Config = s3ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
         return awsBuilder.withS3Bucket(s3Config.getBucket())
@@ -66,7 +68,7 @@ public class DiagnosticCloudStorageConverter {
                 .build();
     }
 
-    public AzureDiagnosticParameters loggingToAdlsGen2(Logging logging) {
+    private AzureDiagnosticParameters loggingToAdlsGen2(Logging logging) {
         AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
         return AzureDiagnosticParameters.builder()
                 .withAdlsv2StorageAccount(adlsGen2Config.getAccount())
@@ -75,7 +77,7 @@ public class DiagnosticCloudStorageConverter {
                 .build();
     }
 
-    public GcsDiagnosticsParameters loggingToGcs(Logging logging) {
+    private GcsDiagnosticsParameters loggingToGcs(Logging logging) {
         GcsConfig gcsConfig = gcsConfigGenerator.generateStorageConfig(logging.getStorageLocation());
         return GcsDiagnosticsParameters.builder()
                 .withBucket(gcsConfig.getBucket())
@@ -83,7 +85,7 @@ public class DiagnosticCloudStorageConverter {
                 .build();
     }
 
-    public AwsDiagnosticParameters loggingResponseToS3(LoggingResponse logging, String region) {
+    private AwsDiagnosticParameters loggingResponseToS3(LoggingResponse logging, String region) {
         AwsDiagnosticParameters.AwsDiagnosticParametersBuilder awsBuilder = AwsDiagnosticParameters.builder();
         S3Config s3Config = s3ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
         return awsBuilder.withS3Bucket(s3Config.getBucket())
@@ -92,7 +94,7 @@ public class DiagnosticCloudStorageConverter {
                 .build();
     }
 
-    public AzureDiagnosticParameters loggingResponseToAdlsGen2(LoggingResponse logging) {
+    private AzureDiagnosticParameters loggingResponseToAdlsGen2(LoggingResponse logging) {
         AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
         return AzureDiagnosticParameters.builder()
                 .withAdlsv2StorageAccount(adlsGen2Config.getAccount())
@@ -101,7 +103,7 @@ public class DiagnosticCloudStorageConverter {
                 .build();
     }
 
-    public GcsDiagnosticsParameters loggingResponseToGcs(LoggingResponse logging) {
+    private GcsDiagnosticsParameters loggingResponseToGcs(LoggingResponse logging) {
         GcsConfig gcsConfig = gcsConfigGenerator.generateStorageConfig(logging.getStorageLocation());
         return GcsDiagnosticsParameters.builder()
                 .withBucket(gcsConfig.getBucket())
