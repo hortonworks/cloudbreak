@@ -30,13 +30,14 @@ public class HiveKnoxConfigProvider implements CmTemplateComponentConfigProvider
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
             serviceConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, filePerEvent));
         } else {
-            KerberosConfig kerberosConfigOpt = templatePreparationObject.getKerberosConfig().get();
-            String realm = kerberosConfigOpt.getRealm();
+            KerberosConfig kerberosConfig = templatePreparationObject.getKerberosConfig().get();
+            String realm = kerberosConfig.getRealm();
             String principal = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.principal", "HTTP/_HOST@" + realm);
             String keytab = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.keytab", "hive.keytab");
             serviceConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, principal + keytab + filePerEvent));
         }
-        if (CMRepositoryVersionUtil.isS3SslChannelModeSupported(cdhVersion, templatePreparationObject.getCloudPlatform())) {
+        if (CMRepositoryVersionUtil.isS3SslChannelModeSupported(cdhVersion, templatePreparationObject.getCloudPlatform(),
+                templatePreparationObject.getPlatformVariant())) {
             String sslChannelMode = ConfigUtils.getSafetyValveProperty("fs.s3a.ssl.channel.mode", "openssl");
             serviceConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, sslChannelMode));
         }

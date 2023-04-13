@@ -123,6 +123,8 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     private static final String TEST_CLOUD_PLATFORM = "AWS";
 
+    private static final String TEST_PLATFORM_VARIANT = "AWS_VARIANT";
+
     private static final String ADMIN_GROUP_NAME = "mockAdmins";
 
     private static final Map<String, String> MOCK_GROUP_MAPPINGS = Map.of(ADMIN_GROUP_NAME, "mockGroupRole");
@@ -290,6 +292,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getEnvironmentCrn()).thenReturn("env");
         when(stackMock.getCloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         when(stackMock.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
+        when(stackMock.getPlatformVariant()).thenReturn(TEST_PLATFORM_VARIANT);
         when(stackMock.getType()).thenReturn(StackType.DATALAKE);
         when(stackMock.getRegion()).thenReturn(REGION);
         when(stackMock.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
@@ -602,13 +605,14 @@ public class StackToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertCloudPlatformMatches() {
+    public void testConvertCloudPlatformAndVariantMatch() {
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
         when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getCloudPlatform()).isEqualTo(CloudPlatform.AWS);
+        assertThat(result.getPlatformVariant()).isEqualTo(TEST_PLATFORM_VARIANT);
     }
 
     @Test

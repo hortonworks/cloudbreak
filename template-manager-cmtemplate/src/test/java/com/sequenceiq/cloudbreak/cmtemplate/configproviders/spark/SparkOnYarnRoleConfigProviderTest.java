@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SparkOnYarnRoleConfigProviderTest {
 
     private final SparkOnYarnRoleConfigProvider underTest = new SparkOnYarnRoleConfigProvider();
@@ -46,7 +46,7 @@ public class SparkOnYarnRoleConfigProviderTest {
 
     @Test
     public void testGetSparkOnYarnRoleConfigsWhenNoStorageConfigured() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.GCP);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.GCP, null);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -57,7 +57,7 @@ public class SparkOnYarnRoleConfigProviderTest {
     }
 
     protected void validateClientConfig(String hmsExternalDirLocation, String clientConfigDirLocation) {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, hmsExternalDirLocation);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS", hmsExternalDirLocation);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -72,7 +72,21 @@ public class SparkOnYarnRoleConfigProviderTest {
 
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(CloudPlatform cloudPlatform, String... locations) {
+    @Test
+    public void testGetSparkOnYarnRoleConfigsForAwsGov() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS_NATIVE_GOV", "s3a://bucket/hive/warehouse/external");
+        String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> sparkOnYarnConfigs = roleConfigs.get("spark_on_yarn-GATEWAY-BASE");
+
+        assertEquals(1, sparkOnYarnConfigs.size());
+        assertEquals("spark-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
+        assertEquals("spark.yarn.access.hadoopFileSystems=s3a://bucket", sparkOnYarnConfigs.get(0).getValue());
+    }
+
+    private TemplatePreparationObject getTemplatePreparationObject(CloudPlatform cloudPlatform, String platformVariant, String... locations) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
@@ -90,10 +104,13 @@ public class SparkOnYarnRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         cmTemplateProcessor.setCdhVersion("7.2.16");
 
-        return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
+        return Builder.builder()
+                .withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withBlueprintView(new BlueprintView(null, null, null, cmTemplateProcessor))
-                .withCloudPlatform(cloudPlatform).build();
+                .withCloudPlatform(cloudPlatform)
+                .withPlatformVariant(platformVariant)
+                .build();
     }
 
     private String getBlueprintText(String path) {
