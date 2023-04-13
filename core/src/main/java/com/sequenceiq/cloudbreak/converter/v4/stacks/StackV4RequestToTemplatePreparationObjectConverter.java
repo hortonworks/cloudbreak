@@ -176,6 +176,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
 
             Builder builder = Builder.builder()
                     .withCloudPlatform(source.getCloudPlatform())
+                    .withPlatformVariant(source.getVariant())
                     .withRdsViews(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
                     .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed(version))

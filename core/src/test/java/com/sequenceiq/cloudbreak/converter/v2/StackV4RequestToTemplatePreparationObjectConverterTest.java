@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -21,11 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -89,7 +93,11 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class StackV4RequestToTemplatePreparationObjectConverterTest {
+
+    private static final String TEST_PLATFORM_VARIANT = "AWS_VARIANT";
 
     private static final String TEST_CREDENTIAL_NAME = "testCred";
 
@@ -219,13 +227,13 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Mock
     private RdsViewProvider rdsViewProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(source.getEnvironmentCrn()).thenReturn(TEST_ENVIRONMENT_CRN);
         when(source.getCluster()).thenReturn(cluster);
         when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
+        when(source.getVariant()).thenReturn(TEST_PLATFORM_VARIANT);
         when(source.getType()).thenReturn(StackType.DATALAKE);
         when(source.getPlacement()).thenReturn(placementSettings);
         when(source.getName()).thenReturn(TEST_CLUSTER_NAME);
@@ -317,9 +325,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenProvidingDataThenBlueprintWithExpectedDataShouldBeStored() {
-        String stackVersion = TEST_VERSION;
         String stackType = "HDP";
-        when(blueprintStackInfo.getVersion()).thenReturn(stackVersion);
+        when(blueprintStackInfo.getVersion()).thenReturn(TEST_VERSION);
         when(blueprintStackInfo.getType()).thenReturn(stackType);
         BlueprintView expected = mock(BlueprintView.class);
         when(blueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);
@@ -370,9 +377,11 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertCloudPlatformMatches() {
+    public void testConvertCloudPlatformAndVariantMatch() {
         TemplatePreparationObject result = underTest.convert(source);
+
         assertEquals(CloudPlatform.AWS, result.getCloudPlatform());
+        assertThat(result.getPlatformVariant()).isEqualTo(TEST_PLATFORM_VARIANT);
     }
 
     @Test
@@ -465,7 +474,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         for (int i = 0; i < GENERAL_TEST_QUANTITY; i++) {
             InstanceGroupV4Request instanceGroup = new InstanceGroupV4Request();
             InstanceTemplateV4Request template = new InstanceTemplateV4Request();
-            template.setAttachedVolumes(Collections.EMPTY_SET);
+            template.setAttachedVolumes(Collections.emptySet());
             instanceGroup.setName(String.format("group-%d", i));
             instanceGroup.setTemplate(template);
             instanceGroup.setType(InstanceGroupType.CORE);

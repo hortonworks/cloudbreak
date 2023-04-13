@@ -37,7 +37,7 @@ public class Spark3OnYarnRoleConfigProvider extends AbstractRoleConfigProvider {
                             SPARK3_YARN_ACCESS_DIR_PARAM + ConfigUtils.getBasePathFromStorageLocation(storageLocationView.get().getValue())));
                 }
                 if (CMRepositoryVersionUtil.isS3SslChannelModeSupported(source.getBlueprintView()
-                        .getProcessor().getVersion().orElse(""), source.getCloudPlatform())) {
+                        .getProcessor().getVersion().orElse(""), source.getCloudPlatform(), source.getPlatformVariant())) {
                     roleConfigs.add(config(SPARK3_CONF_CLIENT_SAFETY_VALVE, SPARK3_HADOOP_S3_SSL_CHANNEL_MODE));
                 }
                 return roleConfigs;
