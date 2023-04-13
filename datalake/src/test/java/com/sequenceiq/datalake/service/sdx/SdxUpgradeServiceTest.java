@@ -219,8 +219,8 @@ public class SdxUpgradeServiceTest {
     }
 
     @Test
-    public void testOsUpgradeShouldCallRollingOsUpgradeForScalableShape() {
-        sdxCluster.setClusterShape(SdxClusterShape.SCALABLE);
+    public void testOsUpgradeShouldCallRollingOsUpgradeForEnterpriseShape() {
+        sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         StackV4Response stackV4Response = getStackV4Response();
         FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
         OrderedOSUpgradeSetRequest orderedOSUpgradeSetRequest = new OrderedOSUpgradeSetRequest();

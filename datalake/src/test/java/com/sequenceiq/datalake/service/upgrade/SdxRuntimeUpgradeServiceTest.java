@@ -332,8 +332,8 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testNoErrorWithScalableShape() {
-        sdxCluster.setClusterShape(SdxClusterShape.SCALABLE);
+    public void testNoErrorWithEnterpriseShape() {
+        sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
