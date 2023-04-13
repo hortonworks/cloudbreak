@@ -1,8 +1,11 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotEmpty;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -46,7 +49,7 @@ public class RepairInstancesRequest {
     }
 
     public List<String> getInstanceIds() {
-        return instanceIds;
+        return instanceIds == null ? instanceIds : instanceIds.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
     }
 
     public void setInstanceIds(List<String> instanceIds) {
