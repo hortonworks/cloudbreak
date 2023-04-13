@@ -404,9 +404,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaCreationRetrievalTask.FREEIPA_FAILURE_COUNT);
-        if (pollWithTimeout.isSuccess()) {
-            eventSender().sendEvent(getNextStepObject(environment), environmentDtoEvent.getHeaders());
-        } else {
+        if (!pollWithTimeout.isSuccess()) {
             LOGGER.info("FreeIPA creation polling has stopped due to the unsuccessful state/result: {}", pollWithTimeout.getPollingResult());
             Optional.ofNullable(pollWithTimeout.getException()).ifPresentOrElse(e -> {
                 throw new FreeIpaOperationFailedException(e.getMessage());

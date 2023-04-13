@@ -48,12 +48,12 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
+import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
 import com.sequenceiq.environment.environment.v1.converter.TelemetryApiConverter;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
@@ -163,7 +163,7 @@ public class FreeIpaCreationHandlerTest {
                 = ArgumentCaptor.forClass(AttachChildEnvironmentRequest.class);
         verify(dnsV1Endpoint).addDnsZoneForSubnets(addDnsZoneForSubnetsRequestArgumentCaptor.capture());
         verify(freeIpaService).attachChildEnvironment(attachChildEnvironmentRequestArgumentCaptor.capture());
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
 
         assertEquals(PARENT_ENVIRONMENT_CRN, addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getEnvironmentCrn());
         assertEquals(Collections.singletonList(YARN_NETWORK_CIDR), addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getSubnets());
@@ -183,7 +183,7 @@ public class FreeIpaCreationHandlerTest {
 
         verify(dnsV1Endpoint, never()).addDnsZoneForSubnets(any(AddDnsZoneForSubnetsRequest.class));
         verify(freeIpaService, never()).attachChildEnvironment(any(AttachChildEnvironmentRequest.class));
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
     }
 
     @Test
@@ -197,7 +197,7 @@ public class FreeIpaCreationHandlerTest {
 
         verify(dnsV1Endpoint, never()).addDnsZoneForSubnets(any(AddDnsZoneForSubnetsRequest.class));
         verify(freeIpaService, never()).attachChildEnvironment(any(AttachChildEnvironmentRequest.class));
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
     }
 
     @ParameterizedTest
@@ -227,7 +227,7 @@ public class FreeIpaCreationHandlerTest {
 
         victim.accept(new Event<>(environmentDto));
 
-        verify(eventBus).notify(anyString(), any(Event.class));
+        verify(eventBus, times(1)).notify(anyString(), any(Event.class));
 
         verify(environmentService, times(1)).findEnvironmentById(anyLong());
         verify(environmentService, times(1)).findEnvironmentById(environmentDto.getId());
@@ -279,6 +279,7 @@ public class FreeIpaCreationHandlerTest {
 
         ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
         verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
         freeIpaRequest.getInstanceGroups().stream()
                 .map(InstanceGroupRequest::getInstanceTemplate)
@@ -318,6 +319,7 @@ public class FreeIpaCreationHandlerTest {
 
         ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
         verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
         assertEquals(IMAGE_CATALOG, freeIpaRequest.getImage().getCatalog());
         assertEquals(IMAGE_ID, freeIpaRequest.getImage().getId());
@@ -350,6 +352,7 @@ public class FreeIpaCreationHandlerTest {
 
         ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
         verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
         assertThat(freeIpaRequest.getInstanceGroups()).extracting(ig -> ig.getInstanceTemplate().getInstanceType()).containsOnly(INSTANCE_TYPE);
     }
@@ -381,6 +384,7 @@ public class FreeIpaCreationHandlerTest {
 
         ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
         verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
         assertThat(freeIpaRequest.getRecipes()).containsExactlyInAnyOrder("recipe1", "recipe2");
     }
@@ -413,6 +417,7 @@ public class FreeIpaCreationHandlerTest {
 
         ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
         verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
         assertNull(freeIpaRequest.getImage().getCatalog());
         assertEquals(IMAGE_ID, freeIpaRequest.getImage().getId());
@@ -445,6 +450,7 @@ public class FreeIpaCreationHandlerTest {
 
         ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
         verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
         assertNull(freeIpaRequest.getImage());
     }
