@@ -6,7 +6,9 @@ buildscript {
 
   repositories {
     maven { url = "$repoMirrorUrl" }
-    maven { url = "$repoUrl" }
+    maven {
+      url = "$repoUrl"
+      allowInsecureProtocol = true}
     mavenCentral()
     maven {
       url "https://plugins.gradle.org/m2/"
@@ -45,7 +47,10 @@ allprojects {
       }
     }
     maven { url = "$cdpRepoUrl" }
-    maven { url = "$repoUrl" }
+    maven {
+      url = "$repoUrl"
+      allowInsecureProtocol = true
+    }
   }
 
   apply plugin: 'idea'
@@ -238,7 +243,10 @@ subprojects {
   }
 
   repositories {
-    maven { url = "$repoUrl" }
+    maven {
+      url = "$repoUrl"
+      allowInsecureProtocol = true
+    }
     mavenCentral()
     maven { url = "$repoMirrorUrl" }
     maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
