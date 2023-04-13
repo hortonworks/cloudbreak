@@ -3,7 +3,7 @@ FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-11-runtim
 MAINTAINER info@cloudera.com
 
 # REPO URL to download jar
-ARG REPO_URL=https://repo.hortonworks.com/content/repositories/releases
+ARG REPO_URL=https://nexus-private.hortonworks.com/nexus/content/groups/public
 ARG VERSION=''
 
 ENV VERSION ${VERSION}
