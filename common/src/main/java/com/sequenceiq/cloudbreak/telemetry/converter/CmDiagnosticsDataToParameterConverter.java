@@ -35,20 +35,22 @@ public class CmDiagnosticsDataToParameterConverter {
             Telemetry telemetry, String clusterName, String region) {
         Logging logging = telemetry.getLogging();
         CmDiagnosticsParameters.CmDiagnosticsParametersBuilder builder = CmDiagnosticsParameters.builder();
-        if (logging.getS3() != null) {
-            S3Config s3Config = s3ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
-            builder.withS3Bucket(s3Config.getBucket());
-            builder.withS3Location(Paths.get(s3Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
-            builder.withS3Region(region);
-        } else if (logging.getAdlsGen2() != null) {
-            AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
-            builder.withAdlsv2StorageAccount(adlsGen2Config.getAccount());
-            builder.withAdlsv2StorageContainer(adlsGen2Config.getFileSystem());
-            builder.withAdlsv2StorageLocation(Paths.get(adlsGen2Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
-        } else if (logging.getGcs() != null) {
-            GcsConfig gcsConfig = gcsConfigGenerator.generateStorageConfig(logging.getStorageLocation());
-            builder.withGcsBucket(gcsConfig.getBucket());
-            builder.withGcsLocation(Paths.get(gcsConfig.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
+        if (logging != null) {
+            if (logging.getS3() != null) {
+                S3Config s3Config = s3ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
+                builder.withS3Bucket(s3Config.getBucket());
+                builder.withS3Location(Paths.get(s3Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
+                builder.withS3Region(region);
+            } else if (logging.getAdlsGen2() != null) {
+                AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
+                builder.withAdlsv2StorageAccount(adlsGen2Config.getAccount());
+                builder.withAdlsv2StorageContainer(adlsGen2Config.getFileSystem());
+                builder.withAdlsv2StorageLocation(Paths.get(adlsGen2Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
+            } else if (logging.getGcs() != null) {
+                GcsConfig gcsConfig = gcsConfigGenerator.generateStorageConfig(logging.getStorageLocation());
+                builder.withGcsBucket(gcsConfig.getBucket());
+                builder.withGcsLocation(Paths.get(gcsConfig.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
+            }
         }
         builder.withComments(request.getComments())
                 .withDestination(request.getDestination())
