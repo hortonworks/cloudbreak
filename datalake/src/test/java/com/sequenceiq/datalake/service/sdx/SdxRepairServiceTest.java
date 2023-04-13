@@ -140,7 +140,7 @@ public class SdxRepairServiceTest {
         when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
         assertThrows(BadRequestException.class, () -> underTest.triggerRepairByCrn(USER_CRN, CLUSTER_CRN, null));
 
-        cluster.setClusterShape(SdxClusterShape.SCALABLE);
+        cluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
         assertThrows(BadRequestException.class, () -> underTest.triggerRepairByCrn(USER_CRN, CLUSTER_CRN, null));
     }
@@ -155,7 +155,7 @@ public class SdxRepairServiceTest {
         when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
         underTest.triggerRepairByCrn(USER_CRN, CLUSTER_CRN, null);
 
-        cluster.setClusterShape(SdxClusterShape.SCALABLE);
+        cluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
         underTest.triggerRepairByCrn(USER_CRN, CLUSTER_CRN, null);
     }
@@ -170,7 +170,7 @@ public class SdxRepairServiceTest {
         when(sdxService.getByNameInAccount(USER_CRN, CLUSTER_NAME)).thenReturn(cluster);
         assertThrows(BadRequestException.class, () -> underTest.triggerRepairByName(USER_CRN, CLUSTER_NAME, null));
 
-        cluster.setClusterShape(SdxClusterShape.SCALABLE);
+        cluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         when(sdxService.getByNameInAccount(USER_CRN, CLUSTER_NAME)).thenReturn(cluster);
         assertThrows(BadRequestException.class, () -> underTest.triggerRepairByName(USER_CRN, CLUSTER_NAME, null));
     }
@@ -185,7 +185,7 @@ public class SdxRepairServiceTest {
         when(sdxService.getByNameInAccount(USER_CRN, CLUSTER_NAME)).thenReturn(cluster);
         underTest.triggerRepairByName(USER_CRN, CLUSTER_NAME, null);
 
-        cluster.setClusterShape(SdxClusterShape.SCALABLE);
+        cluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         when(sdxService.getByNameInAccount(USER_CRN, CLUSTER_NAME)).thenReturn(cluster);
         underTest.triggerRepairByName(USER_CRN, CLUSTER_NAME, null);
     }

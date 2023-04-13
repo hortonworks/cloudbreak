@@ -553,7 +553,7 @@ cb:
           7.2.17 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
           7.2.17 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
           7.2.17 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
-          7.2.17 - SDX Scalable: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-scalable;
+          7.2.17 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
           7.2.17 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
           7.2.17 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
           7.2.17 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;

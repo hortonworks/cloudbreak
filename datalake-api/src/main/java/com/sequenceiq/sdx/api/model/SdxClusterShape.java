@@ -18,6 +18,6 @@ public enum SdxClusterShape {
     }
 
     public boolean isHA() {
-        return MEDIUM_DUTY_HA.equals(this) || SCALABLE.equals(this);
+        return MEDIUM_DUTY_HA.equals(this) || ENTERPRISE.equals(this);
     }
 }
