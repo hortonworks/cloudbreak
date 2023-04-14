@@ -116,8 +116,8 @@ class StackToAutoscaleStackV4ResponseConverterTest {
     private Cluster getMockedCluster() {
         Cluster cluster = mock(Cluster.class);
         doReturn("testIP").when(cluster).getClusterManagerIp();
-        doReturn("user").when(cluster).getCloudbreakAmbariUserSecretPath();
-        doReturn("passwd").when(cluster).getCloudbreakAmbariPasswordSecretPath();
+        doReturn("user").when(cluster).getCloudbreakClusterManagerUserSecretPath();
+        doReturn("passwd").when(cluster).getCloudbreakClusterManagerPasswordSecretPath();
 
         return cluster;
     }

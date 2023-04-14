@@ -210,14 +210,14 @@ public class ClusterProxyService {
     private ClusterServiceConfig cmServiceConfig(Stack stack, ClientCertificate clientCertificate, String serviceName, String clusterManagerUrl) {
         Cluster cluster = stack.getCluster();
 
-        String cloudbreakUser = cluster.getCloudbreakAmbariUser();
-        String cloudbreakPasswordVaultPath = vaultPath(cluster.getCloudbreakAmbariPasswordSecretPath(), false);
+        String cloudbreakUser = cluster.getCloudbreakClusterManagerUser();
+        String cloudbreakPasswordVaultPath = vaultPath(cluster.getCloudbreakClusterManagerPasswordSecretPath(), false);
 
-        String dpUser = cluster.getDpAmbariUser();
-        String dpPasswordVaultPath = vaultPath(cluster.getDpAmbariPasswordSecretPath(), false);
+        String mgmtUser = cluster.getClusterManagerMgmtUser();
+        String mgmtPasswordVaultPath = vaultPath(cluster.getClusterManagerMgmtPasswordSecretPath(), false);
 
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
-                new ClusterServiceCredential(dpUser, dpPasswordVaultPath, true));
+                new ClusterServiceCredential(mgmtUser, mgmtPasswordVaultPath, true));
         return new ClusterServiceConfig(serviceName, singletonList(clusterManagerUrl), credentials, clientCertificate);
     }
 
@@ -302,6 +302,10 @@ public class ClusterProxyService {
 
     public Optional<ConfigRegistrationResponse> reRegisterCluster(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        return reregisterIfClusterProxyApplicable(stack);
+    }
+
+    public Optional<ConfigRegistrationResponse> reregisterIfClusterProxyApplicable(Stack stack) {
         if (clusterProxyEnablementService.isClusterProxyApplicable(stack.getCloudPlatform())) {
             LOGGER.info("Cluster Proxy integration is ENABLED, starting re-registering with Cluster Proxy service");
             ConfigRegistrationResponse registrationResult = reRegisterCluster(stack);

@@ -1146,8 +1146,8 @@ public class ClouderaManagerSetupServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         cluster.setName("name");
-        cluster.setCloudbreakAmbariPassword("pass");
-        cluster.setCloudbreakAmbariUser("user");
+        cluster.setCloudbreakClusterManagerPassword("pass");
+        cluster.setCloudbreakClusterManagerUser("user");
         return cluster;
     }
 

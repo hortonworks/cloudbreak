@@ -113,8 +113,8 @@ public class ClouderaManagerClusterCommissionServiceTest {
 
     private Cluster createCluster() {
         Cluster cluster = new Cluster();
-        cluster.setCloudbreakUser(USER);
-        cluster.setCloudbreakPassword(PASSWORD);
+        cluster.setCloudbreakClusterManagerUser(USER);
+        cluster.setCloudbreakClusterManagerPassword(PASSWORD);
         return cluster;
     }
 }

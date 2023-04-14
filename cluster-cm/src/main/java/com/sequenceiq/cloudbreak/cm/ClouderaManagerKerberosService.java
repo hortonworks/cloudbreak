@@ -78,8 +78,8 @@ public class ClouderaManagerKerberosService {
 
     public void deleteCredentials(HttpClientConfig clientConfig, StackDtoDelegate stack) {
         ClusterView cluster = stack.getCluster();
-        String user = cluster.getCloudbreakAmbariUser();
-        String password = cluster.getCloudbreakAmbariPassword();
+        String user = cluster.getCloudbreakClusterManagerUser();
+        String password = cluster.getCloudbreakClusterManagerPassword();
         try {
             ApiClient client = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
             clouderaManagerConfigService.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, client, stack.getName());

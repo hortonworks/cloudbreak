@@ -42,8 +42,8 @@ public class GeneralClusterConfigsView {
         uuid = generalClusterConfigs.getUuid();
         userName = generalClusterConfigs.getUserName();
         password = generalClusterConfigs.getPassword();
-        cmUserName = generalClusterConfigs.getCloudbreakAmbariUser();
-        cmPassword = generalClusterConfigs.getCloudbreakAmbariPassword();
+        cmUserName = generalClusterConfigs.getCloudbreakClusterManagerUser();
+        cmPassword = generalClusterConfigs.getCloudbreakClusterManagerPassword();
         clusterManagerIp = generalClusterConfigs.getClusterManagerIp();
         orchestratorType = generalClusterConfigs.getOrchestratorType();
         nodeCount = generalClusterConfigs.getNodeCount();

@@ -33,14 +33,6 @@ public interface ClusterSecurityService {
 
     void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig, VirtualGroupRequest virtualGroupRequest) throws CloudbreakException;
 
-    String getCloudbreakClusterUserName();
-
-    String getCloudbreakClusterPassword();
-
-    String getDataplaneClusterUserName();
-
-    String getDataplaneClusterPassword();
-
     String getClusterUserProvidedPassword();
 
     String getCertPath();

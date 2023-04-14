@@ -60,8 +60,8 @@ public class ClouderaManagerLdapService {
     public void setupLdap(StackView stack, ClusterView cluster, HttpClientConfig clientConfig, LdapView ldapView, VirtualGroupRequest virtualGroupRequest)
             throws ApiException, ClouderaManagerClientInitException {
         if (ldapView != null) {
-            String user = cluster.getCloudbreakAmbariUser();
-            String password = cluster.getCloudbreakAmbariPassword();
+            String user = cluster.getCloudbreakClusterManagerUser();
+            String password = cluster.getCloudbreakClusterManagerPassword();
             ApiClient client = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
 
             LOGGER.debug("Setup LDAP on ClouderaManager API for stack: {}", stack.getId());

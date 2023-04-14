@@ -106,8 +106,8 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
     @PostConstruct
     private void initApiClient() throws ClusterClientInitException {
         ClusterView cluster = stack.getCluster();
-        String user = cluster.getCloudbreakAmbariUser();
-        String password = cluster.getCloudbreakAmbariPassword();
+        String user = cluster.getCloudbreakClusterManagerUser();
+        String password = cluster.getCloudbreakClusterManagerPassword();
         try {
             apiClient = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, httpClientConfig);
         } catch (ClouderaManagerClientInitException e) {

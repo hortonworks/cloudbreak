@@ -262,10 +262,10 @@ public class ClouderaManagerSecurityServiceTest {
         ArgumentCaptor<ApiUser2List> argumentCaptor = ArgumentCaptor.forClass(ApiUser2List.class);
         verify(usersResourceApi, times(2)).createUsers2(argumentCaptor.capture());
         List<ApiUser2List> createdUsers = argumentCaptor.getAllValues();
-        assertEquals(stack.getCluster().getCloudbreakAmbariUser(), createdUsers.get(0).getItems().get(0).getName());
-        assertEquals(stack.getCluster().getCloudbreakAmbariPassword(), createdUsers.get(0).getItems().get(0).getPassword());
-        assertEquals(stack.getCluster().getDpAmbariUser(), createdUsers.get(1).getItems().get(0).getName());
-        assertEquals(stack.getCluster().getDpAmbariPassword(), createdUsers.get(1).getItems().get(0).getPassword());
+        assertEquals(stack.getCluster().getCloudbreakClusterManagerUser(), createdUsers.get(0).getItems().get(0).getName());
+        assertEquals(stack.getCluster().getCloudbreakClusterManagerPassword(), createdUsers.get(0).getItems().get(0).getPassword());
+        assertEquals(stack.getCluster().getClusterManagerMgmtUser(), createdUsers.get(1).getItems().get(0).getName());
+        assertEquals(stack.getCluster().getClusterManagerMgmtPassword(), createdUsers.get(1).getItems().get(0).getPassword());
 
         verify(usersResourceApi).updateUser2(oldUserList.getItems().get(0).getName(), oldUserList.getItems().get(0));
     }
@@ -288,8 +288,8 @@ public class ClouderaManagerSecurityServiceTest {
         when(clouderaManagerApiFactory.getToolsResourceApi(any())).thenReturn(toolsResourceApi);
         when(toolsResourceApi.echo("TEST")).thenReturn(new ApiEcho());
 
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(newApiClient);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakClusterManagerUser(),
+                stack.getCluster().getCloudbreakClusterManagerPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(newApiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(newApiClient)).thenReturn(newUsersResourceApi);
 
         underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_DISABLED);
@@ -297,16 +297,16 @@ public class ClouderaManagerSecurityServiceTest {
         verify(clouderaManagerApiClientProvider).getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31);
         verify(usersResourceApi).readUsers2("SUMMARY");
 
-        verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31);
+        verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakClusterManagerUser(),
+                stack.getCluster().getCloudbreakClusterManagerPassword(), ClouderaManagerApiClientProvider.API_V_31);
 
         ArgumentCaptor<ApiUser2List> createUserCaptor = ArgumentCaptor.forClass(ApiUser2List.class);
         verify(usersResourceApi, times(2)).createUsers2(createUserCaptor.capture());
         List<ApiUser2List> createdUsers = createUserCaptor.getAllValues();
-        assertEquals(stack.getCluster().getCloudbreakAmbariUser(), createdUsers.get(0).getItems().get(0).getName());
-        assertEquals(stack.getCluster().getCloudbreakAmbariPassword(), createdUsers.get(0).getItems().get(0).getPassword());
-        assertEquals(stack.getCluster().getDpAmbariUser(), createdUsers.get(1).getItems().get(0).getName());
-        assertEquals(stack.getCluster().getDpAmbariPassword(), createdUsers.get(1).getItems().get(0).getPassword());
+        assertEquals(stack.getCluster().getCloudbreakClusterManagerUser(), createdUsers.get(0).getItems().get(0).getName());
+        assertEquals(stack.getCluster().getCloudbreakClusterManagerPassword(), createdUsers.get(0).getItems().get(0).getPassword());
+        assertEquals(stack.getCluster().getClusterManagerMgmtUser(), createdUsers.get(1).getItems().get(0).getName());
+        assertEquals(stack.getCluster().getClusterManagerMgmtPassword(), createdUsers.get(1).getItems().get(0).getPassword());
 
         ArgumentCaptor<ApiUser2List> createNewUserCaptor = ArgumentCaptor.forClass(ApiUser2List.class);
         verify(newUsersResourceApi).createUsers2(createNewUserCaptor.capture());
@@ -333,8 +333,8 @@ public class ClouderaManagerSecurityServiceTest {
         setUpUsersAlreadyCreated(usersResourceApi, cluster);
         setUpApiClientCredentialAlreadyChanged();
 
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, cluster.getCloudbreakAmbariUser(),
-                cluster.getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(newApiClient);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, cluster.getCloudbreakClusterManagerUser(),
+                cluster.getCloudbreakClusterManagerPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(newApiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(newApiClient)).thenReturn(newUsersResourceApi);
 
         underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_DISABLED);
@@ -347,8 +347,8 @@ public class ClouderaManagerSecurityServiceTest {
 
     private void setUpClientCreation(Cluster cluster) throws ClouderaManagerClientInitException {
         when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
-        when(clouderaManagerApiClientProvider.getV40Client(GATEWAY_PORT, cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword(), clientConfig))
-                .thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getV40Client(GATEWAY_PORT, cluster.getCloudbreakClusterManagerUser(),
+                cluster.getCloudbreakClusterManagerPassword(), clientConfig)).thenReturn(apiClient);
     }
 
     private void setUpApiClientCredentialAlreadyChanged() throws ApiException {
@@ -361,18 +361,18 @@ public class ClouderaManagerSecurityServiceTest {
         ApiUser2List oldUserList = new ApiUser2List()
                 .addItemsItem(new ApiUser2().name(ADMIN))
                 .addItemsItem(new ApiUser2().name(cluster.getUserName()).password(cluster.getPassword()))
-                .addItemsItem(new ApiUser2().name(cluster.getCloudbreakAmbariUser()).password(cluster.getCloudbreakAmbariPassword()))
-                .addItemsItem(new ApiUser2().name(cluster.getDpAmbariUser()).password(cluster.getDpAmbariPassword()));
+                .addItemsItem(new ApiUser2().name(cluster.getCloudbreakClusterManagerUser()).password(cluster.getCloudbreakClusterManagerPassword()))
+                .addItemsItem(new ApiUser2().name(cluster.getClusterManagerMgmtUser()).password(cluster.getClusterManagerMgmtPassword()));
         when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(oldUserList);
     }
 
     private void verifyClientCreation(Cluster cluster) throws ClouderaManagerClientInitException {
         verify(clouderaManagerApiClientProvider).getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31);
         verify(clouderaManagerApiClientProvider)
-                .getV40Client(GATEWAY_PORT, cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword(), clientConfig);
+                .getV40Client(GATEWAY_PORT, cluster.getCloudbreakClusterManagerUser(), cluster.getCloudbreakClusterManagerPassword(), clientConfig);
 
-        verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, cluster.getCloudbreakAmbariUser(),
-                cluster.getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31);
+        verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, cluster.getCloudbreakClusterManagerUser(),
+                cluster.getCloudbreakClusterManagerPassword(), ClouderaManagerApiClientProvider.API_V_31);
     }
 
     private void verifyNoUsersCreated(UsersResourceApi usersResourceApi, UsersResourceApi newUsersResourceApi) throws ApiException {
@@ -398,24 +398,25 @@ public class ClouderaManagerSecurityServiceTest {
         when(clouderaManagerApiFactory.getToolsResourceApi(any())).thenReturn(toolsResourceApi);
         when(toolsResourceApi.echo("TEST")).thenReturn(new ApiEcho());
 
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(newApiClient);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakClusterManagerUser(),
+                stack.getCluster().getCloudbreakClusterManagerPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(newApiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(newApiClient)).thenReturn(newUsersResourceApi);
 
         underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_ENABLED);
 
         verify(clouderaManagerApiClientProvider).getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31);
         verify(usersResourceApi).readUsers2("SUMMARY");
-        verify(clouderaManagerApiClientProvider, times(2)).getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31);
+        verify(clouderaManagerApiClientProvider, times(2)).getClouderaManagerClient(clientConfig, GATEWAY_PORT,
+                stack.getCluster().getCloudbreakClusterManagerUser(), stack.getCluster().getCloudbreakClusterManagerPassword(),
+                ClouderaManagerApiClientProvider.API_V_31);
 
         ArgumentCaptor<ApiUser2List> createUserCaptor = ArgumentCaptor.forClass(ApiUser2List.class);
         verify(usersResourceApi, times(2)).createUsers2(createUserCaptor.capture());
         List<ApiUser2List> createdUsers = createUserCaptor.getAllValues();
-        assertEquals(stack.getCluster().getCloudbreakAmbariUser(), createdUsers.get(0).getItems().get(0).getName());
-        assertEquals(stack.getCluster().getCloudbreakAmbariPassword(), createdUsers.get(0).getItems().get(0).getPassword());
-        assertEquals(stack.getCluster().getDpAmbariUser(), createdUsers.get(1).getItems().get(0).getName());
-        assertEquals(stack.getCluster().getDpAmbariPassword(), createdUsers.get(1).getItems().get(0).getPassword());
+        assertEquals(stack.getCluster().getCloudbreakClusterManagerUser(), createdUsers.get(0).getItems().get(0).getName());
+        assertEquals(stack.getCluster().getCloudbreakClusterManagerPassword(), createdUsers.get(0).getItems().get(0).getPassword());
+        assertEquals(stack.getCluster().getClusterManagerMgmtUser(), createdUsers.get(1).getItems().get(0).getName());
+        assertEquals(stack.getCluster().getClusterManagerMgmtPassword(), createdUsers.get(1).getItems().get(0).getPassword());
 
         ArgumentCaptor<ApiUser2List> createNewUserCaptor = ArgumentCaptor.forClass(ApiUser2List.class);
         verify(newUsersResourceApi).createUsers2(createNewUserCaptor.capture());
@@ -431,8 +432,8 @@ public class ClouderaManagerSecurityServiceTest {
     public void testRotateHostCertificates(String testCaseName, String subAltName) throws Exception {
         // GIVEN
         initTestInput("user");
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakClusterManagerUser(),
+                stack.getCluster().getCloudbreakClusterManagerPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
         BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
         when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
@@ -497,8 +498,8 @@ public class ClouderaManagerSecurityServiceTest {
             throws Exception {
         // GIVEN
         initTestInput("user");
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakClusterManagerUser(),
+                stack.getCluster().getCloudbreakClusterManagerPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
         BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
         when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
@@ -518,8 +519,8 @@ public class ClouderaManagerSecurityServiceTest {
     public void testRotateHostCertificatesWhenPollingCancelled() throws Exception {
         // GIVEN
         initTestInput("user");
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakClusterManagerUser(),
+                stack.getCluster().getCloudbreakClusterManagerPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
         BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
         when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
@@ -540,8 +541,8 @@ public class ClouderaManagerSecurityServiceTest {
     public void testRotateHostCertificatesWhenPollingTimedOut() throws Exception {
         // GIVEN
         initTestInput("user");
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakClusterManagerUser(),
+                stack.getCluster().getCloudbreakClusterManagerPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
         BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
         when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
@@ -563,8 +564,8 @@ public class ClouderaManagerSecurityServiceTest {
     public void testRotateHostCertificatesWhenCMApiCallFailed() throws Exception {
         // GIVEN
         initTestInput("user");
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakClusterManagerUser(),
+                stack.getCluster().getCloudbreakClusterManagerPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
         BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
         when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
@@ -585,12 +586,12 @@ public class ClouderaManagerSecurityServiceTest {
 
     private Cluster createCluster(String userName) {
         Cluster cluster = new Cluster();
-        cluster.setCloudbreakUser("cloudbereak");
-        cluster.setCloudbreakPassword("cloudbereak123");
-        cluster.setDpUser("dp");
-        cluster.setDpPassword("dp123");
         cluster.setUserName(userName);
         cluster.setPassword("admin123");
+        cluster.setClusterManagerMgmtUser("dp");
+        cluster.setClusterManagerMgmtPassword("dp123");
+        cluster.setCloudbreakClusterManagerUser("cloudbreak");
+        cluster.setCloudbreakClusterManagerPassword("cloudbreak123");
         return cluster;
     }
 

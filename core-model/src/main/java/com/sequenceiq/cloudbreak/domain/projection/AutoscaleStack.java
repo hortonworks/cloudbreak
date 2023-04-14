@@ -21,9 +21,9 @@ public interface AutoscaleStack {
 
     Status getStackStatus();
 
-    Secret getCloudbreakAmbariUser();
+    Secret getCloudbreakClusterManagerUser();
 
-    Secret getCloudbreakAmbariPassword();
+    Secret getCloudbreakClusterManagerPassword();
 
     Status getClusterStatus();
 

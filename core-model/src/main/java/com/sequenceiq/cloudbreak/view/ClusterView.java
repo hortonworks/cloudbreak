@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.view;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -53,21 +52,13 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     Json getCustomContainerDefinition();
 
-    Secret getDpAmbariUserSecret();
+    Secret getCloudbreakClusterManagerUserSecret();
 
-    Secret getDpAmbariPasswordSecret();
+    Secret getCloudbreakClusterManagerPasswordSecret();
 
-    Secret getDpClusterManagerUserSecret();
+    Secret getClusterManagerMgmtUserSecret();
 
-    Secret getDpClusterManagerPasswordSecret();
-
-    Secret getCloudbreakAmbariUserSecret();
-
-    Secret getCloudbreakAmbariPasswordSecret();
-
-    Secret getCloudbreakClusterManagerUserSecretObject();
-
-    Secret getCloudbreakClusterManagerPasswordSecretObject();
+    Secret getClusterManagerMgmtPasswordSecret();
 
     Secret getCloudbreakClusterManagerMonitoringUserSecret();
 
@@ -102,6 +93,30 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     Boolean getDbSslEnabled();
 
+    default String getCloudbreakClusterManagerUser() {
+        return getIfNotNull(getCloudbreakClusterManagerUserSecret(), Secret::getRaw);
+    }
+
+    default String getCloudbreakClusterManagerPassword() {
+        return getIfNotNull(getCloudbreakClusterManagerPasswordSecret(), Secret::getRaw);
+    }
+
+    default String getCloudbreakClusterManagerUserSecretPath() {
+        return getIfNotNull(getCloudbreakClusterManagerUserSecret(), Secret::getSecret);
+    }
+
+    default String getCloudbreakClusterManagerPasswordSecretPath() {
+        return getIfNotNull(getCloudbreakClusterManagerPasswordSecret(), Secret::getSecret);
+    }
+
+    default String getClusterManagerMgmtUser() {
+        return getIfNotNull(getClusterManagerMgmtUserSecret(), Secret::getRaw);
+    }
+
+    default String getClusterManagerMgmtPassword() {
+        return getIfNotNull(getClusterManagerMgmtPasswordSecret(), Secret::getRaw);
+    }
+
     default String getPassword() {
         return getIfNotNull(getPasswordSecret(), Secret::getRaw);
     }
@@ -114,28 +129,12 @@ public interface ClusterView extends MdcContextInfoProvider {
         return getIfNotNull(getAttributesSecret(), Secret::getRaw);
     }
 
-    default String getDpAmbariUser() {
-        return getIfNotNull(getDpClusterManagerUserSecret(), Secret::getRaw);
+    default String getClusterManagerMgmtUserSecretPath() {
+        return getIfNotNull(getClusterManagerMgmtUserSecret(), Secret::getSecret);
     }
 
-    default String getDpAmbariPassword() {
-        return getIfNotNull(getDpClusterManagerPasswordSecret(), Secret::getRaw);
-    }
-
-    default String getDpClusterManagerUserSecretPath() {
-        return getIfNotNull(getDpClusterManagerUserSecret(), Secret::getSecret);
-    }
-
-    default String getDpClusterManagerPasswordSecretPath() {
-        return getIfNotNull(getDpClusterManagerPasswordSecret(), Secret::getSecret);
-    }
-
-    default String getCloudbreakAmbariUser() {
-        return getIfNotNull(getCloudbreakAmbariUserSecret(), Secret::getRaw);
-    }
-
-    default String getCloudbreakAmbariPassword() {
-        return getIfNotNull(getCloudbreakAmbariPasswordSecret(), Secret::getRaw);
+    default String getClusterManagerMgmtPasswordSecretPath() {
+        return getIfNotNull(getClusterManagerMgmtPasswordSecret(), Secret::getSecret);
     }
 
     default String getCloudbreakClusterManagerMonitoringUser() {
@@ -167,13 +166,11 @@ public interface ClusterView extends MdcContextInfoProvider {
     }
 
     default String getKeyStorePwd() {
-        String pwd = getIfNotNull(getKeyStorePwdSecret(), Secret::getRaw);
-        return isNotEmpty(pwd) ? pwd : getCloudbreakAmbariPassword();
+        return getIfNotNull(getKeyStorePwdSecret(), Secret::getRaw);
     }
 
     default String getTrustStorePwd() {
-        String pwd = getIfNotNull(getTrustStorePwdSecret(), Secret::getRaw);
-        return isNotEmpty(pwd) ? pwd : getCloudbreakAmbariPassword();
+        return getIfNotNull(getTrustStorePwdSecret(), Secret::getRaw);
     }
 
     @Override

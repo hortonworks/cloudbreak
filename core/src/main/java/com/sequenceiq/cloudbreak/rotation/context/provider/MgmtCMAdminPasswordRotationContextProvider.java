@@ -20,33 +20,23 @@ public class MgmtCMAdminPasswordRotationContextProvider extends CMUserRotationCo
     }
 
     @Override
-    protected Set<Secret> getDuplicatedUserSecrets(ClusterView cluster) {
-        return Set.of(cluster.getDpAmbariUserSecret());
-    }
-
-    @Override
-    protected Set<Secret> getDuplicatedPasswordSecrets(ClusterView cluster) {
-        return Set.of(cluster.getDpAmbariPasswordSecret());
-    }
-
-    @Override
     protected Secret getUserSecret(ClusterView cluster) {
-        return cluster.getDpClusterManagerUserSecret();
+        return cluster.getClusterManagerMgmtUserSecret();
     }
 
     @Override
     protected Secret getPasswordSecret(ClusterView cluster) {
-        return cluster.getDpClusterManagerPasswordSecret();
+        return cluster.getClusterManagerMgmtPasswordSecret();
     }
 
     @Override
     protected Secret getClientUserSecret(ClusterView cluster) {
-        return cluster.getCloudbreakClusterManagerUserSecretObject();
+        return cluster.getCloudbreakClusterManagerUserSecret();
     }
 
     @Override
     protected Secret getClientPasswordSecret(ClusterView cluster) {
-        return cluster.getCloudbreakClusterManagerPasswordSecretObject();
+        return cluster.getCloudbreakClusterManagerPasswordSecret();
     }
 
     @Override
