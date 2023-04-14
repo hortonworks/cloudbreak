@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -106,6 +108,54 @@ public class ClouderaManagerSecurityServiceTest {
         clientConfig = new HttpClientConfig("localhost");
         underTest = new ClouderaManagerSecurityService(stack, clientConfig);
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testUpdateExistingUserWhenUserNotExists() throws ClouderaManagerClientInitException, ApiException {
+        initTestInput(ADMIN);
+        UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
+        ApiUser2List userList = createApiUser2List();
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(any(), any(), anyString(), anyString(), anyString())).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
+        when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(userList);
+
+        Assert.assertThrows(CloudbreakException.class, () ->
+                underTest.updateExistingUser("clientUser", "clientPass", "notexists", "password"));
+    }
+
+    @Test
+    public void testUpdateExistingUser() throws ClouderaManagerClientInitException, ApiException, CloudbreakException {
+        initTestInput(ADMIN);
+        UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
+        ApiUser2List userList = createApiUser2List();
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(any(), any(), anyString(), anyString(), anyString())).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
+        when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(userList);
+        when(usersResourceApi.updateUser2(anyString(), any())).thenReturn(userList.getItems().get(0));
+
+        underTest.updateExistingUser("clientUser", "clientPass", ADMIN, "password");
+
+        ArgumentCaptor<ApiUser2> captor = ArgumentCaptor.forClass(ApiUser2.class);
+        verify(usersResourceApi, times(1)).updateUser2(eq(ADMIN), captor.capture());
+        assertEquals("password", captor.getValue().getPassword());
+    }
+
+    @Test
+    public void testUpdateExistingUserWhenAPICallFails() throws ClouderaManagerClientInitException, ApiException, CloudbreakException {
+        initTestInput(ADMIN);
+        UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
+        ApiUser2List userList = createApiUser2List();
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(any(), any(), anyString(), anyString(), anyString())).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
+        when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(userList);
+        when(usersResourceApi.updateUser2(anyString(), any())).thenThrow(new ApiException("failure"));
+
+        Assert.assertThrows("CM API call failed.", CloudbreakException.class, () ->
+                underTest.updateExistingUser("clientUser", "clientPass", ADMIN, "password"));
+
+        ArgumentCaptor<ApiUser2> captor = ArgumentCaptor.forClass(ApiUser2.class);
+        verify(usersResourceApi, times(1)).updateUser2(eq(ADMIN), captor.capture());
+        assertEquals("password", captor.getValue().getPassword());
     }
 
     @Test

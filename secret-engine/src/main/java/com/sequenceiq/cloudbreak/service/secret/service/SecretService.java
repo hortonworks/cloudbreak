@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.secret.service;
 
 import static java.lang.String.format;
 
-import java.security.InvalidKeyException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,20 +65,19 @@ public class SecretService {
      */
     public String put(String key, String value) throws Exception {
         long start = System.currentTimeMillis();
-        boolean exists = vaultRetryService.tryReadingVault(() -> persistentEngine.exists(key));
-        long duration = System.currentTimeMillis() - start;
-        metricService.gauge(MetricType.VAULT_READ, duration);
-        LOGGER.trace("Secret read took {} ms", duration);
-        if (exists) {
-            throw new InvalidKeyException(format("Key: %s already exists!", key));
-        }
-        start = System.currentTimeMillis();
         String secret = vaultRetryService.tryWritingVault(() -> persistentEngine.put(key, value));
-        duration = System.currentTimeMillis() - start;
+        long duration = System.currentTimeMillis() - start;
         metricService.gauge(MetricType.VAULT_WRITE, duration);
         LOGGER.trace("Secret write took {} ms", duration);
         metricService.incrementMetricCounter(() -> "secret.write." + convertSecretToMetric(secret));
         return secret;
+    }
+
+    public String update(String secret, String newValue) throws Exception {
+        String fullPath = convertToExternal(secret).getSecretPath();
+        String result = put(fullPath.split(persistentEngine.appPath(), 2)[1], newValue);
+        LOGGER.info("Secret on path {} have been updated.", fullPath);
+        return result;
     }
 
     /**

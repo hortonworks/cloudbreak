@@ -195,8 +195,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         createNewUser(newUsersResourceApi, oldAdminUser.getAuthRoles(), cluster.getUserName(), cluster.getPassword(), userList);
     }
 
-    private boolean checkUserExists(ApiUser2List userList, String username) {
-        return userList.getItems().stream().map(ApiUser2::getName).anyMatch(username::equals);
+    private Optional<ApiUser2> getUser(ApiUser2List userList, String username) {
+        return userList.getItems().stream().filter(user -> StringUtils.equals(user.getName(), username)).findFirst();
     }
 
     private ApiClient createApiClient() throws ClusterClientInitException, ClouderaManagerClientInitException, CloudbreakException {
@@ -324,9 +324,30 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         }
     }
 
+    @Override
+    public void updateExistingUser(String clientUser, String clientPassword, String user, String password) throws CloudbreakException {
+        ClusterView cluster = stack.getCluster();
+        try {
+            ApiClient client = getClient(stack.getGatewayPort(), clientUser, clientPassword, clientConfig);
+            UsersResourceApi usersResourceApi = clouderaManagerApiFactory.getUserResourceApi(client);
+            ApiUser2List userList = usersResourceApi.readUsers2("SUMMARY");
+            Optional<ApiUser2> updatableUser = getUser(userList, user);
+            if (updatableUser.isEmpty()) {
+                throw new CloudbreakException("CM user does not exists.");
+            }
+            ApiUser2 apiUser2 = updatableUser.get();
+            apiUser2.setPassword(password);
+            usersResourceApi.updateUser2(user, apiUser2);
+        } catch (ClouderaManagerClientInitException e) {
+            throw new CloudbreakException("CM client initalization failed.", e);
+        } catch (ApiException e) {
+            throw new CloudbreakException("CM API call failed.", e);
+        }
+    }
+
     private void createNewUser(UsersResourceApi usersResourceApi, List<ApiAuthRoleRef> authRoles, String userName, String password, ApiUser2List userList)
             throws ApiException {
-        if (checkUserExists(userList, userName)) {
+        if (getUser(userList, userName).isPresent()) {
             return;
         }
         ApiUser2List apiUser2List = new ApiUser2List();
