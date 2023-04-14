@@ -39,6 +39,11 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     }
 
     @Override
+    public String appPath() {
+        return appPath;
+    }
+
+    @Override
     public String put(String path, String value) {
         LOGGER.info("Storing secret to {}", path);
         VaultSecret secret = convertToVaultSecret(enginePath, appPath + path);

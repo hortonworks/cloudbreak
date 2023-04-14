@@ -5,6 +5,9 @@ import java.util.List;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 public interface SecretEngine {
+
+    String appPath();
+
     String put(String key, String value);
 
     boolean exists(String secret);
