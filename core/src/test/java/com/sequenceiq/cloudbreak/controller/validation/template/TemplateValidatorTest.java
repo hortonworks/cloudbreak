@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -108,8 +110,10 @@ public class TemplateValidatorTest {
                         1, 24);
         VmType c3VmType = VmType.vmTypeWithMeta("c3.2xlarge", vmMetaBuilder.create(), false);
         VmType i3VmType = VmType.vmTypeWithMeta("i3.2xlarge", vmMetaBuilder.withEphemeralConfig(1, 17592, 1, 24).create(), false);
+        VmType c5VmType = VmType.vmTypeWithMeta("c5.xlarge", vmMetaBuilder.create(), false);
+        VmType m5VmType = VmType.vmTypeWithMeta("m5.xlarge", vmMetaBuilder.create(), false);
         Map<String, Set<VmType>> machines = new HashMap<>();
-        machines.put(location, Set.of(c3VmType, i3VmType));
+        machines.put(location, Set.of(c3VmType, i3VmType, c5VmType, m5VmType));
         cloudVmTypes = new CloudVmTypes(machines, new HashMap<>());
         when(cloudParameterService.getVmTypesV2(
                 isNull(), anyString(), isNull(), any(CdpResourceType.class), any(HashMap.class))).thenReturn(cloudVmTypes);
@@ -131,7 +135,7 @@ public class TemplateValidatorTest {
     public void validateIDBrokerDataVolumeZeroCountZeroSize() {
         instanceGroup = createInstanceGroup(0, 0, true, false, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
         verifyIDBrokerVolume(instanceGroup);
     }
 
@@ -139,14 +143,14 @@ public class TemplateValidatorTest {
     public void validateIDBrokerDataVolumeCountOne() {
         instanceGroup = createInstanceGroup(1, 0, true, false, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
     }
 
     @Test
     public void validateComputeDataVolumeZeroCountZeroSize() {
         instanceGroup = createInstanceGroup(0, 0, false, true, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
         verifyIDBrokerVolume(instanceGroup);
     }
 
@@ -154,7 +158,7 @@ public class TemplateValidatorTest {
     public void validateComputeDataVolumeCountOne() {
         instanceGroup = createInstanceGroup(1, 0, false, true, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
     }
 
     @Test
@@ -162,28 +166,28 @@ public class TemplateValidatorTest {
         // volume count is larger than the max value of 24
         instanceGroup = createInstanceGroup(25, 1, true, false, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(1)).error(anyString());
+        Mockito.verify(builder, times(1)).error(anyString());
     }
 
     @Test
     public void validateIDBrokerDataVolumeDefaultSize() {
         instanceGroup = createInstanceGroup(1, 100, true, false, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
     }
 
     @Test
     public void validateIDBrokerDataVolumeInvalidSize() {
         instanceGroup = createInstanceGroup(1, 18000, true, false, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(1)).error(anyString());
+        Mockito.verify(builder, times(1)).error(anyString());
     }
 
     @Test
     public void validateIDBrokerMixedVolumeCountOne() {
         instanceGroup = createInstanceGroup(1, 0, true, false, true, "i3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
     }
 
     @Test
@@ -191,21 +195,21 @@ public class TemplateValidatorTest {
         // volume count is larger than the max value of 24
         instanceGroup = createInstanceGroup(25, 1, true, false, true, "i3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(2)).error(anyString());
+        Mockito.verify(builder, times(2)).error(anyString());
     }
 
     @Test
     public void validateIDBrokerMixedVolumeDefaultSize() {
         instanceGroup = createInstanceGroup(1, 100, true, false, true, "i3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
     }
 
     @Test
     public void validateIDBrokerMixedVolumeInvalidSize() {
         instanceGroup = createInstanceGroup(1, 18000, true, false, true, "i3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(2)).error(anyString());
+        Mockito.verify(builder, times(2)).error(anyString());
     }
 
     @Test
@@ -214,7 +218,7 @@ public class TemplateValidatorTest {
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(2)).error(anyString());
+        Mockito.verify(builder, times(2)).error(anyString());
     }
 
     @Test
@@ -223,7 +227,7 @@ public class TemplateValidatorTest {
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
     }
 
     @Test
@@ -233,7 +237,7 @@ public class TemplateValidatorTest {
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(1)).error(anyString());
+        Mockito.verify(builder, times(1)).error(anyString());
     }
 
     @Test
@@ -242,7 +246,7 @@ public class TemplateValidatorTest {
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
     }
 
     @Test
@@ -251,7 +255,7 @@ public class TemplateValidatorTest {
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(1)).error(anyString());
+        Mockito.verify(builder, times(1)).error(anyString());
     }
 
     @Test
@@ -264,7 +268,7 @@ public class TemplateValidatorTest {
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
     }
 
     @Test
@@ -277,7 +281,7 @@ public class TemplateValidatorTest {
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
     }
 
     @Test
@@ -290,7 +294,7 @@ public class TemplateValidatorTest {
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(1)).error(anyString());
+        Mockito.verify(builder, times(1)).error(anyString());
     }
 
     @Test
@@ -303,7 +307,7 @@ public class TemplateValidatorTest {
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        Mockito.verify(builder, times(0)).error(anyString());
     }
 
     @Test
@@ -316,7 +320,43 @@ public class TemplateValidatorTest {
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
-        Mockito.verify(builder, Mockito.times(1)).error(anyString());
+        Mockito.verify(builder, times(1)).error(anyString());
+    }
+
+    @Test
+    public void validateSDXComputeHostgroupsAttachedVolumes() {
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
+        Set<ServiceComponent> services = new HashSet<>();
+        ServiceComponent service = ServiceComponent.of("ATLAS", "ATLAS");
+        services.add(service);
+        when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
+
+        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "hmsHG");
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, never()).error(anyString());
+
+        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "atlasHG");
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, never()).error(anyString());
+
+        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("m5.xlarge", "razHG");
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, never()).error(anyString());
+
+        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("m5.xlarge", "storageHG");
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, times(2)).error(anyString());
+    }
+
+    private InstanceGroup createSDXInstanceGroupWithoutAttachedVolumes(String instanceType, String instanceGroupName) {
+        Template awsTemplate = TestUtil.awsTemplate(1L, instanceType);
+        VolumeTemplate standardVolumeTemplate = TestUtil.volumeTemplate(0, 0, "standard");
+        Set<VolumeTemplate> volumeTemplateSet = Sets.newHashSet(standardVolumeTemplate);
+        awsTemplate.setVolumeTemplates(volumeTemplateSet);
+        instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, awsTemplate);
+        instanceGroup.setGroupName(instanceGroupName);
+        return instanceGroup;
     }
 
     private InstanceGroup createInstanceGroup(int dataVolumeCount, int dataVolumeSize, boolean createIDBroker, boolean createCompute,

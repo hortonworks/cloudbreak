@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -58,6 +59,8 @@ public class TemplateValidatorAndUpdater {
     public static final String SERVICE_IMPALA = "IMPALA";
 
     public static final String ROLE_IMPALAD = "IMPALAD";
+
+    private static final Set<String> SDX_COMPUTE_INSTANCES = Set.of("hmshg", "razhg", "atlashg");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateValidatorAndUpdater.class);
 
@@ -236,7 +239,7 @@ public class TemplateValidatorAndUpdater {
                 if (value.getVolumeCount() > config.maximumNumber()) {
                     validationBuilder.error(String.format("Max allowed volume count for '%s': %s", vmType.value(), config.maximumNumber()));
                 } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)
-                        || isCoordinatorAndExecutorInstanceGroup(bluePrintText)) &&
+                        || isSdxComputeInstanceHostGroup(instanceGroup) || isCoordinatorAndExecutorInstanceGroup(bluePrintText)) &&
                         value.getVolumeCount() < config.minimumNumber()) {
                     validationBuilder.error(String.format("Min allowed volume count for '%s': %s", vmType.value(), config.minimumNumber()));
                 }
@@ -244,6 +247,10 @@ public class TemplateValidatorAndUpdater {
                 validationBuilder.error(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
             }
         }
+    }
+
+    private boolean isSdxComputeInstanceHostGroup(InstanceGroup instanceGroup) {
+        return SDX_COMPUTE_INSTANCES.contains(instanceGroup.getGroupName().toLowerCase(Locale.ROOT));
     }
 
     private void validateVolumeSize(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
@@ -256,7 +263,7 @@ public class TemplateValidatorAndUpdater {
                 if (value.getVolumeSize() > config.maximumSize()) {
                     validationBuilder.error(String.format("Max allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
                 } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)
-                        || isCoordinatorAndExecutorInstanceGroup(bluePrintText)) &&
+                        || isSdxComputeInstanceHostGroup(instanceGroup) || isCoordinatorAndExecutorInstanceGroup(bluePrintText)) &&
                         value.getVolumeSize() < config.minimumSize()) {
                     validationBuilder.error(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.minimumSize()));
                 }
