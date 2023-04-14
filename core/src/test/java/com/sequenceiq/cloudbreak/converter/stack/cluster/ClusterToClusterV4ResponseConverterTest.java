@@ -109,10 +109,10 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         when(stackDtoDelegate.getStack()).thenReturn(source.getStack());
         when(stackUtil.extractClusterManagerIp(any(StackDtoDelegate.class))).thenReturn("10.0.0.1");
         when(stackUtil.extractClusterManagerAddress(any(StackDtoDelegate.class))).thenReturn("some.fqdn");
-        TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariUser", source, "user", "secret/path");
-        TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
-        TestUtil.setSecretField(Cluster.class, "dpClusterManagerUser", source, "user", "secret/path");
-        TestUtil.setSecretField(Cluster.class, "dpClusterManagerPassword", source, "pass", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "cloudbreakClusterManagerUser", source, "user", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "cloudbreakClusterManagerPassword", source, "pass", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "clusterManagerMgmtUser", source, "user", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "clusterManagerMgmtPassword", source, "pass", "secret/path");
         when(stringToSecretResponseConverter.convert("secret/path")).thenReturn(new SecretResponse("kv", "pass"));
         when(blueprintToBlueprintV4ResponseConverter.convert(blueprint)).thenReturn(new BlueprintV4Response());
         when(serviceEndpointCollector.getManagerServerUrl(any(StackDtoDelegate.class), anyString())).thenReturn("http://server/");

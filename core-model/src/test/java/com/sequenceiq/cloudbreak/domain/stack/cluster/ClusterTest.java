@@ -21,10 +21,9 @@ public class ClusterTest {
 
     @ParameterizedTest
     @MethodSource("passwords")
-    public void testTrustStorePwds(String ambariPwd, String cmPwd, String truststorePwd, String expectedPwd) {
+    public void testTrustStorePwds(String cmPwd, String truststorePwd, String expectedPwd) {
         // GIVEN
         Cluster cluster = new Cluster();
-        cluster.setCloudbreakAmbariPassword(ambariPwd);
         cluster.setCloudbreakClusterManagerPassword(cmPwd);
         cluster.setTrustStorePwd(truststorePwd);
         // WHEN
@@ -45,10 +44,9 @@ public class ClusterTest {
 
     @ParameterizedTest
     @MethodSource("passwords")
-    public void testKeyStorePwds(String ambariPwd, String cmPwd, String truststorePwd, String expectedPwd) {
+    public void testKeyStorePwds(String cmPwd, String truststorePwd, String expectedPwd) {
         // GIVEN
         Cluster cluster = new Cluster();
-        cluster.setCloudbreakAmbariPassword(ambariPwd);
         cluster.setCloudbreakClusterManagerPassword(cmPwd);
         cluster.setKeyStorePwd(truststorePwd);
         // WHEN
@@ -59,12 +57,9 @@ public class ClusterTest {
 
     private static Stream<Arguments> passwords() {
         return Stream.of(
-                Arguments.arguments(null, null, null, null),
-                Arguments.arguments("ambari", null, null, "ambari"),
-                Arguments.arguments(null, "cm", null, "cm"),
-                Arguments.arguments("ambari", "cm", "pwd", "pwd"),
-                Arguments.arguments("ambari", "cm", null, "cm"),
-                Arguments.arguments(null, "cm", null, "cm"),
-                Arguments.arguments(null, null, "pwd", "pwd"));
+                Arguments.arguments(null, null, null),
+                Arguments.arguments("cm", null, "cm"),
+                Arguments.arguments("cm", "pwd", "pwd"),
+                Arguments.arguments(null, "pwd", "pwd"));
     }
 }

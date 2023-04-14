@@ -8,14 +8,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 public interface ClusterPreCreationApi {
 
-    String getCloudbreakClusterUserName(Cluster cluster);
-
-    String getCloudbreakClusterPassword(Cluster cluster);
-
-    String getDataplaneClusterUserName(Cluster cluster);
-
-    String getDataplaneClusterPassword(Cluster cluster);
-
     String getClusterUserProvidedPassword(Cluster cluster);
 
     String getCertPath();

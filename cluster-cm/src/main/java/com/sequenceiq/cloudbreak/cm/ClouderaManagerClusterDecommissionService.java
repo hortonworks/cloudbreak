@@ -64,8 +64,8 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
     @PostConstruct
     public void initApiClient() throws ClusterClientInitException {
         ClusterView cluster = stack.getCluster();
-        String user = cluster.getCloudbreakAmbariUser();
-        String password = cluster.getCloudbreakAmbariPassword();
+        String user = cluster.getCloudbreakClusterManagerUser();
+        String password = cluster.getCloudbreakClusterManagerPassword();
         try {
             v31Client = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {

@@ -92,8 +92,8 @@ public class ClouderaManagerKerberosServiceTest {
         stack.setGatewayPort(1);
         cluster = new Cluster();
         cluster.setName("clusterName");
-        cluster.setCloudbreakUser("user");
-        cluster.setCloudbreakPassword("password");
+        cluster.setCloudbreakClusterManagerUser("user");
+        cluster.setCloudbreakClusterManagerPassword("password");
         stack.setCluster(cluster);
         stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         clientConfig = new HttpClientConfig("1.2.3.4", null, null, null);

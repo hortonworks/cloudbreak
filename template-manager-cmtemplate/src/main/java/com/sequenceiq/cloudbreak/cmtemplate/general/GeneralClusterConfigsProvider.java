@@ -40,8 +40,8 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setUuid(stack.getUuid());
         generalClusterConfigs.setUserName(cluster.getUserName());
         generalClusterConfigs.setPassword(cluster.getPassword());
-        generalClusterConfigs.setCloudbreakAmbariUser(cluster.getCloudbreakAmbariUser());
-        generalClusterConfigs.setCloudbreakAmbariPassword(cluster.getCloudbreakAmbariPassword());
+        generalClusterConfigs.setCloudbreakClusterManagerUser(cluster.getCloudbreakClusterManagerUser());
+        generalClusterConfigs.setCloudbreakClusterManagerPassword(cluster.getCloudbreakClusterManagerPassword());
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount().intValue());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
         generalClusterConfigs.setVariant(cluster.getVariant());

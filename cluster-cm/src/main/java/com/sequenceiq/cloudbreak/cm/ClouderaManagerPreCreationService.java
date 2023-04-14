@@ -28,26 +28,6 @@ public class ClouderaManagerPreCreationService implements ClusterPreCreationApi 
     private CmMgmtVolumePathBuilder volumePathBuilder;
 
     @Override
-    public String getCloudbreakClusterUserName(Cluster cluster) {
-        return securityConfigProvider.getCloudbreakClusterUserName(cluster);
-    }
-
-    @Override
-    public String getCloudbreakClusterPassword(Cluster cluster) {
-        return securityConfigProvider.getCloudbreakClusterPassword(cluster);
-    }
-
-    @Override
-    public String getDataplaneClusterUserName(Cluster cluster) {
-        return securityConfigProvider.getDataplaneClusterUserName(cluster);
-    }
-
-    @Override
-    public String getDataplaneClusterPassword(Cluster cluster) {
-        return securityConfigProvider.getDataplaneClusterPassword(cluster);
-    }
-
-    @Override
     public String getClusterUserProvidedPassword(Cluster cluster) {
         return securityConfigProvider.getClusterUserProvidedPassword(cluster);
     }

@@ -22,9 +22,9 @@ public class GeneralClusterConfigs {
 
     private String password;
 
-    private String cloudbreakAmbariUser;
+    private String cloudbreakClusterManagerUser;
 
-    private String cloudbreakAmbariPassword;
+    private String cloudbreakClusterManagerPassword;
 
     private String clusterManagerIp;
 
@@ -82,12 +82,12 @@ public class GeneralClusterConfigs {
         this.uuid = uuid;
     }
 
-    public void setCloudbreakAmbariUser(String cloudbreakAmbariUser) {
-        this.cloudbreakAmbariUser = cloudbreakAmbariUser;
+    public void setCloudbreakClusterManagerUser(String cloudbreakClusterManagerUser) {
+        this.cloudbreakClusterManagerUser = cloudbreakClusterManagerUser;
     }
 
-    public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
-        this.cloudbreakAmbariPassword = cloudbreakAmbariPassword;
+    public void setCloudbreakClusterManagerPassword(String cloudbreakClusterManagerPassword) {
+        this.cloudbreakClusterManagerPassword = cloudbreakClusterManagerPassword;
     }
 
     public void setUserName(String userName) {
@@ -134,12 +134,12 @@ public class GeneralClusterConfigs {
         return password;
     }
 
-    public String getCloudbreakAmbariUser() {
-        return cloudbreakAmbariUser;
+    public String getCloudbreakClusterManagerUser() {
+        return cloudbreakClusterManagerUser;
     }
 
-    public String getCloudbreakAmbariPassword() {
-        return cloudbreakAmbariPassword;
+    public String getCloudbreakClusterManagerPassword() {
+        return cloudbreakClusterManagerPassword;
     }
 
     public String getClusterManagerIp() {

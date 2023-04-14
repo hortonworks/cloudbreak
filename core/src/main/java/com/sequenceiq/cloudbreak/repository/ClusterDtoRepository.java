@@ -29,14 +29,14 @@ public interface ClusterDtoRepository extends Repository<Cluster, Long> {
             "c.extendedBlueprintText as extendedBlueprintTextSecret, " +
             "c.attributes as attributesSecret, " +
             "c.customContainerDefinition as customContainerDefinition, " +
-            "c.dpClusterManagerUser as dpClusterManagerUserSecret," +
-            "c.dpClusterManagerPassword as dpClusterManagerPasswordSecret," +
+            "c.clusterManagerMgmtUser as clusterManagerMgmtUserSecret," +
+            "c.clusterManagerMgmtPassword as clusterManagerMgmtPasswordSecret," +
             "c.password as passwordSecret, " +
             "c.userName as userNameSecret, " +
             "c.executorType as executorType, " +
             "c.variant as variant, " +
-            "c.cloudbreakAmbariUser as cloudbreakAmbariUserSecret, " +
-            "c.cloudbreakAmbariPassword as cloudbreakAmbariPasswordSecret, " +
+            "c.cloudbreakClusterManagerUser as cloudbreakClusterManagerUserSecret, " +
+            "c.cloudbreakClusterManagerPassword as cloudbreakClusterManagerPasswordSecret, " +
             "c.cdpNodeStatusMonitorPassword as cdpNodeStatusMonitorPasswordSecret, " +
             "c.cdpNodeStatusMonitorUser as cdpNodeStatusMonitorUserSecret, " +
             "c.cloudbreakClusterManagerMonitoringPassword as cloudbreakClusterManagerMonitoringPasswordSecret, " +

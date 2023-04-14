@@ -8,7 +8,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -42,6 +46,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterV4Request> {
 
     private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
+    private List<String> deprecatedFieldNames;
 
     @InjectMocks
     private ClusterV4RequestToClusterConverter underTest;
@@ -75,6 +81,10 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     public void setUp() {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         lenient().when(entitlementService.dataLakeEfsEnabled(anyString())).thenReturn(true);
+        deprecatedFieldNames = Arrays.stream(Cluster.class.getDeclaredFields())
+                .filter(field -> field.isAnnotationPresent(Deprecated.class))
+                .map(Field::getName)
+                .collect(Collectors.toList());
     }
 
     @Test
@@ -89,10 +99,12 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // WHEN
         Cluster result = underTest.convert(request);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
-                "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
+        List<String> skippedFields = Lists.newArrayList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
+                "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "proxyConfigCrn",
                 "configStrategy", "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "customConfigurations",
-                "dbSslEnabled", "dbSslRootCertBundle"));
+                "dbSslEnabled", "dbSslRootCertBundle");
+        skippedFields.addAll(deprecatedFieldNames);
+        assertAllFieldsNotNull(result, skippedFields);
     }
 
     @Test
@@ -109,10 +121,12 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // WHEN
         Cluster result = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.convert(request));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
-                "clusterManagerIp", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
+        List<String> skippedFields = Lists.newArrayList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
+                "clusterManagerIp", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "proxyConfigCrn",
                 "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "configStrategy", "customConfigurations",
-                "dbSslEnabled", "dbSslRootCertBundle"));
+                "dbSslEnabled", "dbSslRootCertBundle");
+        skippedFields.addAll(deprecatedFieldNames);
+        assertAllFieldsNotNull(result, skippedFields);
     }
 
     @Test
@@ -125,10 +139,12 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         ClusterV4Request clusterRequest = getRequest("cluster-no-gateway.json");
         Cluster result = underTest.convert(clusterRequest);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
-                "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
+        List<String> skippedFields = Lists.newArrayList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason",
+                "clusterManagerIp", "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "proxyConfigCrn",
                 "configStrategy", "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn",
-                "customConfigurations", "dbSslEnabled", "dbSslRootCertBundle"));
+                "customConfigurations", "dbSslEnabled", "dbSslRootCertBundle");
+        skippedFields.addAll(deprecatedFieldNames);
+        assertAllFieldsNotNull(result, skippedFields);
         assertNull(result.getGateway());
     }
 
