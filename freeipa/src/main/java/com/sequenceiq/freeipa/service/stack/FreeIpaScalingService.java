@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNI
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -152,6 +153,7 @@ public class FreeIpaScalingService {
             response.setOperationId(operation.getOperationId());
             response.setOriginalAvailabilityType(originalAvailabilityInfo.getAvailabilityType());
             response.setTargetAvailabilityType(targetAvailabilityType);
+            response.setDownscaleCandidates(new HashSet<>(downscaleCandidates));
             response.setFlowIdentifier(flowIdentifier);
             return response;
         } catch (Exception e) {

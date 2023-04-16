@@ -168,6 +168,7 @@ class FreeIpaScalingServiceTest {
         Stack stack = mock(Stack.class);
         Set<InstanceMetaData> allInstances = createValidImSet();
         Operation operation = createOperation(true);
+        AvailabilityInfo originalAvailabilityInfo = new AvailabilityInfo(allInstances.size());
 
         when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
@@ -177,13 +178,16 @@ class FreeIpaScalingServiceTest {
         when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
         DownscaleRequest request = createDownscaleRequest();
         when(freeipaDownscaleNodeCalculatorService.calculateTargetAvailabilityType(request, allInstances.size())).thenCallRealMethod();
+        when(freeipaDownscaleNodeCalculatorService.calculateDownscaleCandidates(stack, originalAvailabilityInfo, request.getTargetAvailabilityType(), null))
+                .thenReturn(new ArrayList<>(List.of("im2")));
 
         DownscaleResponse response = underTest.downscale(ACCOUNT_ID, request);
 
-        assertEquals(response.getOperationId(), OPERATION_ID);
-        assertEquals(response.getOriginalAvailabilityType(), TWO_NODE_BASED);
-        assertEquals(response.getTargetAvailabilityType(), NON_HA);
-        assertEquals(response.getFlowIdentifier(), flowIdentifier);
+        assertEquals(OPERATION_ID, response.getOperationId());
+        assertEquals(TWO_NODE_BASED, response.getOriginalAvailabilityType());
+        assertEquals(NON_HA, response.getTargetAvailabilityType());
+        assertEquals(flowIdentifier, response.getFlowIdentifier());
+        assertEquals(Set.of("im2"), response.getDownscaleCandidates());
     }
 
     @Test
@@ -207,10 +211,11 @@ class FreeIpaScalingServiceTest {
 
         DownscaleResponse response = underTest.downscale(ACCOUNT_ID, request);
 
-        assertEquals(response.getOperationId(), OPERATION_ID);
-        assertEquals(response.getOriginalAvailabilityType(), TWO_NODE_BASED);
-        assertEquals(response.getTargetAvailabilityType(), NON_HA);
-        assertEquals(response.getFlowIdentifier(), flowIdentifier);
+        assertEquals(OPERATION_ID, response.getOperationId());
+        assertEquals(TWO_NODE_BASED, response.getOriginalAvailabilityType());
+        assertEquals(NON_HA, response.getTargetAvailabilityType());
+        assertEquals(flowIdentifier, response.getFlowIdentifier());
+        assertEquals(instanceIdsToDelete, response.getDownscaleCandidates());
 
         ArgumentCaptor<DownscaleEvent> downscaleEventArgumentCaptor = ArgumentCaptor.forClass(DownscaleEvent.class);
         verify(flowManager).notify(eq("DOWNSCALE_EVENT"), downscaleEventArgumentCaptor.capture());
