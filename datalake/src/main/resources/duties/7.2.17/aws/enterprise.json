@@ -1,6 +1,6 @@
 {
   "cluster": {
-    "blueprintName": "7.2.17 - SDX Scalable: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "blueprintName": "7.2.17 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas",
     "validateBlueprint": false
   },
   "customDomain": {

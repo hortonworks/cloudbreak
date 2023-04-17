@@ -4,7 +4,7 @@ public enum SdxClusterShape {
     CUSTOM(Boolean.FALSE),
     LIGHT_DUTY(Boolean.FALSE),
     MEDIUM_DUTY_HA(Boolean.TRUE),
-    SCALABLE(Boolean.TRUE),
+    ENTERPRISE(Boolean.TRUE),
     MICRO_DUTY(Boolean.FALSE);
 
     private final boolean multiAzEnabledByDefault;
@@ -18,6 +18,6 @@ public enum SdxClusterShape {
     }
 
     public boolean isHA() {
-        return MEDIUM_DUTY_HA.equals(this) || SCALABLE.equals(this);
+        return MEDIUM_DUTY_HA.equals(this) || ENTERPRISE.equals(this);
     }
 }

@@ -2,10 +2,10 @@
   "tags":{
     "shared_services_ready":true
   },
-  "description":"7.2.17 - Scalable SDX template with Atlas, HMS, Ranger and other services they are dependent on.  Services like HDFS, HBASE, RANGER, HMS have HA",
+  "description":"7.2.17 - Enterprise SDX template with Atlas, HMS, Ranger and other services they are dependent on.  Services like HDFS, HBASE, RANGER, HMS have HA",
   "blueprint":{
     "cdhVersion":"7.2.17",
-    "displayName":"scalable-datalake",
+    "displayName":"enterprise-datalake",
     "hostTemplates":[
       {
         "cardinality":2,
