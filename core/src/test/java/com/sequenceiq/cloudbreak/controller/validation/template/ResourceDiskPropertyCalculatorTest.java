@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.validation.template;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -55,6 +58,18 @@ public class ResourceDiskPropertyCalculatorTest {
         underTest.updateWithResourceDiskAttached(credential, template, vmType);
 
         Mockito.verify(templateService, Mockito.times(1)).savePure(any(Template.class));
+    }
+
+    @Test
+    public void testUpdateWithResourceDiskAttachedWhenAzureAndVmtypeNullShouldThrowBadRequest() {
+        when(credential.cloudPlatform()).thenReturn("AZURE");
+
+        BadRequestException thrown = assertThrows(BadRequestException.class, () ->
+                underTest.updateWithResourceDiskAttached(credential, template, null));
+
+        Assert.assertEquals(thrown.getMessage(),
+                "The virtual machine type for Azure probably not supported in you subscription. " +
+                        "Please make sure you select an instance which enabled for CDP.");
     }
 
     @Test
