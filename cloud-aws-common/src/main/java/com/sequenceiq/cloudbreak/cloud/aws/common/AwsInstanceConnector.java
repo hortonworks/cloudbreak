@@ -112,6 +112,7 @@ public class AwsInstanceConnector implements InstanceConnector {
                 InstanceStatus.TERMINATED,
                 InstanceStatus.TERMINATED_BY_PROVIDER,
                 InstanceStatus.DELETE_REQUESTED,
+                InstanceStatus.SHUTTING_DOWN,
                 AwsInstanceStatusMapper.getInstanceStatusByAwsStatus("Running"));
         return setCloudVmInstanceStatuses(ac, vms, "Running",
                 (ec2Client, instances) -> ec2Client.startInstances(StartInstancesRequest.builder().instanceIds(instances).build()),
@@ -146,6 +147,7 @@ public class AwsInstanceConnector implements InstanceConnector {
                 InstanceStatus.TERMINATED,
                 InstanceStatus.TERMINATED_BY_PROVIDER,
                 InstanceStatus.DELETE_REQUESTED,
+                InstanceStatus.SHUTTING_DOWN,
                 AwsInstanceStatusMapper.getInstanceStatusByAwsStatus("Stopped"));
         return setCloudVmInstanceStatuses(ac, vms, "Stopped",
                 (ec2Client, instances) -> ec2Client.stopInstances(StopInstancesRequest.builder().instanceIds(instances).build()),
@@ -158,7 +160,7 @@ public class AwsInstanceConnector implements InstanceConnector {
             Long timeboundInMs) {
         AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
         try {
-            Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, status);
+            Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, status, completedStatuses);
             if (!instances.isEmpty()) {
                 consumer.accept(amazonEC2Client, instances);
             }
@@ -337,13 +339,17 @@ public class AwsInstanceConnector implements InstanceConnector {
         return cloudVmInstanceStatuses;
     }
 
-    private Collection<String> instanceIdsWhichAreNotInCorrectState(List<CloudInstance> vms, AmazonEc2Client amazonEC2Client, String state) {
+    private Collection<String> instanceIdsWhichAreNotInCorrectState(List<CloudInstance> vms, AmazonEc2Client amazonEC2Client, String state,
+            Set<InstanceStatus> completedStatuses) {
         Set<String> instances = vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toCollection(HashSet::new));
         DescribeInstancesResponse describeInstances = amazonEC2Client.describeInstances(
                 DescribeInstancesRequest.builder().instanceIds(instances).build());
         for (Reservation reservation : describeInstances.reservations()) {
             for (Instance instance : reservation.instances()) {
-                if (state.equalsIgnoreCase(instance.state().name().toString())) {
+                if (state.equalsIgnoreCase(instance.state().name().toString().toLowerCase())
+                        || completedStatuses.contains(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(instance.state().name().toString()))) {
+                    LOGGER.debug(" Removing AWS instance [{}] with {} state from list of stop/start instances.",
+                            instance.instanceId(), instance.state().name());
                     instances.remove(instance.instanceId());
                 }
             }
