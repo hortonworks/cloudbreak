@@ -12,6 +12,7 @@ public enum InstanceStatus {
     CREATE_REQUESTED(StatusGroup.PERMANENT),
     DELETE_REQUESTED(StatusGroup.PERMANENT),
     IN_PROGRESS(StatusGroup.TRANSIENT),
+    SHUTTING_DOWN(StatusGroup.TRANSIENT),
     ZOMBIE(StatusGroup.PERMANENT);
 
     private final StatusGroup statusGroup;

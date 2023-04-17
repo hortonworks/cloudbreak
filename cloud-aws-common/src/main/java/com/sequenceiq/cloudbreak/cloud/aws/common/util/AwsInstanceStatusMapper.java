@@ -20,6 +20,8 @@ public class AwsInstanceStatusMapper {
                 return InstanceStatus.STOPPED;
             case "running":
                 return InstanceStatus.STARTED;
+            case "shutting-down" :
+                return InstanceStatus.SHUTTING_DOWN;
             case "terminated":
                 return stateReason != null && "Server.SpotInstanceTermination".equals(stateReason.code())
                         ? InstanceStatus.TERMINATED_BY_PROVIDER
