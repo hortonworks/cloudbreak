@@ -197,6 +197,17 @@
         ]
       },
       {
+        "refName": "schemaregistry",
+        "serviceType": "SCHEMAREGISTRY",
+        "roleConfigGroups": [
+          {
+            "refName": "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
+            "roleType": "SCHEMA_REGISTRY_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "nifiregistry",
         "serviceType": "NIFIREGISTRY",
         "serviceConfigs": [
@@ -339,7 +350,8 @@
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
-          "stub_dfs-STORAGEOPERATIONS-BASE"
+          "stub_dfs-STORAGEOPERATIONS-BASE",
+          "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE"
         ]
       }
     ]
