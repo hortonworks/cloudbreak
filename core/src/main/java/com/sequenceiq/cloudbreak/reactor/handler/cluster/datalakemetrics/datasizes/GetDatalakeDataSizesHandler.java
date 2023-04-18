@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -84,12 +82,12 @@ public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<Ge
         StackDto stackDto = stackDtoService.getById(stackId);
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
         String gatewayHost = primaryGatewayConfig.getHostname();
-        Set<String> serviceHosts = getServiceHosts(stackDto, gatewayHost);
+        Set<String> serviceHost = getServiceHost(stackDto, gatewayHost);
 
         try {
             String databaseSizes = runSaltStateAndGetResult(primaryGatewayConfig, GET_DATABASE_SIZES_STATE, Set.of(gatewayHost), stackId);
             String dbBackupAvailableSpace = runSaltStateAndGetResult(primaryGatewayConfig, GET_NODE_FREE_SPACE_STATE, Set.of(gatewayHost), stackId);
-            String solrHBaseSizes = runSaltStateAndGetResult(primaryGatewayConfig, GET_SOLR_HBASE_DATA_SIZES_STATE, serviceHosts, stackId);
+            String solrHBaseSizes = runSaltStateAndGetResult(primaryGatewayConfig, GET_SOLR_HBASE_DATA_SIZES_STATE, serviceHost, stackId);
 
             String result = '{' + databaseSizes + ',' + solrHBaseSizes + ',' + dbBackupAvailableSpace + '}';
 
@@ -115,23 +113,17 @@ public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<Ge
         return result;
     }
 
-    private String getTargetHostName(StackDto stackDto, GatewayConfig primaryGatewayConfig) {
-        return getCoreHosts(stackDto)
-                .findFirst()
-                .orElse(primaryGatewayConfig.getHostname());
+    private Set<String> getServiceHost(StackDto stackDto, String primaryGatewayHost) {
+        Optional<String> coreHost = getCoreHost(stackDto);
+        return Set.of(coreHost.orElse(primaryGatewayHost));
     }
 
-    private Set<String> getServiceHosts(StackDto stackDto, String primaryGatewayHost) {
-        Set<String> coreHosts = getCoreHosts(stackDto).collect(Collectors.toSet());
-
-        return coreHosts.isEmpty() ? Set.of(primaryGatewayHost) : coreHosts;
-    }
-
-    private static Stream<String> getCoreHosts(StackDto stackDto) {
+    private static Optional<String> getCoreHost(StackDto stackDto) {
         return stackDto.getAllAvailableInstances().stream()
                 .filter(im -> CORE_INSTANCE_GROUP_NAME.equals(im.getInstanceGroupName()))
                 .filter(im -> InstanceMetadataType.CORE.equals(im.getInstanceMetadataType()))
-                .map(InstanceMetadataView::getDiscoveryFQDN);
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .findFirst();
     }
 
     private String saltResultToDataSizesResult(List<Map<String, JsonNode>> saltResponse, String state) {
