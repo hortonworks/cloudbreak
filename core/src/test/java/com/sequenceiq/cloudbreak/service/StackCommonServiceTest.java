@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
@@ -46,13 +49,16 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -72,6 +78,8 @@ import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class StackCommonServiceTest {
+
+    private static final String AWS = CloudPlatform.AWS.name();
 
     private static final long WORKSPACE_ID = 1L;
 
@@ -109,6 +117,9 @@ class StackCommonServiceTest {
     private CloudbreakEventService eventService;
 
     @Mock
+    private VerticalScalingValidatorService verticalScalingValidatorService;
+
+    @Mock
     private MultiAzValidator multiAzValidator;
 
     @Mock
@@ -140,6 +151,9 @@ class StackCommonServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private ClusterCommonService clusterCommonService;
 
     @InjectMocks
     private StackCommonService underTest;
@@ -467,4 +481,53 @@ class StackCommonServiceTest {
         verify(stackOperationService).getSaltPasswordStatus(STACK_CRN, ACCOUNT_ID);
     }
 
+    @Test
+    public void testPutDeleteVolumesInWorkspaceSuccess() {
+        Stack stack = mock(Stack.class);
+        StackView stackView = mock(StackView.class);
+        when(stackView.getId()).thenReturn(STACK_ID);
+        when(stackView.getResourceCrn()).thenReturn("CRN");
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getStackViewByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stackView);
+        Template template = new Template();
+        template.setInstanceStorageCount(1);
+
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(1L);
+        stackDeleteVolumesRequest.setGroup("COMPUTE");
+
+        underTest.putDeleteVolumesInWorkspace(STACK_NAME, ACCOUNT_ID, stackDeleteVolumesRequest);
+
+        verify(clusterCommonService).putDeleteVolumes("CRN", stackDeleteVolumesRequest);
+    }
+
+    @Test
+    public void testPutDeleteVolumesInWorkspaceFailure() {
+        Stack stack = mock(Stack.class);
+        StackView stackView = mock(StackView.class);
+        when(stackView.getId()).thenReturn(STACK_ID);
+        when(stackView.getResourceCrn()).thenReturn("CRN");
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getStackViewByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stackView);
+        Template template = new Template();
+        template.setInstanceStorageCount(1);
+        doThrow(new BadRequestException("Deleting volumes is not supported on MOCK cloudplatform")).when(verticalScalingValidatorService)
+                .validateProviderForDelete(any(), anyString(), eq(false));
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(1L);
+        stackDeleteVolumesRequest.setGroup("COMPUTE");
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.putDeleteVolumesInWorkspace(STACK_NAME,
+                ACCOUNT_ID, stackDeleteVolumesRequest));
+
+        assertEquals("Deleting volumes is not supported on MOCK cloudplatform", exception.getMessage());
+    }
+
+    private InstanceGroup instanceGroup(String name, String instanceType, Template template) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName(name);
+        template.setInstanceType(instanceType);
+        instanceGroup.setTemplate(template);
+        return instanceGroup;
+    }
 }

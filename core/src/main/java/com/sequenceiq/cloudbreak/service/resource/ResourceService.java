@@ -112,4 +112,8 @@ public class ResourceService {
     public void deleteByResourceReferenceAndType(String reference, ResourceType type) {
         repository.deleteByResourceReferenceAndType(reference, type);
     }
+
+    public void deleteAll(List<Resource> resources) {
+        repository.deleteAll(resources);
+    }
 }

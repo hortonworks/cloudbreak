@@ -14,6 +14,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXChangeImageCatalogA
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteDisksAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInternalGetAction;
@@ -145,4 +146,9 @@ public class DistroXTestClient {
     public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes) {
         return new DistroXRotateSecretAction(secretTypes);
     }
+
+    public Action<DistroXTestDto, CloudbreakClient> deleteDisks() {
+        return new DistroXDeleteDisksAction();
+    }
+
 }

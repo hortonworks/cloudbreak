@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
@@ -145,6 +146,11 @@ public class GcpConnector implements CloudConnector {
     @Override
     public ObjectStorageConnector objectStorage() {
         return gcpObjectStorageConnector;
+    }
+
+    @Override
+    public ResourceVolumeConnector volumeConnector() {
+        throw new UnsupportedOperationException("This connector is not implemented for GCP!");
     }
 
     @Override

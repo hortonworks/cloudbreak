@@ -28,6 +28,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -276,6 +277,17 @@ public class StackOperationsTest {
 
     private StackV4Response stackResponse() {
         return new StackV4Response();
+    }
+
+    @Test
+    void testPutDeleteVolumes() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(1L);
+        stackDeleteVolumesRequest.setGroup("COMPUTE");
+        underTest.putDeleteVolumes(nameOrCrn, ACCOUNT_ID, stackDeleteVolumesRequest);
+
+        verify(stackCommonService).putDeleteVolumesInWorkspace(nameOrCrn, ACCOUNT_ID, stackDeleteVolumesRequest);
     }
 
 }

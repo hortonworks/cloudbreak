@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -300,6 +302,21 @@ public class ClusterOperationServiceTest {
         verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT.getMessage()), any());
         verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, "AVAILABLE", CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT, List.of("null"));
         assertEquals(InstanceStatus.SERVICES_HEALTHY, instanceWithoutFqdn.getInstanceStatus());
+    }
+
+    @Test
+    public void shouldTriggerDeleteVolumes() {
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(1L);
+        stackDeleteVolumesRequest.setGroup("COMPUTE");
+
+        underTest.deleteVolumes(STACK_ID, stackDeleteVolumesRequest);
+
+        ArgumentCaptor<StackDeleteVolumesRequest> captor = ArgumentCaptor.forClass(StackDeleteVolumesRequest.class);
+        verify(flowManager).triggerDeleteVolumes(eq(STACK_ID), captor.capture());
+        StackDeleteVolumesRequest request = captor.getValue();
+        assertEquals("COMPUTE", request.getGroup());
+        assertEquals(STACK_ID, request.getStackId());
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {

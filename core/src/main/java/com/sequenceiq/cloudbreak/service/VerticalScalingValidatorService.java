@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -42,9 +44,18 @@ public class VerticalScalingValidatorService {
     @Inject
     private CloudParameterCache cloudParameterCache;
 
-    public void validateProvider(Stack stack) {
+    public void validateProviderForDelete(Stack stack, String message, boolean checkStackStopped) {
+        if (!cloudParameterCache.isDeleteVolumesSupported(stack.getCloudPlatform())) {
+            throw new BadRequestException(String.format("%s is not supported on %s cloudplatform", message, stack.getCloudPlatform()));
+        }
+        if (!stack.isStopped() && checkStackStopped) {
+            throw new BadRequestException(String.format("You must stop %s to be able to vertically scale it.", stack.getName()));
+        }
+    }
+
+    public void validateProvider(Stack stack, String message, StackVerticalScaleV4Request verticalScaleV4Request) {
         if (!cloudParameterCache.isVerticalScalingSupported(stack.getCloudPlatform())) {
-            throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
+            throw new BadRequestException(String.format("%s is not supported on %s cloudplatform", message, stack.getCloudPlatform()));
         }
         if (!stack.isStopped()) {
             throw new BadRequestException(String.format("You must stop %s to be able to vertically scale it.", stack.getName()));
@@ -112,5 +123,25 @@ public class VerticalScalingValidatorService {
 
     private String getZone(String region, String availabilityZone) {
         return Strings.isNullOrEmpty(availabilityZone) ? region : availabilityZone;
+    }
+
+    public void validateInstanceTypeForDeletingDisks(Stack stack, StackDeleteVolumesRequest deleteRequest) {
+        Optional<InstanceGroup> instanceGroupOptional = stack.getInstanceGroups()
+                .stream()
+                .filter(e -> e.getGroupName().equals(deleteRequest.getGroup()))
+                .findFirst();
+        if (instanceGroupOptional.isPresent()) {
+            Template template = instanceGroupOptional.get().getTemplate();
+            if (null == template.getInstanceStorageCount() || template.getInstanceStorageCount() == 0) {
+                throw new BadRequestException("Deleting disks is only supported on instances with instance storage");
+            }
+        } else {
+            throw new BadRequestException(String.format("Define a group which exists in Cluster. It can be [%s].",
+                    stack.getInstanceGroups()
+                            .stream()
+                            .map(InstanceGroup::getGroupName)
+                            .collect(Collectors.joining(", ")))
+            );
+        }
     }
 }

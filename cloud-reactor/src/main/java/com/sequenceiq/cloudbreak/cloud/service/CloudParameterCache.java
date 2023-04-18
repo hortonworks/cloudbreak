@@ -78,4 +78,13 @@ public class CloudParameterCache {
         }
         return platformParameters.specialParameters().getSpecialParameters();
     }
+
+    public boolean isDeleteVolumesSupported(String platform) {
+        return isDeleteVolumesSupported(Platform.platform(platform));
+    }
+
+    public boolean isDeleteVolumesSupported(Platform platform) {
+        Boolean result = getSpecialParameters(platform).get(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED);
+        return result == null || result;
+    }
 }

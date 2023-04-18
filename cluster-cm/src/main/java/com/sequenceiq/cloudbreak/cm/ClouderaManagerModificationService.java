@@ -63,6 +63,7 @@ import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.HTTPMethod;
 import com.google.common.annotations.VisibleForTesting;
@@ -1145,4 +1146,22 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         clouderaManagerRoleRefreshService.refreshClusterRoles(v31Client, stack);
         restartServices(false);
     }
+
+    @Override
+    public void stopClouderaManagerService(String serviceType) throws Exception {
+        configService.stopClouderaManagerService(v31Client, stack, serviceType);
+    }
+
+    @Override
+    public void startClouderaManagerService(String serviceType) throws Exception {
+        configService.startClouderaManagerService(v31Client, stack, serviceType);
+    }
+
+    @Override
+    public Map<String, String> fetchServiceStatuses() throws Exception {
+        ApiServiceList serviceSummary = configService.readServices(v31Client, stack.getName());
+        return serviceSummary.getItems().stream()
+                .collect(Collectors.toMap(ApiService::getName, item -> item.getServiceState().getValue()));
+    }
+
 }
