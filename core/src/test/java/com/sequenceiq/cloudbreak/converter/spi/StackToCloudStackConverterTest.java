@@ -847,10 +847,9 @@ public class StackToCloudStackConverterTest {
 
         Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, instanceMetaData, CloudPlatform.AWS, null);
 
-        assertThat(result).hasSize(5);
+        assertThat(result).hasSize(4);
         assertThat(result).doesNotContainKey(RESOURCE_GROUP_NAME_PARAMETER);
         assertThat(result).doesNotContainKey(RESOURCE_GROUP_USAGE_PARAMETER);
-        assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
         assertThat(result.get(CloudInstance.FQDN)).isEqualTo(DISCOVERY_FQDN);
         assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
         assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
@@ -864,8 +863,7 @@ public class StackToCloudStackConverterTest {
 
         Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, instanceMetaData, CloudPlatform.AWS, null);
 
-        assertEquals(1, result.size());
-        assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -897,8 +895,7 @@ public class StackToCloudStackConverterTest {
 
         assertEquals(RESOURCE_GROUP, result.get(RESOURCE_GROUP_NAME_PARAMETER).toString());
         assertEquals(ResourceGroupUsage.SINGLE.name(), result.get(RESOURCE_GROUP_USAGE_PARAMETER).toString());
-        assertEquals(8, result.size());
-        assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
+        assertEquals(7, result.size());
         assertThat(result.get(CloudInstance.FQDN)).isEqualTo(DISCOVERY_FQDN);
         assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
         assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
@@ -928,8 +925,7 @@ public class StackToCloudStackConverterTest {
         assertFalse(result.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
         assertFalse(result.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
 
-        assertEquals(6, result.size());
-        assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
+        assertEquals(5, result.size());
         assertThat(result.get(CloudInstance.FQDN)).isEqualTo(DISCOVERY_FQDN);
         assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
         assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
