@@ -37,7 +37,7 @@ public class NifiUpgradeValidator implements ServiceUpgradeValidator {
         if (validationRequest.isLockComponents() && isNifiServicePresent(validationRequest.getStack())) {
             validateNifiWorkingDirectory(validationRequest.getStack());
         } else {
-            LOGGER.debug("Skipping Nifi service validation because  it's not OS upgrade or Nifi not present in the cluster.");
+            LOGGER.debug("Skipping Nifi service validation because it's not OS upgrade or Nifi not present in the cluster.");
         }
     }
 

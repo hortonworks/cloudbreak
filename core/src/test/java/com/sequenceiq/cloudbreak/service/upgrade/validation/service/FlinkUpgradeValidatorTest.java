@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_14;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
@@ -59,7 +61,7 @@ public class FlinkUpgradeValidatorTest {
     @Test
     void validateNoRuntimeVersion() {
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, null);
+                new ServiceUpgradeValidationRequest(stack, false, null, null);
         underTest.validate(request);
         verifyNoInteractions(cmTemplateService);
         verifyNoInteractions(clusterApiConnectors);
@@ -68,7 +70,7 @@ public class FlinkUpgradeValidatorTest {
     @Test
     void validateNotAffectedRuntime() {
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_14.getVersion());
+                new ServiceUpgradeValidationRequest(stack, false, CLOUDERA_STACK_VERSION_7_2_14.getVersion(), null);
         underTest.validate(request);
         verifyNoInteractions(cmTemplateService);
         verifyNoInteractions(clusterApiConnectors);
@@ -78,7 +80,7 @@ public class FlinkUpgradeValidatorTest {
     void validateNoFlinkSevice() {
         when(cmTemplateService.isServiceTypePresent("FLINK", BLUEPRINT_TEXT)).thenReturn(false);
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16.getVersion());
+                new ServiceUpgradeValidationRequest(stack, false, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
         underTest.validate(request);
 
         verifyNoInteractions(clusterApiConnectors);
@@ -90,7 +92,7 @@ public class FlinkUpgradeValidatorTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "FLINK")).thenReturn(false);
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16.getVersion());
+                new ServiceUpgradeValidationRequest(stack, false, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
         underTest.validate(request);
     }
 
@@ -102,7 +104,7 @@ public class FlinkUpgradeValidatorTest {
                 .thenThrow(new CloudbreakServiceException("Api exception"));
 
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16.getVersion());
+                new ServiceUpgradeValidationRequest(stack, false, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.validate(request));
 
@@ -116,7 +118,7 @@ public class FlinkUpgradeValidatorTest {
         when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "FLINK")).thenReturn(true);
 
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16.getVersion());
+                new ServiceUpgradeValidationRequest(stack, false, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
 
         UpgradeValidationFailedException exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(request));
 

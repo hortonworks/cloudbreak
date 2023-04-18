@@ -281,7 +281,9 @@ public class ClusterUpgradeValidationActions {
                 LOGGER.info("Starting to validate services.");
                 boolean lockComponents = (Boolean) variables.get(LOCK_COMPONENTS);
                 String targetRuntime = (String) variables.get(TARGET_RUNTIME);
-                ClusterUpgradeServiceValidationEvent event = new ClusterUpgradeServiceValidationEvent(payload.getResourceId(), lockComponents, targetRuntime);
+                UpgradeImageInfo imageInfo = (UpgradeImageInfo) variables.get(UPGRADE_IMAGE_INFO);
+                ClusterUpgradeServiceValidationEvent event = new ClusterUpgradeServiceValidationEvent(payload.getResourceId(), lockComponents, targetRuntime,
+                        imageInfo);
                 sendEvent(context, event.selector(), event);
             }
 
