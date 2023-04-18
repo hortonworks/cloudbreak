@@ -455,9 +455,9 @@ public class StackOperationService {
         eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), STACK_STOP_REQUESTED);
     }
 
-    public FlowIdentifier reRegisterClusterProxyConfig(@NotNull NameOrCrn nameOrCrn, String accountId, String originalCrn) {
+    public FlowIdentifier reRegisterClusterProxyConfig(@NotNull NameOrCrn nameOrCrn, String accountId, boolean skipFullReRegistration, String originalCrn) {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
-        return flowManager.triggerClusterProxyConfigReRegistration(stack.getId(), originalCrn);
+        return flowManager.triggerClusterProxyConfigReRegistration(stack.getId(), skipFullReRegistration, originalCrn);
     }
 
     public FlowIdentifier rotateSaltPassword(@NotNull NameOrCrn nameOrCrn, String accountId, RotateSaltPasswordReason reason) {

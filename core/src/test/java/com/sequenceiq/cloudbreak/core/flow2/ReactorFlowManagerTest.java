@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordTyp
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.service.FlowCancelService;
 
@@ -94,6 +95,7 @@ public class ReactorFlowManagerTest {
         reset(reactorNotifier);
         stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
+        stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
         ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
         when(asyncTaskExecutor.submit(captor.capture())).then(invocation -> {
             captor.getValue().run();
@@ -115,6 +117,7 @@ public class ReactorFlowManagerTest {
 
         when(stackService.getPlatformVariantByStackId(STACK_ID)).thenReturn(cloudPlatformVariant);
         when(cloudPlatformVariant.getVariant()).thenReturn(Variant.variant("AWS"));
+        when(stackService.getById(STACK_ID)).thenReturn(stack);
 
         underTest.triggerProvisioning(STACK_ID);
         underTest.triggerClusterInstall(STACK_ID);
@@ -162,7 +165,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerStopStartStackUpscale(STACK_ID, instanceGroupAdjustment, true);
         underTest.triggerStopStartStackDownscale(STACK_ID, instanceIdsByHostgroup, false);
         underTest.triggerClusterServicesRestart(STACK_ID);
-        underTest.triggerClusterProxyConfigReRegistration(STACK_ID, "");
+        underTest.triggerClusterProxyConfigReRegistration(STACK_ID, false, "");
         underTest.triggerRdsUpgrade(STACK_ID, TargetMajorVersion.VERSION_11, null, null);
         underTest.triggerRotateSaltPassword(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.FALLBACK);
         underTest.triggerModifyProxyConfig(STACK_ID, null);
