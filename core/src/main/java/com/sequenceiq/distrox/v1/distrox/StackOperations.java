@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -530,5 +531,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public void determineDatalakeDataSizes(Long workspaceId, NameOrCrn nameOrCrn, String operationId) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         determineDatalakeDataSizesService.determineDatalakeDataSizes(stack, operationId);
+    }
+
+    public FlowIdentifier putDeleteVolumes(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackDeleteVolumesRequest deleteRequest) {
+        return stackCommonService.putDeleteVolumesInWorkspace(nameOrCrn, accountId, deleteRequest);
     }
 }

@@ -42,6 +42,8 @@ public class PlatformParametersConsts {
 
     public static final String ENCRYPTION_KEY_RESOURCE_GROUP_NAME = "keyVaultResourceGroupName";
 
+    public static final String DELETE_VOLUMES_SUPPORTED = "deleteVolumesSupported";
+
     private PlatformParametersConsts() {
 
     }

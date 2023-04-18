@@ -1487,4 +1487,21 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(eq(stack), eq(v31Client), eq(deployClientCommandId)))
                 .thenReturn(success);
     }
+
+    @Test
+    public void testReadServices() throws Exception {
+        List<ApiService> services = List.of(
+                new ApiService().name("RANGER_RAZ").serviceState(ApiServiceState.STOPPED),
+                new ApiService().name("ATLAS").serviceState(ApiServiceState.STOPPED),
+                new ApiService().name("TEZ").serviceState(ApiServiceState.NA),
+                new ApiService().name("HDFS").serviceState(ApiServiceState.STOPPING));
+        when(configService.readServices(any(), anyString())).thenReturn(new ApiServiceList().items(services));
+
+        Map<String, String> results = underTest.fetchServiceStatuses();
+
+        assertEquals(4, results.size());
+        assertEquals("STOPPED", results.get("ATLAS"));
+        assertEquals("STOPPING", results.get("HDFS"));
+        assertEquals("NA", results.get("TEZ"));
+    }
 }

@@ -61,6 +61,8 @@ import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointServicesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
+import software.amazon.awssdk.services.ec2.model.DetachVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.DetachVolumeResponse;
 import software.amazon.awssdk.services.ec2.model.DisassociateAddressRequest;
 import software.amazon.awssdk.services.ec2.model.DisassociateAddressResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
@@ -280,5 +282,9 @@ public class AmazonEc2Client extends AmazonClient {
 
     public DescribeLaunchTemplateVersionsResponse describeLaunchTemplateVersions(DescribeLaunchTemplateVersionsRequest request) {
         return client.describeLaunchTemplateVersions(request);
+    }
+
+    public DetachVolumeResponse detachVolume(DetachVolumeRequest request) {
+        return retry.testWith2SecDelayMax15Times(() -> client.detachVolume(request));
     }
 }

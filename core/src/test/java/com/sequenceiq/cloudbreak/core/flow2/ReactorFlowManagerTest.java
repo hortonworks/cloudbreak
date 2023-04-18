@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -27,10 +28,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.task.AsyncTaskExecutor;
 
+import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -42,6 +45,7 @@ import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -51,6 +55,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.TerminationTriggerService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
+import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
@@ -172,7 +177,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerVerticalScale(STACK_ID, new StackVerticalScaleV4Request());
         underTest.triggerOsUpgradeByUpgradeSetsFlow(STACK_ID, "AWS", new ImageChangeDto(STACK_ID, null), List.of());
         underTest.triggerDetermineDatalakeDataSizes(STACK_ID, "asdf");
-        underTest.triggerServicesRollingRestart(STACK_ID);
+        underTest.triggerDeleteVolumes(STACK_ID, new StackDeleteVolumesRequest());
+        underTest.triggerSecretRotation(STACK_ID, "CRN", Lists.newArrayList(), RotationFlowExecutionType.ROTATE);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
@@ -307,6 +313,22 @@ public class ReactorFlowManagerTest {
         verify(reactorNotifier).notify(eq(stackId), eq("DATABASE_RESTORE_EVENT"), captor.capture());
         DatabaseRestoreTriggerEvent event = (DatabaseRestoreTriggerEvent) captor.getValue();
         assertEquals(databaseMaxDurationInMin, event.getDatabaseMaxDurationInMin());
+    }
+
+    @Test
+    public void testTriggerDeleteVolumes() {
+        long stackId = 1L;
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(stackId);
+        stackDeleteVolumesRequest.setGroup("TEST");
+        underTest.triggerDeleteVolumes(stackId, stackDeleteVolumesRequest);
+        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
+        verify(reactorNotifier).notify(eq(stackId), eq(DELETE_VOLUMES_VALIDATION_EVENT.event()), captor.capture());
+        DeleteVolumesTriggerEvent event = (DeleteVolumesTriggerEvent) captor.getValue();
+        assertEquals(DELETE_VOLUMES_VALIDATION_EVENT.event(), event.selector());
+        assertEquals(stack.getId(), event.getResourceId());
+        assertEquals(stackDeleteVolumesRequest, event.getStackDeleteVolumesRequest());
+        assertEquals(stackId, event.getResourceId().longValue());
     }
 
     private static class TestAcceptable implements Acceptable {

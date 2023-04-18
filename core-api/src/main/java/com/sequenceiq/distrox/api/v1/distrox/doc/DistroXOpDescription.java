@@ -33,6 +33,8 @@ public class DistroXOpDescription {
     public static final String SCALE_BY_CRN = "scales the stack by crn";
     public static final String VERTICAL_SCALE_BY_NAME = "vertical scale the stack instances (node type/disks) by name";
     public static final String VERTICAL_SCALE_BY_CRN = "vertical scales the instances (node type/disks) stack by crn";
+    public static final String DELETE_VOLUMES_BY_STACK_NAME = "delete attached volumes on stack instances by stack name";
+    public static final String DELETE_VOLUMES_BY_STACK_CRN = "delete attached volumes on stack instances by stack crn";
     public static final String REPAIR_CLUSTER_BY_NAME = "repairs the stack by name";
     public static final String REPAIR_CLUSTER_BY_CRN = "repairs the stack by crn";
     public static final String DELETE_WITH_KERBEROS_BY_NAME = "deletes the stack (with kerberos cluster) by name";

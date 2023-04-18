@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
@@ -359,5 +360,19 @@ public class ClusterCommonService {
             throw new BadRequestException(String.format("Please start all stopped instances. %s can only be made when all your nodes in running state.",
                     operationDescription));
         }
+    }
+
+    public FlowIdentifier putDeleteVolumes(String crn, StackDeleteVolumesRequest deleteRequest) {
+        StackDto stack = stackDtoService.getByCrn(crn);
+        Long stackId = stack.getId();
+        MDCBuilder.buildMdcContext(stack);
+        FlowIdentifier flowIdentifier;
+        if (deleteRequest != null) {
+            flowIdentifier = clusterOperationService.deleteVolumes(stackId, deleteRequest);
+        } else {
+            LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
+            throw new BadRequestException("Invalid update cluster request!");
+        }
+        return flowIdentifier;
     }
 }

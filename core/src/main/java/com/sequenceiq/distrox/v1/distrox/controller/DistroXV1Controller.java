@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -750,4 +751,19 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier rotateSecrets(@RequestObject DistroXSecretRotationRequest request) {
         return stackOperationService.rotateSecrets(request.getCrn(), request.getSecrets(), request.getExecutionType());
     }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
+    public FlowIdentifier deleteVolumesByStackName(@ResourceName String name, StackDeleteVolumesRequest deleteRequest) {
+        deleteRequest.setStackId(stackOperations.getResourceIdByResourceName(name));
+        return stackOperations.putDeleteVolumes(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), deleteRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
+    public FlowIdentifier deleteVolumesByStackCrn(@ResourceCrn String crn, StackDeleteVolumesRequest deleteRequest) {
+        deleteRequest.setStackId(stackOperations.getResourceIdByResourceCrn(crn));
+        return stackOperations.putDeleteVolumes(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), deleteRequest);
+    }
+
 }

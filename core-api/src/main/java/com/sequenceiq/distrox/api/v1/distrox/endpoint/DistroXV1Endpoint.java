@@ -20,6 +20,8 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DEL
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_MULTIPLE;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_VOLUMES_BY_STACK_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_VOLUMES_BY_STACK_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN;
@@ -72,6 +74,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
@@ -592,4 +595,20 @@ public interface DistroXV1Endpoint {
     @Path("rotate_secret")
     @ApiOperation(value = "Rotate DistroX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateDistroXSecrets")
     FlowIdentifier rotateSecrets(@Valid @NotNull DistroXSecretRotationRequest request);
+
+    @PUT
+    @Path("name/{name}/delete_volumes")
+    @ApiOperation(value = DELETE_VOLUMES_BY_STACK_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteVolumesByStackName")
+    FlowIdentifier deleteVolumesByStackName(
+            @PathParam("name") String name,
+            @Valid StackDeleteVolumesRequest deleteRequest);
+
+    @PUT
+    @Path("crn/{crn}/delete_volumes")
+    @ApiOperation(value = DELETE_VOLUMES_BY_STACK_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteVolumesByStackCrn")
+    FlowIdentifier deleteVolumesByStackCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @Valid StackDeleteVolumesRequest deleteRequest);
 }

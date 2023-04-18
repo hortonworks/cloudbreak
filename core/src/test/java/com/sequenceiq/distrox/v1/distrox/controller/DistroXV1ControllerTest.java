@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
@@ -145,5 +146,31 @@ class DistroXV1ControllerTest {
         distroXV1Controller.modifyProxyInternal(CRN, previousProxyConfigCrn, "user-crn");
 
         verify(stackOperationService).modifyProxyConfig(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, previousProxyConfigCrn);
+    }
+
+    @Test
+    void testDeleteVolumesByStackName() {
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(1L);
+        stackDeleteVolumesRequest.setGroup("COMPUTE");
+
+        distroXV1Controller.deleteVolumesByStackName(CRN, stackDeleteVolumesRequest);
+
+        verify(stackOperations).putDeleteVolumes(NameOrCrn.ofName(CRN), ACCOUNT_ID, stackDeleteVolumesRequest);
+    }
+
+    @Test
+    void testDeleteVolumesByStackCrn() {
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(1L);
+        stackDeleteVolumesRequest.setGroup("COMPUTE");
+
+        distroXV1Controller.deleteVolumesByStackCrn(CRN, stackDeleteVolumesRequest);
+
+        verify(stackOperations).putDeleteVolumes(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, stackDeleteVolumesRequest);
     }
 }

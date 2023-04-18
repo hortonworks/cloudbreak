@@ -161,4 +161,10 @@ public interface CloudConnector extends CloudPlatformAware {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
+    /**
+     * Access to the {@link ResourceVolumeConnector} object.
+     *
+     * @return the {@link ResourceVolumeConnector} object
+     */
+    ResourceVolumeConnector volumeConnector();
 }

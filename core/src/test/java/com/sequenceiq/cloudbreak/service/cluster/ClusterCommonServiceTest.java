@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -267,5 +269,32 @@ public class ClusterCommonServiceTest {
 
         verifyNoInteractions(clusterOperationService);
         assertEquals(String.format("SaltStack update cannot be initiated as stack 'stack-name' is currently in '%s' state.", status), ex.getMessage());
+    }
+
+    @Test
+    public void testPutDeleteVolumes() {
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(STACK_ID);
+        stackDeleteVolumesRequest.setGroup("TEST");
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackDtoService.getByCrn(eq("CRN"))).thenReturn(stack);
+        when(clusterOperationService.deleteVolumes(STACK_ID, stackDeleteVolumesRequest)).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
+
+        FlowIdentifier flowIdentifier = underTest.putDeleteVolumes("CRN", stackDeleteVolumesRequest);
+
+        verify(clusterOperationService, times(1)).deleteVolumes(eq(STACK_ID), eq(stackDeleteVolumesRequest));
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("1", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    public void testPutDeleteVolumesBadRequest() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByCrn(eq("CRN"))).thenReturn(stack);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.putDeleteVolumes("CRN", null));
+
+        assertEquals("Invalid update cluster request!", exception.getMessage());
     }
 }

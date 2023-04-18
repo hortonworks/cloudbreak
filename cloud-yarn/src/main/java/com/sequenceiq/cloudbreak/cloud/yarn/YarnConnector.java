@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
@@ -129,5 +130,10 @@ public class YarnConnector implements CloudConnector {
     @Override
     public ObjectStorageConnector objectStorage() {
         return objectStorage;
+    }
+
+    @Override
+    public ResourceVolumeConnector volumeConnector() {
+        throw new UnsupportedOperationException("This connector is not implemented for Yarn!");
     }
 }

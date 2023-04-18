@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
@@ -163,6 +164,11 @@ public class CloudPlatformConnectorsTest {
         @Override
         public String regionToDisplayName(String region) {
             return region;
+        }
+
+        @Override
+        public ResourceVolumeConnector volumeConnector() {
+            return null;
         }
 
         @Override

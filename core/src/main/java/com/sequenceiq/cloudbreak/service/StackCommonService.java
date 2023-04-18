@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -317,7 +318,7 @@ public class StackCommonService {
     }
 
     private void validateVerticalScalingRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
-        verticalScalingValidatorService.validateProvider(stack);
+        verticalScalingValidatorService.validateProvider(stack, "Vertical scaling", verticalScaleV4Request);
         verticalScalingValidatorService.validateRequest(stack, verticalScaleV4Request);
         verticalScalingValidatorService.validateInstanceType(stack, verticalScaleV4Request);
     }
@@ -474,5 +475,19 @@ public class StackCommonService {
 
     public List<SubnetIdWithResourceNameAndCrn> getAllUsedSubnetsByEnvironmentCrn(String environmentCrn) {
         return instanceMetaDataService.findAllUsedSubnetsByEnvironmentCrn(environmentCrn);
+    }
+
+    public FlowIdentifier putDeleteVolumesInWorkspace(NameOrCrn nameOrCrn, String accountId, StackDeleteVolumesRequest deleteRequest) {
+        StackView stackView = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
+        Stack stack = stackService.getByIdWithLists(stackView.getId());
+        MDCBuilder.buildMdcContext(stackView);
+        LOGGER.debug("Validating Stack Delete Volumes Request for Stack ID {}", stackView.getId());
+        validateDeleteVolumesRequest(stack, deleteRequest);
+        return clusterCommonService.putDeleteVolumes(stackView.getResourceCrn(), deleteRequest);
+    }
+
+    private void validateDeleteVolumesRequest(Stack stack, StackDeleteVolumesRequest deleteRequest) {
+        verticalScalingValidatorService.validateProviderForDelete(stack, "Deleting volumes", false);
+        verticalScalingValidatorService.validateInstanceTypeForDeletingDisks(stack, deleteRequest);
     }
 }

@@ -624,7 +624,11 @@ public enum ResourceEvent {
     DATALAKE_SECRET_ROTATION_FAILED("datalake.secret.rotation.failed"),
 
     // deprecated
-    STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped");
+    STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped"),
+    CLUSTER_DELETINGVOLUMES("cluster.changing.deletevolumes"),
+    CLUSTER_DELETEDVOLUMES("cluster.changed.deletevolumes"),
+    CLUSTER_DELETEVOLUMES_FAILED("cluster.change.deletevolumes.failed"),
+    VOLUMES_DELETE_FAILED("cluster.change.deletevolumes.delete.failed");
 
     private final String message;
 

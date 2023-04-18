@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
@@ -73,6 +74,9 @@ public class AwsNativeConnector implements CloudConnector {
 
     @Inject
     private AwsInstanceConnector awsInstanceConnector;
+
+    @Inject
+    private ResourceVolumeConnector resourceVolumeConnector;
 
     @Inject
     private AwsNativeSetup awsNativeSetup;
@@ -173,6 +177,11 @@ public class AwsNativeConnector implements CloudConnector {
     @Override
     public PublicKeyConnector publicKey() {
         return awsPublicKeyConnector;
+    }
+
+    @Override
+    public ResourceVolumeConnector volumeConnector() {
+        return resourceVolumeConnector;
     }
 
     @Override
