@@ -128,7 +128,7 @@ class AzureMetadataCollectorTest {
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
-        when(azureUtils.getFullInstanceId(any(), any(), any(), any()))
+        when(azureUtils.getPrivateInstanceId(any(), any(), any()))
                 .thenReturn(INSTANCE_1)
                 .thenReturn(INSTANCE_2)
                 .thenReturn(INSTANCE_3);
@@ -180,16 +180,15 @@ class AzureMetadataCollectorTest {
 
     private List<CloudInstance> createVms() {
         return List.of(
-                createCloudInstance(INSTANCE_1, PRIVATE_ID_1, 1L),
-                createCloudInstance(INSTANCE_2, PRIVATE_ID_2, 2L),
-                createCloudInstance(INSTANCE_3, PRIVATE_ID_3, 3L));
+                createCloudInstance(INSTANCE_1, PRIVATE_ID_1),
+                createCloudInstance(INSTANCE_2, PRIVATE_ID_2),
+                createCloudInstance(INSTANCE_3, PRIVATE_ID_3));
     }
 
-    private CloudInstance createCloudInstance(String instanceId, Long privateId, Long id) {
+    private CloudInstance createCloudInstance(String instanceId, Long privateId) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(null, INSTANCE_GROUP_NAME, privateId, Collections.emptyList(), null, Collections.emptyMap(),
                 null, null, TemporaryStorage.ATTACHED_VOLUMES, 0L);
-        return new CloudInstance(instanceId, instanceTemplate, null, "subnet-1", "az1",
-                Collections.singletonMap(CloudInstance.ID, id));
+        return new CloudInstance(instanceId, instanceTemplate, null, "subnet-1", "az1");
     }
 
     private CloudResource createCloudResource() {
