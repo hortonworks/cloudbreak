@@ -3,15 +3,18 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.Map;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 /**
  * A common, abstract representation of a virtual machine in a cloud provider.
- *
+ * <p>
  * For example, this class can be used to represent an AWS EC2 instance, Azure virtual machine, or GCP virtual machine instance.
- *
+ * <p>
  * This is a <em>minimal</em> representation, containing the unique (cloud vendor specific) instance ID, template used to create the
  * instance, and necessary information to authenticate and connect to the instance.
  *
@@ -26,6 +29,10 @@ public class CloudInstance extends DynamicModel {
 
     public static final String FQDN = "FQDN";
 
+    public static final String ID = "ID";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudInstance.class);
+
     private final String instanceId;
 
     private String subnetId;
@@ -37,10 +44,10 @@ public class CloudInstance extends DynamicModel {
     private final InstanceAuthentication authentication;
 
     public CloudInstance(String instanceId,
-        InstanceTemplate template,
-        InstanceAuthentication authentication,
-        String subnetId,
-        String availabilityZone) {
+            InstanceTemplate template,
+            InstanceAuthentication authentication,
+            String subnetId,
+            String availabilityZone) {
         this.instanceId = instanceId;
         this.template = template;
         this.authentication = authentication;
@@ -89,6 +96,16 @@ public class CloudInstance extends DynamicModel {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
+    }
+
+    public String getDbIdOrDefaultIfNotExists() {
+        Long dbId = getParameter(CloudInstance.ID, Long.class);
+        if (dbId != null) {
+            return Long.toString(dbId);
+        } else {
+            LOGGER.info("DB id not found, return with 'not_found' instead");
+            return "not_found";
+        }
     }
 
     @Override
