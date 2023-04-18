@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.model.SafetyValve;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
@@ -88,6 +89,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
             HueConfigProvider.HUE_SERVER_HUE_SAFETY_VALVE);
 
     private static final IniFileFactory DEFAULT_INI_FILE_FACTORY = new IniFileFactory();
+
+    private static final String SAFETY_VALVE_NAME_SUFFIX = "_safety_valve";
 
     private final ApiClusterTemplate cmTemplate;
 
@@ -699,7 +702,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                     .filter(currentConfig -> currentConfig.getName().equalsIgnoreCase(config.getName()))
                     .findFirst();
             if (configIfExists.isPresent()) {
-                if (config.getName().endsWith("_safety_valve")) {
+                if (config.getName().endsWith(SAFETY_VALVE_NAME_SUFFIX)) {
                     String currentValue = configIfExists.get().getValue();
                     String valueToBeAppended = config.getValue();
                     config.setValue(currentValue + '\n' + valueToBeAppended);
@@ -718,7 +721,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         if (existingApiClusterTemplateConfig != null) {
             LOGGER.info("Found config present in both blueprint and generated settings: '{}'", configName);
             // OPSAPS-54706 Let's honor the safety valve settings in both bp and generated.
-            if (configName.endsWith("_safety_valve")) {
+            if (configName.endsWith(SAFETY_VALVE_NAME_SUFFIX)) {
                 String oldConfigValue = existingApiClusterTemplateConfig.getValue();
                 String newConfigValue = newConfig.getValue();
 
@@ -960,6 +963,32 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                         .flatMap(rcg -> Optional.ofNullable(rcg.getConfigs()).orElseGet(List::of).stream())
                         .filter(config -> configName.equals(config.getName()))
                         .findAny());
+    }
+
+    public List<SafetyValve> getSafetyValves() {
+        List<SafetyValve> safetyValves = new ArrayList<>();
+        List<ApiClusterTemplateConfig> apiClusterTemplateConfigList;
+        for (ApiClusterTemplateService apiClusterTemplateService : cmTemplate.getServices()) {
+            apiClusterTemplateConfigList = !CollectionUtils.isEmpty(apiClusterTemplateService.getServiceConfigs()) ?
+                    apiClusterTemplateService.getServiceConfigs() : Collections.emptyList();
+            apiClusterTemplateConfigList.stream()
+                    .filter(apiClusterTemplateConfig -> apiClusterTemplateConfig.getName().endsWith(SAFETY_VALVE_NAME_SUFFIX))
+                    .forEach(apiClusterTemplateConfig -> safetyValves.add(new SafetyValve(apiClusterTemplateService.getServiceType(), null,
+                            apiClusterTemplateConfig.getName(), apiClusterTemplateConfig.getValue())));
+
+            if (!CollectionUtils.isEmpty(apiClusterTemplateService.getRoleConfigGroups())) {
+                for (ApiClusterTemplateRoleConfigGroup apiClusterTemplateRoleConfigGroup : apiClusterTemplateService.getRoleConfigGroups()) {
+                    apiClusterTemplateConfigList = !CollectionUtils.isEmpty(apiClusterTemplateRoleConfigGroup.getConfigs()) ?
+                            apiClusterTemplateRoleConfigGroup.getConfigs() : Collections.emptyList();
+                    apiClusterTemplateConfigList.stream()
+                            .filter(apiClusterTemplateConfig -> apiClusterTemplateConfig.getName().endsWith(SAFETY_VALVE_NAME_SUFFIX))
+                            .forEach(apiClusterTemplateConfig -> safetyValves.add(new SafetyValve(apiClusterTemplateService.getServiceType(),
+                                    apiClusterTemplateRoleConfigGroup.getRoleType(),
+                                    apiClusterTemplateConfig.getName(), apiClusterTemplateConfig.getValue())));
+                }
+            }
+        }
+        return safetyValves;
     }
 
     public List<String> getHostTemplateRoleNames(String groupName) {
