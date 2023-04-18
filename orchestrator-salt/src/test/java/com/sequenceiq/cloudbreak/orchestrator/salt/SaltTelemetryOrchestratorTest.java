@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -56,6 +55,10 @@ class SaltTelemetryOrchestratorTest {
 
     private static final int MAX_DIAGNOSTICS_COLLECTION_RETRY = 360;
 
+    private static final String LOCAL_PREFLIGHT_SCRIPTS_LOCATION = "salt-common/salt/filecollector/scripts/";
+
+    private static final String[] SCRIPTS_TO_UPLOAD = new String[]{"preflight_check.sh", "filecollector_minion_check.py"};
+
     private final GatewayConfig gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443,
             "instanceid", "servercert", "clientcert", "clientkey", "saltpasswd", "saltbootpassword",
             "signkey", false, true, "privatekey", "publickey", null, null);
@@ -94,6 +97,9 @@ class SaltTelemetryOrchestratorTest {
 
     @Mock
     private SaltStateService saltStateService;
+
+    @Mock
+    private SaltPartialStateUpdater saltPartialStateUpdater;
 
     @InjectMocks
     private SaltTelemetryOrchestrator underTest;
@@ -283,19 +289,17 @@ class SaltTelemetryOrchestratorTest {
         verify(saltService, times(3)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(3)).createSaltConnector(gatewayConfig);
         verify(saltRunner, times(2)).runnerWithCalculatedErrorCount(any(), any(), any(), anyInt());
-        verify(saltRunner, times(2)).runnerWithConfiguredErrorCount(any(), any(), any());
+        verify(saltPartialStateUpdater, times(1)).uploadAndUpdateSaltStateComponent(
+                any(), any(), any(), any(), any(), any());
     }
 
     @Test
     void testUpdateMeteringSaltDefinition() throws CloudbreakOrchestratorFailedException {
         underTest.updateMeteringSaltDefinition(new byte[0], gatewayConfigs, exitCriteriaModel);
 
-        SaltFileUpload saltFileUpload = (SaltFileUpload) orchestratorBootstrapArgumentCaptor.getValue();
-        String saltUploadTarget = saltFileUpload.getTargets().stream().findFirst().orElse(null);
-
-        assertEquals(saltUploadTarget, gatewayConfig.getPrivateAddress());
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
-        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+        verify(saltPartialStateUpdater, times(1)).uploadAndUpdateSaltStateComponent(
+                any(), any(), any(), eq(Set.of(gatewayConfig.getPrivateAddress())), any(), any());
     }
 
     @Test
@@ -314,21 +318,6 @@ class SaltTelemetryOrchestratorTest {
     }
 
     @Test
-    void testUpdatePartialSaltDefinition() throws CloudbreakOrchestratorFailedException {
-        underTest.updatePartialSaltDefinition(new byte[0], anyList(), gatewayConfigs, exitCriteriaModel);
-
-        List<OrchestratorBootstrap> orchestratorBootstraps = orchestratorBootstrapArgumentCaptor.getAllValues();
-
-        for (OrchestratorBootstrap ob : orchestratorBootstraps) {
-            String saltUploadTarget = ((SaltFileUpload) ob).getTargets().stream().findFirst().orElse(null);
-            assertEquals(saltUploadTarget, gatewayConfig.getPrivateAddress());
-        }
-        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
-        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(2)).runnerWithConfiguredErrorCount(any(), any(), any());
-    }
-
-    @Test
     void testPreFlightDiagnosticsCheck() throws CloudbreakOrchestratorFailedException {
         Map<String, Object> parameters = getParametersMap();
         when(saltStateService.runCommandOnHosts(eq(retry), eq(saltConnector), any(), eq(""))).thenReturn(new HashMap<>() {{
@@ -341,7 +330,8 @@ class SaltTelemetryOrchestratorTest {
         assertNotNull(cloudbreakOrchestratorFailedException);
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(2)).runnerWithConfiguredErrorCount(any(), any(), any());
+        verify(saltPartialStateUpdater, times(1)).uploadScripts(
+                any(), any(), any(), eq(LOCAL_PREFLIGHT_SCRIPTS_LOCATION), eq(SCRIPTS_TO_UPLOAD[0]), eq(SCRIPTS_TO_UPLOAD[1]));
     }
 
     @Test
@@ -360,7 +350,8 @@ class SaltTelemetryOrchestratorTest {
         assertNotNull(cloudbreakOrchestratorFailedException);
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(2)).runnerWithConfiguredErrorCount(any(), any(), any());
+        verify(saltPartialStateUpdater, times(1)).uploadScripts(
+                any(), any(), any(), eq(LOCAL_PREFLIGHT_SCRIPTS_LOCATION), eq(SCRIPTS_TO_UPLOAD[0]), eq(SCRIPTS_TO_UPLOAD[1]));
     }
 
     private Map<String, Object> getParametersMap() {

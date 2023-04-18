@@ -4,8 +4,10 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.DETERMINE_DATALAKE_DATA_SIZES_FINISHED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.metrics.datasizes.DetermineDatalakeDataSizesEvent.DETERMINE_DATALAKE_DATA_SIZES_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.metrics.datasizes.DetermineDatalakeDataSizesEvent.DETERMINE_DATALAKE_DATA_SIZES_SALT_UPDATE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.metrics.datasizes.DetermineDatalakeDataSizesEvent.DETERMINE_DATALAKE_DATA_SIZES_SUBMISSION_SUCCESS_EVENT;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -25,12 +27,15 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datas
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesSubmissionEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.GetDatalakeDataSizesRequest;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.salt.PartialSaltStateUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @Configuration
 public class DetermineDatalakeDataSizesActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(DetermineDatalakeDataSizesActions.class);
+
+    private static final String SALT_COMPONENT_NAME = "datalake_metrics";
 
     @Inject
     private StackUpdater stackUpdater;
@@ -44,14 +49,28 @@ public class DetermineDatalakeDataSizesActions {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    @Bean(name = "DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS_STATE")
-    public Action<?, ?> determineDatalakeDataSizesAction() {
+    @Inject
+    private PartialSaltStateUpdateService partialSaltStateUpdateService;
+
+    @Bean(name = "DETERMINE_DATALAKE_DATA_SIZES_SALT_UPDATE_STATE")
+    public Action<?, ?> saltUpdateAction() {
         return new AbstractDetermineDatalakeDataSizesAction<>(DetermineDatalakeDataSizesBaseEvent.class) {
             @Override
             protected void doExecute(DetermineDatalakeDataSizesContext context, DetermineDatalakeDataSizesBaseEvent payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(
                         context.getStackId(), DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS, "Determination of datalake data sizes in progress"
                 );
+                partialSaltStateUpdateService.performSaltUpdate(context.getStackId(), List.of(SALT_COMPONENT_NAME));
+                sendEvent(context, DETERMINE_DATALAKE_DATA_SIZES_SALT_UPDATE_FINISHED_EVENT.event(), payload);
+            }
+        };
+    }
+
+    @Bean(name = "DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS_STATE")
+    public Action<?, ?> determineDatalakeDataSizesAction() {
+        return new AbstractDetermineDatalakeDataSizesAction<>(DetermineDatalakeDataSizesBaseEvent.class) {
+            @Override
+            protected void doExecute(DetermineDatalakeDataSizesContext context, DetermineDatalakeDataSizesBaseEvent payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

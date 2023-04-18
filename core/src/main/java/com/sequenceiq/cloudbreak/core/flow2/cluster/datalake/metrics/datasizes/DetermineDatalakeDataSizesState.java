@@ -7,6 +7,7 @@ import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
 public enum DetermineDatalakeDataSizesState implements FlowState {
     INIT_STATE,
+    DETERMINE_DATALAKE_DATA_SIZES_SALT_UPDATE_STATE,
     DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS_STATE,
     DETERMINE_DATALAKE_DATA_SIZES_SUBMISSION_STATE,
     DETERMINE_DATALAKE_DATA_SIZES_FAILURE_STATE,

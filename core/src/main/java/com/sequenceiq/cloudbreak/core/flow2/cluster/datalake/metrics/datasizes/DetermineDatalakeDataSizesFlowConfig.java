@@ -17,8 +17,12 @@ public class DetermineDatalakeDataSizesFlowConfig
                     .defaultFailureEvent(DetermineDatalakeDataSizesEvent.DETERMINE_DATALAKE_DATA_SIZES_FAILURE_EVENT)
 
                     .from(DetermineDatalakeDataSizesState.INIT_STATE)
-                    .to(DetermineDatalakeDataSizesState.DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS_STATE)
+                    .to(DetermineDatalakeDataSizesState.DETERMINE_DATALAKE_DATA_SIZES_SALT_UPDATE_STATE)
                     .event(DetermineDatalakeDataSizesEvent.DETERMINE_DATALAKE_DATA_SIZES_EVENT).noFailureEvent()
+
+                    .from(DetermineDatalakeDataSizesState.DETERMINE_DATALAKE_DATA_SIZES_SALT_UPDATE_STATE)
+                    .to(DetermineDatalakeDataSizesState.DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS_STATE)
+                    .event(DetermineDatalakeDataSizesEvent.DETERMINE_DATALAKE_DATA_SIZES_SALT_UPDATE_FINISHED_EVENT).defaultFailureEvent()
 
                     .from(DetermineDatalakeDataSizesState.DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS_STATE)
                     .to(DetermineDatalakeDataSizesState.DETERMINE_DATALAKE_DATA_SIZES_SUBMISSION_STATE)

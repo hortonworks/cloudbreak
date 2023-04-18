@@ -4,12 +4,6 @@ import static com.sequenceiq.common.model.diagnostics.DiagnosticParameters.EXCLU
 import static com.sequenceiq.common.model.diagnostics.DiagnosticParameters.HOSTS_FILTER;
 import static com.sequenceiq.common.model.diagnostics.DiagnosticParameters.HOST_GROUPS_FILTER;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,12 +21,8 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.FileCopyUtils;
 
-import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -44,7 +34,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUploadWithPermission;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
@@ -86,10 +75,6 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private static final String TELEMETRY_UPGRADE = "telemetry.upgrade";
 
-    private static final String READ_WRITE_PERMISSION = "0600";
-
-    private static final String EXECUTE_PERMISSION = "0700";
-
     private static final String PREFLIGHT_ERROR_START = "PreFlight diagnostics check FAILED";
 
     private static final String RAM_WARNING = "-- RAM ISSUES ---";
@@ -103,12 +88,6 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     private static final String LOCAL_TELEMETRY_SCRIPTS_LOCATION = "salt-common/salt/telemetry/scripts/";
 
     private static final String TELEMETRY_DEPLOYER_SCRIPT_FILENAME = "cdp-telemetry-deployer.sh";
-
-    private static final String LOCAL_SALT_RESOURCES_LOCATION = "salt";
-
-    private static final String SALT_STATE_UPDATER_SCRIPT = "salt-state-updater.sh";
-
-    private static final String REMOTE_TMP_FOLDER = "/tmp/";
 
     private static final String[] SCRIPTS_TO_UPLOAD = new String[]{"preflight_check.sh", "filecollector_minion_check.py"};
 
@@ -137,6 +116,9 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     @Inject
     private SaltStateService saltStateService;
+
+    @Inject
+    private SaltPartialStateUpdater saltPartialStateUpdater;
 
     @Override
     public void validateCloudStorage(List<GatewayConfig> allGateways, Set<Node> allNodes, Set<String> targetHostNames,
@@ -197,7 +179,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         Set<String> gatewayHostnames = getGatewayHostnames(allGateways);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             Target<String> targets = new HostList(gatewayHostnames);
-            uploadScripts(sc, gatewayTargets, exitModel, LOCAL_PREFLIGHT_SCRIPTS_LOCATION, SCRIPTS_TO_UPLOAD);
+            saltPartialStateUpdater.uploadScripts(sc, gatewayTargets, exitModel, LOCAL_PREFLIGHT_SCRIPTS_LOCATION, SCRIPTS_TO_UPLOAD);
             executeVmPreFlightCheck(sc, targets, nodes, parameters);
         } catch (Exception e) {
             LOGGER.info("Error occurred during preflight_check.sh script upload/execution", e);
@@ -259,7 +241,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(allGateways);
         Set<String> gatewayHostnames = getGatewayHostnames(allGateways);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            uploadAndUpdateSaltStateComponent(FLUENT_COMPONENT, loggingAgentSaltState, sc, gatewayTargets, gatewayHostnames, exitModel);
+            saltPartialStateUpdater.uploadAndUpdateSaltStateComponent(FLUENT_COMPONENT, loggingAgentSaltState, sc, gatewayTargets, gatewayHostnames, exitModel);
             distributeAndExecuteLoggingAgentDoctor(allGateways, nodes, exitModel);
         } catch (Exception e) {
             LOGGER.info("Error occurred during logging agent diagnostics ", e);
@@ -274,7 +256,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(gatewayConfigs);
         Set<String> gatewayHostnames = getGatewayHostnames(gatewayConfigs);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            uploadAndUpdateSaltStateComponent(stateName, saltState, sc, gatewayTargets, gatewayHostnames, exitModel);
+            saltPartialStateUpdater.uploadAndUpdateSaltStateComponent(stateName, saltState, sc, gatewayTargets, gatewayHostnames, exitModel);
             runSimpleSaltState(gatewayConfigs, nodes, exitModel, applyState, String.format("Apply state '%s' failed.", applyState),
                     REINIT_STATE_APPLY_MAX_RETRY, false);
         } catch (Exception e) {
@@ -290,7 +272,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(allGateways);
         Set<String> gatewayHostnames = getGatewayHostnames(allGateways);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            uploadAndUpdateSaltStateComponent(METERING_COMPONENT, meteringSaltState, sc, gatewayTargets, gatewayHostnames, exitModel);
+            saltPartialStateUpdater.uploadAndUpdateSaltStateComponent(METERING_COMPONENT, meteringSaltState, sc, gatewayTargets, gatewayHostnames, exitModel);
         } catch (Exception e) {
             LOGGER.info("Error occurred during metering salt definition update.", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -321,19 +303,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     @Override
     public void updatePartialSaltDefinition(byte[] partialSaltState, List<String> components, List<GatewayConfig> gatewayConfigs,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
-        LOGGER.debug("Start partial salt update for components: {}.", components);
-        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
-        Set<String> gatewayTargets = getGatewayPrivateIps(gatewayConfigs);
-        Set<String> gatewayHostnames = getGatewayHostnames(gatewayConfigs);
-        Target<String> targets = new HostList(gatewayHostnames);
-        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            uploadScripts(sc, gatewayTargets, exitModel, LOCAL_SALT_RESOURCES_LOCATION, SALT_STATE_UPDATER_SCRIPT);
-            String stateZip = "partial_salt_states.zip";
-            uploadFileToTargetsWithContentAndPermission(sc, gatewayTargets, exitModel, partialSaltState,
-                    REMOTE_TMP_FOLDER, stateZip, READ_WRITE_PERMISSION);
-            updateSaltStateComponentDefinition(sc, targets, stateZip, Joiner.on(',').join(components));
-            LOGGER.debug("Partial salt update has been successfully finished with components {}", components);
-        }
+        saltPartialStateUpdater.updatePartialSaltDefinition(partialSaltState, components, gatewayConfigs, exitModel);
     }
 
     private void runSimpleSaltState(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel,
@@ -376,43 +346,6 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private Set<String> getGatewayHostnames(Collection<GatewayConfig> allGatewayConfigs) {
         return allGatewayConfigs.stream().filter(GatewayConfig::isPrimary).map(GatewayConfig::getHostname).collect(Collectors.toSet());
-    }
-
-    private void uploadScripts(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel,
-            String localFolder, String... fileNames)
-            throws CloudbreakOrchestratorFailedException {
-        for (String fileName : fileNames) {
-            uploadFileToTargetsWithPermission(saltConnector, targets, exitCriteriaModel, localFolder, fileName);
-        }
-    }
-
-    private void uploadFileToTargetsWithPermission(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel,
-            String localFolderPath, String fileName) throws CloudbreakOrchestratorFailedException {
-        ClassPathResource scriptResource = new ClassPathResource(Path.of(localFolderPath, fileName).toString(), getClass().getClassLoader());
-        byte[] content = asString(scriptResource).getBytes(StandardCharsets.UTF_8);
-        uploadFileToTargetsWithContentAndPermission(saltConnector, targets, exitCriteriaModel, content,
-                REMOTE_SCRIPTS_LOCATION, fileName, EXECUTE_PERMISSION);
-    }
-
-    private void uploadFileToTargetsWithContentAndPermission(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel,
-            byte[] content, String remoteFolder, String fileName, String permission) throws CloudbreakOrchestratorFailedException {
-        try {
-            OrchestratorBootstrap saltUpload = new SaltUploadWithPermission(saltConnector, targets, remoteFolder,
-                    fileName, permission, content);
-            Callable<Boolean> saltUploadRunner = saltRunner.runnerWithConfiguredErrorCount(saltUpload, exitCriteria, exitCriteriaModel);
-            saltUploadRunner.call();
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during file distribute to gateway nodes", e);
-            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
-        }
-    }
-
-    private String asString(Resource resource) {
-        try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
-            return FileCopyUtils.copyToString(reader);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 
     private String getAnyPreflightOutput(Map<String, String> responses) {
@@ -501,13 +434,6 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         }
     }
 
-    private void updateSaltStateComponentDefinition(SaltConnector sc, Target<String> targets, String zipFileName, String component) {
-        String command = String.format("%s/%s -f %s%s -s %s",
-                REMOTE_SCRIPTS_LOCATION, SALT_STATE_UPDATER_SCRIPT, REMOTE_TMP_FOLDER, zipFileName, component);
-        Map<String, String> result = saltStateService.runCommandOnHosts(retry, sc, targets, command);
-        LOGGER.debug("Result of partial salt state ({}) upgrade: {}", component, result);
-    }
-
     private void distributeAndExecuteLoggingAgentDoctor(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel) {
         try {
             runSimpleSaltState(allGateways, nodes, exitModel, FLUENT_CRONTAB, "Logging agent crontab distribution operation failed.",
@@ -517,15 +443,5 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         } catch (Exception e) {
             LOGGER.warn("Logging agent doctor operation failed. Skipping...", e);
         }
-    }
-
-    private void uploadAndUpdateSaltStateComponent(String component, byte[] saltState, SaltConnector sc, Set<String> gatewayTargets,
-            Set<String> gatewayHostnames, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
-        Target<String> targets = new HostList(gatewayHostnames);
-        uploadScripts(sc, gatewayTargets, exitModel, LOCAL_SALT_RESOURCES_LOCATION, SALT_STATE_UPDATER_SCRIPT);
-        String stateZip = String.format("%s.zip", component);
-        uploadFileToTargetsWithContentAndPermission(sc, gatewayTargets, exitModel, saltState,
-                REMOTE_TMP_FOLDER, stateZip, READ_WRITE_PERMISSION);
-        updateSaltStateComponentDefinition(sc, targets, stateZip, component);
     }
 }
