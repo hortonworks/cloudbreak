@@ -439,9 +439,14 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, stackLoadBalancerUpdateTriggerEvent);
     }
 
-    public FlowIdentifier triggerClusterProxyConfigReRegistration(Long stackId, String originalCrn) {
-        String selector = ClusterProxyReRegistrationEvent.CLUSTER_PROXY_RE_REGISTRATION_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new ClusterProxyReRegistrationTriggerEvent(selector, stackId, originalCrn));
+    public FlowIdentifier triggerClusterProxyConfigReRegistration(Long stackId, boolean skipFullReRegistration, String originalCrn) {
+        String selector;
+        if (stackService.getById(stackId).getTunnel().useCcmV1()) {
+            selector = ClusterProxyReRegistrationEvent.CLUSTER_PROXY_CCMV1_REMAP_EVENT.event();
+        } else {
+            selector = ClusterProxyReRegistrationEvent.CLUSTER_PROXY_RE_REGISTRATION_EVENT.event();
+        }
+        return reactorNotifier.notify(stackId, selector, new ClusterProxyReRegistrationTriggerEvent(selector, stackId, skipFullReRegistration, originalCrn));
     }
 
     public void triggerDetermineDatalakeDataSizes(Long stackId, String operationId) {

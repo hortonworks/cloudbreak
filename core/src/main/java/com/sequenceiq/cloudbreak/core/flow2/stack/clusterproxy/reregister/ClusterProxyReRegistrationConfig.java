@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent.CLUSTER_PROXY_CCMV1_REMAP_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent.CLUSTER_PROXY_CCMV1_REMAP_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent.CLUSTER_PROXY_CCMV1_REMAP_FINISHED_SKIP_RE_REGISTRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent.CLUSTER_PROXY_RE_REGISTRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent.CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent.CLUSTER_PROXY_RE_REGISTRATION_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationState.CLUSTER_PROXY_CCMV1_REMAP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationState.CLUSTER_PROXY_RE_REGISTRATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationState.CLUSTER_PROXY_RE_REGISTRATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationState.FINAL_STATE;
@@ -23,9 +27,33 @@ public class ClusterProxyReRegistrationConfig
         implements RetryableFlowConfiguration<ClusterProxyReRegistrationEvent> {
     private static final List<Transition<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent>> TRANSITIONS =
             new Builder<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent>()
-                    .from(INIT_STATE).to(CLUSTER_PROXY_RE_REGISTRATION_STATE).event(CLUSTER_PROXY_RE_REGISTRATION_EVENT).noFailureEvent()
-                    .from(CLUSTER_PROXY_RE_REGISTRATION_STATE).to(FINAL_STATE).event(CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT)
-                    .failureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
+                    .defaultFailureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
+
+                    .from(INIT_STATE)
+                    .to(CLUSTER_PROXY_RE_REGISTRATION_STATE)
+                    .event(CLUSTER_PROXY_RE_REGISTRATION_EVENT)
+                    .noFailureEvent()
+
+                    .from(INIT_STATE)
+                    .to(CLUSTER_PROXY_CCMV1_REMAP_STATE)
+                    .event(CLUSTER_PROXY_CCMV1_REMAP_EVENT)
+                    .noFailureEvent()
+
+                    .from(CLUSTER_PROXY_CCMV1_REMAP_STATE)
+                    .to(CLUSTER_PROXY_RE_REGISTRATION_STATE)
+                    .event(CLUSTER_PROXY_CCMV1_REMAP_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(CLUSTER_PROXY_RE_REGISTRATION_STATE)
+                    .to(FINAL_STATE)
+                    .event(CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(CLUSTER_PROXY_CCMV1_REMAP_STATE)
+                    .to(FINAL_STATE)
+                    .event(CLUSTER_PROXY_CCMV1_REMAP_FINISHED_SKIP_RE_REGISTRATION_EVENT)
+                    .defaultFailureEvent()
+
                     .build();
 
     private static final FlowEdgeConfig<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent> EDGE_CONFIG =

@@ -684,7 +684,8 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RE_REGISTER_CLUSTER_PROXY_CONFIG, nickname = "reRegisterClusterProxyConfig")
     FlowIdentifier reRegisterClusterProxyConfig(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
-            @QueryParam("originalCrn") String originalCrn, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("skipFullReRegistration") @DefaultValue("false") boolean skipFullReRegistration, @QueryParam("originalCrn") String originalCrn,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("internal/{name}/vertical_scaling")

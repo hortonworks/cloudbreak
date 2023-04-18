@@ -83,7 +83,7 @@ public class SdxDetachService {
 
     public void detachCCMv1ClusterProxyMapping(SdxCluster cluster) {
             LOGGER.info("Started detaching CCMv1 cluster proxy mapping of SDX cluster with ID: {}.", cluster.getId());
-            sdxAttachDetachUtils.reRegisterClusterProxyConfig(cluster, cluster.getOriginalCrn());
+            sdxAttachDetachUtils.reRegisterClusterProxyConfig(cluster, true, cluster.getOriginalCrn());
             LOGGER.info("Finished detaching CCMv1 cluster proxy mapping of SDX cluster with ID: {}.", cluster.getId());
     }
 

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent.CLUSTER_PROXY_CCMV1_REMAP_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent.CLUSTER_PROXY_CCMV1_REMAP_FINISHED_SKIP_RE_REGISTRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT;
 
 import java.util.Map;
@@ -17,6 +19,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -33,15 +36,16 @@ public class ClusterProxyReRegistrationActions {
     @Inject
     private StackService stackService;
 
-    @Bean(name = "CLUSTER_PROXY_RE_REGISTRATION_STATE")
-    public Action<?, ?> reRegisterClusterProxyConfigAction() {
+    @Bean(name = "CLUSTER_PROXY_CCMV1_REMAP_STATE")
+    public Action<?, ?> remapCCMV1ClusterProxyAction() {
         return new AbstractStackAction<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent,
                 ClusterProxyReRegistrationContext, ClusterProxyReRegistrationTriggerEvent>(ClusterProxyReRegistrationTriggerEvent.class) {
             @Override
             protected ClusterProxyReRegistrationContext createFlowContext(FlowParameters flowParameters,
                     StateContext<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent> stateContext,
                     ClusterProxyReRegistrationTriggerEvent payload) {
-                return new ClusterProxyReRegistrationContext(flowParameters, stackService.getById(payload.getResourceId()), payload.getOriginalCrn());
+                return new ClusterProxyReRegistrationContext(flowParameters, stackService.getById(payload.getResourceId()),
+                        payload.isSkipFullReRegistration(), payload.getOriginalCrn());
             }
 
             @Override
@@ -51,10 +55,44 @@ public class ClusterProxyReRegistrationActions {
 
             @Override
             protected Selectable createRequest(ClusterProxyReRegistrationContext context) {
-                if (context.getStack().getTunnel().useCcmV1()) {
-                    return new CCMV1RemapKeyRequest(context.getStack().getId(), context.getStack().getCloudPlatform(),
-                            CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event(), context.getOriginalCrn());
+                String transitionEvent;
+                if (context.isSkipFullReRegistration()) {
+                    transitionEvent = CLUSTER_PROXY_CCMV1_REMAP_FINISHED_SKIP_RE_REGISTRATION_EVENT.event();
+                } else {
+                    transitionEvent = CLUSTER_PROXY_CCMV1_REMAP_FINISHED_EVENT.event();
                 }
+
+                return new CCMV1RemapKeyRequest(context.getStack().getId(), context.getStack().getCloudPlatform(),
+                        transitionEvent, context.getOriginalCrn());
+            }
+
+            @Override
+            protected Object getFailurePayload(ClusterProxyReRegistrationTriggerEvent payload,
+                    Optional<ClusterProxyReRegistrationContext> flowContext, Exception ex) {
+                LOGGER.error("Failed to remap CCMV1 cluster proxy configuration", ex);
+                return new StackFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_PROXY_RE_REGISTRATION_STATE")
+    public Action<?, ?> reRegisterClusterProxyConfigAction() {
+        return new AbstractStackAction<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent,
+                StackContext, StackEvent>(StackEvent.class) {
+            @Override
+            protected StackContext createFlowContext(FlowParameters flowParameters,
+                    StateContext<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent> stateContext,
+                    StackEvent payload) {
+                return new StackContext(flowParameters, stackService.getById(payload.getResourceId()), null, null, null);
+            }
+
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
                 return new ClusterProxyReRegistrationRequest(
                         context.getStack().getId(), context.getStack().getCloudPlatform(),
                         CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event()
@@ -62,8 +100,9 @@ public class ClusterProxyReRegistrationActions {
             }
 
             @Override
-            protected Object getFailurePayload(ClusterProxyReRegistrationTriggerEvent payload,
-                    Optional<ClusterProxyReRegistrationContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(StackEvent payload,
+                    Optional<StackContext> flowContext, Exception ex) {
+                LOGGER.error("Failed to perform cluster proxy re-registration", ex);
                 return new StackFailureEvent(payload.getResourceId(), ex);
             }
         };

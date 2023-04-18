@@ -228,7 +228,7 @@ public class SdxDetachActions {
                     SdxCluster reattached = sdxAttachService.reattachCluster(detached);
                     sdxAttachService.reattachStack(reattached, detachedName);
                     if (cloudbreakStackService.getStack(detached).getTunnel().useCcmV1()) {
-                        sdxAttachService.reRegisterClusterProxyConfig(reattached, detachedCrn);
+                        sdxAttachService.reRegisterClusterProxyConfig(reattached, true, detachedCrn);
                     }
 
                     LOGGER.info("Successfully restored detached SDX with ID {} which failed to detach its external database.",

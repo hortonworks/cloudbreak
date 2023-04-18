@@ -82,12 +82,12 @@ public class SdxAttachDetachUtils {
         );
     }
 
-    public void reRegisterClusterProxyConfig(SdxCluster cluster, String originalCrn) {
+    public void reRegisterClusterProxyConfig(SdxCluster cluster, boolean skipFullReRegistration, String originalCrn) {
         LOGGER.info("Attempting to re-register the cluster proxy config for SDX cluster with ID: {}", cluster.getId());
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         FlowIdentifier flowId = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> stackV4Endpoint.reRegisterClusterProxyConfig(0L, cluster.getCrn(), originalCrn, initiatorUserCrn)
+                () -> stackV4Endpoint.reRegisterClusterProxyConfig(0L, cluster.getCrn(), skipFullReRegistration, originalCrn, initiatorUserCrn)
         );
         PollingConfig pollingConfig = new PollingConfig(
                 reRegisterClusterProxyConfigSleepTimeInSec, TimeUnit.SECONDS,

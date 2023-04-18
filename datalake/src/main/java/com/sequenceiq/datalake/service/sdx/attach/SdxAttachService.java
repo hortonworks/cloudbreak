@@ -66,7 +66,7 @@ public class SdxAttachService {
             if (clusterToReattach.hasExternalDatabase()) {
                 reattachExternalDatabase(reattached, detachedCrn);
             }
-            reRegisterClusterProxyConfig(reattached, detachedCrn);
+            reRegisterClusterProxyConfig(reattached, false, detachedCrn);
             return reattached;
         } catch (Exception e) {
             LOGGER.error("Failed to reattach SDX cluster with CRN '" + detachedCrn +
@@ -127,9 +127,9 @@ public class SdxAttachService {
      * This explicitly occurs during recovery due to the resized DL being deleted.
      * Note that this method has no undesired side effects and is safe to call even if not necessarily required.
      */
-    public void reRegisterClusterProxyConfig(SdxCluster cluster, String detachedCrn) {
+    public void reRegisterClusterProxyConfig(SdxCluster cluster, boolean skipFullReRegistration, String detachedCrn) {
         LOGGER.info("Started re-registering cluster proxy config for SDX cluster with ID: {}", cluster.getId());
-        sdxAttachDetachUtils.reRegisterClusterProxyConfig(cluster, detachedCrn);
+        sdxAttachDetachUtils.reRegisterClusterProxyConfig(cluster, skipFullReRegistration, detachedCrn);
         LOGGER.info("Finished re-registering cluster proxy config for SDX cluster with ID: {}. Now has crn: {}.",
                 cluster.getId(), cluster.getCrn());
     }
