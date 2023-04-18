@@ -53,13 +53,17 @@ public class CurrentImageUpgradeImageFilter implements UpgradeImageFilter {
     private Predicate<Image> filterCurrentImage(ImageFilterParams imageFilterParams) {
         return image -> {
             String currentImageId = imageFilterParams.getCurrentImage().getUuid();
-            if (!(image.getUuid().equals(currentImageId) && !isCurrentImageUsedOnInstances(imageFilterParams, currentImageId))) {
+            if (!isCurrentImage(image, currentImageId) || !isCurrentImageUsedOnInstances(imageFilterParams, currentImageId)) {
                 return true;
             } else {
                 LOGGER.debug("The current image was removed from the upgrade candidates.");
                 return false;
             }
         };
+    }
+
+    private boolean isCurrentImage(Image image, String currentImageId) {
+        return image.getUuid().equals(currentImageId);
     }
 
     private boolean isCurrentImageUsedOnInstances(ImageFilterParams imageFilterParams, String currentImageId) {

@@ -19,9 +19,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.conf.UpgradeImageFilterConfig;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { UpgradeImageFilterConfigTest.TestAppContext.class, UpgradeImageFilterConfig.class })
@@ -60,6 +63,15 @@ public class UpgradeImageFilterConfigTest {
 
         @MockBean
         private ImageService imageService;
+
+        @MockBean
+        private PythonVersionBasedRuntimeVersionValidator pythonVersionBasedRuntimeVersionValidator;
+
+        @MockBean
+        private StackDtoService stackDtoService;
+
+        @MockBean
+        private ImageCatalogService imageCatalogService;
 
     }
 }

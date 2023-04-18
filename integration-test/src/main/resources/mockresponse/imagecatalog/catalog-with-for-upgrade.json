@@ -18,7 +18,8 @@
           "cm": "CDH_RUNTIME",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME"
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.13-1.el7"
         },
         "stack-details": {
           "repo": {
@@ -86,7 +87,8 @@
           "cm": "CDH_RUNTIME",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME"
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.13-1.el7"
         },
         "stack-details": {
           "repo": {

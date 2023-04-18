@@ -15,9 +15,9 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFinishedEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidationRequest;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidator;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -29,20 +29,19 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeServiceValidationHandler.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private List<ServiceUpgradeValidator> serviceUpgradeValidators;
 
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeServiceValidationEvent> event) {
-        LOGGER.debug("Accepting Cluster upgrade service validation event.");
         ClusterUpgradeServiceValidationEvent request = event.getData();
+        LOGGER.debug("Accepting Cluster upgrade service validation event. {}", request);
         Long stackId = request.getResourceId();
         try {
-            Stack stack = getStack(stackId);
-            ServiceUpgradeValidationRequest validationRequest =
-                    new ServiceUpgradeValidationRequest(stack, request.isLockComponents(), request.getTargetRuntime());
+            ServiceUpgradeValidationRequest validationRequest = createValidationRequest(request, stackId);
+            LOGGER.debug("Running the following upgrade validations: {}", serviceUpgradeValidators);
             serviceUpgradeValidators.forEach(validator -> validator.validate(validationRequest));
             return new ClusterUpgradeValidationFinishedEvent(stackId);
         } catch (UpgradeValidationFailedException e) {
@@ -54,8 +53,9 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
         }
     }
 
-    private Stack getStack(Long stackId) {
-        return stackService.getByIdWithListsInTransaction(stackId);
+    private ServiceUpgradeValidationRequest createValidationRequest(ClusterUpgradeServiceValidationEvent request, Long stackId) {
+        StackDto stack = stackDtoService.getById(stackId);
+        return new ServiceUpgradeValidationRequest(stack, request.isLockComponents(), request.getTargetRuntime(), request.getUpgradeImageInfo());
     }
 
     @Override
