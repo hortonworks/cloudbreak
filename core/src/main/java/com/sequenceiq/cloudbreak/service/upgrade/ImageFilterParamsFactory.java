@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 
@@ -37,8 +37,9 @@ public class ImageFilterParamsFactory {
     @Inject
     private PlatformStringTransformer platformStringTransformer;
 
-    public ImageFilterParams create(Image image, boolean lockComponents, Stack stack, InternalUpgradeSettings internalUpgradeSettings, boolean getAllImages) {
-        return new ImageFilterParams(image, lockComponents, getStackRelatedParcels(stack), stack.getType(),
+    public ImageFilterParams create(StatedImage image, boolean lockComponents, Stack stack, InternalUpgradeSettings internalUpgradeSettings,
+            boolean getAllImages) {
+        return new ImageFilterParams(image.getImage(), image.getImageCatalogName(), lockComponents, getStackRelatedParcels(stack), stack.getType(),
                 getBlueprint(stack), stack.getId(), internalUpgradeSettings, platformStringTransformer.getPlatformStringForImageCatalog(stack.cloudPlatform(),
                 stack.getPlatformVariant()), stack.cloudPlatform(), stack.getRegion(), getAllImages);
     }

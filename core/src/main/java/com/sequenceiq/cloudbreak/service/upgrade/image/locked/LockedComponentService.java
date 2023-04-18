@@ -40,13 +40,18 @@ public class LockedComponentService {
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = imageCatalogService
                     .getImage(workspaceId, currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), targetImageId)
                     .getImage();
-            LOGGER.info("Determining that the stack {} component versions are the same on the current image {} and the target image {}", stack.getName(),
-                    currentCatalogImage.getUuid(), targetCatalogImage.getUuid());
-            return lockedComponentChecker.isUpgradePermitted(currentCatalogImage, targetCatalogImage, imageFilterParamsFactory.getStackRelatedParcels(stack));
+            return isComponentsLocked(stack, currentCatalogImage, targetCatalogImage);
         } catch (Exception ex) {
             String msg = "Exception during determining the lockComponents parameter.";
             LOGGER.warn(msg, ex);
             throw new CloudbreakRuntimeException(msg, ex);
         }
+    }
+
+    public boolean isComponentsLocked(StackDto stack, com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage,
+            com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage) {
+        LOGGER.debug("Determining that the stack {} component versions are the same on the current image {} and the target image {}", stack.getName(),
+                currentCatalogImage.getUuid(), targetCatalogImage.getUuid());
+        return lockedComponentChecker.isUpgradePermitted(currentCatalogImage, targetCatalogImage, imageFilterParamsFactory.getStackRelatedParcels(stack));
     }
 }

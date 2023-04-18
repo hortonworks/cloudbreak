@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -38,20 +39,20 @@ public class CurrentImageUsageConditionTest {
 
     @Test
     public void testFilterCurrentImageShouldReturnTrueWhenThereAreInstanceWithOtherImage() {
-        Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(NEW_IMAGE), createInstanceMetaData(OLD_IMAGE));
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaData(NEW_IMAGE, OLD_IMAGE);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertTrue(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
+        assertFalse(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
 
     @Test
     public void testFilterCurrentImageShouldReturnTrueWhenThereAreNoInstanceWithOtherImage() {
-        Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(NEW_IMAGE), createInstanceMetaData(NEW_IMAGE));
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaData(NEW_IMAGE, NEW_IMAGE);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertFalse(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
+        assertTrue(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
@@ -60,10 +61,11 @@ public class CurrentImageUsageConditionTest {
     public void testFilterCurrentImageShouldReturnFalseWhenOneOfTheImageJsonIsNull() {
         InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
         nullImageInstanceMetadata.setImage(new Json(null));
-        Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(NEW_IMAGE), nullImageInstanceMetadata);
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaData(NEW_IMAGE);
+        instanceMetaData.add(nullImageInstanceMetadata);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertFalse(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
+        assertTrue(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
@@ -72,10 +74,11 @@ public class CurrentImageUsageConditionTest {
     public void testFilterCurrentImageShouldReturnTrueWhenOneOfTheImageJsonIsNullButTheOtherIsOnOldImage() {
         InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
         nullImageInstanceMetadata.setImage(new Json(null));
-        Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(OLD_IMAGE), nullImageInstanceMetadata);
+        Set<InstanceMetaData> instanceMetaData = createInstanceMetaData(OLD_IMAGE);
+        instanceMetaData.add(nullImageInstanceMetadata);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertTrue(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
+        assertFalse(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
@@ -98,10 +101,16 @@ public class CurrentImageUsageConditionTest {
         return new com.sequenceiq.cloudbreak.cloud.model.Image(null, null, null, null, null, null, imageId, null);
     }
 
-    private InstanceMetaData createInstanceMetaData(String imageId) {
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setImage(new Json(createImage(imageId)));
-        return instanceMetaData;
+    private Set<InstanceMetaData> createInstanceMetaData(String... imageId) {
+        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
+        for (int i = 0; i < imageId.length; i++) {
+            String s = imageId[i];
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setInstanceId("instance-" + i);
+            instanceMetaData.setImage(new Json(createImage(imageId[i])));
+            instanceMetaDataSet.add(instanceMetaData);
+        }
+        return instanceMetaDataSet;
     }
 
 }

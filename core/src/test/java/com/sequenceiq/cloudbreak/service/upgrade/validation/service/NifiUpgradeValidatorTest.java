@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
@@ -47,19 +49,25 @@ public class NifiUpgradeValidatorTest {
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
 
-    private ClusterApi connector;
+    @Mock
+    private StackDto stack;
 
-    private Stack stack;
+    private ClusterApi connector;
 
     @BeforeEach
     public void before() {
         connector = Mockito.mock(ClusterApi.class);
-        stack = createStack();
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(BLUEPRINT_TEXT);
+        Cluster cluster = new Cluster();
+        cluster.setName(CLUSTER_NAME);
+        lenient().when(stack.getBlueprint()).thenReturn(blueprint);
+        lenient().when(stack.getCluster()).thenReturn(cluster);
     }
 
     @Test
     public void testValidateShouldNotThrowExceptionWhenLockComponentsIsFalse() {
-        underTest.validate(new ServiceUpgradeValidationRequest(null, false, ""));
+        underTest.validate(new ServiceUpgradeValidationRequest(null, false, "", null));
 
         verifyNoInteractions(cmTemplateService);
         verifyNoInteractions(clusterApiConnectors);
@@ -69,7 +77,7 @@ public class NifiUpgradeValidatorTest {
     public void testValidateShouldNotThrowExceptionWhenLockComponentsTrueAndTheNifiServiceIsNotPresent() {
         when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(false);
 
-        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, ""));
+        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "", null));
 
         verifyNoInteractions(clusterApiConnectors);
     }
@@ -80,7 +88,7 @@ public class NifiUpgradeValidatorTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG)).thenReturn(Optional.of(VolumeUtils.VOLUME_PREFIX));
 
-        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, ""));
+        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "", null));
         verify(cmTemplateService).isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT);
         verify(clusterApiConnectors).getConnector(stack);
         verify(connector).getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG);
@@ -92,7 +100,8 @@ public class NifiUpgradeValidatorTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG)).thenReturn(Optional.of("/var/etc"));
 
-        Exception actual = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "")));
+        Exception actual = assertThrows(UpgradeValidationFailedException.class,
+                () -> underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "", null)));
 
         assertEquals("Nifi working directory validation failed. The current directory /var/etc is not eligible for upgrade because it is located on the "
                 + "root disk. The Nifi working directory should be under the /hadoopfs/fs path. During upgrade or repair the Nifi directory would get deleted "

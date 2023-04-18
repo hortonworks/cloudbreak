@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateService;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
@@ -37,19 +37,19 @@ public class NifiUpgradeValidator implements ServiceUpgradeValidator {
         if (validationRequest.isLockComponents() && isNifiServicePresent(validationRequest.getStack())) {
             validateNifiWorkingDirectory(validationRequest.getStack());
         } else {
-            LOGGER.debug("Skipping Nifi service validation because  it's not OS upgrade or Nifi not present in the cluster.");
+            LOGGER.debug("Skipping Nifi service validation because it's not OS upgrade or Nifi not present in the cluster.");
         }
     }
 
-    private boolean isNifiServicePresent(Stack stack) {
+    private boolean isNifiServicePresent(StackDto stack) {
         return cmTemplateService.isServiceTypePresent(NIFI_SERVICE_TYPE, getBlueprintText(stack));
     }
 
-    private String getBlueprintText(Stack stack) {
-        return stack.getCluster().getBlueprint().getBlueprintText();
+    private String getBlueprintText(StackDto stack) {
+        return stack.getBlueprint().getBlueprintText();
     }
 
-    private void validateNifiWorkingDirectory(Stack stack) {
+    private void validateNifiWorkingDirectory(StackDto stack) {
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         Optional<String> nifiWorkingDirectory = connector.getRoleConfigValueByServiceType(stack.getCluster().getName(), ROLE_TYPE, NIFI_SERVICE_TYPE,
                 NIFI_WORKING_DIRECTORY);
