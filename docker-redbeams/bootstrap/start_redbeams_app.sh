@@ -41,4 +41,6 @@ if [ "$SECURE_RANDOM" == "false" ]; then
   REDBEAMS_JAVA_OPTS="$REDBEAMS_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 fi
 
+REDBEAMS_JAVA_OPTS="$REDBEAMS_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
+
 eval "(java $REDBEAMS_JAVA_OPTS -jar /redbeams.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"

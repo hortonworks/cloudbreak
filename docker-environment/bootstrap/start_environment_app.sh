@@ -41,4 +41,6 @@ if [ "$SECURE_RANDOM" == "false" ]; then
   ENVIRONMENT_JAVA_OPTS="$ENVIRONMENT_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 fi
 
+ENVIRONMENT_JAVA_OPTS="$ENVIRONMENT_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
+
 eval "(java $ENVIRONMENT_JAVA_OPTS -jar /environment.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"
