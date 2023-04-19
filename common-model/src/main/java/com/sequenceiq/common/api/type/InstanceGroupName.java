@@ -6,7 +6,13 @@ public enum InstanceGroupName {
     IDBROKER("idbroker"),
     GATEWAY("gateway"),
     AUXILIARY("auxiliary"),
-    CORE("core");
+    CORE("core"),
+    SOLRHG("solrhg"),
+    STORAGEHG("storagehg"),
+    KAFKAHG("kafkahg"),
+    RAZHG("razhg"),
+    ATLASHG("atlashg"),
+    HMSHG("hmshg");
 
     private final String name;
 

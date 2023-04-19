@@ -1,10 +1,16 @@
 package com.sequenceiq.datalake.service.upgrade;
 
+import static com.sequenceiq.common.api.type.InstanceGroupName.ATLASHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.AUXILIARY;
 import static com.sequenceiq.common.api.type.InstanceGroupName.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupName.GATEWAY;
+import static com.sequenceiq.common.api.type.InstanceGroupName.HMSHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.IDBROKER;
+import static com.sequenceiq.common.api.type.InstanceGroupName.KAFKAHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.MASTER;
+import static com.sequenceiq.common.api.type.InstanceGroupName.RAZHG;
+import static com.sequenceiq.common.api.type.InstanceGroupName.SOLRHG;
+import static com.sequenceiq.common.api.type.InstanceGroupName.STORAGEHG;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,6 +62,27 @@ class OrderedOSUpgradeRequestProviderTest {
                 createInstanceMetadata(GATEWAY, 1)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(AUXILIARY, 0))));
+        instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(SOLRHG, 3))));
+        instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(STORAGEHG, 3))));
+        instanceGroups.add(createInstanceGroup(Set.of(
+                createInstanceMetadata(KAFKAHG, 3),
+                createInstanceMetadata(KAFKAHG, 4)
+        )));
+        instanceGroups.add(createInstanceGroup(Set.of(
+                createInstanceMetadata(RAZHG, 3),
+                createInstanceMetadata(RAZHG, 4),
+                createInstanceMetadata(RAZHG, 5)
+        )));
+        instanceGroups.add(createInstanceGroup(Set.of(
+                createInstanceMetadata(ATLASHG, 3),
+                createInstanceMetadata(ATLASHG, 4),
+                createInstanceMetadata(ATLASHG, 5),
+                createInstanceMetadata(ATLASHG, 6)
+        )));
+        instanceGroups.add(createInstanceGroup(Set.of(
+                createInstanceMetadata(HMSHG, 3),
+                createInstanceMetadata(HMSHG, 4)
+        )));
 
         OrderedOSUpgradeSetRequest actual = underTest.createMediumDutyOrderedOSUpgradeSetRequest(createStackV4Response(instanceGroups), TARGET_IMAGE_ID);
 
@@ -63,12 +90,25 @@ class OrderedOSUpgradeRequestProviderTest {
         assertEquals(0, actual.getOrderedOsUpgradeSets().get(0).getOrder());
         assertEquals(1, actual.getOrderedOsUpgradeSets().get(1).getOrder());
         assertEquals(2, actual.getOrderedOsUpgradeSets().get(2).getOrder());
+        assertEquals(3, actual.getOrderedOsUpgradeSets().get(3).getOrder());
+        assertEquals(4, actual.getOrderedOsUpgradeSets().get(4).getOrder());
+        assertEquals(5, actual.getOrderedOsUpgradeSets().get(5).getOrder());
+        assertEquals(6, actual.getOrderedOsUpgradeSets().get(6).getOrder());
+
         assertThat(actual.getOrderedOsUpgradeSets().get(0).getInstanceIds(),
                 containsInAnyOrder(Arrays.asList("i-master0", "i-core0", "i-auxiliary0", "i-idbroker0").toArray()));
         assertThat(actual.getOrderedOsUpgradeSets().get(1).getInstanceIds(),
                 containsInAnyOrder(Set.of("i-master1", "i-core1", "i-gateway0", "i-idbroker1").toArray()));
         assertThat(actual.getOrderedOsUpgradeSets().get(2).getInstanceIds(),
                 containsInAnyOrder(Set.of("i-core2", "i-gateway1").toArray()));
+        assertThat(actual.getOrderedOsUpgradeSets().get(3).getInstanceIds(),
+                containsInAnyOrder(Set.of("i-solrhg3", "i-storagehg3", "i-kafkahg3", "i-razhg3", "i-atlashg3", "i-hmshg3").toArray()));
+        assertThat(actual.getOrderedOsUpgradeSets().get(4).getInstanceIds(),
+                containsInAnyOrder(Set.of("i-kafkahg4", "i-razhg4", "i-atlashg4", "i-hmshg4").toArray()));
+        assertThat(actual.getOrderedOsUpgradeSets().get(5).getInstanceIds(),
+                containsInAnyOrder(Set.of("i-razhg5", "i-atlashg5").toArray()));
+        assertThat(actual.getOrderedOsUpgradeSets().get(6).getInstanceIds(),
+                containsInAnyOrder(Set.of("i-atlashg6").toArray()));
     }
 
     @Test
