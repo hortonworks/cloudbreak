@@ -304,7 +304,7 @@ class SaltOrchestratorTest {
     void runServiceTest() throws Exception {
         SaltConfig saltConfig = new SaltConfig();
         OrchestratorAware orchestratorAware = mock(OrchestratorAware.class);
-        when(orchestratorAware.getAllNodes()).thenReturn(Set.of());
+        when(orchestratorAware.getAllFunctioningNodes()).thenReturn(Set.of());
         saltOrchestrator.initServiceRun(orchestratorAware, Collections.singletonList(gatewayConfig), targets, targets,
                 saltConfig, exitCriteriaModel, "testPlatform");
         saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
@@ -359,7 +359,7 @@ class SaltOrchestratorTest {
         when(remainingNode.getPrivateIp()).thenReturn("10.0.0.1");
         ExitCriteriaModel exitCriteriaModel = mock(ExitCriteriaModel.class);
         OrchestratorAware orchestratorAware = mock(OrchestratorAware.class);
-        when(orchestratorAware.getAllNodes()).thenReturn(Set.of());
+        when(orchestratorAware.getAllFunctioningNodes()).thenReturn(Set.of());
 
         saltOrchestrator.tearDown(orchestratorAware, Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(remainingNode), exitCriteriaModel);
 
@@ -466,7 +466,7 @@ class SaltOrchestratorTest {
         when(saltRunner.runnerWithCalculatedErrorCount(any(), any(), any(), anyInt())).thenReturn(mock(Callable.class));
 
         OrchestratorAware orchestratorAware = mock(OrchestratorAware.class);
-        when(orchestratorAware.getAllNodes()).thenReturn(allNodes);
+        when(orchestratorAware.getAllFunctioningNodes()).thenReturn(allNodes);
         saltOrchestrator.stopClusterManagerAgent(orchestratorAware, gatewayConfig, targets, downscaleTargets,
                 exitCriteriaModel, new CmAgentStopFlags(false, false, false));
 

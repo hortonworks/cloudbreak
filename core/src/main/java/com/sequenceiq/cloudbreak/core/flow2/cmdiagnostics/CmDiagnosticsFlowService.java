@@ -60,7 +60,7 @@ public class CmDiagnosticsFlowService {
                 .includeHosts(hosts)
                 .exlcudeHosts(excludeHosts)
                 .build();
-        Set<Node> filteredNodes = filter.apply(stack.getAllNodes());
+        Set<Node> filteredNodes = filter.apply(stack.getAllFunctioningNodes());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
         if (filteredNodes.isEmpty()) {
             LOGGER.debug("CM Diagnostics {} has been skipped. (no target minions)", operation);

@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.util.DigestUtils;
 
 import com.azure.core.management.exception.AdditionalInfo;
 import com.azure.core.management.exception.ManagementError;
@@ -90,8 +89,6 @@ public class AzureUtils {
     private static final int NETWORKINTERFACE_DETACH_CHECKING_MAXATTEMPT = 5;
 
     private static final int MAX_DISK_ENCRYPTION_SET_NAME_LENGTH = 80;
-
-    private static final int INSTANCE_NAME_HASH_LENGTH = 8;
 
     private static final String AUTHORIZATION_FAILED_CODE = "AuthorizationFailed";
 
@@ -149,17 +146,8 @@ public class AzureUtils {
         sb.delete(j, sb.length());
     }
 
-    public String getFullInstanceId(String stackName, String groupName, String privateId, String dbId) {
-        return stackName + getInstanceIdWithoutStackName(groupName, privateId, dbId);
-    }
-
-    public static String getInstanceIdWithoutStackName(String groupName, String privateId, String dbId) {
-        if (dbId != null) {
-            return String.format("%s%s-%s", getGroupName(groupName), privateId,
-                    DigestUtils.md5DigestAsHex(dbId.getBytes()).substring(0, INSTANCE_NAME_HASH_LENGTH));
-        } else {
-            return String.format("%s%s", getGroupName(groupName), privateId);
-        }
+    public String getPrivateInstanceId(String stackName, String groupName, String privateId) {
+        return String.format("%s%s%s", stackName, getGroupName(groupName), privateId);
     }
 
     public String getStackName(CloudContext cloudContext) {

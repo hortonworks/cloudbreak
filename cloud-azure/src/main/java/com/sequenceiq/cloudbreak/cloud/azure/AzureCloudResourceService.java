@@ -187,11 +187,10 @@ public class AzureCloudResourceService {
                                 .stream()
                                 .filter(cloudInstance -> cloudInstance.getTemplate().getStatus().equals(InstanceStatus.CREATE_REQUESTED))
                                 .filter(cloudInstance -> instance.getName().equalsIgnoreCase(
-                                        azureUtils.getFullInstanceId(stackName,
+                                        azureUtils.getPrivateInstanceId(stackName,
                                                 cloudInstance.getTemplate().getGroupName(),
-                                                Long.toString(cloudInstance.getTemplate().getPrivateId()),
-                                                cloudInstance.getDbIdOrDefaultIfNotExists())))
-                                .peek(cloudInstance -> LOGGER.debug("The following resource is categorized as VM instance {}", cloudInstance))
+                                                Long.toString(cloudInstance.getTemplate().getPrivateId()))))
+                                .peek(cloudInstance -> LOGGER.debug("The following resource is categorized as VM instance {}", cloudInstance.toString()))
                                 .forEach(filteredInstance ->
                                         vmResourceList.add(buildVm(instance, filteredInstance.getTemplate().getPrivateId(),
                                                 filteredInstance.getTemplate().getGroupName(), resourceGroupName))
