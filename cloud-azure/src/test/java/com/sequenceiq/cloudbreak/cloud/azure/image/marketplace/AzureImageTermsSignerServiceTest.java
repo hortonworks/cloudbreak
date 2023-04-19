@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image.marketplace;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -8,7 +9,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.URI;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
@@ -120,13 +120,12 @@ public class AzureImageTermsSignerServiceTest {
         underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
 
         verify(azureClient).getAccessToken();
-        ArgumentCaptor<URI> argumentCaptor = ArgumentCaptor.forClass(URI.class);
+        ArgumentCaptor<AzureImageTerms> argumentCaptor = ArgumentCaptor.forClass(AzureImageTerms.class);
         InOrder inOrder = Mockito.inOrder(azureRestOperationsService);
         inOrder.verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
-        inOrder.verify(azureRestOperationsService).httpPut(argumentCaptor.capture(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
-        URI signURI = argumentCaptor.getValue();
-        assertEquals(signURI.toString(), "https://management.azure.com/subscriptions/azureSubscriptionId/providers/Microsoft.MarketplaceOrdering/" +
-                "offerTypes/virtualmachine/publishers/cloudera/offers/my-offer/plans/my-plan/agreements/current?api-version=2015-06-01");
+        inOrder.verify(azureRestOperationsService).httpPut(any(), argumentCaptor.capture(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+        AzureImageTerms azureImageTermsWithAccept = argumentCaptor.getValue();
+        assertTrue(azureImageTermsWithAccept.getProperties().isAccepted());
     }
 
     @Test

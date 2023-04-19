@@ -22,7 +22,6 @@ import com.sequenceiq.environment.environment.v1.EnvironmentController;
 import com.sequenceiq.environment.environment.v1.EnvironmentInternalV1Controller;
 import com.sequenceiq.environment.environment.v1.co2.EnvironmentCO2Controller;
 import com.sequenceiq.environment.environment.v1.cost.EnvironmentCostController;
-import com.sequenceiq.environment.marketplace.v1.controller.AzureMarketplaceTermsController;
 import com.sequenceiq.environment.operation.v1.OperationController;
 import com.sequenceiq.environment.platformresource.v1.CredentialPlatformResourceController;
 import com.sequenceiq.environment.platformresource.v1.EnvironmentPlatformResourceController;
@@ -60,8 +59,7 @@ public class EndpointConfig extends ResourceConfig {
             AuthorizationUtilEndpoint.class,
             CDPStructuredEventV1Controller.class,
             EnvironmentCostController.class,
-            EnvironmentCO2Controller.class,
-            AzureMarketplaceTermsController.class);
+            EnvironmentCO2Controller.class);
 
     private final String applicationVersion;
 

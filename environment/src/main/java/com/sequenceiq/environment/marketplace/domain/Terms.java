@@ -48,7 +48,7 @@ public class Terms implements Serializable, AuthResource, AccountIdAwareResource
 
     @Override
     public void setResourceCrn(String resourceCrn) {
-        this.resourceCrn = resourceCrn;
+
     }
 
     public Long getId() {

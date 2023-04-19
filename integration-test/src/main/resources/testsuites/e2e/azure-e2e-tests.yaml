@@ -8,7 +8,6 @@ tests:
           - testCreateDistroXWithEncryptedVolumesInSingleRG
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMarketplaceImageTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaScalingTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRecipeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest
@@ -17,4 +16,3 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.saltpassword.RotateSaltPasswordE2ETest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.proxy.ModifyProxyConfigE2ETest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMarketplaceImageTests

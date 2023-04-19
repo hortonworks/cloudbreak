@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.lang.String.format;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -12,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -26,6 +30,12 @@ import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
 public class DistroXImagesTests extends AbstractE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXImagesTests.class);
+
+    private static final Map<String, InstanceStatus> INSTANCES_HEALTHY = new HashMap<>() {{
+            put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
+            put(HostGroupType.COMPUTE.getName(), InstanceStatus.SERVICES_HEALTHY);
+            put(HostGroupType.WORKER.getName(), InstanceStatus.SERVICES_HEALTHY);
+        }};
 
     @Inject
     private DistroXTestClient distroXTestClient;

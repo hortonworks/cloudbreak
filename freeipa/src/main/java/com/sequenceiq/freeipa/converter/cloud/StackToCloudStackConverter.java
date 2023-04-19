@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.converter.cloud;
 
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUD_STACK_TYPE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.FREEIPA_STACK_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
@@ -83,7 +82,6 @@ import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.SecurityRuleService;
-import com.sequenceiq.freeipa.service.client.AzureMarketplaceTermsClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 
@@ -106,9 +104,6 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
 
     @Inject
     private CachedEnvironmentClientService cachedEnvironmentClientService;
-
-    @Inject
-    private AzureMarketplaceTermsClientService azureMarketplaceTermsClientService;
 
     @Override
     public CloudStack convert(Stack stack) {
@@ -502,14 +497,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             params.put(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName);
             params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
         }
-        Optional<Boolean> acceptancePolicy = getAzureMarketplaceTermsAcceptancePolicy();
-        acceptancePolicy.ifPresent(acceptance -> params.put(ACCEPTANCE_POLICY_PARAMETER, acceptance.toString()));
         return params;
-    }
-
-    private Optional<Boolean> getAzureMarketplaceTermsAcceptancePolicy() {
-        return Optional.of(measure(() -> azureMarketplaceTermsClientService.getAccepted(),
-                LOGGER, "Terms setting queried under {} ms"));
     }
 
     private Optional<AzureResourceGroup> getAzureResourceGroup(String environmentCrn) {

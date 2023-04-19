@@ -29,8 +29,8 @@ public class AzureImageTermsSignerService {
     private static final String SIGN_ERROR_MESSAGE_HINTS = "Please try again. Alternatively you can also sign it manually, please refer to azure " +
             "documentation at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.";
 
-    private static final String AGREEMENTS_URL_AZ_TEMPLATE = "https://management.azure.com/subscriptions/%s/providers/Microsoft.MarketplaceOrdering/" +
-            "offerTypes/virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
+    private static final String SIGN_URL_AZ_TEMPLATE = "https://management.azure.com/subscriptions/%s/providers/Microsoft.MarketplaceOrdering/offerTypes/" +
+        "virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
 
     private static final String READ_PROBLEM_MESSAGE_TEMPLATE = "Failed to get the status of the Terms and Conditions for image %s. " +
             "Please make sure that Azure Marketplace Terms and Conditions have been accepted for your subscription before proceeding with CDP deployment.";
@@ -40,12 +40,12 @@ public class AzureImageTermsSignerService {
 
     @Retryable(maxAttempts = 15, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public AzureImageTermStatus getImageTermStatus(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage, AzureClient azureClient) {
-        URI agreementUri = getAgreementUri(subscriptionId, azureMarketplaceImage);
+        URI signUri = getSignUri(subscriptionId, azureMarketplaceImage);
         ErrorMessageBuilder errorMessageBuilder = new ErrorMessageBuilder(String.format(READ_ERROR_MESSAGE_TEMPLATE, azureMarketplaceImage))
                 .withPostfix("Please try again.");
         String token = getToken(azureClient, errorMessageBuilder);
         try {
-            AzureImageTerms azureImageTerms = azureRestOperationsService.httpGet(agreementUri, AzureImageTerms.class, token);
+            AzureImageTerms azureImageTerms = azureRestOperationsService.httpGet(signUri, AzureImageTerms.class, token);
             LOGGER.debug("Image terms and conditions received for image {} is : {}", azureMarketplaceImage, azureImageTerms);
             return AzureImageTermStatus.parseFromBoolean(azureImageTerms.getProperties().isAccepted());
         } catch (AzureRestResponseException e) {
@@ -67,18 +67,18 @@ public class AzureImageTermsSignerService {
      */
     @Retryable(maxAttempts = 15, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public void sign(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage, AzureClient azureClient) {
-        URI agreementUri = getAgreementUri(subscriptionId, azureMarketplaceImage);
+        URI signUri = getSignUri(subscriptionId, azureMarketplaceImage);
         ErrorMessageBuilder errorMessageBuilder =
                 new ErrorMessageBuilder(String.format(SIGN_ERROR_MESSAGE_TEMPLATE, azureMarketplaceImage)).withPostfix(SIGN_ERROR_MESSAGE_HINTS);
         String token = getToken(azureClient, errorMessageBuilder);
 
         try {
-            AzureImageTerms azureImageTerms = azureRestOperationsService.httpGet(agreementUri, AzureImageTerms.class, token);
+            AzureImageTerms azureImageTerms = azureRestOperationsService.httpGet(signUri, AzureImageTerms.class, token);
             LOGGER.debug("Image terms and conditions received for image {} is : {}", azureMarketplaceImage, azureImageTerms);
 
             azureImageTerms.getProperties().setAccepted(true);
 
-            AzureImageTerms responseImageTerms = azureRestOperationsService.httpPut(agreementUri, azureImageTerms, AzureImageTerms.class, token);
+            AzureImageTerms responseImageTerms = azureRestOperationsService.httpPut(signUri, azureImageTerms, AzureImageTerms.class, token);
             LOGGER.debug("Image terms and conditions received for image {} is : {}", azureMarketplaceImage, responseImageTerms);
         } catch (Exception e) {
             String message =
@@ -96,8 +96,8 @@ public class AzureImageTermsSignerService {
         return tokenOptional.get();
     }
 
-    private URI getAgreementUri(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage) {
-        String signUrl = String.format(AGREEMENTS_URL_AZ_TEMPLATE,
+    private URI getSignUri(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage) {
+        String signUrl = String.format(SIGN_URL_AZ_TEMPLATE,
                 subscriptionId, azureMarketplaceImage.getPublisherId(), azureMarketplaceImage.getOfferId(), azureMarketplaceImage.getPlanId());
         return URI.create(signUrl);
     }

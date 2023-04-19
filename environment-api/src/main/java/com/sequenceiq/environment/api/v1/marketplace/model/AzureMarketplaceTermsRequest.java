@@ -10,9 +10,6 @@ public class AzureMarketplaceTermsRequest {
     @NotNull
     private Boolean accepted;
 
-    public AzureMarketplaceTermsRequest() {
-    }
-
     public AzureMarketplaceTermsRequest(Boolean accepted) {
         this.accepted = accepted;
     }

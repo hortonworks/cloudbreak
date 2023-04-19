@@ -68,12 +68,6 @@ public class AzureImageTerms {
 
         private String signature;
 
-        private String plan;
-
-        private String privacyPolicyLink;
-
-        private String marketplaceTermsLink;
-
         public boolean isAccepted() {
             return accepted;
         }
@@ -122,30 +116,6 @@ public class AzureImageTerms {
             this.signature = signature;
         }
 
-        public String getPlan() {
-            return plan;
-        }
-
-        public void setPlan(String plan) {
-            this.plan = plan;
-        }
-
-        public String getPrivacyPolicyLink() {
-            return privacyPolicyLink;
-        }
-
-        public void setPrivacyPolicyLink(String privacyPolicyLink) {
-            this.privacyPolicyLink = privacyPolicyLink;
-        }
-
-        public String getMarketplaceTermsLink() {
-            return marketplaceTermsLink;
-        }
-
-        public void setMarketplaceTermsLink(String marketplaceTermsLink) {
-            this.marketplaceTermsLink = marketplaceTermsLink;
-        }
-
         @Override
         public String toString() {
             return new StringJoiner(", ", TermsProperties.class.getSimpleName() + "[", "]")
@@ -155,9 +125,6 @@ public class AzureImageTerms {
                     .add("publisher='" + publisher + "'")
                     .add("retrieveDatetime='" + retrieveDatetime + "'")
                     .add("signature='" + signature + "'")
-                    .add("plan='" + plan + "'")
-                    .add("privacyPolicyLink='" + privacyPolicyLink + "'")
-                    .add("marketplaceTermsLink='" + marketplaceTermsLink + "'")
                     .toString();
         }
     }

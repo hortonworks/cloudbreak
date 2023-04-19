@@ -16,7 +16,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
-import com.sequenceiq.it.cloudbreak.client.AzureMarketplaceTermsClient;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -28,7 +27,6 @@ import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.TermsPolicyDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -90,9 +88,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     @Inject
     private ProxyTestClient proxyTestClient;
 
-    @Inject
-    private AzureMarketplaceTermsClient azureMarketplaceTermsClient;
-
     @BeforeMethod
     public final void minimalSetupForClusterCreation(Object[] data, ITestResult testResult) {
         setupTest(testResult);
@@ -147,13 +142,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
-                .validate();
-    }
-
-    protected void initalizeAzureMarketplaceTermsPolicy(TestContext testContext) {
-        testContext.init(TermsPolicyDto.class)
-                .withAccepted(Boolean.TRUE)
-                .when(azureMarketplaceTermsClient.put())
                 .validate();
     }
 
