@@ -11,7 +11,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_UAE_CENTRAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
@@ -381,9 +380,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.ha.upgrade.enable}")
     private boolean haUpgradeEnabled;
-
-    @Value("${auth.mock.azure.single.resourcegroup.enable}")
-    private boolean enableAzureSingleResourceGroupDeployment;
 
     @Value("${auth.mock.azure.single.resourcegroup.dedicated.storage.account.enable}")
     private boolean enableAzureSingleResourceGroupDedicatedStorageAccount;
@@ -885,9 +881,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (haRepairEnabled) {
             builder.addEntitlements(createEntitlement(CDP_ALLOW_HA_REPAIR));
-        }
-        if (enableAzureSingleResourceGroupDeployment) {
-            builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP));
         }
         if (enableAzureSingleResourceGroupDedicatedStorageAccount) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT));

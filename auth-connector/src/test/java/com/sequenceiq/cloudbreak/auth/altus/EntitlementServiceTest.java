@@ -97,9 +97,6 @@ class EntitlementServiceTest {
                 {"CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE", (EntitlementCheckFunction) EntitlementService::ccmV2ToV2JumpgateUpgradeEnabled, false},
                 {"CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE", (EntitlementCheckFunction) EntitlementService::ccmV2ToV2JumpgateUpgradeEnabled, true},
 
-                {"CDP_AZURE_SINGLE_RESOURCE_GROUP", (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, false},
-                {"CDP_AZURE_SINGLE_RESOURCE_GROUP", (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, true},
-
                 {"CDP_CLOUD_IDENTITY_MAPPING", (EntitlementCheckFunction) EntitlementService::cloudIdentityMappingEnabled, false},
                 {"CDP_CLOUD_IDENTITY_MAPPING", (EntitlementCheckFunction) EntitlementService::cloudIdentityMappingEnabled, true},
 
