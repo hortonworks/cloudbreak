@@ -114,30 +114,21 @@ public class AzureParameterValidator implements ParameterValidator {
             return validationResultBuilder.build();
         }
     }
+
     //CHECKSTYLE:OFF:FallThroughCheck
     private ValidationResult validateEntitlement(ValidationResultBuilder validationResultBuilder, AzureResourceGroupDto azureResourceGroupDto,
             String accountId) {
 
         ResourceGroupUsagePattern resourceGroupUsagePattern = azureResourceGroupDto.getResourceGroupUsagePattern();
         if (Objects.nonNull(resourceGroupUsagePattern)) {
-            switch (resourceGroupUsagePattern) {
-                case USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT:
-                    if (!entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(accountId)) {
-                        LOGGER.info("Invalid request, singleResourceGroupDedicatedStorageAccountEnabled entitlement turned off for account {}", accountId);
-                        return validationResultBuilder.error(
-                                "You specified to use a single resource group with dedicated storage account for the images, "
-                                        + "but that feature is currently disabled").
-                                build();
-                    }
-                case USE_SINGLE:
-                    if (!entitlementService.azureSingleResourceGroupDeploymentEnabled(accountId)) {
-                        LOGGER.info("Invalid request, singleResourceGroupDeploymentEnabled entitlement turned off for account {}", accountId);
-                        return validationResultBuilder.error(
-                                "You specified to use a single resource group for all of your resources, "
-                                        + "but that feature is currently disabled").build();
-                    }
-                default:
-                    break;
+            if (ResourceGroupUsagePattern.USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT == resourceGroupUsagePattern) {
+                if (!entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(accountId)) {
+                    LOGGER.info("Invalid request, singleResourceGroupDedicatedStorageAccountEnabled entitlement turned off for account {}", accountId);
+                    return validationResultBuilder.error(
+                                    "You specified to use a single resource group with dedicated storage account for the images, "
+                                            + "but that feature is currently disabled").
+                            build();
+                }
             }
         }
         return validationResultBuilder.build();

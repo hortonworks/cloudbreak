@@ -208,9 +208,6 @@ public class MockUserManagementServiceTest {
                 {"microDutySdxEnabled false", "microDutySdxEnabled", false, "CDP_MICRO_DUTY_SDX", false},
                 {"microDutySdxEnabled true", "microDutySdxEnabled", true, "CDP_MICRO_DUTY_SDX", true},
 
-                {"enableAzureSingleResourceGroupDeployment false", "enableAzureSingleResourceGroupDeployment", false, "CDP_AZURE_SINGLE_RESOURCE_GROUP", false},
-                {"enableAzureSingleResourceGroupDeployment true", "enableAzureSingleResourceGroupDeployment", true, "CDP_AZURE_SINGLE_RESOURCE_GROUP", true},
-
                 {"enableAzureSingleResourceGroupDedicatedStorageAccount false", "enableAzureSingleResourceGroupDedicatedStorageAccount", false,
                         "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", false},
                 {"enableAzureSingleResourceGroupDedicatedStorageAccount true", "enableAzureSingleResourceGroupDedicatedStorageAccount", true,

@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -66,7 +65,6 @@ public class AzureParameterValidatorTest {
     @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(true);
     }
 
     @Test
@@ -293,40 +291,12 @@ public class AzureParameterValidatorTest {
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureUtils.checkResourceGroupExistenceWithRetry(azureClient, RESOURCE_GROUP_NAME)).thenReturn(false);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(false);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(azureClientService, never()).getClient(any());
-        verify(entitlementService, times(0)).azureSingleResourceGroupDeploymentEnabled(anyString());
-    }
-
-    @Test
-    public void testWhenFeatureTurnedOffAndUseSingleAndNoEncryptionParametersThenError() {
-        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
-                .withAzureParameters(AzureParametersDto.builder()
-                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
-                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
-                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
-                                .withName(RESOURCE_GROUP_NAME).build())
-                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
-                        .build())
-                .build();
-        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
-
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
-        AzureClient azureClient = mock(AzureClient.class);
-        when(azureClientService.getClient(any())).thenReturn(azureClient);
-        when(azureUtils.checkResourceGroupExistenceWithRetry(azureClient, RESOURCE_GROUP_NAME)).thenReturn(false);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(false);
-
-        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
-
-        assertTrue(validationResult.hasError());
-        assertEquals("You specified to use a single resource group for all of your resources, but that feature is currently disabled",
-                validationResult.getFormattedErrors());
     }
 
     @Test
@@ -346,7 +316,6 @@ public class AzureParameterValidatorTest {
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureUtils.checkResourceGroupExistenceWithRetry(azureClient, RESOURCE_GROUP_NAME)).thenReturn(false);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(true);
         when(entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(anyString())).thenReturn(false);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
