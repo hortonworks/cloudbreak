@@ -6,7 +6,7 @@
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.17 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry"
+      "blueprintName": "7.2.17 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry"
     },
     "externalDatabase": {
       "availabilityType": "HA"

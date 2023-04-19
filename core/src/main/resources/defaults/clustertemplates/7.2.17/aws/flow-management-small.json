@@ -5,7 +5,7 @@
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.17 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry"
+      "blueprintName": "7.2.17 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry"
     },
     "externalDatabase": {
       "availabilityType": "NON_HA"
