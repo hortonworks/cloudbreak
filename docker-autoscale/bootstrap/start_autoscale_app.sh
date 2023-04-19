@@ -46,4 +46,6 @@ if [ "$EXPOSE_JMX_METRICS" == "true" ]; then
   CB_JAVA_OPTS="$CB_JAVA_OPTS -javaagent:/jmx_prometheus_javaagent.jar=$EXPOSE_JMX_BIND_ADDRESS:$EXPOSE_JMX_METRICS_PORT:$EXPOSE_JMX_METRICS_CONFIG"
 fi
 
+CB_JAVA_OPTS="$CB_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
+
 eval "(java $CB_JAVA_OPTS -jar /periscope.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"

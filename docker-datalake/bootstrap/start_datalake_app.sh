@@ -41,4 +41,6 @@ if [ "$SECURE_RANDOM" == "false" ]; then
   DATALAKE_JAVA_OPTS="$DATALAKE_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 fi
 
+DATALAKE_JAVA_OPTS="$DATALAKE_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
+
 eval "(java $DATALAKE_JAVA_OPTS -jar /datalake.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"

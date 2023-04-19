@@ -30,8 +30,8 @@ $INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up --remove-orphans -
 
 date
 echo -e "\n\033[1;96m--- Copy mock infrastructure infrastructure-mock.p12 cert to certs dir\033[0m\n"
-mkdir -p $INTEGCB_LOCATION/certs/trusted
-cp ../mock-infrastructure/src/main/resources/keystore/infrastructure-mock.cer $INTEGCB_LOCATION/certs/trusted/infrastructure-mock.cer
+mkdir -p $INTEGCB_LOCATION/certs/into-nssdb
+cp ../mock-infrastructure/src/main/resources/keystore/infrastructure-mock.pem $INTEGCB_LOCATION/certs/into-nssdb/infrastructure-mock.pem
 
 date
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
