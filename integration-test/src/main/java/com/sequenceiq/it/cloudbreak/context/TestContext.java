@@ -32,17 +32,21 @@ import org.testng.Reporter;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderAssertionProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
@@ -75,6 +79,8 @@ public abstract class TestContext implements ApplicationContextAware {
     private static final String DESCRIPTION = "DESCRIPTION";
 
     private static final String TEST_METHOD_NAME = "TEST_METHOD_NAME";
+
+    private static final String MOCK_UMS_PASSWORD = "Password123!";
 
     private ApplicationContext applicationContext;
 
@@ -130,6 +136,9 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("${integrationtest.cloudbreak.server}")
     private String defaultServer;
 
+    @Value("${integrationtest.user.workloadPassword:}")
+    private String workloadPassword;
+
     @Inject
     private CloudProviderProxy cloudProvider;
 
@@ -156,6 +165,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private UmsTestClient umsTestClient;
 
     private boolean validated;
 
@@ -636,6 +648,29 @@ public abstract class TestContext implements ApplicationContextAware {
             return Optional.of(getTestParameter().get(CloudbreakTest.USER_NAME));
         }
         return Optional.empty();
+    }
+
+    public String getWorkloadUserName() {
+        String workloadUserName;
+        if (umsUserCacheInUse()) {
+            workloadUserName = given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
+                    .when(umsTestClient.getUserDetails(getActingUserCrn().toString(), regionAwareInternalCrnGeneratorFactory))
+                    .getResponse().getWorkloadUsername();
+        } else {
+            String username = getActingUserCrn().getResource();
+            workloadUserName = SanitizerUtil.sanitizeWorkloadUsername(username);
+        }
+        return workloadUserName;
+    }
+
+    public String getWorkloadPassword() {
+        String workloadPassword;
+        if (umsUserCacheInUse()) {
+            workloadPassword = this.workloadPassword;
+        } else {
+            workloadPassword = MOCK_UMS_PASSWORD;
+        }
+        return workloadPassword;
     }
 
     /**

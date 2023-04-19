@@ -8,11 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.config.ProxyConfigProperties;
-import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -26,8 +24,6 @@ class ProxyConfigCmAssertions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyProxyConfigE2ETest.class);
 
-    private static final String MOCK_UMS_PASSWORD = "Password123!";
-
     @Inject
     private ProxyConfigProperties proxyConfigProperties;
 
@@ -37,9 +33,8 @@ class ProxyConfigCmAssertions {
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeCmNoProxySettings() {
         return (testContext, testDto, client) -> {
             LOGGER.info("Validating {} datalake's CM has no proxy settings", testDto.getCrn());
-            String sanitizedUserName = getSanitizedUserName(testDto);
             Map<String, String> expectedConfig = getEmptyExpectedConfig();
-            clouderaManagerUtil.checkConfig(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, expectedConfig);
+            clouderaManagerUtil.checkConfig(testDto, testContext.getWorkloadUserName(), testContext.getWorkloadPassword(), expectedConfig);
             return testDto;
         };
     }
@@ -47,9 +42,8 @@ class ProxyConfigCmAssertions {
     public Assertion<DistroXTestDto, CloudbreakClient> validateDatahubCmNoProxySettings() {
         return (testContext, testDto, client) -> {
             LOGGER.info("Validating {} datahub's CM has no proxy settings", testDto.getCrn());
-            String sanitizedUserName = getSanitizedUserName(testDto);
             Map<String, String> expectedConfig = getEmptyExpectedConfig();
-            clouderaManagerUtil.checkConfig(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, expectedConfig);
+            clouderaManagerUtil.checkConfig(testDto, testContext.getWorkloadUserName(), testContext.getWorkloadPassword(), expectedConfig);
             return testDto;
         };
     }
@@ -57,9 +51,8 @@ class ProxyConfigCmAssertions {
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeCmProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
             LOGGER.info("Validating {} datalake's CM has correct proxy settings {}", testDto.getCrn(), proxy.getName());
-            String sanitizedUserName = getSanitizedUserName(testDto);
             Map<String, String> expectedConfig = getExpectedConfig(proxy);
-            clouderaManagerUtil.checkConfig(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, expectedConfig);
+            clouderaManagerUtil.checkConfig(testDto, testContext.getWorkloadUserName(), testContext.getWorkloadPassword(), expectedConfig);
             return testDto;
         };
     }
@@ -67,16 +60,10 @@ class ProxyConfigCmAssertions {
     public Assertion<DistroXTestDto, CloudbreakClient> validateDatahubCmProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
             LOGGER.info("Validating {} datahub's CM has correct proxy settings {}", testDto.getCrn(), proxy.getName());
-            String sanitizedUserName = getSanitizedUserName(testDto);
             Map<String, String> expectedConfig = getExpectedConfig(proxy);
-            clouderaManagerUtil.checkConfig(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, expectedConfig);
+            clouderaManagerUtil.checkConfig(testDto, testContext.getWorkloadUserName(), testContext.getWorkloadPassword(), expectedConfig);
             return testDto;
         };
-    }
-
-    private static String getSanitizedUserName(AbstractTestDto testDto) {
-        String username = testDto.getTestContext().getActingUserCrn().getResource();
-        return SanitizerUtil.sanitizeWorkloadUsername(username);
     }
 
     private static Map<String, String> getEmptyExpectedConfig() {
