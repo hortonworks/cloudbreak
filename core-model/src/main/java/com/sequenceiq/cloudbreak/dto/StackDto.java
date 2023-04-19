@@ -303,11 +303,11 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         return gateway != null;
     }
 
-    public Set<Node> getAllNodes() {
+    public Set<Node> getAllFunctioningNodes() {
         Set<Node> ret = new HashSet<>();
         getInstanceGroupDtos().forEach(ig -> {
             InstanceGroupView instanceGroup = ig.getInstanceGroup();
-            ig.getInstanceMetadataViews().forEach(im -> {
+            ig.getNotDeletedAndNotZombieInstanceMetaData().forEach(im -> {
                 if (StringUtils.isNotBlank(im.getDiscoveryFQDN())) {
                     ret.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
                             instanceGroup.getTemplate().getInstanceType(), im.getDiscoveryFQDN(), instanceGroup.getGroupName()));

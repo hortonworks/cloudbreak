@@ -36,13 +36,13 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
 
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeServiceValidationEvent> event) {
-        LOGGER.debug("Accepting Cluster upgrade service validation event.");
         ClusterUpgradeServiceValidationEvent request = event.getData();
+        LOGGER.debug("Accepting Cluster upgrade service validation event. {}", request);
         Long stackId = request.getResourceId();
         try {
             Stack stack = getStack(stackId);
-            ServiceUpgradeValidationRequest validationRequest =
-                    new ServiceUpgradeValidationRequest(stack, request.isLockComponents(), request.getTargetRuntime());
+            ServiceUpgradeValidationRequest validationRequest = createValidationRequest(request, stack);
+            LOGGER.debug("Running the following upgrade validations: {}", serviceUpgradeValidators);
             serviceUpgradeValidators.forEach(validator -> validator.validate(validationRequest));
             return new ClusterUpgradeValidationFinishedEvent(stackId);
         } catch (UpgradeValidationFailedException e) {
@@ -52,6 +52,10 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
             LOGGER.error("Cluster upgrade service validation was unsuccessful due to an internal error", e);
             return new ClusterUpgradeValidationFinishedEvent(stackId, e);
         }
+    }
+
+    private ServiceUpgradeValidationRequest createValidationRequest(ClusterUpgradeServiceValidationEvent request, Stack stack) {
+        return new ServiceUpgradeValidationRequest(stack, request.isLockComponents(), request.getTargetRuntime(), request.getUpgradeImageInfo());
     }
 
     private Stack getStack(Long stackId) {

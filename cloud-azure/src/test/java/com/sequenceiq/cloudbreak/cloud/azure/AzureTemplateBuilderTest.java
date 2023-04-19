@@ -224,7 +224,6 @@ public class AzureTemplateBuilderTest {
                 new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         Map<String, Object> params = new HashMap<>();
         params.put(NetworkConstants.SUBNET_ID, "existingSubnet");
-        params.put(CloudInstance.ID, 1L);
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication, "existingSubnet", "az1", params);
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
@@ -703,13 +702,13 @@ public class AzureTemplateBuilderTest {
         String lbGroupExpectedBlob =
                 "\"tags\":{},\"sku\":{\"name\":\"Standard\",\"tier\":\"Regional\"},\"properties\":{\"publicIPAllocationM" +
                         "ethod\":\"Static\"}},{\"apiVersion\":\"2016-09-01\",\"type\":\"Microsoft.Network/networkInterfa" +
-                        "ces\",\"name\":\"[concat(parameters('nicNamePrefix'),'m0-c4ca4238')]\",\"location\":\"[parameters('regio" +
+                        "ces\",\"name\":\"[concat(parameters('nicNamePrefix'),'m0')]\",\"location\":\"[parameters('regio" +
                         "n')]\",\"tags\":{},\"dependsOn\":[\"[concat('Microsoft.Network/networkSecurityGroups/',variable" +
                         "s('gateway-groupsecGroupName'))]\"";
         String nonLbGroupExpectedBlob =
                 "\"tags\":{},\"properties\":{\"publicIPAllocationMethod\":\"Dynamic\"}},{\"apiVersion\":\"2016-09-01\",\"" +
                         "type\":\"Microsoft.Network/networkInterfaces\",\"name\":\"[concat(parameters('nicNamePrefix'),'" +
-                        "m0-c4ca4238')]\",\"location\":\"[parameters('region')]\",\"tags\":{},\"dependsOn\":[\"[concat('Microsoft" +
+                        "m0')]\",\"location\":\"[parameters('region')]\",\"tags\":{},\"dependsOn\":[\"[concat('Microsoft" +
                         ".Network/networkSecurityGroups/',variables('core-groupsecGroupName'))]\"";
 
         Network network = new Network(new Subnet(SUBNET_CIDR));
@@ -1286,8 +1285,8 @@ public class AzureTemplateBuilderTest {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString).contains("[concat('datadisk', 'm0-c4ca4238', '0')]");
-        assertThat(templateString).contains("[concat('datadisk', 'm0-c4ca4238', '1')]");
+        assertThat(templateString).contains("[concat('datadisk', 'm0', '0')]");
+        assertThat(templateString).contains("[concat('datadisk', 'm0', '1')]");
     }
 
     @ParameterizedTest(name = "buildTestDisksOnAllVersionsAndVerifyOsDisks {0}")
@@ -1323,7 +1322,7 @@ public class AzureTemplateBuilderTest {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0-c4ca4238')]"));
+        assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0')]"));
     }
 
     @ParameterizedTest(name = "buildTestDisksWhenTheVersion210OrGreater {0}")
@@ -1361,7 +1360,7 @@ public class AzureTemplateBuilderTest {
                         AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0-c4ca4238')]"));
+        assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0')]"));
         assertFalse(templateString.contains("[concat('datadisk', 'm0', '1')]"));
     }
 

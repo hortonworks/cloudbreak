@@ -113,8 +113,7 @@ public class AzureInstanceView {
     }
 
     public String getInstanceId() {
-        String id = instance.getDbIdOrDefaultIfNotExists();
-        return AzureUtils.getInstanceIdWithoutStackName(instanceTemplate.getGroupName(), instanceTemplate.getPrivateId().toString(), id);
+        return AzureUtils.getGroupName(instanceTemplate.getGroupName()) + instanceTemplate.getPrivateId();
     }
 
     public long getPrivateId() {
