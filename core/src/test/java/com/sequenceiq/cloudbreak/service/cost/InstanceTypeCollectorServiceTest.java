@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.co2.model.DiskCO2Dto;
 import com.sequenceiq.cloudbreak.co2.model.InstanceGroupCO2Dto;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.cost.cloudera.ClouderaCostCache;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
@@ -67,6 +68,9 @@ public class InstanceTypeCollectorServiceTest {
 
     @Mock
     private ClouderaCostCache clouderaCostCache;
+
+    @Mock
+    private CredentialToExtendedCloudCredentialConverter credentialConverter;
 
     @InjectMocks
     private InstanceTypeCollectorService underTest;

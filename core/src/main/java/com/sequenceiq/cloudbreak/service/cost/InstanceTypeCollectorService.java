@@ -10,14 +10,13 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PricingCache;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.co2.model.ClusterCO2Dto;
 import com.sequenceiq.cloudbreak.co2.model.DiskCO2Dto;
 import com.sequenceiq.cloudbreak.co2.model.InstanceGroupCO2Dto;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.cost.cloudera.ClouderaCostCache;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
@@ -48,6 +47,9 @@ public class InstanceTypeCollectorService {
 
     @Inject
     private ClouderaCostCache clouderaCostCache;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter credentialConverter;
 
     public Optional<ClusterCostDto> getAllInstanceTypesForCost(StackView stack) {
         String region = stack.getRegion();
@@ -98,7 +100,7 @@ public class InstanceTypeCollectorService {
         if (pricingCacheMap.containsKey(cloudPlatform) && template != null) {
             PricingCache pricingCache = pricingCacheMap.get(cloudPlatform);
             String instanceType = template.getInstanceType();
-            ExtendedCloudCredential extendedCloudCredential = convertCredentialToExtendedCloudCredential(credential, cloudPlatform);
+            ExtendedCloudCredential extendedCloudCredential = credentialConverter.convert(credential);
             Optional<Double> pricePerInstance = pricingCache.getPriceForInstanceType(region, instanceType, extendedCloudCredential);
 
             if (pricePerInstance.isPresent()) {
@@ -132,7 +134,7 @@ public class InstanceTypeCollectorService {
         if (pricingCacheMap.containsKey(cloudPlatform) && template != null) {
             PricingCache pricingCache = pricingCacheMap.get(cloudPlatform);
             String instanceType = template.getInstanceType();
-            ExtendedCloudCredential extendedCloudCredential = convertCredentialToExtendedCloudCredential(credential, cloudPlatform);
+            ExtendedCloudCredential extendedCloudCredential = credentialConverter.convert(credential);
             Optional<Integer> coresPerInstance = pricingCache.getCpuCountForInstanceType(region, instanceType, extendedCloudCredential);
             Optional<Integer> memoryPerInstance = pricingCache.getMemoryForInstanceType(region, instanceType, extendedCloudCredential);
 
@@ -157,16 +159,5 @@ public class InstanceTypeCollectorService {
             }
         }
         return Optional.empty();
-    }
-
-    private ExtendedCloudCredential convertCredentialToExtendedCloudCredential(Credential credential, CloudPlatform cloudPlatform) {
-        Map<String, Object> credentialAttributes = credential.getAttributes().getMap();
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        CloudCredential cloudCredential = new CloudCredential(credential.getCrn(), credential.getName(), credential.getAccount());
-        String cloudPlatformString = cloudPlatform.name();
-        Map<String, Object> credMap = (Map<String, Object>) credentialAttributes.get(cloudPlatformString.toLowerCase());
-        cloudCredential.putParameter(cloudPlatformString.toLowerCase(), credMap);
-        return new ExtendedCloudCredential(cloudCredential, cloudPlatformString, "", userCrn, accountId, List.of());
     }
 }
