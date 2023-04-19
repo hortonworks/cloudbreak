@@ -1,0 +1,198 @@
+{
+  "cluster": {
+    "blueprintName": "7.2.18 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "validateBlueprint": false
+  },
+  "customDomain": {
+    "domainName": "cloudera.site",
+    "hostgroupNameAsHostname": true
+  },
+  "instanceGroups": [
+    {
+      "name": "master",
+      "template": {
+        "instanceType": "e2-standard-4",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "gateway",
+      "template": {
+        "instanceType": "e2-standard-8",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "core",
+      "template": {
+        "instanceType": "e2-standard-8",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 512,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 3,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "auxiliary",
+      "template": {
+        "instanceType": "e2-standard-4",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "solrHG",
+      "template": {
+        "instanceType": "e2-standard-4",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 256,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "storageHG",
+      "template": {
+        "instanceType": "e2-standard-4",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 256,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "kafkaHG",
+      "template": {
+        "instanceType": "e2-standard-4",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "razHG",
+      "template": {
+        "instanceType": "e2-standard-4",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "size": 0,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "atlasHG",
+      "template": {
+        "instanceType": "e2-standard-4",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "size": 0,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "hmsHG",
+      "template": {
+        "instanceType": "e2-standard-4",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "size": 0,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "idbroker",
+      "template": {
+        "instanceType": "e2-standard-2",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "type": "pd-ssd"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    }
+  ]
+}
