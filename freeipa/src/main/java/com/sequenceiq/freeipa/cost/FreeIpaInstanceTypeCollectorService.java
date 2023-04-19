@@ -9,12 +9,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PricingCache;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.co2.model.ClusterCO2Dto;
 import com.sequenceiq.cloudbreak.co2.model.DiskCO2Dto;
@@ -24,6 +19,7 @@ import com.sequenceiq.cloudbreak.cost.cloudera.ClouderaCostCache;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
 import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
+import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -45,6 +41,9 @@ public class FreeIpaInstanceTypeCollectorService {
 
     @Inject
     private ClouderaCostCache clouderaCostCache;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter credentialConverter;
 
     public Optional<ClusterCostDto> getAllInstanceTypesForCost(Stack stack) {
         String region = stack.getRegion();
@@ -95,7 +94,7 @@ public class FreeIpaInstanceTypeCollectorService {
         if (pricingCacheMap.containsKey(cloudPlatform) && template != null) {
             PricingCache pricingCache = pricingCacheMap.get(cloudPlatform);
             String instanceType = template.getInstanceType();
-            ExtendedCloudCredential extendedCloudCredential = convertCredentialToExtendedCloudCredential(credential, cloudPlatform);
+            ExtendedCloudCredential extendedCloudCredential = credentialConverter.convert(credential);
             Optional<Double> pricePerInstance = pricingCache.getPriceForInstanceType(region, instanceType, extendedCloudCredential);
 
             if (pricePerInstance.isPresent()) {
@@ -134,7 +133,7 @@ public class FreeIpaInstanceTypeCollectorService {
         if (pricingCacheMap.containsKey(cloudPlatform) && template != null) {
             PricingCache pricingCache = pricingCacheMap.get(cloudPlatform);
             String instanceType = template.getInstanceType();
-            ExtendedCloudCredential extendedCloudCredential = convertCredentialToExtendedCloudCredential(credential, cloudPlatform);
+            ExtendedCloudCredential extendedCloudCredential = credentialConverter.convert(credential);
             Optional<Integer> coresPerInstance = pricingCache.getCpuCountForInstanceType(region, instanceType, extendedCloudCredential);
             Optional<Integer> memoryPerInstance = pricingCache.getMemoryForInstanceType(region, instanceType, extendedCloudCredential);
 
@@ -162,22 +161,5 @@ public class FreeIpaInstanceTypeCollectorService {
             }
         }
         return Optional.empty();
-    }
-
-    private ExtendedCloudCredential convertCredentialToExtendedCloudCredential(Credential credential, CloudPlatform cloudPlatform) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> credentialAttributes;
-        try {
-            credentialAttributes = objectMapper.readValue(credential.getAttributes(), new TypeReference<>() { });
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        CloudCredential cloudCredential = new CloudCredential(credential.getCrn(), credential.getName(), credential.getAccountId());
-        String cloudPlatformString = cloudPlatform.name();
-        Map<String, Object> azureCredMap = (Map<String, Object>) credentialAttributes.get(cloudPlatformString.toLowerCase());
-        cloudCredential.putParameter(cloudPlatformString.toLowerCase(), azureCredMap);
-        return new ExtendedCloudCredential(cloudCredential, cloudPlatformString, "", userCrn, accountId, List.of());
     }
 }

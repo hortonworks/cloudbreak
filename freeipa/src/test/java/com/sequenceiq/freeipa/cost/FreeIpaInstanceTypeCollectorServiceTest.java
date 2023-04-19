@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
 import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -57,6 +58,9 @@ public class FreeIpaInstanceTypeCollectorServiceTest {
 
     @Mock
     private ClouderaCostCache clouderaCostCache;
+
+    @Mock
+    private CredentialToExtendedCloudCredentialConverter credentialConverter;
 
     @InjectMocks
     private FreeIpaInstanceTypeCollectorService underTest;
