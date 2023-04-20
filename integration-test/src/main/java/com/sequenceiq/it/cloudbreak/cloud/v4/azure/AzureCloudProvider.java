@@ -514,4 +514,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return azureProperties.getExternalDatabaseSslEnforcementSupported();
     }
+
+    @Override
+    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
+        return getLatestPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.AZURE.name(), false, runtime);
+    }
 }

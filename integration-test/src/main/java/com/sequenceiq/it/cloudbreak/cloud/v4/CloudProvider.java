@@ -203,4 +203,6 @@ public interface CloudProvider {
     boolean verticalScalingSupported();
 
     boolean isExternalDatabaseSslEnforcementSupported();
+
+    String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime);
 }

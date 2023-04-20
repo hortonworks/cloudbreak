@@ -549,4 +549,9 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return gcpProperties.getExternalDatabaseSslEnforcementSupported();
     }
+
+    @Override
+    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
+        return getLatestPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.GCP.name(), false, runtime);
+    }
 }
