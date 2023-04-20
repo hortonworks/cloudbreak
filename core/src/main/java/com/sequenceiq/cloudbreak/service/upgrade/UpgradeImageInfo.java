@@ -1,26 +1,23 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
 public class UpgradeImageInfo {
 
-    private final Image currentImage;
+    private Image currentImage;
 
-    private final StatedImage currentStatedImage;
+    private StatedImage currentStatedImage;
 
-    private final StatedImage targetStatedImage;
+    private StatedImage targetStatedImage;
 
-    @JsonCreator
-    public UpgradeImageInfo(
-            @JsonProperty("currentImage") Image currentImage,
-            @JsonProperty("currentStatedImage") StatedImage currentStatedImage,
-            @JsonProperty("targetStatedImage") StatedImage targetStatedImage) {
+    public UpgradeImageInfo(Image currentImage, StatedImage currentStatedImage, StatedImage targetStatedImage) {
         this.currentImage = currentImage;
         this.currentStatedImage = currentStatedImage;
         this.targetStatedImage = targetStatedImage;
+    }
+
+    public UpgradeImageInfo() {
     }
 
     public Image getCurrentImage() {
