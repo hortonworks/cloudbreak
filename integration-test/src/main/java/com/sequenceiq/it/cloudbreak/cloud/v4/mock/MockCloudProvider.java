@@ -138,6 +138,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
+        return getLatestPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.MOCK.name(), false, runtime);
+    }
+
+    @Override
     public MockStackV4Parameters stackParameters() {
         return new MockStackV4Parameters();
     }

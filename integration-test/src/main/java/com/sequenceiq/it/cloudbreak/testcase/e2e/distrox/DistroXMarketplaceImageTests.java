@@ -61,7 +61,7 @@ public class DistroXMarketplaceImageTests extends AbstractE2ETest {
                 .withUrl("https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-marketplace-image-catalog.json")
                 .when(imageCatalogTestClient.createIfNotExistV4())
                 .when((tc, dto, client) -> {
-                    selectedImageID.set(cloudProvider.getLatestPreWarmedImageID(tc, dto, client));
+                    selectedImageID.set(cloudProvider.getLatestPreWarmedImageIDByRuntime(tc, dto, client, "7.2.16"));
                     return dto;
                 })
                 .given(imageSettings, DistroXImageTestDto.class)

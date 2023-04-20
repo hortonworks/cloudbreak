@@ -86,6 +86,11 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
+        return getLatestPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.YARN.name(), false, runtime);
+    }
+
+    @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
         return credential
                 .withDescription(commonCloudProperties().getDefaultCredentialDescription())

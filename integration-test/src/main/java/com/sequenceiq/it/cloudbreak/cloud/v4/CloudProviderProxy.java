@@ -474,4 +474,9 @@ public class CloudProviderProxy implements CloudProvider {
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return delegate.isExternalDatabaseSslEnforcementSupported();
     }
+
+    @Override
+    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
+        return delegate.getLatestPreWarmedImageIDByRuntime(tc, dto, client, runtime);
+    }
 }

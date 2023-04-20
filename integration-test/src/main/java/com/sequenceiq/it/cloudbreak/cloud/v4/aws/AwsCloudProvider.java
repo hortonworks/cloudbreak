@@ -576,4 +576,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return awsProperties.getExternalDatabaseSslEnforcementSupported();
     }
+
+    @Override
+    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
+        return getLatestPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.AWS.name(), false, runtime);
+    }
 }

@@ -283,6 +283,12 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     protected abstract DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster);
 
     public String getLatestPreWarmedImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform, boolean govCloud) {
+        return getLatestPreWarmedImageByRuntimeVersion(imageCatalogTestDto, cloudbreakClient, platform, govCloud,
+                commonClusterManagerProperties.getRuntimeVersion());
+    }
+
+    public String getLatestPreWarmedImageByRuntimeVersion(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform,
+            boolean govCloud, String runtimeVersion) {
         try {
             List<ImageV4Response> prewarmedImagesForRuntime = cloudbreakClient
                     .getDefaultClient()
@@ -291,13 +297,13 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                             platform, null, null, govCloud)
                     .getCdhImages().stream()
                     .filter(image -> StringUtils.equalsIgnoreCase(image.getStackDetails().getVersion(),
-                            commonClusterManagerProperties.getRuntimeVersion()))
+                            runtimeVersion))
                     .sorted(Comparator.comparing(ImageV4Response::getPublished))
                     .collect(Collectors.toList());
 
             if (prewarmedImagesForRuntime.isEmpty()) {
                 throw new IllegalStateException(format("Cannot find pre-warmed images at '%s' provider for '%s' runtime version!", platform,
-                        commonClusterManagerProperties.getRuntimeVersion()));
+                        runtimeVersion));
             }
             ImageV4Response latestPrewarmedImage = prewarmedImagesForRuntime.get(prewarmedImagesForRuntime.size() - 1);
             Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
