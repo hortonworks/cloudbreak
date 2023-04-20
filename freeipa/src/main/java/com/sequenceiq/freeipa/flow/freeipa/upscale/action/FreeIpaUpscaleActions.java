@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -586,10 +587,10 @@ public class FreeIpaUpscaleActions {
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating environment stack config");
                 try {
                     ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                             () -> {
-                        environmentEndpoint.updateConfigsInEnvironmentByCrn(stack.getEnvironmentCrn());
-                    });
+                                environmentEndpoint.updateConfigsInEnvironmentByCrn(stack.getEnvironmentCrn());
+                            });
                     sendEvent(context, UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
                 } catch (ClientErrorException e) {
                     String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
@@ -632,6 +633,12 @@ public class FreeIpaUpscaleActions {
             @Inject
             private OperationService operationService;
 
+            @Inject
+            private InstanceMetaDataService instanceMetaDataService;
+
+            @Inject
+            private Clock clock;
+
             @Override
             protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<UpscaleState, UpscaleFlowEvent> stateContext,
                     UpscaleFailureEvent payload) {
@@ -656,9 +663,29 @@ public class FreeIpaUpscaleActions {
                 String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(context.getStack().getId(), getFailedStatus(variables), errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                updateInstanceStatus(stack.getNotDeletedInstanceMetaDataSet());
                 enableStatusChecker(stack, "Failed upscaling FreeIPA");
                 enableNodeStatusChecker(stack, "Failed upscaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
+            }
+
+            private void updateInstanceStatus(Set<InstanceMetaData> notDeletedInstanceMetaDataSet) {
+                Set<InstanceMetaData> instancesToUpdate = new HashSet<>();
+                notDeletedInstanceMetaDataSet.forEach(im -> {
+                    if (StringUtils.isBlank(im.getInstanceId())) {
+                        im.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.TERMINATED);
+                        im.setTerminationDate(clock.getCurrentTimeMillis());
+                        instancesToUpdate.add(im);
+                    } else if (StringUtils.isAnyBlank(im.getPrivateIp(), im.getDiscoveryFQDN())
+                            || com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED == im.getInstanceStatus()) {
+                        im.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.FAILED);
+                        instancesToUpdate.add(im);
+                    }
+                });
+                if (!instancesToUpdate.isEmpty()) {
+                    LOGGER.warn("Updating the following instances status during failed upscale: {}", instancesToUpdate);
+                    instanceMetaDataService.saveAll(instancesToUpdate);
+                }
             }
 
             @Override
