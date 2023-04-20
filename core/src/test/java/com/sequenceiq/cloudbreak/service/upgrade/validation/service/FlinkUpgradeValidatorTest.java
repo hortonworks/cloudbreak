@@ -76,7 +76,7 @@ public class FlinkUpgradeValidatorTest {
 
     @Test
     void validateNoFlinkSevice() {
-        when(cmTemplateService.isServiceTypePresent("FLINK", BLUEPRINT_TEXT)).thenReturn(false);
+        when(cmTemplateService.isServiceTypePresent("SQL_STREAM_BUILDER", BLUEPRINT_TEXT)).thenReturn(false);
         ServiceUpgradeValidationRequest request =
                 new ServiceUpgradeValidationRequest(stack, false, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16.getVersion());
         underTest.validate(request);
@@ -86,9 +86,9 @@ public class FlinkUpgradeValidatorTest {
 
     @Test
     void validateNoRole() {
-        when(cmTemplateService.isServiceTypePresent("FLINK", BLUEPRINT_TEXT)).thenReturn(true);
+        when(cmTemplateService.isServiceTypePresent("SQL_STREAM_BUILDER", BLUEPRINT_TEXT)).thenReturn(true);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
-        when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "FLINK")).thenReturn(false);
+        when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "SQL_STREAM_BUILDER")).thenReturn(false);
         ServiceUpgradeValidationRequest request =
                 new ServiceUpgradeValidationRequest(stack, false, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16.getVersion());
         underTest.validate(request);
@@ -96,9 +96,9 @@ public class FlinkUpgradeValidatorTest {
 
     @Test
     void validateApiException() {
-        when(cmTemplateService.isServiceTypePresent("FLINK", BLUEPRINT_TEXT)).thenReturn(true);
+        when(cmTemplateService.isServiceTypePresent("SQL_STREAM_BUILDER", BLUEPRINT_TEXT)).thenReturn(true);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
-        when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "FLINK"))
+        when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "SQL_STREAM_BUILDER"))
                 .thenThrow(new CloudbreakServiceException("Api exception"));
 
         ServiceUpgradeValidationRequest request =
@@ -111,9 +111,9 @@ public class FlinkUpgradeValidatorTest {
 
     @Test
     void validateRoleExistsValidationFails() {
-        when(cmTemplateService.isServiceTypePresent("FLINK", BLUEPRINT_TEXT)).thenReturn(true);
+        when(cmTemplateService.isServiceTypePresent("SQL_STREAM_BUILDER", BLUEPRINT_TEXT)).thenReturn(true);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
-        when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "FLINK")).thenReturn(true);
+        when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "SQL_STREAM_BUILDER")).thenReturn(true);
 
         ServiceUpgradeValidationRequest request =
                 new ServiceUpgradeValidationRequest(stack, false, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16.getVersion());
