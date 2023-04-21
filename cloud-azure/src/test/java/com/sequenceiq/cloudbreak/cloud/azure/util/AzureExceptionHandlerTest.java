@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
@@ -168,6 +169,11 @@ public class AzureExceptionHandlerTest {
     void testManagementExceptionIsConflict() {
         assertTrue(underTest.isExceptionCodeConflict(
                 new ManagementException("asdf", mock(HttpResponse.class), new ManagementError("conflict", "asdffda"))));
+        ManagementError managementErrorWithDetails = mock(ManagementError.class);
+        when(managementErrorWithDetails.getCode()).thenReturn("Asdf");
+        when(managementErrorWithDetails.getDetails()).thenAnswer(invocation -> List.of(new ManagementError("conflict", "asdffda")));
+        assertTrue(underTest.isExceptionCodeConflict(
+                new ManagementException("asdf", mock(HttpResponse.class), managementErrorWithDetails)));
         assertFalse(underTest.isExceptionCodeConflict(
                 new ManagementException("asdf", mock(HttpResponse.class), new ManagementError("nope", "asdffda"))));
         assertFalse(underTest.isExceptionCodeConflict(
