@@ -1,5 +1,5 @@
 {
-  "description": "7.2.18 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry",
+  "description": "7.2.18 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry",
   "blueprint": {
     "cdhVersion": "7.2.18",
     "displayName": "flow-management",
