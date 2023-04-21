@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -28,8 +27,6 @@ import com.sequenceiq.it.util.TestParameter;
 public class DistroXStopStartTest extends AbstractE2ETest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXStopStartTest.class);
-
-    private static final String MOCK_UMS_PASSWORD = "Password123!";
 
     @Inject
     private DistroXTestClient distroXTestClient;
@@ -57,9 +54,6 @@ public class DistroXStopStartTest extends AbstractE2ETest {
             then = "clusters are created, device mount point are checked, and after stopping and starting the clusters ephemeral store handling checked again")
     public void testCreateDistroXWithEphemeralTemporaryStorage(TestContext testContext) {
 
-        String username = testContext.getActingUserCrn().getResource();
-        String sanitizedUserName = SanitizerUtil.sanitizeWorkloadUsername(username);
-
         testContext
                 .given("non_eph_dx", DistroXTestDto.class)
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
@@ -74,35 +68,33 @@ public class DistroXStopStartTest extends AbstractE2ETest {
                 .when(distroXTestClient.create(), RunningParameter.key("eph_dx"))
                 .given("non_eph_dx", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("non_eph_dx"))
-                .then((tc, testDto, client) -> verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(tc, sanitizedUserName, testDto))
+                .then((tc, testDto, client) -> verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(tc, testDto))
                 .when(distroXTestClient.stop(), RunningParameter.key("non_eph_dx"))
                 .await(STACK_STOPPED, RunningParameter.key("non_eph_dx"))
                 .when(distroXTestClient.start(), RunningParameter.key("non_eph_dx"))
                 .await(STACK_AVAILABLE, RunningParameter.key("non_eph_dx"))
-                .then((tc, testDto, client) -> verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(tc, sanitizedUserName, testDto))
+                .then((tc, testDto, client) -> verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(tc, testDto))
                 .given("eph_dx", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("eph_dx"))
                 .then(this::verifyMountedDisks)
-                .then((tc, testDto, client) -> verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(tc, sanitizedUserName, testDto))
-                .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, sanitizedUserName,
-                        MOCK_UMS_PASSWORD))
+                .then((tc, testDto, client) -> verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(tc, testDto))
+                .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, tc))
                 .when(distroXTestClient.stop(), RunningParameter.key("eph_dx"))
                 .await(STACK_STOPPED, RunningParameter.key("eph_dx"))
                 .when(distroXTestClient.start(), RunningParameter.key("eph_dx"))
                 .await(STACK_AVAILABLE, RunningParameter.key("eph_dx"))
                 .then(this::verifyMountedDisks)
-                .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, sanitizedUserName,
-                        MOCK_UMS_PASSWORD))
+                .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, tc))
                 .validate();
     }
 
-    private DistroXTestDto verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(TestContext testContext, String sanitizedUserName, DistroXTestDto testDto) {
+    private DistroXTestDto verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(TestContext testContext, DistroXTestDto testDto) {
         CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getInstanceGroups();
         Set<String> mountPoints = cloudFunctionality.getVolumeMountPoints(instanceGroups, List.of(HostGroupType.WORKER.getName()));
 
-        clouderaManagerUtil.checkClouderaManagerHdfsDatanodeRoleConfigGroups(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, mountPoints);
-        clouderaManagerUtil.checkClouderaManagerHdfsNamenodeRoleConfigGroups(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, mountPoints);
+        clouderaManagerUtil.checkClouderaManagerHdfsDatanodeRoleConfigGroups(testDto, testContext, mountPoints);
+        clouderaManagerUtil.checkClouderaManagerHdfsNamenodeRoleConfigGroups(testDto, testContext, mountPoints);
         return testDto;
     }
 

@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -27,8 +26,6 @@ import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class DistroXUpgradeTests extends AbstractE2ETest {
-
-    private static final String MOCK_UMS_PASSWORD = "Password123!";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -60,9 +57,6 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         String distroXName = resourcePropertyProvider().getName();
         String currentRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
-
-        String username = testContext.getActingUserCrn().getResource();
-        String sanitizedUserName = SanitizerUtil.sanitizeWorkloadUsername(username);
 
         testContext
                 .given(sdxName, SdxTestDto.class)
@@ -96,8 +90,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                     cloudFunctionality.checkMountedDisks(instanceGroups, List.of(HostGroupType.WORKER.getName()));
                     return testDto;
                 })
-                .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroupsDirect(testDto, sanitizedUserName,
-                        MOCK_UMS_PASSWORD))
+                .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroupsDirect(testDto, tc))
                 .validate();
     }
 }

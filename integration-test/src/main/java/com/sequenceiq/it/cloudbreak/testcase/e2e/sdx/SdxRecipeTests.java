@@ -70,7 +70,7 @@ public class SdxRecipeTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName()), filePath, fileName, 1, null, null, sshJUtil))
+                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName()), filePath, fileName, 1, sshJUtil))
                 .then(saltHighStateDurationAssertions::saltHighStateDurationLimits)
                 .when(sdxTestClient.delete())
                 .await(SdxClusterStatusResponse.DELETED)

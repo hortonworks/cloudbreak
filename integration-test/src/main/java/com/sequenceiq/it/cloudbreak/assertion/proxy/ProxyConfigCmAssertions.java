@@ -16,13 +16,12 @@ import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.proxy.ModifyProxyConfigE2ETest;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 
 @Component
 class ProxyConfigCmAssertions {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModifyProxyConfigE2ETest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigCmAssertions.class);
 
     @Inject
     private ProxyConfigProperties proxyConfigProperties;
@@ -34,7 +33,7 @@ class ProxyConfigCmAssertions {
         return (testContext, testDto, client) -> {
             LOGGER.info("Validating {} datalake's CM has no proxy settings", testDto.getCrn());
             Map<String, String> expectedConfig = getEmptyExpectedConfig();
-            clouderaManagerUtil.checkConfig(testDto, testContext.getWorkloadUserName(), testContext.getWorkloadPassword(), expectedConfig);
+            clouderaManagerUtil.checkConfig(testDto, testContext, expectedConfig);
             return testDto;
         };
     }
@@ -43,7 +42,7 @@ class ProxyConfigCmAssertions {
         return (testContext, testDto, client) -> {
             LOGGER.info("Validating {} datahub's CM has no proxy settings", testDto.getCrn());
             Map<String, String> expectedConfig = getEmptyExpectedConfig();
-            clouderaManagerUtil.checkConfig(testDto, testContext.getWorkloadUserName(), testContext.getWorkloadPassword(), expectedConfig);
+            clouderaManagerUtil.checkConfig(testDto, testContext, expectedConfig);
             return testDto;
         };
     }
@@ -52,7 +51,7 @@ class ProxyConfigCmAssertions {
         return (testContext, testDto, client) -> {
             LOGGER.info("Validating {} datalake's CM has correct proxy settings {}", testDto.getCrn(), proxy.getName());
             Map<String, String> expectedConfig = getExpectedConfig(proxy);
-            clouderaManagerUtil.checkConfig(testDto, testContext.getWorkloadUserName(), testContext.getWorkloadPassword(), expectedConfig);
+            clouderaManagerUtil.checkConfig(testDto, testContext, expectedConfig);
             return testDto;
         };
     }
@@ -61,7 +60,7 @@ class ProxyConfigCmAssertions {
         return (testContext, testDto, client) -> {
             LOGGER.info("Validating {} datahub's CM has correct proxy settings {}", testDto.getCrn(), proxy.getName());
             Map<String, String> expectedConfig = getExpectedConfig(proxy);
-            clouderaManagerUtil.checkConfig(testDto, testContext.getWorkloadUserName(), testContext.getWorkloadPassword(), expectedConfig);
+            clouderaManagerUtil.checkConfig(testDto, testContext, expectedConfig);
             return testDto;
         };
     }

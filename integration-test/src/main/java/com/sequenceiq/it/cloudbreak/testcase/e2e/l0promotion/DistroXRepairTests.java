@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -63,9 +62,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    @Value("${integrationtest.user.workloadPassword:}")
-    private String workloadPassword;
-
     @Override
     protected void setupTest(TestContext testContext) {
         assertSupportedCloudPlatform(CloudPlatform.AZURE);
@@ -87,9 +83,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
         String distrox = resourcePropertyProvider().getName();
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
-        String userCrn = testContext.getActingUserCrn().toString();
-        String workloadUsername = testContext.given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.getUserDetails(userCrn, regionAwareInternalCrnGeneratorFactory)).getResponse().getWorkloadUsername();
 
         testContext
                 .given(FreeIpaTestDto.class)
@@ -99,7 +92,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .given(UmsTestDto.class)
                     .assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(workloadPassword, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword(), regionAwareInternalCrnGeneratorFactory))
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
@@ -127,8 +120,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .await(STACK_AVAILABLE, key(distrox))
                 .awaitForHealthyInstances()
                 .then(this::verifyMountedDisks)
-                .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, workloadUsername,
-                        workloadPassword))
+                .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, tc))
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
                     List<String> instanceIds = distroxUtil.getInstanceIds(testDto, client, MASTER.getName());

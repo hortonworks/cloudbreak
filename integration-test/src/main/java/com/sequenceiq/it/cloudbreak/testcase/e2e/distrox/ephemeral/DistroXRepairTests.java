@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -36,8 +35,6 @@ import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
  */
 public class DistroXRepairTests extends AbstractE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXRepairTests.class);
-
-    private static final String MOCK_UMS_PASSWORD = "Password123!";
 
     @Inject
     private DistroXTestClient distroXTestClient;
@@ -69,9 +66,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
 
-        String username = testContext.getActingUserCrn().getResource();
-        String sanitizedUserName = SanitizerUtil.sanitizeWorkloadUsername(username);
-
         testContext
                 .given(distrox, DistroXTestDto.class)
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
@@ -94,8 +88,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .await(STACK_AVAILABLE, key(distrox))
                 .awaitForHealthyInstances()
                 .then(this::verifyMountedDisks)
-                .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, sanitizedUserName,
-                        MOCK_UMS_PASSWORD))
+                .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, tc))
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
                     List<String> instanceIds = distroxUtil.getInstanceIds(testDto, client, MASTER.getName());
