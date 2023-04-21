@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
@@ -81,18 +80,18 @@ public class MultiAzCalculatorService {
         return availabilityZone == null || availabilityZone.equals(value.getAvailabilityZone());
     }
 
-    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup) {
+    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroupNetwork instanceGroupNetwork, Set<InstanceMetaData> instanceMetaDataSet) {
         LOGGER.trace("Calculate the subnet by round robin from {}", subnetAzPairs);
         Map<String, Integer> subnetUsage = new HashMap<>();
-        Set<String> subnetIds = collectSubnetIds(instanceGroup, NetworkScaleDetails.getEmpty());
+        Set<String> subnetIds = collectSubnetIds(instanceGroupNetwork, NetworkScaleDetails.getEmpty());
         LOGGER.trace("Collected subnetIds: {}", subnetIds);
         initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
-        List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>(instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
+        List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>(instanceMetaDataSet);
         collectCurrentSubnetUsage(instanceMetadataViews, subnetUsage);
 
-        if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
+        if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroupNetwork)) {
             checkSubnetUsageCount(subnetUsage, subnetIds);
-            for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
+            for (InstanceMetaData instanceMetaData : instanceMetaDataSet) {
                 if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
                     Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(subnetUsage);
                     String leastUsedSubnetId = searchTheSmallestUsedID(subnetUsage, numberOfInstanceInASubnet);
@@ -111,7 +110,7 @@ public class MultiAzCalculatorService {
         LOGGER.debug("Calculate the subnet by round robin for {} from {}", instanceMetaData.getDiscoveryFQDN(), subnetAzPairs);
         Map<String, Integer> subnetUsage = new HashMap<>();
         InstanceGroupView instanceGroup = instanceGroupDto.getInstanceGroup();
-        Set<String> subnetIds = collectSubnetIds(instanceGroup, networkScaleDetails);
+        Set<String> subnetIds = collectSubnetIds(instanceGroup.getInstanceGroupNetwork(), networkScaleDetails);
         LOGGER.debug("Collected subnetIds: {}", subnetIds);
         initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
         collectCurrentSubnetUsage(instanceGroupDto.getNotDeletedAndNotZombieInstanceMetaData(), subnetUsage);
@@ -216,9 +215,8 @@ public class MultiAzCalculatorService {
         }
     }
 
-    private Set<String> collectSubnetIds(InstanceGroupView instanceGroup, NetworkScaleDetails networkScaleDetails) {
+    private Set<String> collectSubnetIds(InstanceGroupNetwork instanceGroupNetwork, NetworkScaleDetails networkScaleDetails) {
         Set<String> allSubnetIds = new HashSet<>();
-        InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
         if (instanceGroupNetwork != null) {
             Json attributes = instanceGroupNetwork.getAttributes();
             if (attributes != null) {

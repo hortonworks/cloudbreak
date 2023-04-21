@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -7,14 +8,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +31,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -40,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -50,8 +61,10 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
@@ -156,6 +169,7 @@ public class StackCreatorServiceTest {
     @Mock
     private ValidationResult validationResult;
 
+//    @Spy
     @Mock
     private MultiAzCalculatorService multiAzCalculatorService;
 
@@ -341,9 +355,8 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 2, InstanceGroupType.CORE);
         InstanceGroup computeGroup = getARequestGroup("compute", 4, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup));
-        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(Map.of());
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
-
+        doReturn(Map.of()).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), anySet());
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
         Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
@@ -370,8 +383,8 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup, managerGroup, gatewayGroup));
-        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(Map.of());
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
+        doReturn(Map.of()).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), anySet());
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
@@ -399,6 +412,55 @@ public class StackCreatorServiceTest {
         validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 3, hostGroupInstances.get("worker"), null, null, null);
     }
 
+    @Test
+    public void testFillInstanceMetadataForDl() {
+        Stack stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+        InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
+        InstanceGroup gatewayGroup = getARequestGroup("gateway", 2, InstanceGroupType.GATEWAY);
+        InstanceGroup coreGroup = getARequestGroup("core", 3, InstanceGroupType.CORE);
+        InstanceGroup auxiliaryGroup = getARequestGroup("auxiliary", 1, InstanceGroupType.CORE);
+        InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
+        stack.setInstanceGroups(Set.of(masterGroup, coreGroup, auxiliaryGroup, idbrokerGroup, gatewayGroup));
+        doReturn(subnetAzPairs(3)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
+
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), anySet());
+//        doNothing().when(multiAzCalculatorService).prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId()
+
+        underTest.fillInstanceMetadata(environmentResponse, stack);
+        verify(multiAzCalculatorService, times(3)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), anySet());
+        reset(multiAzCalculatorService);
+
+        stack.setInstanceGroups(Set.of(auxiliaryGroup, gatewayGroup));
+        underTest.fillInstanceMetadata(environmentResponse, stack);
+        ArgumentCaptor<Set<InstanceMetaData>> capture = ArgumentCaptor.forClass(Set.class);
+        verify(multiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), capture.capture());
+        Assert.assertEquals(3, capture.getValue().size());
+        capture.getValue().stream().allMatch(instanceMetaData -> {
+            if(instanceMetaData.getId() == 1L) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
+    private Map<String, String> subnetAzPairs(int subnetCount) {
+        Map<String, String> subnetAzPairs = new HashMap<>();
+        for (int i = 0; i < subnetCount; i++) {
+            subnetAzPairs.put(cloudSubnetName(i), cloudSubnetAz(i));
+        }
+        return subnetAzPairs;
+    }
+
+    private String cloudSubnetName(int i) {
+        return "name-" + i;
+    }
+
+    private String cloudSubnetAz(int i) {
+        return "az-" + i;
+    }
+
     static Object[][] fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider() {
         return new Object[][]{
                 // testCaseName subnetId availabilityZone
@@ -414,15 +476,16 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(workerGroup));
         Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzPairs);
+        doReturn(subnetAzPairs).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
         doAnswer(invocation -> {
-            InstanceGroup instanceGroup = invocation.getArgument(1, InstanceGroup.class);
-            instanceGroup.getAllInstanceMetaData().forEach(instanceMetaData -> {
+            Set<InstanceMetaData> instanceMetaDataSet = invocation.getArgument(2);
+            instanceMetaDataSet.forEach(instanceMetaData -> {
                 instanceMetaData.setSubnetId(subnetId);
                 instanceMetaData.setAvailabilityZone(availabilityZone);
             });
             return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, workerGroup);
+        }).when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, workerGroup.getInstanceGroupNetwork(),
+                workerGroup.getNotTerminatedAndNotZombieInstanceMetaDataSet());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn("/fooRack");
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
@@ -444,8 +507,9 @@ public class StackCreatorServiceTest {
         network.setAttributes(Json.silent(Map.of("subnetId", "subnet-1")));
         stack.setNetwork(network);
         Map<String, String> subnetAzPairs = Map.of("subnet-1", "az-1");
-        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzPairs);
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, workerGroup);
+        doReturn(subnetAzPairs).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupNetwork.class),
+                eq(workerGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()));
         when(multiAzCalculatorService.determineRackId("subnet-1", "az-1")).thenReturn("/fooRack");
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
@@ -531,9 +595,19 @@ public class StackCreatorServiceTest {
         InstanceGroup requestHostGroup = new InstanceGroup();
         requestHostGroup.setGroupName(hostGroup);
         requestHostGroup.setInstanceGroupType(hostGroupType);
-
+        requestHostGroup.setInstanceGroupNetwork(new InstanceGroupNetwork());
         Set<InstanceMetaData> instanceMetadata = new HashSet<>();
         IntStream.range(0, numOfNodes).forEach(count -> instanceMetadata.add(new InstanceMetaData()));
+        if(hostGroup.equals("gateway") || hostGroup.equals("auxiliary")) {
+            instanceMetadata.stream()
+                    .forEach(metadata -> {
+                        metadata.setId(1L);
+                    });
+        }
+        instanceMetadata.stream()
+                .forEach(metadata -> {
+                    metadata.setInstanceStatus(SERVICES_RUNNING);
+                });
         requestHostGroup.setInstanceMetaData(instanceMetadata);
         return requestHostGroup;
     }

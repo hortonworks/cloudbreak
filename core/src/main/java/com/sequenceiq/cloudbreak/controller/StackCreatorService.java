@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -19,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -90,6 +92,7 @@ import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -379,9 +382,45 @@ public class StackCreatorService {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
-            multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup);
-            prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup);
         }
+        if (stack.getType() == StackType.DATALAKE) {
+            for (InstanceGroup instanceGroup : sortInstanceGroups(stack)) {
+                if (!(instanceGroup.getGroupName().equals(InstanceGroupName.GATEWAY.getName()) ||
+                        instanceGroup.getGroupName().equals(InstanceGroupName.AUXILIARY.getName()))) {
+                    multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup.getInstanceGroupNetwork(),
+                            instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
+                }
+                prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup);
+            }
+
+            Set<InstanceMetaData> mergedInstanceMetaData = new HashSet<>();
+//            mergedInstanceMetaData.addAll(getInstanceMetadata(stack, InstanceGroupName.GATEWAY));
+//            mergedInstanceMetaData.addAll(getInstanceMetadata(stack, InstanceGroupName.AUXILIARY));
+
+            multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs,
+                    getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.AUXILIARY).get().getInstanceGroupNetwork(), mergedInstanceMetaData);
+        } else {
+            for (InstanceGroup instanceGroup : sortInstanceGroups(stack)) {
+                multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup.getInstanceGroupNetwork(),
+                        instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
+                prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup);
+            }
+        }
+    }
+
+    private Set<InstanceMetaData> getInstanceMetadata(Stack stack, InstanceGroupName groupName) {
+        AtomicReference<Set<InstanceMetaData>> instanceMetaDataSet = null;
+
+        getInstanceGroupByInstanceGroupName(stack, groupName).ifPresentOrElse(instanceGroup -> {
+            instanceMetaDataSet.set(instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
+        }, () -> {
+            instanceMetaDataSet.set(Collections.EMPTY_SET);
+        });
+        return instanceMetaDataSet.get();
+    }
+
+    private Optional<InstanceGroup> getInstanceGroupByInstanceGroupName(Stack stack, InstanceGroupName groupName) {
+        return stack.getInstanceGroups().stream().filter(instanceGroup -> instanceGroup.getGroupName().equals(groupName.name())).findFirst();
     }
 
     private String getStackSubnetIdIfExists(Stack stack) {
@@ -394,13 +433,13 @@ public class StackCreatorService {
     }
 
     private void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(String stackSubnetId, String stackAz, InstanceGroup instanceGroup) {
-        for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
-            if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId()) && Strings.isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
-                instanceMetaData.setSubnetId(stackSubnetId);
-                instanceMetaData.setAvailabilityZone(stackAz);
-            }
-            instanceMetaData.setRackId(multiAzCalculatorService.determineRackId(instanceMetaData.getSubnetId(), instanceMetaData.getAvailabilityZone()));
-        }
+//        for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
+//            if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId()) && Strings.isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
+//                instanceMetaData.setSubnetId(stackSubnetId);
+//                instanceMetaData.setAvailabilityZone(stackAz);
+//            }
+//            instanceMetaData.setRackId(multiAzCalculatorService.determineRackId(instanceMetaData.getSubnetId(), instanceMetaData.getAvailabilityZone()));
+//        }
     }
 
     public List<InstanceGroup> sortInstanceGroups(Stack stack) {
