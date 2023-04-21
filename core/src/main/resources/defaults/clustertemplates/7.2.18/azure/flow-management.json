@@ -5,7 +5,7 @@
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.18 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry"
+      "blueprintName": "7.2.18 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry"
     },
     "externalDatabase": {
       "availabilityType": "HA"
