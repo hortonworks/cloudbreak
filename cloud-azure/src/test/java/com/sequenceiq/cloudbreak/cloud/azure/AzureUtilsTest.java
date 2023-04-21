@@ -42,6 +42,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.azure.core.management.exception.AdditionalInfo;
 import com.azure.core.management.exception.ManagementError;
+import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.ApiError;
 import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.azure.resourcemanager.compute.models.PolicyViolation;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudExceptionConverter;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -478,24 +480,81 @@ public class AzureUtilsTest {
     }
 
     @Test
-    void convertToCloudExceptionTestWhenCloudExceptionAndDetails() {
-        ApiError cloudError = AzureTestUtils.apiError("123", "foobar");
+    void convertToCloudExceptionTestWhenPermissionExceptionAndDetails() {
+        String message = "The client does not have authorization to perform action 'Microsoft.Marketplace/offerTypes/publishers/offers/plans/agreements/read'";
+
+        ManagementError managementError = AzureTestUtils.managementError("AuthorizationFailed", message);
         List<ManagementError> details = new ArrayList<>();
         details.add(AzureTestUtils.managementError("123", "detail1"));
-        String message = "The client does not have authorization to perform action 'Microsoft.Marketplace/offerTypes/publishers/offers/plans/agreements/read'";
         details.add(AzureTestUtils.managementError("AuthorizationFailed", message));
-        AzureTestUtils.setDetails(cloudError, details);
-        ApiErrorException e = new ApiErrorException("Authorization failed", null, cloudError);
+        AzureTestUtils.setDetails(managementError, details);
+        ManagementException e = new ManagementException("Authorization failed", null, managementError);
 
-        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Stack provision failed");
+        CloudConnectorException result = underTest.convertToCloudException(e, "Stack provision failed");
 
         verifyCloudConnectorException(result,
-                "Stack provision failed failed, status code 123, error message: foobar, details: detail1, " +
-                        "The client does not have authorization to perform action 'Microsoft.Marketplace/offerTypes/publishers/offers/plans/agreements/read'");
+                "Stack provision failed failed, status code AuthorizationFailed, error message: The client does not have authorization to perform action " +
+                        "'Microsoft.Marketplace/offerTypes/publishers/offers/plans/agreements/read', details: detail1, The client does not have authorization" +
+                        " to perform action 'Microsoft.Marketplace/offerTypes/publishers/offers/plans/agreements/read'");
+        assertEquals(CloudImageException.class, result.getClass());
     }
 
     @Test
-    void convertToCloudConnectorExceptionTestWhenDetailCloudErrorsHaveRequestDisallowedByPolicyCode() throws NoSuchFieldException {
+    void convertToCloudExceptionTestWhenTermsExceptionAndDetails() {
+        String message = "Marketplace purchase eligibilty check returned errors. See inner errors for details.";
+
+        ManagementError managementError = AzureTestUtils.managementError("MarketplacePurchaseEligibilityFailed", message);
+        List<ManagementError> details = new ArrayList<>();
+        details.add(AzureTestUtils.managementError("123", "detail1"));
+        details.add(AzureTestUtils.managementError("MarketplacePurchaseEligibilityFailed", message));
+        AzureTestUtils.setDetails(managementError, details);
+        ManagementException e = new ManagementException("Terms failed", null, managementError);
+
+        CloudConnectorException result = underTest.convertToCloudException(e, "Stack provision failed");
+
+        verifyCloudConnectorException(result,
+                "Stack provision failed failed, status code MarketplacePurchaseEligibilityFailed, error message: Marketplace purchase eligibilty check " +
+                        "returned errors. See inner errors for details., details: detail1, Marketplace purchase eligibilty check returned errors. " +
+                        "See inner errors for details.");
+        assertEquals(CloudImageException.class, result.getClass());
+    }
+
+    @Test
+    void convertToCloudExceptionTestWhenNonMatchingExceptionAndDetails() {
+        String message = "Marketplace purchase eligibilty check returned errors. See inner errors for details.";
+
+        ManagementError managementError = AzureTestUtils.managementError("foo", message);
+        List<ManagementError> details = new ArrayList<>();
+        details.add(AzureTestUtils.managementError("123", "detail1"));
+        details.add(AzureTestUtils.managementError("MarketplacePurchaseEligibilityFailed", message));
+        AzureTestUtils.setDetails(managementError, details);
+        ManagementException e = new ManagementException("Terms failed", null, managementError);
+
+        CloudConnectorException result = underTest.convertToCloudException(e, "Stack provision failed");
+
+        verifyCloudConnectorException(result,
+                "Stack provision failed failed, status code foo, error message: Marketplace purchase eligibilty check returned errors. " +
+                        "See inner errors for details., details: detail1, Marketplace purchase eligibilty check returned errors. " +
+                        "See inner errors for details.");
+        assertNotEquals(CloudImageException.class, result.getClass());
+    }
+
+    @Test
+    void convertToCloudExceptionTestWhenExceptionHasNoDetails() {
+        String message = "Marketplace purchase eligibilty check returned errors. See inner errors for details.";
+        ManagementError managementError = AzureTestUtils.managementError("MarketplacePurchaseEligibilityFailed", message);
+        ManagementException e = new ManagementException("Terms failed", null, managementError);
+
+        CloudConnectorException result = underTest.convertToCloudException(e, "Checking resources");
+
+        verifyCloudConnectorException(result,
+                "Checking resources failed: 'com.azure.core.management.exception.ManagementException: Terms failed: Marketplace purchase eligibilty" +
+                        " check returned errors. See inner errors for details.', please go to Azure Portal for detailed message");
+        assertNotEquals(CloudImageException.class, result.getClass());
+    }
+
+    @Test
+    void convertToCloudConnectorExceptionTestWhenDetailCloudErrorsHaveRequestDisallowedByPolicyCode() {
         ApiError cloudError = AzureTestUtils.apiError("InvalidTemplateDeployment",
                 "The template deployment failed with multiple errors. Please see details for more information.");
         List<ManagementError> details = new ArrayList<>();

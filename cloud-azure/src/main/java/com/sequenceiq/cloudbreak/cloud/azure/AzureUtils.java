@@ -776,14 +776,14 @@ public class AzureUtils {
     }
 
     public CloudConnectorException convertToCloudException(ManagementException e, String actionDescription) {
-        LOGGER.warn(String.format("%s failed, cloud exception happened:", actionDescription), e);
+        LOGGER.warn(String.format("%s failed, %s exception happened:", actionDescription, e.getClass()), e);
         if (e.getValue() != null && e.getValue().getDetails() != null) {
             String errorCode = e.getValue().getCode();
             String errorMessage = e.getValue().getMessage();
             String details = e.getValue().getDetails().stream().map(this::getCloudErrorMessage).collect(Collectors.joining(", "));
             String exceptionMessage = String.format("%s failed, status code %s, error message: %s, details: %s",
                     actionDescription, errorCode, errorMessage, details);
-            if (errorCode.contains(AUTHORIZATION_FAILED_CODE) && errorMessage.contains(MICROSOFT_MARKETPLACE_ROLE)) {
+            if (marketplaceRelatedError(errorCode, errorMessage)) {
                 return new CloudImageException(exceptionMessage);
             } else {
                 return new CloudConnectorException(exceptionMessage);
@@ -791,6 +791,12 @@ public class AzureUtils {
         } else {
             return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
         }
+    }
+
+    private boolean marketplaceRelatedError(String errorCode, String errorMessage) {
+        return Arrays.stream(AzureDeploymentMarketplaceError.values())
+                .filter(error -> error.getCode().equalsIgnoreCase(errorCode))
+                .anyMatch(error -> errorMessage.contains(error.getMessageFragment()));
     }
 
     private String getCloudErrorMessage(ManagementError cloudError) {

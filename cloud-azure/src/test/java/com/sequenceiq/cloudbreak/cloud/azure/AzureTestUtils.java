@@ -27,7 +27,7 @@ public class AzureTestUtils {
         return managementError;
     }
 
-    public static void setDetails(ApiError apiError, List<ManagementError> details) {
+    public static void setDetails(ManagementError apiError, List<ManagementError> details) {
         setField(apiError, "details", details);
     }
 
