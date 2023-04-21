@@ -536,6 +536,7 @@ public class StackToCloudStackConverter {
     public Map<String, Object> buildCloudInstanceParameters(DetailedEnvironmentResponse environment,
             InstanceMetadataView instanceMetaData, CloudPlatform platform, Template template) {
         Map<String, Object> params = new HashMap<>();
+        putIfPresent(params, CloudInstance.ID, getIfNotNull(instanceMetaData, InstanceMetadataView::getId));
         putIfPresent(params, CloudInstance.DISCOVERY_NAME, getIfNotNull(instanceMetaData, InstanceMetadataView::getShortHostname));
         putIfPresent(params, SUBNET_ID, getIfNotNull(instanceMetaData, InstanceMetadataView::getSubnetId));
         putIfPresent(params, CloudInstance.INSTANCE_NAME, getIfNotNull(instanceMetaData, InstanceMetadataView::getInstanceName));

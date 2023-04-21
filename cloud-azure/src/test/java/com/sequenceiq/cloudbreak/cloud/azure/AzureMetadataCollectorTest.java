@@ -8,9 +8,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +21,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -128,10 +132,6 @@ class AzureMetadataCollectorTest {
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
-        when(azureUtils.getPrivateInstanceId(any(), any(), any()))
-                .thenReturn(INSTANCE_1)
-                .thenReturn(INSTANCE_2)
-                .thenReturn(INSTANCE_3);
         when(azureVirtualMachineService.getVirtualMachinesByName(eq(azureClient), eq(RESOURCE_GROUP_NAME), anySet())).thenReturn(machines);
         when(azureClient.getFaultDomainNumber(RESOURCE_GROUP_NAME, INSTANCE_1)).thenReturn(FAULT_DOMAIN_COUNT);
         when(azureClient.getFaultDomainNumber(RESOURCE_GROUP_NAME, INSTANCE_2)).thenReturn(FAULT_DOMAIN_COUNT);
@@ -157,6 +157,12 @@ class AzureMetadataCollectorTest {
         assertEquals(PRIVATE_IP, actual.get(2).getMetaData().getPrivateIp());
         assertEquals(PUBLIC_IP, actual.get(2).getMetaData().getPublicIp());
         assertEquals(LOCALITY_INDICATOR, actual.get(2).getMetaData().getLocalityIndicator());
+        ArgumentCaptor<Collection> collectionArgumentCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(azureVirtualMachineService, times(1))
+                .getVirtualMachinesByName(any(), eq(RESOURCE_GROUP_NAME), collectionArgumentCaptor.capture());
+        Collection instanceIds = collectionArgumentCaptor.getValue();
+        assertThat(instanceIds).containsExactlyInAnyOrder(INSTANCE_1, INSTANCE_2, INSTANCE_3);
+        verify(azureUtils, times(0)).getFullInstanceId(anyString(), anyString(), anyString(), anyString());
     }
 
     private Map<String, VirtualMachine> getMachines() {
@@ -180,15 +186,16 @@ class AzureMetadataCollectorTest {
 
     private List<CloudInstance> createVms() {
         return List.of(
-                createCloudInstance(INSTANCE_1, PRIVATE_ID_1),
-                createCloudInstance(INSTANCE_2, PRIVATE_ID_2),
-                createCloudInstance(INSTANCE_3, PRIVATE_ID_3));
+                createCloudInstance(INSTANCE_1, PRIVATE_ID_1, 1L),
+                createCloudInstance(INSTANCE_2, PRIVATE_ID_2, 2L),
+                createCloudInstance(INSTANCE_3, PRIVATE_ID_3, 3L));
     }
 
-    private CloudInstance createCloudInstance(String instanceId, Long privateId) {
+    private CloudInstance createCloudInstance(String instanceId, Long privateId, Long id) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(null, INSTANCE_GROUP_NAME, privateId, Collections.emptyList(), null, Collections.emptyMap(),
                 null, null, TemporaryStorage.ATTACHED_VOLUMES, 0L);
-        return new CloudInstance(instanceId, instanceTemplate, null, "subnet-1", "az1");
+        return new CloudInstance(instanceId, instanceTemplate, null, "subnet-1", "az1",
+                Collections.singletonMap(CloudInstance.ID, id));
     }
 
     private CloudResource createCloudResource() {
