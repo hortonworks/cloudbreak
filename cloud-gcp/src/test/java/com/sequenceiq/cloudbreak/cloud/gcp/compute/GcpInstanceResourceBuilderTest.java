@@ -444,25 +444,25 @@ public class GcpInstanceResourceBuilderTest {
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("test-master-1")
-                .withGroup(group.getName())
+                .withGroup("master")
                 .build();
         CloudResource gatewayInstanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("test-gateway-1")
-                .withGroup(group.getName())
+                .withGroup("gateway")
                 .build();
         CloudResource idBrokerInstanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("test-idbroker-1")
-                .withGroup(group.getName())
+                .withGroup("idbroker")
                 .build();
         CloudResource master0InstanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("test-master0-1")
-                .withGroup(group.getName())
+                .withGroup("master0")
                 .build();
         context.addGroupResources(group.getName(), List.of(master0InstanceGroup, gatewayInstanceGroup, masterInstanceGroup, idBrokerInstanceGroup));
         when(compute.instanceGroups()).thenReturn(instanceGroups);

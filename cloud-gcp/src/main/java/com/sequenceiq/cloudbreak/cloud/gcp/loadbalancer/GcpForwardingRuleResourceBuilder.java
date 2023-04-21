@@ -103,7 +103,6 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
                 forwardingRule.setNetwork(networkUrl);
                 forwardingRule.setSubnetwork(subnetUrl);
                 LOGGER.debug("Set network to '{}' and subnet to '{}' for {} load balancer", networkUrl, subnetUrl, scheme);
-
             }
 
             Integer hcPort = buildableResource.getParameter(HCPORT, Integer.class);
@@ -124,6 +123,7 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
             } else {
                 forwardingRule.setIPAddress(String.format(GCP_IP_REF_FORMAT, projectId, regionName, ipResources.get(0).getName()));
             }
+
             forwardingRule.setUnknownKeys(new HashMap<>(gcpLabelUtil.createLabelsFromTags(cloudStack)));
             Compute.ForwardingRules.Insert insert = context.getCompute().forwardingRules().insert(projectId, regionName, forwardingRule);
             results.add(doOperationalRequest(buildableResource, insert));

@@ -484,8 +484,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private List<CloudResource> filterGroupFromName(List<CloudResource> resources, String filterString) {
         return Optional.ofNullable(resources).orElseGet(List::of).stream()
-                .filter(resource ->
-                        StringUtils.equals(filterString, getResourceNameService().decodeInstanceGroupResourceNameFromString(resource.getName()).getGroupName()))
+                .filter(resource -> resource.getGroup().equals(filterString))
                 .collect(Collectors.toList());
     }
 
