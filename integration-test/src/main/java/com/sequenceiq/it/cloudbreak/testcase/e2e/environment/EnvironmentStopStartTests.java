@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -71,8 +70,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
 
     private static final String VERTICAL_SCALE_FAIL_MSG_FORMAT = "%s vertical scale was not successful, because the expected instance type is the following: %s"
             + ", but the actual is: %s";
-
-    private static final String MOCK_UMS_PASSWORD = "Password123!";
 
     private static final String FREEIPA_VERTICAL_SCALE_KEY = "freeipaVerticalScaleKey";
 
@@ -343,9 +340,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
     }
 
     private DistroXTestDto verifyCmServicesStartedSuccessfully(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
-        String username = testContext.getActingUserCrn().getResource();
-        String sanitizedUserName = SanitizerUtil.sanitizeWorkloadUsername(username);
-        clouderaManagerUtil.checkCmServicesStartedSuccessfully(testDto, sanitizedUserName, MOCK_UMS_PASSWORD);
+        clouderaManagerUtil.checkCmServicesStartedSuccessfully(testDto, testContext);
         return testDto;
     }
 

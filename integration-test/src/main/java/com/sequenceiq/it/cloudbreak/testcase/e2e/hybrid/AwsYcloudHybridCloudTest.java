@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
@@ -71,8 +70,6 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
     private static final String CHILD_ENVIRONMENT_NETWORK_KEY = "childNetwork";
 
     private static final String CHILD_ENVIRONMENT_KEY = "childEnvironment";
-
-    private static final String MOCK_UMS_PASSWORD = "Password123!";
 
     private static final String MOCK_UMS_PASSWORD_INVALID = "Invalid password";
 
@@ -212,16 +209,13 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient = tc.getMicroserviceClient(FreeIpaClient.class).getDefaultClient();
                     checkUserSyncState(environmentCrn, freeIpaClient);
 
-                    String username = testContext.getActingUserCrn().getResource();
-                    String sanitizedUserName = SanitizerUtil.sanitizeWorkloadUsername(username);
-
                     for (InstanceGroupV4Response ig : dto.getResponse().getStackV4Response().getInstanceGroups()) {
                         for (InstanceMetaDataV4Response i : ig.getMetadata()) {
                             String ip = i.getPublicIp();
 
-                            LOGGER.info("Trying to ssh with user {} into instance: {}", sanitizedUserName, OBJECT_MAPPER.writeValueAsString(i));
-                            testShhAuthenticationSuccessful(sanitizedUserName, ip);
-                            testShhAuthenticationFailure(sanitizedUserName, ip);
+                            LOGGER.info("Trying to ssh with user {} into instance: {}", tc.getWorkloadUserName(), OBJECT_MAPPER.writeValueAsString(i));
+                            testShhAuthenticationSuccessful(tc, ip);
+                            testShhAuthenticationFailure(tc, ip);
                         }
                     }
                     return dto;
@@ -243,17 +237,17 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         LOGGER.info("Last user sync is in state {}, last operation: {}", userSyncState.getState(), OBJECT_MAPPER.writeValueAsString(syncOperationStatus));
     }
 
-    private void testShhAuthenticationSuccessful(String username, String host) {
+    private void testShhAuthenticationSuccessful(TestContext testContext, String host) {
         try (SSHClient client = getSshClient(host)) {
-            client.authPassword(username, MOCK_UMS_PASSWORD);
+            client.authPassword(testContext.getWorkloadUserName(), testContext.getWorkloadPassword());
         } catch (IOException e) {
             throw new TestFailException(String.format("Failed to ssh into host %s", host), e);
         }
     }
 
-    private void testShhAuthenticationFailure(String username, String host) throws IOException {
+    private void testShhAuthenticationFailure(TestContext testContext, String host) throws IOException {
         try (SSHClient client = getSshClient(host)) {
-            client.authPassword(username, MOCK_UMS_PASSWORD_INVALID);
+            client.authPassword(testContext.getWorkloadUserName(), MOCK_UMS_PASSWORD_INVALID);
             throw new TestFailException(String.format("SSH authentication passed with invalid password on host %s.", host));
         } catch (UserAuthException ex) {
             //Expected

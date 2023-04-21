@@ -45,8 +45,6 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
@@ -174,6 +172,10 @@ public abstract class TestContext implements ApplicationContextAware {
     private boolean initialized;
 
     private CloudbreakUser actingUser;
+
+    public String getMockUmsPassword() {
+        return MOCK_UMS_PASSWORD;
+    }
 
     public TestParameter getTestParameter() {
         return testParameter;
@@ -580,10 +582,9 @@ public abstract class TestContext implements ApplicationContextAware {
      * by `useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN)`
      */
     private Optional<Crn> getRealUMSUserCrn() {
-        if (Crn.isCrn(getActingUser().getCrn())) {
-            return Optional.ofNullable(Crn.fromString(getActingUser().getCrn()));
-        }
-        return Optional.empty();
+        return Crn.isCrn(getActingUser().getCrn())
+                ? Optional.ofNullable(Crn.fromString(getActingUser().getCrn()))
+                : Optional.empty();
     }
 
     /**
@@ -594,17 +595,16 @@ public abstract class TestContext implements ApplicationContextAware {
      * - environment variable: INTEGRATIONTEST_USER_CRN
      */
     private Optional<Crn> getUserParameterCrn() {
-        if (StringUtils.isNotBlank(getTestParameter().get(CloudbreakTest.USER_CRN))) {
-            return Optional.ofNullable(Crn.fromString(getTestParameter().get(CloudbreakTest.USER_CRN)));
-        }
-        return Optional.empty();
+        return StringUtils.isNotBlank(getTestParameter().get(CloudbreakTest.USER_CRN))
+                ? Optional.ofNullable(Crn.fromString(getTestParameter().get(CloudbreakTest.USER_CRN)))
+                : Optional.empty();
     }
 
     public String getActingUserName() {
         return getMockUserName()
                 .or(this::getRealUMSUserName)
                 .or(this::getUserParameterName)
-                .orElseThrow(() -> new TestFailException(String.format("Cannot find acting user: '%s' - Name", getActingUserAccessKey())));
+                .orElseThrow(() -> new TestFailException(format("Cannot find acting user: '%s' - Name", getActingUserAccessKey())));
     }
 
     /**
@@ -624,53 +624,90 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     /**
+     * Returning the default Mock user's workload username.
+     * <p>
+     * Default Mock user details can be defined at:
+     * - application parameter: integrationtest.user.crn
+     * - in ~/.dp/config as "localhost" profile
+     */
+    private Optional<String> getMockWorkloadUserName() {
+        return getMockUserName().isPresent()
+                ? Optional.of(SanitizerUtil.sanitizeWorkloadUsername(getMockUserName().get()))
+                : Optional.empty();
+    }
+
+    /**
      * Returning the acting (actually used as actor) UMS user's name.
+     * <p>
+     * Default UMS user details are defined at ums-users/api-credentials.json and can be accessed
+     * by `useRealUmsUser`
+     */
+    private Optional<String> getRealUMSUserName() {
+        return getRealUMSUserCrn().isPresent()
+                ? Optional.of(getActingUser().getDisplayName())
+                : Optional.empty();
+    }
+
+    /**
+     * Returning the acting (actually used as actor) UMS user's workload username.
      * <p>
      * Default UMS user details are defined at ums-users/api-credentials.json and can be accessed
      * by `useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN)`
      */
-    private Optional<String> getRealUMSUserName() {
-        if (getRealUMSUserCrn().isPresent()) {
-            return Optional.of(getActingUser().getDisplayName());
-        }
-        return Optional.empty();
+    private Optional<String> getRealUMSWorkloadUserName() {
+        return getRealUMSUserName().isPresent()
+                ? Optional.of(getActingUser().getWorkloadUserName())
+                : Optional.empty();
     }
 
     /**
      * Returning the default Cloudbreak user's name.
      * <p>
-     * Default Cloudbreak user details can be defined as:
+     * Default Cloudbreak username can be defined as:
      * - application parameter: integrationtest.user.name
      * - environment variable: INTEGRATIONTEST_USER_NAME
      */
     private Optional<String> getUserParameterName() {
-        if (StringUtils.isNotBlank(getTestParameter().get(CloudbreakTest.USER_NAME))) {
-            return Optional.of(getTestParameter().get(CloudbreakTest.USER_NAME));
-        }
-        return Optional.empty();
+        return StringUtils.isNotBlank(getTestParameter().get(CloudbreakTest.USER_NAME))
+                ? Optional.of(getTestParameter().get(CloudbreakTest.USER_NAME))
+                : Optional.empty();
     }
 
+    /**
+     * Returning the default Cloudbreak user's workload username.
+     * <p>
+     * Default Cloudbreak user workload username can be defined as:
+     * - application parameter: integrationtest.user.workloadUserName
+     * - environment variable: INTEGRATIONTEST_USER_WORKLOADUSERNAME
+     */
+    private Optional<String> getUserParameterWorkloadUserName() {
+        return StringUtils.isNotBlank(getTestParameter().get(CloudbreakTest.WORKLOAD_USER_NAME))
+                ? Optional.of(getTestParameter().get(CloudbreakTest.WORKLOAD_USER_NAME))
+                : Optional.empty();
+    }
+
+    /**
+     * Returning the acting (actually used as actor) user's workload username.
+     */
     public String getWorkloadUserName() {
-        String workloadUserName;
-        if (umsUserCacheInUse()) {
-            workloadUserName = given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                    .when(umsTestClient.getUserDetails(getActingUserCrn().toString(), regionAwareInternalCrnGeneratorFactory))
-                    .getResponse().getWorkloadUsername();
-        } else {
-            String username = getActingUserCrn().getResource();
-            workloadUserName = SanitizerUtil.sanitizeWorkloadUsername(username);
-        }
-        return workloadUserName;
+        return getMockWorkloadUserName()
+                .or(this::getRealUMSWorkloadUserName)
+                .or(this::getUserParameterWorkloadUserName)
+                .orElseThrow(() -> new TestFailException(format("Cannot find acting user: '%s' - Workload Username", getActingUserAccessKey())));
     }
 
+    /**
+     * Returning the acting (actually used as actor) user's workload password.
+     * <p>
+     * Default user password can be defined as:
+     * - application parameter: integrationtest.user.workloadPassword
+     * - environment variable: INTEGRATIONTEST_USER_WORKLOADPASSWORD
+     * - MOCK_UMS_PASSWORD
+     */
     public String getWorkloadPassword() {
-        String workloadPassword;
-        if (umsUserCacheInUse()) {
-            workloadPassword = this.workloadPassword;
-        } else {
-            workloadPassword = MOCK_UMS_PASSWORD;
-        }
-        return workloadPassword;
+        return getRealUMSWorkloadUserName().isPresent()
+                ? workloadPassword
+                : getMockUmsPassword();
     }
 
     /**
@@ -724,13 +761,35 @@ public abstract class TestContext implements ApplicationContextAware {
         if (actingUser == null) {
             LOGGER.info(" Requested acting user is NULL. So we are falling back to Default user with \nACCESS_KEY: {} \nSECRET_KEY: {}",
                     getTestParameter().get(CloudbreakTest.ACCESS_KEY), getTestParameter().get(CloudbreakTest.SECRET_KEY));
-            setActingUser(cloudbreakActor.defaultUser());
+            CloudbreakUser defaultRealUmsUser = findRealUmsUserByDisplayName(getTestParameter().get(CloudbreakTest.USER_NAME));
+            actingUser = (defaultRealUmsUser != null) ? defaultRealUmsUser : cloudbreakActor.defaultUser();
         } else {
-            LOGGER.info(" Found acting user is present with details:: \nDisplay Name: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {}" +
-                            " \nDescription: {} ", actingUser.getDisplayName(), actingUser.getAccessKey(), actingUser.getSecretKey(), actingUser.getCrn(),
-                    actingUser.getAdmin(), actingUser.getDescription());
+            LOGGER.info(" Found acting user is present in the fetched UMS user store file with details:: \nDisplay Name: {} \nAccess Key: {} \nSecret Key: {}" +
+                            " \nCRN: {} \nAdmin: {} \nDescription: {} ", actingUser.getDisplayName(), actingUser.getAccessKey(), actingUser.getSecretKey(),
+                    actingUser.getCrn(), actingUser.getAdmin(), actingUser.getDescription());
         }
         return actingUser;
+    }
+
+    private CloudbreakUser findRealUmsUserByDisplayName(String userName) {
+        CloudbreakUser foundUser;
+        if (StringUtils.isNotBlank(userName)) {
+            try {
+                foundUser = cloudbreakActor.useRealUmsUser(userName);
+                useUmsUserCache(true);
+                LOGGER.info(" The user is present in the fetched UMS user store file with:" +
+                                " \nDisplay Name: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {} \nDescription: {} " +
+                                "\nWorkload User Name: {}", foundUser.getDisplayName(), foundUser.getAccessKey(), foundUser.getSecretKey(),
+                        foundUser.getCrn(), foundUser.getAdmin(), foundUser.getDescription(), foundUser.getWorkloadUserName());
+                return foundUser;
+            } catch (TestFailException e) {
+                LOGGER.warn("User by '{}' name is not present in the fetched UMS user store file.", userName);
+                return null;
+            }
+        } else {
+            LOGGER.warn("Provided user name is null or empty! So we cannot check the user in the fetched UMS user store file.");
+            return null;
+        }
     }
 
     /**

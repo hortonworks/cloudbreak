@@ -54,6 +54,11 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public String getMockUmsPassword() {
+        return wrappedTestContext.getMockUmsPassword();
+    }
+
+    @Override
     public TestParameter getTestParameter() {
         return wrappedTestContext.getTestParameter();
     }
@@ -161,6 +166,16 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public String getActingUserOwnerTag() {
         return wrappedTestContext.getActingUserOwnerTag();
+    }
+
+    @Override
+    public String getWorkloadUserName() {
+        return wrappedTestContext.getWorkloadUserName();
+    }
+
+    @Override
+    public String getWorkloadPassword() {
+        return wrappedTestContext.getWorkloadPassword();
     }
 
     @Override

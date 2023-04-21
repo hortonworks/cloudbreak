@@ -25,6 +25,7 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiRoleState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -44,21 +45,21 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
     private String cloudProvider;
 
     @Retryable
-    public SdxInternalTestDto checkConfig(SdxInternalTestDto testDto, String user, String password, Map<String, String> expectedConfig) {
+    public SdxInternalTestDto checkConfig(SdxInternalTestDto testDto, TestContext testContext, Map<String, String> expectedConfig) {
         String serverIp = testDto.getResponse().getStackV4Response().getCluster().getServerIp();
-        checkConfig(serverIp, testDto.getName(), user, password, expectedConfig);
+        checkConfig(serverIp, testDto.getName(), testContext, expectedConfig);
         return testDto;
     }
 
     @Retryable
-    public DistroXTestDto checkConfig(DistroXTestDto testDto, String user, String password, Map<String, String> expectedConfig) {
+    public DistroXTestDto checkConfig(DistroXTestDto testDto, TestContext testContext, Map<String, String> expectedConfig) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        checkConfig(serverIp, testDto.getName(), user, password, expectedConfig);
+        checkConfig(serverIp, testDto.getName(), testContext, expectedConfig);
         return testDto;
     }
 
-    private void checkConfig(String serverIp, String name, String user, String password, Map<String, String> expectedConfig) {
-        ApiClient apiClient = getCmApiClient(serverIp, name, V_43, user, password);
+    private void checkConfig(String serverIp, String name, TestContext testContext, Map<String, String> expectedConfig) {
+        ApiClient apiClient = getCmApiClient(serverIp, name, V_43, testContext.getWorkloadUserName(), testContext.getWorkloadPassword());
         // CHECKSTYLE:OFF
         ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(apiClient);
         // CHECKSTYLE:ON
@@ -85,9 +86,9 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         }
     }
 
-    public SdxInternalTestDto checkCmKnoxIDBrokerRoleConfigGroups(SdxInternalTestDto testDto, String user, String password) {
+    public SdxInternalTestDto checkCmKnoxIDBrokerRoleConfigGroups(SdxInternalTestDto testDto, TestContext testContext) {
         String serverFqdn = testDto.getResponse().getStackV4Response().getCluster().getServerFqdn();
-        ApiClient apiClient = getCmApiClient(serverFqdn, testDto.getName(), V_43, user, password);
+        ApiClient apiClient = getCmApiClient(serverFqdn, testDto.getName(), V_43, testContext.getWorkloadUserName(), testContext.getWorkloadPassword());
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
@@ -130,15 +131,18 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         return testDto;
     }
 
-    public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, String user, String password) {
+    public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, TestContext testContext) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
+        String user = testContext.getWorkloadUserName();
+        String password = testContext.getWorkloadPassword();
         ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, user, password);
         return checkCmYarnNodemanagerRoleConfigGroups(apiClient, testDto, user, password);
     }
 
-    public DistroXTestDto checkCmHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
+    public DistroXTestDto checkCmHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, TestContext testContext, Set<String> mountPoints) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, user, password);
+        ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, testContext.getWorkloadUserName(),
+                testContext.getWorkloadPassword());
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
@@ -176,9 +180,10 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         return testDto;
     }
 
-    public DistroXTestDto checkCmHdfsDatanodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
+    public DistroXTestDto checkCmHdfsDatanodeRoleConfigGroups(DistroXTestDto testDto, TestContext testContext, Set<String> mountPoints) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, user, password);
+        ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, testContext.getWorkloadUserName(),
+                testContext.getWorkloadPassword());
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
@@ -216,8 +221,10 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         return testDto;
     }
 
-    public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroupsDirect(DistroXTestDto testDto, String user, String password) {
+    public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroupsDirect(DistroXTestDto testDto, TestContext testContext) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
+        String user = testContext.getWorkloadUserName();
+        String password = testContext.getWorkloadPassword();
         ApiClient apiClient = getCmApiClientWithTimeoutDisabledDirect(serverIp, testDto.getName(), V_43, user, password);
         return checkCmYarnNodemanagerRoleConfigGroups(apiClient, testDto, user, password);
     }
@@ -258,9 +265,10 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         return testDto;
     }
 
-    public DistroXTestDto checkCmServicesStartedSuccessfully(DistroXTestDto testDto, String user, String password) {
+    public DistroXTestDto checkCmServicesStartedSuccessfully(DistroXTestDto testDto, TestContext testContext) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        ApiClient apiClient = getCmApiClientWithTimeoutDisabledDirect(serverIp, testDto.getName(), V_43, user, password);
+        ApiClient apiClient = getCmApiClientWithTimeoutDisabledDirect(serverIp, testDto.getName(), V_43, testContext.getWorkloadUserName(),
+                testContext.getWorkloadPassword());
         // CHECKSTYLE:OFF
         HostsResourceApi hostsResourceApi = new HostsResourceApi(apiClient);
         // CHECKSTYLE:ON

@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.action.ClouderaManagerClientActions;
@@ -20,35 +21,35 @@ public class ClouderaManagerUtil {
     private ClouderaManagerUtil() {
     }
 
-    public SdxInternalTestDto checkClouderaManagerKnoxIDBrokerRoleConfigGroups(SdxInternalTestDto testDto, String user, String password) {
-        return clouderaManagerClientActions.checkCmKnoxIDBrokerRoleConfigGroups(testDto, user, password);
+    public SdxInternalTestDto checkClouderaManagerKnoxIDBrokerRoleConfigGroups(SdxInternalTestDto testDto, TestContext testContext) {
+        return clouderaManagerClientActions.checkCmKnoxIDBrokerRoleConfigGroups(testDto, testContext);
     }
 
-    public SdxInternalTestDto checkConfig(SdxInternalTestDto testDto, String user, String password, Map<String, String> expectedConfig) {
-        return clouderaManagerClientActions.checkConfig(testDto, user, password, expectedConfig);
+    public SdxInternalTestDto checkConfig(SdxInternalTestDto testDto, TestContext testContext, Map<String, String> expectedConfig) {
+        return clouderaManagerClientActions.checkConfig(testDto, testContext, expectedConfig);
     }
 
-    public DistroXTestDto checkConfig(DistroXTestDto testDto, String user, String password, Map<String, String> expectedConfig) {
-        return clouderaManagerClientActions.checkConfig(testDto, user, password, expectedConfig);
+    public DistroXTestDto checkConfig(DistroXTestDto testDto, TestContext testContext, Map<String, String> expectedConfig) {
+        return clouderaManagerClientActions.checkConfig(testDto, testContext, expectedConfig);
     }
 
-    public DistroXTestDto checkClouderaManagerYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, String user, String password) {
-        return clouderaManagerClientActions.checkCmYarnNodemanagerRoleConfigGroups(testDto, user, password);
+    public DistroXTestDto checkClouderaManagerYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, TestContext testContext) {
+        return clouderaManagerClientActions.checkCmYarnNodemanagerRoleConfigGroups(testDto, testContext);
     }
 
-    public DistroXTestDto checkClouderaManagerYarnNodemanagerRoleConfigGroupsDirect(DistroXTestDto testDto, String user, String password) {
-        return clouderaManagerClientActions.checkCmYarnNodemanagerRoleConfigGroupsDirect(testDto, user, password);
+    public DistroXTestDto checkClouderaManagerYarnNodemanagerRoleConfigGroupsDirect(DistroXTestDto testDto, TestContext testContext) {
+        return clouderaManagerClientActions.checkCmYarnNodemanagerRoleConfigGroupsDirect(testDto, testContext);
     }
 
-    public DistroXTestDto checkClouderaManagerHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
-        return clouderaManagerClientActions.checkCmHdfsNamenodeRoleConfigGroups(testDto, user, password, mountPoints);
+    public DistroXTestDto checkClouderaManagerHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, TestContext testContext, Set<String> mountPoints) {
+        return clouderaManagerClientActions.checkCmHdfsNamenodeRoleConfigGroups(testDto, testContext, mountPoints);
     }
 
-    public DistroXTestDto checkClouderaManagerHdfsDatanodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
-        return clouderaManagerClientActions.checkCmHdfsDatanodeRoleConfigGroups(testDto, user, password, mountPoints);
+    public DistroXTestDto checkClouderaManagerHdfsDatanodeRoleConfigGroups(DistroXTestDto testDto, TestContext testContext, Set<String> mountPoints) {
+        return clouderaManagerClientActions.checkCmHdfsDatanodeRoleConfigGroups(testDto, testContext, mountPoints);
     }
 
-    public DistroXTestDto checkCmServicesStartedSuccessfully(DistroXTestDto testDto, String user, String password) {
-        return clouderaManagerClientActions.checkCmServicesStartedSuccessfully(testDto, user, password);
+    public DistroXTestDto checkCmServicesStartedSuccessfully(DistroXTestDto testDto, TestContext testContext) {
+        return clouderaManagerClientActions.checkCmServicesStartedSuccessfully(testDto, testContext);
     }
 }

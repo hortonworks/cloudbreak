@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -47,9 +46,6 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
     private static final String SSSD_RESTART = "systemctl restart sssd.service";
 
     private static final String SSSD_STATUS = "systemctl status sssd.service";
-
-    @Value("${integrationtest.user.workloadPassword:}")
-    private String workloadPassword;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -101,14 +97,14 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
 
         testContext
                 .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(workloadPassword, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword(), regionAwareInternalCrnGeneratorFactory))
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .thenException((tc, testDto, client) -> {
-                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, workloadPassword, LIST_RULES_FLAG);
+                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, tc.getWorkloadPassword(), LIST_RULES_FLAG);
                     return testDto;
                 }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'."))
                 .given(UmsTestDto.class)
@@ -125,11 +121,12 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                     Set<String> ipAddresses = getIpAddresses(tc);
                     sshSudoCommandActions.executeCommand(ipAddresses, null, null, SSSD_RESTART, SSSD_STATUS);
                     tc.waitingFor(Duration.ofMinutes(2), "Waiting for SSSD to be synchronized has been interrupted");
-                    sshSudoCommandActions.executeCommand(ipAddresses, workloadUsernameEnvCreator, workloadPassword, LIST_RULES_FLAG);
+                    sshSudoCommandActions.executeCommand(ipAddresses, workloadUsernameEnvCreator, tc.getWorkloadPassword(), LIST_RULES_FLAG);
                     return testDto;
                 })
                 .thenException((tc, testDto, client) -> {
-                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, workloadPassword, CHANGE_USER_TO_ROOT_COMMAND);
+                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, tc.getWorkloadPassword(),
+                            CHANGE_USER_TO_ROOT_COMMAND);
                     return testDto;
                 }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'.")
                         .withWho(cloudbreakActor.useRealUmsUser(L0UserKeys.USER_ENV_CREATOR)))

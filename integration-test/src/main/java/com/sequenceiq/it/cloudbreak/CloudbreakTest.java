@@ -38,6 +38,8 @@ public class CloudbreakTest extends AbstractTestNGSpringContextTests {
 
     public static final String USER_NAME = "USER_NAME";
 
+    public static final String WORKLOAD_USER_NAME = "WORKLOAD_USER_NAME";
+
     public static final String SECONDARY_ACCESS_KEY = "SECONDARY_ACCESS_KEY";
 
     public static final String SECONDARY_SECRET_KEY = "SECONDARY_SECRET_KEY";
@@ -55,6 +57,9 @@ public class CloudbreakTest extends AbstractTestNGSpringContextTests {
 
     @Value("${integrationtest.user.name:}")
     private String userName;
+
+    @Value("${integrationtest.user.workloadUserName:}")
+    private String workloadUserName;
 
     @Value("${mock.imagecatalog.server:localhost}")
     private String mockImageCatalogAddr;
@@ -90,9 +95,11 @@ public class CloudbreakTest extends AbstractTestNGSpringContextTests {
         testParameter.put(SECRET_KEY, secretkey);
         testParameter.put(USER_CRN, userCrn);
         testParameter.put(USER_NAME, userName);
+        testParameter.put(WORKLOAD_USER_NAME, workloadUserName);
 
-        LOGGER.info(" Default user details in test parameters:: \nACCESS_KEY: {} \nSECRET_KEY: {} \nUSER_CRN: {} \nUSER_NAME: {} ",
-                testParameter.get(ACCESS_KEY), testParameter.get(SECRET_KEY), testParameter.get(USER_CRN), testParameter.get(USER_NAME));
+        LOGGER.info(" Default user details in test parameters:: \nACCESS_KEY: {} \nSECRET_KEY: {} \nUSER_CRN: {} \nUSER_NAME: {} \nWORKLOAD_USER_NAME: {} ",
+                testParameter.get(ACCESS_KEY), testParameter.get(SECRET_KEY), testParameter.get(USER_CRN), testParameter.get(USER_NAME),
+                testParameter.get(WORKLOAD_USER_NAME));
     }
 
     public TestParameter getTestParameter() {

@@ -120,7 +120,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), filePath, fileName, 1, null, null, sshJUtil))
+                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), filePath, fileName, 1, sshJUtil))
                 .then((tc, dto, client) -> {
                     if (!StringUtils.equalsIgnoreCase(dto.getResponse().getStackV4Response().getImage().getId(), selectedImageID)) {
                         throw new TestFailException(String.format("The datalake image Id (%s) do NOT match with the selected pre-warmed image Id: '%s'!",
@@ -139,7 +139,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdxInternal).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), filePath, fileName, 1, null, null, sshJUtil))
+                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), filePath, fileName, 1, sshJUtil))
                 .validate();
     }
 }
