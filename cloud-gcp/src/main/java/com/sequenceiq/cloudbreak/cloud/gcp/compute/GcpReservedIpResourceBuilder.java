@@ -1,10 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer.GcpLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -31,6 +36,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpReservedIpResourceBuilder.class);
+
+    @Inject
+    private GcpStackUtil gcpStackUtil;
 
     @Override
     public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -62,7 +70,13 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
             address.setName(resource.getName());
             address.setDescription(description());
             address.setAddressType(type.getGcpType());
-
+            if (type.equals(GcpLoadBalancerScheme.GATEWAY_INTERNAL)) {
+                String sharedProjectId = gcpStackUtil.getSharedProjectId(cloudStack.getNetwork());
+                String subnetId = gcpStackUtil.getSubnetId(cloudStack.getNetwork());
+                String netProjectId = isNotEmpty(sharedProjectId) ? sharedProjectId : projectId;
+                String gcpSubnetSelfLink = gcpStackUtil.getSubnetUrl(netProjectId, region, subnetId);
+                address.setSubnetwork(gcpSubnetSelfLink);
+            }
             Map<String, Object> customTags = new HashMap<>();
             customTags.putAll(cloudStack.getTags());
             address.setUnknownKeys(customTags);

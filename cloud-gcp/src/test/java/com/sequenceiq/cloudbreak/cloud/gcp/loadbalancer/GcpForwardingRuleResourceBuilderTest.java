@@ -30,6 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.compute.model.Subnetwork;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -53,6 +54,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 class GcpForwardingRuleResourceBuilderTest {
+
     @Mock
     private GcpContext gcpContext;
 
@@ -79,6 +81,9 @@ class GcpForwardingRuleResourceBuilderTest {
 
     @Mock
     private Compute.ForwardingRules forwardingRules;
+
+    @Mock
+    private Compute.Subnetworks subnetworks;
 
     @Mock
     private Group group;
@@ -266,6 +271,8 @@ class GcpForwardingRuleResourceBuilderTest {
 
     private void mockCalls(LoadBalancerType lbType) throws IOException {
         Compute.ForwardingRules.Insert forwardingRulesInsert = mock(Compute.ForwardingRules.Insert.class);
+        Compute.Subnetworks.Get subnetworkGet = mock(Compute.Subnetworks.Get.class);
+        Subnetwork subnetwork = mock(Subnetwork.class);
 
         when(gcpContext.getCompute()).thenReturn(compute);
         when(gcpContext.getProjectId()).thenReturn("id");
@@ -273,7 +280,6 @@ class GcpForwardingRuleResourceBuilderTest {
         when(location.getRegion()).thenReturn(region);
         when(region.getRegionName()).thenReturn("us-west2");
         when(gcpContext.getLoadBalancerResources(any())).thenReturn(List.of(backendResource, ipResource));
-
         when(compute.forwardingRules()).thenReturn(forwardingRules);
         when(forwardingRules.insert(anyString(), anyString(), forwardingRuleArg.capture())).thenReturn(forwardingRulesInsert);
         when(forwardingRulesInsert.execute()).thenReturn(operation);
