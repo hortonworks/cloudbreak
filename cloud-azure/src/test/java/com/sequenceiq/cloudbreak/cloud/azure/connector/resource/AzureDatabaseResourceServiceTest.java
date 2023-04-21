@@ -277,8 +277,6 @@ class AzureDatabaseResourceServiceTest {
         ManagementException managementException = new ManagementException("asdf", mock(HttpResponse.class), new ManagementError("conflict", "asdf"));
         doThrow(managementException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         when(azureExceptionHandler.isExceptionCodeConflict(managementException)).thenReturn(Boolean.TRUE);
-        when(azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(managementException, "Database server deployment"))
-                .thenReturn(new Retry.ActionFailedException(managementException));
         when(azureUtils.convertToCloudConnectorException(managementException, "Database stack upgrade")).thenReturn(new CloudConnectorException("fda"));
 
         assertThrows(CloudConnectorException.class,
@@ -299,7 +297,6 @@ class AzureDatabaseResourceServiceTest {
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
         verify(persistenceNotifier).notifyAllocations(cloudResourceList, cloudContext);
-        verify(azureUtils).convertToActionFailedExceptionCausedByCloudConnectorException(managementException, "Database server deployment");
     }
 
     @Test

@@ -99,7 +99,13 @@ public class AzureExceptionHandler {
     }
 
     public boolean isExceptionCodeConflict(ManagementException e) {
-        return e != null && e.getValue() != null && MGMT_ERROR_CODE_CONFLICT.equalsIgnoreCase(e.getValue().getCode());
+        return e != null && e.getValue() != null
+                && (MGMT_ERROR_CODE_CONFLICT.equalsIgnoreCase(e.getValue().getCode()) || isDetailsContainAnyConflict(e));
+    }
+
+    private boolean isDetailsContainAnyConflict(ManagementException e) {
+        return e.getValue().getDetails() != null
+                && e.getValue().getDetails().stream().anyMatch(detail -> MGMT_ERROR_CODE_CONFLICT.equalsIgnoreCase(detail.getCode()));
     }
 
 }

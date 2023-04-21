@@ -373,7 +373,7 @@ public class AzureDatabaseResourceService {
             } catch (ManagementException e) {
                 if (azureExceptionHandler.isExceptionCodeConflict(e)) {
                     LOGGER.info("Database server deployment failed with a conflict. It's retried 5 times before failing.", e);
-                    throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Database server deployment");
+                    throw Retry.ActionFailedException.ofCause(e);
                 } else {
                     throw e;
                 }
