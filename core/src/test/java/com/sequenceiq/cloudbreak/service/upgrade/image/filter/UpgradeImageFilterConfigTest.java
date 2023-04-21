@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
-import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { UpgradeImageFilterConfigTest.TestAppContext.class, UpgradeImageFilterConfig.class })
@@ -61,9 +60,6 @@ public class UpgradeImageFilterConfigTest {
 
         @MockBean
         private ImageService imageService;
-
-        @MockBean
-        private PythonVersionBasedRuntimeVersionValidator pythonVersionBasedRuntimeVersionValidator;
 
     }
 }
