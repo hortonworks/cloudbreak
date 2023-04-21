@@ -31,6 +31,7 @@ import com.azure.resourcemanager.resources.models.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -184,18 +185,21 @@ public class AzureCloudResourceService {
                 .forEach(instance -> groups
                         .stream()
                         .map(Group::getInstances)
-                        .forEach(cloudInstances -> cloudInstances
-                                .stream()
-                                .filter(cloudInstance -> cloudInstance.getTemplate().getStatus().equals(InstanceStatus.CREATE_REQUESTED))
-                                .filter(cloudInstance -> instance.getName().equalsIgnoreCase(
-                                        azureUtils.getPrivateInstanceId(stackName,
-                                                cloudInstance.getTemplate().getGroupName(),
-                                                Long.toString(cloudInstance.getTemplate().getPrivateId()))))
-                                .peek(cloudInstance -> LOGGER.debug("The following resource is categorized as VM instance {}", cloudInstance.toString()))
-                                .forEach(filteredInstance ->
-                                        vmResourceList.add(buildVm(instance, filteredInstance.getTemplate().getPrivateId(),
-                                                filteredInstance.getTemplate().getGroupName(), resourceGroupName))
-                                )
+                        .forEach(cloudInstances -> {
+                                    List<CloudInstance> vmInstances = cloudInstances
+                                            .stream()
+                                            .filter(cloudInstance -> cloudInstance.getTemplate().getStatus().equals(InstanceStatus.CREATE_REQUESTED))
+                                            .filter(cloudInstance -> instance.getName().equalsIgnoreCase(
+                                                    azureUtils.getFullInstanceId(stackName,
+                                                            cloudInstance.getTemplate().getGroupName(),
+                                                            Long.toString(cloudInstance.getTemplate().getPrivateId()),
+                                                            cloudInstance.getDbIdOrDefaultIfNotExists())))
+                                            .collect(Collectors.toList());
+                                    LOGGER.info("The following resources are categorized as VM instance: {}", vmInstances);
+                                    vmInstances.forEach(filteredInstance ->
+                                            vmResourceList.add(buildVm(instance, filteredInstance.getTemplate().getPrivateId(),
+                                                    filteredInstance.getTemplate().getGroupName(), resourceGroupName)));
+                                }
                         )
                 );
         return vmResourceList;
