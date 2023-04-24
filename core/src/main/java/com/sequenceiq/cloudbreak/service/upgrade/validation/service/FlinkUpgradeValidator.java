@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -13,11 +14,12 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
+@Component
 public class FlinkUpgradeValidator implements ServiceUpgradeValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlinkUpgradeValidator.class);
 
-    private static final String FLINK_SERVICE_TYPE = "FLINK";
+    private static final String FLINK_SERVICE_TYPE = "SQL_STREAM_BUILDER";
 
     private static final String ROLE_TYPE = "STREAMING_SQL_CONSOLE";
 

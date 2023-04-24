@@ -55,8 +55,8 @@ class HiveKnoxConfigProviderTest {
             config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty("hive.hook.proto.file.per.event", "true")));
 
     private static final Set<ApiClusterTemplateConfig> NO_KERBEROS_SAFETY_VALVE_WITH_SSL_CHANNEL_MODE_EXPECTED_CONFIGS = Set.of(
-            config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty("hive.hook.proto.file.per.event", "true")),
-            config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, "<property><name>fs.s3a.ssl.channel.mode</name><value>openssl</value></property>")
+            config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty("hive.hook.proto.file.per.event", "true") +
+                    ConfigUtils.getSafetyValveProperty("fs.s3a.ssl.channel.mode", "openssl"))
             );
 
     private HiveKnoxConfigProvider underTest;
