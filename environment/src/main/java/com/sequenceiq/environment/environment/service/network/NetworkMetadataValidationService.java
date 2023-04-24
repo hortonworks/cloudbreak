@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -72,7 +71,6 @@ public class NetworkMetadataValidationService {
             if (MapUtils.isNotEmpty(endpointGatewaySubnetMetas)) {
                 LOGGER.info("Validation of endpoint gateway subnets: gateway subnets should share availability " +
                         "zones with the provided environment subnets.");
-                validateAwsEndpointGatewaySubnets(environment, endpointGatewaySubnetMetas);
                 validateProvidedEndpointGatewaySubnets(subnetMetas, endpointGatewaySubnetMetas);
             } else {
                 LOGGER.info("Validation of endpoint gateway subnets: Please make sure to provide a public " +
@@ -121,17 +119,6 @@ public class NetworkMetadataValidationService {
             .collect(Collectors.toSet());
         if (!publicAZs.containsAll(privateAZs)) {
             throw new BadRequestException(String.format(UNMATCHED_AZ, privateAZs));
-        }
-    }
-
-    private void validateAwsEndpointGatewaySubnets(Environment environment, Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
-        if (AWS.equalsIgnoreCase(environment.getCloudPlatform()) &&
-                MapUtils.isNotEmpty(endpointGatewaySubnetMetas) &&
-                endpointGatewaySubnetMetas.values().stream().allMatch(sn -> SubnetType.PRIVATE == sn.getType()) &&
-                PublicEndpointAccessGateway.ENABLED == environment.getNetwork().getPublicEndpointAccessGateway()) {
-
-            throw new BadRequestException("All subnets that are provided as Endpoint Access Gateway Subnet are PRIVATE, " +
-                    "internet-facing load balancer could not be created.");
         }
     }
 
