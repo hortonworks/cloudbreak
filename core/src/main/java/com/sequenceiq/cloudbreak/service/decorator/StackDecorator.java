@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -219,11 +220,23 @@ public class StackDecorator {
 
     private String getAvailabilityZoneFromEnv(DetailedEnvironmentResponse environment) {
         if (environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
-            return environment.getNetwork().getSubnetMetas().entrySet().stream()
+            String preferedSubnet = environment.getNetwork().getPreferedSubnetId();
+            if (StringUtils.isNotEmpty(preferedSubnet)) {
+                Optional<String> availabilityZone = environment.getNetwork().getSubnetMetas().entrySet().stream()
+                        .filter(subnetMeta -> subnetMeta.getValue().getId().equals(preferedSubnet) && subnetMeta.getValue().getAvailabilityZone() != null)
+                        .map(subnetMeta -> subnetMeta.getValue().getAvailabilityZone()).findFirst();
+                if (availabilityZone.isPresent()) {
+                    LOGGER.debug("Availablity zone is updated - based on prefered subnet ({})- to {}", preferedSubnet, availabilityZone.get());
+                    return availabilityZone.get();
+                }
+            }
+            String availablityZone = environment.getNetwork().getSubnetMetas().entrySet().stream()
                     .findFirst()
                     .map(Map.Entry::getValue)
                     .map(CloudSubnet::getAvailabilityZone)
                     .orElse(null);
+            LOGGER.debug("Availability zone is updated by the first subnet's availability zone: {}", availablityZone);
+            return availablityZone;
         } else {
             return null;
         }
