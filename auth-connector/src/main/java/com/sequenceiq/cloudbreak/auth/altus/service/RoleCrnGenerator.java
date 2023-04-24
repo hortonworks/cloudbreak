@@ -26,6 +26,10 @@ public class RoleCrnGenerator {
         return getRoleCrn(UmsRole.DBUS_UPLOADER, accountId).toString();
     }
 
+    public String getBuiltInComputeMetricsPublisherRoleCrn(String accountId) {
+        return getRoleCrn(UmsRole.COMPUTE_METRICS_PUBLISHER, accountId).toString();
+    }
+
     public String getBuiltInOwnerResourceRoleCrn(String accountId) {
         return getResourceRoleCrn(UmsResourceRole.OWNER, accountId).toString();
     }
