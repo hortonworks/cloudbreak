@@ -4,12 +4,15 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_17;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -89,6 +92,8 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerSetupService.class);
+
+    private static final String SDX_ENTERPRISE_DATALAKE_TEXT = "Enterprise SDX";
 
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
@@ -534,7 +539,17 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private void configureCmMgmtServices(TemplatePreparationObject templatePreparationObject, String sdxCrn, Telemetry telemetry,
             String sdxContextName, ProxyConfig proxyConfig) throws ApiException {
-        Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
+        Optional<ApiHost> optionalCmHost;
+        if (null != templatePreparationObject.getStackType()
+            && templatePreparationObject.getStackType().equals(StackType.DATALAKE)
+            && isVersionNewerOrEqualThanLimited(templatePreparationObject.getBlueprintView().getVersion(), CLOUDERA_STACK_VERSION_7_2_17)
+            && containsIgnoreCase(templatePreparationObject.getBlueprintView().getBlueprintText(), SDX_ENTERPRISE_DATALAKE_TEXT)) {
+            LOGGER.info("CM MGMT services are started on Auxiliary host group");
+            optionalCmHost = getAuxiliaryHost(templatePreparationObject, apiClient);
+        } else {
+            LOGGER.info("CM MGMT services are started on Gateway host group");
+            optionalCmHost = getCmHost(templatePreparationObject, apiClient);
+        }
         if (optionalCmHost.isPresent()) {
             ApiHost cmHost = optionalCmHost.get();
             ApiHostRef cmHostRef = new ApiHostRef();
@@ -563,6 +578,19 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 .stream()
                 .filter(host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
                 .findFirst();
+    }
+
+    public Optional<ApiHost> getAuxiliaryHost(TemplatePreparationObject templatePreparationObject, ApiClient apiClient) throws ApiException {
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
+        Optional<ApiHost> auxiliaryHost = hostsResourceApi.readHosts(null, null, DataView.SUMMARY.name())
+                .getItems()
+                .stream()
+                .filter(host -> (host.getHostname().toUpperCase(Locale.ROOT).contains("AUXILIARY")))
+                .findFirst();
+        if (auxiliaryHost.isPresent()) {
+            LOGGER.info("Get Auxiliary host for CM MGMT services. Host: {}", auxiliaryHost.get());
+        }
+        return auxiliaryHost;
     }
 
     private boolean calculateAddRepositories(ApiClusterTemplate apiClusterTemplate, boolean prewarmed) {
