@@ -18,7 +18,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 
-import com.azure.resourcemanager.resources.models.ResourceGroup;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
