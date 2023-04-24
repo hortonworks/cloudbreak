@@ -741,17 +741,33 @@ public class GrpcUmsClient {
     public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String accountId,
             String roleCrn, Map<String, String> resourceRoles, AccessKeyType.Value accessKeyType,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        return createMachineUserAndGenerateKeys(machineUserName, userCrn, accountId, Set.of(roleCrn), resourceRoles, accessKeyType,
+                regionAwareInternalCrnGeneratorFactory);
+    }
+
+    /**
+     * Generate new machine user (if it is needed) and access api key for this user.
+     * Also assign built-in dabaus uploader role for the machine user (if the role is not empty).
+     *
+     * @param machineUserName machine user name
+     * @param userCrn         crn of the actor
+     * @param roleCrns        crns of the roles
+     * @param accessKeyType   algorithm type used for the access key
+     * @return credential (access/secret keypair)
+     */
+    @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
+    public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String accountId,
+            Set<String> roleCrns, Map<String, String> resourceRoles, AccessKeyType.Value accessKeyType,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         Optional<String> machineUserCrn = createMachineUser(machineUserName, userCrn, accountId,
                 regionAwareInternalCrnGeneratorFactory);
-        if (StringUtils.isNotEmpty(roleCrn)) {
-            assignMachineUserRole(userCrn, accountId, machineUserCrn.orElse(null), roleCrn,
-                    regionAwareInternalCrnGeneratorFactory);
+        if (CollectionUtils.isNotEmpty(roleCrns)) {
+            roleCrns.forEach(roleCrn -> assignMachineUserRole(userCrn, accountId, machineUserCrn.orElse(null), roleCrn,
+                    regionAwareInternalCrnGeneratorFactory));
         }
         if (MapUtils.isNotEmpty(resourceRoles) && machineUserCrn.isPresent()) {
-            resourceRoles.forEach((resourceCrn, resourceRoleCrn) -> {
-                assignMachineUserResourceRole(accountId, machineUserCrn.get(), resourceRoleCrn, resourceCrn,
-                        regionAwareInternalCrnGeneratorFactory);
-            });
+            resourceRoles.forEach((resourceCrn, resourceRoleCrn) -> assignMachineUserResourceRole(accountId, machineUserCrn.get(), resourceRoleCrn, resourceCrn,
+                    regionAwareInternalCrnGeneratorFactory));
         }
         return generateAccessSecretKeyPair(userCrn, accountId, machineUserCrn.orElse(null),
                 accessKeyType, regionAwareInternalCrnGeneratorFactory);

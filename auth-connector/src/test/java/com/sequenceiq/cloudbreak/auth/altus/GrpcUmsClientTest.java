@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.cloudera.thunderhead.service.common.paging.PagingProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyType.Value;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
@@ -261,6 +263,24 @@ public class GrpcUmsClientTest {
                 Map.of("resourceCrn", "resourceRoleCrn"), regionAwareInternalCrnGeneratorFactory);
         verify(umsClient, times(1)).createMachineUser(eq("userCrn"), eq("accountId"), eq("machineUserName"));
         verify(umsClient, times(1)).assignMachineUserRole(eq("userCrn"), eq("accountId"), eq("machineUserCrn"), eq("roleCrn"));
+        verify(umsClient, times(1)).assignMachineUserResourceRole(eq("accountId"), eq("machineUserCrn"), eq("resourceRoleCrn"),
+                eq("resourceCrn"));
+    }
+
+    @Test
+    public void testCreateMachineUserAndGenerateKeysWithMultipleRoleCrns() {
+        when(umsClient.createMachineUser(eq("userCrn"), eq("accountId"), eq("machineUserName"))).thenReturn(Optional.of("machineUserCrn"));
+        UserManagementProto.CreateAccessKeyResponse createAccessKeyResponse = UserManagementProto.CreateAccessKeyResponse.newBuilder()
+                .setAccessKey(UserManagementProto.AccessKey.newBuilder().setAccessKeyId("accessKeyId").build())
+                .setPrivateKey("privateKey")
+                .build();
+        when(umsClient.createAccessPrivateKeyPair(eq("userCrn"), eq("accountId"), eq("machineUserCrn"), any())).thenReturn(createAccessKeyResponse);
+
+        underTest.createMachineUserAndGenerateKeys("machineUserName", "userCrn", "accountId", Set.of("roleCrn1", "roleCrn2"),
+                Map.of("resourceCrn", "resourceRoleCrn"), Value.UNSET, regionAwareInternalCrnGeneratorFactory);
+        verify(umsClient, times(1)).createMachineUser(eq("userCrn"), eq("accountId"), eq("machineUserName"));
+        verify(umsClient, times(1)).assignMachineUserRole(eq("userCrn"), eq("accountId"), eq("machineUserCrn"), eq("roleCrn1"));
+        verify(umsClient, times(1)).assignMachineUserRole(eq("userCrn"), eq("accountId"), eq("machineUserCrn"), eq("roleCrn2"));
         verify(umsClient, times(1)).assignMachineUserResourceRole(eq("accountId"), eq("machineUserCrn"), eq("resourceRoleCrn"),
                 eq("resourceCrn"));
     }

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,12 +88,13 @@ public class AltusIAMService {
      * Generate monitoring machine user with access keys
      */
     public Optional<AltusCredential> generateMonitoringMachineUserWithAccessKey(MachineUserRequest machineUserRequest, boolean useSharedCredential) {
+        String accountId = machineUserRequest.getAccountId();
         return Optional.ofNullable(sharedAltusCredentialProvider.getSharedCredentialIfConfigured(useSharedCredential)
                 .orElse(umsClient.createMachineUserAndGenerateKeys(
                         machineUserRequest.getName(),
                         machineUserRequest.getActorCrn(),
-                        machineUserRequest.getAccountId(),
-                        roleCrnGenerator.getBuiltInDatabusRoleCrn(machineUserRequest.getAccountId()),
+                        accountId,
+                        Set.of(roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId), roleCrnGenerator.getBuiltInComputeMetricsPublisherRoleCrn(accountId)),
                         Collections.emptyMap(),
                         mapToAccessKeyType(machineUserRequest.getCdpAccessKeyType()),
                         regionAwareInternalCrnGeneratorFactory)));
