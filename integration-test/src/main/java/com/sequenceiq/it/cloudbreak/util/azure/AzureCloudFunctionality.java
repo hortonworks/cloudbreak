@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.azure.resourcemanager.resources.models.ResourceGroup;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -72,17 +72,17 @@ public class AzureCloudFunctionality implements CloudFunctionality {
 
     @Override
     public void cloudStorageListContainer(String baseLocation, String selectedDirectory, boolean zeroContent) {
-        azureCloudBlobUtil.listSelectedFoldersInAContainer(baseLocation, selectedDirectory, zeroContent);
+        azureCloudBlobUtil.listSelectedFoldersInAContaier(baseLocation, selectedDirectory, zeroContent);
     }
 
     @Override
     public void cloudStorageListContainerFreeIpa(String baseLocation, String clusterName, String crn) {
-        azureCloudBlobUtil.listFreeIpaFoldersInAContainer(baseLocation, clusterName, crn);
+        azureCloudBlobUtil.listFreeIpaFoldersInAContaier(baseLocation, clusterName, crn);
     }
 
     @Override
     public void cloudStorageListContainerDataLake(String baseLocation, String clusterName, String crn) {
-        azureCloudBlobUtil.listDataLakeFoldersInAContainer(baseLocation, clusterName, crn);
+        azureCloudBlobUtil.listDataLakeFoldersInAContaier(baseLocation, clusterName, crn);
     }
 
     @Override
