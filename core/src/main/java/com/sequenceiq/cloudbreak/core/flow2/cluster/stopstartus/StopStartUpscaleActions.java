@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus;
 
-
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
@@ -128,8 +127,7 @@ public class StopStartUpscaleActions {
                         .collect(Collectors.toList());
 
                 List<InstanceMetadataView> stoppedInstancesInHg = instanceMetaDataForHg.stream()
-                        .filter(s -> s.getInstanceStatus() == STOPPED)
-                        .collect(Collectors.toList());
+                        .filter(s -> (s.getInstanceStatus() == STOPPED)).collect(Collectors.toList());
 
                 LOGGER.info("NotDeletedInstanceMetadata totalCount={}. count for hostGroup: {}={}, stoppedInstancesInHgCount={}",
                         instanceMetaDataList.size(), context.getHostGroupName(), instanceMetaDataForHg.size(), stoppedInstancesInHg.size());

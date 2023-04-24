@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +58,9 @@ public class AwsInstanceConnector implements InstanceConnector {
     public static final String INSUFFICIENT_INSTANCE_CAPACITY_ERROR_CODE = "InsufficientInstanceCapacity";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsInstanceConnector.class);
+
+    private static final Set<InstanceStatus> PENDING_STATUSES = EnumSet.of(
+            InstanceStatus.PENDING);
 
     @Inject
     private PollerUtil pollerUtil;
@@ -160,9 +164,17 @@ public class AwsInstanceConnector implements InstanceConnector {
             Long timeboundInMs) {
         AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
         try {
-            Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, status, completedStatuses);
+            ImmutablePair<Collection<String>, Collection<String>> instancesPair =
+                    instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, status, completedStatuses);
+            Collection<String> instances = instancesPair.getLeft();
+            Collection<String> pendingInstances = instancesPair.getRight();
             if (!instances.isEmpty()) {
                 consumer.accept(amazonEC2Client, instances);
+            }
+            if (!pendingInstances.isEmpty()) {
+                LOGGER.debug("Force Stopping Instances Stuck on PENDING state in AWS: {}", pendingInstances);
+                forceStopPendingInstances(amazonEC2Client, pendingInstances);
+                vms = vms.stream().filter(i -> !pendingInstances.contains(i.getInstanceId())).collect(Collectors.toList());
             }
         } catch (Ec2Exception e) {
             handleEC2Exception(vms, e);
@@ -175,6 +187,10 @@ public class AwsInstanceConnector implements InstanceConnector {
         } else {
             return pollerUtil.waitFor(ac, vms, completedStatuses, status);
         }
+    }
+
+    private void forceStopPendingInstances(AmazonEc2Client amazonEC2Client, Collection<String> pendingInstances) {
+        amazonEC2Client.stopInstances(StopInstancesRequest.builder().force(true).instanceIds(pendingInstances).build());
     }
 
     private List<CloudVmInstanceStatus> setCloudVmInstanceStatuses(AuthenticatedContext ac, List<CloudInstance> vms, String status,
@@ -339,21 +355,26 @@ public class AwsInstanceConnector implements InstanceConnector {
         return cloudVmInstanceStatuses;
     }
 
-    private Collection<String> instanceIdsWhichAreNotInCorrectState(List<CloudInstance> vms, AmazonEc2Client amazonEC2Client, String state,
-            Set<InstanceStatus> completedStatuses) {
+    private ImmutablePair<Collection<String>, Collection<String>> instanceIdsWhichAreNotInCorrectState(List<CloudInstance> vms,
+            AmazonEc2Client amazonEC2Client, String state, Set<InstanceStatus> completedStatuses) {
         Set<String> instances = vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toCollection(HashSet::new));
+        Set<String> pendingInstances = vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toCollection(HashSet::new));
         DescribeInstancesResponse describeInstances = amazonEC2Client.describeInstances(
                 DescribeInstancesRequest.builder().instanceIds(instances).build());
         for (Reservation reservation : describeInstances.reservations()) {
             for (Instance instance : reservation.instances()) {
-                if (state.equalsIgnoreCase(instance.state().name().toString().toLowerCase())
-                        || completedStatuses.contains(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(instance.state().name().toString()))) {
+                String instanceState = instance.state().name().toString();
+                if (state.equalsIgnoreCase(instanceState) || PENDING_STATUSES.contains(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(instanceState))
+                        || completedStatuses.contains(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(instanceState))) {
                     LOGGER.debug(" Removing AWS instance [{}] with {} state from list of stop/start instances.",
                             instance.instanceId(), instance.state().name());
                     instances.remove(instance.instanceId());
                 }
+                if (!PENDING_STATUSES.contains(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(instanceState))) {
+                    pendingInstances.remove(instance.instanceId());
+                }
             }
         }
-        return instances;
+        return ImmutablePair.of(instances, pendingInstances);
     }
 }

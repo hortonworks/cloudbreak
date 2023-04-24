@@ -165,7 +165,7 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
     private List<CloudVmInstanceStatus> collectStoppedInstancesFromCloudProvider(
             CloudConnector connector, AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
         List<CloudVmInstanceStatus> vmInstanceStatusAllInstances = connector.instances().checkWithoutRetry(ac, cloudInstances);
-        return vmInstanceStatusAllInstances.stream().filter(vm -> vm.getStatus() == InstanceStatus.STOPPED).collect(Collectors.toList());
+        return vmInstanceStatusAllInstances.stream().filter(vm -> (vm.getStatus() == InstanceStatus.STOPPED)).collect(Collectors.toList());
     }
 
     private List<CloudInstance> getInstancesToStart(List<CloudInstance> stoppedInstancesInCb,

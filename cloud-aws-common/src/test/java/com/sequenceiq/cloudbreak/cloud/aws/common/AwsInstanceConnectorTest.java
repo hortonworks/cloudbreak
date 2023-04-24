@@ -139,7 +139,8 @@ class AwsInstanceConnectorTest {
                 .withLocation(Location.location(Region.region("region")))
                 .withAccountId("account")
                 .build();
-        CloudCredential credential = new CloudCredential("id", "alma", Map.of("accessKey", "ac", "secretKey", "secret"), "acc");
+        CloudCredential credential = new CloudCredential("id", "alma",
+                Map.of("accessKey", "ac", "secretKey", "secret"), "acc");
         authenticatedContext = awsAuthenticator.authenticate(context, credential);
 
         StopInstancesResponse stopInstancesResult = StopInstancesResponse.builder().build();
@@ -377,6 +378,43 @@ class AwsInstanceConnectorTest {
         assertThat(result, hasSize(2));
     }
 
+    @Test
+    void testNodesWithPendingState() {
+        String status = "Running";
+        InstanceStatus running = AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(status);
+        inputList = getThreeCloudInstances();
+
+        mockDescribeInstancesOneIsPendingLastSuccess(POLLING_LIMIT);
+        ArgumentCaptor<StartInstancesRequest> captorStart = ArgumentCaptor.forClass(StartInstancesRequest.class);
+        ArgumentCaptor<StopInstancesRequest> captorStop = ArgumentCaptor.forClass(StopInstancesRequest.class);
+
+        List<CloudVmInstanceStatus> result = underTest.start(authenticatedContext, List.of(), inputList);
+
+        verify(amazonEC2Client, times(1)).startInstances(captorStart.capture());
+        verify(amazonEC2Client, times(1)).stopInstances(captorStop.capture());
+        assertEquals(1, captorStart.getValue().instanceIds().size());
+        assertEquals(1, captorStop.getValue().instanceIds().size());
+        assertEquals(result.size(), 2);
+        assertThat(result, hasItem(allOf(hasProperty("status", is(running)))));
+    }
+
+    @Test
+    void testNodesWithPendingStateWithStop() {
+        String status = "Stopped";
+        InstanceStatus stopped = AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(status);
+        inputList = getThreeCloudInstances();
+
+        mockDescribeInstancesOneIsPendingTwoStoppedLastSuccess(POLLING_LIMIT);
+        ArgumentCaptor<StopInstancesRequest> captorStop = ArgumentCaptor.forClass(StopInstancesRequest.class);
+
+        List<CloudVmInstanceStatus> result = underTest.stop(authenticatedContext, List.of(), inputList);
+
+        verify(amazonEC2Client, times(2)).stopInstances(captorStop.capture());
+        assertEquals(1, captorStop.getValue().instanceIds().size());
+        assertEquals(result.size(), 2);
+        assertThat(result, hasItem(allOf(hasProperty("status", is(stopped)))));
+    }
+
     private void mockDescribeInstances(int pollResponses, String lastStatus, int lastStatusCode) {
         mockListOfDescribeInstances(getDescribeInstancesResult("notrunning", 16), pollResponses,
                 getDescribeInstancesResult(lastStatus, lastStatusCode));
@@ -385,6 +423,16 @@ class AwsInstanceConnectorTest {
     private void mockDescribeInstancesOneIsRunningLastSuccess(int pollResponses) {
         mockListOfDescribeInstances(getDescribeInstancesResultOneRunning("notrunning", 16), pollResponses,
                 getDescribeInstancesResult("running", 16));
+    }
+
+    private void mockDescribeInstancesOneIsPendingLastSuccess(int pollResponses) {
+        mockListOfDescribeInstances(getDescribeInstancesResultOneRunningOnePendingOneStopped(), pollResponses,
+                getDescribeInstancesResultTwoRunning());
+    }
+
+    private void mockDescribeInstancesOneIsPendingTwoStoppedLastSuccess(int pollResponses) {
+        mockListOfDescribeInstances(getDescribeInstancesResultOneRunningOnePendingOneStopped(), pollResponses,
+                getDescribeInstancesResultThreeStopped());
     }
 
     private void mockDescribeInstancesOneIsStoppedLastSuccess(int pollResponses) {
@@ -450,6 +498,35 @@ class AwsInstanceConnectorTest {
         return DescribeInstancesResponse.builder().reservations(reservation1, reservation2).build();
     }
 
+    private DescribeInstancesResponse getDescribeInstancesResultOneRunningOnePendingOneStopped() {
+        Instance instance1 = getAwsInstance("i-1", "pending", 16);
+        Instance instance2 = getAwsInstance("i-2", "running", 48);
+        Instance instance3 = getAwsInstance("i-3", "stopped", 81);
+        Reservation reservation1 = Reservation.builder().reservationId("1").instances(instance1, instance2).build();
+        Reservation reservation2 = Reservation.builder().reservationId("2").instances(instance3).build();
+
+        return DescribeInstancesResponse.builder().reservations(reservation1, reservation2).build();
+    }
+
+    private DescribeInstancesResponse getDescribeInstancesResultTwoRunning() {
+        Instance instance2 = getAwsInstance("i-2", "running", 48);
+        Instance instance3 = getAwsInstance("i-3", "running", 81);
+        Reservation reservation1 = Reservation.builder().reservationId("1").instances(instance2).build();
+        Reservation reservation2 = Reservation.builder().reservationId("2").instances(instance3).build();
+
+        return DescribeInstancesResponse.builder().reservations(reservation1, reservation2).build();
+    }
+
+    private DescribeInstancesResponse getDescribeInstancesResultThreeStopped() {
+        Instance instance2 = getAwsInstance("i-2", "stopped", 48);
+        Instance instance1 = getAwsInstance("i-1", "stopped", 81);
+        Instance instance3 = getAwsInstance("i-3", "stopped", 81);
+        Reservation reservation1 = Reservation.builder().reservationId("1").instances(instance2).build();
+        Reservation reservation2 = Reservation.builder().reservationId("2").instances(instance3, instance1).build();
+
+        return DescribeInstancesResponse.builder().reservations(reservation1, reservation2).build();
+    }
+
     private DescribeInstancesResponse getDescribeInstancesResultOneRunning(String state, int code) {
         Instance instances1 = getAwsInstance("i-1", state, code);
         Instance instances2 = getAwsInstance("i-2", "running", 16);
@@ -472,6 +549,13 @@ class AwsInstanceConnectorTest {
         CloudInstance instance1 = new CloudInstance("i-1", null, null, "subnet-123", "az1");
         CloudInstance instance2 = new CloudInstance("i-2", null, null, "subnet-123", "az1");
         return List.of(instance1, instance2);
+    }
+
+    private List<CloudInstance> getThreeCloudInstances() {
+        CloudInstance instance1 = new CloudInstance("i-1", null, null, "subnet-123", "az1");
+        CloudInstance instance2 = new CloudInstance("i-2", null, null, "subnet-123", "az1");
+        CloudInstance instance3 = new CloudInstance("i-3", null, null, "subnet-123", "az1");
+        return List.of(instance1, instance2, instance3);
     }
 
     private Reservation getReservation(Instance instances1, String s) {
