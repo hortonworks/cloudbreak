@@ -9,15 +9,18 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -75,6 +78,8 @@ import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -1002,6 +1007,111 @@ public class ClouderaManagerSetupServiceTest {
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmTemplateInstallation(
                 any(Stack.class), any(ApiClient.class), any(BigDecimal.class));
         verify(clusterCommandRepository, times(1)).save(any(ClusterCommand.class));
+    }
+
+    @Test
+    void getCMHosFromMGMTWithEnterpiseDL() throws ApiException, IOException {
+        ClouderaManagerSetupService spy = spy(underTest);
+
+        ApiHostList apiHostList = getApiHostList();
+
+        String template = FileReaderUtils.readFileFromPath(Path.of("../core/src/main/resources/defaults/blueprints/7.2.17/cdp-sdx-enterprise.bp"));
+
+        TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+        when(blueprintView.getBlueprintText()).thenReturn(template);
+        when(blueprintView.getVersion()).thenReturn("7.2.17");
+        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
+        doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
+        spy.configureManagementServices(templatePreparationObject, null, null, null, null);
+        verify(spy, times(1)).getAuxiliaryHost(any(), any());
+    }
+
+    @Test
+    void getCMHosFromMGMTWithEnterpiseDLHostNotFound() throws ApiException, IOException {
+        ClouderaManagerSetupService spy = spy(underTest);
+
+        ApiHostList apiHostList = getApiHostList();
+        apiHostList.getItems().clear();
+
+        String template = FileReaderUtils.readFileFromPath(Path.of("../core/src/main/resources/defaults/blueprints/7.2.17/cdp-sdx-enterprise.bp"));
+
+        TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+        when(blueprintView.getBlueprintText()).thenReturn(template);
+        when(blueprintView.getVersion()).thenReturn("7.2.17");
+        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
+
+        spy.configureManagementServices(templatePreparationObject, null, null, null, null);
+
+        verify(spy, times(1)).getAuxiliaryHost(any(), any());
+        verify(mgmtSetupService, times(0)).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void getCMHosFromMGMTWithEnterpiseDH() throws ApiException {
+        ClouderaManagerSetupService spy = spy(underTest);
+
+        var apiHostList = getApiHostList();
+
+        TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
+        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
+        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN()).thenReturn(Optional.of("fqdn"));
+        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
+        doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
+
+        spy.configureManagementServices(templatePreparationObject, null, null, null, null);
+
+        verify(spy, times(0)).getAuxiliaryHost(any(), any());
+    }
+
+    @Test
+    void getCMHosFromMGMTWithEnterpiseOldVersonDL() throws ApiException, IOException {
+        ClouderaManagerSetupService spy = spy(underTest);
+
+        ApiHostList apiHostList = getApiHostList();
+
+        String template = FileReaderUtils.readFileFromPath(Path.of("../datalake/src/main/resources/duties/7.2.16/aws/medium_duty_ha.json"));
+
+        TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
+        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
+        when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN()).thenReturn(Optional.of("fqdn"));
+        when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+        when(blueprintView.getVersion()).thenReturn("7.2.17");
+        when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
+        doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
+
+        spy.configureManagementServices(templatePreparationObject, null, null, null, null);
+
+        verify(spy, times(0)).getAuxiliaryHost(any(), any());
+    }
+
+    private ApiHostList getApiHostList() {
+        var apiHostList = new ApiHostList();
+        apiHostList.addItemsItem(apiHost("auxiliary"));
+        apiHostList.addItemsItem(apiHost("fqdn"));
+        return apiHostList;
     }
 
     private ApiHost apiHost(String fqdn) {
