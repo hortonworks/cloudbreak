@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -46,6 +47,8 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudInstance> instances = request.getCloudInstances();
+            LOGGER.debug("Requesting start for the following instances: {}", String.join(",",
+                    instances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList())));
             List<CloudVmInstanceStatus> instanceStatuses = connector.instances().start(authenticatedContext, request.getResources(), instances);
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, instanceStatuses);
             StartInstancesResult result = new StartInstancesResult(request.getResourceId(), statusResult);
