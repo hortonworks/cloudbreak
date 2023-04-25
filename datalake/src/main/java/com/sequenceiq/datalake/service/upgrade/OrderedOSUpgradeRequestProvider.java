@@ -1,23 +1,15 @@
 package com.sequenceiq.datalake.service.upgrade;
 
-import static com.sequenceiq.common.api.type.InstanceGroupName.ATLASHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.AUXILIARY;
 import static com.sequenceiq.common.api.type.InstanceGroupName.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupName.GATEWAY;
-import static com.sequenceiq.common.api.type.InstanceGroupName.HMSHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.IDBROKER;
-import static com.sequenceiq.common.api.type.InstanceGroupName.KAFKAHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.MASTER;
-import static com.sequenceiq.common.api.type.InstanceGroupName.RAZHG;
-import static com.sequenceiq.common.api.type.InstanceGroupName.SOLRHG;
-import static com.sequenceiq.common.api.type.InstanceGroupName.STORAGEHG;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,26 +35,23 @@ public class OrderedOSUpgradeRequestProvider {
         Map<String, List<String>> instanceIdsByInstanceGroup = getInstanceIdsByInstanceGroup(instanceMetaDataByInstanceGroup);
         LOGGER.debug("Instance ids by instance group: {}", instanceIdsByInstanceGroup);
 
-        int order = 0;
         List<OrderedOSUpgradeSet> osUpgradeByUpgradeSets = new ArrayList<>();
-        osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(
+        osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(0, Set.of(
                 getInstanceId(instanceIdsByInstanceGroup, MASTER),
                 getInstanceId(instanceIdsByInstanceGroup, CORE),
                 getInstanceId(instanceIdsByInstanceGroup, AUXILIARY),
                 getInstanceId(instanceIdsByInstanceGroup, IDBROKER)
         )));
-        osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(
+        osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(1, Set.of(
                 getInstanceId(instanceIdsByInstanceGroup, MASTER),
                 getInstanceId(instanceIdsByInstanceGroup, CORE),
                 getInstanceId(instanceIdsByInstanceGroup, GATEWAY),
                 getInstanceId(instanceIdsByInstanceGroup, IDBROKER)
         )));
-        osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(
+        osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(2, Set.of(
                 getInstanceId(instanceIdsByInstanceGroup, CORE),
                 getInstanceId(instanceIdsByInstanceGroup, GATEWAY)
         )));
-        addServiceHostGroupsToOrderedOSUpgradeSet(instanceIdsByInstanceGroup, order, osUpgradeByUpgradeSets);
-
         validateThatEveryInstanceIsPresentInTheConfig(instanceIdsByInstanceGroup);
         OrderedOSUpgradeSetRequest request = new OrderedOSUpgradeSetRequest();
         request.setOrderedOsUpgradeSets(osUpgradeByUpgradeSets);
@@ -80,7 +69,7 @@ public class OrderedOSUpgradeRequestProvider {
     private Map<String, List<String>> getInstanceIdsByInstanceGroup(Map<String, List<InstanceMetaDataV4Response>> instanceMetaDataByInstanceGroup) {
         return instanceMetaDataByInstanceGroup.entrySet().stream()
                 .collect(Collectors.toMap(
-                        Entry::getKey,
+                        Map.Entry::getKey,
                         entry -> entry.getValue().stream()
                                 .map(InstanceMetaDataV4Response::getInstanceId)
                                 .collect(Collectors.toList())));
@@ -105,35 +94,6 @@ public class OrderedOSUpgradeRequestProvider {
         if (!instancesFromInstanceGroups.isEmpty()) {
             throw new CloudbreakServiceException(
                     String.format("The following instances are missing from the ordered OS upgrade request: %s", instancesFromInstanceGroups));
-        }
-    }
-
-    private void addServiceHostGroupsToOrderedOSUpgradeSet(Map<String, List<String>> instanceIdsByInstanceGroup, int order,
-            List<OrderedOSUpgradeSet> osUpgradeByUpgradeSets) {
-        Set<String> instanceIds = null;
-        do {
-            if (instanceIds != null) {
-                osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, instanceIds));
-            }
-            instanceIds = getServicesHostGroupIds(instanceIdsByInstanceGroup);
-        } while (!instanceIds.isEmpty());
-    }
-
-    private Set<String> getServicesHostGroupIds(Map<String, List<String>> instanceIdsByInstanceGroup) {
-        Set<String> instanceIds = new HashSet<>();
-        addInstanceId(instanceIdsByInstanceGroup, SOLRHG, instanceIds);
-        addInstanceId(instanceIdsByInstanceGroup, STORAGEHG, instanceIds);
-        addInstanceId(instanceIdsByInstanceGroup, KAFKAHG, instanceIds);
-        addInstanceId(instanceIdsByInstanceGroup, RAZHG, instanceIds);
-        addInstanceId(instanceIdsByInstanceGroup, ATLASHG, instanceIds);
-        addInstanceId(instanceIdsByInstanceGroup, HMSHG, instanceIds);
-        return instanceIds;
-    }
-
-    private void addInstanceId(Map<String, List<String>> instanceIdsByInstanceGroup, InstanceGroupName instanceGroupName, Set<String> instanceIds) {
-        if (instanceIdsByInstanceGroup.containsKey(instanceGroupName.getName()) &&
-                !instanceIdsByInstanceGroup.get(instanceGroupName.getName()).isEmpty()) {
-            instanceIds.add(instanceIdsByInstanceGroup.get(instanceGroupName.getName()).remove(0));
         }
     }
 }
