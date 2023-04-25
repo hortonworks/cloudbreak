@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcSdxSaasClient;
 import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
 import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Service
 public class SaasSdxService extends AbstractSdxService<SDXSvcCommonProto.InstanceHighLevelStatus.Value> {
@@ -95,5 +96,10 @@ public class SaasSdxService extends AbstractSdxService<SDXSvcCommonProto.Instanc
     @Override
     public Optional<Entitlement> getEntitlement() {
         return Optional.of(CDP_SAAS_SDX_INTEGRATION);
+    }
+
+    @Override
+    public SdxClusterResponse getSdxClusterByEnvironmentCrn(String environmentCrn) {
+        throw new UnsupportedOperationException("This is not supported in case of SAAS");
     }
 }
