@@ -129,8 +129,12 @@ message Event {
     CDPLiftieRequested cdpLiftieRequested = 52;
     // A CDP Liftie cluster's status changed.
     CDPLiftieClusterStatusChanged cdpLiftieClusterStatusChanged = 53;
-    // A CDP Liftie heartbeat usage event
+    // A CDP Liftie node heartbeat usage event
     CDPLiftieClusterNodeStatesHeartbeat cdpLiftieClusterNodeStatesHeartbeat = 99;
+    // A CDP Liftie pod summary heartbeat usage event
+    CDPLiftieClusterPodStatesHeartbeatSummary cdpLiftieClusterPodStatesHeartbeatSummary = 134;
+    // A CDP Liftie pod heartbeat usage event
+    CDPLiftieClusterPodStatesHeartbeat cdpLiftieClusterPodStatesHeartbeat = 135;
     // A KPI was added to a DataFlow deployment.
     CDPDFDeploymentKpiCreated cdpDFDeploymentKpiCreated = 54;
     // A KPI of a DataFlow deployment was modified.
@@ -224,7 +228,7 @@ message Event {
     CDPEnvironmentProxyConfigEditEvent cdpEnvironmentProxyConfigEditEvent = 107;
     // A CDP CDW Usage Event.
     CDPCDWUsageEvent cdpCDWUsageEvent = 108;
-    // A CDP Liftie summary heartbeat usage event
+    // A CDP Liftie node summary heartbeat usage event
     CDPLiftieClusterNodeStatesHeartbeatSummary cdpLiftieClusterNodeStatesHeartbeatSummary = 109;
     // A CDP CDE session is requested.
     CDPCDESessionRequested cdpCDESessionRequested = 110;
@@ -288,6 +292,8 @@ message AltusIamAccountType {
     TRIAL = 2;
     // A managed Skynet CDPOne trial account.
     MANAGED_SKYNET_CDPONE_TRIAL = 3;
+    // A managed Skynet CDP trial account.
+    MANAGED_SKYNET_CDP_TRIAL = 4;
   }
 }
 
@@ -1466,6 +1472,8 @@ message CDPLiftieClusterNodeStatesHeartbeatSummary {
   CDPLiftieClusterNodesSummary nodesSummary = 7;
   // Summary info for the clusters metering related pods
   CDPLiftieClusterMeteringPodsSummary meteringPodsSummary = 8;
+  // The workload region
+  string workloadRegion = 9;
 }
 
 message CDPLiftieClusterNodesSummary {
@@ -1494,6 +1502,77 @@ message CDPLiftieClusterMeteringPodsSummary {
   int32 numMeteringPods = 3;
   // Total number of unhealthy metering pods
   int32 numMeteringPodsUnhealthy = 4;
+}
+
+message CDPLiftieClusterPodCondition {
+  // Indicates the condition
+  string condition = 1;
+  // Indicates the status of this condition
+  string status = 2;
+  // Last time we probed the condition.
+  uint64 lastProbeTime = 3;
+  // Indicates the last time this condition changed
+  uint64 lastTransitionTime = 4;
+}
+
+message CDPLiftieClusterPodState {
+  // Indicates Id of the pod
+  string id = 1;
+  // Indicates the name of the pod
+  string name = 2;
+  // Indicates the namespace of the pod
+  string namespace = 3;
+  // Indicates the pod condition
+  repeated CDPLiftieClusterPodCondition condition = 4;
+  // All labels present on this pod
+  repeated string labels = 5;
+  // Indicates pod annotations
+  repeated string annotations = 6;
+  // Reason for the conditions last transition
+  string reason = 7;
+  // Human readable string containing details about the last transition
+  string message = 8;
+}
+
+message CDPLiftieClusterPodStatesHeartbeatSummary {
+  // The Compute Cluster CRN
+  string clusterCrn = 1;
+  // Indicates the cluster id
+  string clusterId = 2;
+  // Total number of pods
+  int32 totalNumPods = 3;
+  // Summary Info of Metering Pods
+  CDPLiftieClusterPodSummmary meteringPods = 4;
+  // Summary Info of Fluentd Pods
+  CDPLiftieClusterPodSummmary fluentdPods = 5;
+  // Summary Info of Yunikorn Pods
+  CDPLiftieClusterPodSummmary yunikornPods = 6;
+  // Summary Info of Istio Pods
+  CDPLiftieClusterPodSummmary istioPods = 7;
+  // Summary Info of CoreDNS Pods
+  CDPLiftieClusterPodSummmary coreDNSPods = 8;
+  //List of all the unhealthy pods in each cluster
+  repeated string unhealthyPodList = 9;
+  // The workload region
+  string workloadRegion = 10;
+}
+
+message CDPLiftieClusterPodSummmary {
+  // Total number of pods
+  int32 numTotalPods = 1;
+  // Total number of unhealthy pods
+  int32 numUnhealthyPods = 2;
+}
+
+message CDPLiftieClusterPodStatesHeartbeat {
+  // List of all the pods in each cluster
+  repeated CDPLiftieClusterPodState podStates = 1;
+  // The Compute Cluster CRN
+  string clusterCrn = 2;
+  // Indicates the cluster id
+  string clusterId = 3;
+  // The CDP environment CRN.
+  string environmentCrn = 4;
 }
 
 // The status of a CDP request
@@ -1759,6 +1838,13 @@ message CDPClusterStatus {
     SALT_UPDATE_FINISHED = 59;
     // The status when a salt update operation on the cluster is failed
     SALT_UPDATE_FAILED = 60;
+
+    // The status when a delete volume operation on a cluster is initiated.
+    DELETE_EBS_VOLUMES_STARTED = 61;
+    // The status when a delete volume operation on a cluster has successfully finished.
+    DELETE_EBS_VOLUMES_FINISHED = 62;
+    // The status when a delete volume operation on a cluster has failed.
+    DELETE_EBS_VOLUMES_FAILED = 63;
   }
 }
 
@@ -1977,6 +2063,8 @@ message CDPImageDetails {
   string imageCatalogUrl = 3;
   // OS type
   string osType = 4;
+  // Image name - used for Azure Marketplace usage tracking
+  string imageName = 5;
 }
 
 message CDPClusterShape {
@@ -4405,6 +4493,7 @@ message JobCreatedOrModifiedEvent {
   uint32 notifyStopped = 10;
   string file = 11;
   string reportAttachments = 12;
+  UsageRuntime runtime = 13;
 }
 
 message ExperimentStartEvent {

@@ -15,6 +15,8 @@ public class StackDetailsToCDPImageDetailsConverterTest {
 
     private static final String IMAGE_ID = "image id";
 
+    private static final String IMAGE_NAME = "image name";
+
     private static final String OS_TYPE = "os type";
 
     private static final String IMAGE_CATALOG = "image catalog";
@@ -36,6 +38,7 @@ public class StackDetailsToCDPImageDetailsConverterTest {
         Assertions.assertEquals("", cdpImageDetails.getImageId());
         Assertions.assertEquals("", cdpImageDetails.getImageCatalogUrl());
         Assertions.assertEquals("", cdpImageDetails.getOsType());
+        Assertions.assertEquals("", cdpImageDetails.getImageName());
     }
 
     @Test
@@ -46,6 +49,7 @@ public class StackDetailsToCDPImageDetailsConverterTest {
         Assertions.assertEquals("", cdpImageDetails.getImageId());
         Assertions.assertEquals("", cdpImageDetails.getImageCatalogUrl());
         Assertions.assertEquals("", cdpImageDetails.getOsType());
+        Assertions.assertEquals("", cdpImageDetails.getImageName());
     }
 
     @Test
@@ -56,6 +60,7 @@ public class StackDetailsToCDPImageDetailsConverterTest {
         imageDetails.setOsType(OS_TYPE);
         imageDetails.setImageCatalogName(IMAGE_CATALOG);
         imageDetails.setImageCatalogUrl(IMAGE_CATALOG_URL);
+        imageDetails.setImageName(IMAGE_NAME);
         stackDetails.setImage(imageDetails);
 
         UsageProto.CDPImageDetails cdpImageDetails = underTest.convert(stackDetails);
@@ -64,5 +69,6 @@ public class StackDetailsToCDPImageDetailsConverterTest {
         Assertions.assertEquals(IMAGE_ID, cdpImageDetails.getImageId());
         Assertions.assertEquals(IMAGE_CATALOG_URL, cdpImageDetails.getImageCatalogUrl());
         Assertions.assertEquals(OS_TYPE, cdpImageDetails.getOsType());
+        Assertions.assertEquals(IMAGE_NAME, cdpImageDetails.getImageName());
     }
 }
