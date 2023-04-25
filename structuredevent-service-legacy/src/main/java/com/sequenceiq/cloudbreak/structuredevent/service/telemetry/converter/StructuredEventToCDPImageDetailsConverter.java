@@ -46,6 +46,7 @@ public class StructuredEventToCDPImageDetailsConverter {
                 cdpImageDetails.setImageId(defaultIfEmpty(image.getImageId(), ""));
                 cdpImageDetails.setImageCatalogUrl(defaultIfEmpty(image.getImageCatalogUrl(), ""));
                 cdpImageDetails.setOsType(defaultIfEmpty(image.getOsType(), ""));
+                cdpImageDetails.setImageName(defaultIfEmpty(image.getImageName(), ""));
             }
         }
 
