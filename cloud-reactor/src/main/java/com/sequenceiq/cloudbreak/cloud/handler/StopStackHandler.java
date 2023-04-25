@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -46,6 +47,8 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             List<CloudInstance> instances = request.getCloudInstances();
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            LOGGER.info("Stopping instances with the following ID(s): {}", String.join(",",
+                    instances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList())));
             List<CloudVmInstanceStatus> cloudVmInstanceStatuses = connector.instances().stop(authenticatedContext, request.getResources(), instances);
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, cloudVmInstanceStatuses);
             StopInstancesResult result = new StopInstancesResult(request.getResourceId(), statusResult);
