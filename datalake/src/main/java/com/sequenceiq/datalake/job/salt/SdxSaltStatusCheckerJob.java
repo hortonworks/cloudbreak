@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.job.salt;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -46,6 +48,9 @@ public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private SdxStatusService sdxStatusService;
+
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Override
     protected Optional<Object> getMdcContextObject() {
@@ -87,7 +92,12 @@ public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
                 Optional<RotateSaltPasswordReason> reasonOptional = RotateSaltPasswordReason.getForStatus(saltPasswordStatus.getStatus());
                 if (reasonOptional.isPresent()) {
                     LOGGER.info("Salt password rotation is needed for SDX {} based on response {}", sdxCluster.getCrn(), saltPasswordStatus);
-                    sdxService.rotateSaltPassword(sdxCluster, reasonOptional.get());
+                    try {
+                        sdxService.rotateSaltPassword(sdxCluster, reasonOptional.get());
+                    } catch (WebApplicationException e) {
+                        String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+                        LOGGER.warn("Salt password rotation failed. {}", errorMessage);
+                    }
                 } else {
                     LOGGER.debug("Salt password rotation is NOT needed for SDX {} based on response {}", sdxCluster.getCrn(), saltPasswordStatus);
                 }
