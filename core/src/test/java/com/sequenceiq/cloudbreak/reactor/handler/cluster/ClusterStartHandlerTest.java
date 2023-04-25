@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterStartHandlerTest {
-
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
 
@@ -61,7 +60,6 @@ class ClusterStartHandlerTest {
 
         stack = new Stack();
         stack.setCloudPlatform("AWS");
-
         when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
         when(apiConnectors.getConnector(any(Stack.class))).thenReturn(connector);
         when(connector.clusterStatusService()).thenReturn(clusterStatusService);

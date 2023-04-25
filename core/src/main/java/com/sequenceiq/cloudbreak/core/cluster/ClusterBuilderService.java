@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.saas.sdx.PaasRemoteDataContextSupplier;
+import com.sequenceiq.cloudbreak.saas.sdx.PaasSdxService;
 import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Service
 public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
@@ -88,12 +91,21 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
     @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
+    @Inject
+    private PaasSdxService sdxService;
+
     public void startCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
         StackDto stackDto = stackDtoService.getById(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
         connector.waitForServer(true);
         boolean ldapConfigured = ldapConfigService.isLdapConfigExistsForEnvironment(stackDto.getStack().getEnvironmentCrn(), stackDto.getStack().getName());
         connector.changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
+        if (StackType.DATALAKE.equals(stackDto.getType())) {
+            SdxClusterResponse sdxCluster = sdxService.getSdxClusterByEnvironmentCrn(stackDto.getStack().getResourceCrn());
+            if (sdxCluster.getClusterShape().isHA()) {
+                connector.clusterModificationService().reconfigureCMMemory();
+            }
+        }
     }
 
     public void waitForClusterManager(Long stackId) throws CloudbreakException, ClusterClientInitException {

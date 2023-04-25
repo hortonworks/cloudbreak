@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
 import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 public interface SdxService<S> {
 
@@ -52,4 +53,6 @@ public interface SdxService<S> {
     default boolean isPlatformEntitled(String accountId) {
         return getEntitlement().isEmpty() || getEntitlementService().isEntitledFor(accountId, getEntitlement().get());
     }
+
+    SdxClusterResponse getSdxClusterByEnvironmentCrn(String environmentCrn);
 }
