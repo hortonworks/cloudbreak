@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.ClassValue;
@@ -81,6 +83,9 @@ class FreeIpaDeletionServiceTest {
     @Mock
     private ApplicationFlowInformation applicationFlowInformation;
 
+    @Mock
+    private Clock clock;
+
     private Stack stack;
 
     @BeforeEach
@@ -126,7 +131,41 @@ class FreeIpaDeletionServiceTest {
     }
 
     @Test
-    public void testTerminationFlowExists() {
+    public void testTerminationFlowExistsNotForcedAndFresh() {
+        when(stackService.findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID))).thenReturn(Collections.singletonList(stack));
+        when(applicationFlowInformation.getTerminationFlow()).thenReturn(List.of(StackTerminationFlowConfig.class));
+        FlowLog flowLog = new FlowLog();
+        flowLog.setFlowType(ClassValue.of(StackTerminationFlowConfig.class));
+        flowLog.setCurrentState(StackTerminationState.INIT_STATE.name());
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(stack.getId())).thenReturn(List.of(flowLog));
+        when(clock.nowMinus(Duration.ofHours(1L))).thenCallRealMethod();
+
+        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID, false);
+
+        verify(flowManager, never()).notify(anyString(), any(Acceptable.class));
+        verify(flowCancelService, never()).cancelRunningFlows(stack.getId());
+    }
+
+    @Test
+    public void testTerminationFlowExistsNotForcedAndStale() {
+        when(stackService.findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID))).thenReturn(Collections.singletonList(stack));
+        when(applicationFlowInformation.getTerminationFlow()).thenReturn(List.of(StackTerminationFlowConfig.class));
+        FlowLog flowLog = new FlowLog();
+        flowLog.setFlowType(ClassValue.of(StackTerminationFlowConfig.class));
+        flowLog.setCurrentState(StackTerminationState.INIT_STATE.name());
+        flowLog.setCreated(1L);
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(stack.getId())).thenReturn(List.of(flowLog));
+        when(clock.nowMinus(Duration.ofHours(1L))).thenCallRealMethod();
+
+        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID, false);
+
+        verify(flowManager).notify(anyString(), any(Acceptable.class));
+        verify(flowCancelService).cancelRunningFlows(stack.getId());
+        verify(flowCancelService).cancelFlowSilently(flowLog);
+    }
+
+    @Test
+    public void testTerminationFlowExistsNotForcedAndRequestIsForced() {
         when(stackService.findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID))).thenReturn(Collections.singletonList(stack));
         when(applicationFlowInformation.getTerminationFlow()).thenReturn(List.of(StackTerminationFlowConfig.class));
         FlowLog flowLog = new FlowLog();
@@ -134,10 +173,11 @@ class FreeIpaDeletionServiceTest {
         flowLog.setCurrentState(StackTerminationState.INIT_STATE.name());
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(stack.getId())).thenReturn(List.of(flowLog));
 
-        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID, false);
+        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID, true);
 
-        verify(flowManager, never()).notify(anyString(), any(Acceptable.class));
-        verify(flowCancelService, never()).cancelRunningFlows(stack.getId());
+        verify(flowManager).notify(anyString(), any(Acceptable.class));
+        verify(flowCancelService).cancelRunningFlows(stack.getId());
+        verify(flowCancelService).cancelFlowSilently(flowLog);
     }
 
     @Test

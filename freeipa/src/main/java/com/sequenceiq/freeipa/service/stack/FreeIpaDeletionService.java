@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.TERMINATION_EVENT;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,9 +15,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.entity.ChildEnvironment;
@@ -56,6 +60,9 @@ public class FreeIpaDeletionService {
     @Inject
     private ApplicationFlowInformation applicationFlowInformation;
 
+    @Inject
+    private Clock clock;
+
     public void delete(String environmentCrn, String accountId, boolean forced) {
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stacks.isEmpty()) {
@@ -83,6 +90,15 @@ public class FreeIpaDeletionService {
         if (optionalFlowLog.isPresent()) {
             FlowLog flowLog = optionalFlowLog.get();
             LOGGER.debug("Found termination flowlog with id [{}] and payload [{}]", flowLog.getFlowId(), flowLog.getPayloadJackson());
+            if (!isRunningFlowForced(flowLog) && forced) {
+                LOGGER.info("Cancelling running termination flow as it's not forced, but the requested termination is forced");
+                flowCancelService.cancelFlowSilently(flowLog);
+                fireTerminationEvent(stack, forced);
+            } else if (flowLog.getCreated() != null && flowLog.getCreated() < clock.nowMinus(Duration.ofHours(1L)).toEpochMilli()) {
+                LOGGER.info("Cancelling running termination flow before triggering a new one as it's older than 1 hour");
+                flowCancelService.cancelFlowSilently(flowLog);
+                fireTerminationEvent(stack, forced);
+            }
         } else {
             fireTerminationEvent(stack, forced);
         }
@@ -112,6 +128,17 @@ public class FreeIpaDeletionService {
                     .collect(Collectors.joining(", "));
             throw new BadRequestException(String.format("FreeIpa can not be deleted while it has the following child environment(s) attached [%s]",
                     childEnvironmentCrns));
+        }
+    }
+
+    private boolean isRunningFlowForced(FlowLog fl) {
+        ClassValue payloadType = fl.getPayloadType();
+        if (payloadType != null && payloadType.isOnClassPath() && TerminationEvent.class.equals(payloadType.getClassValue())) {
+            TerminationEvent payload = JsonUtil.readValueUnchecked(fl.getPayloadJackson(), TerminationEvent.class);
+            return payload.getForced();
+        } else {
+            LOGGER.warn("Payloadtype [{}] is not 'TerminationEvent' for flow [{}]", fl.getPayloadType(), fl.getFlowId());
+            return false;
         }
     }
 }
