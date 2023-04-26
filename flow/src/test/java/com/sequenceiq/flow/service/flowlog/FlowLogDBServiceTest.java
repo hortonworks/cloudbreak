@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -74,6 +75,8 @@ import com.sequenceiq.flow.repository.FlowLogRepository;
 class FlowLogDBServiceTest {
 
     private static final String FLOW_ID = "flowId";
+
+    private static final Long FLOW_LOG_ID = 1L;
 
     private static final long ID = 123L;
 
@@ -451,6 +454,41 @@ class FlowLogDBServiceTest {
     void testFlowLogsWithoutPayloadByFlowChainIdsCreatedDescEmptyChainId() {
         List<FlowLogWithoutPayload> actual = underTest.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(new HashSet<>());
         assertEquals(0, actual.size());
+    }
+
+    @Test
+    void testCloseFlowWhenFlowFound() {
+        FlowLog flowLog = new FlowLog(ID, FLOW_ID, "currentState", false, StateStatus.PENDING, OperationType.PROVISION);
+        flowLog.setId(FLOW_LOG_ID);
+        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
+        underTest.closeFlow(FLOW_ID);
+        verify(flowLogRepository, times(1)).findFirstByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
+        verify(applicationFlowInformation, times(1)).handleFlowFail(eq(flowLog));
+        verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(eq(FLOW_LOG_ID), eq(StateStatus.FAILED), anyLong());
+        verify(flowLogRepository, times(1)).finalizeByFlowId(eq(FLOW_ID));
+    }
+
+    @Test
+    void testCloseFlowWhenFlowFoundButHandlingFails() {
+        FlowLog flowLog = new FlowLog(ID, FLOW_ID, "currentState", false, StateStatus.PENDING, OperationType.PROVISION);
+        flowLog.setId(FLOW_LOG_ID);
+        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
+        doThrow(new RuntimeException("Boom")).when(applicationFlowInformation).handleFlowFail(any());
+        underTest.closeFlow(FLOW_ID);
+        verify(flowLogRepository, times(1)).findFirstByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
+        verify(applicationFlowInformation, times(1)).handleFlowFail(eq(flowLog));
+        verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(eq(FLOW_LOG_ID), eq(StateStatus.FAILED), anyLong());
+        verify(flowLogRepository, times(1)).finalizeByFlowId(eq(FLOW_ID));
+    }
+
+    @Test
+    void testCloseFlowWhenFlowNotFound() {
+        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.empty());
+        underTest.closeFlow(FLOW_ID);
+        verify(flowLogRepository, times(1)).findFirstByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
+        verify(applicationFlowInformation, never()).handleFlowFail(any());
+        verify(flowLogRepository, never()).updateLastLogStatusInFlow(anyLong(), any(), anyLong());
+        verify(flowLogRepository, never()).finalizeByFlowId(anyString());
     }
 
     public static class TerminationFlowConfig extends AbstractFlowConfiguration<MockFlowState, MockFlowEvent> {

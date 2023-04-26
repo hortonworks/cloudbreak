@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
-import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -40,10 +39,6 @@ public class EventBusConfig {
 
     @Value("${cb.eventbus.threadpool.backlog.size:1000}")
     private int eventBusThreadPoolBacklogSize;
-
-    @Inject
-    @Lazy
-    private ApplicationFlowInformation applicationFlowInformation;
 
     @Inject
     @Lazy
@@ -103,7 +98,7 @@ public class EventBusConfig {
                         .orElse(null);
                 if (flowId != null) {
                     LOGGER.error("Unhandled exception happened in flow {}, lets cancel it", flowId, exception);
-                    closeFlow(flowId);
+                    flowLogDBService.closeFlow(flowId);
                 } else {
                     LOGGER.error("We were not able to guess flowId on thread: {}", generateStackTrace());
                 }
@@ -121,7 +116,7 @@ public class EventBusConfig {
             if (!threadPoolExecutor.isTerminating()) {
                 String flowId = tryGetFlowIdFromEvent(event);
                 if (flowId != null) {
-                    closeFlow(flowId);
+                    flowLogDBService.closeFlow(flowId);
                 } else {
                     LOGGER.error("We were not able to guess flowId on thread: {}", generateStackTrace());
                 }
@@ -131,17 +126,5 @@ public class EventBusConfig {
         } catch (Exception e) {
             LOGGER.error("can't handle flow fail", e);
         }
-    }
-
-    private void closeFlow(String flowId) {
-        flowLogDBService.findFirstByFlowIdOrderByCreatedDesc(flowId).ifPresent(flowLog -> {
-            try {
-                applicationFlowInformation.handleFlowFail(flowLog);
-            } catch (Exception e) {
-                LOGGER.error("Exception occurred while handled {} flow failure. Message: {}", flowId, e.getMessage(), e);
-            }
-            flowLogDBService.updateLastFlowLogStatus(flowLog, true);
-            flowLogDBService.finalize(flowLog.getFlowId());
-        });
     }
 }

@@ -432,4 +432,16 @@ public class FlowLogDBService implements FlowLogService {
                         Collectors.reducing(BinaryOperator.maxBy(Comparator.comparing(FlowLog::getCreated)))))
                 .values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
+
+    public void closeFlow(String flowId) {
+        findFirstByFlowIdOrderByCreatedDesc(flowId).ifPresent(flowLog -> {
+            try {
+                applicationFlowInformation.handleFlowFail(flowLog);
+            } catch (Exception e) {
+                LOGGER.error("Exception occurred while handled {} flow failure. Message: {}", flowId, e.getMessage(), e);
+            }
+            updateLastFlowLogStatus(flowLog, true);
+            finalize(flowLog.getFlowId());
+        });
+    }
 }

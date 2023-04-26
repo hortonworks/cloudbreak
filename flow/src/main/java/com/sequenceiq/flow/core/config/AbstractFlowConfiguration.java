@@ -41,12 +41,14 @@ import com.sequenceiq.flow.core.FlowAdapter;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowFinalizeAction;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.MessageFactory;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.StateConverterAdapter;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
+import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);
@@ -63,6 +65,9 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     @Inject
     @Qualifier("DefaultRestartAction")
     private DefaultRestartAction defaultRestartAction;
+
+    @Inject
+    private FlowLogDBService flowLogDBService;
 
     protected AbstractFlowConfiguration(Class<S> stateType, Class<E> eventType) {
         this.stateType = stateType;
@@ -145,6 +150,8 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                     @Override
                     public void eventNotAccepted(Message<E> event) {
                         LOGGER.error("{} not accepted event: {}", getClass().getSimpleName(), event);
+                        FlowParameters flowParameters = (FlowParameters) event.getHeaders().get(MessageFactory.HEADERS.FLOW_PARAMETERS.name());
+                        flowLogDBService.closeFlow(flowParameters.getFlowId());
                     }
                 };
         return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener, new SyncTaskExecutor());
