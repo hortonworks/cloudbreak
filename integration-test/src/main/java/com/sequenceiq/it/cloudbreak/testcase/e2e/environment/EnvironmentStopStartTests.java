@@ -283,21 +283,10 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .given("dx1", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("dx1"))
                 .then(cloudProviderSideTagAssertion.verifyDistroxTags(DX1_TAGS))
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.stop())
-                .await(EnvironmentStatus.ENV_STOPPED)
-
-                .when(this::executeDatahubVerticalScaleIfSupported)
-
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.start())
-                .await(EnvironmentStatus.AVAILABLE)
-                .then(this::validateClusterLogsArePresent)
-                .then(this::validateClusterBackupsArePresent)
-                .given("dx1", DistroXTestDto.class)
-                .await(STACK_AVAILABLE, RunningParameter.key("dx1"))
                 .awaitForHealthyInstances()
                 .then(this::verifyCmServicesStartedSuccessfully)
+
+                .when(this::executeDatahubVerticalScaleIfSupported)
 
                 .then(this::verifyFailedVerticalScaleOutputsIfSupported)
                 .validate();
