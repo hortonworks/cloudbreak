@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -143,13 +144,13 @@ public class ClusterUpgradeAvailabilityService {
             LOGGER.info(String.format("Retrieving images for upgrading stack %s", stack.getName()));
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage = getImage(stack);
             Long workspaceId = stack.getWorkspace().getId();
-            Image image = imageCatalogService
-                    .getImage(workspaceId, currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), currentImage.getImageId())
-                    .getImage();
+            StatedImage image = imageCatalogService
+                    .getImage(workspaceId, currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), currentImage.getImageId());
             ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack, internalUpgradeSettings, getAllImages);
             ImageFilterResult imageFilterResult = filterImages(accountId, workspaceId, currentImage.getImageCatalogName(), imageFilterParams);
             LOGGER.info(String.format("%d possible image found for stack upgrade.", imageFilterResult.getImages().size()));
-            upgradeOptions = createResponse(image, imageFilterResult, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());
+            upgradeOptions = createResponse(image.getImage(), imageFilterResult, stack.getCloudPlatform(), stack.getRegion(),
+                    currentImage.getImageCatalogName());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException | NotFoundException e) {
             LOGGER.warn("Failed to get images", e);
             upgradeOptions.setReason(String.format("Failed to retrieve image due to %s", e.getMessage()));

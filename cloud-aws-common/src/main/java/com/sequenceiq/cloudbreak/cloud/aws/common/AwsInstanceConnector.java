@@ -86,6 +86,8 @@ public class AwsInstanceConnector implements InstanceConnector {
     )
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
+        LOGGER.debug("Sending start request for VM(s) with the following ID(s): {}", String.join(",",
+                vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList())));
         return setCloudVmInstanceStatuses(ac, vms, "Running",
                 (ec2Client, instances) -> ec2Client.startInstances(StartInstancesRequest.builder().instanceIds(instances).build()),
                 "Failed to send start request to AWS: ");
@@ -100,6 +102,8 @@ public class AwsInstanceConnector implements InstanceConnector {
     public List<CloudVmInstanceStatus> startWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
             Long timeboundInMs) {
         // The following states will never transition over to "Running"/STARTED - so it is safe to ignore instances in this state.
+        LOGGER.debug("Sending start request for VM(s) with the following ID(s): {}", String.join(",",
+                vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList())));
         Set<InstanceStatus> completedStatuses = EnumSet.of(
                 InstanceStatus.FAILED,
                 InstanceStatus.TERMINATED,

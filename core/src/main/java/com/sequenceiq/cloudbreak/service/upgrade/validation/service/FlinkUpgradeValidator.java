@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateService;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
 @Component
@@ -32,7 +32,7 @@ public class FlinkUpgradeValidator implements ServiceUpgradeValidator {
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
         String targetRuntime = validationRequest.getTargetRuntime();
-        Stack stack = validationRequest.getStack();
+        StackDto stack = validationRequest.getStack();
         if (!StringUtils.hasText(targetRuntime)) {
             LOGGER.debug("Skipping Flink service validation due to missing or invalid: target runtime version: [{}]", targetRuntime);
         } else if (!CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetRuntime, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16)) {
@@ -52,11 +52,11 @@ public class FlinkUpgradeValidator implements ServiceUpgradeValidator {
         }
     }
 
-    private boolean isFLinkServicePresent(Stack stack) {
+    private boolean isFLinkServicePresent(StackDto stack) {
         return cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, getBlueprintText(stack));
     }
 
-    private String getBlueprintText(Stack stack) {
-        return stack.getCluster().getBlueprint().getBlueprintText();
+    private String getBlueprintText(StackDto stack) {
+        return stack.getBlueprint().getBlueprintText();
     }
 }

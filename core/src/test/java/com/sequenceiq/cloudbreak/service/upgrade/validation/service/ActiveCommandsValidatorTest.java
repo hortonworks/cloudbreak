@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterManagerCommand;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +49,7 @@ public class ActiveCommandsValidatorTest {
     private ClusterStatusService clusterStatusService;
 
     @Mock
-    private Stack stack;
+    private StackDto stack;
 
     @Test
     public void testValidateIfActiveCommandsListIsEmpty() {
@@ -57,7 +57,7 @@ public class ActiveCommandsValidatorTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.clusterStatusService()).thenReturn(clusterStatusService);
         // WHEN
-        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, ""));
+        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "", null));
         // THEN no exception is thrown
     }
 
@@ -68,7 +68,7 @@ public class ActiveCommandsValidatorTest {
         when(connector.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterStatusService.getActiveCommandsList()).thenReturn(null);
         // WHEN
-        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, ""));
+        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "", null));
         // THEN no exception is thrown
     }
 
@@ -80,7 +80,7 @@ public class ActiveCommandsValidatorTest {
         initGlobalPrivateFields();
         when(clusterStatusService.getActiveCommandsList()).thenReturn(List.of(createCommand(INTERRUPTABLE_COMMAND_1), createCommand(INTERRUPTABLE_COMMAND_2)));
         // WHEN
-        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, ""));
+        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "", null));
         // THEN no exception is thrown
     }
 
@@ -94,7 +94,7 @@ public class ActiveCommandsValidatorTest {
                 List.of(createCommand(NON_INTERRUPTABLE_COMMAND_1), createCommand(NON_INTERRUPTABLE_COMMAND_2)));
         // WHEN
         UpgradeValidationFailedException ex = Assertions.assertThrows(UpgradeValidationFailedException.class,
-                () -> underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "")));
+                () -> underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "", null)));
         // THEN exception is thrown
         assertEquals("There are active commands running on CM that are not interruptable, upgrade is not possible. " +
                 "Active commands: [ClusterManagerCommand{id=1, name='non-interruptable-1', startTime='start-time', endTime='null', active=null, " +
@@ -112,7 +112,7 @@ public class ActiveCommandsValidatorTest {
                 List.of(createCommand(INTERRUPTABLE_COMMAND_1), createCommand(NON_INTERRUPTABLE_COMMAND_1)));
         // WHEN
         UpgradeValidationFailedException ex = Assertions.assertThrows(UpgradeValidationFailedException.class,
-                () -> underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "")));
+                () -> underTest.validate(new ServiceUpgradeValidationRequest(stack, true, "", null)));
         // THEN exception is thrown
         assertEquals("There are active commands running on CM that are not interruptable, upgrade is not possible. " +
                 "Active commands: [ClusterManagerCommand{id=1, name='non-interruptable-1', startTime='start-time', endTime='null', active=null, " +
