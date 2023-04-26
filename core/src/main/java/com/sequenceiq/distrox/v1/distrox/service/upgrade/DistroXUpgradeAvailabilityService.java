@@ -105,7 +105,7 @@ public class DistroXUpgradeAvailabilityService {
 
     private List<ImageInfoV4Response> addOsUpgradeOptionIfAvailable(Stack stack, UpgradeV4Response response, List<ImageInfoV4Response> filteredCandidates) {
         ImageInfoV4Response currentImage = response.getCurrent();
-        if (!filteredCandidates.contains(currentImage) && currentImageUsageCondition.currentImageUsedOnInstances(stack.getId(), currentImage.getImageId())) {
+        if (!filteredCandidates.contains(currentImage) && !currentImageUsageCondition.currentImageUsedOnInstances(stack.getId(), currentImage.getImageId())) {
             LOGGER.debug("Adding the current image for image candidates to offer OS upgrade. Current image id: {}", currentImage.getImageId());
             filteredCandidates = new ArrayList<>(filteredCandidates);
             filteredCandidates.add(currentImage);
@@ -230,7 +230,7 @@ public class DistroXUpgradeAvailabilityService {
                 Optional<String> datalakeVersionOpt = runtimeVersionService.getRuntimeVersion(datalakeViewOpt.get().getClusterView().getId());
                 if (datalakeVersionOpt.isPresent()) {
                     String dlVersion = datalakeVersionOpt.get();
-                    result = filterForDatalakeVersion(dlVersion, candidates);
+                    result = filterForDatalakeVersion(dlVersion, upgradeV4Response.getCurrent().getComponentVersions().getCdp(), candidates);
                     if (result.isEmpty() && !candidates.isEmpty()) {
                         upgradeV4Response.setReason(String.format("Data Hub can only be upgraded to the same version as the Data Lake (%s)."
                                 + " To upgrade your Data Hub, please upgrade your Data Lake first.", dlVersion));
@@ -241,8 +241,12 @@ public class DistroXUpgradeAvailabilityService {
         return result;
     }
 
-    private List<ImageInfoV4Response> filterForDatalakeVersion(String datalakeVersion, List<ImageInfoV4Response> candidates) {
-        return candidates.stream().filter(imageInfo -> imageInfo.getComponentVersions().getCdp().equals(datalakeVersion)).collect(Collectors.toList());
+    private List<ImageInfoV4Response> filterForDatalakeVersion(String datalakeVersion, String currentDataHubRuntimeVersion,
+            List<ImageInfoV4Response> candidates) {
+        return candidates.stream()
+                .filter(imageInfo -> imageInfo.getComponentVersions().getCdp().equals(datalakeVersion)
+                        || imageInfo.getComponentVersions().getCdp().equals(currentDataHubRuntimeVersion))
+                .collect(Collectors.toList());
     }
 
 }

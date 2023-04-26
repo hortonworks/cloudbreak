@@ -13,6 +13,8 @@ public class ImageFilterParams {
 
     private final Image currentImage;
 
+    private final String imageCatalogName;
+
     private final boolean lockComponents;
 
     private final Map<String, String> stackRelatedParcels;
@@ -33,10 +35,11 @@ public class ImageFilterParams {
 
     private final boolean getAllImages;
 
-    public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint,
-            Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform imageCatalogPlatform, String cloudPlatform, String region,
-            boolean getAllImages) {
+    public ImageFilterParams(Image currentImage, String imageCatalogName, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType,
+            Blueprint blueprint, Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform imageCatalogPlatform, String cloudPlatform,
+            String region, boolean getAllImages) {
         this.currentImage = currentImage;
+        this.imageCatalogName = imageCatalogName;
         this.lockComponents = lockComponents;
         this.stackRelatedParcels = stackRelatedParcels;
         this.stackType = stackType;
@@ -51,6 +54,10 @@ public class ImageFilterParams {
 
     public Image getCurrentImage() {
         return currentImage;
+    }
+
+    public String getImageCatalogName() {
+        return imageCatalogName;
     }
 
     public boolean isLockComponents() {
