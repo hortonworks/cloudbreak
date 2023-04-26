@@ -1403,6 +1403,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         if (updatedCount < 1) {
             throw notFoundException("SdxCluster with", crn + " crn");
         } else {
+            Optional<Long> databaseId = sdxClusterRepository.findDatabaseIdByCrn(crn);
+            databaseId.ifPresent(id -> sdxDatabaseRepository.updateDatabaseEngineVersion(id, databaseEngineVersion));
             LOGGER.info("Updated database engine version for [{}] with [{}]", crn, databaseEngineVersion);
         }
     }

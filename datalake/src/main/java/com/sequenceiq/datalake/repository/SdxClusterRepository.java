@@ -138,4 +138,6 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
     @Query("SELECT sdxc.resourceCrn FROM SdxCluster sdxc WHERE sdxc.id = :id")
     Optional<String> findCrnById(@Param("id") Long id);
 
+    @Query(value = "SELECT sdxc.sdxDatabase.id FROM SdxCluster sdxc WHERE sdxc.crn = :crn")
+    Optional<Long> findDatabaseIdByCrn(@Param("crn") String crn);
 }
