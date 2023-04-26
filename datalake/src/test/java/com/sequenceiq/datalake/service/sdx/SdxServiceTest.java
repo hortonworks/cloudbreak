@@ -312,7 +312,7 @@ class SdxServiceTest {
                 // testCaseName cloudPlatform runtime
                 {"CloudPlatform.AWS", AWS, "7.2.2"},
                 {"CloudPlatform.AZURE", AZURE, "7.2.2"},
-                {"CloudPlatform.GCP", GCP, "7.2.16"}
+                {"CloudPlatform.GCP", GCP, "7.2.17"}
         };
     }
 
@@ -327,7 +327,7 @@ class SdxServiceTest {
                                 "greater than or equal to 7.2.2 and not 7.1.0"},
                 {"CloudPlatform.GCP", GCP,
                         "Provisioning Ranger Raz on GCP is only valid for Cloudera Runtime version " +
-                                "greater than or equal to 7.2.16 and not 7.1.0"}
+                                "greater than or equal to 7.2.17 and not 7.1.0"}
         };
     }
 
@@ -342,7 +342,7 @@ class SdxServiceTest {
                                 "greater than or equal to 7.2.2 and not 7.2.0"},
                 {"CloudPlatform.GCP", GCP,
                         "Provisioning Ranger Raz on GCP is only valid for Cloudera Runtime version " +
-                                "greater than or equal to 7.2.16 and not 7.2.0"}
+                                "greater than or equal to 7.2.17 and not 7.2.0"}
         };
     }
 
@@ -924,7 +924,7 @@ class SdxServiceTest {
 
     @Test
     void testSdxCreateRazEnabledForGcpEntitilementNotEnabled() {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.16", LIGHT_DUTY);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         when(entitlementService.isRazForGcpEnabled(anyString())).thenReturn(false);
         mockEnvironmentCall(sdxClusterRequest, GCP, null);

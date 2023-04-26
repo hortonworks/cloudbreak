@@ -161,7 +161,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         {
             put(AWS, () -> "7.2.2");
             put(AZURE, () -> "7.2.2");
-            put(GCP, () -> "7.2.16");
+            put(GCP, () -> "7.2.17");
         }
     };
 

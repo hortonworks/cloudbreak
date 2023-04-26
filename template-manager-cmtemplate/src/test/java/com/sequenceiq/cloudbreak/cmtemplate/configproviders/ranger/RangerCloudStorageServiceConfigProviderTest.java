@@ -156,7 +156,7 @@ public class RangerCloudStorageServiceConfigProviderTest {
         TemplatePreparationObject preparationObject = getTemplatePreparationObjectForGcp(true)
                 .withBlueprintView(mock(BlueprintView.class))
                 .withCloudPlatform(CloudPlatform.GCP)
-                .withProductDetails(new ClouderaManagerRepo().withVersion("7.9.0"), List.of())
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.11.0"), List.of())
                 .withStackType(StackType.DATALAKE)
                 .build();
 
