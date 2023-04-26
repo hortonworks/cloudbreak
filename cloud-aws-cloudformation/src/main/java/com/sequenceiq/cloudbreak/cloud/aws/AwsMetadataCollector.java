@@ -325,6 +325,8 @@ public class AwsMetadataCollector implements MetadataCollector {
         String asGroupName = cloudFormationStackUtil.getAutoscalingGroupName(ac, amazonCFClient, group);
         List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(amazonASClient, asGroupName);
 
+        LOGGER.debug("Collected instanceID(s) for group ({}): {}", String.join(",", instanceIds), group);
+
         DescribeInstancesRequest instancesRequest = cloudFormationStackUtil.createDescribeInstancesRequest(instanceIds);
         DescribeInstancesResponse instancesResponse = amazonEC2Client.retryableDescribeInstances(instancesRequest);
 

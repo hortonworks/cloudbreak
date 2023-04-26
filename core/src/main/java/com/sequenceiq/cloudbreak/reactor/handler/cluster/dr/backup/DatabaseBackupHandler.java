@@ -78,7 +78,7 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             String rangerAdminGroup = rangerVirtualGroupService.getRangerVirtualGroup(stack);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup,
                     request.isCloseConnections(), request.getSkipDatabaseNames(), stack);
-            hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel);
+            hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
 
             result = new DatabaseBackupSuccess(stackId);
         } catch (Exception e) {

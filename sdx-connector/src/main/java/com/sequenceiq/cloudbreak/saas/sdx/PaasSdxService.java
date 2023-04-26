@@ -86,4 +86,9 @@ public class PaasSdxService extends AbstractSdxService<SdxClusterStatusResponse>
         }
     }
 
+    @Override
+    public SdxClusterResponse getSdxClusterByEnvironmentCrn(String environmentCrn) {
+        return sdxEndpoint.getByCrn(environmentCrn);
+    }
+
 }

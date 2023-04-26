@@ -28,6 +28,8 @@ public interface ClusterModificationService {
 
     void deployConfigAndStartClusterServices() throws CloudbreakException;
 
+    void reconfigureCMMemory() throws CloudbreakException;
+
     Map<String, String> getComponentsByCategory(String blueprintName, String hostGroupName);
 
     String getStackRepositoryJson(StackRepoDetails repoDetails, String stackRepoId);

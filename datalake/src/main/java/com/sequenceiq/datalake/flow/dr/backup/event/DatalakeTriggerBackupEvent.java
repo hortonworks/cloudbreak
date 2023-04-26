@@ -24,6 +24,8 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
 
     private final DatalakeDrSkipOptions skipOptions;
 
+    private final int fullDrMaxDurationInMin;
+
     @JsonCreator
     public DatalakeTriggerBackupEvent(
             @JsonProperty("selector") String selector,
@@ -34,21 +36,25 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
             @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions,
             @JsonProperty("reason") DatalakeBackupFailureReason reason,
             @JsonProperty("skipDatabaseNames") List<String> skipDatabaseNames,
+            @JsonProperty("fullDrMaxDurationInMin") int fullDrMaxDurationInMin,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, SdxOperationType.BACKUP, skipDatabaseNames, accepted);
         this.backupLocation = backupLocation;
         this.backupName = backupName;
         this.skipOptions = skipOptions;
         this.reason = reason;
+        this.fullDrMaxDurationInMin = fullDrMaxDurationInMin;
     }
 
     public DatalakeTriggerBackupEvent(String selector, Long sdxId, String userId, String backupLocation, String backupName,
-            DatalakeBackupFailureReason reason, DatalakeDrSkipOptions skipOptions, List<String> skipDatabaseNames) {
+            DatalakeBackupFailureReason reason, DatalakeDrSkipOptions skipOptions, List<String> skipDatabaseNames,
+            int fullDrMaxDurationInMin) {
         super(selector, sdxId, userId, SdxOperationType.BACKUP, skipDatabaseNames);
         this.backupLocation = backupLocation;
         this.backupName = backupName;
         this.reason = reason;
         this.skipOptions = skipOptions;
+        this.fullDrMaxDurationInMin = fullDrMaxDurationInMin;
     }
 
     public String getBackupLocation() {
@@ -65,6 +71,10 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
 
     public DatalakeDrSkipOptions getSkipOptions() {
         return skipOptions;
+    }
+
+    public int getFullDrMaxDurationInMin() {
+        return fullDrMaxDurationInMin;
     }
 
     @Override

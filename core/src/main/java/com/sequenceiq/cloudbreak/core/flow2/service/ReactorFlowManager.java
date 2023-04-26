@@ -414,15 +414,15 @@ public class ReactorFlowManager {
     }
 
     public FlowIdentifier triggerDatalakeDatabaseBackup(Long stackId, String location, String backupId,
-            boolean closeConnections, List<String> skipDatabaseNames) {
+            boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin) {
         String selector = FlowChainTriggers.DATALAKE_DATABASE_BACKUP_CHAIN_TRIGGER_EVENT;
         return reactorNotifier.notify(stackId, selector, new DatabaseBackupTriggerEvent(selector, stackId,
-                location, backupId, closeConnections, skipDatabaseNames));
+                location, backupId, closeConnections, skipDatabaseNames, databaseMaxDurationInMin));
     }
 
-    public FlowIdentifier triggerDatalakeDatabaseRestore(Long stackId, String location, String backupId) {
+    public FlowIdentifier triggerDatalakeDatabaseRestore(Long stackId, String location, String backupId, int databaseMaxDurationInMin) {
         String selector = DATABASE_RESTORE_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new DatabaseRestoreTriggerEvent(selector, stackId, location, backupId));
+        return reactorNotifier.notify(stackId, selector, new DatabaseRestoreTriggerEvent(selector, stackId, location, backupId, databaseMaxDurationInMin));
     }
 
     public FlowIdentifier triggerAutoTlsCertificatesRotation(Long stackId, CertificatesRotationV4Request certificatesRotationV4Request) {

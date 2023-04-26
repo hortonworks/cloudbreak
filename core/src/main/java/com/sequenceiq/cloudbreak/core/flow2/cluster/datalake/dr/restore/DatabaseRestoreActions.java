@@ -45,7 +45,8 @@ public class DatabaseRestoreActions {
 
             @Override
             protected Selectable createRequest(BackupRestoreContext context) {
-                return new DatabaseRestoreRequest(context.getStackId(), context.getBackupLocation(), context.getBackupId());
+                return new DatabaseRestoreRequest(context.getStackId(), context.getBackupLocation(), context.getBackupId(),
+                        context.getDatabaseMaxDurationInMin());
             }
 
             @Override
@@ -81,7 +82,8 @@ public class DatabaseRestoreActions {
                 DatabaseRestoreFailedEvent payload) {
                 Flow flow = getFlow(flowParameters.getFlowId());
                 flow.setFlowFailed(payload.getException());
-                return BackupRestoreContext.from(flowParameters, payload, null, null, true, payload.getSkipDatabaseNames());
+                return BackupRestoreContext.from(flowParameters, payload, null, null, true, payload.getSkipDatabaseNames(),
+                        payload.getDatabaseMaxDurationInMin());
             }
 
             @Override

@@ -56,7 +56,7 @@ public class UpgradePermissionProviderTest {
         String componentVersion = "7.2.1";
         Image currentImage = createImage(componentVersion, "2000");
         Image candidateImage = createImage(componentVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -75,7 +75,7 @@ public class UpgradePermissionProviderTest {
         String componentVersion = "7.2.1";
         Image currentImage = createImage(componentVersion, "2002");
         Image candidateImage = createImage(componentVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -95,7 +95,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -117,7 +117,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.1.2";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -137,7 +137,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -159,7 +159,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), StackType.WORKLOAD, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), StackType.WORKLOAD, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -180,7 +180,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -198,7 +198,7 @@ public class UpgradePermissionProviderTest {
     public void testPermitStackUpgradeShouldReturnFalseWhenTheCmBuildNumberIsNotAvailable() {
         Image currentImage = createImage("7.2.1", "2002");
         Image candidateImage = createImage("7.2.1", null);
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -218,7 +218,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.10";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2010");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 

@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.cloudera.api.swagger.AllHostsResourceApi;
 import com.cloudera.api.swagger.BatchResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
@@ -52,6 +53,8 @@ import com.cloudera.api.swagger.model.ApiBatchRequestElement;
 import com.cloudera.api.swagger.model.ApiBatchResponse;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
+import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiHost;
@@ -901,6 +904,27 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.info("Couldn't start Cloudera Manager services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void reconfigureCMMemory() {
+        try {
+            LOGGER.info("configure CM memory settings.");
+            configureCMMemoryThreasholdOnAllHosts();
+        } catch (ApiException e) {
+            LOGGER.warn("Couldn't Configure CM memory settings", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void configureCMMemoryThreasholdOnAllHosts() throws ApiException {
+        AllHostsResourceApi allHostsResourceApi = clouderaManagerApiFactory.getAllHostsResourceApi(apiClient);
+        ApiConfigList apiConfigList = new ApiConfigList();
+        ApiConfig apiConfig = new ApiConfig();
+        apiConfig.setName("memory_overcommit_threshold");
+        apiConfig.setValue("0.95");
+        apiConfigList.addItemsItem(apiConfig);
+        allHostsResourceApi.updateConfig(null, apiConfigList);
     }
 
     @Override

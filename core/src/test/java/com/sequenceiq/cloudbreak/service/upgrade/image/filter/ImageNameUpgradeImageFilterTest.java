@@ -88,6 +88,6 @@ class ImageNameUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(String platform, String region) {
-        return new ImageFilterParams(null, false, null, null, null, null, null, imageCatalogPlatform(platform), platform, region, false);
+        return new ImageFilterParams(null, null, false, null, null, null, null, null, imageCatalogPlatform(platform), platform, region, false);
     }
 }

@@ -38,7 +38,7 @@ class CurrentImageUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnAllImage() {
         List<Image> images = List.of(createImage("image1"), createImage(CURRENT_IMAGE_ID));
-        when(currentImageUsageCondition.currentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID)).thenReturn(true);
+        when(currentImageUsageCondition.currentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID)).thenReturn(false);
 
         ImageFilterResult actual = underTest.filter(createImageFilterResult(images), imageFilterParams);
 
@@ -51,7 +51,7 @@ class CurrentImageUpgradeImageFilterTest {
     public void testFilterShouldReturnImagesWithoutCurrentImageWhenTheCurrentImageFilteringIsNotAllowed() {
         Image image1 = createImage("image1");
         Image currentImage = createImage(CURRENT_IMAGE_ID);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID)).thenReturn(false);
+        when(currentImageUsageCondition.currentImageUsedOnInstances(CURRENT_STACK_ID, CURRENT_IMAGE_ID)).thenReturn(true);
 
         ImageFilterResult actual = underTest.filter(createImageFilterResult(List.of(image1, currentImage)), imageFilterParams);
 
@@ -73,7 +73,7 @@ class CurrentImageUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(createImage(CURRENT_IMAGE_ID), false, null, null, null, CURRENT_STACK_ID, null, null, null, null, false);
+        return new ImageFilterParams(createImage(CURRENT_IMAGE_ID), null, false, null, null, null, CURRENT_STACK_ID, null, null, null, null, false);
     }
 
     private Image createImage(String imageId) {

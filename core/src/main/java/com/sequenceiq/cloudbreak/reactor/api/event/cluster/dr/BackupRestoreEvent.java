@@ -20,8 +20,14 @@ public class BackupRestoreEvent extends StackEvent {
 
     private final List<String> skipDatabaseNames;
 
+    private final int databaseMaxDurationInMin;
+
     public BackupRestoreEvent(Long stackId, String backupLocation, String backupId) {
         this (null, stackId, backupLocation, backupId);
+    }
+
+    public BackupRestoreEvent(Long stackId, String backupLocation, String backupId, int databaseMaxDurationInMin) {
+        this (null, stackId, backupLocation, backupId, databaseMaxDurationInMin);
     }
 
     public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId) {
@@ -30,22 +36,36 @@ public class BackupRestoreEvent extends StackEvent {
         this.backupId = backupId;
         this.closeConnections = true;
         this.skipDatabaseNames = Collections.emptyList();
+        this.databaseMaxDurationInMin = 0;
     }
 
-    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, boolean closeConnections, List<String> skipDatabaseNames) {
+    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, int databaseMaxDurationInMin) {
+        super(selector, stackId);
+        this.backupLocation = backupLocation;
+        this.backupId = backupId;
+        this.closeConnections = true;
+        this.skipDatabaseNames = Collections.emptyList();
+        this.databaseMaxDurationInMin = databaseMaxDurationInMin;
+    }
+
+    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, boolean closeConnections, List<String> skipDatabaseNames,
+            int databaseMaxDurationInMin) {
         super(selector, stackId);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = closeConnections;
         this.skipDatabaseNames = skipDatabaseNames;
+        this.databaseMaxDurationInMin = databaseMaxDurationInMin;
     }
 
-    public BackupRestoreEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String backupLocation, String backupId, boolean closeConnections) {
+    public BackupRestoreEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String backupLocation, String backupId, boolean closeConnections,
+            int databaseMaxDurationInMin) {
         super(selector, stackId, accepted);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = closeConnections;
         this.skipDatabaseNames = Collections.emptyList();
+        this.databaseMaxDurationInMin = databaseMaxDurationInMin;
     }
 
     @JsonCreator
@@ -56,12 +76,14 @@ public class BackupRestoreEvent extends StackEvent {
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backupId") String backupId,
             @JsonProperty("closeConnections") boolean closeConnections,
-            @JsonProperty("skipDatabaseNames") List<String> skipDatabaseNames) {
+            @JsonProperty("skipDatabaseNames") List<String> skipDatabaseNames,
+            @JsonProperty("databaseMaxDurationInMin") int databaseMaxDurationInMin) {
         super(selector, stackId, accepted);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = closeConnections;
         this.skipDatabaseNames = skipDatabaseNames;
+        this.databaseMaxDurationInMin = databaseMaxDurationInMin;
     }
 
     public String getBackupLocation() {
@@ -78,5 +100,9 @@ public class BackupRestoreEvent extends StackEvent {
 
     public List<String> getSkipDatabaseNames() {
         return skipDatabaseNames;
+    }
+
+    public int getDatabaseMaxDurationInMin() {
+        return databaseMaxDurationInMin;
     }
 }

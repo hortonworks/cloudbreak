@@ -41,7 +41,7 @@ public class ProviderChecker {
     private boolean updateStatus;
 
     public List<ProviderSyncResult> updateAndGetStatuses(Stack stack, Set<InstanceMetaData> checkableInstances,
-        Map<InstanceMetaData, DetailedStackStatus> instanceHealthStatusMap, boolean updateStatusFromFlow) {
+            Map<InstanceMetaData, DetailedStackStatus> instanceHealthStatusMap, boolean updateStatusFromFlow) {
         return checkedMeasure(() -> {
             List<ProviderSyncResult> results = new ArrayList<>();
             List<CloudVmInstanceStatus> statuses = stackInstanceProviderChecker.checkStatus(stack, checkableInstances);
@@ -78,7 +78,7 @@ public class ProviderChecker {
     }
 
     private InstanceStatus updateStatuses(CloudVmInstanceStatus vmInstanceStatus, InstanceMetaData instanceMetaData,
-        Map<InstanceMetaData, DetailedStackStatus> instanceHealthStatusMap) {
+            Map<InstanceMetaData, DetailedStackStatus> instanceHealthStatusMap) {
         LOGGER.info(":::Auto sync::: {} instance metadata status update in progress, new status: {}",
                 instanceMetaData.getShortHostname(), vmInstanceStatus);
         InstanceStatus status = null;
@@ -91,8 +91,8 @@ public class ProviderChecker {
                     setStatusIfNotTheSame(instanceMetaData, InstanceStatus.UNHEALTHY);
                     status = InstanceStatus.UNHEALTHY;
                 } else {
-                setStatusIfNotTheSame(instanceMetaData, InstanceStatus.CREATED);
-                status = InstanceStatus.CREATED;
+                    setStatusIfNotTheSame(instanceMetaData, InstanceStatus.CREATED);
+                    status = InstanceStatus.CREATED;
                 }
                 break;
             case STOPPED:
@@ -128,10 +128,11 @@ public class ProviderChecker {
         if (oldStatus != newStatus) {
             if (updateStatus) {
                 instanceMetaData.setInstanceStatus(newStatus);
-                LOGGER.info(":::Auto sync::: The instance status updated from {} to {}", oldStatus, newStatus);
+                LOGGER.info(":::Auto sync::: The instance [{}] [{}] status updated from {} to {}",
+                        instanceMetaData.getInstanceId(), instanceMetaData.getDiscoveryFQDN(), oldStatus, newStatus);
             } else {
-                LOGGER.info(":::Auto sync::: The instance status would be had to update from {} to {}",
-                        oldStatus, newStatus);
+                LOGGER.info(":::Auto sync::: The instance [{}] [{}] status would be had to update from {} to {}",
+                        instanceMetaData.getInstanceId(), instanceMetaData.getDiscoveryFQDN(), oldStatus, newStatus);
             }
         }
     }

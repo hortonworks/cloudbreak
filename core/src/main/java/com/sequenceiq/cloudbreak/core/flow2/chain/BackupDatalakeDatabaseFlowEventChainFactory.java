@@ -52,7 +52,8 @@ public class BackupDatalakeDatabaseFlowEventChainFactory implements FlowEventCha
             LOGGER.info("Skipping salt update step in backup DL DB flow chain due to already being done as part of determine DL data sizes flow chain.");
         }
         flowEventChain.add(new DatabaseBackupTriggerEvent(DATABASE_BACKUP_EVENT.event(), event.getResourceId(), event.accepted(),
-                event.getBackupLocation(), event.getBackupId(), event.isCloseConnections(), event.getSkipDatabaseNames()));
+                event.getBackupLocation(), event.getBackupId(), event.isCloseConnections(), event.getSkipDatabaseNames(),
+                event.getDatabaseMaxDurationInMin()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 

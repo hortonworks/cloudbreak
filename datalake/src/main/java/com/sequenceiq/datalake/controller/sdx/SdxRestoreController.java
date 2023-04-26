@@ -32,7 +32,7 @@ public class SdxRestoreController implements SdxRestoreEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId,
-            String restoreId, String backupLocation) {
+            String restoreId, String backupLocation, int databaseMaxDurationInMin) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         try {
             sdxBackupRestoreService.getDatabaseRestoreStatus(sdxCluster, restoreId);
@@ -40,18 +40,19 @@ public class SdxRestoreController implements SdxRestoreEndpoint {
             sdxDatabaseRestoreResponse.setOperationId(restoreId);
             return sdxDatabaseRestoreResponse;
         } catch (NotFoundException notFoundException) {
-            return sdxBackupRestoreService.triggerDatabaseRestore(sdxCluster, backupId, restoreId, backupLocation);
+            return sdxBackupRestoreService.triggerDatabaseRestore(sdxCluster, backupId, restoreId, backupLocation, databaseMaxDurationInMin);
         }
     }
 
+    @SuppressWarnings("ParameterNumber")
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxRestoreResponse restoreDatalakeByName(@ResourceName String name, String backupId, String backupLocationOverride,
                                                     boolean skipValidation, boolean skipAtlasMetadata, boolean skipRangerAudits,
-                                                    boolean skipRangerMetadata) {
+                                                    boolean skipRangerMetadata, int fullDrMaxDurationInMin) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxBackupRestoreService.triggerDatalakeRestore(sdxCluster, name, backupId, backupLocationOverride,
-                new DatalakeDrSkipOptions(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata));
+                new DatalakeDrSkipOptions(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata), fullDrMaxDurationInMin);
     }
 
     @Override

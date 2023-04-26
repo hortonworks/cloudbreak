@@ -32,13 +32,15 @@ public interface SdxRestoreEndpoint {
     @Path("{name}/restoreDatalake")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "restore the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatalake")
+    @SuppressWarnings("ParameterNumber")
     SdxRestoreResponse restoreDatalakeByName(@PathParam("name") String name,
             @QueryParam("backupId") String backupId,
             @QueryParam("backupLocationOverride") String backupLocationOverride,
             @QueryParam("skipValidation") boolean skipValidation,
             @QueryParam("skipAtlasMetadata") boolean skipAtlasMetadata,
             @QueryParam("skipRangerAudits") boolean skipRangerAudits,
-            @QueryParam("skipRangerMetadata") boolean skipRangerMetadata);
+            @QueryParam("skipRangerMetadata") boolean skipRangerMetadata,
+            @QueryParam("fullDrMaxDurationInMin") int fullDrMaxDurationInMin);
 
     @POST
     @Path("{name}/restoreDatalakeStatus")
@@ -69,7 +71,7 @@ public interface SdxRestoreEndpoint {
     @ApiOperation(value = "restore the database backing datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatabase")
     SdxDatabaseRestoreResponse restoreDatabaseByName(@PathParam("name") String name,
             @QueryParam("backupId") String backupId, @QueryParam("restoreId") String restoreId,
-            @QueryParam("backupLocation") String backupLocation);
+            @QueryParam("backupLocation") String backupLocation, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin);
 
     @GET
     @Path("{name}/restoreDatabaseStatus")

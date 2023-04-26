@@ -54,9 +54,10 @@ public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         Selectable response;
+        int duration = request.getFullDrMaxDurationInMin() == 0 ? durationInMinutes : request.getFullDrMaxDurationInMin();
         try {
-            LOGGER.info("Start polling datalake full restore status for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes,
+            LOGGER.info("Start polling datalake full restore status for id: {} with timeout duration: {}", sdxId, duration);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration,
                 TimeUnit.MINUTES);
             sdxBackupRestoreService.waitForDatalakeDrRestoreToComplete(sdxId, request.getOperationId(), request.getUserId(),
                 pollingConfig, "Full restore");

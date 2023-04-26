@@ -28,24 +28,27 @@ public class DatalakeDatabaseBackupStartEvent extends DatalakeDatabaseDrStartBas
         this.backupRequest = backupRequest;
     }
 
+    @SuppressWarnings("checkstyle:ExecutableStatementCount")
     public DatalakeDatabaseBackupStartEvent(String selector, SdxOperation drStatus, String userId,
-                                            String backupId, String backupLocation, List<String> skipDatabaseNames) {
+                                            String backupId, String backupLocation, List<String> skipDatabaseNames, int databaseMaxDurationInMin) {
         super(selector, drStatus.getSdxClusterId(), userId, drStatus, skipDatabaseNames);
         backupRequest = new SdxDatabaseBackupRequest();
         backupRequest.setBackupId(backupId);
         backupRequest.setBackupLocation(backupLocation);
         backupRequest.setCloseConnections(true);
         backupRequest.setSkipDatabaseNames(skipDatabaseNames);
+        backupRequest.setDatabaseMaxDurationInMin(databaseMaxDurationInMin);
     }
 
-    public static DatalakeDatabaseBackupStartEvent from(DatalakeTriggerBackupEvent trigggerBackupEvent,
+    public static DatalakeDatabaseBackupStartEvent from(DatalakeTriggerBackupEvent triggerBackupEvent,
                                                         String backupId) {
         return  new DatalakeDatabaseBackupStartEvent(DATALAKE_DATABASE_BACKUP_EVENT.event(),
-                trigggerBackupEvent.getDrStatus(),
-                trigggerBackupEvent.getUserId(),
+                triggerBackupEvent.getDrStatus(),
+                triggerBackupEvent.getUserId(),
                 backupId,
-                trigggerBackupEvent.getBackupLocation(),
-                trigggerBackupEvent.getSkipDatabaseNames());
+                triggerBackupEvent.getBackupLocation(),
+                triggerBackupEvent.getSkipDatabaseNames(),
+                0);
     }
 
     public SdxDatabaseBackupRequest getBackupRequest() {

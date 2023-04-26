@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.model.SafetyValve;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationPropertyView;
@@ -808,6 +809,55 @@ public class CmTemplateProcessorTest {
                 .name("property2")
                 .value("value2"))));
         assertEquals(expectedMap, underTest.getCustomRoleConfigsMap(configs));
+    }
+
+    @Test
+    public void testGetSafetyValvesNoSafetyValves() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
+
+        List<SafetyValve> safetyValves = underTest.getSafetyValves();
+
+        assertEquals(0, safetyValves.size());
+    }
+
+    @Test
+    public void testGetSafetyValvesSafetyValvesPresent() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-host-with-uppercase.bp"));
+
+        List<SafetyValve> safetyValves = underTest.getSafetyValves();
+
+        assertEquals(3, safetyValves.size());
+        assertEquals(3, safetyValves.stream().filter(safetyValve -> safetyValve.getServiceType() != null).count());
+        assertEquals(2, safetyValves.stream().filter(safetyValve -> safetyValve.getRoleType() != null).count());
+
+        assertEquals(3, safetyValves.stream().filter(safetyValve -> "IMPALA".equals(safetyValve.getServiceType())).count());
+        assertEquals(2, safetyValves.stream().filter(safetyValve -> "IMPALAD".equals(safetyValve.getRoleType())).count());
+
+    }
+
+    @Test
+    public void testGetSafetyValvesOnlyServiceConfigs() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/nifi.bp"));
+
+        List<SafetyValve> safetyValves = underTest.getSafetyValves();
+
+        assertEquals(1, safetyValves.size());
+        assertEquals(1, safetyValves.stream().filter(safetyValve -> safetyValve.getServiceType() != null).count());
+        assertEquals(0, safetyValves.stream().filter(safetyValve -> safetyValve.getRoleType() != null).count());
+        assertEquals(1, safetyValves.stream().filter(safetyValve -> "HDFS".equals(safetyValve.getServiceType())).count());
+    }
+
+    @Test
+    public void testGetSafetyValvesOnlyRoleConfigs() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/flink.bp"));
+
+        List<SafetyValve> safetyValves = underTest.getSafetyValves();
+
+        assertEquals(1, safetyValves.size());
+        assertEquals(1, safetyValves.stream().filter(safetyValve -> safetyValve.getServiceType() != null).count());
+        assertEquals(1, safetyValves.stream().filter(safetyValve -> safetyValve.getRoleType() != null).count());
+        assertEquals(1, safetyValves.stream().filter(safetyValve -> "YARN".equals(safetyValve.getServiceType())).count());
+        assertEquals(1, safetyValves.stream().filter(safetyValve -> "RESOURCEMANAGER".equals(safetyValve.getRoleType())).count());
     }
 
     private Map<String, String> hostAttributes(String hostname, boolean withRackId, String rackId) {

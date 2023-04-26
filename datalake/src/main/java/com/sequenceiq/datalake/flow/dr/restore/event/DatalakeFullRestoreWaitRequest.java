@@ -9,21 +9,28 @@ public class DatalakeFullRestoreWaitRequest extends SdxEvent {
 
     private final String operationId;
 
+    private final int fullDrMaxDurationInMin;
+
     @JsonCreator
     public DatalakeFullRestoreWaitRequest(
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
-            @JsonProperty("operationId") String operationId) {
+            @JsonProperty("operationId") String operationId,
+            @JsonProperty("fullDrMaxDurationInMin") int fullDrMaxDurationInMin) {
         super(sdxId, userId);
         this.operationId = operationId;
+        this.fullDrMaxDurationInMin = fullDrMaxDurationInMin;
     }
 
-    public static DatalakeFullRestoreWaitRequest from(SdxContext context, String operationId) {
-        return new DatalakeFullRestoreWaitRequest(context.getSdxId(), context.getUserId(), operationId);
+    public static DatalakeFullRestoreWaitRequest from(SdxContext context, String operationId, int fullDrMaxDurationInMin) {
+        return new DatalakeFullRestoreWaitRequest(context.getSdxId(), context.getUserId(), operationId, fullDrMaxDurationInMin);
     }
 
     public String getOperationId() {
         return operationId;
     }
 
+    public int getFullDrMaxDurationInMin() {
+        return fullDrMaxDurationInMin;
+    }
 }

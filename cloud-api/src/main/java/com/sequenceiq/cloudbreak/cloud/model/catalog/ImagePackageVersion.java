@@ -16,7 +16,8 @@ public enum ImagePackageVersion {
     SALT_BOOTSTRAP("salt-bootstrap"),
     SPARK3("spark3", "Spark 3"),
     STACK("stack"),
-    CDP_LOGGING_AGENT("cdp-logging-agent");
+    CDP_LOGGING_AGENT("cdp-logging-agent"),
+    PYTHON38("python38", "Python 3.8");
 
     private final String key;
 

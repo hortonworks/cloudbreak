@@ -67,6 +67,10 @@ public class DatalakeRestoreActions {
 
     private static final String REASON = "REASON";
 
+    private static final String DATABASE_MAX_DURATION_IN_MIN = "DATABASE_MAX_DURATION_IN_MIN";
+
+    private static final String FULLDR_MAX_DURATION_IN_MIN = "FULLDR_MAX_DURATION_IN_MIN";
+
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
 
@@ -115,11 +119,13 @@ public class DatalakeRestoreActions {
                                 payload.getBackupId(),
                                 payload.getBackupLocationOverride(),
                                 payload.getUserId(),
-                                payload.getSkipOptions());
+                                payload.getSkipOptions(),
+                                payload.getFullDrMaxDurationInMin());
                 variables.put(REASON, payload.getReason().name());
                 variables.put(RESTORE_ID, restoreStatusResponse.getRestoreId());
                 variables.put(BACKUP_ID, restoreStatusResponse.getBackupId());
                 variables.put(OPERATION_ID, restoreStatusResponse.getRestoreId());
+                variables.put(FULLDR_MAX_DURATION_IN_MIN, payload.getFullDrMaxDurationInMin());
                 payload.getDrStatus().setOperationId(restoreStatusResponse.getRestoreId());
                 if (restoreStatusResponse.getState().isFailed()) {
                     LOGGER.error("Datalake restore has failed for {} ", context.getSdxId());
@@ -167,7 +173,9 @@ public class DatalakeRestoreActions {
                     sdxBackupRestoreService.databaseRestore(payload.getDrStatus(),
                             payload.getResourceId(),
                             payload.getBackupId(),
-                            payload.getBackupLocation());
+                            payload.getBackupLocation(),
+                            payload.getDatabaseMaxDurationInMin());
+                    variables.put(DATABASE_MAX_DURATION_IN_MIN, payload.getDatabaseMaxDurationInMin());
                     sendEvent(context, DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT.event(), payload);
                 } else {
                     LOGGER.error("Datalake database restore has been skipped because backup location is null {}", payload.getResourceId());
@@ -195,12 +203,13 @@ public class DatalakeRestoreActions {
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake database restore is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
+                int databaseMaxDurationInMin = variables.get(DATABASE_MAX_DURATION_IN_MIN) != null ? (Integer) variables.get(DATABASE_MAX_DURATION_IN_MIN) : 0;
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_INPROGRESS,
                         ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS,
                         "Datalake restore in progress", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_REQUESTED, sdxCluster);
-                sendEvent(context, DatalakeDatabaseRestoreWaitRequest.from(context, operationId));
+                sendEvent(context, DatalakeDatabaseRestoreWaitRequest.from(context, operationId, databaseMaxDurationInMin));
             }
 
             @Override
@@ -249,13 +258,14 @@ public class DatalakeRestoreActions {
                 LOGGER.info("Full datalake restore is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
                 String restoreId = (String) variables.get(RESTORE_ID);
+                int fullDrMaxDurationInMin = variables.get(FULLDR_MAX_DURATION_IN_MIN) != null ? (Integer) variables.get(FULLDR_MAX_DURATION_IN_MIN) : 0;
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 SdxDatabaseRestoreStatusResponse restoreStatusResponse =
                         sdxBackupRestoreService.getDatabaseRestoreStatus(sdxCluster, operationId);
                 if (restoreStatusResponse.getStatus().equals(DatalakeDatabaseDrStatus.INPROGRESS)) {
                     sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.SUCCEEDED, null);
                 }
-                sendEvent(context, DatalakeFullRestoreWaitRequest.from(context, restoreId));
+                sendEvent(context, DatalakeFullRestoreWaitRequest.from(context, restoreId, fullDrMaxDurationInMin));
             }
 
             @Override
