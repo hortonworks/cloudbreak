@@ -10,6 +10,7 @@ import static com.sequenceiq.periscope.api.model.ActivityStatus.UNKNOWN;
 import static com.sequenceiq.periscope.api.model.ActivityStatus.UPSCALE_TRIGGER_FAILED;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -29,6 +30,8 @@ import com.sequenceiq.periscope.service.ha.PeriscopeNodeService;
 @ConditionalOnProperty(prefix = "periscope.enabledAutoscaleMonitors.cleanup-monitor", name = "enabled", havingValue = "true")
 public class CleanupMonitor extends ScalingActivityMonitor {
 
+    private static final Long CLEANUP_IDS_LIMIT = 200L;
+
     private final AtomicLong scalingActivitiesIdGenerator = new AtomicLong(0L);
 
     @Override
@@ -38,7 +41,7 @@ public class CleanupMonitor extends ScalingActivityMonitor {
         PeriscopeNodeService periscopeNodeService = getPeriscopeNodeService();
         if (periscopeNodeService.isLeader(getPeriscopeNodeConfig().getId())) {
             Set<Long> activityIdsToCleanup = getScalingActivityService().findAllInStatusesThatStartedBefore(statuses,
-                    getCleanupConfig().getCleanupDurationHours());
+                    getCleanupConfig().getCleanupDurationHours()).stream().limit(CLEANUP_IDS_LIMIT).collect(toSet());
             return activityIdsToCleanup.isEmpty() ? emptyList() :
                     singletonList(new ScalingActivities(scalingActivitiesIdGenerator.incrementAndGet(), activityIdsToCleanup));
         }

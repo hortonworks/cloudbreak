@@ -84,4 +84,19 @@ class CleanupMonitorTest {
         assertThat(result).isEmpty();
         verifyNoInteractions(scalingActivityService);
     }
+
+    @Test
+    void testGetMonitoredForIdsGreaterThanLimit() {
+        Set<Long> activityIds = LongStream.range(0, 500).boxed().collect(toSet());
+
+        doReturn(TEST_NODE_ID).when(nodeConfig).getId();
+        doReturn(Boolean.TRUE).when(nodeService).isLeader(TEST_NODE_ID);
+        doReturn(TEST_CLEANUP_DURATION).when(cleanupConfig).getCleanupDurationHours();
+        doReturn(activityIds).when(scalingActivityService).findAllInStatusesThatStartedBefore(anyCollection(), anyLong());
+
+        List<ScalingActivities> result = underTest.getMonitored();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next().getActivityIds()).hasSize(200);
+    }
 }
