@@ -36,17 +36,13 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScalePreparationRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScalePreparationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Configuration
 public class CoreVerticalScaleActions {
@@ -70,24 +66,20 @@ public class CoreVerticalScaleActions {
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
 
-    @Bean(name = "STACK_PREPARATION_STATE")
-    public Action<?, ?> stackPreparation() {
+    @Bean(name = "STACK_VERTICALSCALE_STATE")
+    public Action<?, ?> stackVerticalScale() {
         return new AbstractClusterAction<>(CoreVerticalScalingTriggerEvent.class) {
             @Override
-            protected void doExecute(ClusterViewContext ctx, CoreVerticalScalingTriggerEvent payload, Map<Object, Object> variables)
-                    throws Exception {
+            protected void doExecute(ClusterViewContext ctx, CoreVerticalScalingTriggerEvent payload, Map<Object, Object> variables) {
                 StackVerticalScaleV4Request stackVerticalScaleV4Request = payload.getRequest();
-                StackDto stack = stackDtoService.getById(payload.getResourceId());
-                InstanceGroupDto instanceGroup = stack.getInstanceGroupDtos().stream()
-                        .filter(instance -> null != instance.getInstanceGroup().getGroupName() &&
-                                instance.getInstanceGroup().getGroupName().equals(stackVerticalScaleV4Request.getGroup()))
-                        .findFirst().get();
-                LOGGER.debug("Updating status of stack for vertical scale.");
                 coreVerticalScaleService.verticalScale(ctx.getStackId(), stackVerticalScaleV4Request);
-                List<CloudResource> cloudResources = stack.getResources().stream().map(s -> cloudResourceConverter.convert(s))
-                        .collect(Collectors.toList());
+                StackDto stack = stackDtoService.getById(payload.getResourceId());
+                Set<Resource> resources = stack.getResources();
+                List<CloudResource> cloudResources =
+                        resources.stream().map(resource -> cloudResourceConverter.convert(resource)).collect(Collectors.toList());
                 CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
-
+                CloudStack cloudStack = cloudStackConverter.convert(stack);
+                cloudStack = cloudStackConverter.updateWithVerticalScaleRequest(cloudStack, stackVerticalScaleV4Request);
                 Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
                 CloudContext cloudContext = CloudContext.Builder.builder()
                         .withId(stack.getId())
@@ -99,57 +91,12 @@ public class CoreVerticalScaleActions {
                         .withWorkspaceId(stack.getWorkspace().getId())
                         .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                         .build();
-                CoreVerticalScalePreparationRequest request = new CoreVerticalScalePreparationRequest(
-                        cloudContext,
-                        cloudCredential,
-                        null,
-                        stack,
-                        instanceGroup,
-                        cloudResources,
-                        stackVerticalScaleV4Request);
-                sendEvent(ctx, request);
-            }
-        };
-    }
 
-    @Bean(name = "STACK_VERTICALSCALE_STATE")
-    public Action<?, ?> stackVerticalScale() {
-        return new AbstractClusterAction<>(CoreVerticalScalePreparationResult.class) {
-            @Override
-            protected void doExecute(ClusterViewContext ctx, CoreVerticalScalePreparationResult payload, Map<Object, Object> variables)
-                    throws Exception {
-                StackVerticalScaleV4Request stackVerticalScaleV4Request = payload.getStackVerticalScaleV4Request();
-                StackDto stack = stackDtoService.getById(payload.getResourceId());
-                InstanceGroupDto instanceGroup = stack.getInstanceGroupDtos().stream()
-                        .filter(instance -> null != instance.getInstanceGroup().getGroupName() &&
-                                instance.getInstanceGroup().getGroupName().equals(stackVerticalScaleV4Request.getGroup()))
-                        .findFirst().get();
-                Set<Resource> resources = stack.getResources();
-                LOGGER.debug("Converting stack resources to cloud resources.");
-                List<CloudResource> cloudResources =
-                        resources.stream().map(resource -> cloudResourceConverter.convert(resource)).collect(Collectors.toList());
-                CloudCredential cloudCredential = payload.getCloudCredential();
-                if (!stack.isStackInStopPhase()) {
-                    LOGGER.debug("Removing groups that aren't being vertically scaled from stack to convert to cloud stack.");
-                    stack.getInstanceGroupDtos().stream()
-                            .filter(instance -> !instance.getInstanceGroup().getGroupName().equals(stackVerticalScaleV4Request.getGroup())
-                                    && !instance.getInstanceGroup().getInstanceGroupType().equals(InstanceGroupType.GATEWAY))
-                            .map(instance -> instance.getInstanceGroup().getGroupName()).forEach(group -> stack.getInstanceGroups().remove(group));
-                }
-                CloudStack cloudStack = cloudStackConverter.convert(stack);
-                cloudStack = cloudStackConverter.updateWithVerticalScaleRequest(cloudStack, stackVerticalScaleV4Request);
-                CloudContext cloudContext = payload.getCloudContext();
-
-                CoreVerticalScaleRequest request = new CoreVerticalScaleRequest(stack,
-                        instanceGroup,
-                        payload.getGroupServiceComponents(),
-                        payload.getInstanceStorageInfo(),
-                        cloudContext,
+                CoreVerticalScaleRequest request = new CoreVerticalScaleRequest(cloudContext,
                         cloudCredential,
                         cloudStack,
                         cloudResources,
-                        stackVerticalScaleV4Request,
-                        payload.getHostTemplateRoleGroupNames());
+                        stackVerticalScaleV4Request);
                 sendEvent(ctx, request);
             }
         };
@@ -160,10 +107,8 @@ public class CoreVerticalScaleActions {
         return new AbstractClusterAction<>(CoreVerticalScaleResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, CoreVerticalScaleResult payload, Map<Object, Object> variables) {
-                coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStackId(), payload.getStackVerticalScaleV4Request(),
-                        payload.getInstanceStoreInfo());
-                StackDto stack = stackDtoService.getById(payload.getResourceId());
-                coreVerticalScaleService.finishVerticalScale(context.getStackId(), payload.getStackVerticalScaleV4Request(), stack.isStackInStopPhase());
+                coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStackId(), payload.getStackVerticalScaleV4Request());
+                coreVerticalScaleService.finishVerticalScale(context.getStackId(), payload.getStackVerticalScaleV4Request());
                 sendEvent(context);
             }
 

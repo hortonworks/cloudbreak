@@ -5,7 +5,6 @@ mount_instance_storage_script:
     - template: jinja
     - makedirs: True
     - mode: 755
-    - replace: True
 
 mount_instance_storage_service_file:
   file.managed:

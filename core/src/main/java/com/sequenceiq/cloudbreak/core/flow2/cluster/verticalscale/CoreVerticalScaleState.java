@@ -6,8 +6,8 @@ import com.sequenceiq.flow.core.RestartAction;
 
 public enum CoreVerticalScaleState implements FlowState {
     INIT_STATE,
-    STACK_PREPARATION_STATE,
     STACK_VERTICALSCALE_FAILED_STATE,
+
     STACK_VERTICALSCALE_STATE,
     STACK_VERTICALSCALE_FINISHED_STATE,
 
