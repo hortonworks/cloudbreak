@@ -135,7 +135,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 // testCaseName cloudPlatform runtime
                 {"CloudPlatform.AWS", CloudPlatform.AWS, "7.2.2"},
                 {"CloudPlatform.AZURE", CloudPlatform.AZURE, "7.2.2"},
-                {"CloudPlatform.GCP", CloudPlatform.GCP, "7.9.0"}
+                {"CloudPlatform.GCP", CloudPlatform.GCP, "7.11.0"}
         };
     }
 

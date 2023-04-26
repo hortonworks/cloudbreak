@@ -82,7 +82,7 @@ public class RangerRazBaseConfigProviderTest {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.10"));
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
-        cmRepo.setVersion("7.9.0");
+        cmRepo.setVersion("7.11.0");
 
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withStackType(StackType.DATALAKE)
