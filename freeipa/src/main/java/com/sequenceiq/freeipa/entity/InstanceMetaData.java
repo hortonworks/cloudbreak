@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.entity;
 
-import java.util.StringJoiner;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -257,19 +255,26 @@ public class InstanceMetaData implements OrchestrationNode {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", InstanceMetaData.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("privateId=" + privateId)
-                .add("privateIp='" + privateIp + "'")
-                .add("publicIp='" + publicIp + "'")
-                .add("instanceId='" + instanceId + "'")
-                .add("discoveryFQDN='" + discoveryFQDN + "'")
-                .add("instanceName='" + instanceName + "'")
-                .add("instanceStatus='" + instanceStatus + "'")
-                .add("availabilityZone='" + availabilityZone + "'")
-                .add("subnetId='" + subnetId + "'")
-                .add("variant='" + variant + "'")
-                .toString();
+        return "InstanceMetaData{" +
+                "id=" + id +
+                ", privateId=" + privateId +
+                ", privateIp='" + privateIp + '\'' +
+                ", publicIp='" + publicIp + '\'' +
+                ", sshPort=" + sshPort +
+                ", instanceId='" + instanceId + '\'' +
+                ", discoveryFQDN='" + discoveryFQDN + '\'' +
+                ", instanceStatus=" + instanceStatus +
+                ", instanceMetadataType=" + instanceMetadataType +
+                ", localityIndicator='" + localityIndicator + '\'' +
+                ", startDate=" + startDate +
+                ", terminationDate=" + terminationDate +
+                ", subnetId='" + subnetId + '\'' +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                ", instanceName='" + instanceName + '\'' +
+                ", instanceGroup=" + instanceGroup +
+                ", lifeCycle=" + lifeCycle +
+                ", variant='" + variant + '\'' +
+                '}';
     }
 
     @Override

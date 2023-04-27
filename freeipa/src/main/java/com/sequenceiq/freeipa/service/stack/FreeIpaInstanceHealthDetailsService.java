@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Retryable;
@@ -80,13 +81,11 @@ public class FreeIpaInstanceHealthDetailsService {
 
     @Retryable(RetryableFreeIpaClientException.class)
     public RPCResponse<Boolean> checkFreeIpaHealth(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
-        RPCResponse<Boolean> result;
         if (healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(stack)) {
-            result = toBooleanRpcResponse(freeIpaHealthCheck(stack, instance));
+            return toBooleanRpcResponse(freeIpaHealthCheck(stack, instance), instance.getDiscoveryFQDN());
         } else {
-            result = legacyFreeIpaHealthCheck(stack, instance);
+            return legacyFreeIpaHealthCheck(stack, instance);
         }
-        return result;
     }
 
     private RPCResponse<CheckResult> freeIpaHealthCheck(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
@@ -113,18 +112,26 @@ public class FreeIpaInstanceHealthDetailsService {
         return freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), instance.getDiscoveryFQDN());
     }
 
-    private RPCResponse<Boolean> toBooleanRpcResponse(RPCResponse<CheckResult> nodeHealth) {
-        RPCMessage rpcMessage = createRpcMessageFromCheckResult(nodeHealth);
-        RPCResponse<Boolean> response = new RPCResponse<>();
-        response.setSummary(nodeHealth.getSummary());
-        response.setResult(isHealthCheckPassing(nodeHealth));
-        response.setCount(nodeHealth.getCount());
-        response.setTruncated(nodeHealth.getTruncated());
-        response.setMessages(List.of(rpcMessage));
-        response.setCompleted(nodeHealth.getCompleted());
-        response.setFailed(nodeHealth.getFailed());
-        response.setValue(nodeHealth.getValue());
-        return response;
+    private RPCResponse<Boolean> toBooleanRpcResponse(RPCResponse<CheckResult> nodeHealth, String discoveryFQDN) throws FreeIpaClientException {
+        if (nodeHealth.getResult() == null || StringUtils.equalsIgnoreCase(discoveryFQDN, nodeHealth.getResult().getHost())) {
+            RPCMessage rpcMessage = createRpcMessageFromCheckResult(nodeHealth);
+            RPCResponse<Boolean> response = new RPCResponse<>();
+            response.setSummary(nodeHealth.getSummary());
+            response.setResult(isHealthCheckPassing(nodeHealth));
+            response.setCount(nodeHealth.getCount());
+            response.setTruncated(nodeHealth.getTruncated());
+            response.setMessages(List.of(rpcMessage));
+            response.setCompleted(nodeHealth.getCompleted());
+            response.setFailed(nodeHealth.getFailed());
+            response.setValue(nodeHealth.getValue());
+            return response;
+        } else {
+            String message = String.format("Expected hostname [%s] and received [%s] are different. "
+                + "This could happen when cluster proxy is used, and the instance is not registered with CP.",
+                discoveryFQDN, nodeHealth.getResult().getHost());
+            LOGGER.warn(message);
+            throw new FreeIpaClientException(message);
+        }
     }
 
     private RPCMessage createRpcMessageFromCheckResult(RPCResponse<CheckResult> nodeHealth) {

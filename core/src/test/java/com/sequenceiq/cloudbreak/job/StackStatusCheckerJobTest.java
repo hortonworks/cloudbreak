@@ -393,8 +393,8 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testHandledAllStatesSeparately() {
         Set<Status> unschedulableStates = Status.getUnschedulableStatuses();
-        Set<Status> ignoredStates = underTest.ignoredStates();
-        Set<Status> syncableStates = underTest.syncableStates();
+        Set<Status> ignoredStates = StackStatusCheckerJob.IGNORED_STATES;
+        Set<Status> syncableStates = StackStatusCheckerJob.SYNCABLE_STATES;
 
         assertTrue(Sets.intersection(unschedulableStates, ignoredStates).isEmpty());
         assertTrue(Sets.intersection(unschedulableStates, syncableStates).isEmpty());

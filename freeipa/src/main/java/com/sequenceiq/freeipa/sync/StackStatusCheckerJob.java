@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.sync;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,10 +13,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,8 +25,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -41,6 +42,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStatusCheckerJob.class);
 
     private static final String AUTO_SYNC_LOG_PREFIX = ":::Auto sync::: ";
+
+    private static final EnumSet<Status> LONG_SYNCABLE_STATES = EnumSet.of(Status.DELETED_ON_PROVIDER_SIDE);
 
     @Inject
     private FlowLogService flowLogService;
@@ -69,6 +72,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private MetricsClient metricsClient;
 
+    @Inject
+    private StatusCheckerJobService jobService;
+
     @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
 
@@ -78,7 +84,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeTracedJob(JobExecutionContext context) {
         Long stackId = getStackId();
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         try {
@@ -86,6 +92,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for freeipa stack: {}", stackId);
             } else {
                 LOGGER.debug("No flows running, trying to sync freeipa");
+                rescheduleIfRequired(stack.getStackStatus().getStatus(), context);
                 syncAStack(stack, false);
             }
             if (stack.getStackStatus() != null && stack.getStackStatus().getStatus() != null) {
@@ -97,6 +104,27 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
+    private void rescheduleIfRequired(Status stackStatus, JobExecutionContext context) {
+        switchToShortSyncIfNecessary(stackStatus, context);
+        switchToLongSyncIfNecessary(stackStatus, context);
+    }
+
+    private void switchToShortSyncIfNecessary(Status stackStatus, JobExecutionContext context) {
+        if (jobService.isLongSyncJob(context) && !LONG_SYNCABLE_STATES.contains(stackStatus)) {
+            LOGGER.info("Switching to short sync as status is {}", stackStatus);
+            jobService.unschedule(getLocalId());
+            jobService.schedule(getStackId(), StackJobAdapter.class);
+        }
+    }
+
+    private void switchToLongSyncIfNecessary(Status stackStatus, JobExecutionContext context) {
+        if (!jobService.isLongSyncJob(context) && LONG_SYNCABLE_STATES.contains(stackStatus)) {
+            LOGGER.info("Switching to long sync as status is {}", stackStatus);
+            jobService.unschedule(getLocalId());
+            jobService.scheduleLongIntervalCheck(getStackId(), StackJobAdapter.class);
+        }
+    }
+
     private Long getStackId() {
         return Long.valueOf(getLocalId());
     }
@@ -105,10 +133,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         try {
             checkedMeasure(() -> {
                 ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
-                    // Exclude terminated but include deleted
                     Set<InstanceMetaData> notTerminatedForStack = stack.getAllInstanceMetaDataList().stream()
                             .filter(Predicate.not(InstanceMetaData::isTerminated))
-                            .filter(Predicate.not(InstanceMetaData::isDeletedOnProvider))
                             .collect(Collectors.toSet());
 
                     Set<InstanceMetaData> unusableInstances = collectAndUpdateUnusableInstances(notTerminatedForStack);
@@ -149,7 +175,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    @NotNull
     private Set<InstanceMetaData> collectAndUpdateUnusableInstances(Set<InstanceMetaData> notTerminatedForStack) {
         Set<InstanceMetaData> unusableInstances = notTerminatedForStack.stream()
                 .filter(im -> StringUtils.isAnyBlank(im.getDiscoveryFQDN(), im.getPrivateIp()))
