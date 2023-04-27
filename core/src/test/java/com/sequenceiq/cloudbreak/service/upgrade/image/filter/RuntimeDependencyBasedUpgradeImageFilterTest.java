@@ -56,7 +56,7 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
     private StackDto stack;
 
     @Test
-    void testFilterShouldReturnTheImagesWithTheCorrectPythonVersion() throws CloudbreakImageCatalogException {
+    void testFilterShouldReturnTheImagesWithTheCorrectPythonVersionWithWarningMessage() throws CloudbreakImageCatalogException {
         Image image1 = ImageTestBuilder.builder().withUuid("image1").build();
         Image image2 = ImageTestBuilder.builder().withUuid("image2").build();
         ImageFilterParams imageFilterParams = createImageFilterParams();
@@ -73,6 +73,27 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
 
         assertTrue(actual.getImages().contains(image1));
         assertFalse(actual.getImages().contains(image2));
+        assertEquals(RuntimeDependencyBasedUpgradeImageFilter.WARNING_MESSAGE, actual.getReason());
+    }
+
+    @Test
+    void testFilterShouldReturnAllImagesWithTheCorrectPythonVersionWithoutWarningMessage() throws CloudbreakImageCatalogException {
+        Image image1 = ImageTestBuilder.builder().withUuid("image1").build();
+        Image image2 = ImageTestBuilder.builder().withUuid("image2").build();
+        ImageFilterParams imageFilterParams = createImageFilterParams();
+
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
+        when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(imageCatalogService.getAllCdhImages(any(), eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), any())).thenReturn(IMAGES);
+        when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, IMAGES, imageFilterParams.getCurrentImage(), image1))
+                .thenReturn(true);
+        when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, IMAGES, imageFilterParams.getCurrentImage(), image2))
+                .thenReturn(true);
+
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(image1, image2)), imageFilterParams);
+
+        assertTrue(actual.getImages().contains(image1));
+        assertTrue(actual.getImages().contains(image2));
         assertTrue(actual.getReason().isEmpty());
     }
 

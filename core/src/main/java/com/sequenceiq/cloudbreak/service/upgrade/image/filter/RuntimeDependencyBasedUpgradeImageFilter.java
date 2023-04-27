@@ -25,6 +25,14 @@ import com.sequenceiq.cloudbreak.service.upgrade.validation.service.PythonVersio
 @Component
 public class RuntimeDependencyBasedUpgradeImageFilter implements UpgradeImageFilter {
 
+    public static final String WARNING_MESSAGE = "This cluster cannot be directly upgraded to the latest Cloudera Runtime 7.2.16 Service Pack. "
+            + "You will need to perform the upgrade in multiple steps to bring this cluster to the latest version. "
+            + "First please perform an upgrade to the latest Service Pack of the current runtime. "
+            + "(Select the last item in “Target Cloudera Runtime Version” and perform the upgrade.) "
+            + "After the Runtime upgrade has been completed, please also perform an OS upgrade. "
+            + "(Return to this screen, select the last item in “Target Cloudera Runtime Version” and perform the upgrade.) "
+            + "Once you have completed the steps above, you will be able to upgrade to the latest Cloudera Runtime 7.2.16 Service Pack";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeDependencyBasedUpgradeImageFilter.class);
 
     private static final int ORDER_NUMBER = 10;
@@ -42,7 +50,7 @@ public class RuntimeDependencyBasedUpgradeImageFilter implements UpgradeImageFil
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
         List<Image> filteredImages = filterImages(imageFilterResult, imageFilterParams);
         LOGGER.debug("After the filtering {} image left.", filteredImages.size());
-        return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
+        return new ImageFilterResult(filteredImages, getReasonMessage(imageFilterResult, imageFilterParams, filteredImages));
     }
 
     @Override
@@ -73,5 +81,11 @@ public class RuntimeDependencyBasedUpgradeImageFilter implements UpgradeImageFil
             LOGGER.error("Failed to retrieve images from catalog {}", imageFilterParams.getImageCatalogName(), e);
             throw new CloudbreakServiceException(e);
         }
+    }
+
+    private String getReasonMessage(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams, List<Image> filteredImages) {
+        return !filteredImages.isEmpty() && imageFilterResult.getImages().size() != filteredImages.size() ?
+                WARNING_MESSAGE :
+                getReason(filteredImages, imageFilterParams);
     }
 }
