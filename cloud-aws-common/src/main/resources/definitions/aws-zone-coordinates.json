@@ -167,6 +167,13 @@
       "latitude": "25.563633",
       "longitude": "50.36539",
       "k8sSupported": true
+    },
+    {
+      "name": "me-central-1",
+      "displayName": "Middle East (UAE)",
+      "latitude": "23.4241",
+      "longitude": "53.8478",
+      "k8sSupported": true
     }
   ]
 }

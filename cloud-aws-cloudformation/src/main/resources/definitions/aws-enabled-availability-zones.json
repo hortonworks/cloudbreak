@@ -181,6 +181,14 @@
       ]
     },
     {
+      "name": "me-central-1",
+      "zones": [
+        "me-central-1a",
+        "me-central-1b",
+        "me-central-1c"
+      ]
+    },
+    {
       "name": "us-gov-west-1",
       "zones": [
         "us-gov-west-1a",
