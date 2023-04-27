@@ -16,7 +16,7 @@
           {
             "count": 1,
             "size": 128,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
@@ -33,7 +33,7 @@
           {
             "count": 1,
             "size": 128,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
@@ -50,7 +50,7 @@
           {
             "count": 1,
             "size": 512,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
@@ -67,7 +67,7 @@
           {
             "count": 1,
             "size": 128,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
@@ -84,7 +84,7 @@
           {
             "count": 1,
             "size": 256,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
@@ -101,7 +101,7 @@
           {
             "count": 1,
             "size": 256,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
@@ -118,7 +118,7 @@
           {
             "count": 1,
             "size": 128,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
@@ -135,7 +135,7 @@
           {
             "count": 0,
             "size": 0,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
@@ -152,7 +152,7 @@
           {
             "count": 0,
             "size": 0,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
@@ -169,7 +169,7 @@
           {
             "count": 0,
             "size": 0,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
@@ -185,7 +185,7 @@
         "attachedVolumes": [
           {
             "count": 0,
-            "type": "gp2"
+            "type": "gp3"
           }
         ]
       },
