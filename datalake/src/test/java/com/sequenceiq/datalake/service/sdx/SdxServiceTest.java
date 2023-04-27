@@ -1918,8 +1918,19 @@ class SdxServiceTest {
     @Test
     public void testUpdateDbEngineVersionUpdatesField() {
         when(sdxClusterRepository.updateDatabaseEngineVersion(SDX_CRN, "10")).thenReturn(1);
+        when(sdxClusterRepository.findDatabaseIdByCrn(anyString())).thenReturn(Optional.of(1L));
 
         underTest.updateDatabaseEngineVersion(SDX_CRN, "10");
+        verify(sdxDatabaseRepository, times(1)).updateDatabaseEngineVersion(1L, "10");
+    }
+
+    @Test
+    public void testUpdateDbEngineVersionUpdatesFieldNoDB() {
+        when(sdxClusterRepository.updateDatabaseEngineVersion(SDX_CRN, "10")).thenReturn(1);
+        when(sdxClusterRepository.findDatabaseIdByCrn(anyString())).thenReturn(Optional.empty());
+
+        underTest.updateDatabaseEngineVersion(SDX_CRN, "10");
+        verify(sdxDatabaseRepository, times(0)).updateDatabaseEngineVersion(anyLong(), anyString());
     }
 
     @Test
@@ -1927,6 +1938,7 @@ class SdxServiceTest {
         when(sdxClusterRepository.updateDatabaseEngineVersion(SDX_CRN, "10")).thenReturn(0);
 
         assertThrows(NotFoundException.class, () -> underTest.updateDatabaseEngineVersion(SDX_CRN, "10"));
+        verify(sdxDatabaseRepository, times(0)).updateDatabaseEngineVersion(anyLong(), anyString());
     }
 
     @Test
