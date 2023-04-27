@@ -28,16 +28,12 @@ public class DistroXVerticalScaleAction implements Action<DistroXTestDto, Cloudb
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         if (testContext.getCloudProvider().verticalScalingSupported()) {
-            try {
-                FlowIdentifier flowIdentifier = client.getDefaultClient()
-                        .distroXV1Endpoint()
-                        .verticalScalingByCrn(
-                                testDto.getResponse().getCrn(),
-                                convertVerticalScaleTestDtoToStackV4VerticalScaleRequest(testContext));
-                testDto.setFlow("DistroX put vertical scaling", flowIdentifier);
-            } catch (Exception e) {
-                Log.whenJson(LOGGER, format("DistroX vertical scaling failed reason %s, %n", e.getMessage()), testDto.getCrn());
-            }
+            FlowIdentifier flowIdentifier = client.getDefaultClient()
+                    .distroXV1Endpoint()
+                    .verticalScalingByCrn(
+                            testDto.getResponse().getCrn(),
+                            convertVerticalScaleTestDtoToStackV4VerticalScaleRequest(testContext));
+            testDto.setFlow("DistroX put vertical scaling", flowIdentifier);
             Log.whenJson(LOGGER, format("DistroX put vertical scaling: %n"), testDto.getCrn());
         } else {
             Log.when(LOGGER, "DataHub vertical scale is not supported by now for the following cloud provider: " + testContext.getCloudPlatform());
