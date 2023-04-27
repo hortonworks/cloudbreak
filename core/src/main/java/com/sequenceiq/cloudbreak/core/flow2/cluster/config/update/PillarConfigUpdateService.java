@@ -53,7 +53,7 @@ public class PillarConfigUpdateService {
                 .fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(),
                         CLUSTER_PILLAR_CONFIG_UPDATE_STARTED);
         StackDto stackDto = stackDtoService.getById(stackId);
-        clusterHostServiceRunner.updateClusterConfigs(stackDto, false);
+        clusterHostServiceRunner.updateClusterConfigs(stackDto);
     }
 
     public void configUpdateFinished(Long stackId) {

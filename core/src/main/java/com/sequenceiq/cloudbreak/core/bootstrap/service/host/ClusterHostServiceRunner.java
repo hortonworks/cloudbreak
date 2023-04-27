@@ -348,7 +348,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void updateClusterConfigs(@Nonnull StackDto stackDto, boolean bootstrap) {
+    public void updateClusterConfigs(@Nonnull StackDto stackDto) {
         try {
             Set<Node> allNodes = stackUtil.collectNodes(stackDto, emptySet());
             Set<Node> reachableNodes = stackUtil.collectReachableNodesByInstanceStates(stackDto);
@@ -356,16 +356,8 @@ public class ClusterHostServiceRunner {
             List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
             SaltConfig saltConfig = createSaltConfig(stackDto, grainsProperties);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getStack().getId(), stackDto.getCluster().getId());
-            if (bootstrap) {
-                LOGGER.debug("Adding GRAIN.ADD operation to update the salt properties on the mount-instance-storage");
-                modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.ADD);
-            }
             hostOrchestrator.initSaltConfig(stackDto, gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
             hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
-            if (bootstrap) {
-                LOGGER.debug("Removing GRAIN.ADD operation after execution");
-                modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.REMOVE);
-            }
         } catch (CloudbreakOrchestratorException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
@@ -548,9 +540,7 @@ public class ClusterHostServiceRunner {
     }
 
     private String getMountPath(InstanceGroupView group) {
-        TemporaryStorage templateTemporaryStorage = group.getTemplate().getTemporaryStorage();
-        if (TemporaryStorage.EPHEMERAL_VOLUMES.equals(templateTemporaryStorage)
-                || TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.equals(templateTemporaryStorage)) {
+        if (TemporaryStorage.EPHEMERAL_VOLUMES.equals(group.getTemplate().getTemporaryStorage())) {
             return "ephfs";
         }
         return "fs";
