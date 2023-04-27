@@ -177,7 +177,11 @@
               {
                 "name":"ranger.audit.solr.max.shards.per.node",
                 "value":"2"
-              }
+              },
+             {
+               "name":"ranger.audit.solr.config.ttl",
+               "value":"30"
+             }
             ]
           }
         ],
