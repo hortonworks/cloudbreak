@@ -64,7 +64,7 @@ public class AltusIAMService {
 
     private AccessKeyType.Value getDefaultAccessKeyType() {
         Provider sunNSSFipsProvider = Security.getProvider(SUN_PKCS_11_NSS_FIPS_PROVIDER_NAME);
-        AccessKeyType.Value defaultAccessKeyType = sunNSSFipsProvider != null ? AccessKeyType.Value.ED25519 : AccessKeyType.Value.RSA;
+        AccessKeyType.Value defaultAccessKeyType = sunNSSFipsProvider != null ? AccessKeyType.Value.ECDSA : AccessKeyType.Value.RSA;
         LOGGER.debug("Default access key type is {}", defaultAccessKeyType);
         return defaultAccessKeyType;
     }
