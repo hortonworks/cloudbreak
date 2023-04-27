@@ -9,7 +9,7 @@ import com.azure.core.http.policy.RetryOptions;
 
 public class AzureQuartzRetryUtils {
 
-    private static final Integer MAX_CLIENT_QUARTZ_RETRY = 1;
+    private static final Integer MAX_CLIENT_QUARTZ_RETRY = 0;
 
     private AzureQuartzRetryUtils() {
 
