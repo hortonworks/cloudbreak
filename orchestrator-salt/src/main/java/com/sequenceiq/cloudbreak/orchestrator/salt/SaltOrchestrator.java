@@ -65,6 +65,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
+import com.sequenceiq.cloudbreak.orchestrator.model.Memory;
+import com.sequenceiq.cloudbreak.orchestrator.model.MemoryInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
@@ -523,6 +525,36 @@ public class SaltOrchestrator implements HostOrchestrator {
             saveCustomPillars(saltConfig, exitModel, stateParams.getTargetHostNames(), sc);
         } catch (Exception e) {
             LOGGER.info("Error occurred during save custom pillars", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Optional<MemoryInfo> getMemoryInfo(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            return saltStateService.getMemoryInfo(sc, gatewayConfig.getHostname());
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during requesting memory information", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Optional<Memory> getClusterManagerMemory(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            return saltStateService.getClouderaManagerMemory(sc, gatewayConfig);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during requesting memory information", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void setClusterManagerMemory(GatewayConfig gatewayConfig, Memory memory) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            saltStateService.setClouderaManagerMemory(sc, gatewayConfig, memory);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during setting cluster manager memory", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }

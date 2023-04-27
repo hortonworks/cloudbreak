@@ -8,6 +8,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -58,7 +59,10 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
+import com.sequenceiq.cloudbreak.orchestrator.model.Memory;
+import com.sequenceiq.cloudbreak.orchestrator.model.MemoryInfo;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
@@ -84,6 +88,7 @@ class SaltStateServiceTest {
 
     private static final String VALID_PATERN = "(.*)-([0-9]+)[a-zA-z]*(\\..*)?";
 
+    @Mock
     private SaltConnector saltConnector;
 
     private Target<String> target;
@@ -104,7 +109,6 @@ class SaltStateServiceTest {
         targets.add("10-0-0-2.example.com");
         targets.add("10-0-0-3.example.com");
         target = new HostList(targets);
-        saltConnector = mock(SaltConnector.class);
         lenient().when(minionUtil.createMinion(any(), any(), anyBoolean(), anyBoolean())).thenReturn(mock(Minion.class));
     }
 
@@ -627,4 +631,78 @@ class SaltStateServiceTest {
         assertTrue(saltEmptyResponseException.getMessage().contains("jobs.lookup_jid returns an empty response"));
     }
 
+    void testSetClouderaManagerMemory() {
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getHostname()).thenReturn("host.master0.site");
+
+        underTest.setClouderaManagerMemory(saltConnector, gatewayConfig, Memory.of(4, "GB"));
+
+        ArgumentCaptor<Target<String>> captor = ArgumentCaptor.forClass(Target.class);
+        verify(saltConnector).run(
+                captor.capture(),
+                eq("file.replace"),
+                eq(LOCAL),
+                eq(Map.class),
+                eq("/etc/default/cloudera-scm-server"),
+                eq("Xmx\\d+G"),
+                eq("Xmx4G"));
+
+        assertEquals("host.master0.site", captor.getValue().getTarget());
+    }
+
+    @Test
+    void testGetConfiguredClouderaManagerMemoryWithSingleDigit() {
+        testGetClouderaManagerMemoryWhenConfigIs(
+                "export CMF_JAVA_OPTS=\"-Xmx4G -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError " +
+                        "-XX:HeapDumpPath=/tmp -Dcom.sun.management.jmxremote.ssl.enabled.protocols=TLSv1.2\"",
+                Optional.of(Memory.ofGigaBytes(4)));
+    }
+
+    @Test
+    void testGetConfiguredClouderaManagerMemoryWithMultipleDigit() {
+        testGetClouderaManagerMemoryWhenConfigIs(
+                "export CMF_JAVA_OPTS=\"-Xmx12G -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError " +
+                        "-XX:HeapDumpPath=/tmp -Dcom.sun.management.jmxremote.ssl.enabled.protocols=TLSv1.2\"",
+                Optional.of(Memory.ofGigaBytes(12)));
+    }
+
+    @Test
+    void testGetConfiguredClouderaManagerMemoryWhenConfigDoesntContainJvmMemorySetting() {
+        testGetClouderaManagerMemoryWhenConfigIs(
+                "export CMF_JAVA_OPTS=\"-XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError " +
+                        "-XX:HeapDumpPath=/tmp -Dcom.sun.management.jmxremote.ssl.enabled.protocols=TLSv1.2\"",
+                Optional.empty());
+    }
+
+    @Test
+    void testGetVmMemoryInfo() {
+        Map<String, Map<String, String>> memoryResult = Map.of("MemTotal", Map.of("value", "1", "unit", "kB"));
+        when(saltConnector.run(any(Target.class), any(String.class), any(SaltClientType.class), any()))
+                .thenReturn(Map.of("return", List.of(Map.of("host.master0.site", memoryResult))));
+
+        Optional<MemoryInfo> memoryInfo = underTest.getMemoryInfo(saltConnector, "host.master0.site");
+
+        assertNotNull(memoryInfo);
+        assertTrue(memoryInfo.isPresent());
+        assertEquals(Memory.of(1, "kb"), memoryInfo.get().getTotalMemory());
+    }
+
+    void testGetClouderaManagerMemoryWhenConfigIs(String cmConfig, Optional<Memory> expectedMemory) {
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getHostname()).thenReturn("host.master0.site");
+        when(saltConnector.run(any(Target.class), any(String.class), any(SaltClientType.class), any(), any(String.class)))
+                .thenReturn(Map.of("return", List.of(Map.of("host.master0.site", cmConfig))));
+
+        Optional<Memory> clouderaManagerMemory = underTest.getClouderaManagerMemory(saltConnector, gatewayConfig);
+
+        assertEquals(expectedMemory, clouderaManagerMemory);
+        ArgumentCaptor<Target<String>> captor = ArgumentCaptor.forClass(Target.class);
+        verify(saltConnector).run(
+                captor.capture(),
+                eq("cmd.run"),
+                eq(LOCAL),
+                eq(Map.class),
+                eq("cat /etc/default/cloudera-scm-server | grep CMF_JAVA_OPTS"));
+        assertEquals("host.master0.site", captor.getValue().getTarget());
+    }
 }
