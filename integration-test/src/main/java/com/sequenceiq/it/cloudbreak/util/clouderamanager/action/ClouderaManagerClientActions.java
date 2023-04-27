@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -42,12 +43,14 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
     @Value("${integrationtest.cloudProvider:}")
     private String cloudProvider;
 
+    @Retryable
     public SdxInternalTestDto checkConfig(SdxInternalTestDto testDto, String user, String password, Map<String, String> expectedConfig) {
         String serverIp = testDto.getResponse().getStackV4Response().getCluster().getServerIp();
         checkConfig(serverIp, testDto.getName(), user, password, expectedConfig);
         return testDto;
     }
 
+    @Retryable
     public DistroXTestDto checkConfig(DistroXTestDto testDto, String user, String password, Map<String, String> expectedConfig) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
         checkConfig(serverIp, testDto.getName(), user, password, expectedConfig);
@@ -60,7 +63,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(apiClient);
         // CHECKSTYLE:ON
         try {
-            ApiConfigList configList = clouderaManagerResourceApi.getConfig("full");
+            ApiConfigList configList = clouderaManagerResourceApi.getConfig("summary");
             expectedConfig.forEach((configKey, expectedConfigValue) -> {
                 String actualConfigValue = configList.getItems().stream()
                         .filter(apiConfig -> apiConfig.getName().equalsIgnoreCase(configKey))
