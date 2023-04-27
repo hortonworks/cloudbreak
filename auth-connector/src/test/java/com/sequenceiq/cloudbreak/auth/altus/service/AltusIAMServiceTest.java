@@ -71,7 +71,7 @@ class AltusIAMServiceTest {
             assertEquals("accessKey", altusCredential.getAccessKey());
             assertEquals("privateKey", String.valueOf(altusCredential.getPrivateKey()));
             verify(umsClient, times(1)).createMachineUserAndGenerateKeys(eq("machineUserName"), eq("actorCrn"), eq("accountId"),
-                    eq("roleCrn"), eq(Map.of("key", "value")), eq(UserManagementProto.AccessKeyType.Value.ED25519), eq(regionAwareInternalCrnGeneratorFactory));
+                    eq("roleCrn"), eq(Map.of("key", "value")), eq(UserManagementProto.AccessKeyType.Value.ECDSA), eq(regionAwareInternalCrnGeneratorFactory));
         }
     }
 }
