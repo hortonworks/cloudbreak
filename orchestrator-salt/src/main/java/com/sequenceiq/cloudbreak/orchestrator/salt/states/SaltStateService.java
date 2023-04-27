@@ -37,6 +37,8 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
+import com.sequenceiq.cloudbreak.orchestrator.model.Memory;
+import com.sequenceiq.cloudbreak.orchestrator.model.MemoryInfo;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
@@ -68,6 +70,8 @@ import com.sequenceiq.cloudbreak.service.Retry;
 public class SaltStateService {
 
     public static final Pattern RUNNING_HIGHSTATE_JID = Pattern.compile(".*The function .*state\\.highstate.* is running as PID.*with jid (\\d+).*");
+
+    private static final Pattern CLOUDERA_MANAGER_JVM_CONFIG_LINE = Pattern.compile(".+-Xmx(?<memory>\\d+)G.+");
 
     private static final long NETWORK_IPADDRS_TIMEOUT = 15L;
 
@@ -182,7 +186,7 @@ public class SaltStateService {
         Multimap<String, Map<String, String>> missingTargetsWithErrors = ArrayListMultimap.create();
         for (Entry<String, List<RunnerInfo>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
             LOGGER.debug("Collect missing targets from host: {}", stringMapEntry.getKey());
-            if  (stringMapEntry.getValue() != null) {
+            if (stringMapEntry.getValue() != null) {
                 logRunnerInfos(stringMapEntry);
                 for (RunnerInfo targetObject : stringMapEntry.getValue()) {
                     if (!targetObject.getResult()) {
@@ -396,6 +400,36 @@ public class SaltStateService {
         return result;
     }
 
+    public Optional<MemoryInfo> getMemoryInfo(SaltConnector sc, String masterFqdn) {
+        try {
+            Map<String, List<Map<String, Map<String, Map<String, String>>>>> result =
+                    measure(() -> sc.run(new HostList(List.of(masterFqdn)), "status.meminfo", LOCAL, Map.class), LOGGER, "Get memory info took {}ms");
+            return Optional.of(new MemoryInfo(result.get("return").get(0).get(masterFqdn)));
+        } catch (Exception e) {
+            LOGGER.error("Couldn't get memory info from master {}. Message: {}", masterFqdn, e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Memory> getClouderaManagerMemory(SaltConnector sc, GatewayConfig gatewayConfig) {
+        try {
+            Map<String, List<Map<String, String>>> result =
+                    measure(() -> sc.run(new HostList(List.of(gatewayConfig.getHostname())), "cmd.run", LOCAL, Map.class,
+                            "cat /etc/default/cloudera-scm-server | grep CMF_JAVA_OPTS"), LOGGER, "Get memory info took {}ms");
+            LOGGER.info("Salt response from cloudera manager config: {}", result);
+            String configLine = result.get("return").get(0).get(gatewayConfig.getHostname());
+            Matcher matcher = CLOUDERA_MANAGER_JVM_CONFIG_LINE.matcher(configLine);
+            if (matcher.matches()) {
+                return Optional.of(Memory.ofGigaBytes(Integer.parseInt(matcher.group(1))));
+            } else {
+                return Optional.empty();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Couldn't get memory info from master {}. Message: {}", gatewayConfig.getHostname(), e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
     public Map<String, String> runCommand(Retry retry, SaltConnector sc, String command) {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
@@ -413,7 +447,7 @@ public class SaltStateService {
     public Map<String, String> replacePatternInFile(Retry retry, SaltConnector sc, String file, String pattern, String replace) {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
-                String[] args = new String[]{file, String.format("pattern='%s'", pattern), String.format("repl='%s'", replace)};
+                String[] args = new String[] {file, String.format("pattern='%s'", pattern), String.format("repl='%s'", replace)};
                 CommandExecutionResponse resp = measure(() -> sc.run(Glob.ALL, "file.replace", LOCAL, CommandExecutionResponse.class, args), LOGGER,
                         "Command run took {}ms for file.replace with args [{}]", (Object) args);
                 List<Map<String, String>> result = resp.getResult();
@@ -470,7 +504,7 @@ public class SaltStateService {
     public ApplyResponse applyConcurrentState(SaltConnector sc, String service, Target<String> target,
             Map<String, Object> inlinePillars) throws JsonProcessingException {
         String inlinePillarsStr = new ObjectMapper().writeValueAsString(inlinePillars);
-        return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class,  service, String.format("pillar=%s", inlinePillarsStr),
+        return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service, String.format("pillar=%s", inlinePillarsStr),
                 "concurrent=True"), LOGGER, "ApplyConcurrentState took {}ms for service [{}]", service);
     }
 
@@ -504,5 +538,15 @@ public class SaltStateService {
         return measure(() -> sc.run(target, "file.file_exists", LOCAL, PingResponse.class, "/etc/unbound/conf.d/00-cluster.conf"), LOGGER,
                 "Getting information about existence of unbound config took {}ms").getResult().stream()
                 .anyMatch(map -> map.values().stream().anyMatch(Boolean::booleanValue));
+    }
+
+    public void setClouderaManagerMemory(SaltConnector sc, GatewayConfig gatewayConfig, Memory memory) {
+        try {
+            measure(() -> sc.run(new HostList(List.of(gatewayConfig.getHostname())), "file.replace", LOCAL, Map.class,
+                            "/etc/default/cloudera-scm-server", "Xmx\\d+G", "Xmx" + (int) Math.ceil(memory.getValueInGigaBytes()) + "G"), LOGGER,
+                    "Set memory took {}ms");
+        } catch (Exception e) {
+            LOGGER.error("Couldn't set memory info from master {}. Message: {}", gatewayConfig.getHostname(), e.getMessage(), e);
+        }
     }
 }

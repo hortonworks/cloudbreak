@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -73,6 +74,9 @@ public class ClusterManagerUpscaleServiceTest {
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Mock
+    private ClusterManagerMemoryAdjuster clusterManagerMemoryAdjuster;
+
     @InjectMocks
     private ClusterManagerUpscaleService underTest;
 
@@ -98,6 +102,7 @@ public class ClusterManagerUpscaleServiceTest {
 
         verifyNoMoreInteractions(clusterServiceRunner);
         verify(clusterApi, times(2)).waitForHosts(any());
+        verify(clusterManagerMemoryAdjuster, times(2)).adjustMemory(eq(stackDto), anyInt());
     }
 
     @Test

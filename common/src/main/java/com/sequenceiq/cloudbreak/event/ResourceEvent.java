@@ -426,7 +426,7 @@ public enum ResourceEvent {
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED("cluster.scaling.stopstart.downscale.finished"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_FAILED("cluster.scaling.stopstart.downscale.failed"),
     CLUSTER_SCALING_UPSCALE_FAILED("cluster.scaling.upscale.failed"),
-
+    CLUSTER_SCALING_CM_MEMORY_WARNING("cluster.scaling.cm.memory.warning"),
 
     CLUSTER_SALT_UPDATE_STARTED("cluster.salt.update.started"),
     CLUSTER_SALT_UPDATE_FAILED("cluster.salt.update.failed"),

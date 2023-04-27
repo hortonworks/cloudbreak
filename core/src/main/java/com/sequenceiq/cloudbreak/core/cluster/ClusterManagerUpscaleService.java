@@ -56,6 +56,9 @@ public class ClusterManagerUpscaleService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Inject
+    private ClusterManagerMemoryAdjuster clusterManagerMemoryAdjuster;
+
     public void upscaleClusterManager(Long stackId, Map<String, Integer> hostGroupWithAdjustment, boolean primaryGatewayChanged, boolean repair)
             throws ClusterClientInitException {
         StackDto stackDto = stackDtoService.getById(stackId);
@@ -71,6 +74,8 @@ public class ClusterManagerUpscaleService {
         }
         clusterService.updateInstancesToRunning(stackId, nodeReachabilityResult.getReachableNodes());
         clusterService.updateInstancesToZombie(stackId, nodeReachabilityResult.getUnreachableNodes());
+
+        clusterManagerMemoryAdjuster.adjustMemory(stackDto, nodeReachabilityResult.getReachableNodes().size());
 
         ClusterApi connector = clusterApiConnectors.getConnector(stackDto, clusterManagerIp);
         ExtendedPollingResult result;
