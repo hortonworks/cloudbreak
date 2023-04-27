@@ -44,7 +44,6 @@ dependencies {
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   implementation     group: "net.bytebuddy",             name: "byte-buddy",                     version: "1.14.4"
-  implementation     group: "com.fasterxml.jackson.dataformat",   name: "jackson-dataformat-xml",      version: jacksonVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

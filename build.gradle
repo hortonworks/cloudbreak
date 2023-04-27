@@ -108,7 +108,6 @@ allprojects {
         force "com.google.protobuf:protobuf-java:$protobufVersion"
         force "com.google.guava:guava:$guavaVersion"
         force "junit:junit:$junitVersion"
-        force "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion"
       }
     }
   }
