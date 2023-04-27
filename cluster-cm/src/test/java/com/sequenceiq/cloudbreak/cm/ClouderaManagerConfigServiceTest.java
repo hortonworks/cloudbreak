@@ -1,14 +1,10 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -22,13 +18,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.RoleConfigGroupsResourceApi;
@@ -44,10 +42,8 @@ import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
-import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ClouderaManagerConfigServiceTest {
 
     private static final String VERSION_7_0_1 = "7.0.1";
@@ -80,9 +76,6 @@ public class ClouderaManagerConfigServiceTest {
 
     @Mock
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
-
-    @Mock
-    private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
     @InjectMocks
     private ClouderaManagerConfigService underTest;
@@ -213,10 +206,10 @@ public class ClouderaManagerConfigServiceTest {
         when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
 
-        Exception exception = assertThrows(
+        Exception exception = Assertions.assertThrows(
                 ClouderaManagerOperationFailedException.class, ()
                         -> underTest.modifyServiceConfig(new ApiClient(), TEST_CLUSTER_NAME, hueType, Collections.singletonMap(configName, configValue)));
-        assertEquals("Service of type: HUE is not found", exception.getMessage());
+        Assert.assertEquals("Service of type: HUE is not found", exception.getMessage());
     }
 
     @Test
@@ -370,117 +363,5 @@ public class ClouderaManagerConfigServiceTest {
         configGroup.setName(configGroupName);
         configGroup.setRoleType(roleType);
         return configGroup;
-    }
-
-    @Test
-    public void testStopServiceSuccess() throws Exception {
-        String serviceType = "YARN";
-        String yarnName = "yarn-1";
-        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
-        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(yarnName).type(serviceType));
-        StackDtoDelegate stack = mock(StackDtoDelegate.class);
-        doReturn(TEST_CLUSTER_NAME).when(stack).getName();
-        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
-
-        underTest.stopClouderaManagerService(new ApiClient(), stack, serviceType);
-
-        verify(serviceResourceApi, times(1)).stopCommand(eq(TEST_CLUSTER_NAME), eq(yarnName));
-    }
-
-    @Test
-    public void testStopServiceNoServiceFound() throws Exception {
-        String serviceType = "YARN";
-        String yarnName = "yarn-1";
-        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
-        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(yarnName).type("HUE"));
-        StackDtoDelegate stack = mock(StackDtoDelegate.class);
-        doReturn(TEST_CLUSTER_NAME).when(stack).getName();
-        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
-
-        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
-                () -> underTest.stopClouderaManagerService(new ApiClient(), stack, serviceType));
-
-        assertEquals("Service of type: YARN is not found", exception.getMessage());
-    }
-
-    @Test
-    public void testReadServices() throws ApiException {
-        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
-        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name("HUE-1").type("HUE"));
-
-        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
-
-        ApiServiceList result = underTest.readServices(new ApiClient(), TEST_CLUSTER_NAME);
-        assertEquals("HUE-1", result.getItems().get(0).getName());
-    }
-
-    @Test
-    public void testReadServicesException() throws ApiException {
-        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
-
-        doThrow(new ApiException("TEST")).when(serviceResourceApi).readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name());
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
-
-        ApiServiceList result = underTest.readServices(new ApiClient(), TEST_CLUSTER_NAME);
-        assertNull(result.getItems());
-    }
-
-    @Test
-    public void testStartServiceSuccess() throws Exception {
-        String serviceType = "YARN";
-        String yarnName = "yarn-1";
-        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
-        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(yarnName).type(serviceType));
-        StackDtoDelegate stack = mock(StackDtoDelegate.class);
-        doReturn(TEST_CLUSTER_NAME).when(stack).getName();
-        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
-
-        underTest.startClouderaManagerService(new ApiClient(), stack, serviceType);
-
-        verify(serviceResourceApi, times(1)).startCommand(eq(TEST_CLUSTER_NAME), eq(yarnName));
-    }
-
-    @Test
-    public void testStartServiceNoServiceFound() throws Exception {
-        String serviceType = "YARN";
-        String yarnName = "yarn-1";
-        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
-        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(yarnName).type("HUE"));
-        StackDtoDelegate stack = mock(StackDtoDelegate.class);
-        doReturn(TEST_CLUSTER_NAME).when(stack).getName();
-        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
-
-        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
-                () -> underTest.startClouderaManagerService(new ApiClient(), stack, serviceType));
-
-        assertEquals("Service of type: YARN is not found", exception.getMessage());
-    }
-
-    @Test
-    public void tesModifyRoleBasedConfigSuccess() throws Exception {
-        String serviceType = "YARN";
-        String yarnName = "yarn-1";
-        String roleName = "yarn-NODEMANAGER-WORKER";
-        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
-        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
-        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(yarnName).type(serviceType));
-        StackDtoDelegate stack = mock(StackDtoDelegate.class);
-        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
-        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(any())).thenReturn(roleConfigGroupsResourceApi);
-        Map<String, String> config = new HashMap<>();
-        config.put("test-config", "test-config-property");
-        ApiConfigList apiConfigList = new ApiConfigList();
-        apiConfigList.addItemsItem(new ApiConfig().name("test-config").value("test-config-property"));
-
-        underTest.modifyRoleBasedConfig(new ApiClient(), TEST_CLUSTER_NAME, serviceType, config, List.of(roleName));
-
-        verify(roleConfigGroupsResourceApi, times(1)).updateConfig(eq(TEST_CLUSTER_NAME), eq(roleName),
-                eq(yarnName), eq(""), eq(apiConfigList));
     }
 }

@@ -10,11 +10,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVer
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_PREPARATION_FAILURE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_PREPARATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleState.INIT_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleState.STACK_PREPARATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleState.STACK_VERTICALSCALE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleState.STACK_VERTICALSCALE_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleState.STACK_VERTICALSCALE_STATE;
@@ -37,14 +34,9 @@ public class CoreVerticalScaleFlowConfig extends StackStatusFinalizerAbstractFlo
             new Builder<CoreVerticalScaleState, CoreVerticalScaleEvent>()
 
                     .from(INIT_STATE)
-                    .to(STACK_PREPARATION_STATE)
+                    .to(STACK_VERTICALSCALE_STATE)
                     .event(STACK_VERTICALSCALE_EVENT)
                     .noFailureEvent()
-
-                    .from(STACK_PREPARATION_STATE)
-                    .to(STACK_VERTICALSCALE_STATE)
-                    .event(STACK_VERTICALSCALE_PREPARATION_FINISHED_EVENT)
-                    .failureEvent(STACK_VERTICALSCALE_PREPARATION_FAILURE_EVENT)
 
                     .from(STACK_VERTICALSCALE_STATE)
                     .to(STACK_VERTICALSCALE_FINISHED_STATE)

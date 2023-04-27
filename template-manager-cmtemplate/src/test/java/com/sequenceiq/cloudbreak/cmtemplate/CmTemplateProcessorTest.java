@@ -653,13 +653,6 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void getHostTemplateRoleNames() {
-        underTest = new CmTemplateProcessor(getBlueprintText("input/cdp-invalid-multi-host-template-name.bp"));
-        assertEquals(5, underTest.getHostTemplateRoleNames("worker").size());
-        assertEquals(1, underTest.getHostTemplateRoleNames("worker").stream().filter("hdfs-DATANODE-BASE"::equals).count());
-    }
-
-    @Test
     public void testGetComputeHostGroups() {
         Versioned blueprintVersion = () -> "7.2.11";
 

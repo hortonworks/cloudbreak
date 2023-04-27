@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -18,15 +17,11 @@ import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleService;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.InstanceStorageInfo;
-import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
-import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 
 @Component
 public class CoreVerticalScaleHandler implements CloudPlatformEventHandler<CoreVerticalScaleRequest> {
@@ -42,9 +37,6 @@ public class CoreVerticalScaleHandler implements CloudPlatformEventHandler<CoreV
     @Inject
     private StackUpscaleService stackUpscaleService;
 
-    @Inject
-    private CoreVerticalScaleService coreVerticalScaleService;
-
     @Override
     public Class<CoreVerticalScaleRequest> type() {
         return CoreVerticalScaleRequest.class;
@@ -54,29 +46,18 @@ public class CoreVerticalScaleHandler implements CloudPlatformEventHandler<CoreV
     public void accept(Event<CoreVerticalScaleRequest> stackVerticalScaleRequestEvent) {
         LOGGER.debug("Received event: {}", stackVerticalScaleRequestEvent);
         CoreVerticalScaleRequest<CoreVerticalScaleResult> request = stackVerticalScaleRequestEvent.getData();
-        StackDto stackDto = request.getStack();
         CloudContext cloudContext = request.getCloudContext();
         StackVerticalScaleV4Request stackVerticalScaleV4Request = request.getStackVerticalScaleV4Request();
-        String datahubCrn = cloudContext.getCrn();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
             List<CloudResourceStatus> resourceStatus = stackUpscaleService.verticalScale(ac, request, connector);
-            List<InstanceStorageInfo> instanceStorageInfo = request.getInstanceStorageInfo();
-            if (!stackDto.isStackInStopPhase()) {
-                Set<ServiceComponent> hostTemplateServiceComponents = request.getGroupServiceComponents();
-                coreVerticalScaleService.startInstances(connector, request.getResourceList(), request.getInstanceGroup(),
-                        stackDto, ac);
-                coreVerticalScaleService.updateClouderaManagerConfigsForComputeGroupAndStartServices(stackDto, hostTemplateServiceComponents,
-                        instanceStorageInfo, request.getHostTemplateRoleGroupNames());
-            }
             LOGGER.info("Vertical scaling resource statuses: {}", resourceStatus);
             CoreVerticalScaleResult result = new CoreVerticalScaleResult(
                     request.getResourceId(),
                     ResourceStatus.UPDATED,
                     resourceStatus,
-                    stackVerticalScaleV4Request,
-                    instanceStorageInfo);
+                    stackVerticalScaleV4Request);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(stackVerticalScaleRequestEvent.getHeaders(), result));
             LOGGER.debug("Vertical scaling successfully finished for {}, and the result is: {}", cloudContext, result);
@@ -97,4 +78,5 @@ public class CoreVerticalScaleHandler implements CloudPlatformEventHandler<CoreV
             CloudContext cloudContext, CloudConnector connector) {
         return connector.authentication().authenticate(cloudContext, request.getCloudCredential());
     }
+
 }
