@@ -284,6 +284,9 @@ public class MockUserManagementServiceTest {
                         "CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", false},
                 {"enableUsersyncSplitFreeIPAUserRetrieval true", "enableUsersyncSplitFreeIPAUserRetrieval", true,
                         "CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", true},
+
+                {"azureDatabaseFlexibleServerEnabled false", "azureDatabaseFlexibleServerEnabled", false, "CDP_AZURE_DATABASE_FLEXIBLE_SERVER", false},
+                {"azureDatabaseFlexibleServerEnabled true", "azureDatabaseFlexibleServerEnabled", true, "CDP_AZURE_DATABASE_FLEXIBLE_SERVER", true},
         };
     }
 

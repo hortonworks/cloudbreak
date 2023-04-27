@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_H
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
@@ -592,6 +593,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.enforce.aws.native.single.az.enabled}")
     private boolean enforceAwsNativeForSingleAzEnabled;
 
+    @Value("${auth.mock.azure.database.flexibleserver.enabled}")
+    private boolean azureDatabaseFlexibleServerEnabled;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -1075,6 +1079,9 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA));
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE));
             builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB));
+        }
+        if (azureDatabaseFlexibleServerEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_FLEXIBLE_SERVER));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
