@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REQUESTED;
@@ -68,8 +67,7 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
                 CREATE_IN_PROGRESS,
                 STACK_AVAILABLE,
                 DELETE_IN_PROGRESS,
-                DELETE_COMPLETED,
-                DELETED_ON_PROVIDER_SIDE));
+                DELETE_COMPLETED));
     }
 
     public Stack getByIdWithListsInTransaction(Long id) {

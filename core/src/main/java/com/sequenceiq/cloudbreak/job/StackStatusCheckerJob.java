@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -77,6 +76,73 @@ import com.sequenceiq.flow.domain.FlowLog;
 @DisallowConcurrentExecution
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
+
+    public static final EnumSet<Status> SYNCABLE_STATES = EnumSet.of(
+            Status.AVAILABLE,
+            Status.UPDATE_FAILED,
+            Status.ENABLE_SECURITY_FAILED,
+            Status.START_FAILED,
+            Status.STOPPED,
+            Status.STOP_FAILED,
+            Status.AMBIGUOUS,
+            Status.UNREACHABLE,
+            Status.NODE_FAILURE,
+            Status.RESTORE_FAILED,
+            Status.BACKUP_FAILED,
+            Status.BACKUP_FINISHED,
+            Status.RESTORE_FINISHED,
+            Status.DELETED_ON_PROVIDER_SIDE,
+            Status.EXTERNAL_DATABASE_START_FAILED,
+            Status.EXTERNAL_DATABASE_START_IN_PROGRESS,
+            Status.EXTERNAL_DATABASE_START_FINISHED,
+            Status.EXTERNAL_DATABASE_STOP_FAILED,
+            Status.EXTERNAL_DATABASE_STOP_IN_PROGRESS,
+            Status.EXTERNAL_DATABASE_STOP_FINISHED,
+            Status.EXTERNAL_DATABASE_UPGRADE_FINISHED,
+            Status.EXTERNAL_DATABASE_UPGRADE_FAILED,
+            Status.RECOVERY_FAILED,
+            Status.UPGRADE_CCM_FAILED,
+            Status.UPGRADE_CCM_FINISHED,
+            Status.UPGRADE_CCM_IN_PROGRESS
+    );
+
+    public static final EnumSet<Status> IGNORED_STATES = EnumSet.of(
+            Status.REQUESTED,
+            Status.CREATE_IN_PROGRESS,
+            Status.UPDATE_IN_PROGRESS,
+            Status.UPDATE_REQUESTED,
+            Status.STOP_REQUESTED,
+            Status.START_REQUESTED,
+            Status.STOP_IN_PROGRESS,
+            Status.START_IN_PROGRESS,
+            Status.WAIT_FOR_SYNC,
+            Status.MAINTENANCE_MODE_ENABLED,
+            Status.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
+            Status.EXTERNAL_DATABASE_UPGRADE_IN_PROGRESS,
+            Status.BACKUP_IN_PROGRESS,
+            Status.RESTORE_IN_PROGRESS,
+            Status.LOAD_BALANCER_UPDATE_IN_PROGRESS,
+            Status.RECOVERY_IN_PROGRESS,
+            Status.RECOVERY_REQUESTED,
+            Status.DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS
+    );
+
+    public static final EnumSet<Status> LONG_SYNCABLE_STATES = EnumSet.of(Status.DELETED_ON_PROVIDER_SIDE);
+
+    public static final EnumSet<Status> STATES_FROM_AVAILABLE_ALLOWED = EnumSet.of(
+            Status.AMBIGUOUS,
+            Status.NODE_FAILURE,
+            Status.STOPPED,
+            Status.START_FAILED,
+            Status.STOP_FAILED,
+            Status.UPDATE_FAILED,
+            Status.ENABLE_SECURITY_FAILED);
+
+    private static final EnumSet<InstanceStatus> STATES_FROM_HEALTHY_ALLOWED = EnumSet.of(
+            SERVICES_UNHEALTHY,
+            SERVICES_RUNNING,
+            DECOMMISSION_FAILED,
+            FAILED);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStatusCheckerJob.class);
 
@@ -159,9 +225,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     LOGGER.debug("Stack sync will be scheduled to long polling, stack state is {}", stackStatus);
                     jobService.unschedule(getLocalId());
                     jobService.scheduleLongIntervalCheck(getStackId(), StackJobAdapter.class);
-                } else if (null == stackStatus || ignoredStates().contains(stackStatus)) {
+                } else if (null == stackStatus || IGNORED_STATES.contains(stackStatus)) {
                     LOGGER.debug("Stack sync is skipped, stack state is {}", stackStatus);
-                } else if (syncableStates().contains(stackStatus)) {
+                } else if (SYNCABLE_STATES.contains(stackStatus)) {
                     RegionAwareInternalCrnGenerator dataHub = regionAwareInternalCrnGeneratorFactory.datahub();
                     ThreadBasedUserCrnProvider.doAs(dataHub.getInternalCrnForServiceAsString(), () -> doSync(stack));
                     switchToShortSyncIfNecessary(context, stack);
@@ -199,80 +265,16 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void switchToShortSyncIfNecessary(JobExecutionContext context, StackDto stackDto) {
-        if (isLongSyncJob(context)) {
+        if (jobService.isLongSyncJob(context)) {
             Status stackStatus = stackDto.getStatus();
-            if (!longSyncableStates().contains(stackStatus)) {
+            if (!LONG_SYNCABLE_STATES.contains(stackStatus)) {
                 jobService.schedule(getStackId(), StackJobAdapter.class);
             }
         }
     }
 
     private boolean shouldSwitchToLongSyncJob(Status stackStatus, JobExecutionContext context) {
-        return !isLongSyncJob(context) && longSyncableStates().contains(stackStatus);
-    }
-
-    private boolean isLongSyncJob(JobExecutionContext context) {
-        return StatusCheckerJobService.LONG_SYNC_JOB_TYPE.equals(context.getMergedJobDataMap().get(StatusCheckerJobService.SYNC_JOB_TYPE));
-    }
-
-    private Set<Status> longSyncableStates() {
-        return EnumSet.of(Status.DELETED_ON_PROVIDER_SIDE);
-    }
-
-    @VisibleForTesting
-    Set<Status> ignoredStates() {
-        return EnumSet.of(
-                Status.REQUESTED,
-                Status.CREATE_IN_PROGRESS,
-                Status.UPDATE_IN_PROGRESS,
-                Status.UPDATE_REQUESTED,
-                Status.STOP_REQUESTED,
-                Status.START_REQUESTED,
-                Status.STOP_IN_PROGRESS,
-                Status.START_IN_PROGRESS,
-                Status.WAIT_FOR_SYNC,
-                Status.MAINTENANCE_MODE_ENABLED,
-                Status.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
-                Status.EXTERNAL_DATABASE_UPGRADE_IN_PROGRESS,
-                Status.BACKUP_IN_PROGRESS,
-                Status.RESTORE_IN_PROGRESS,
-                Status.LOAD_BALANCER_UPDATE_IN_PROGRESS,
-                Status.RECOVERY_IN_PROGRESS,
-                Status.RECOVERY_REQUESTED,
-                Status.DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS
-        );
-    }
-
-    @VisibleForTesting
-    Set<Status> syncableStates() {
-        return EnumSet.of(
-                Status.AVAILABLE,
-                Status.UPDATE_FAILED,
-                Status.ENABLE_SECURITY_FAILED,
-                Status.START_FAILED,
-                Status.STOPPED,
-                Status.STOP_FAILED,
-                Status.AMBIGUOUS,
-                Status.UNREACHABLE,
-                Status.NODE_FAILURE,
-                Status.RESTORE_FAILED,
-                Status.BACKUP_FAILED,
-                Status.BACKUP_FINISHED,
-                Status.RESTORE_FINISHED,
-                Status.DELETED_ON_PROVIDER_SIDE,
-                Status.EXTERNAL_DATABASE_START_FAILED,
-                Status.EXTERNAL_DATABASE_START_IN_PROGRESS,
-                Status.EXTERNAL_DATABASE_START_FINISHED,
-                Status.EXTERNAL_DATABASE_STOP_FAILED,
-                Status.EXTERNAL_DATABASE_STOP_IN_PROGRESS,
-                Status.EXTERNAL_DATABASE_STOP_FINISHED,
-                Status.EXTERNAL_DATABASE_UPGRADE_FINISHED,
-                Status.EXTERNAL_DATABASE_UPGRADE_FAILED,
-                Status.RECOVERY_FAILED,
-                Status.UPGRADE_CCM_FAILED,
-                Status.UPGRADE_CCM_FINISHED,
-                Status.UPGRADE_CCM_IN_PROGRESS
-        );
+        return !jobService.isLongSyncJob(context) && LONG_SYNCABLE_STATES.contains(stackStatus);
     }
 
     private void doSync(StackDto stack) {
@@ -287,11 +289,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 reportHealthAndSyncInstances(stack, runningInstances, getFailedInstancesInstanceMetadata(stack, extendedHostStatuses, runningInstances),
                         getNewHealthyHostNames(extendedHostStatuses, runningInstances), extendedHostStatuses.isAnyCertExpiring());
             } else {
-                syncInstances(stack, runningInstances, false);
+                syncInstances(stack, runningInstances);
             }
         } catch (RuntimeException e) {
             LOGGER.warn("Error during sync", e);
-            syncInstances(stack, runningInstances, false);
+            syncInstances(stack, runningInstances);
         }
     }
 
@@ -303,7 +305,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                         .contains(e.getKey().getInstanceStatus()))
                 .filter(e -> e.getKey().getDiscoveryFQDN() != null)
                 .collect(Collectors.toMap(e -> e.getKey().getDiscoveryFQDN(), Map.Entry::getValue));
-        ifFlowNotRunning(() -> updateStates(stack, failedInstances.keySet(), newFailedNodeNamesWithReason, newHealthyHostNames, hostCertExpiring));
+        runIfFlowNotRunning(() -> updateStates(stack, failedInstances.keySet(), newFailedNodeNamesWithReason, newHealthyHostNames, hostCertExpiring));
         syncInstances(stack, runningInstances, failedInstances.keySet(), InstanceSyncState.RUNNING, true);
     }
 
@@ -333,28 +335,16 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             } else {
                 clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
             }
-        } else if (statesFromAvailableAllowed().contains(stack.getStatus())) {
+        } else if (STATES_FROM_AVAILABLE_ALLOWED.contains(stack.getStatus())) {
             clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE);
         }
         clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNamesWithReason, newHealthyHostNames);
     }
 
-    private void ifFlowNotRunning(Runnable function) {
-        if (flowLogService.isOtherFlowRunning(getStackId())) {
-            return;
+    private void runIfFlowNotRunning(Runnable function) {
+        if (!flowLogService.isOtherFlowRunning(getStackId())) {
+            function.run();
         }
-        function.run();
-    }
-
-    private EnumSet<Status> statesFromAvailableAllowed() {
-        return EnumSet.of(
-                Status.AMBIGUOUS,
-                Status.NODE_FAILURE,
-                Status.STOPPED,
-                Status.START_FAILED,
-                Status.STOP_FAILED,
-                Status.UPDATE_FAILED,
-                Status.ENABLE_SECURITY_FAILED);
     }
 
     private boolean isClusterManagerRunning(StackView stack, ClusterApi connector) {
@@ -363,8 +353,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 && isCMRunning(connector);
     }
 
-    private void syncInstances(StackDto stack, Collection<InstanceMetadataView> instanceMetaData, boolean cmServerRunning) {
-        syncInstances(stack, instanceMetaData, instanceMetaData, InstanceSyncState.DELETED_ON_PROVIDER_SIDE, cmServerRunning);
+    private void syncInstances(StackDto stack, Collection<InstanceMetadataView> instanceMetaData) {
+        syncInstances(stack, instanceMetaData, instanceMetaData, InstanceSyncState.DELETED_ON_PROVIDER_SIDE, false);
     }
 
     private void syncInstances(StackDto stack, Collection<InstanceMetadataView> runningInstances,
@@ -373,7 +363,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, cloudInstances);
         LOGGER.debug("Cluster '{}' state check on provider, instances: {}", stack.getId(), instanceStatuses);
         SyncConfig syncConfig = new SyncConfig(true, cmServerRunning);
-        ifFlowNotRunning(() -> syncService.autoSync(stack.getStack(), runningInstances, instanceStatuses, defaultState, syncConfig));
+        runIfFlowNotRunning(() -> syncService.autoSync(stack.getStack(), runningInstances, instanceStatuses, defaultState, syncConfig));
     }
 
     private boolean isCMRunning(ClusterApi connector) {
@@ -395,19 +385,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .map(HostName::value)
                 .collect(toSet());
         Set<String> unhealthyStoredHosts = runningInstances.stream()
-                .filter(i -> statesFromHealthyAllowed().contains(i.getInstanceStatus()))
+                .filter(i -> STATES_FROM_HEALTHY_ALLOWED.contains(i.getInstanceStatus()))
                 .filter(i -> i.getDiscoveryFQDN() != null)
                 .map(InstanceMetadataView::getDiscoveryFQDN)
                 .collect(toSet());
         return Sets.intersection(healthyHosts, unhealthyStoredHosts);
-    }
-
-    private EnumSet<InstanceStatus> statesFromHealthyAllowed() {
-        return EnumSet.of(
-                SERVICES_UNHEALTHY,
-                SERVICES_RUNNING,
-                DECOMMISSION_FAILED,
-                FAILED);
     }
 
     private Map<InstanceMetadataView, Optional<String>> getFailedInstancesInstanceMetadata(StackDto stack, ExtendedHostStatuses hostStatuses,

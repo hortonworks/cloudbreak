@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
@@ -103,6 +104,10 @@ public class StatusCheckerJobService implements JobSchedulerService {
         }
     }
 
+    public boolean isLongSyncJob(JobExecutionContext context) {
+        return StatusCheckerJobService.LONG_SYNC_JOB_TYPE.equals(context.getMergedJobDataMap().get(StatusCheckerJobService.SYNC_JOB_TYPE));
+    }
+
     private void schedule(JobDetail jobDetail, Trigger trigger, JobResource jobResource) {
         try {
             JobKey jobKey = JobKey.jobKey(jobResource.getLocalId(), JOB_GROUP);
@@ -136,7 +141,7 @@ public class StatusCheckerJobService implements JobSchedulerService {
                 .build();
     }
 
-    private <T> String getResourceTypeFromCrnIfAvailable(JobResource jobResource) {
+    private String getResourceTypeFromCrnIfAvailable(JobResource jobResource) {
         String remoteResourceId = jobResource.getRemoteResourceId();
         String resourceType = "unknown";
         if (Crn.isCrn(remoteResourceId)) {

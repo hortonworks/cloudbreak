@@ -34,8 +34,10 @@ import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -96,6 +98,9 @@ class StackStatusTest {
     @MockBean
     private MetricsClient metricsClient;
 
+    @MockBean
+    private StatusCheckerJobService jobService;
+
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
@@ -155,8 +160,8 @@ class StackStatusTest {
     @Test
     @DisplayName(
             "GIVEN an available stack " +
-            "WHEN FreeIpa instance is available " +
-            "THEN stack status should not change"
+                    "WHEN FreeIpa instance is available " +
+                    "THEN stack status should not change"
     )
     void available() throws Exception {
         setUp(1);
@@ -179,8 +184,8 @@ class StackStatusTest {
     @Test
     @DisplayName(
             "GIVEN an available stack " +
-            "WHEN FreeIpa instance is available another is requested without IP and FQDN but with instance id" +
-            "THEN stack status should change to unhealthy and instance updated to failed"
+                    "WHEN FreeIpa instance is available another is requested without IP and FQDN but with instance id" +
+                    "THEN stack status should change to unhealthy and instance updated to failed"
     )
     void availableToUnhealthyForRequestedInstance() throws Exception {
         setUp(1);
@@ -217,8 +222,8 @@ class StackStatusTest {
     @Test
     @DisplayName(
             "GIVEN an available stack " +
-            "WHEN FreeIpa instance is available another is requested without IP, FQDN and instance id" +
-            "THEN stack status should change to unhealthy and instance updated to failed"
+                    "WHEN FreeIpa instance is available another is requested without IP, FQDN and instance id" +
+                    "THEN stack status should change to unhealthy and instance updated to failed"
     )
     void availableForRequestedInstanceWithoutId() throws Exception {
         setUp(1);
@@ -256,8 +261,8 @@ class StackStatusTest {
     @Test
     @DisplayName(
             "GIVEN an available stack " +
-                "WHEN FreeIpa instance is deleted " +
-                "THEN stack status should change"
+                    "WHEN FreeIpa instance is deleted " +
+                    "THEN stack status should change"
     )
     void deleted() throws Exception {
         setUp(1);
@@ -355,6 +360,87 @@ class StackStatusTest {
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UNHEALTHY), any());
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an available stack " +
+                    "WHEN FreeIpa instances are terminated on provider " +
+                    "THEN stack status should change to deleted on provider"
+    )
+    void updateToDeletedOnProvider() throws Exception {
+        setUp(2);
+        setUpFreeIpaAvailabilityResponse(false);
+        when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
+                createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER),
+                createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER)
+        ));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(jobService.isLongSyncJob(jobExecutionContext)).thenReturn(Boolean.FALSE);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE), any());
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN a deleteed on provider stack  with short sync" +
+                    "WHEN FreeIpa instance are deleted on provider " +
+                    "THEN stack status shouldn't change, but sync should switch to long interval"
+    )
+    void switchToLongSync() throws Exception {
+        setUp(2);
+        setUpFreeIpaAvailabilityResponse(false);
+        StackStatus stackStatus = new StackStatus();
+        stackStatus.setDetailedStackStatus(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE);
+        stackStatus.setStatus(Status.DELETED_ON_PROVIDER_SIDE);
+        stack.setStackStatus(stackStatus);
+        when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
+                createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER),
+                createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER)
+        ));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(jobService.isLongSyncJob(jobExecutionContext)).thenReturn(Boolean.FALSE);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verifyNoInteractions(stackUpdater);
+        verify(jobService).scheduleLongIntervalCheck(eq(STACK_ID), any());
+        verify(jobService).unschedule(STACK_ID.toString());
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an available stack with long sync" +
+                    "WHEN FreeIpa instances are available " +
+                    "THEN stack status shouldn't change and switch to short sync"
+    )
+    void switchToShortSync() throws Exception {
+        setUp(2);
+        setUpFreeIpaAvailabilityResponse(false);
+        StackStatus stackStatus = new StackStatus();
+        stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
+        stackStatus.setStatus(Status.AVAILABLE);
+        stack.setStackStatus(stackStatus);
+        when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
+                createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED),
+                createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED)
+        ));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(jobService.isLongSyncJob(jobExecutionContext)).thenReturn(Boolean.TRUE);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verifyNoInteractions(stackUpdater);
+        verify(jobService).schedule(eq(STACK_ID), any());
+        verify(jobService).unschedule(STACK_ID.toString());
     }
 
     private void setUpFreeIpaAvailabilityResponse(boolean value) {
