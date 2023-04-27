@@ -20,6 +20,15 @@ init-cloudera-manager-db:
         - file: {{ postgresql.root_certs_file }}
 {%- endif %}
 
+refresh-db-password:
+  file.replace:
+    - name: /etc/cloudera-scm-server/db.properties
+    - pattern: "^com.cloudera.cmf.db.password=.*"
+    - repl: "com.cloudera.cmf.db.password={{ cloudera_manager.cloudera_manager_database.connectionPassword }}"
+    - append_if_not_found: True
+    - require:
+        - cmd: init-cloudera-manager-db
+
 # Configure JDBC URL for CM after DB init if client side DB server certificate validation is enabled for the cluster and the CM version is too old to support this natively
 {% if postgresql.ssl_enabled == True and postgresql.ssl_for_cm_db_natively_supported == False %}
 replace-db-connection-url:
