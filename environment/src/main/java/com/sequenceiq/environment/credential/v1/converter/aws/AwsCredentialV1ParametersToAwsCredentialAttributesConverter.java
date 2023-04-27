@@ -17,7 +17,6 @@ public class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
     public AwsCredentialAttributes convert(AwsCredentialParameters source) {
         AwsCredentialAttributes response = new AwsCredentialAttributes();
         doIfNotNull(source.getKeyBased(), params -> response.setKeyBased(getKeyBased(params)));
-        doIfNotNull(source.getKeyBased(), params -> response.setKeyBased(getKeyBased(params)));
         doIfNotNull(source.getRoleBased(), params -> response.setRoleBased(getRoleBased(params)));
         return response;
     }
