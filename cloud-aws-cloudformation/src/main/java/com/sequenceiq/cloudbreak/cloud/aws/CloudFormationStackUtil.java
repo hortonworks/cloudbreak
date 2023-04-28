@@ -7,6 +7,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -193,11 +194,20 @@ public class CloudFormationStackUtil {
         List<String> instanceIds = new ArrayList<>();
         if (!describeAutoScalingGroupsResponse.autoScalingGroups().isEmpty()
                 && describeAutoScalingGroupsResponse.autoScalingGroups().get(0).instances() != null) {
+            Map<String, LifecycleState> instanceIdsNotInService = new HashMap<>();
             for (Instance instance : describeAutoScalingGroupsResponse.autoScalingGroups().get(0).instances()) {
                 if (LifecycleState.IN_SERVICE == instance.lifecycleState()) {
                     instanceIds.add(instance.instanceId());
+                } else {
+                    instanceIdsNotInService.put(instance.instanceId(), instance.lifecycleState());
                 }
             }
+            if (!instanceIdsNotInService.isEmpty()) {
+                LOGGER.debug("Following instances are not in service  : {}", String.join(",",
+                        instanceIdsNotInService.entrySet().stream().map(k -> k.getKey() + ": " + k.getValue()).collect(Collectors.toList())));
+            }
+        } else {
+            LOGGER.debug("Autoscaling group ({}) is empty", asGroupName);
         }
         return instanceIds;
     }
