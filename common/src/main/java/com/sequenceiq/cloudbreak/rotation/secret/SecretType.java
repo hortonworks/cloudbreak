@@ -7,8 +7,7 @@ import java.util.List;
 
 public enum SecretType {
     CLOUDBREAK_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER), PostRotationAction.REPAIR),
-    MGMT_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER), PostRotationAction.REPAIR),
-    SERVICES_DB_PASSWORDS(List.of(VAULT), PostRotationAction.REPAIR);
+    MGMT_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER), PostRotationAction.REPAIR);
 
     private final List<SecretLocationType> rotations;
 

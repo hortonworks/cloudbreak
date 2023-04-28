@@ -16,9 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.rotation.context.VaultRotationContext;
 
 @ExtendWith(MockitoExtension.class)
 public class VaultRotationExecutorTest {
@@ -32,19 +33,19 @@ public class VaultRotationExecutorTest {
     @Test
     public void testVaultRotation() throws Exception {
         when(secretService.update(any(), anyString())).thenReturn("anything");
-        RotationContext rotationContext = RotationContext.contextBuilder()
-                .withUserPasswordSecrets(Map.of("user", "password"))
+        VaultRotationContext rotationContext = VaultRotationContext.builder()
+                .withNewSecretMap(Map.of(new Secret("secret", "secret"), "secretvalue"))
                 .build();
         underTest.rotate(rotationContext);
 
-        verify(secretService, times(1)).update(eq("password"), anyString());
+        verify(secretService, times(1)).update(eq("secret"), anyString());
     }
 
     @Test
     public void testVaultRotationFailure() throws Exception {
         when(secretService.update(any(), anyString())).thenThrow(new Exception("anything"));
-        RotationContext rotationContext = RotationContext.contextBuilder()
-                .withUserPasswordSecrets(Map.of("user", "password"))
+        VaultRotationContext rotationContext = VaultRotationContext.builder()
+                .withNewSecretMap(Map.of(new Secret("secret", "secret"), "secretvalue"))
                 .build();
         Assert.assertThrows(SecretRotationException.class, () -> underTest.rotate(rotationContext));
     }
