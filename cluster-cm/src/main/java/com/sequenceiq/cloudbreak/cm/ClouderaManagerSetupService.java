@@ -366,7 +366,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
             ApiConfigList apiConfigList = new ApiConfigList()
                     .addItemsItem(removeRemoteParcelRepos())
-                    .addItemsItem(setHeader(stackType));
+                    .addItemsItem(setHeader(stackType))
+                    .addItemsItem(disableGoogleAnalytics());
             clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
         } catch (ApiException e) {
             throw mapApiException(e);
@@ -616,6 +617,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private ApiConfig removeRemoteParcelRepos() {
         return new ApiConfig().name("remote_parcel_repo_urls").value("");
+    }
+
+    private ApiConfig disableGoogleAnalytics() {
+        return new ApiConfig().name("allow_usage_data").value("false");
     }
 
     private ApiConfig setHeader(com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType) {
