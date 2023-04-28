@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.rotation.secret;
 
-public interface RotationExecutor {
+public interface RotationExecutor<C extends RotationContext> {
 
-    void rotate(RotationContext rotationContext);
+    void rotate(C rotationContext);
 
-    void rollback(RotationContext rotationContext);
+    void rollback(C rotationContext);
 
-    void finalize(RotationContext rotationContext);
+    void finalize(C rotationContext);
 
     SecretLocationType getType();
 }
