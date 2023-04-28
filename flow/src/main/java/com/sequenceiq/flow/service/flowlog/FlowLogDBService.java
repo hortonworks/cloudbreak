@@ -154,6 +154,7 @@ public class FlowLogDBService implements FlowLogService {
 
     @Override
     public void saveChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue chain, String flowTriggerUserCrn) {
+        LOGGER.debug("Saving the FlowChain info into FlowChainLog with chain: {}", chain);
         String chainType = chain.getFlowChainName();
         String chainJackson = TypedJsonUtil.writeValueAsStringSilent(chain.getQueue());
         String triggerEventJackson = null;

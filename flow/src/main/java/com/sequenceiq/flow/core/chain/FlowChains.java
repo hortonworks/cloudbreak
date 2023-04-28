@@ -121,6 +121,7 @@ public class FlowChains {
 
     public void removeLastTriggerEvent(String flowChainId, String flowTriggerUserCrn) {
         FlowTriggerEventQueue flowTriggerEventQueue = flowChainMap.get(flowChainId);
+        LOGGER.debug("Removing LastTriggerEvent in [{}] with EventQueue: {}", flowChainId, flowTriggerEventQueue);
         if (flowTriggerEventQueue != null) {
             Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
             if (queue != null) {
@@ -134,6 +135,7 @@ public class FlowChains {
 
     public void cleanFlowChain(String flowChainId, String flowTriggerUserCrn) {
         FlowTriggerEventQueue flowTriggerEventQueue = flowChainMap.get(flowChainId);
+        LOGGER.debug("Cleaning FlowChain [{}] with EventQueue: {}", flowChainId, flowTriggerEventQueue);
         if (flowTriggerEventQueue != null) {
             Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
             if (queue != null) {
@@ -149,6 +151,7 @@ public class FlowChains {
             Optional<Runnable> finalizerCallback) {
         FlowTriggerEventQueue flowTriggerEventQueue = flowChainMap.get(flowChainId);
         if (flowTriggerEventQueue != null) {
+            LOGGER.info("Triggering the next flow in FlowChain [{}] with EventQueue: {}", flowChainId, flowTriggerEventQueue);
             Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
             if (queue != null) {
                 Selectable selectable = queue.peek();
@@ -184,6 +187,7 @@ public class FlowChains {
     private void triggerParentFlowChain(String flowChainId, String flowTriggerUserCrn, Map<Object, Object> contextParams, String operationType,
             Optional<Runnable> finalizerCallback) {
         String parentFlowChainId = getParentFlowChainId(flowChainId);
+        LOGGER.debug("Triggering ParentFlowChain [{}] with flowChainId [{}]", parentFlowChainId, flowChainId);
         removeFlowChain(flowChainId, true);
         if (parentFlowChainId != null) {
             triggerNextFlow(parentFlowChainId, flowTriggerUserCrn, contextParams, operationType, finalizerCallback);
@@ -193,6 +197,7 @@ public class FlowChains {
     }
 
     public void saveAllUnsavedFlowChains(String flowChainId, String flowTriggerUserCrn) {
+        LOGGER.debug("Saving all unsaved FlowChains for [{}]", flowChainId);
         List<Pair<String, FlowTriggerEventQueue>> flowTriggerEventQueues = new ArrayList<>();
         while (flowChainId != null && notSavedFlowChains.contains(flowChainId)) {
             String parentFlowChainId = getParentFlowChainId(flowChainId);
