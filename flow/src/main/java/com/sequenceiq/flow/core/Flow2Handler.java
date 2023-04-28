@@ -320,6 +320,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         String flowId = UUID.randomUUID().toString();
         addFlowParameters(flowParameters, flowId, flowChainId, flowConfig);
         Flow flow = flowConfig.createFlow(flowId, flowChainId, payload.getResourceId(), flowChainType);
+        LOGGER.debug("Creating new flow {}", flow.getFlowId());
         try {
             flow.initialize(contextParams);
             runningFlows.put(flow, flowChainId);
@@ -328,6 +329,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             transactionService.required(() -> {
                 flowLogService.save(flowParameters, flowChainId, key, payload, contextParams, flowConfig.getClass(), flow.getCurrentState());
                 if (flowChainId != null) {
+                    LOGGER.debug("Updating FlowChain [{}] when creating new flow", flowChainId);
                     flowChains.saveAllUnsavedFlowChains(flowChainId, flowParameters.getFlowTriggerUserCrn());
                     flowChains.removeLastTriggerEvent(flowChainId, flowParameters.getFlowTriggerUserCrn());
                 }
