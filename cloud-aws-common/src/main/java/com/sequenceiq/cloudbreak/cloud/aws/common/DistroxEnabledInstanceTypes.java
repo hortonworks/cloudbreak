@@ -10,7 +10,7 @@ public class DistroxEnabledInstanceTypes {
             "m6a.xlarge,m6a.2xlarge,m6a.4xlarge,m6a.8xlarge,m6a.12xlarge,m6a.16xlarge,m6a.24xlarge,m6a.32xlarge,m6a.48xlarge," +
             "m5d.xlarge,m5d.2xlarge,m5d.4xlarge,m5d.8xlarge,m5d.12xlarge,m5d.16xlarge,m5d.24xlarge," +
             "m5dn.xlarge,m5dn.2xlarge,m5dn.4xlarge,m5dn.8xlarge,m5dn.12xlarge,m5dn.16xlarge,m5dn.24xlarge," +
-            "r5a.4xlarge,r5a.8xlarge," +
+            "r5a.2xlarge,r5a.4xlarge,r5a.8xlarge," +
             "r5ad.xlarge,r5ad.2xlarge,r5ad.4xlarge,r5ad.8xlarge,r5ad.16xlarge," +
             "c5a.2xlarge,c5a.4xlarge,c5a.8xlarge,c5a.12xlarge," +
             "r5.2xlarge,r5.4xlarge,r5.8xlarge,r5.16xlarge,c5.2xlarge,c5.4xlarge,c5.9xlarge,c5.12xlarge," +

@@ -212,6 +212,10 @@
     "cost": 1.0000
   },
   {
+    "type": "r5a.2xlarge",
+    "cost": 0.2667
+  },
+  {
     "type": "r5a.4xlarge",
     "cost": 0.5333
   },
