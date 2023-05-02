@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedExc
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -137,6 +138,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private BlueprintUtils blueprintUtils;
 
     private final StackDtoDelegate stack;
 
@@ -525,7 +529,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             String sdxContextName, ProxyConfig proxyConfig) throws ApiException {
         Optional<ApiHost> optionalCmHost;
         if (StackType.DATALAKE.equals(templatePreparationObject.getStackType())
-            && containsIgnoreCase(templatePreparationObject.getBlueprintView().getBlueprintText(), SDX_ENTERPRISE_DATALAKE_TEXT)) {
+                && containsIgnoreCase(templatePreparationObject.getBlueprintView().getBlueprintText(), SDX_ENTERPRISE_DATALAKE_TEXT)) {
             LOGGER.info("CM MGMT services are started on Auxiliary host group");
             optionalCmHost = getAuxiliaryHost(templatePreparationObject, apiClient);
         } else {

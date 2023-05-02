@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cmtemplate.util;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -14,8 +17,14 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,5 +59,84 @@ public class BlueprintUtilsTest {
         } catch (NoSuchFileException noSuchFileException) {
 
         }
+    }
+
+    @Test
+    public void isEnterpriseDatalakeTestwithTemplatePreparationObject() throws IOException {
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        when(blueprintView.getBlueprintText()).thenReturn(FileReaderUtils.readFileFromPath(Path.of(
+                String.format("../core/src/main/resources/defaults/blueprints/%s/%s.bp", "7.2.17", "cdp-sdx-enterprise"))));
+        TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
+                .withBlueprintView(blueprintView)
+                .build();
+
+        Assert.assertTrue(underTest.isEnterpriseDatalake(tpo));
+
+
+        Stack stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+        stack.setCluster(createSdxCluster("ENTERPRISE"));
+        Assert.assertTrue(underTest.isEnterpriseDatalake(stack));
+
+        stack.setCluster(createSdxCluster("MEDIUM_DUTY_HA"));
+        Assert.assertFalse(underTest.isEnterpriseDatalake(stack));
+    }
+
+    @Test
+    public void isEnterpriseDatalakeTestwithShape() throws IOException {
+        Stack stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+        stack.setCluster(createSdxCluster("ENTERPRISE"));
+        Assert.assertTrue(underTest.isEnterpriseDatalake(stack));
+
+        stack.setCluster(createSdxCluster("MEDIUM_DUTY_HA"));
+        Assert.assertFalse(underTest.isEnterpriseDatalake(stack));
+    }
+
+    @Test
+    public void isMediumDatalakeTest() throws IOException {
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        when(blueprintView.getBlueprintText()).thenReturn(FileReaderUtils.readFileFromPath(Path.of(
+                String.format("../core/src/main/resources/defaults/blueprints/%s/%s.bp", "7.2.17", "cdp-sdx-medium-ha"))));
+        TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
+                .withBlueprintView(blueprintView)
+                .build();
+
+        Assert.assertFalse(underTest.isEnterpriseDatalake(tpo));
+    }
+
+    private Cluster createSdxCluster(String shape) throws IOException {
+        String template = null;
+        Blueprint blueprint = new Blueprint();
+        switch (shape) {
+            case "LIGHT_DUTY":
+                template = "cdp-sdx";
+                blueprint.setDescription("7.2.17 - SDX template with Atlas, HMS, Ranger and other services they are dependent on");
+                break;
+            case "MEDIUM_DUTY_HA":
+                template = "cdp-sdx-medium-ha";
+                blueprint.setDescription(".2.17 - Medium SDX template with Atlas, HMS, Ranger and other services they are dependent on." +
+                        "  Services like HDFS, HBASE, RANGER, HMS have HA");
+                break;
+            case "ENTERPRISE":
+                template = "cdp-sdx-enterprise";
+                blueprint.setDescription(".2.17 - Enterprise SDX template with Atlas, HMS, Ranger and other services they are dependent on. " +
+                        " Services like HDFS, HBASE, RANGER, HMS have HA");
+                break;
+            case "MICRO_DUTY":
+                template = "cdp-sdx-micro";
+                blueprint.setDescription("7.2.17 - Micro SDX template with Atlas, HMS, Ranger and other services they are dependent on");
+                break;
+            default:
+                template = "cdp-sdx";
+        }
+        blueprint.setBlueprintText(
+                FileReaderUtils.readFileFromPath(
+                        Path.of(
+                                String.format("../core/src/main/resources/defaults/blueprints/7.2.17/%s.bp", template))));
+
+        Cluster sdxCluster = new Cluster();
+        sdxCluster.setBlueprint(blueprint);
+        return sdxCluster;
     }
 }
