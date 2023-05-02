@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -493,8 +494,7 @@ public class SdxRuntimeUpgradeServiceTest {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                     underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false));
         } catch (BadRequestException e) {
-            String errorMessage = "The rolling upgrade is not allowed for LIGHT_DUTY cluster shape. "
-                    + "If you want to use rolling upgrade you need to launch a Data Lake with MEDIUM_DUTY_HA cluster shape.";
+            String errorMessage = "The rolling upgrade is not allowed for LIGHT_DUTY cluster shape.";
             assertEquals(errorMessage, e.getMessage());
         }
 
@@ -502,6 +502,21 @@ public class SdxRuntimeUpgradeServiceTest {
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+
+        sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false));
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        reset(sdxReactorFlowManager);
+
+        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false));
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
     }
