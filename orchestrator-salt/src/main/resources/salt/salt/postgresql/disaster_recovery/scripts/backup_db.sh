@@ -26,41 +26,72 @@ doLog() {
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
 }
 
-if [[ $# -lt 6 || $# -gt 10 || "$1" == "None" || -z "$1" ]]; then
-  doLog "ERROR: Invalid inputs provided"
-  doLog "A total of $# inputs were provided."
-  if [[ $# -gt 0 ]]; then
-    doLog "Below are the inputs passed in. If some of them are empty, it could be incorrect:"
-    COUNTER=1
-    for input in "$@"
-    do
-      echo "  $COUNTER. $input"
-      let COUNTER++
-    done
-  fi
+usage() {
   doLog "There might be missing values in /srv/pillar/postgresql/disaster_recovery.sls or /srv/pillar/postgresql/postgre.sls."
   doLog "This might be caused by the command not being run on the Primary Gateway node or due to never having run a backup/restore via the CDP CLI before."
-  doLog "Script accepts at least 6 and at most 7 inputs:"
-  doLog "  1. Object Storage Service url to place backups."
-  doLog "  2. PostgresSQL host name."
-  doLog "  3. PostgresSQL port."
-  doLog "  4. PostgresSQL user name."
-  doLog "  5. Ranger admin group."
-  doLog "  6. Whether or not to close connections for the database while it is being backed up."
-  doLog "  7-10. (optional) Names of the databases to backup. If not given, will backup ranger and hive databases."
-  exit 1
-fi
+  doLog "Script accepts the following inputs:"
+  doLog "  -s path : Object Storage Service url to place backups."
+  doLog "  -h host : PostgresSQL host name."
+  doLog "  -p port : PostgresSQL port."
+  doLog "  -u username : PostgresSQL user name."
+  doLog "  -r group : Ranger admin group."
+  doLog "  -c bool : Whether or not to close connections for the database while it is being backed up."
+  doLog "  -z compression_level : (optional)  database dump compression level 0-9"
+  doLog "  -d \"db1 db2 db3\" : (optional) Names of the databases to backup. If not given, will backup ranger and hive databases."
+}
 
-BACKUP_LOCATION="$1"
-HOST="$2"
-PORT="$3"
-USERNAME="$4"
-RANGERGROUP="$5"
-CLOSECONNECTIONS="$6"
-DATABASENAMES="${@: 7}"
+BACKUP_LOCATION=""
+HOST=""
+PORT=""
+USERNAME=""
+RANGERGROUP=""
+CLOSECONNECTIONS=""
+COMPRESSION=""
+
+while getopts "s:h:p:u:r:c:z:d:" OPTION; do
+    case $OPTION in
+    s  )
+        BACKUP_LOCATION="$OPTARG"
+        ;;
+    h  )
+        HOST="$OPTARG"
+        ;;
+    p  )
+        PORT="$OPTARG"
+        ;;
+    u  )
+        USERNAME="$OPTARG"
+        ;;
+    r  )
+        RANGERGROUP="$OPTARG"
+        ;;
+    c  )
+        CLOSECONNECTIONS="$OPTARG"
+        ;;
+    z  )
+        COMPRESSION=$OPTARG
+        ;;
+    \? ) echo "Unknown option: -$OPTNAME" >&2;
+         usage
+         exit 1;;
+    :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+    esac
+done
+
+shift $((OPTIND-1))
+DATABASENAMES="$@"
+
+
+[ -z "$BACKUP_LOCATION" ]  || [[ $BACKUP_LOCATION == \-* ]] && doLog "backup location is not specified, use the -s option"
+[ -z "$RANGERGROUP" ] || [[ $RANGERGROUP == \-* ]] && doLog "Ranger admin group is not specified, use the -r option"
+[ -z "$CLOSECONNECTIONS" ] || [[ $CLOSECONNECTIONS == \-* ]] && doLog "Whether to close connections flag is not specified, use the -c option"
+
+[ -z "$BACKUP_LOCATION" ] || [ -z "$RANGERGROUP" ] || [ -z "$CLOSECONNECTIONS" ] && doLog "At least one mandatory parameter is not set!" && usage && exit 1
+
+doLog "Backup with compression level $COMPRESSION"
 
 # Root directory for local postgres dump.
-BACKUPS_DIR="/var/tmp/"
+BACKUPS_DIR="/var/tmp"
 # Directory for the current postgres dump.
 DATE_DIR=${BACKUPS_DIR}/$(date '+%Y-%m-%dT%H:%M:%SZ')
 
@@ -126,11 +157,12 @@ replace_ranger_group_before_export() {
 
 move_backup_to_cloud () {
   LOCAL_BACKUP="$1"
+  REMOTE_BACKUP_NAME="$2"
   run_kinit
   doLog "INFO Uploading to ${BACKUP_LOCATION}"
 
   hdfs --loglevel ERROR dfs -mkdir -p "$BACKUP_LOCATION"
-  OBJECT_STORE_PATH="${BACKUP_LOCATION}/${SERVICE}_backup"
+  OBJECT_STORE_PATH="${BACKUP_LOCATION}/${REMOTE_BACKUP_NAME}"
   hdfs --loglevel ERROR dfs -moveFromLocal -f "$LOCAL_BACKUP" "$OBJECT_STORE_PATH" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to upload $SERVICE backup"
   doLog "INFO Completed upload to ${BACKUP_LOCATION}"
 }
@@ -173,19 +205,29 @@ backup_database_for_service() {
 
   doLog "INFO Dumping ${SERVICE}"
   LOCAL_BACKUP=${DATE_DIR}/${SERVICE}_backup
-  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain --file="$LOCAL_BACKUP" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
-  if [[ "$CLOSECONNECTIONS" == "true" ]]; then
-    limit_incomming_connection $SERVICE -1
+  if [[ "$SERVICE" == "ranger" ]]; then
+    REMOTE_BACKUP_NAME="ranger_backup"
+    doLog "INFO Do not compress the 'ranger' database"
+    pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain --file="$LOCAL_BACKUP" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
+    replace_ranger_group_before_export $RANGERGROUP $LOCAL_BACKUP
+  elif [[ ${COMPRESSION} -eq 0 ]] || [[ -z ${COMPRESSION} ]]; then
+    REMOTE_BACKUP_NAME="${SERVICE}_backup"
+    doLog "INFO Do not compress database ${SERVICE}, plain SQL output"
+    pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain --file="$LOCAL_BACKUP" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
+  else
+    doLog "INFO Use compressed dump for the ${SERVICE} database"
+    REMOTE_BACKUP_NAME="${SERVICE}_backup.dump"
+    pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=custom --file="$LOCAL_BACKUP" -Z $COMPRESSION > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
   fi
 
-  if [[ "$SERVICE" == "ranger" ]]; then
-    replace_ranger_group_before_export $RANGERGROUP $LOCAL_BACKUP
+  if [[ "$CLOSECONNECTIONS" == "true" ]]; then
+    limit_incomming_connection $SERVICE -1
   fi
 
   BACKUP_SIZE=$(du -h $LOCAL_BACKUP | cut -f 1)
   doLog "INFO ${SERVICE} backup size is ${BACKUP_SIZE}"
 
-  move_backup_to_cloud "$LOCAL_BACKUP"
+  move_backup_to_cloud "$LOCAL_BACKUP" "$REMOTE_BACKUP_NAME"
 
   doLog "INFO Completed upload to ${BACKUP_LOCATION}"
   doLog "INFO ${SERVICE} dumped to ${OBJECT_STORE_PATH}"

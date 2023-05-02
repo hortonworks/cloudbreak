@@ -44,6 +44,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_ZDU_OS_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
@@ -474,6 +475,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.postgres.upgrade.skip.service.stop.enable}")
     private boolean skipPostgresUpgradeServicesAndCmStop;
+
+    @Value("${auth.mock.datalake.backup.compression.enable}")
+    private boolean dlBackupCompressionEnable;
 
     private String cbLicense;
 
@@ -1028,6 +1032,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (azureDatabaseFlexibleServerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_FLEXIBLE_SERVER));
+        }
+        if (dlBackupCompressionEnable) {
+            builder.addEntitlements(createEntitlement(CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION));
         }
         if (secretRotationEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ROTATION));

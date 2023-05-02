@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -51,6 +53,9 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
     @Inject
     private RangerVirtualGroupService rangerVirtualGroupService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DatabaseBackupRequest.class);
@@ -76,8 +81,11 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, cluster.getId());
             String rangerAdminGroup = rangerVirtualGroupService.getRangerVirtualGroup(stack);
+
+            boolean enableDbCompression = entitlementService.isDatalakeDatabaseBackupCompressionEnabled(ThreadBasedUserCrnProvider.getAccountId());
+            LOGGER.info("Compression entitlement: {}", enableDbCompression);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup,
-                    request.isCloseConnections(), request.getSkipDatabaseNames(), stack);
+                    request.isCloseConnections(), request.getSkipDatabaseNames(), enableDbCompression, stack);
             hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
 
             result = new DatabaseBackupSuccess(stackId);

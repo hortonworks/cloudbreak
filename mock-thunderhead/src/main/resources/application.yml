@@ -45,6 +45,7 @@ auth:
       select.instance.type.enable: true
       zdu.osupgrade.enable: true
       backup.restore.permission.checks.enabled: true
+      backup.compression.enable: false
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
     database.wire.encryption.datahub.enable: false
