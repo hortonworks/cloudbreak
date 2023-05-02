@@ -7,11 +7,14 @@
 
 set_default_java_version:
   cmd.run:
-    - name: /opt/salt/scripts/set_default_java_version.sh
+    - name: /opt/salt/scripts/set_default_java_version.sh 2>&1 | tee -a /var/log/set-default-java-version.log && [[ 0 -eq ${PIPESTATUS[0]} ]] && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/set-default-java-version-executed || exit ${PIPESTATUS[0]}
+    - runas: root
     - env:
         - TARGET_JAVA_VERSION: {{salt['pillar.get']('java:version')}}
+    - failhard: True
     - require:
-      - file: /opt/salt/scripts/set_default_java_version.sh
+        - file: /opt/salt/scripts/set_default_java_version.sh
+    - unless: test -f /var/log/set-default-java-version-executed
 
 #java-1.7.0-openjdk-devel:
 #  pkg.installed: []

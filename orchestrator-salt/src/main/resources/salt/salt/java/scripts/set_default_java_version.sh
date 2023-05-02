@@ -19,16 +19,6 @@ if [ -n "$TARGET_JAVA_VERSION" ]; then
     mkdir -p /etc/alternatives/java_sdk_11/jre/lib/security
     ln -sfn /etc/alternatives/java_sdk_11/conf/security/java.security /etc/alternatives/java_sdk_11/jre/lib/security/java.security
     ln -sfn /etc/pki/java/cacerts /etc/alternatives/java_sdk_11/jre/lib/security/cacerts
-
-    #Regenerate the resolv.conf
-    source /etc/dhcp/dhclient-enter-hooks
-    generate_resolv_conf
-
-    #The domain should be existed in the resolv.conf to avoid DNS resolution error.
-    if ! grep -Fxq "domain" /etc/resolv.conf; then
-      echo "Failed to set the domain in resolve.conf"
-      exit 1
-    fi
   else
     echo "Changing java version from $CURRENT_JAVA_VERSION to $TARGET_JAVA_VERSION is not supported"
     exit 1
