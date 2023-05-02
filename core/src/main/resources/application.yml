@@ -316,7 +316,18 @@ cb:
         Standard_E64s_v3,
         Standard_E8s_v4,
         Standard_E16s_v4,
-        Standard_E32s_v4
+        Standard_E32s_v4,
+        Standard_D4s_v3,
+        Standard_D48s_v3,
+        Standard_E4_v3,
+        Standard_E4s_v3,
+        Standard_E4s_v4,
+        Standard_E4ds_v4
+        Standard_E16-8s_v3,
+        Standard_E20s_v4,
+        Standard_E20ds_v4,
+        Standard_E48ds_v4,
+        Standard_E48s_v4
 
   os:
     enable.autoimport: true
