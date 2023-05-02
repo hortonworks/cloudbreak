@@ -1,4 +1,12 @@
 {% set configure_remote_db = salt['pillar.get']('postgres:configure_remote_db', 'None') %}
+{% set object_storage_url = salt['pillar.get']('disaster_recovery:object_storage_url') %}
+{% set remote_db_url = salt['pillar.get']('postgres:clouderamanager:remote_db_url') %}
+{% set remote_db_port = salt['pillar.get']('postgres:clouderamanager:remote_db_port') %}
+{% set pg_username = salt['pillar.get']('postgres:clouderamanager:remote_admin') %}
+{% set ranger_admin_group = salt['pillar.get']('disaster_recovery:ranger_admin_group') %}
+{% set close_connections = salt['pillar.get']('disaster_recovery:close_connections') %}
+{% set compression_level = salt['pillar.get']('disaster_recovery:compression_level', '0') %}
+{% set database_name = salt['pillar.get']('disaster_recovery:database_name', '') %}
 
 include:
   - postgresql.disaster_recovery
@@ -9,7 +17,7 @@ include:
 {% if 'None' != configure_remote_db %}
 backup_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/backup_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} {{salt['pillar.get']('postgres:clouderamanager:remote_db_url')}} {{salt['pillar.get']('postgres:clouderamanager:remote_db_port')}} {{salt['pillar.get']('postgres:clouderamanager:remote_admin')}} {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} {{salt['pillar.get']('disaster_recovery:close_connections')}} {{salt['pillar.get']('disaster_recovery:database_name') or ''}}
+    - name: /opt/salt/scripts/backup_db.sh -s {{object_storage_url}} -h {{remote_db_url}} -p {{remote_db_port}} -u {{remote_admin}} -r {{ranger_admin_group}} -c {{close_connections}} -z {{compression_level}} {{database_name}}
     - require:
       - sls: postgresql.disaster_recovery
 
@@ -26,7 +34,7 @@ add_root_role_to_database:
 
 backup_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/backup_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} "" "" "" {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} {{salt['pillar.get']('disaster_recovery:close_connections')}} {{salt['pillar.get']('disaster_recovery:database_name') or ''}}
+    - name: /opt/salt/scripts/backup_db.sh -s {{object_storage_url}} -r {{ranger_admin_group}} -c {{close_connections}} -z {{compression_level}} {{database_name}}
     - require:
       - cmd: add_root_role_to_database
 {% endif %}

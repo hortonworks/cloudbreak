@@ -77,7 +77,7 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, cluster.getId());
             String rangerAdminGroup = rangerVirtualGroupService.getRangerVirtualGroup(stack);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup,
-                    true, Collections.emptyList(), stack);
+                    true, Collections.emptyList(), false, stack);
             hostOrchestrator.restoreDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
 
             result = new DatabaseRestoreSuccess(stackId);

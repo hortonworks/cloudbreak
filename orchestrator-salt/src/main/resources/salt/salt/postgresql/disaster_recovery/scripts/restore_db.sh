@@ -7,7 +7,8 @@ set -o nounset
 set -o pipefail
 
 LOGFILE=/var/log/dl_postgres_restore.log
-echo "Logs at ${LOGFILE}"
+
+echo "Logs are at ${LOGFILE}"
 
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
@@ -138,7 +139,8 @@ is_database_exists() {
 
 restore_db_from_local() {
   SERVICE=$1
-  BACKUP="${BACKUPS_DIR}/${SERVICE}_backup"
+  BACKUP_PLAIN="${BACKUPS_DIR}/${SERVICE}_backup"
+  BACKUP_DUMP="${BACKUPS_DIR}/${SERVICE}_backup.dump"
 
   is_database_exists $SERVICE
   if [ "$?" -eq 1 ];then
@@ -146,21 +148,31 @@ restore_db_from_local() {
     return 0
   fi
 
-  if [[ "$SERVICE" == "ranger" ]]; then
-    replace_ranger_group_before_import $RANGERGROUP $BACKUP
+  if [[ ! -f "$BACKUP_PLAIN" && ! -f "$BACKUP_DUMP" ]]; then
+    doLog "INFO Not restoring ${SERVICE} as neither ${BACKUP_PLAIN} nor ${BACKUP_DUMP} files exist"
+    return 0
   fi
-  if [ -f "$BACKUP" ]; then
-    limit_incomming_connection $SERVICE 0
-    close_existing_connections $SERVICE
-    doLog "INFO Restoring $SERVICE"
-    psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
-    psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to re-create database ${SERVICE}"
-    psql --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" <"$BACKUP" >$LOGFILE 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
-    doLog "INFO Successfully restored ${SERVICE}"
-    limit_incomming_connection $SERVICE -1
-else
-    doLog "INFO Not restoring ${SERVICE} as ${BACKUP} does not exist"
-fi
+
+  if [[ "$SERVICE" == "ranger" ]]; then
+    # Ranger databases are always plain backup files
+    replace_ranger_group_before_import $RANGERGROUP $BACKUP_PLAIN
+  fi
+
+  limit_incomming_connection $SERVICE 0
+  close_existing_connections $SERVICE
+  doLog "INFO Restoring $SERVICE"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to re-create database ${SERVICE}"
+
+  if [ -f "$BACKUP_PLAIN" ]; then
+      doLog "INFO restore a plain text dump file"
+      psql --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" <"$BACKUP_PLAIN" >>$LOGFILE 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
+  elif [ -f "$BACKUP_DUMP" ]; then
+      doLog "INFO restore a custom format backup file"
+      pg_restore --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" "$BACKUP_DUMP" >>$LOGFILE 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
+  fi
+  doLog "INFO Successfully restored ${SERVICE}"
+  limit_incomming_connection $SERVICE -1
 }
 
 run_restore() {
