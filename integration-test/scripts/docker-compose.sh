@@ -52,10 +52,12 @@ cbd_services_sanity_check() {
   if [[ $RESULT -ne 0 ]]; then
     cbd_teardown_and_exit
   else
-    local exited_containers=$(docker ps -f "name=cbreak" -f status=exited -f status=dead -q)
+    local exited_containers=$(docker ps -f "name=cbreak" -f status=exited -f status=dead -f since=cbreak_nssdb-init-svc_1 -q)
     docker ps -f "name=cbreak" --format "table {{.ID}}\t{{.State}}\t{{.Names}}\t{{.Image}}"
 
     if [[ -n "$exited_containers" ]]; then
+      echo -e "\n\033[1;96m--- ERROR: Only nssdb-init-svc is allowed to exit. However the following containers are exited/dead:\033[0m\n"
+      docker ps -f "name=cbreak" -f status=exited -f status=dead --format "table {{.ID}}\t{{.State}}\t{{.Names}}\t{{.Image}}"
       cbd_teardown_and_exit
     else
       date
