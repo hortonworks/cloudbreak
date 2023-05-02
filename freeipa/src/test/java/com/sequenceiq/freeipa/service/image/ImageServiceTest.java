@@ -24,6 +24,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -59,6 +61,8 @@ public class ImageServiceTest {
 
     private static final String IMAGE_UUID = "UUID";
 
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
     private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
 
     @Mock
@@ -85,34 +89,52 @@ public class ImageServiceTest {
     @Mock
     private ImageToImageEntityConverter imageConverter;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @Captor
     private ArgumentCaptor<ImageSettingsRequest> imageSettingsRequestCaptor;
 
     @Test
-    public void tesDetermineImageNameFound() {
+    public void testDetermineImageNameFound() {
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
-        String imageName = underTest.determineImageName(DEFAULT_PLATFORM, REGION, image);
+        String imageName =  ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName(DEFAULT_PLATFORM, REGION, image));
         assertEquals("ami-09fea90f257c85513", imageName);
     }
 
     @Test
-    public void tesDetermineImageNameFoundDefaultPreferred() {
+    public void testDetermineImageNameFoundDefaultPreferred() {
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM,
                 Map.of(
                         REGION, EXISTING_ID,
                         DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
 
-        String imageName = underTest.determineImageName(DEFAULT_PLATFORM, REGION, image);
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName(DEFAULT_PLATFORM, REGION, image));
         assertEquals("ami-09fea90f257c85514", imageName);
     }
 
     @Test
-    public void tesDetermineImageNameNotFound() {
+    public void testDetermineImageNameFoundNoMpEntitlement() {
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(false);
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM,
+                Map.of(
+                        REGION, EXISTING_ID,
+                        DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
+
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName(DEFAULT_PLATFORM, REGION, image));
+        assertEquals("ami-09fea90f257c85513", imageName);
+    }
+
+    @Test
+    public void testDetermineImageNameNotFound() {
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
         Exception exception = assertThrows(RuntimeException.class, () ->
-                underTest.determineImageName(DEFAULT_PLATFORM, "fake-region", image));
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName(DEFAULT_PLATFORM, "fake-region", image)));
         String exceptionMessage = "Virtual machine image couldn't be found in image";
         MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(exceptionMessage));
     }
@@ -147,8 +169,9 @@ public class ImageServiceTest {
         when(image.getUuid()).thenReturn(IMAGE_UUID);
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
         when(imageConverter.extractLdapAgentVersion(image)).thenReturn("1.2.3");
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
 
-        ImageEntity imageEntity = underTest.changeImage(stack, imageRequest);
+        ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImage(stack, imageRequest));
 
         assertEquals(EXISTING_ID, imageEntity.getImageName());
         assertEquals(IMAGE_CATALOG_URL, imageEntity.getImageCatalogUrl());
@@ -169,8 +192,9 @@ public class ImageServiceTest {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
         when(imageConverter.convert(image)).thenReturn(new ImageEntity());
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
 
-        ImageEntity imageEntity = underTest.create(stack, imageRequest);
+        ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, imageRequest));
 
         assertEquals(stack, imageEntity.getStack());
         assertEquals(EXISTING_ID, imageEntity.getImageName());
