@@ -156,6 +156,14 @@ dns_resolution_fix:
   file.append:
     - name: /etc/resolv.conf
     - text: "domain {{ salt['grains.get']('domain') }}"
+{% else %}
+java11_dns_resolution_fix:
+  file.append:
+    - name: /etc/resolv.conf
+    - text: "domain {{ salt['grains.get']('domain') }}"
+    - onlyif:
+      - ! grep -q '^domain .*' /etc/resolv.conf
+      - java -version |& grep 'openjdk version "11.0'
 {% endif %}
 
 include:
