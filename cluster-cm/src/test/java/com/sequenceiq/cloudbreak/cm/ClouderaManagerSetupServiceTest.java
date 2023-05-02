@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerStorageErrorMapper;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -144,6 +146,9 @@ public class ClouderaManagerSetupServiceTest {
     @Mock
     private ClouderaManagerFedRAMPService clouderaManagerFedRAMPService;
 
+    @Mock
+    private BlueprintUtils blueprintUtils;
+
     @InjectMocks
     private ClouderaManagerSetupService underTest;
 
@@ -166,6 +171,7 @@ public class ClouderaManagerSetupServiceTest {
         ReflectionTestUtils.setField(underTest, "clusterCommandRepository", clusterCommandRepository);
         ReflectionTestUtils.setField(underTest, "clouderaManagerFedRAMPService", clouderaManagerFedRAMPService);
         ReflectionTestUtils.setField(underTest, "apiClient", mock(ApiClient.class));
+        ReflectionTestUtils.setField(underTest, "blueprintUtils", blueprintUtils);
     }
 
     @Test
@@ -1101,7 +1107,7 @@ public class ClouderaManagerSetupServiceTest {
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
         doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
-
+        when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(false);
         spy.configureManagementServices(templatePreparationObject, null, null, null, null);
 
         verify(spy, times(0)).getAuxiliaryHost(any(), any());
