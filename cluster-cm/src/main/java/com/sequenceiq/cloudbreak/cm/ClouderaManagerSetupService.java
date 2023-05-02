@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_17;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
-import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,6 +65,7 @@ import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedExc
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -139,6 +139,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private BlueprintUtils blueprintUtils;
 
     private final StackDtoDelegate stack;
 
@@ -543,7 +546,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         if (null != templatePreparationObject.getStackType()
             && templatePreparationObject.getStackType().equals(StackType.DATALAKE)
             && isVersionNewerOrEqualThanLimited(templatePreparationObject.getBlueprintView().getVersion(), CLOUDERA_STACK_VERSION_7_2_17)
-            && containsIgnoreCase(templatePreparationObject.getBlueprintView().getBlueprintText(), SDX_ENTERPRISE_DATALAKE_TEXT)) {
+            && blueprintUtils.isEnterpriseDatalake(templatePreparationObject)) {
             LOGGER.info("CM MGMT services are started on Auxiliary host group");
             optionalCmHost = getAuxiliaryHost(templatePreparationObject, apiClient);
         } else {
