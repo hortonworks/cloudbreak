@@ -492,8 +492,7 @@ public class SdxRuntimeUpgradeServiceTest {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                     underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false));
         } catch (BadRequestException e) {
-            String errorMessage = "The rolling upgrade is not allowed for LIGHT_DUTY cluster shape. "
-                    + "If you want to use rolling upgrade you need to launch a Data Lake with MEDIUM_DUTY_HA cluster shape.";
+            String errorMessage = "The rolling upgrade is not allowed for LIGHT_DUTY cluster shape.";
             assertEquals(errorMessage, e.getMessage());
         }
 
