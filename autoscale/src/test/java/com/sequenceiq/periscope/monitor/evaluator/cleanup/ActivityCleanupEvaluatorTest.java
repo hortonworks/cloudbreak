@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -66,7 +67,7 @@ class ActivityCleanupEvaluatorTest {
 
         underTest.execute();
 
-        verifyNoInteractions(scalingActivityService);
+        verify(scalingActivityService, never()).deleteScalingActivityByIds(anySet());
     }
 
     @Test

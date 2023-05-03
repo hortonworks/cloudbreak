@@ -63,6 +63,9 @@ public class YarnBasedScalingAdjustmentService {
     private ClusterService clusterService;
 
     @Inject
+    private PeriscopeMetricService metricService;
+
+    @Inject
     private ScalingEventSender eventSender;
 
     public void pollYarnMetricsAndScaleCluster(Cluster cluster, String pollingUserCrn, boolean stopStartEnabled, StackV4Response stackV4Response)
@@ -95,9 +98,11 @@ public class YarnBasedScalingAdjustmentService {
         Optional<Integer> maxDecommissionNodeCount = Optional.of(maxResourceValueOffset)
                 .filter(mandatoryDownscale -> mandatoryDownscale < 0).map(downscale -> -1 * downscale);
 
+        long start = clock.getCurrentTimeMillis();
         YarnScalingServiceV1Response yarnResponse =
                 yarnMetricsClient.getYarnMetricsForCluster(cluster, stackV4Response, policyHostGroupInstanceInfo.getPolicyHostGroup(),
                         pollingUserCrn, maxDecommissionNodeCount);
+        metricService.recordYarnInvocation(cluster, start);
 
         if (cluster.getUpdateFailedDetails() != null && pollingUserCrn.equals(cluster.getMachineUserCrn())) {
             // Successful YARN API call

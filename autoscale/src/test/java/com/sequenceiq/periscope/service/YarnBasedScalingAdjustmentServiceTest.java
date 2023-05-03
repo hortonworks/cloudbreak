@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -97,6 +98,9 @@ class YarnBasedScalingAdjustmentServiceTest {
     private ScalingActivityService scalingActivityService;
 
     @Mock
+    private PeriscopeMetricService metricService;
+
+    @Mock
     private Clock clock;
 
     @Mock
@@ -148,6 +152,7 @@ class YarnBasedScalingAdjustmentServiceTest {
 
         underTest.pollYarnMetricsAndScaleCluster(cluster, POLLING_USER_CRN, Boolean.TRUE.equals(cluster.isStopStartScalingEnabled()), stackResponse);
 
+        verify(metricService, times(1)).recordYarnInvocation(eq(cluster), anyLong());
         if (desiredAbsoluteHostGroupNodeCount - Math.min(yarnRecommendedScaleUpCount, DEFAULT_MAX_SCALE_UP_STEP_SIZE) > 0) {
             verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
             ScalingEvent result = eventCaptor.getValue();
@@ -193,6 +198,7 @@ class YarnBasedScalingAdjustmentServiceTest {
 
         underTest.pollYarnMetricsAndScaleCluster(cluster, POLLING_USER_CRN, Boolean.TRUE.equals(cluster.isStopStartScalingEnabled()), stackResponse);
 
+        verify(metricService, times(1)).recordYarnInvocation(eq(cluster), anyLong());
         if (desiredAbsoluteHostGroupNodeCount - Math.min(yarnRecommendedScaleUpCount, DEFAULT_MAX_SCALE_UP_STEP_SIZE) > 0) {
             verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
             ScalingEvent result = eventCaptor.getValue();
@@ -237,6 +243,7 @@ class YarnBasedScalingAdjustmentServiceTest {
 
         underTest.pollYarnMetricsAndScaleCluster(cluster, POLLING_USER_CRN, Boolean.TRUE.equals(cluster.isStopStartScalingEnabled()), stackResponse);
 
+        verify(metricService, times(1)).recordYarnInvocation(eq(cluster), anyLong());
         if (desiredAbsoluteHostGroupNodeCount - Math.min(yarnRecommendedScaleUpCount, DEFAULT_MAX_SCALE_UP_STEP_SIZE) > 0) {
             verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
             ScalingEvent result = eventCaptor.getValue();
@@ -277,6 +284,7 @@ class YarnBasedScalingAdjustmentServiceTest {
 
         underTest.pollYarnMetricsAndScaleCluster(cluster, POLLING_USER_CRN, Boolean.TRUE.equals(cluster.isStopStartScalingEnabled()), stackResponse);
 
+        verify(metricService, times(1)).recordYarnInvocation(eq(cluster), anyLong());
         if (expectedDecommissionCount > 0) {
             verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
             ScalingEvent result = eventCaptor.getValue();
@@ -319,6 +327,7 @@ class YarnBasedScalingAdjustmentServiceTest {
 
         underTest.pollYarnMetricsAndScaleCluster(cluster, POLLING_USER_CRN, Boolean.TRUE.equals(cluster.isStopStartScalingEnabled()), stackResponse);
 
+        verify(metricService, times(1)).recordYarnInvocation(eq(cluster), anyLong());
         if (expectedDecommissionNodeCount > 0) {
             verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
             ScalingEvent result = eventCaptor.getValue();
@@ -361,6 +370,7 @@ class YarnBasedScalingAdjustmentServiceTest {
 
         underTest.pollYarnMetricsAndScaleCluster(cluster, POLLING_USER_CRN, Boolean.TRUE.equals(cluster.isStopStartScalingEnabled()), stackResponse);
 
+        verify(metricService, times(1)).recordYarnInvocation(eq(cluster), anyLong());
         if (expectedDecommissionNodeCount > 0) {
             verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
             ScalingEvent result = eventCaptor.getValue();
@@ -433,6 +443,7 @@ class YarnBasedScalingAdjustmentServiceTest {
         doReturn(yarnResponse).when(yarnMetricsClient).getYarnMetricsForCluster(any(Cluster.class), eq(stackResponse), eq(HOSTGROUP), eq(POLLING_USER_CRN),
                 any(Optional.class));
         doReturn(TEST_MESSAGE).when(messagesService).getMessageWithArgs(anyString(), anyInt(), anyList(), anyInt(), anyList());
+        doNothing().when(metricService).recordYarnInvocation(any(Cluster.class), anyLong());
         lenient().doCallRealMethod().when(clock).getCurrentTimeMillis();
         lenient().doReturn(scalingActivity).when(scalingActivityService).create(any(Cluster.class), any(ActivityStatus.class), anyString(), anyLong());
         lenient().doCallRealMethod().when(scalingEventSender).sendScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt(), anyInt(), anyLong());

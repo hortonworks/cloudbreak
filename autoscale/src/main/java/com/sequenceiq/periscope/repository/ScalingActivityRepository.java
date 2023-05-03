@@ -95,6 +95,9 @@ public interface ScalingActivityRepository extends PagingAndSortingRepository<Sc
     @Query("SELECT st.id FROM ScalingActivity st WHERE st.activityStatus IN :statuses")
     List<Long> findAllIdsInActivityStatuses(@Param("statuses") List<ActivityStatus> statuses, Sort sort);
 
+    @Query("SELECT count(st) FROM ScalingActivity st WHERE st.activityStatus IN :statuses")
+    Long countAllInActivityStatuses(@Param("statuses") Collection<ActivityStatus> statuses);
+
     @Modifying
     @Query("DELETE FROM ScalingActivity st WHERE st.cluster.id = :clusterId")
     void deleteAllByCluster(@Param("clusterId") Long clusterId);

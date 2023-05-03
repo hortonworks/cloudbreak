@@ -1,18 +1,9 @@
 package com.sequenceiq.periscope.monitor;
 
-import static com.sequenceiq.periscope.api.model.ActivityStatus.DOWNSCALE_TRIGGER_FAILED;
-import static com.sequenceiq.periscope.api.model.ActivityStatus.MANDATORY_DOWNSCALE;
-import static com.sequenceiq.periscope.api.model.ActivityStatus.MANDATORY_UPSCALE;
-import static com.sequenceiq.periscope.api.model.ActivityStatus.METRICS_COLLECTION_FAILED;
-import static com.sequenceiq.periscope.api.model.ActivityStatus.SCALING_FLOW_FAILED;
-import static com.sequenceiq.periscope.api.model.ActivityStatus.SCALING_FLOW_SUCCESS;
-import static com.sequenceiq.periscope.api.model.ActivityStatus.UNKNOWN;
-import static com.sequenceiq.periscope.api.model.ActivityStatus.UPSCALE_TRIGGER_FAILED;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -36,8 +27,7 @@ public class CleanupMonitor extends ScalingActivityMonitor {
 
     @Override
     protected List<ScalingActivities> getMonitored() {
-        Set<ActivityStatus> statuses = EnumSet.of(SCALING_FLOW_FAILED, SCALING_FLOW_SUCCESS, METRICS_COLLECTION_FAILED, UPSCALE_TRIGGER_FAILED,
-                DOWNSCALE_TRIGGER_FAILED, MANDATORY_UPSCALE, MANDATORY_DOWNSCALE, UNKNOWN);
+        Set<ActivityStatus> statuses = ActivityStatus.getStatusesApplicableForCleanup();
         PeriscopeNodeService periscopeNodeService = getPeriscopeNodeService();
         if (periscopeNodeService.isLeader(getPeriscopeNodeConfig().getId())) {
             Set<Long> activityIdsToCleanup = getScalingActivityService().findAllInStatusesThatStartedBefore(statuses,
