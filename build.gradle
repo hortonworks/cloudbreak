@@ -106,7 +106,7 @@ allprojects {
         force "org.springframework:spring-messaging:$springFrameworkVersion"
         force "io.swagger:swagger-jersey2-jaxrs:$swaggerVersion"
         force "io.swagger:swagger-annotations:$swaggerVersion"
-        force "org.ow2.asm:asm:9.2"
+        force "org.ow2.asm:asm:9.5"
         force "com.google.protobuf:protobuf-java:$protobufVersion"
         force "com.google.guava:guava:$guavaVersion"
         force "junit:junit:$junitVersion"
