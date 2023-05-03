@@ -33,7 +33,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final int FOUR_CERTS = 4;
 
-    private static final int NUM_CERTS_TOTAL = 20;
+    private static final int NUM_CERTS_TOTAL = 21;
 
     private static final int VERSION_0 = 0;
 
@@ -133,6 +133,8 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final String REGION_MES1 = "me-south-1";
 
+    private static final String REGION_MEC1 = "me-central-1";
+
     private static final String REGION_APE1 = "ap-east-1";
 
     private static final String REGION_USGE1 = "us-gov-east-1";
@@ -152,6 +154,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_AFS1)).isEqualTo(SINGLE_CERT);
         assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_EUS1)).isEqualTo(SINGLE_CERT);
         assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_MES1)).isEqualTo(SINGLE_CERT);
+        assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_MEC1)).isEqualTo(SINGLE_CERT);
         assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_APE1)).isEqualTo(SINGLE_CERT);
         assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_USGW1)).isEqualTo(FOUR_CERTS);
         assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_USGE1)).isEqualTo(FOUR_CERTS);
@@ -166,6 +169,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         assertThat(underTest.getMinVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_AFS1)).isEqualTo(VERSION_0);
         assertThat(underTest.getMinVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_EUS1)).isEqualTo(VERSION_0);
         assertThat(underTest.getMinVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_MES1)).isEqualTo(VERSION_0);
+        assertThat(underTest.getMinVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_MEC1)).isEqualTo(VERSION_0);
         assertThat(underTest.getMinVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_APE1)).isEqualTo(VERSION_0);
         assertThat(underTest.getMinVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_USGW1)).isEqualTo(VERSION_0);
         assertThat(underTest.getMinVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_USGE1)).isEqualTo(VERSION_0);
@@ -180,6 +184,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_AFS1)).isEqualTo(VERSION_0);
         assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_EUS1)).isEqualTo(VERSION_0);
         assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_MES1)).isEqualTo(VERSION_0);
+        assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_MEC1)).isEqualTo(VERSION_0);
         assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_APE1)).isEqualTo(VERSION_0);
         assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_USGW1)).isEqualTo(VERSION_3);
         assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_USGE1)).isEqualTo(VERSION_3);
@@ -198,6 +203,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
                     "aws." + REGION_USGE1,
                     "aws." + REGION_AFS1,
                     "aws." + REGION_MES1,
+                    "aws." + REGION_MEC1,
                     "aws." + REGION_APE1,
                     "aws." + REGION_USGW1,
                     "aws." + REGION_APS3,
@@ -247,6 +253,12 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         assertThat(certsAwsMes1).isNotNull();
         assertThat(certsAwsMes1).hasSize(SINGLE_CERT);
         assertThat(certsAwsMes1).doesNotContainNull();
+
+        Set<SslCertificateEntry> certsAwsMec1 = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_MEC1);
+
+        assertThat(certsAwsMec1).isNotNull();
+        assertThat(certsAwsMec1).hasSize(SINGLE_CERT);
+        assertThat(certsAwsMec1).doesNotContainNull();
 
         Set<SslCertificateEntry> certsAwsApe1 = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_APE1);
 
