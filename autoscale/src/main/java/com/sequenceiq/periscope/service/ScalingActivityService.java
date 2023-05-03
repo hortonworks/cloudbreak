@@ -93,7 +93,7 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
         scalingActivity.setScalingActivityReason(reason);
         scalingActivity.setStartTime(new Date(creationTimestamp));
         LOGGER.info("Creating ScalingActivity with creation timestamp: {} for cluster: {}", creationTimestamp, cluster.getStackCrn());
-        return scalingActivityRepository.save(scalingActivity);
+        return save(scalingActivity);
     }
 
     public void update(Long activityId, FlowIdentifier flowIdentifier, ActivityStatus activityStatus, String reason) {
@@ -177,6 +177,14 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
         return newArrayList(scalingActivityRepository.findAllById(ids));
     }
 
+    public Long countAllActivitiesInStatuses(Collection<ActivityStatus> statuses) {
+        return scalingActivityRepository.countAllInActivityStatuses(statuses);
+    }
+
+    public Long countAllActivities() {
+        return scalingActivityRepository.count();
+    }
+
     public Set<Long> findAllIdsOfSuccessfulAndInProgressScalingActivity() {
         return Sets.newConcurrentHashSet(scalingActivityRepository.findAllIdsInActivityStatuses(newArrayList(UPSCALE_TRIGGER_SUCCESS,
                 DOWNSCALE_TRIGGER_SUCCESS, SCALING_FLOW_IN_PROGRESS), Sort.by("startTime")));
@@ -197,7 +205,7 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
         scalingActivityRepository.deleteAllByCluster(clusterId);
     }
 
-    public void save(ScalingActivity scalingActivity) {
-        scalingActivityRepository.save(scalingActivity);
+    public ScalingActivity save(ScalingActivity scalingActivity) {
+        return scalingActivityRepository.save(scalingActivity);
     }
 }

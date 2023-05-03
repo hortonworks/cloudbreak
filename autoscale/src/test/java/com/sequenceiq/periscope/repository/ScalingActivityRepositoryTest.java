@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.repository;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -414,6 +415,27 @@ class ScalingActivityRepositoryTest {
         assertThat(result).hasSize(2).hasSameElementsAs(asList(scalingActivity1.getId(), scalingActivity2.getId()));
     }
 
+    @Test
+    void testCountAllInActivityStatuses() {
+        Instant now = Instant.now();
+
+        Set<ActivityStatus> statuses = EnumSet.of(ActivityStatus.UPSCALE_TRIGGER_SUCCESS, ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS,
+                ActivityStatus.METRICS_COLLECTION_FAILED, ActivityStatus.MANDATORY_UPSCALE);
+        List<ScalingActivity> activities = newArrayList();
+
+        statuses.forEach(status -> {
+            ScalingActivity activity = createScalingActivity(testCluster, status, now.minus(15, MINUTES).toEpochMilli());
+            activities.add(activity);
+        });
+
+        saveScalingActivity(testCluster, activities);
+
+        Long result = underTest.countAllInActivityStatuses(Set.of(ActivityStatus.MANDATORY_UPSCALE, ActivityStatus.METRICS_COLLECTION_SUCCESS,
+                ActivityStatus.DOWNSCALE_TRIGGER_SUCCESS));
+
+        assertThat(result).isEqualTo(2);
+    }
+
     private Cluster getACluster() {
         Cluster cluster = new Cluster();
         cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
@@ -445,6 +467,12 @@ class ScalingActivityRepositoryTest {
         clusterPertainRepository.save(cluster.getClusterPertain());
         clusterRepository.save(cluster);
         underTest.saveAll(asList(scalingActivities));
+    }
+
+    private void saveScalingActivity(Cluster cluster, List<ScalingActivity> activities) {
+        clusterPertainRepository.save(cluster.getClusterPertain());
+        clusterRepository.save(cluster);
+        underTest.saveAll(activities);
     }
 
 }

@@ -62,6 +62,9 @@ class ScalingActivityServiceTest {
     @Mock
     private RegionAwareCrnGenerator crnGenerator;
 
+    @Mock
+    private PeriscopeMetricService metricService;
+
     @Captor
     private ArgumentCaptor<ScalingActivity> captor;
 
@@ -82,7 +85,7 @@ class ScalingActivityServiceTest {
     }
 
     @Test
-    void testUpdateWithFlowDetails() {
+    void testUpdate() {
         ActivityStatus newStatus = SCALING_FLOW_IN_PROGRESS;
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, TEST_FLOW_ID);
         ScalingActivity scalingActivity = createScalingActivity(TEST_ACTIVITY_ID, getCluster(), UPSCALE_TRIGGER_SUCCESS, TEST_ACTIVITY_REASON, null);

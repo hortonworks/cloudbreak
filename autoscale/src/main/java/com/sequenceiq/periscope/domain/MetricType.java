@@ -16,6 +16,17 @@ public enum MetricType implements Metric {
     CLUSTER_DOWNSCALE_SUCCESSFUL("cluster.downscale.successful"),
     CLUSTER_DOWNSCALE_FAILED("cluster.downscale.failed"),
 
+    CLUSTER_MANAGER_API_INVOCATION("cluster.manager.api.invocation"),
+    YARN_API_INVOCATION("yarn.api.invocation"),
+    YARN_FORBIDDEN_EXCEPTION("yarn.forbidden.exception"),
+
+    TOTAL_SCALING_ACTIVITIES("total.scaling.activities"),
+    STALE_SCALING_ACTIVITY("stale.scaling.activity"),
+    SCALING_ACTIVITY_CLEANUP_CANDIDATES("scaling.activity.cleanup.candidates"),
+
+    IPA_USER_SYNC_INVOCATION("ipa.user.sync.invocation"),
+    IPA_USER_SYNC_FAILED("ipa.user.sync.failed"),
+
     THREADPOOL_QUEUE_SIZE("threadpool.queue.size"),
     THREADPOOL_ACTIVE_THREADS("threadpool.threads.active"),
     THREADPOOL_THREADS_TOTAL("threadpool.threads.coresize"),

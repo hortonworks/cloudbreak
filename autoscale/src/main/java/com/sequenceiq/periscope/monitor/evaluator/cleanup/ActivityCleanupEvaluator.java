@@ -1,6 +1,11 @@
 package com.sequenceiq.periscope.monitor.evaluator.cleanup;
 
+import static com.sequenceiq.periscope.domain.MetricType.SCALING_ACTIVITY_CLEANUP_CANDIDATES;
+import static com.sequenceiq.periscope.domain.MetricType.STALE_SCALING_ACTIVITY;
+import static com.sequenceiq.periscope.domain.MetricType.TOTAL_SCALING_ACTIVITIES;
+
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -10,10 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
+import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.model.ScalingActivities;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.ScalingActivitiesEvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
+import com.sequenceiq.periscope.service.PeriscopeMetricService;
 import com.sequenceiq.periscope.service.ScalingActivityService;
 
 @Component("ActivityCleanupEvaluator")
@@ -26,6 +34,9 @@ public class ActivityCleanupEvaluator extends EvaluatorExecutor {
 
     @Inject
     private ScalingActivityService scalingActivityService;
+
+    @Inject
+    private PeriscopeMetricService metricService;
 
     private ScalingActivities scalingActivities;
 
@@ -61,10 +72,19 @@ public class ActivityCleanupEvaluator extends EvaluatorExecutor {
                 LOGGER.info("Purging {} scalingActivity Ids as part of cleanup", scalingActivities.getActivityIds().size());
                 scalingActivityService.deleteScalingActivityByIds(scalingActivities.getActivityIds());
             }
+            calculateUnprocessedScalingActivityMetrics(scalingActivities.getActivityIds().size());
         } catch (Exception e) {
             LOGGER.error("Exception occurred when executing ScalingActivityCleanupEvaluator: {}", scalingActivities.getId(), e);
         } finally {
             LOGGER.info("Finished executing ScalingActivityCleanupEvaluator: {}", scalingActivities.getId());
         }
+    }
+
+    private void calculateUnprocessedScalingActivityMetrics(long totalCleanupCandidates) {
+        LOGGER.info("Submitting untracked scaling activity metrics");
+        Set<ActivityStatus> applicableStatuses = Sets.difference(Set.of(ActivityStatus.values()), ActivityStatus.getStatusesApplicableForCleanup());
+        metricService.gauge(STALE_SCALING_ACTIVITY, scalingActivityService.countAllActivitiesInStatuses(applicableStatuses));
+        metricService.gauge(TOTAL_SCALING_ACTIVITIES, scalingActivityService.countAllActivities());
+        metricService.gauge(SCALING_ACTIVITY_CLEANUP_CANDIDATES, totalCleanupCandidates);
     }
 }

@@ -1,5 +1,9 @@
 package com.sequenceiq.periscope.api.model;
 
+import static com.google.common.collect.Sets.immutableEnumSet;
+
+import java.util.Set;
+
 public enum ActivityStatus {
     ACTIVITY_PENDING,
     METRICS_COLLECTION_SUCCESS,
@@ -20,5 +24,10 @@ public enum ActivityStatus {
     SCALING_FLOW_IN_PROGRESS,
     SCALING_FLOW_SUCCESS,
     SCALING_FLOW_FAILED,
-    UNKNOWN
+    UNKNOWN;
+
+    public static Set<ActivityStatus> getStatusesApplicableForCleanup() {
+        return immutableEnumSet(SCALING_FLOW_FAILED, SCALING_FLOW_SUCCESS, METRICS_COLLECTION_FAILED, UPSCALE_TRIGGER_FAILED,
+                DOWNSCALE_TRIGGER_FAILED, MANDATORY_UPSCALE, MANDATORY_DOWNSCALE, UNKNOWN);
+    }
 }
