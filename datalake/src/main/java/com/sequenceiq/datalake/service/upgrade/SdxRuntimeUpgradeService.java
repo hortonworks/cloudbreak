@@ -127,13 +127,10 @@ public class SdxRuntimeUpgradeService {
         return entitlementService.isInternalRepositoryForUpgradeAllowed(accountId);
     }
 
-    private SdxUpgradeResponse checkForSdxUpgradeResponse(SdxUpgradeRequest upgradeSdxClusterRequest,
-            String clusterName, String accountId, boolean upgradePreparation) {
-        UpgradeV4Request request = sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest);
-        if (upgradePreparation) {
-            InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, false, false, true, false);
-            request.setInternalUpgradeSettings(internalUpgradeSettings);
-        }
+    private SdxUpgradeResponse checkForSdxUpgradeResponse(SdxUpgradeRequest upgradeSdxClusterRequest, String clusterName, String accountId,
+            boolean upgradePreparation) {
+        UpgradeV4Request request = createUpgradeV4Request(upgradeSdxClusterRequest, upgradePreparation);
+
         UpgradeV4Response upgradeV4Response = ThreadBasedUserCrnProvider
                 .doAsInternalActor(
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -142,6 +139,14 @@ public class SdxRuntimeUpgradeService {
         UpgradeV4Response filteredUpgradeV4Response =
                 upgradeFilter.filterSdxUpgradeResponse(accountId, clusterName, upgradeSdxClusterRequest, upgradeV4Response);
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(filteredUpgradeV4Response);
+    }
+
+    private UpgradeV4Request createUpgradeV4Request(SdxUpgradeRequest upgradeSdxClusterRequest, boolean upgradePreparation) {
+        UpgradeV4Request request = sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest);
+        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, false, false, upgradePreparation,
+                Boolean.TRUE.equals(upgradeSdxClusterRequest.getRollingUpgradeEnabled()));
+        request.setInternalUpgradeSettings(internalUpgradeSettings);
+        return request;
     }
 
     private SdxUpgradeResponse initSdxUpgrade(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request, SdxCluster cluster) {
