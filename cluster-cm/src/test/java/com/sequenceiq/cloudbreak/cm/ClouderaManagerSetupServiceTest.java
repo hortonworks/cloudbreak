@@ -74,7 +74,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -1032,7 +1031,8 @@ public class ClouderaManagerSetupServiceTest {
 
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
-        when(blueprintView.getBlueprintText()).thenReturn(template);
+        when(blueprintView.getVersion()).thenReturn("7.2.17");
+        when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(true);
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
         doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
@@ -1055,9 +1055,10 @@ public class ClouderaManagerSetupServiceTest {
 
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
-        when(blueprintView.getBlueprintText()).thenReturn(template);
+        when(blueprintView.getVersion()).thenReturn("7.2.17");
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
+        when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(true);
 
         spy.configureManagementServices(templatePreparationObject, null, null, null, null);
 
@@ -1104,6 +1105,7 @@ public class ClouderaManagerSetupServiceTest {
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN()).thenReturn(Optional.of("fqdn"));
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+        when(blueprintView.getVersion()).thenReturn("7.2.17");
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
         doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());

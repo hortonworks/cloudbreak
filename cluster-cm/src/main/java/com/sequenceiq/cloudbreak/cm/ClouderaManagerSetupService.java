@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_17;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
-import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -528,8 +528,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private void configureCmMgmtServices(TemplatePreparationObject templatePreparationObject, String sdxCrn, Telemetry telemetry,
             String sdxContextName, ProxyConfig proxyConfig) throws ApiException {
         Optional<ApiHost> optionalCmHost;
-        if (StackType.DATALAKE.equals(templatePreparationObject.getStackType())
-                && containsIgnoreCase(templatePreparationObject.getBlueprintView().getBlueprintText(), SDX_ENTERPRISE_DATALAKE_TEXT)) {
+        if (null != templatePreparationObject.getStackType()
+                && templatePreparationObject.getStackType().equals(StackType.DATALAKE)
+                && isVersionNewerOrEqualThanLimited(templatePreparationObject.getBlueprintView().getVersion(), CLOUDERA_STACK_VERSION_7_2_17)
+                && blueprintUtils.isEnterpriseDatalake(templatePreparationObject)) {
             LOGGER.info("CM MGMT services are started on Auxiliary host group");
             optionalCmHost = getAuxiliaryHost(templatePreparationObject, apiClient);
         } else {
