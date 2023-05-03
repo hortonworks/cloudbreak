@@ -33,7 +33,8 @@ public class SdxUpgradeClusterConverter {
             upgradeV4Request.setShowAvailableImages(UpgradeShowAvailableImages.valueOf(sdxUpgradeRequest.getShowAvailableImages().name()));
         }
         upgradeV4Request.setReplaceVms(Optional.ofNullable(sdxUpgradeRequest.getReplaceVms()).orElse(SdxUpgradeReplaceVms.ENABLED).getBooleanValue());
-        upgradeV4Request.setSkipDataHubValidation(sdxUpgradeRequest.getSkipDataHubValidation());
+        upgradeV4Request.setSkipDataHubValidation(Boolean.TRUE.equals(sdxUpgradeRequest.getSkipDataHubValidation())
+                || Boolean.TRUE.equals(sdxUpgradeRequest.getRollingUpgradeEnabled()));
         return upgradeV4Request;
     }
 }

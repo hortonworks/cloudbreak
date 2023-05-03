@@ -3,7 +3,6 @@ package com.sequenceiq.datalake.service.upgrade;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -163,7 +162,7 @@ public class SdxRuntimeUpgradeServiceTest {
                         underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false)));
 
         assertEquals("There is no compatible image to upgrade for stack " + sdxCluster.getClusterName(), exception.getMessage());
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -187,7 +186,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
         assertEquals(String.format("The given image (%s) is not eligible for the cluster upgrade. "
                 + "Please choose an id from the following: %s", IMAGE_ID, ANOTHER_IMAGE_ID), exception.getMessage());
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -213,7 +212,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
         assertEquals(String.format("The following error prevents the cluster upgrade process, please fix it and try again: %s",
                 "error reason"), exception.getMessage());
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -243,7 +242,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
         assertEquals(String.format("There is no image eligible for the cluster upgrade with runtime: %s. "
                 + "Please choose a runtime from the following: %s", ANOTHER_TARGET_RUNTIME, MATCHING_TARGET_RUNTIME), exception.getMessage());
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -278,7 +277,7 @@ public class SdxRuntimeUpgradeServiceTest {
                 SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
                 SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -307,7 +306,7 @@ public class SdxRuntimeUpgradeServiceTest {
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false));
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
                 skipOptions, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -328,7 +327,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false)));
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -350,7 +349,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false)));
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -410,7 +409,7 @@ public class SdxRuntimeUpgradeServiceTest {
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -457,7 +456,7 @@ public class SdxRuntimeUpgradeServiceTest {
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -503,7 +502,7 @@ public class SdxRuntimeUpgradeServiceTest {
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -548,7 +547,7 @@ public class SdxRuntimeUpgradeServiceTest {
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -582,7 +581,7 @@ public class SdxRuntimeUpgradeServiceTest {
                 () -> underTest.triggerUpgradeByCrn(USER_CRN, STACK_NAME, sdxUpgradeRequest, ACCOUNT_ID, false));
 
         assertTrue(exception.getMessage().contains("Something went wrong"));
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -615,7 +614,7 @@ public class SdxRuntimeUpgradeServiceTest {
                 () -> underTest.triggerUpgradeByName(USER_CRN, STACK_NAME, sdxUpgradeRequest, ACCOUNT_ID, false));
 
         assertTrue(exception.getMessage().contains("Something went wrong"));
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -648,7 +647,7 @@ public class SdxRuntimeUpgradeServiceTest {
         assertEquals(actualResponse, expectedResponse);
         assertTrue(capturedUpgradeV4Response.getReason().contains("No information about current image, cannot filter patch upgrade candidates based on it"));
         assertTrue(capturedUpgradeV4Response.getUpgradeCandidates().isEmpty());
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -688,7 +687,7 @@ public class SdxRuntimeUpgradeServiceTest {
         assertTrue(StringUtils.isEmpty(capturedUpgradeV4Response.getReason()));
         assertEquals(1, capturedUpgradeV4Response.getUpgradeCandidates().size());
         assertEquals(MATCHING_TARGET_RUNTIME, capturedUpgradeV4Response.getUpgradeCandidates().get(0).getComponentVersions().getCdp());
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -725,7 +724,7 @@ public class SdxRuntimeUpgradeServiceTest {
         UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
         assertEquals(expectedResponse, actualResponse);
         assertEquals(0, capturedUpgradeV4Response.getUpgradeCandidates().size());
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -764,7 +763,7 @@ public class SdxRuntimeUpgradeServiceTest {
         assertEquals(expectedResponse, actualResponse);
         assertEquals(0, capturedUpgradeV4Response.getUpgradeCandidates().size());
         assertTrue(capturedUpgradeV4Response.getReason().contains("it is not possible to upgrade from [7.0.2] to [7.2.0] runtime"));
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
@@ -803,7 +802,7 @@ public class SdxRuntimeUpgradeServiceTest {
         assertEquals(expectedResponse, actualResponse);
         assertEquals(0, capturedUpgradeV4Response.getUpgradeCandidates().size());
         assertTrue(capturedUpgradeV4Response.getReason().contains("The version of target runtime has to be the same as the current one"));
-        assertNull(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings());
+        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     private SdxCluster getValidSdxCluster() {
