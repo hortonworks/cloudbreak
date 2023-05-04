@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -18,21 +18,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.compute.PowerState;
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
-import com.microsoft.azure.management.compute.VirtualMachines;
-import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
+import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.compute.models.PowerState;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.compute.models.VirtualMachineDataDisk;
+import com.azure.resourcemanager.resources.fluentcore.arm.models.HasId;
+import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionExecutor;
-import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionResult;
-
-import rx.schedulers.Schedulers;
 
 @Component
 public class AzureClientActions {
@@ -40,7 +37,7 @@ public class AzureClientActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClientActions.class);
 
     @Inject
-    private Azure azure;
+    private AzureResourceManager azure;
 
     @Inject
     private AzureProperties azureProperties;
@@ -73,56 +70,78 @@ public class AzureClientActions {
     }
 
     public void deleteInstances(String clusterName, List<String> instanceIds) {
-        AzureInstanceActionExecutor.builder()
-                .onInstances(instanceIds)
-                .withInstanceAction(id -> {
-                    String resourceGroup = getResourceGroupName(clusterName, id);
-                    VirtualMachines virtualMachines = azure.virtualMachines();
-                    VirtualMachine vm = virtualMachines.getByResourceGroup(resourceGroup, id);
-                    LOGGER.info("Before deleting, vm {} power state is {}", id, getVmPowerState(vm));
-                    return virtualMachines.deleteByResourceGroupAsync(resourceGroup, id)
-                            .doOnError(throwable -> Log.error(LOGGER, "Error when deleting instance {}: {}", id, throwable))
-                            .subscribeOn(Schedulers.io());
-                })
-                .withInstanceStatusCheck(id -> {
-                    String resourceGroup = getResourceGroupName(clusterName, id);
-                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-                    String powerState = getVmPowerState(vm);
-                    String provisioningState = getVmProvisioningState(vm);
-                    Log.log("Delete action is successful={} (expected true), vm {} power state is {}, provisioning state is {}",
-                            vm == null, id, powerState, provisioningState);
-                    return new AzureInstanceActionResult(vm == null, powerState, id);
-                })
-                .withTimeout(10, TimeUnit.MINUTES)
-                .build()
-                .execute();
-        LOGGER.info("Deleting instances finished succesfully");
+        if (!instanceIds.isEmpty()) {
+            String resourceGroup = getResourceGroupName(clusterName, instanceIds.get(0));
+            try {
+                List<String> vmIdList = getVmIdList(instanceIds, resourceGroup);
+                azure.virtualMachines().deleteByIds(vmIdList);
+
+                List<VirtualMachine> vmList = getVmList(instanceIds, resourceGroup);
+                if (!vmList.isEmpty()) {
+                    String errorMsg = String.format("There are not deleted instances: %s, retrying..", vmList.stream().map(VirtualMachine::id));
+                    LOGGER.warn(errorMsg);
+                    throw new IllegalStateException(errorMsg);
+                }
+                LOGGER.info("Deleting instances finished successfully");
+            } catch (ManagementException e) {
+                LOGGER.debug("Exception occurred during the deletion of Virtual Machines by resource group, ignoring it", e);
+            }
+        } else {
+            LOGGER.info("Instance id list is empty, nothing to delete for {} ", clusterName);
+        }
+    }
+
+    private boolean isVmDeallocated(VirtualMachine vm) {
+        String powerState = getVmPowerState(vm);
+        String provisioningState = getVmProvisioningState(vm);
+        boolean success = PowerState.DEALLOCATED.toString().equals(powerState);
+        Log.log("Stop action isSuccessful={}, vm {} power state is {}, provisioning state is {}", success, vm.id(), powerState, provisioningState);
+        return success;
+    }
+
+    private List<String> getVmIdList(List<String> instanceIds, String resourceGroup) {
+        return getVmList(instanceIds, resourceGroup).stream()
+                .map(VirtualMachine::id)
+                .collect(Collectors.toList());
+    }
+
+    private List<VirtualMachine> getVmList(List<String> instanceIds, String resourceGroup) {
+        PagedIterable<VirtualMachine> virtualMachines = azure.virtualMachines().listByResourceGroup(resourceGroup);
+        List<VirtualMachine> filteredVmList = virtualMachines.stream()
+                .filter(Objects::nonNull)
+                .filter(vm -> instanceIds.contains(vm.name()))
+                .collect(Collectors.toList());
+        LOGGER.debug("The following VMs are found in resource group {}: {}", resourceGroup, filteredVmList);
+        return filteredVmList;
     }
 
     public void stopInstances(String clusterName, List<String> instanceIds) {
-        AzureInstanceActionExecutor.builder()
-                .onInstances(instanceIds)
-                .withInstanceAction(id -> {
-                    String resourceGroup = getResourceGroupName(clusterName, id);
-                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-                    LOGGER.info("Before stopping, vm {} power state is {}", id, vm.powerState());
-                    return azure.virtualMachines().deallocateAsync(vm.resourceGroupName(), vm.name())
-                            .doOnError(throwable -> Log.error(LOGGER, "Error when stopping instance {}: {}", id, throwable))
-                            .subscribeOn(Schedulers.io());
-                })
-                .withInstanceStatusCheck(id -> {
-                    String resourceGroup = getResourceGroupName(clusterName, id);
-                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+        if (!instanceIds.isEmpty()) {
+            String resourceGroup = getResourceGroupName(clusterName, instanceIds.get(0));
+            try {
+                List<String> vmIdList = getVmIdList(instanceIds, resourceGroup);
+                vmIdList.forEach(vm -> azure.virtualMachines().deallocate(resourceGroup, vm));
+
+                List<VirtualMachine> vmList = getVmList(instanceIds, resourceGroup);
+
+                vmList.forEach(vm -> {
                     String powerState = getVmPowerState(vm);
                     String provisioningState = getVmProvisioningState(vm);
                     boolean success = PowerState.DEALLOCATED.toString().equals(powerState);
-                    Log.log("Stop action isSuccessful={}, vm {} power state is {}, provisioning state is {}", success, id, powerState, provisioningState);
-                    return new AzureInstanceActionResult(success, powerState, id);
-                })
-                .withTimeout(10, TimeUnit.MINUTES)
-                .build()
-                .execute();
-        LOGGER.info("Stopping of instances finished succesfully");
+                    Log.log("Stop action isSuccessful={}, vm {} power state is {}, provisioning state is {}", success, vm.name(), powerState, provisioningState);
+                    if (!success) {
+                        String errorMsg = String.format("There is at least one not stopped instance: %s, retrying..", vm.name());
+                        LOGGER.warn(errorMsg);
+                        throw new IllegalStateException(errorMsg);
+                    }
+                });
+                LOGGER.info("Stopping instances finished successfully");
+            } catch (ManagementException e) {
+                LOGGER.debug("Exception occurred during the stopping of Virtual Machines by resource group, ignoring it", e);
+            }
+        } else {
+            LOGGER.info("Instance id list is empty, nothing to stop for {} ", clusterName);
+        }
     }
 
     private String getVmPowerState(VirtualMachine vm) {
@@ -139,7 +158,7 @@ public class AzureClientActions {
         return StringUtils.isBlank(resourcegroupName) ? id.replaceAll("(" + clusterName + "[0-9]+).*", "$1") : resourcegroupName;
     }
 
-    public void setAzure(Azure azure) {
+    public void setAzure(AzureResourceManager azure) {
         this.azure = azure;
     }
 
@@ -167,7 +186,7 @@ public class AzureClientActions {
                         .stream()
                         .collect(Collectors.toMap(HasId::id, virtualMachineDataDisk ->
                                 virtualMachineDataDisk
-                                        .inner()
+                                        .innerModel()
                                         .managedDisk()
                                         .diskEncryptionSet()
                                         .id()));

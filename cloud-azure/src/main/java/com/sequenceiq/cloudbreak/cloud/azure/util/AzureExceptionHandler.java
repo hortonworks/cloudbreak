@@ -79,7 +79,7 @@ public class AzureExceptionHandler {
 
     public boolean isNotFound(ManagementException exception) {
         /*
-         * Azure SDK throws various codes such as "ResourceNotFound", "ResourceGroupNotFound", "DeploymnentNotFound"
+         * Azure SDK throws various codes such as "ResourceNotFound", "ResourceGroupNotFound", "DeploymentNotFound"
          * when a resource doesn't exist. Instead of checking the code in a fragile way the below part checks only the
          * status code which is always 404 if the resource doesn't exist.
          */
