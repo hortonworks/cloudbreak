@@ -454,10 +454,52 @@ public class SdxBackupRestoreService {
                 return DatalakeDatabaseDrStatus.INPROGRESS;
             case SUCCEEDED:
                 return DatalakeDatabaseDrStatus.SUCCEEDED;
-            case FAILED:
-                return DatalakeDatabaseDrStatus.FAILED;
             default:
                 return DatalakeDatabaseDrStatus.FAILED;
+        }
+    }
+
+    public void waitForServiceToBeStopped(Long id, String operationId, String userCrn, PollingConfig pollingConfig,
+            String pollingMessage, SdxOperationType type) {
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
+        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
+                .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
+                .run(() -> checkIfStopServicesHasCompleted(sdxCluster, operationId, userCrn, pollingMessage, type));
+    }
+
+    private AttemptResult<DatalakeOperationStatus> checkIfStopServicesHasCompleted(SdxCluster sdxCluster, String operationId,
+            String userCrn, String pollingMessage, SdxOperationType type) {
+        LOGGER.info("{} polling datalake-dr service for status: '{}' in '{}' env", pollingMessage,
+                sdxCluster.getClusterName(), sdxCluster.getEnvName());
+        try {
+            if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
+                LOGGER.info("{} polling cancelled in in-memory store, id: {}", pollingMessage, sdxCluster.getId());
+                return AttemptResults.breakFor(pollingMessage + " polling cancelled in inmemory store, id: " + sdxCluster.getId());
+            } else {
+                DatalakeOperationStatus statusResponse = (type.equals(SdxOperationType.BACKUP)) ?
+                        datalakeDrClient.getBackupStatusByBackupId(sdxCluster.getClusterName(), operationId, userCrn) :
+                        datalakeDrClient.getRestoreStatusByRestoreId(sdxCluster.getClusterName(), operationId, userCrn);
+
+                if (statusResponse.getIncludedData().contains("STOP_SERVICES")) {
+                    LOGGER.info("Stopped services process for SDX cluster {} is successful", sdxCluster.getClusterName());
+                    return AttemptResults.finishWith(statusResponse);
+                } else if (statusResponse.isComplete()) {
+                    LOGGER.info("Full DR operation for SDX cluster {} is successfully completed", sdxCluster.getClusterName());
+                    return AttemptResults.finishWith(statusResponse);
+                } else if (statusResponse.isFailed()) {
+                    LOGGER.info("{} failed, statusReason: {}", pollingMessage, statusResponse.getFailureReason());
+                    return AttemptResults.breakFor(statusResponse.getFailureReason());
+                } else if (statusResponse.getState() == State.CANCELLED) {
+                    LOGGER.info("Full DR operation for SDX cluster {} is cancelled", sdxCluster.getClusterName());
+                    return AttemptResults.finishWith(statusResponse);
+                } else {
+                    LOGGER.info("Datalake {} wait for stopped services still in progress", sdxCluster.getClusterName());
+                    return AttemptResults.justContinue();
+                }
+            }
+        } catch (Exception e) {
+            return AttemptResults.breakFor(e);
         }
     }
 

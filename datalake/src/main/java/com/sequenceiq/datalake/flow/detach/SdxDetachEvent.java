@@ -24,11 +24,11 @@ public enum SdxDetachEvent implements FlowEvent {
     private final String event;
 
     SdxDetachEvent() {
-        this.event = name();
+        event = name();
     }
 
     SdxDetachEvent(Class eventClass) {
-        this.event = EventSelectorUtil.selector(eventClass);
+        event = EventSelectorUtil.selector(eventClass);
     }
 
     @Override

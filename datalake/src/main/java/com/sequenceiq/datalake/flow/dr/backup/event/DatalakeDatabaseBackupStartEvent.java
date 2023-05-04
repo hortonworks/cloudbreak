@@ -42,7 +42,7 @@ public class DatalakeDatabaseBackupStartEvent extends DatalakeDatabaseDrStartBas
 
     public static DatalakeDatabaseBackupStartEvent from(DatalakeTriggerBackupEvent triggerBackupEvent,
                                                         String backupId) {
-        return  new DatalakeDatabaseBackupStartEvent(DATALAKE_DATABASE_BACKUP_EVENT.event(),
+        return new DatalakeDatabaseBackupStartEvent(DATALAKE_DATABASE_BACKUP_EVENT.event(),
                 triggerBackupEvent.getDrStatus(),
                 triggerBackupEvent.getUserId(),
                 backupId,

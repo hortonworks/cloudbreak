@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.dyngr.exception.PollerStoppedException;
@@ -30,6 +29,7 @@ import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupAwaitServicesStoppedRequest;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupCancelledEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
@@ -46,9 +46,6 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
@@ -87,12 +84,6 @@ public class DatalakeBackupActions {
     public Action<?, ?> triggerDatalakeBackup() {
         return new AbstractSdxAction<>(DatalakeTriggerBackupEvent.class) {
             @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeTriggerBackupEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
-            @Override
             protected void prepareExecution(DatalakeTriggerBackupEvent payload, Map<Object, Object> variables) {
                 variables.put(OPERATION_ID, payload.getDrStatus().getOperationId());
                 variables.put(REASON, payload.getReason().name());
@@ -125,15 +116,25 @@ public class DatalakeBackupActions {
         };
     }
 
+    @Bean(name = "DATALAKE_BACKUP_AWAIT_SERVICES_STOPPED_STATE")
+    public Action<?, ?> datalakeBackupAwaitingServicesStopped() {
+        return new AbstractSdxAction<>(DatalakeDatabaseBackupStartEvent.class) {
+            @Override
+            protected void doExecute(SdxContext context, DatalakeDatabaseBackupStartEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Wating for services to be stopped for datalake backup of {} ", payload.getResourceId());
+                sendEvent(context, DatalakeBackupAwaitServicesStoppedRequest.from(payload));
+            }
+
+            @Override
+            protected Object getFailurePayload(DatalakeDatabaseBackupStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return DatalakeBackupFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
     @Bean(name = "DATALAKE_DATABASE_BACKUP_START_STATE")
     public Action<?, ?> datalakeBackup() {
         return new AbstractSdxAction<>(DatalakeDatabaseBackupStartEvent.class) {
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeDatabaseBackupStartEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void prepareExecution(DatalakeDatabaseBackupStartEvent payload, Map<Object, Object> variables) {
                 super.prepareExecution(payload, variables);
@@ -171,12 +172,6 @@ public class DatalakeBackupActions {
     @Bean(name = "DATALAKE_DATABASE_BACKUP_IN_PROGRESS_STATE")
     public Action<?, ?> datalakeBackupInProgress() {
         return new AbstractSdxAction<>(SdxEvent.class) {
-
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake database backup is in progress for {} ", payload.getResourceId());
@@ -202,12 +197,6 @@ public class DatalakeBackupActions {
     public Action<?, ?> backupCouldNotStart() {
         return new AbstractSdxAction<>(DatalakeDatabaseBackupCouldNotStartEvent.class) {
             @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeDatabaseBackupCouldNotStartEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
-            @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseBackupCouldNotStartEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake database backup could not be started for datalake with id: {}", payload.getResourceId(), exception);
@@ -230,12 +219,6 @@ public class DatalakeBackupActions {
     @Bean(name = "DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE")
     public Action<?, ?> datalakeFullBackupInProgress() {
         return new AbstractSdxAction<>(SdxEvent.class) {
-
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Full datalake backup is in progress for {} ", payload.getResourceId());
@@ -261,13 +244,6 @@ public class DatalakeBackupActions {
     @Bean(name = "DATALAKE_BACKUP_FINISHED_STATE")
     public Action<?, ?> finishedBackupAction() {
         return new AbstractSdxAction<>(DatalakeBackupSuccessEvent.class) {
-
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeBackupSuccessEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void doExecute(SdxContext context, DatalakeBackupSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx backup is finalized with sdx id: {}", payload.getResourceId());
@@ -288,13 +264,6 @@ public class DatalakeBackupActions {
     @Bean(name = "DATALAKE_BACKUP_CANCELLED_STATE")
     public Action<?, ?> cancelledBackupAction() {
         return new AbstractSdxAction<>(DatalakeBackupCancelledEvent.class) {
-
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeBackupCancelledEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void doExecute(SdxContext context, DatalakeBackupCancelledEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx backup was cancelled with sdx id: {}", payload.getResourceId());
@@ -316,12 +285,6 @@ public class DatalakeBackupActions {
     @Bean(name = "DATALAKE_DATABASE_BACKUP_FAILED_STATE")
     public Action<?, ?> databaseBackupFailed() {
         return new AbstractSdxAction<>(DatalakeDatabaseBackupFailedEvent.class) {
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeDatabaseBackupFailedEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseBackupFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
@@ -346,12 +309,6 @@ public class DatalakeBackupActions {
     public Action<?, ?> backupFailed() {
         return new AbstractSdxAction<>(DatalakeBackupFailedEvent.class) {
             @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeBackupFailedEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
-            @Override
             protected void doExecute(SdxContext context, DatalakeBackupFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake backup failed for datalake with id: {}", payload.getResourceId(), exception);
@@ -371,23 +328,23 @@ public class DatalakeBackupActions {
             protected Object getFailurePayload(DatalakeBackupFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return DatalakeDatabaseBackupFailedEvent.from(payload, ex);
             }
-        };
-    }
 
-    private String getFailureReason(Map<Object, Object> variables, Exception exception) {
-        StringBuilder reason = new StringBuilder();
-        if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeBackupFailureReason.BACKUP_ON_UPGRADE.name())) {
-            reason.append("Upgrade not started, datalake backup failed.");
-        } else {
-            if (exception instanceof PollerStoppedException) {
-                reason.append("Backup timed out, see the backup status using cdp-cli for more information.");
-            } else {
-                reason.append("Backup failed, returning datalake to running state.");
+            private String getFailureReason(Map<Object, Object> variables, Exception exception) {
+                StringBuilder reason = new StringBuilder();
+                if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeBackupFailureReason.BACKUP_ON_UPGRADE.name())) {
+                    reason.append("Upgrade not started, datalake backup failed.");
+                } else {
+                    if (exception instanceof PollerStoppedException) {
+                        reason.append("Backup timed out, see the backup status using cdp-cli for more information.");
+                    } else {
+                        reason.append("Backup failed, returning datalake to running state.");
+                    }
+                }
+                if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {
+                    reason.append(" Failure message: ").append(exception.getMessage());
+                }
+                return reason.toString();
             }
-        }
-        if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {
-            reason.append(" Failure message: ").append(exception.getMessage());
-        }
-        return reason.toString();
+        };
     }
 }

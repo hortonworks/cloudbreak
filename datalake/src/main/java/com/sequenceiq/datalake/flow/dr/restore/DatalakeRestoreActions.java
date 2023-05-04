@@ -36,6 +36,7 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreFail
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreWaitRequest;
+import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreAwaitServicesStoppedRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreFailedEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
@@ -143,15 +144,25 @@ public class DatalakeRestoreActions {
         };
     }
 
+    @Bean(name = "DATALAKE_RESTORE_AWAIT_SERVICES_STOPPED_STATE")
+    public Action<?, ?> datalakeRestoreAwaitingServicesStopped() {
+        return new AbstractSdxAction<>(DatalakeDatabaseRestoreStartEvent.class) {
+            @Override
+            protected void doExecute(SdxContext context, DatalakeDatabaseRestoreStartEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Wating for services to be stopped for datalake restore of {} ", payload.getResourceId());
+                sendEvent(context, DatalakeRestoreAwaitServicesStoppedRequest.from(payload));
+            }
+
+            @Override
+            protected Object getFailurePayload(DatalakeDatabaseRestoreStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return DatalakeRestoreFailedEvent.from(flowContext, payload, ex);
+            }
+        };
+    }
+
     @Bean(name = "DATALAKE_DATABASE_RESTORE_START_STATE")
     public Action<?, ?> datalakeRestore() {
         return new AbstractSdxAction<>(DatalakeDatabaseRestoreStartEvent.class) {
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeDatabaseRestoreStartEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void prepareExecution(DatalakeDatabaseRestoreStartEvent payload, Map<Object, Object> variables) {
                 super.prepareExecution(payload, variables);
@@ -193,12 +204,6 @@ public class DatalakeRestoreActions {
     @Bean(name = "DATALAKE_DATABASE_RESTORE_IN_PROGRESS_STATE")
     public Action<?, ?> datalakeRestoreInProgress() {
         return new AbstractSdxAction<>(SdxEvent.class) {
-
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake database restore is in progress for {} ", payload.getResourceId());
@@ -223,12 +228,6 @@ public class DatalakeRestoreActions {
     public Action<?, ?> restoreCouldNotStart() {
         return new AbstractSdxAction<>(DatalakeDatabaseRestoreCouldNotStartEvent.class) {
             @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeDatabaseRestoreCouldNotStartEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
-            @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseRestoreCouldNotStartEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
@@ -247,12 +246,6 @@ public class DatalakeRestoreActions {
     @Bean(name = "DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE")
     public Action<?, ?> datalakeFullResoreInProgress() {
         return new AbstractSdxAction<>(SdxEvent.class) {
-
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Full datalake restore is in progress for {} ", payload.getResourceId());
@@ -278,13 +271,6 @@ public class DatalakeRestoreActions {
     @Bean(name = "DATALAKE_RESTORE_FINISHED_STATE")
     public Action<?, ?> finishedRestoreAction() {
         return new AbstractSdxAction<>(DatalakeRestoreSuccessEvent.class) {
-
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeRestoreSuccessEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void doExecute(SdxContext context, DatalakeRestoreSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx database restore is finalized with sdx id: {}", payload.getResourceId());
@@ -306,12 +292,6 @@ public class DatalakeRestoreActions {
     public Action<?, ?> databaseRestoreFailed() {
         return new AbstractSdxAction<>(DatalakeDatabaseRestoreFailedEvent.class) {
             @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeDatabaseRestoreFailedEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
-            @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseRestoreFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
@@ -332,12 +312,6 @@ public class DatalakeRestoreActions {
     @Bean(name = "DATALAKE_RESTORE_FAILED_STATE")
     public Action<?, ?> restoreFailed() {
         return new AbstractSdxAction<>(DatalakeRestoreFailedEvent.class) {
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    DatalakeRestoreFailedEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
             @Override
             protected void doExecute(SdxContext context, DatalakeRestoreFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
@@ -363,23 +337,23 @@ public class DatalakeRestoreActions {
             protected Object getFailurePayload(DatalakeRestoreFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return null;
             }
-        };
-    }
 
-    private String getFailureReason(Map<Object, Object> variables, Exception exception) {
-        StringBuilder reason = new StringBuilder();
-        if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeRestoreFailureReason.RESTORE_ON_UPGRADE_FAILURE.name())) {
-            reason.append("Upgrade not finished correctly, datalake restore failed.");
-        } else {
-            if (exception instanceof PollerStoppedException) {
-                reason.append("Restore timed out, see the restore status using cdp-cli for more information.");
-            } else {
-                reason.append("Restore failed, returning datalake to running state.");
+            private String getFailureReason(Map<Object, Object> variables, Exception exception) {
+                StringBuilder reason = new StringBuilder();
+                if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeRestoreFailureReason.RESTORE_ON_UPGRADE_FAILURE.name())) {
+                    reason.append("Upgrade not finished correctly, datalake restore failed.");
+                } else {
+                    if (exception instanceof PollerStoppedException) {
+                        reason.append("Restore timed out, see the restore status using cdp-cli for more information.");
+                    } else {
+                        reason.append("Restore failed, returning datalake to running state.");
+                    }
+                }
+                if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {
+                    reason.append(" Failure message: ").append(exception.getMessage());
+                }
+                return reason.toString();
             }
-        }
-        if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {
-            reason.append(" Failure message: ").append(exception.getMessage());
-        }
-        return reason.toString();
+        };
     }
 }
