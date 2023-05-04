@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -416,7 +417,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request) {
-        return createSdx(userCrn, name, sdxClusterRequest, internalStackV4Request, null);
+        ImageSettingsV4Request imageSettingsV4Request = Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).orElse(null);
+        return createSdx(userCrn, name, sdxClusterRequest, internalStackV4Request, imageSettingsV4Request);
     }
 
     public void updateRangerRazEnabled(SdxCluster sdxCluster) {
@@ -451,6 +453,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
+        String os = Optional.ofNullable(imageV4Response).map(ImageV4Response::getOs)
+                        .or(() -> Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).map(ImageSettingsV4Request::getOs))
+                        .orElse(null);
+
         validateCcmV2Requirement(environment, runtimeVersion);
 
         SdxCluster sdxCluster = validateAndCreateNewSdxCluster(userCrn,
@@ -478,7 +484,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         DatabaseRequest internalDatabaseRequest = Optional.ofNullable(internalStackV4Request).map(StackV4Request::getExternalDatabase).orElse(null);
         sdxCluster.setSdxDatabase(externalDatabaseConfigurer.configure(
-                cloudPlatform, internalDatabaseRequest, sdxClusterRequest.getExternalDatabase(), sdxCluster));
+                cloudPlatform, os, internalDatabaseRequest, sdxClusterRequest.getExternalDatabase(), sdxCluster));
 
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
@@ -1097,7 +1103,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
 
         if (imageV4Response != null) {
-            if (clusterRequest.getRuntime() != null) {
+            if (clusterRequest.getRuntime() != null && !Objects.equals(clusterRequest.getRuntime(), imageV4Response.getVersion())) {
                 validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
                         "decides runtime version.");
             }

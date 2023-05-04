@@ -606,7 +606,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
         try {
             Set<Component> components = imageService.create(stack, imgFromCatalog);
-            setRuntimeAndDbVersion(stack, components);
+            setRuntimeAndDbVersion(stack, components, imgFromCatalog.getImage().getOs());
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
@@ -621,19 +621,20 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return savedStack;
     }
 
-    private void setRuntimeAndDbVersion(Stack stack, Set<Component> components) {
+    private void setRuntimeAndDbVersion(Stack stack, Set<Component> components, String os) {
         ClouderaManagerProduct runtime = ComponentConfigProviderService.getComponent(components, ClouderaManagerProduct.class, CDH_PRODUCT_DETAILS);
+        String stackVersion = null;
         if (Objects.nonNull(runtime)) {
-            String stackVersion = substringBefore(runtime.getVersion(), "-");
+            stackVersion = substringBefore(runtime.getVersion(), "-");
             LOGGER.debug("Setting runtime version {} for stack", stackVersion);
             stack.setStackVersion(stackVersion);
-            stack.setExternalDatabaseEngineVersion(databaseDefaultVersionProvider
-                    .calculateDbVersionBasedOnRuntimeIfMissing(stackVersion, stack.getExternalDatabaseEngineVersion()));
-            stackRepository.save(stack);
         } else {
-            // should not happen ever
+            // happens for base images
             LOGGER.warn("Product component is not present amongst components, runtime could not be set!");
         }
+        stack.setExternalDatabaseEngineVersion(databaseDefaultVersionProvider
+                .calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, stack.getExternalDatabaseEngineVersion()));
+        stackRepository.save(stack);
     }
 
     private void setDefaultTags(Stack stack) {

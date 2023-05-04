@@ -13,6 +13,8 @@ public class DatabaseDefaultVersionProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseDefaultVersionProvider.class);
 
+    private static final String REDHAT_8 = "redhat8";
+
     @Value("${cb.db.override.minRuntimeVersion}")
     private String minRuntimeVersion;
 
@@ -21,7 +23,7 @@ public class DatabaseDefaultVersionProvider {
 
     private final VersionComparator versionComparator = new VersionComparator();
 
-    public String calculateDbVersionBasedOnRuntimeIfMissing(String runtime, String requestedDbEngineVersion) {
+    public String calculateDbVersionBasedOnRuntimeAndOsIfMissing(String runtime, String os, String requestedDbEngineVersion) {
         if (StringUtils.isNotBlank(requestedDbEngineVersion)) {
             LOGGER.debug("DB engine version already requested to be [{}]", requestedDbEngineVersion);
             return requestedDbEngineVersion;
@@ -33,8 +35,11 @@ public class DatabaseDefaultVersionProvider {
                 LOGGER.debug("Setting DB engine version to 'null' for runtime [{}]", runtime);
                 return null;
             }
+        } else if (REDHAT_8.equalsIgnoreCase(os)) {
+            LOGGER.debug("Setting DB engine version to [{}] for os [{}]", dbEngineVersion, os);
+            return dbEngineVersion;
         } else {
-            LOGGER.warn("Runtime is null, cannot provide default db engine version. Setting it to 'null'");
+            LOGGER.warn("Setting DB engine version to 'null' for runtime [{}] and os [{}]", runtime, os);
             return null;
         }
     }

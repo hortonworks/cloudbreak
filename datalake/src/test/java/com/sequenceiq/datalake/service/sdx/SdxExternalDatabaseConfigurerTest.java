@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,15 +42,19 @@ public class SdxExternalDatabaseConfigurerTest {
     @InjectMocks
     private SdxExternalDatabaseConfigurer underTest;
 
+    @BeforeEach
+    void setUp() {
+        lenient().when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any())).thenReturn("11");
+    }
+
     @Test
     public void whenPlatformIsAwsWithDefaultsShouldCreateDatabase() {
         CloudPlatform cloudPlatform = CloudPlatform.AWS;
         when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
         when(platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)).thenReturn(true);
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(null, null)).thenReturn("11");
         SdxCluster sdxCluster = new SdxCluster();
 
-        underTest.configure(cloudPlatform, null, null, sdxCluster);
+        underTest.configure(cloudPlatform, null, null, null, sdxCluster);
 
         assertTrue(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
@@ -60,9 +67,8 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
         dbRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         SdxCluster sdxCluster = new SdxCluster();
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(null, null)).thenReturn("11");
 
-        underTest.configure(cloudPlatform, null, dbRequest, sdxCluster);
+        underTest.configure(cloudPlatform, null, null, dbRequest, sdxCluster);
 
         assertFalse(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.NONE, sdxCluster.getDatabaseAvailabilityType());
@@ -76,9 +82,8 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
         dbRequest.setAvailabilityType(SdxDatabaseAvailabilityType.HA);
         SdxCluster sdxCluster = new SdxCluster();
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(null, null)).thenReturn("11");
 
-        underTest.configure(cloudPlatform, null, dbRequest, sdxCluster);
+        underTest.configure(cloudPlatform, null, null, dbRequest, sdxCluster);
 
         assertTrue(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
@@ -93,9 +98,8 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("clusterName");
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(null, null)).thenReturn("11");
 
-        underTest.configure(cloudPlatform, null, dbRequest, sdxCluster);
+        underTest.configure(cloudPlatform, null, null, dbRequest, sdxCluster);
 
         assertTrue(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
@@ -109,9 +113,8 @@ public class SdxExternalDatabaseConfigurerTest {
         dbRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("clusterName");
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(null, null)).thenReturn("11");
 
-        underTest.configure(cloudPlatform, null, dbRequest, sdxCluster);
+        underTest.configure(cloudPlatform, null, null, dbRequest, sdxCluster);
 
         assertFalse(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.NONE, sdxCluster.getDatabaseAvailabilityType());
@@ -126,10 +129,9 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("clusterName");
         sdxCluster.setRuntime("7.0.2");
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(sdxCluster.getRuntime(), null)).thenReturn("11");
 
 
-        underTest.configure(cloudPlatform, null, dbRequest, sdxCluster);
+        underTest.configure(cloudPlatform, null, null, dbRequest, sdxCluster);
 
         assertFalse(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.NONE, sdxCluster.getDatabaseAvailabilityType());
@@ -145,9 +147,8 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("clusterName");
         sdxCluster.setRuntime("7.1.0");
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(sdxCluster.getRuntime(), null)).thenReturn("11");
 
-        underTest.configure(cloudPlatform, null, dbRequest, sdxCluster);
+        underTest.configure(cloudPlatform, null, null, dbRequest, sdxCluster);
 
         assertTrue(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
@@ -163,9 +164,8 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("clusterName");
         sdxCluster.setRuntime("7.2.0");
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(sdxCluster.getRuntime(), null)).thenReturn("11");
 
-        underTest.configure(cloudPlatform, null, dbRequest, sdxCluster);
+        underTest.configure(cloudPlatform, null, null, dbRequest, sdxCluster);
 
         assertTrue(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
@@ -179,9 +179,8 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
         dbRequest.setAvailabilityType(SdxDatabaseAvailabilityType.HA);
         SdxCluster sdxCluster = new SdxCluster();
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(null, null)).thenReturn("11");
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.configure(cloudPlatform, null, dbRequest, sdxCluster));
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.configure(cloudPlatform, null, null, dbRequest, sdxCluster));
 
         assertTrue(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
@@ -197,9 +196,8 @@ public class SdxExternalDatabaseConfigurerTest {
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.NON_HA);
         SdxCluster sdxCluster = new SdxCluster();
         when(platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)).thenReturn(true);
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(null, databaseEngineVersion)).thenReturn(databaseEngineVersion);
 
-        underTest.configure(cloudPlatform, databaseRequest, null, sdxCluster);
+        underTest.configure(cloudPlatform, null, databaseRequest, null, sdxCluster);
 
         assertTrue(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.NON_HA, sdxCluster.getDatabaseAvailabilityType());
@@ -215,9 +213,8 @@ public class SdxExternalDatabaseConfigurerTest {
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
         SdxCluster sdxCluster = new SdxCluster();
         when(platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)).thenReturn(true);
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(null, databaseEngineVersion)).thenReturn(databaseEngineVersion);
 
-        underTest.configure(cloudPlatform, databaseRequest, null, sdxCluster);
+        underTest.configure(cloudPlatform, null, databaseRequest, null, sdxCluster);
 
         assertTrue(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
@@ -231,9 +228,9 @@ public class SdxExternalDatabaseConfigurerTest {
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
         SdxCluster sdxCluster = new SdxCluster();
         when(platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)).thenReturn(true);
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(null, null)).thenReturn(null);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any())).thenReturn(null);
 
-        underTest.configure(cloudPlatform, databaseRequest, null, sdxCluster);
+        underTest.configure(cloudPlatform, null, databaseRequest, null, sdxCluster);
 
         assertTrue(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
@@ -247,9 +244,8 @@ public class SdxExternalDatabaseConfigurerTest {
         String databaseEngineVersion = "11";
         databaseRequest.setDatabaseEngineVersion(databaseEngineVersion);
         SdxCluster sdxCluster = new SdxCluster();
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeIfMissing(null, databaseEngineVersion)).thenReturn(databaseEngineVersion);
 
-        underTest.configure(cloudPlatform, databaseRequest, null, sdxCluster);
+        underTest.configure(cloudPlatform, null, databaseRequest, null, sdxCluster);
 
         assertFalse(sdxCluster.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.NONE, sdxCluster.getDatabaseAvailabilityType());
