@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.imagecatalog;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -45,50 +46,49 @@ public class ImageCatalogService implements AuthorizationResourceCrnProvider {
     }
 
     public ImageV4Response getImageResponseFromImageRequest(ImageSettingsV4Request imageSettingsV4Request, ImageCatalogPlatform imageCatalogPlatform) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-
-        if (imageSettingsV4Request == null) {
-            return null;
-        }
-
-        ImageCatalogV4Endpoint imageCatalogV4Endpoint = cloudbreakInternalCrnClient.withInternalCrn().imageCatalogV4Endpoint();
-
-        try {
-            LOGGER.info("Calling cloudbreak to get image response for the given image catalog {} and image id {}",
-                    imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
-            ImagesV4Response imagesV4Response = null;
-            try {
-                if (StringUtils.isBlank(imageSettingsV4Request.getCatalog())) {
-                    imagesV4Response = imageCatalogV4Endpoint.getImageByImageId(SdxService.WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getId(), accountId);
-                } else {
-                    imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(SdxService.WORKSPACE_ID_DEFAULT,
-                            imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId(), accountId);
-                }
-            } catch (Exception e) {
-                LOGGER.error("Sdx service fails to get image using image id", e);
-            }
-
-            if (imagesV4Response == null) {
-                return null;
-            }
-
-            for (ImageV4Response imageV4Response : imagesV4Response.getCdhImages()) {
-                // find the image can be used on the cloud platform of the environment
-                if (imageV4Response.getImageSetsByProvider() != null) {
-                    if (imageV4Response.getImageSetsByProvider().containsKey(imageCatalogPlatform.nameToLowerCase())) {
+        if (imageSettingsV4Request != null) {
+            List<ImageV4Response> images = getImagesMatchingRequest(imageSettingsV4Request);
+            if (images != null) {
+                String providerName = imageCatalogPlatform.nameToLowerCase();
+                for (ImageV4Response imageV4Response : images) {
+                    // find the image can be used on the cloud platform of the environment
+                    if (imageV4Response.getImageSetsByProvider() != null && imageV4Response.getImageSetsByProvider().containsKey(providerName)) {
                         return imageV4Response;
                     }
                 }
+                String errorMessage = String.format("SDX cluster is on the cloud platform %s, but the image requested with uuid %s:%s does not support it",
+                        providerName, imageSettingsV4Request.getCatalog() != null ? imageSettingsV4Request.getCatalog() : "default",
+                        imageSettingsV4Request.getId());
+                LOGGER.error(errorMessage);
             }
+        }
+        return null;
+    }
 
-            String errorMessage = String.format("SDX cluster is on the cloud platform %s, but the image requested with uuid %s:%s does not support it",
-                    imageCatalogPlatform.nameToLowerCase(), imageSettingsV4Request.getCatalog() != null ? imageSettingsV4Request.getCatalog() : "default",
-                    imageSettingsV4Request.getId());
-            LOGGER.error(errorMessage);
+    private List<ImageV4Response> getImagesMatchingRequest(ImageSettingsV4Request imageSettingsV4Request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        ImageCatalogV4Endpoint imageCatalogV4Endpoint = cloudbreakInternalCrnClient.withInternalCrn().imageCatalogV4Endpoint();
 
-            return null;
-        } catch (javax.ws.rs.NotFoundException e) {
-            LOGGER.info("Sdx cluster not found on CB side", e);
+        LOGGER.info("Calling cloudbreak to get image response for the given image catalog {} and image id {}",
+                imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
+        try {
+            ImagesV4Response imagesV4Response;
+            if (StringUtils.isBlank(imageSettingsV4Request.getCatalog())) {
+                imagesV4Response = imageCatalogV4Endpoint.getImageByImageId(SdxService.WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getId(), accountId);
+            } else {
+                imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(SdxService.WORKSPACE_ID_DEFAULT,
+                        imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId(), accountId);
+            }
+            List<ImageV4Response> images = new LinkedList<>();
+            if (imagesV4Response.getCdhImages() != null) {
+                images.addAll(imagesV4Response.getCdhImages());
+            }
+            if (imagesV4Response.getBaseImages() != null) {
+                images.addAll(imagesV4Response.getBaseImages());
+            }
+            return images;
+        } catch (Exception e) {
+            LOGGER.error("Sdx service failed to get images for request {}", imageSettingsV4Request, e);
             return null;
         }
     }

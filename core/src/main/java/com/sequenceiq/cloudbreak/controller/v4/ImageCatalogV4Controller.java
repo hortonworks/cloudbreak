@@ -219,7 +219,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @DisableCheckPermissions
     public ImagesV4Response getImageByImageId(Long workspaceId, String imageId, @AccountId String accountId) throws Exception {
         StatedImage statedImage = imageCatalogService.getImageByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), imageId, "");
-        Images images = new Images(List.of(), List.of(statedImage.getImage()), List.of(), Set.of());
+        Images images = getImagesFromSingleStatedImage(statedImage);
         return imagesToImagesV4ResponseConverter.convert(images);
     }
 
@@ -228,8 +228,14 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     public ImagesV4Response getImageByCatalogNameAndImageId(Long workspaceId, @ResourceName String name,
             String imageId, @AccountId String accountId) throws Exception {
         StatedImage statedImage = imageCatalogService.getImageByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), imageId, name);
-        Images images = new Images(List.of(), List.of(statedImage.getImage()), List.of(), Set.of());
+        Images images = getImagesFromSingleStatedImage(statedImage);
         return imagesToImagesV4ResponseConverter.convert(images);
+    }
+
+    private Images getImagesFromSingleStatedImage(StatedImage statedImage) {
+        return statedImage.getImage().isPrewarmed()
+                ? new Images(List.of(), List.of(statedImage.getImage()), List.of(), Set.of())
+                : new Images(List.of(statedImage.getImage()), List.of(), List.of(), Set.of());
     }
 
     @Override

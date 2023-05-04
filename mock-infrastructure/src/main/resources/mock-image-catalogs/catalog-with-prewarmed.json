@@ -36,7 +36,7 @@
         "repo": {
           "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
-        "version": "CM_VERSION",
+        "version": "CDH_RUNTIME",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.0.3.0.0.0-21-el7.parcel",
@@ -93,7 +93,7 @@
         "repo": {
           "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
-        "version": "CM_VERSION_NEXT",
+        "version": "CDH_RUNTIME_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.0.3.0.0.0-21-el7.parcel",

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -11,6 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -27,16 +30,14 @@ import java.util.function.Supplier;
 
 import javax.ws.rs.InternalServerErrorException;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -64,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -72,6 +75,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
@@ -87,7 +91,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.flow.core.FlowLogService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StackServiceTest {
 
     private static final Long STACK_ID = 1L;
@@ -102,12 +106,9 @@ public class StackServiceTest {
 
     private static final String STACK_CRN = "stackCrn";
 
-    private static final String STACK_NOT_FOUND_BY_ID_MESSAGE = "Stack '%d' not found";
+    private static final String STACK_NOT_FOUND_BY_ID_MESSAGE = "Stack '%d' not found.";
 
     private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Captor
     public final ArgumentCaptor<String> crnCaptor = ArgumentCaptor.forClass(String.class);
@@ -205,58 +206,103 @@ public class StackServiceTest {
     @Mock
     private AutoscaleStackToAutoscaleStackResponseJsonConverter autoscaleStackToAutoscaleStackResponseJsonConverter;
 
-    @Before
-    public void setUp() {
+    @Mock
+    private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
+    @Mock
+    private StatedImage statedImage;
+
+    @Mock
+    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image image;
+
+    @BeforeEach
+    void setUp() {
         underTest.nowSupplier = () -> MOCK_NOW;
+
+        lenient().when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
+        lenient().when(stackAuthentication.passwordAuthenticationRequired()).thenReturn(false);
+        lenient().when(stackRepository.save(stack)).thenReturn(stack);
+        lenient().when(statedImage.getImage()).thenReturn(image);
+
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
 
     @Test
-    public void testWhenStackCouldNotFindByItsIdThenExceptionWouldThrown() {
+    void testWhenStackCouldNotFindByItsIdThenExceptionWouldThrown() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_ID_MESSAGE, STACK_ID));
-        underTest.getById(STACK_ID);
+
+        assertThatThrownBy(() -> underTest.getById(STACK_ID))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage(String.format(STACK_NOT_FOUND_BY_ID_MESSAGE, STACK_ID));
     }
 
     @Test
-    public void testCreateFailsWithInvalidImageId() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    void testCreateFailsWithInvalidImageId() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
 
-        when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
-        when(stackAuthentication.passwordAuthenticationRequired()).thenReturn(false);
-
-        when(stackRepository.save(stack)).thenReturn(stack);
-
-        expectedException.expectCause(org.hamcrest.Matchers.any(CloudbreakImageNotFoundException.class));
-
-        String platformString = "AWS";
-        doThrow(new CloudbreakImageNotFoundException("Image not found"))
+        CloudbreakImageNotFoundException imageNotFound = new CloudbreakImageNotFoundException("Image not found");
+        doThrow(imageNotFound)
                 .when(imageService)
                 .create(eq(stack), nullable(StatedImage.class));
 
-        try {
-            stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                    () -> underTest.create(stack, mock(StatedImage.class), user, workspace, Optional.empty()));
-        } finally {
-            verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
-        }
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, Optional.empty())))
+                .hasCause(imageNotFound);
+        verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
     }
 
     @Test
-    public void testCreateImageFoundNoStackStatusUpdate() {
+    void testCreateWithRuntime() throws Exception {
+        when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
+        when(variant.value()).thenReturn(VARIANT_VALUE);
+        String os = "redhat8";
+        when(image.getOs()).thenReturn(os);
+        ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
+        String stackVersion = "7.2.16";
+        cdhProduct.setVersion(stackVersion);
+        Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
+        when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
+        String dbVersion = "10";
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);
+        String calculatedDbVersion = "11";
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any())).thenReturn(calculatedDbVersion);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, Optional.empty()));
+
+        verify(stack).setStackVersion(stackVersion);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion);
+        verify(stack).setExternalDatabaseEngineVersion(calculatedDbVersion);
+        verify(stackRepository, times(2)).save(stack);
+    }
+
+    @Test
+    void testCreateWithoutRuntime() throws Exception {
+        when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
+        when(variant.value()).thenReturn(VARIANT_VALUE);
+        String os = "redhat8";
+        when(image.getOs()).thenReturn(os);
+        when(imageService.create(stack, statedImage)).thenReturn(Set.of());
+        String dbVersion = "10";
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);
+        String calculatedDbVersion = "11";
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any())).thenReturn(calculatedDbVersion);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, Optional.empty()));
+
+        verify(stack, never()).setStackVersion(any());
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion);
+        verify(stack).setExternalDatabaseEngineVersion(calculatedDbVersion);
+        verify(stackRepository, times(2)).save(stack);
+    }
+
+    @Test
+    void testCreateImageFoundNoStackStatusUpdate() {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
 
-        when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
-        when(stackAuthentication.passwordAuthenticationRequired()).thenReturn(false);
-
-        when(stackRepository.save(stack)).thenReturn(stack);
-
         try {
             stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                    () -> underTest.create(stack, mock(StatedImage.class), user, workspace, Optional.empty()));
+                    () -> underTest.create(stack, statedImage, user, workspace, Optional.empty()));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(stack).setResourceCrn(crnCaptor.capture());
@@ -268,7 +314,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testGetAllForAutoscaleWithNullSetFromDb() throws TransactionExecutionException {
+    void testGetAllForAutoscaleWithNullSetFromDb() throws TransactionExecutionException {
         when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
             Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
             return callback.get();
@@ -281,7 +327,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testGetAllForAutoscaleWithAvailableStack() throws TransactionExecutionException {
+    void testGetAllForAutoscaleWithAvailableStack() throws TransactionExecutionException {
         when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
             Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
             return callback.get();
@@ -305,7 +351,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testGetAllForAutoscaleWithDeleteInProgressStack() throws TransactionExecutionException {
+    void testGetAllForAutoscaleWithDeleteInProgressStack() throws TransactionExecutionException {
         when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
             Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
             return callback.get();
@@ -332,7 +378,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testGetImagesOfAliveStacksWithValidImage() {
+    void testGetImagesOfAliveStacksWithValidImage() {
         long thresholdTimestamp = Timestamp.valueOf(MOCK_NOW).getTime();
         doReturn(List.of(createStackImageView("{\"imageName\":\"mockimage/hdc-hdp--1710161226.tar.gz\"}")))
                 .when(stackRepository).findImagesOfAliveStacks(thresholdTimestamp);
@@ -343,7 +389,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testGetImagesOfAliveStacksWithInvalidImage() {
+    void testGetImagesOfAliveStacksWithInvalidImage() {
         long thresholdTimestamp = Timestamp.valueOf(MOCK_NOW).getTime();
         doReturn(List.of(createStackImageView("[]")))
                 .when(stackRepository).findImagesOfAliveStacks(thresholdTimestamp);
@@ -352,14 +398,14 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testGetImagesOfAliveStacksWithNullThresholdInDays() {
+    void testGetImagesOfAliveStacksWithNullThresholdInDays() {
         underTest.getImagesOfAliveStacks(null);
 
         verify(stackRepository).findImagesOfAliveStacks(Timestamp.valueOf(MOCK_NOW).getTime());
     }
 
     @Test
-    public void testGetImagesOfAliveStacksWithThreshold() {
+    void testGetImagesOfAliveStacksWithThreshold() {
         final int thresholdInDays = 10;
 
         underTest.getImagesOfAliveStacks(thresholdInDays);
@@ -368,13 +414,13 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereNoResultFromDatalakeCrn() throws TransactionExecutionException {
+    void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereNoResultFromDatalakeCrn() throws TransactionExecutionException {
         Set<StackIdView> result = findClusterConnectedToDatalake(Set.of());
         assertEquals(0, result.size());
     }
 
     @Test
-    public void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereNoResultFromDatalakeResource() throws TransactionExecutionException {
+    void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereNoResultFromDatalakeResource() throws TransactionExecutionException {
         StackIdView i = new StackIdViewImpl(1L, "no", "no");
         StackIdView j = new StackIdViewImpl(2L, "nope", "no");
         StackIdView k = new StackIdViewImpl(3L, "none", "no");
@@ -385,7 +431,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testGetStatusByCrnsInternalShouldReturnWithStatuses() {
+    void testGetStatusByCrnsInternalShouldReturnWithStatuses() {
         when(stackRepository.getStatusByCrnsInternal(any(), any())).thenReturn(List.of(new StackClusterStatusView() {
             @Override
             public Long getId() {
@@ -428,7 +474,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testGetComputeMonitoringFlagWhenEnabled() {
+    void testGetComputeMonitoringFlagWhenEnabled() {
         when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(true, true));
         Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
         assertTrue(computeMonitoringEnabled.isPresent());
@@ -436,7 +482,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testGetComputeMonitoringFlagWhenDisabled() {
+    void testGetComputeMonitoringFlagWhenDisabled() {
         when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(true, false));
         Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
         assertTrue(computeMonitoringEnabled.isPresent());
@@ -444,14 +490,14 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testGetComputeMonitoringFlagWhenTelemetryNull() {
+    void testGetComputeMonitoringFlagWhenTelemetryNull() {
         when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(false, false));
         Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
         assertFalse(computeMonitoringEnabled.isPresent());
     }
 
     @Test
-    public void testGetComputeMonitoringFlagWhenExceptionThrown() {
+    void testGetComputeMonitoringFlagWhenExceptionThrown() {
         when(componentConfigProviderService.getTelemetry(any())).thenThrow(new InternalServerErrorException("something"));
         Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
         assertFalse(computeMonitoringEnabled.isPresent());
@@ -485,7 +531,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testWhenGetByNameOrCrnInWorkspaceIsCalledWithNameThenGetByNameInWorkspaceIsCalled() {
+    void testWhenGetByNameOrCrnInWorkspaceIsCalledWithNameThenGetByNameInWorkspaceIsCalled() {
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
 
         underTest.getByNameOrCrnInWorkspace(NameOrCrn.ofName(STACK_NAME), WORKSPACE_ID);
@@ -495,7 +541,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testWhenGetByNameOrCrnInWorkspaceIsCalledWithCrnThenGetNotTerminatedByCrnInWorkspaceIsCalled() {
+    void testWhenGetByNameOrCrnInWorkspaceIsCalledWithCrnThenGetNotTerminatedByCrnInWorkspaceIsCalled() {
         when(stackRepository.findNotTerminatedByCrnAndWorkspaceId(STACK_CRN, WORKSPACE_ID)).thenReturn(Optional.of(stack));
 
         underTest.getByNameOrCrnInWorkspace(NameOrCrn.ofCrn(STACK_CRN), WORKSPACE_ID);
@@ -511,14 +557,14 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testFindEnvironmentCrnByStackId() {
+    void testFindEnvironmentCrnByStackId() {
         when(stackRepository.findEnvironmentCrnByStackId(WORKSPACE_ID)).thenReturn(Optional.of("ENVIRONMENT_CRN"));
         String environmentCrn = underTest.findEnvironmentCrnByStackId(WORKSPACE_ID);
         assertEquals("ENVIRONMENT_CRN", environmentCrn);
     }
 
     @Test
-    public void testFindEnvironmentCrnByStackIdException() {
+    void testFindEnvironmentCrnByStackIdException() {
         when(stackRepository.findEnvironmentCrnByStackId(WORKSPACE_ID)).thenReturn(Optional.empty());
         RuntimeException exception = assertThrows(NotFoundException.class, () -> underTest.findEnvironmentCrnByStackId(WORKSPACE_ID));
         assertEquals(exception.getMessage(), "Stack '1' not found.");

@@ -162,6 +162,8 @@ class SdxServiceTest {
 
     private static final String CLUSTER_NAME = "test-sdx-cluster";
 
+    private static final String OS = "centos7";
+
     @Mock
     private SdxExternalDatabaseConfigurer externalDatabaseConfigurer;
 
@@ -387,7 +389,7 @@ class SdxServiceTest {
         lenient().when(entitlementService.isRazForGcpEnabled(anyString()))
                 .thenReturn(true);
         lenient().when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
-        lenient().when(externalDatabaseConfigurer.configure(any(CloudPlatform.class), ArgumentMatchers.isNull(), any(SdxDatabaseRequest.class),
+        lenient().when(externalDatabaseConfigurer.configure(any(CloudPlatform.class), any(), ArgumentMatchers.isNull(), any(SdxDatabaseRequest.class),
                         any(SdxCluster.class))).thenReturn(new SdxDatabase());
     }
 
@@ -1068,6 +1070,7 @@ class SdxServiceTest {
         assertNotNull(stackV4Request.getImage());
         assertEquals("cdp-default", stackV4Request.getImage().getCatalog());
         assertEquals("imageId_1", stackV4Request.getImage().getId());
+        verify(externalDatabaseConfigurer).configure(any(), eq(OS), any(), any(), any());
     }
 
     @Test
@@ -1152,6 +1155,7 @@ class SdxServiceTest {
         stackDetails.setVersion("7.2.7");
 
         ImageV4Response imageV4Response = new ImageV4Response();
+        imageV4Response.setOs(OS);
         imageV4Response.setImageSetsByProvider(imageSetsByProvider);
         imageV4Response.setStackDetails(stackDetails);
         return imageV4Response;
