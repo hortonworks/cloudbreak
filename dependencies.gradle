@@ -51,7 +51,7 @@ ext {
   byteBuddyVersion = '1.14.4'
 
   // Logging
-  logbackVersion = '1.2.12'
+  logbackVersion = '1.4.7'
   logbackJsonClassicVersion = '0.1.5'
   slf4jApiVersion = '1.7.30'
 
