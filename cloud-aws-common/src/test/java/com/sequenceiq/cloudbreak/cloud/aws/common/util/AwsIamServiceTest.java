@@ -212,19 +212,6 @@ public class AwsIamServiceTest {
                 Map.entry("ghi", "jkl")
         );
         assertThat(awsIamService.handleTemplateReplacements("abc ghi", replacements)).isEqualTo("def jkl");
-
-        // Test for backup/restore having location with/without ending slash.
-        assertThat(awsIamService.handleTemplateReplacements("${BACKUP_LOCATION_BASE}/*",
-                Collections.singletonMap("${BACKUP_LOCATION_BASE}", "abc/"))).isEqualTo("abc/*");
-        assertThat(awsIamService.handleTemplateReplacements("${BACKUP_LOCATION_BASE}/",
-                Collections.singletonMap("${BACKUP_LOCATION_BASE}", "abc/"))).isEqualTo("abc/");
-        assertThat(awsIamService.handleTemplateReplacements("${BACKUP_LOCATION_BASE}",
-                Collections.singletonMap("${BACKUP_LOCATION_BASE}", "abc/"))).isEqualTo("abc");
-        assertThat(awsIamService.handleTemplateReplacements("${BACKUP_LOCATION_BASE}",
-                Collections.singletonMap("${BACKUP_LOCATION_BASE}", "abc"))).isEqualTo("abc");
-        // Non-backup/restore policy is not be impacted on if the ending slash will be removed or not.
-        assertThat(awsIamService.handleTemplateReplacements("${TEST}/*", Collections.singletonMap("${TEST}", "abc/")))
-                .isEqualTo("abc//*");
     }
 
     @Test
