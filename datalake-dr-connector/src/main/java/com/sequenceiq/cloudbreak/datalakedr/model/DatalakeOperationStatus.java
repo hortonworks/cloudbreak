@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.datalakedr.model;
 
+import java.util.List;
+
 public interface DatalakeOperationStatus {
     String NO_FAILURES = "No failure messages found";
 
@@ -39,6 +41,10 @@ public interface DatalakeOperationStatus {
     }
 
     State getState();
+
+    List<String> getIncludedData();
+
+    String getFailureReason();
 
     default boolean isComplete() {
         return getState().isComplete();

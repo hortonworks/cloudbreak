@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.datalakedr.converter;
 
 import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.FAILED_STATE;
-import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.SUCCESSFUL_STATUS;
+import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.SUCCESSFUL_STATE;
 import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.VALIDATION_FAILED_STATE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,8 +43,8 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
 
         datalakeDRProto.DatabaseBackupRestoreState.Builder database = datalakeDRProto.DatabaseBackupRestoreState.newBuilder().setDatabase(status);
         datalakeDRProto.HbaseBackupRestoreState.Builder hbase = datalakeDRProto.HbaseBackupRestoreState.newBuilder()
-                .setAtlasJanusTable(datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus(SUCCESSFUL_STATUS).build())
-                .setAtlasEntityAuditEventTable(datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus(SUCCESSFUL_STATUS).build());
+                .setAtlasJanusTable(datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus(SUCCESSFUL_STATE).build())
+                .setAtlasEntityAuditEventTable(datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus(SUCCESSFUL_STATE).build());
 
 
         datalakeDRProto.InternalBackupRestoreState.Builder backupState = datalakeDRProto.InternalBackupRestoreState.newBuilder()
@@ -52,7 +52,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
                 .setHbase(hbase)
                 .setSolr(solr);
         datalakeDRProto.BackupDatalakeStatusResponse.Builder builder = datalakeDRProto.BackupDatalakeStatusResponse.newBuilder()
-                .setOverallState(SUCCESSFUL_STATUS)
+                .setOverallState(SUCCESSFUL_STATE)
                 .setOperationStates(backupState.build());
 
         DatalakeBackupStatusResponse response = underTest.convert(builder.build());
@@ -71,7 +71,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
         datalakeDRProto.InternalBackupRestoreState.Builder backupState = datalakeDRProto.InternalBackupRestoreState.newBuilder()
                 .setSolr(solr);
         datalakeDRProto.BackupDatalakeStatusResponse.Builder builder = datalakeDRProto.BackupDatalakeStatusResponse.newBuilder()
-                .setOverallState(SUCCESSFUL_STATUS)
+                .setOverallState(SUCCESSFUL_STATE)
                 .setOperationStates(backupState.build());
 
         DatalakeBackupStatusResponse response = underTest.convert(builder.build());
@@ -88,8 +88,8 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
                 .setEdgeIndexCollection(status);
 
         datalakeDRProto.HbaseBackupRestoreState.Builder hbase = datalakeDRProto.HbaseBackupRestoreState.newBuilder()
-                .setAtlasJanusTable(datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus(SUCCESSFUL_STATUS).build())
-                .setAtlasEntityAuditEventTable(datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus(SUCCESSFUL_STATUS).build());
+                .setAtlasJanusTable(datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus(SUCCESSFUL_STATE).build())
+                .setAtlasEntityAuditEventTable(datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus(SUCCESSFUL_STATE).build());
 
 
         datalakeDRProto.InternalBackupRestoreState.Builder backupMetadata = datalakeDRProto.InternalBackupRestoreState.newBuilder()
@@ -100,7 +100,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
                 .setSolr(solr)
                 .setHbase(hbase);
         datalakeDRProto.BackupDatalakeStatusResponse.Builder builder = datalakeDRProto.BackupDatalakeStatusResponse.newBuilder()
-                .setOverallState(SUCCESSFUL_STATUS)
+                .setOverallState(SUCCESSFUL_STATE)
                 .setOperationStates(backupMetadata.build());
 
         DatalakeBackupStatusResponse response = underTest.convert(builder.build());
@@ -124,7 +124,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
         datalakeDRProto.InternalBackupRestoreState.Builder backupState = datalakeDRProto.InternalBackupRestoreState.newBuilder()
                 .setDatabase(database);
         datalakeDRProto.BackupDatalakeStatusResponse.Builder builder = datalakeDRProto.BackupDatalakeStatusResponse.newBuilder()
-                .setOverallState(SUCCESSFUL_STATUS)
+                .setOverallState(SUCCESSFUL_STATE)
                 .setOperationStates(backupState.build());
 
         DatalakeBackupStatusResponse response = underTest.convert(builder.build());

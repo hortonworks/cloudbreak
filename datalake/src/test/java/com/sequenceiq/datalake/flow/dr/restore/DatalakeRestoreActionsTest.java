@@ -92,7 +92,7 @@ public class DatalakeRestoreActionsTest {
     @Test
     public void testRestoreWithNoFlowChain() throws Exception {
         when(sdxBackupRestoreService.triggerDatalakeRestore(eq(OLD_SDX_ID), any(), any(), eq(USER_CRN), any(DatalakeDrSkipOptions.class), eq(0)))
-                .thenReturn(new DatalakeRestoreStatusResponse(BACKUP_ID, RESTORE_ID, DatalakeOperationStatus.State.STARTED, null));
+                .thenReturn(new DatalakeRestoreStatusResponse(BACKUP_ID, RESTORE_ID, DatalakeOperationStatus.State.STARTED, null, null));
         DatalakeTriggerRestoreEvent event = new DatalakeTriggerRestoreEvent(DATALAKE_TRIGGER_RESTORE_EVENT.event(), OLD_SDX_ID, DATALAKE_NAME,
                 USER_CRN, null, BACKUP_LOCATION, null, SKIP_OPTIONS, DatalakeRestoreFailureReason.RESTORE_ON_RESIZE, 0);
         AbstractAction action = (AbstractAction) underTest.triggerDatalakeRestore();
@@ -139,7 +139,7 @@ public class DatalakeRestoreActionsTest {
         DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(true, true, true, true);
 
         when(sdxBackupRestoreService.triggerDatalakeRestore(eq(NEW_SDX_ID), any(), any(), eq(USER_CRN), eq(skipOptions), eq(0)))
-                .thenReturn(new DatalakeRestoreStatusResponse(BACKUP_ID, RESTORE_ID, DatalakeOperationStatus.State.STARTED, null));
+                .thenReturn(new DatalakeRestoreStatusResponse(BACKUP_ID, RESTORE_ID, DatalakeOperationStatus.State.STARTED, null, null));
         DatalakeTriggerRestoreEvent event = new DatalakeTriggerRestoreEvent(DATALAKE_TRIGGER_RESTORE_EVENT.event(), NEW_SDX_ID, DATALAKE_NAME,
                 USER_CRN, null, BACKUP_LOCATION, null, skipOptions, DatalakeRestoreFailureReason.RESTORE_ON_RESIZE, 0);
         AbstractAction action = (AbstractAction) underTest.triggerDatalakeRestore();
@@ -160,7 +160,7 @@ public class DatalakeRestoreActionsTest {
         int fullDrMaxDurationInMin = 80;
         when(sdxBackupRestoreService.triggerDatalakeRestore(eq(NEW_SDX_ID), any(), any(), eq(USER_CRN), any(DatalakeDrSkipOptions.class),
                 eq(fullDrMaxDurationInMin)))
-                .thenReturn(new DatalakeRestoreStatusResponse(BACKUP_ID, RESTORE_ID, DatalakeOperationStatus.State.STARTED, null));
+                .thenReturn(new DatalakeRestoreStatusResponse(BACKUP_ID, RESTORE_ID, DatalakeOperationStatus.State.STARTED, null, null));
         DatalakeTriggerRestoreEvent event = new DatalakeTriggerRestoreEvent(DATALAKE_TRIGGER_RESTORE_EVENT.event(), NEW_SDX_ID, DATALAKE_NAME,
                 USER_CRN, null, BACKUP_LOCATION, null, SKIP_OPTIONS, DatalakeRestoreFailureReason.RESTORE_ON_RESIZE,
                 fullDrMaxDurationInMin);
@@ -180,7 +180,7 @@ public class DatalakeRestoreActionsTest {
     @Test
     public void testGetNewSdxIdForResizeDoExecute() throws Exception {
         when(sdxBackupRestoreService.triggerDatalakeRestore(eq(NEW_SDX_ID), any(), any(), eq(USER_CRN), eq(SKIP_OPTIONS), eq(0)))
-                .thenReturn(new DatalakeRestoreStatusResponse(BACKUP_ID, RESTORE_ID, DatalakeOperationStatus.State.STARTED, null));
+                .thenReturn(new DatalakeRestoreStatusResponse(BACKUP_ID, RESTORE_ID, DatalakeOperationStatus.State.STARTED, null, null));
         DatalakeTriggerRestoreEvent event = new DatalakeTriggerRestoreEvent(DATALAKE_TRIGGER_RESTORE_EVENT.event(), NEW_SDX_ID, DATALAKE_NAME,
                 USER_CRN, null, BACKUP_LOCATION, null, SKIP_OPTIONS, DatalakeRestoreFailureReason.RESTORE_ON_RESIZE, 0);
         AbstractAction action = (AbstractAction) underTest.triggerDatalakeRestore();

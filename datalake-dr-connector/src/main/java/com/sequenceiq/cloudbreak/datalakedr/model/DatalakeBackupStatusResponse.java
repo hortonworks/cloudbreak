@@ -24,10 +24,12 @@ public class DatalakeBackupStatusResponse implements DatalakeOperationStatus {
         this.failureReason = Optional.ofNullable(failureReason).filter(Predicate.not("null"::equals));
     }
 
+    @Override
     public State getState() {
         return state;
     }
 
+    @Override
     public String getFailureReason() {
         return failureReason.orElse(NO_FAILURES);
     }
@@ -36,6 +38,7 @@ public class DatalakeBackupStatusResponse implements DatalakeOperationStatus {
         return backupId;
     }
 
+    @Override
     public List<String> getIncludedData() {
         return includedData;
     }

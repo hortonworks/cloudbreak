@@ -392,9 +392,9 @@ public class SdxBackupRestoreServiceTest {
         DatalakeBackupStatusResponse backupStatusCompleted = new DatalakeBackupStatusResponse("",
                 DatalakeOperationStatus.State.SUCCESSFUL, Collections.emptyList(), "", "");
         DatalakeRestoreStatusResponse restoreStatusInProgress = new DatalakeRestoreStatusResponse("", "",
-                DatalakeOperationStatus.State.STARTED, "");
+                DatalakeOperationStatus.State.STARTED, Collections.emptyList(), "");
         DatalakeRestoreStatusResponse restoreStatusCompleted = new DatalakeRestoreStatusResponse("", "",
-                DatalakeOperationStatus.State.FAILED, "");
+                DatalakeOperationStatus.State.FAILED, Collections.emptyList(), "");
 
         // Missing actorCrn.
         SdxCluster sdxCluster = getValidSdxCluster();

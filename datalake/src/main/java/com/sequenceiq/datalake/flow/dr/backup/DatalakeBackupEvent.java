@@ -12,24 +12,29 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum DatalakeBackupEvent implements FlowEvent {
 
-    DATALAKE_DATABASE_BACKUP_EVENT(EventSelectorUtil.selector(DatalakeDatabaseBackupStartEvent.class)),
-    DATALAKE_TRIGGER_BACKUP_EVENT("DATALAKE_TRIGGER_BACKUP_EVENT"),
-    DATALAKE_DATABASE_BACKUP_COULD_NOT_START_EVENT(EventSelectorUtil.selector(DatalakeDatabaseBackupCouldNotStartEvent.class)),
-    DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT("DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT"),
-    DATALAKE_FULL_BACKUP_IN_PROGRESS_EVENT(EventSelectorUtil.selector(DatalakeFullBackupInProgressEvent.class)),
-    DATALAKE_BACKUP_SUCCESS_EVENT(EventSelectorUtil.selector(DatalakeBackupSuccessEvent.class)),
-    DATALAKE_BACKUP_CANCELLED_EVENT(EventSelectorUtil.selector(DatalakeBackupCancelledEvent.class)),
-    DATALAKE_DATABASE_BACKUP_FAILED_EVENT(EventSelectorUtil.selector(DatalakeDatabaseBackupFailedEvent.class)),
-    DATALAKE_BACKUP_FAILED_EVENT(EventSelectorUtil.selector(DatalakeBackupFailedEvent.class)),
-    DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT("DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT"),
-    DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT("DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT"),
-    DATALAKE_BACKUP_CANCEL_HANDLED_EVENT("DATALAKE_BACKUP_CANCEL_HANDLED_EVENT"),
-    DATALAKE_BACKUP_FAILURE_HANDLED_EVENT("DATALAKE_BACKUP_FAILURE_HANDLED_EVENT");
+    DATALAKE_DATABASE_BACKUP_EVENT(DatalakeDatabaseBackupStartEvent.class),
+    DATALAKE_TRIGGER_BACKUP_EVENT(),
+    DATALAKE_BACKUP_SERVICES_STOPPED_EVENT(),
+    DATALAKE_DATABASE_BACKUP_COULD_NOT_START_EVENT(DatalakeDatabaseBackupCouldNotStartEvent.class),
+    DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT(),
+    DATALAKE_FULL_BACKUP_IN_PROGRESS_EVENT(DatalakeFullBackupInProgressEvent.class),
+    DATALAKE_BACKUP_SUCCESS_EVENT(DatalakeBackupSuccessEvent.class),
+    DATALAKE_BACKUP_CANCELLED_EVENT(DatalakeBackupCancelledEvent.class),
+    DATALAKE_DATABASE_BACKUP_FAILED_EVENT(DatalakeDatabaseBackupFailedEvent.class),
+    DATALAKE_BACKUP_FAILED_EVENT(DatalakeBackupFailedEvent.class),
+    DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT(),
+    DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT(),
+    DATALAKE_BACKUP_CANCEL_HANDLED_EVENT(),
+    DATALAKE_BACKUP_FAILURE_HANDLED_EVENT();
 
     private final String event;
 
-    DatalakeBackupEvent(String event) {
-        this.event = event;
+    DatalakeBackupEvent() {
+        event = name();
+    }
+
+    DatalakeBackupEvent(Class eventClass) {
+        event = EventSelectorUtil.selector(eventClass);
     }
 
     @Override
