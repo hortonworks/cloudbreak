@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -39,9 +38,7 @@ import com.cloudera.api.swagger.model.ApiCluster;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
-import com.cloudera.api.swagger.model.ApiConfigEnforcement;
 import com.cloudera.api.swagger.model.ApiConfigList;
-import com.cloudera.api.swagger.model.ApiConfigPolicy;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
@@ -82,7 +79,6 @@ import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -138,6 +134,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private ClouderaManagerStorageErrorMapper clouderaManagerStorageErrorMapper;
 
     @Inject
+    private ClouderaManagerFedRAMPService clouderaManagerFedRAMPService;
+
+    @Inject
     private EntitlementService entitlementService;
 
     @Inject
@@ -149,8 +148,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private ApiClient apiClient;
 
-    private String banner;
-
     public ClouderaManagerSetupService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
@@ -161,8 +158,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
-
-        banner = FileReaderUtils.readFileFromClasspath("banner.txt");
         try {
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(cluster.getId());
             if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_9_2)) {
@@ -320,18 +315,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             if (govCloud && isVersionNewerOrEqualThanLimited(apiClusterTemplate.getCmVersion(), CLOUDERAMANAGER_VERSION_7_9_2)) {
                 LOGGER.info("Policy configuration will happen because the cluster is AWS GOV cluster.");
                 ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
-                ApiConfigPolicy apiConfigPolicy = new ApiConfigPolicy();
-                apiConfigPolicy.setVersion("1.0");
-                apiConfigPolicy.setDescription("Cloudera configured FISMA Policy For Login Banner");
-                apiConfigPolicy.setName("FISMA Policy For Login Banner");
-
-                List<ApiConfigEnforcement> apiConfigEnforcements = new ArrayList<>();
-                ApiConfigEnforcement apiConfigEnforcement = new ApiConfigEnforcement();
-                apiConfigEnforcement.setLabel("LOGIN_BANNER");
-                apiConfigEnforcement.setDefaultValue(banner);
-                apiConfigEnforcements.add(apiConfigEnforcement);
-                apiConfigPolicy.setConfigEnforcements(apiConfigEnforcements);
-                clouderaManagerResourceApi.addConfigPolicy(apiConfigPolicy);
+                clouderaManagerResourceApi.addConfigPolicy(clouderaManagerFedRAMPService.getApiConfigPolicy());
             }
         } catch (Exception e) {
             LOGGER.error("Policy configuration error occurred.", e);

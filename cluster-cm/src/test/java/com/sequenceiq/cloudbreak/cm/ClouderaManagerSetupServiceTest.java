@@ -149,6 +149,9 @@ public class ClouderaManagerSetupServiceTest {
     @Mock
     private BlueprintUtils blueprintUtils;
 
+    @Mock
+    private ClouderaManagerFedRAMPService clouderaManagerFedRAMPService;
+
     @InjectMocks
     private ClouderaManagerSetupService underTest;
 
@@ -169,6 +172,7 @@ public class ClouderaManagerSetupServiceTest {
         ReflectionTestUtils.setField(underTest, "clouderaManagerSupportSetupService", clouderaManagerSupportSetupService);
         ReflectionTestUtils.setField(underTest, "clouderaManagerYarnSetupService", clouderaManagerYarnSetupService);
         ReflectionTestUtils.setField(underTest, "clusterCommandRepository", clusterCommandRepository);
+        ReflectionTestUtils.setField(underTest, "clouderaManagerFedRAMPService", clouderaManagerFedRAMPService);
         ReflectionTestUtils.setField(underTest, "apiClient", mock(ApiClient.class));
         ReflectionTestUtils.setField(underTest, "blueprintUtils", blueprintUtils);
     }
@@ -210,20 +214,19 @@ public class ClouderaManagerSetupServiceTest {
         ArgumentCaptor<ApiConfigPolicy> argumentCaptor = ArgumentCaptor.forClass(ApiConfigPolicy.class);
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerFedRAMPService.getApiConfigPolicy()).thenReturn(new ApiConfigPolicy());
+
         when(clouderaManagerResourceApi.addConfigPolicy(argumentCaptor.capture())).thenReturn(new ApiConfigPolicy());
 
         underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.2\",\"displayName\":\"opdb\"}", true);
 
         verify(clouderaManagerResourceApi, times(1)).addConfigPolicy(any());
-        Assertions.assertEquals(argumentCaptor.getValue().getVersion(), "1.0");
-        Assertions.assertEquals(argumentCaptor.getValue().getName(), "FISMA Policy For Login Banner");
-        Assertions.assertEquals(argumentCaptor.getValue().getDescription(), "Cloudera configured FISMA Policy For Login Banner");
+
     }
 
     @Test
     public void testPublishPolicyWhenNonGovCloudAndHigherThan792() throws ApiException, IOException {
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-        ArgumentCaptor<ApiConfigPolicy> argumentCaptor = ArgumentCaptor.forClass(ApiConfigPolicy.class);
 
         underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.2\",\"displayName\":\"opdb\"}", false);
 
