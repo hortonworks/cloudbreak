@@ -1,19 +1,19 @@
 package com.sequenceiq.it.cloudbreak.util.azure.azurevm.client;
 
+import static com.azure.core.http.policy.HttpLogDetailLevel.BODY_AND_HEADERS;
+
 import javax.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.microsoft.azure.AzureEnvironment;
-import com.microsoft.azure.credentials.ApplicationTokenCredentials;
-import com.microsoft.azure.credentials.AzureTokenCredentials;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.rest.LogLevel;
+import com.azure.core.management.AzureEnvironment;
+import com.azure.core.management.profile.AzureProfile;
+import com.azure.identity.ClientSecretCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
+import com.azure.resourcemanager.AzureResourceManager;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties.Credential;
-
-import okhttp3.JavaNetAuthenticator;
 
 @Configuration
 public class AzureClientConfiguration {
@@ -22,15 +22,18 @@ public class AzureClientConfiguration {
     private AzureProperties azureProperties;
 
     @Bean
-    public Azure getAzure() {
+    public AzureResourceManager getAzure() {
             Credential credential = azureProperties.getCredential();
-            AzureTokenCredentials azureTokenCredentials =
-                    new ApplicationTokenCredentials(credential.getAppId(), credential.getTenantId(), credential.getAppPassword(), AzureEnvironment.AZURE);
-            return Azure
+            ClientSecretCredential clientSecretCredential = new ClientSecretCredentialBuilder()
+                    .clientId(credential.getAppId())
+                    .tenantId(credential.getTenantId())
+                    .clientSecret(credential.getAppPassword())
+                    .build();
+        AzureProfile azureProfile = new AzureProfile(credential.getTenantId(), credential.getSubscriptionId(), AzureEnvironment.AZURE);
+        return AzureResourceManager
                     .configure()
-                    .withProxyAuthenticator(new JavaNetAuthenticator())
-                    .withLogLevel(LogLevel.BODY_AND_HEADERS)
-                    .authenticate(azureTokenCredentials)
+                    .withLogLevel(BODY_AND_HEADERS)
+                    .authenticate(clientSecretCredential, azureProfile)
                     .withSubscription(credential.getSubscriptionId());
     }
 }
