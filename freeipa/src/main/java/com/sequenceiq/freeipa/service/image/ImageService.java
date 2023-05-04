@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
@@ -51,6 +53,9 @@ public class ImageService {
 
     @Inject
     private ImageRevisionReaderService imageRevisionReaderService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Inject
     private Clock clock;
@@ -191,7 +196,9 @@ public class ImageService {
     }
 
     private String selectImageByRegionPreferDefault(String platformString, String region, Image imgFromCatalog, Map<String, String> imagesByRegion) {
-        return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String preferredRegion = entitlementService.azureMarketplaceImagesEnabled(accountId) ? DEFAULT_REGION : region;
+        return findStringKeyWithEqualsIgnoreCase(preferredRegion, imagesByRegion)
                 .or(() -> findStringKeyWithEqualsIgnoreCase(region, imagesByRegion))
                 .orElseThrow(() -> new ImageNotFoundException(
                         String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
