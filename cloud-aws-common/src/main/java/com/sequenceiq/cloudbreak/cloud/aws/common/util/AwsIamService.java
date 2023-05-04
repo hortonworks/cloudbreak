@@ -154,10 +154,6 @@ public class AwsIamService {
         if (replacedTemplate != null) {
             for (Entry<String, String> replacement : replacements.entrySet()) {
                 String replacementValue = replacement.getValue() != null ? replacement.getValue() : "";
-                // Remove the ending "/" of a backup location so path with "*" will not have duplicated "/".
-                if (replacement.getKey().equals("${BACKUP_LOCATION_BASE}") && replacementValue.endsWith("/")) {
-                    replacementValue = replacementValue.substring(0, replacementValue.length() - 1);
-                }
                 replacedTemplate = replacedTemplate.replace(replacement.getKey(), replacementValue);
             }
         }
