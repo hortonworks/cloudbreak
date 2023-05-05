@@ -444,6 +444,76 @@ public class SdxBackupRestoreServiceTest {
         assertFalse(sdxBackupRestoreService.isDatalakeInRestoreProgress(sdxCluster.getClusterName(), USER_CRN));
     }
 
+    @Test
+    public void testModifyBackupLocationWithAWS() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+        SdxCluster sdxCluster = getValidSdxCluster();
+        sdxCluster.setRangerRazEnabled(true);
+        assertEquals("s3://bucket/backups", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "s3://bucket"));
+        assertEquals("s3://bucket/backups", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "s3://bucket/"));
+        assertEquals("s3://bucket/test", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "s3://bucket/test"));
+        assertEquals("s3://bucket/test/test1", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "s3://bucket/test/test1"));
+        assertEquals("s3:/bucket", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "s3:/bucket"));
+        assertEquals("s3://", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "s3://"));
+
+        sdxCluster.setRangerRazEnabled(false);
+        assertEquals("s3://bucket", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "s3://bucket"));
+        assertEquals("s3://bucket/", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "s3://bucket/"));
+        assertEquals("s3://bucket/test", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "s3://bucket/test"));
+        assertEquals("s3://bucket/test/test1", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "s3://bucket/test/test1"));
+    }
+
+    @Test
+    public void testModifyBackupLocationWithAzure() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform("AZURE");
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+        SdxCluster sdxCluster = getValidSdxCluster();
+        sdxCluster.setRangerRazEnabled(true);
+        assertEquals("abfs://test@mydatalake.dfs.core.windows.net/backups",
+                sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "abfs://test@mydatalake.dfs.core.windows.net"));
+        assertEquals("abfs://test@mydatalake.dfs.core.windows.net/backups",
+                sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "abfs://test@mydatalake.dfs.core.windows.net/"));
+        assertEquals("abfs://test@mydatalake.dfs.core.windows.net/test",
+                sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "abfs://test@mydatalake.dfs.core.windows.net/test"));
+        assertEquals("abfs://test@mydatalake.dfs.core.windows.net/test/test1",
+                sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "abfs://test@mydatalake.dfs.core.windows.net/test/test1"));
+        assertEquals("abfs:/test@mydatalake.dfs.core.windows.net",
+                sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "abfs:/test@mydatalake.dfs.core.windows.net"));
+        assertEquals("abfs://",
+                sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "abfs://"));
+
+        sdxCluster.setRangerRazEnabled(false);
+        assertEquals("abfs://test@mydatalake.dfs.core.windows.net",
+                sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "abfs://test@mydatalake.dfs.core.windows.net"));
+        assertEquals("abfs://test@mydatalake.dfs.core.windows.net/",
+                sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "abfs://test@mydatalake.dfs.core.windows.net/"));
+        assertEquals("abfs://test@mydatalake.dfs.core.windows.net/test",
+                sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "abfs://test@mydatalake.dfs.core.windows.net/test"));
+        assertEquals("abfs://test@mydatalake.dfs.core.windows.net/test/test1",
+                sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "abfs://test@mydatalake.dfs.core.windows.net/test/test1"));
+    }
+
+    @Test
+    public void testModifyBackupLocationWithGCP() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform("GCP");
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+        SdxCluster sdxCluster = getValidSdxCluster();
+        sdxCluster.setRangerRazEnabled(true);
+        assertEquals("gs://bucket", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "gs://bucket"));
+        assertEquals("gs://bucket/", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "gs://bucket/"));
+        assertEquals("gs://bucket/test", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "gs://bucket/test"));
+
+        sdxCluster.setRangerRazEnabled(false);
+        assertEquals("gs://bucket", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "gs://bucket"));
+        assertEquals("gs://bucket/", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "gs://bucket/"));
+        assertEquals("gs://bucket/test", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "gs://bucket/test"));
+
+    }
+
     private SdxCluster getValidSdxCluster() {
         sdxCluster = new SdxCluster();
         sdxCluster.setClusterName(CLUSTER_NAME);
