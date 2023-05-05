@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.validation.ValidationType;
@@ -76,7 +78,7 @@ class AzureEnvironmentNetworkValidatorTest {
                 .build();
 
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
-                .withEnvironmentDto(EnvironmentDto.builder().build())
+                .withEnvironmentDto(getEnvironmentDtoWithRegion())
                 .build();
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
@@ -190,7 +192,7 @@ class AzureEnvironmentNetworkValidatorTest {
         int numberOfSubnets = 2;
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, true);
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, numberOfSubnets);
-        EnvironmentDto environmentDto = new EnvironmentDto();
+        EnvironmentDto environmentDto =  getEnvironmentDtoWithRegion();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
                 .withEnvironmentDto(environmentDto)
                 .build();
@@ -202,7 +204,8 @@ class AzureEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentValidationDto, networkDto, resultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of("If networkId (aNetworkId) and resourceGroupName (aResourceGroupId) are specified then" +
-                " subnet ids must be specified and should exist on azure as well. Given subnetids: [\"key1\", \"key0\"], existing ones: [\"key1\"]"));
+                " subnet ids must be specified and should exist on azure as well. Given subnetids: [\"key1\", \"key0\"], existing ones: [\"key1\"], " +
+                "in region: [East US]"));
     }
 
     @Test
@@ -315,6 +318,9 @@ class AzureEnvironmentNetworkValidatorTest {
     }
 
     private EnvironmentValidationDto environmentValidationDtoWithSingleRg(String name, ResourceGroupUsagePattern resourceGroupUsagePattern) {
+        Region usWestRegion = new Region();
+        usWestRegion.setName("eastus");
+        usWestRegion.setDisplayName("East US");
         return EnvironmentValidationDto.builder()
                 .withValidationType(ValidationType.ENVIRONMENT_CREATION)
                 .withEnvironmentDto(EnvironmentDto.builder()
@@ -327,6 +333,7 @@ class AzureEnvironmentNetworkValidatorTest {
                                                         .build())
                                                 .build()
                                 ).build())
+                        .withRegions(Set.of(usWestRegion))
                         .build())
                 .build();
     }
@@ -336,5 +343,15 @@ class AzureEnvironmentNetworkValidatorTest {
                 .withNetworkId(networkId)
                 .withResourceGroupName(networkResourceGroupName)
                 .build();
+    }
+
+    private static EnvironmentDto getEnvironmentDtoWithRegion() {
+        Region usWestRegion = new Region();
+        usWestRegion.setName("eastus");
+        usWestRegion.setDisplayName("East US");
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withRegions(Set.of(usWestRegion))
+                .build();
+        return environmentDto;
     }
 }
