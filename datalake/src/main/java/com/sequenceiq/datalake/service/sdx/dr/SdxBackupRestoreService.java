@@ -9,6 +9,8 @@ import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
 import static java.util.Objects.isNull;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -757,4 +759,44 @@ public class SdxBackupRestoreService {
                 || state == DatalakeOperationStatus.State.IN_PROGRESS);
     }
 
+    /**
+     * Modify backup location if it is an AWS or AZURE RAZ environment.
+     *
+     * @param cluster        The SDX cluster.
+     * @param backupLocation The original backup location.
+     * @return The updated backup location.
+     */
+    public String modifyBackupLocation(SdxCluster cluster, String backupLocation) {
+        LOGGER.info("Checking if it needs to modify backup location {}", backupLocation);
+        DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(cluster.getEnvName());
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
+        boolean requireNonEmptyPath = cloudPlatform == CloudPlatform.AWS || cloudPlatform == CloudPlatform.AZURE;
+        if (requireNonEmptyPath && cluster.isRangerRazEnabled()) {
+            backupLocation = appendBackupsIfRootLocation(backupLocation);
+        }
+        return backupLocation;
+    }
+
+    /**
+     * Append "/backups" or "backups" to root directory for RAZ. Below are the two types of root directories:
+     * s3a://my-bucket or abfs://test@mydatalake.dfs.core.windows.net
+     * s3a://my-bucket/ abfs://test@mydatalake.dfs.core.windows.net/
+     *
+     * @param backupLocation The original backup location.
+     * @return The updated backup location.
+     */
+    private String appendBackupsIfRootLocation(String backupLocation) {
+        try {
+            URI uri = new URI(backupLocation);
+            if (Strings.isNullOrEmpty(uri.getPath())) {
+                return backupLocation + "/backups";
+            }
+            if ("/".equals(uri.getPath())) {
+                return backupLocation + "backups";
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.warn("Cannot parse backup location {}", backupLocation, e);
+        }
+        return backupLocation;
+    }
 }
