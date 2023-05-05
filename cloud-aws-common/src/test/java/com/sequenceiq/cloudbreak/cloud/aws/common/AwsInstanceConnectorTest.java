@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSUFFICIENT_INSTANCE_CAPACITY_ERROR_CODE;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.everyItem;
@@ -54,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -325,6 +328,15 @@ class AwsInstanceConnectorTest {
         List<CloudInstance> mutableList = new ArrayList<>(getCloudInstances());
         assertThrows(Ec2Exception.class, () -> underTest.start(authenticatedContext, List.of(), mutableList));
         assertThat(mutableList, hasSize(1));
+    }
+
+    @Test
+    void testCheckInsufficientCapacityExceptionHandle() {
+        mockDescribeInstancesException(INSUFFICIENT_INSTANCE_CAPACITY_ERROR_CODE, "Insufficient capacity on i-432");
+        List<CloudInstance> mutableList = new ArrayList<>(getCloudInstances());
+        assertThatThrownBy(() -> underTest.startWithLimitedRetry(authenticatedContext, List.of(), mutableList, null))
+                .isInstanceOf(InsufficientCapacityException.class);
+        assertThat(mutableList, hasSize(2));
     }
 
     @Test

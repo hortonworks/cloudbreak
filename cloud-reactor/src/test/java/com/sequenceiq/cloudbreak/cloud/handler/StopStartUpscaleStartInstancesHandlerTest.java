@@ -4,12 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -34,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -265,6 +268,45 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         assertEquals(startedInstanceStatusList, result.getAffectedInstanceStatuses());
         assertEquals(EventStatus.OK, result.getStatus());
         assertEquals("STOPSTARTUPSCALESTARTINSTANCESRESULT", result.selector());
+    }
+
+    @Test
+    void testRetryWhenInsufficientCapacityExceptionIsThrown() {
+        List<CloudInstance> stoppedInstancesInHg = generateCloudInstances(5);
+        List<CloudInstance> allInstancesInHg = generateCloudInstances(10);
+        List<CloudInstance> startedInstancesWithServicesNotRunning = null;
+        int numInstancesToStart = 5;
+
+        List<CloudVmInstanceStatus> stoppedInstanceStatusList = generateStoppedCloudVmInstanceStatuses(stoppedInstancesInHg);
+        List<CloudVmInstanceStatus> startedInstanceStatusList = generateStartedCloudVmInstanceStatuses(stoppedInstancesInHg);
+
+        when(instanceConnector.checkWithoutRetry(
+                any(AuthenticatedContext.class),
+                eq(stoppedInstancesInHg)))
+                .thenReturn(stoppedInstanceStatusList).thenReturn(startedInstanceStatusList);
+        when(instanceConnector.startWithLimitedRetry(
+                any(AuthenticatedContext.class),
+                eq(null), anyList(), anyLong()))
+                .thenThrow(new InsufficientCapacityException("exception1"), new InsufficientCapacityException("exception2"),
+                        new InsufficientCapacityException("exception3"))
+                .thenReturn(startedInstanceStatusList);
+
+        StopStartUpscaleStartInstancesRequest request =
+                new StopStartUpscaleStartInstancesRequest(cloudContext, cloudCredential, cloudStack,
+                        "compute", stoppedInstancesInHg, allInstancesInHg, startedInstancesWithServicesNotRunning, numInstancesToStart);
+
+        Event event = new Event(request);
+
+        underTest.accept(event);
+        ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(any(), resultCaptor.capture());
+
+        assertEquals(1, resultCaptor.getAllValues().size());
+        Event resultEvent = resultCaptor.getValue();
+        assertEquals(StopStartUpscaleStartInstancesResult.class, resultEvent.getData().getClass());
+        StopStartUpscaleStartInstancesResult result = (StopStartUpscaleStartInstancesResult) resultEvent.getData();
+
+        verify(instanceConnector, times(2)).startWithLimitedRetry(any(AuthenticatedContext.class), eq(null), anyList(), anyLong());
     }
 
     @Test
