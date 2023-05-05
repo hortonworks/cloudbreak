@@ -9,6 +9,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerStoppedException;
@@ -17,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -31,6 +34,8 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
     private static final Logger LOGGER = LoggerFactory.getLogger(StopStartUpscaleStartInstancesHandler.class);
 
     private static final Long START_POLL_TIMEBOUND_MS = 600_000L;
+
+    private static final Long INSTANCE_SIZE_DECREMENT_FACTOR = 2L;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -124,11 +129,20 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
             // We exceeded the time-bound on the polling. Try getting the status for all the instances that we attempted to start.
             LOGGER.warn("Timed out while attempting to start instances. Attempting to get states for attempted nodes", p);
             return getInstanceStatusOnStartError(connector, ac, instancesToStart, p);
+        } catch (InsufficientCapacityException ice) {
+            LOGGER.error("Insufficient capacity on the cloud provider while attempting to start instances. Trying to fetch statuses of nodes", ice);
+            return startInstancesRetryable(connector, ac, instancesToStart);
         } catch (Exception e) {
             // Some other error while attempting to startInstances. Try getting the status for all the instances that we attempted to start.
             LOGGER.warn("Exception while attempting to start instances. Attempting to get states for attempted nodes", e);
             return getInstanceStatusOnStartError(connector, ac, instancesToStart, e);
         }
+    }
+
+    @Retryable(value = InsufficientCapacityException.class, maxAttempts = 3, backoff = @Backoff(delay = 5000, multiplier = 0.5))
+    private List<CloudVmInstanceStatus> startInstancesRetryable(CloudConnector connector, AuthenticatedContext ac, List<CloudInstance> instancesToStart) {
+        // TODO We need to create a sublist of instances to start. How do we choose this subset of nodes?
+        return connector.instances().startWithLimitedRetry(ac, null, instancesToStart, START_POLL_TIMEBOUND_MS);
     }
 
     private List<CloudVmInstanceStatus> getInstanceStatusOnStartError(CloudConnector connector, AuthenticatedContext ac,
@@ -138,8 +152,12 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
         } catch (Exception e) {
             LOGGER.warn("Error while trying to get instance status after start failure. Propagating original error from the start attempt", e);
             // The PollerStoppedException is too verbose for the console.
-            String message = originalException instanceof PollerStoppedException ? "Timed out while waiting for instances to start" :
-                    "Error while attempting to start instances";
+            String message = "Error while attempting to start instances";
+            if (originalException instanceof PollerStoppedException) {
+                message = "Timed out while waiting for instances to start";
+            } else if (originalException instanceof InsufficientCapacityException) {
+                message = "Insufficient instance capacity on the cloud provider";
+            }
             throw new CloudbreakRuntimeException(message, originalException);
         }
     }

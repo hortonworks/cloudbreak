@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -52,6 +53,8 @@ import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
 public class AwsInstanceConnector implements InstanceConnector {
 
     public static final String INSTANCE_NOT_FOUND_ERROR_CODE = "InvalidInstanceID.NotFound";
+
+    public static final String INSUFFICIENT_INSTANCE_CAPACITY_ERROR_CODE = "InsufficientInstanceCapacity";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsInstanceConnector.class);
 
@@ -265,6 +268,9 @@ public class AwsInstanceConnector implements InstanceConnector {
                 LOGGER.debug("Remove instance from vms: {}", doesNotExistInstanceId);
                 vms.removeIf(vm -> doesNotExistInstanceId.equals(vm.getInstanceId()));
             }
+        } else if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSUFFICIENT_INSTANCE_CAPACITY_ERROR_CODE)) {
+            LOGGER.error("Encountered  EC2 insufficient capacity exception");
+            throw new InsufficientCapacityException(e.getMessage(), e.getCause());
         }
         throw e;
     }
