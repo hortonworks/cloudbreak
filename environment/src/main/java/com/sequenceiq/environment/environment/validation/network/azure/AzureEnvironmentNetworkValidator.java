@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.validation.ValidationType;
@@ -47,7 +48,10 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
         EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         Map<String, CloudSubnet> cloudNetworks = cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto);
-        checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(), cloudNetworks);
+        Region region = environmentDto.getRegions()
+                .stream().findFirst()
+                .orElseThrow();
+        checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(), cloudNetworks, region);
         if (environmentValidationDto.getValidationType() == ValidationType.ENVIRONMENT_CREATION) {
             azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
             azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto);
@@ -88,7 +92,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
     }
 
     private void checkSubnetsProvidedWhenExistingNetwork(ValidationResultBuilder resultBuilder, NetworkDto network,
-            AzureParams azureParams, Map<String, CloudSubnet> subnetMetas) {
+            AzureParams azureParams, Map<String, CloudSubnet> subnetMetas, Region region) {
         if (StringUtils.isNotEmpty(azureParams.getNetworkId()) && StringUtils.isNotEmpty(azureParams.getResourceGroupName())) {
             if (CollectionUtils.isEmpty(network.getSubnetIds())) {
                 String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified as well.",
@@ -97,9 +101,9 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                 resultBuilder.error(message);
             } else if (subnetMetas.size() != network.getSubnetIds().size()) {
                 String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified and should exist " +
-                                "on azure as well. Given subnetids: [%s], existing ones: [%s]", azureParams.getNetworkId(), azureParams.getResourceGroupName(),
-                        network.getSubnetIds().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")),
-                        subnetMetas.keySet().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
+                                "on azure as well. Given subnetids: [%s], existing ones: [%s], in region: [%s]", azureParams.getNetworkId(),
+                        azureParams.getResourceGroupName(), network.getSubnetIds().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")),
+                        subnetMetas.keySet().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")), region.getDisplayName());
                 LOGGER.info(message);
                 resultBuilder.error(message);
             }
