@@ -167,7 +167,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
         repairHA(testContext, SdxClusterShape.MEDIUM_DUTY_HA, MINIMAL_MEDIUM_DUTY_RUNTIME);
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak, and a Scalable SDX cluster in available state",
             when = "repair is run",
