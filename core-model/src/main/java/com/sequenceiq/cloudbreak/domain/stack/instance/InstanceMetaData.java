@@ -429,7 +429,6 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
                 .add("statusReason='" + statusReason + "'")
                 .add("variant='" + variant + "'")
                 .add("subnetId='" + subnetId + "'")
-                .add("availabilityZone='" + availabilityZone + "'")
                 .toString();
     }
 

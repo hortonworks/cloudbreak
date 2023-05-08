@@ -71,13 +71,6 @@ public class MultiAzValidator {
         return false;
     }
 
-    public boolean supportedForInstanceMetadataGeneration(InstanceGroupNetwork instanceGroupNetwork) {
-        if (instanceGroupNetwork != null) {
-            return supportedInstanceMetadataPlatforms.contains(instanceGroupNetwork.cloudPlatform());
-        }
-        return false;
-    }
-
     public Set<String> collectSubnetIds(Iterable<InstanceGroupView> instanceGroups) {
         Set<String> allSubnetIds = new HashSet<>();
         for (InstanceGroupView instanceGroup : instanceGroups) {

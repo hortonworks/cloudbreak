@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.utils;
 
-import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,9 +16,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
@@ -31,8 +27,6 @@ public class BlueprintUtils {
     public static final String CDH_VERSION_JSON_NODE_TEXT = "cdhVersion";
 
     private static final String BLUEPRINT_NODE = "blueprint";
-
-    private static final String SDX_ENTERPRISE_DATALAKE_TEXT = "Enterprise SDX";
 
     @Inject
     private JsonHelper jsonHelper;
@@ -147,14 +141,5 @@ public class BlueprintUtils {
 
     public BlueprintUpgradeOption getBlueprintUpgradeOptionForGA() {
         return BlueprintUpgradeOption.GA;
-    }
-
-    public boolean isEnterpriseDatalake(Stack stack) {
-        return (stack.isDatalake() &&
-                containsIgnoreCase(stack.getCluster().getBlueprint().getDescription(), SDX_ENTERPRISE_DATALAKE_TEXT));
-    }
-
-    public boolean isEnterpriseDatalake(TemplatePreparationObject templatePreparationObject) {
-        return containsIgnoreCase(templatePreparationObject.getBlueprintView().getBlueprintText(), SDX_ENTERPRISE_DATALAKE_TEXT);
     }
 }

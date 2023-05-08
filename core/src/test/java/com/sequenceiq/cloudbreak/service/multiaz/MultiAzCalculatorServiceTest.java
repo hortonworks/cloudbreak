@@ -1,13 +1,9 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +15,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -31,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -40,13 +34,11 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -98,7 +90,7 @@ public class MultiAzCalculatorServiceTest {
 
         Map<String, String> actual = underTest.prepareSubnetAzMap(detailedEnvironmentResponse, "az-1");
         Assertions.assertEquals(2, actual.size());
-        Assertions.assertEquals("az-1", actual.get("subnet-1"));
+        Assertions.assertEquals("az-1", actual.get("name-1"));
         Assertions.assertEquals("az-1", actual.get("1"));
     }
 
@@ -146,13 +138,13 @@ public class MultiAzCalculatorServiceTest {
     public void testSubnetDistributionForWholeInstanceGroup(CloudPlatform cloudPlatform, int subnetCount, int instanceCount, List<Long> expectedCounts,
             boolean supported) {
         if (supported) {
-            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroupNetwork.class))).thenReturn(true);
+            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
         InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
 
         underTest.calculateByRoundRobin(
-                subnetAzPairs(subnetCount), ((InstanceGroup) instanceGroup.getInstanceGroup()).getInstanceGroupNetwork(),
-                ((InstanceGroup) instanceGroup.getInstanceGroup()).getNotDeletedAndNotZombieInstanceMetaDataSet());
+                subnetAzPairs(subnetCount),
+                (InstanceGroup) instanceGroup.getInstanceGroup());
 
         List<Long> actualCounts = new ArrayList<>();
         for (int i = 0; i < subnetCount; i++) {
@@ -174,7 +166,7 @@ public class MultiAzCalculatorServiceTest {
     public void testSubnetDistributionForWholeInstanceGroupWhenPrepopulatedForeignSubnetId(CloudPlatform cloudPlatform, int subnetCount, int instanceCount,
             List<Long> expectedCounts, boolean supported) {
         if (supported) {
-            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroupNetwork.class))).thenReturn(true);
+            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
 
         InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
@@ -182,8 +174,8 @@ public class MultiAzCalculatorServiceTest {
         instanceGroup.getInstanceMetadataViews().add(instanceWithPrepopulatedForeignSubnetId);
 
         underTest.calculateByRoundRobin(
-                subnetAzPairs(subnetCount), ((InstanceGroup) instanceGroup.getInstanceGroup()).getInstanceGroupNetwork(),
-                ((InstanceGroup) instanceGroup.getInstanceGroup()).getNotDeletedAndNotZombieInstanceMetaDataSet());
+                subnetAzPairs(subnetCount),
+                (InstanceGroup) instanceGroup.getInstanceGroup());
 
         List<Long> actualCounts = new ArrayList<>();
         for (int i = 0; i < subnetCount; i++) {
@@ -227,7 +219,7 @@ public class MultiAzCalculatorServiceTest {
     public void testSubnetDistributionForWholeInstanceGroupWhen5InstancesWithPrepopulatedKnownSubnetId(CloudPlatform cloudPlatform, int subnetCount,
             int instanceCount, List<Long> expectedCounts, boolean supported) {
         if (supported) {
-            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroupNetwork.class))).thenReturn(true);
+            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
 
         InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
@@ -244,8 +236,8 @@ public class MultiAzCalculatorServiceTest {
 
         // until the InstanceGroups are not refactored completly, we need the cast
         underTest.calculateByRoundRobin(
-                subnetAzPairs(subnetCount), ((InstanceGroup) instanceGroup.getInstanceGroup()).getInstanceGroupNetwork(),
-                ((InstanceGroup) instanceGroup.getInstanceGroup()).getNotDeletedAndNotZombieInstanceMetaDataSet());
+                subnetAzPairs(subnetCount),
+                (InstanceGroup) instanceGroup.getInstanceGroup());
 
         List<Long> actualCounts = new ArrayList<>();
         for (int i = 0; i < subnetCount; i++) {
@@ -272,7 +264,7 @@ public class MultiAzCalculatorServiceTest {
     public void testSubnetDistributionForWholeInstanceGroupWhenDeletedInstances(CloudPlatform cloudPlatform, int subnetCount, int instanceCount,
             List<Long> expectedCounts, boolean supported) {
         if (supported) {
-            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroupNetwork.class))).thenReturn(true);
+            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
 
         InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
@@ -294,8 +286,8 @@ public class MultiAzCalculatorServiceTest {
         instanceGroup.getInstanceMetadataViews().addAll(deletedInstancesWithPrepopulatedSubnetId);
 
         underTest.calculateByRoundRobin(
-                subnetAzPairs(subnetCount), ((InstanceGroup) instanceGroup.getInstanceGroup()).getInstanceGroupNetwork(),
-                ((InstanceGroup) instanceGroup.getInstanceGroup()).getNotDeletedAndNotZombieInstanceMetaDataSet());
+                subnetAzPairs(subnetCount),
+                (InstanceGroup) instanceGroup.getInstanceGroup());
 
         List<Long> actualCounts = new ArrayList<>();
         for (int i = 0; i < subnetCount; i++) {
@@ -342,8 +334,8 @@ public class MultiAzCalculatorServiceTest {
         }
 
         underTest.calculateByRoundRobin(
-                subnetAzPairs(NO_SUBNETS), instanceGroup.getInstanceGroupNetwork(),
-                (instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()));
+                subnetAzPairs(NO_SUBNETS),
+                instanceGroup);
 
         instanceGroupDto.getInstanceMetadataViews().forEach(instance -> {
             assertThat(instance.getSubnetId()).isNull();
@@ -617,51 +609,6 @@ public class MultiAzCalculatorServiceTest {
         });
     }
 
-    @Test
-    public void calculateByRoundRobinTestWhenSubnetAndAvailabilityZoneAndRackIdAndStackFallback() throws IOException {
-        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
-        EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
-        environmentNetworkResponse.setSubnetMetas(Map.of(
-                cloudSubnetName(1), cloudSubnet(1),
-                cloudSubnetName(2), cloudSubnet(2),
-                cloudSubnetName(3), cloudSubnet(3)
-        ));
-        detailedEnvironmentResponse.setNetwork(environmentNetworkResponse);
-
-        Stack stack = new Stack();
-        stack.setType(StackType.WORKLOAD);
-        InstanceGroupNetwork network = new InstanceGroupNetwork();
-        network.setCloudPlatform("aws");
-        network.setAttributes(Json.silent(Map.of(SUBNET_IDS, List.of("subnet-1", "subnet-2", "subnet-3"))));
-        InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
-        workerGroup.setInstanceGroupNetwork(network);
-        stack.setInstanceGroups(Set.of(workerGroup));
-        when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroupNetwork.class))).thenReturn(true);
-        Map<String, String> subnetAzPairs = underTest.prepareSubnetAzMap(detailedEnvironmentResponse);
-
-        underTest.calculateByRoundRobin(subnetAzPairs, stack);
-
-        Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
-                Collectors.toMap(InstanceGroup::getGroupName, InstanceGroup::getAllInstanceMetaData));
-
-        long privateIdStart = 0L;
-        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 3, hostGroupInstances.get("worker"),
-                List.of("subnet-1", "subnet-2", "subnet-3"),
-                List.of("az-1", "az-2", "az-3"),
-                List.of("/az-1", "/az-2", "/az-3"));
-    }
-
-    private void validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId(String hostGroup, int nodeCount, Set<InstanceMetaData> instanceMetaData,
-            List<String> subnetIdExpected, List<String> availabilityZoneExpected, List<String> rackIdExpected) {
-        assertEquals(nodeCount, instanceMetaData.size(), "Instance Metadata size should match for hostgroup: " + hostGroup);
-        for (InstanceMetaData im : instanceMetaData) {
-            assertThat(subnetIdExpected).overridingErrorMessage("Subnet Id should match for hostgroup: " + hostGroup).contains(im.getSubnetId());
-            assertThat(availabilityZoneExpected).overridingErrorMessage("Availability Zone should match for hostgroup: " + hostGroup)
-                    .contains(im.getAvailabilityZone());
-            assertThat(rackIdExpected).overridingErrorMessage("Rack Id should match for hostgroup: " + hostGroup).contains(im.getRackId());
-        }
-    }
-
     static Object[][] determineRackIdTestDataProvider() {
         return new Object[][]{
                 // testCaseName subnetId availabilityZone rackIdExpected
@@ -747,7 +694,7 @@ public class MultiAzCalculatorServiceTest {
         CloudbreakServiceException actual = Assertions.assertThrows(CloudbreakServiceException.class, () ->
                 underTest.calculateByRoundRobin(Map.of("anysubnet", "anyaz"), instanceGroup, instanceMetaData, NetworkScaleDetails.getEmpty()));
         assertThat(actual.getMessage()).isEqualTo("The following subnets are missing from the Environment, you may have removed them during an environment " +
-                "update previously? Missing subnets: [subnet-0]");
+                "update previously? Missing subnets: [name-0]");
     }
 
     private InstanceGroupDto instanceGroup(CloudPlatform cloudPlatform, int instanceNumber, int subnetCount) {
@@ -798,7 +745,7 @@ public class MultiAzCalculatorServiceTest {
     }
 
     private String cloudSubnetName(int i) {
-        return "subnet-" + i;
+        return "name-" + i;
     }
 
     private String cloudSubnetAz(int i) {
@@ -880,21 +827,4 @@ public class MultiAzCalculatorServiceTest {
         assertThat(Arrays.asList(actualCountsArray)).isEqualTo(existingCounts);
     }
 
-    private InstanceGroup getARequestGroup(String hostGroup, int numOfNodes, InstanceGroupType hostGroupType) {
-        InstanceGroup requestHostGroup = new InstanceGroup();
-        requestHostGroup.setGroupName(hostGroup);
-        requestHostGroup.setInstanceGroupType(hostGroupType);
-        requestHostGroup.setInstanceGroupNetwork(new InstanceGroupNetwork());
-        Set<InstanceMetaData> instanceMetadata = new HashSet<>();
-        IntStream.range(0, numOfNodes).forEach(count -> instanceMetadata.add(new InstanceMetaData()));
-        if ("gateway".equals(hostGroup) || "auxiliary".equals(hostGroup)) {
-            instanceMetadata.forEach(metadata -> metadata.setId(1L));
-        }
-        instanceMetadata.stream()
-                .forEach(metadata -> {
-                    metadata.setInstanceStatus(SERVICES_RUNNING);
-                });
-        requestHostGroup.setInstanceMetaData(instanceMetadata);
-        return requestHostGroup;
-    }
 }

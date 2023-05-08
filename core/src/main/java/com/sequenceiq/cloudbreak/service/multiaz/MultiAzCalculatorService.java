@@ -1,17 +1,14 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -23,14 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
-import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
@@ -87,29 +81,18 @@ public class MultiAzCalculatorService {
         return availabilityZone == null || availabilityZone.equals(value.getAvailabilityZone());
     }
 
-    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, Stack stack) {
-        String stackSubnetId = getStackSubnetIdIfExists(stack);
-        String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
-
-        for (InstanceGroup instanceGroup : sortInstanceGroups(stack)) {
-            calculateByRoundRobin(subnetAzPairs, instanceGroup.getInstanceGroupNetwork(),
-                    instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
-            prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup);
-        }
-    }
-
-    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroupNetwork instanceGroupNetwork, Set<InstanceMetaData> instanceMetaDataSet) {
+    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup) {
         LOGGER.trace("Calculate the subnet by round robin from {}", subnetAzPairs);
         Map<String, Integer> subnetUsage = new HashMap<>();
-        Set<String> subnetIds = collectSubnetIds(instanceGroupNetwork, NetworkScaleDetails.getEmpty());
+        Set<String> subnetIds = collectSubnetIds(instanceGroup, NetworkScaleDetails.getEmpty());
         LOGGER.trace("Collected subnetIds: {}", subnetIds);
         initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
-        List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>(instanceMetaDataSet);
+        List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>(instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
         collectCurrentSubnetUsage(instanceMetadataViews, subnetUsage);
 
-        if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroupNetwork)) {
+        if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
             checkSubnetUsageCount(subnetUsage, subnetIds);
-            for (InstanceMetaData instanceMetaData : instanceMetaDataSet) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                 if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
                     Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(subnetUsage);
                     String leastUsedSubnetId = searchTheSmallestUsedID(subnetUsage, numberOfInstanceInASubnet);
@@ -128,7 +111,7 @@ public class MultiAzCalculatorService {
         LOGGER.debug("Calculate the subnet by round robin for {} from {}", instanceMetaData.getDiscoveryFQDN(), subnetAzPairs);
         Map<String, Integer> subnetUsage = new HashMap<>();
         InstanceGroupView instanceGroup = instanceGroupDto.getInstanceGroup();
-        Set<String> subnetIds = collectSubnetIds(instanceGroup.getInstanceGroupNetwork(), networkScaleDetails);
+        Set<String> subnetIds = collectSubnetIds(instanceGroup, networkScaleDetails);
         LOGGER.debug("Collected subnetIds: {}", subnetIds);
         initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
         collectCurrentSubnetUsage(instanceGroupDto.getNotDeletedAndNotZombieInstanceMetaData(), subnetUsage);
@@ -233,8 +216,9 @@ public class MultiAzCalculatorService {
         }
     }
 
-    private Set<String> collectSubnetIds(InstanceGroupNetwork instanceGroupNetwork, NetworkScaleDetails networkScaleDetails) {
+    private Set<String> collectSubnetIds(InstanceGroupView instanceGroup, NetworkScaleDetails networkScaleDetails) {
         Set<String> allSubnetIds = new HashSet<>();
+        InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
         if (instanceGroupNetwork != null) {
             Json attributes = instanceGroupNetwork.getAttributes();
             if (attributes != null) {
@@ -263,34 +247,5 @@ public class MultiAzCalculatorService {
     private boolean isPreferredSubnetsSpecifiedForScaling(NetworkScaleDetails networkScaleDetails) {
         return networkScaleDetails != null
                 && CollectionUtils.isNotEmpty(networkScaleDetails.getPreferredSubnetIds());
-    }
-
-    protected void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(String stackSubnetId, String stackAz, InstanceGroup instanceGroup) {
-        for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
-            if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId()) && Strings.isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
-                instanceMetaData.setSubnetId(stackSubnetId);
-                instanceMetaData.setAvailabilityZone(stackAz);
-            }
-            instanceMetaData.setRackId(determineRackId(instanceMetaData.getSubnetId(), instanceMetaData.getAvailabilityZone()));
-        }
-    }
-
-    public List<InstanceGroup> sortInstanceGroups(Stack stack) {
-        return stack.getInstanceGroups().stream()
-                .sorted(createGatewayFirstComparator()).collect(Collectors.toList());
-    }
-
-    private Comparator<InstanceGroup> createGatewayFirstComparator() {
-        return Comparator.comparing(InstanceGroup::getInstanceGroupType)
-                .thenComparing(InstanceGroup::getGroupName);
-    }
-
-    protected String getStackSubnetIdIfExists(Stack stack) {
-        return Optional.ofNullable(stack.getNetwork())
-                .map(Network::getAttributes)
-                .map(Json::getMap)
-                .map(attr -> attr.get(SUBNET_ID))
-                .map(Object::toString)
-                .orElse(null);
     }
 }
