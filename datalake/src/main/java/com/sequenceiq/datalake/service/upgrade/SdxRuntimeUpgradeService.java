@@ -38,6 +38,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
@@ -178,9 +179,10 @@ public class SdxRuntimeUpgradeService {
     }
 
     private void validateRollingUpgrade(SdxUpgradeRequest request, SdxCluster cluster) {
-        if (Boolean.TRUE.equals(request.getRollingUpgradeEnabled()) && !cluster.getClusterShape().isHA()) {
-            String message = String.format("The rolling upgrade is not allowed for %s cluster shape.",
-                    cluster.getClusterShape().name());
+        if (Boolean.TRUE.equals(request.getRollingUpgradeEnabled()) && !SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape())) {
+            String message = String.format("The rolling upgrade is not allowed for %s cluster shape. "
+                    + "If you want to use rolling upgrade you need to launch a Data Lake with %s cluster shape.",
+                    cluster.getClusterShape().name(), SdxClusterShape.MEDIUM_DUTY_HA.name());
             LOGGER.warn(message);
             throw new BadRequestException(message);
         }

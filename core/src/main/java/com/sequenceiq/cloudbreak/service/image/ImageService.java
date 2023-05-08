@@ -261,8 +261,7 @@ public class ImageService {
     private String selectImageByRegionPreferDefault(String translatedRegion, Map<String, String> imagesByRegion, String platform)
             throws CloudbreakImageNotFoundException {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String region = entitlementService.azureMarketplaceImagesEnabled(accountId) ? DEFAULT_REGION : translatedRegion;
-        return findStringKeyWithEqualsIgnoreCase(region, imagesByRegion)
+        return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
                     .or(supplyAlternativeImageWhenEntitlementAllows(translatedRegion, imagesByRegion, accountId))
                     .orElseThrow(() -> new CloudbreakImageNotFoundException(
                             String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",

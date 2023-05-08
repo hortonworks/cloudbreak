@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -80,7 +81,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
-import com.sequenceiq.cloudbreak.service.multiaz.DataLakeMultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -146,9 +146,6 @@ public class StackCreatorService {
 
     @Inject
     private MultiAzCalculatorService multiAzCalculatorService;
-
-    @Inject
-    private DataLakeMultiAzCalculatorService dataLakeMultiAzCalculatorService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -382,11 +379,8 @@ public class StackCreatorService {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
-        }
-        if (StackType.DATALAKE.equals(stack.getType())) {
-            dataLakeMultiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
-        } else {
-            multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
+            multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup);
+            prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup);
         }
     }
 
@@ -397,6 +391,16 @@ public class StackCreatorService {
                 .map(attr -> attr.get(SUBNET_ID))
                 .map(Object::toString)
                 .orElse(null);
+    }
+
+    private void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(String stackSubnetId, String stackAz, InstanceGroup instanceGroup) {
+        for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
+            if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId()) && Strings.isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
+                instanceMetaData.setSubnetId(stackSubnetId);
+                instanceMetaData.setAvailabilityZone(stackAz);
+            }
+            instanceMetaData.setRackId(multiAzCalculatorService.determineRackId(instanceMetaData.getSubnetId(), instanceMetaData.getAvailabilityZone()));
+        }
     }
 
     public List<InstanceGroup> sortInstanceGroups(Stack stack) {

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,20 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,14 +24,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -56,17 +45,13 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
-import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
@@ -78,21 +63,18 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClient
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
-import com.sequenceiq.cloudbreak.service.multiaz.DataLakeMultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
 public class StackCreatorServiceTest {
@@ -171,17 +153,11 @@ public class StackCreatorServiceTest {
     @InjectMocks
     private StackCreatorService underTest;
 
-    @InjectMocks
-    private StackCreatorService underTestSpy;
-
     @Mock
     private ValidationResult validationResult;
 
     @Mock
     private MultiAzCalculatorService multiAzCalculatorService;
-
-    @Mock
-    private DataLakeMultiAzCalculatorService dataLakeMultiAzCalculatorService;
 
     @Mock
     private Stack stack;
@@ -197,15 +173,6 @@ public class StackCreatorServiceTest {
 
     @Mock
     private JavaVersionValidator javaVersionValidator;
-
-    @Mock
-    private MultiAzValidator multiAzValidator;
-
-    @BeforeEach
-    void before() {
-        underTestSpy = spy(new StackCreatorService());
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     public void shouldThrowBadRequestWhenRecipeIsMissing() {
@@ -374,8 +341,9 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 2, InstanceGroupType.CORE);
         InstanceGroup computeGroup = getARequestGroup("compute", 4, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup));
-        doReturn(Map.of()).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(Stack.class));
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(Map.of());
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
+
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
         Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
@@ -402,13 +370,13 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup, managerGroup, gatewayGroup));
-        doReturn(Map.of()).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(Stack.class));
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(Map.of());
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
         Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
-                Collectors.toMap(InstanceGroup::getGroupName, InstanceGroup::getAllInstanceMetaData));
+        Collectors.toMap(InstanceGroup::getGroupName, InstanceGroup::getAllInstanceMetaData));
 
         long privateIdStart = 0L;
         validateInstanceMetadataPrivateId("manager", 1, privateIdStart, hostGroupInstances.get("manager"));
@@ -431,109 +399,6 @@ public class StackCreatorServiceTest {
         validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 3, hostGroupInstances.get("worker"), null, null, null);
     }
 
-    @Test
-    void fillInstanceMetadataTestWhenSubnetAndAvZAndRackIdAndRoundRobinForDH() {
-        Stack stack = new Stack();
-        stack.setType(StackType.WORKLOAD);
-        InstanceGroupNetwork network = new InstanceGroupNetwork();
-        network.setCloudPlatform("aws");
-        network.setAttributes(Json.silent(Map.of(SUBNET_IDS, List.of("SUB_1", "SUB_2", "SUB_3"))));
-        InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
-        masterGroup.setInstanceGroupNetwork(network);
-        InstanceGroup gatewayGroup = getARequestGroup("gateway", 2, InstanceGroupType.GATEWAY);
-        gatewayGroup.setInstanceGroupNetwork(network);
-        InstanceGroup coreGroup = getARequestGroup("core", 3, InstanceGroupType.CORE);
-        coreGroup.setInstanceGroupNetwork(network);
-        InstanceGroup auxiliaryGroup = getARequestGroup("auxiliary", 1, InstanceGroupType.CORE);
-        auxiliaryGroup.setInstanceGroupNetwork(network);
-        InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
-        idbrokerGroup.setInstanceGroupNetwork(network);
-        stack.setInstanceGroups(Set.of(masterGroup, coreGroup, auxiliaryGroup, idbrokerGroup, gatewayGroup));
-        doReturn(subnetAzPairs(3)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
-
-        underTestSpy.fillInstanceMetadata(environmentResponse, stack);
-        verify(multiAzCalculatorService, times(1)).calculateByRoundRobin(
-                multiAzCalculatorService.prepareSubnetAzMap(environmentResponse), stack);
-        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), anyString(), any());
-    }
-
-    @Test
-    void fillInstanceMetadataTestWhenSubnetAndAvZAndRackIdAndRoundRobinForDLNoAuxiliary() {
-        Stack stack = new Stack();
-        stack.setType(StackType.WORKLOAD);
-        InstanceGroupNetwork network = new InstanceGroupNetwork();
-        network.setCloudPlatform("aws");
-        network.setAttributes(Json.silent(Map.of(SUBNET_IDS, List.of("SUB_1", "SUB_2", "SUB_3"))));
-        InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
-        masterGroup.setInstanceGroupNetwork(network);
-        InstanceGroup gatewayGroup = getARequestGroup("gateway", 2, InstanceGroupType.GATEWAY);
-        gatewayGroup.setInstanceGroupNetwork(network);
-        InstanceGroup coreGroup = getARequestGroup("core", 3, InstanceGroupType.CORE);
-        coreGroup.setInstanceGroupNetwork(network);
-        InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
-        idbrokerGroup.setInstanceGroupNetwork(network);
-        stack.setInstanceGroups(Set.of(masterGroup, coreGroup, idbrokerGroup, gatewayGroup));
-        doReturn(subnetAzPairs(3)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
-
-        underTestSpy.fillInstanceMetadata(environmentResponse, stack);
-        verify(multiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(Stack.class));
-        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), anyString(), any());
-    }
-
-    @Test
-    void fillInstanceMetadataTestWhenSubnetAndAvZAndRackIdAndRoundRobinForLightDutyDL() throws IOException {
-        Stack stack = new Stack();
-        stack.setType(StackType.DATALAKE);
-        stack.setCluster(createSdxCluster(SdxClusterShape.LIGHT_DUTY));
-        InstanceGroupNetwork network = new InstanceGroupNetwork();
-        network.setCloudPlatform("aws");
-        network.setAttributes(Json.silent(Map.of(SUBNET_IDS, List.of("SUB_1", "SUB_2", "SUB_3"))));
-        InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
-        masterGroup.setInstanceGroupNetwork(network);
-        InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
-        idbrokerGroup.setInstanceGroupNetwork(network);
-        stack.setInstanceGroups(Set.of(masterGroup, idbrokerGroup));
-        doReturn(subnetAzPairs(2)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
-        underTestSpy.fillInstanceMetadata(environmentResponse, stack);
-        verify(dataLakeMultiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(Stack.class));
-        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), anyString(), any());
-    }
-
-    @Test
-    void fillInstanceMetadataTestWhenSubnetAndAvZAndRackIdAndRoundRobinForMediumDutyDL() throws IOException {
-        Stack stack = new Stack();
-        stack.setType(StackType.DATALAKE);
-        stack.setCluster(createSdxCluster(SdxClusterShape.MEDIUM_DUTY_HA));
-        InstanceGroupNetwork network = new InstanceGroupNetwork();
-        network.setCloudPlatform("aws");
-        network.setAttributes(Json.silent(Map.of(SUBNET_IDS, List.of("SUB_1", "SUB_2", "SUB_3"))));
-        InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
-        masterGroup.setInstanceGroupNetwork(network);
-        InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
-        idbrokerGroup.setInstanceGroupNetwork(network);
-        stack.setInstanceGroups(Set.of(masterGroup, idbrokerGroup));
-        doReturn(subnetAzPairs(2)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
-        underTestSpy.fillInstanceMetadata(environmentResponse, stack);
-        verify(dataLakeMultiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(Stack.class));
-        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), anyString(), any());
-    }
-
-    private Map<String, String> subnetAzPairs(int subnetCount) {
-        Map<String, String> subnetAzPairs = new HashMap<>();
-        for (int i = 0; i < subnetCount; i++) {
-            subnetAzPairs.put(cloudSubnetName(i), cloudSubnetAz(i));
-        }
-        return subnetAzPairs;
-    }
-
-    private String cloudSubnetName(int i) {
-        return "name-" + i;
-    }
-
-    private String cloudSubnetAz(int i) {
-        return "az-" + i;
-    }
-
     static Object[][] fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider() {
         return new Object[][]{
                 // testCaseName subnetId availabilityZone
@@ -549,17 +414,17 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(workerGroup));
         Map<String, String> subnetAzPairs = Map.of();
-        doReturn(subnetAzPairs).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzPairs);
         doAnswer(invocation -> {
-            Stack stack1 = invocation.getArgument(1);
-            Set<InstanceMetaData> instanceMetaDataSet = stack1.getInstanceGroups().iterator().next().getInstanceMetaData();
-            instanceMetaDataSet.forEach(instanceMetaData -> {
+            InstanceGroup instanceGroup = invocation.getArgument(1, InstanceGroup.class);
+            instanceGroup.getAllInstanceMetaData().forEach(instanceMetaData -> {
                 instanceMetaData.setSubnetId(subnetId);
                 instanceMetaData.setAvailabilityZone(availabilityZone);
-                instanceMetaData.setRackId("/fooRack");
             });
             return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, stack);
+        }).when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, workerGroup);
+        when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn("/fooRack");
+
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
         Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
@@ -579,8 +444,9 @@ public class StackCreatorServiceTest {
         network.setAttributes(Json.silent(Map.of("subnetId", "subnet-1")));
         stack.setNetwork(network);
         Map<String, String> subnetAzPairs = Map.of("subnet-1", "az-1");
-        doReturn(subnetAzPairs).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(Stack.class));
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzPairs);
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, workerGroup);
+        when(multiAzCalculatorService.determineRackId("subnet-1", "az-1")).thenReturn("/fooRack");
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
@@ -589,6 +455,7 @@ public class StackCreatorServiceTest {
 
         long privateIdStart = 0L;
         validateInstanceMetadataPrivateId("worker", 3, privateIdStart, hostGroupInstances.get("worker"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 3, hostGroupInstances.get("worker"), "subnet-1", "az-1", "/fooRack");
     }
 
     @Test
@@ -664,52 +531,11 @@ public class StackCreatorServiceTest {
         InstanceGroup requestHostGroup = new InstanceGroup();
         requestHostGroup.setGroupName(hostGroup);
         requestHostGroup.setInstanceGroupType(hostGroupType);
-        requestHostGroup.setInstanceGroupNetwork(new InstanceGroupNetwork());
+
         Set<InstanceMetaData> instanceMetadata = new HashSet<>();
         IntStream.range(0, numOfNodes).forEach(count -> instanceMetadata.add(new InstanceMetaData()));
-        if ("gateway".equals(hostGroup) || "auxiliary".equals(hostGroup)) {
-            instanceMetadata.forEach(metadata -> metadata.setId(1L));
-        }
-        instanceMetadata.stream()
-                .forEach(metadata -> {
-                    metadata.setInstanceStatus(SERVICES_RUNNING);
-                });
         requestHostGroup.setInstanceMetaData(instanceMetadata);
         return requestHostGroup;
     }
 
-    private Cluster createSdxCluster(SdxClusterShape shape) throws IOException {
-        String template = null;
-        Blueprint blueprint = new Blueprint();
-        switch (shape) {
-            case LIGHT_DUTY:
-                template = "cdp-sdx";
-                blueprint.setDescription("7.2.17 - SDX template with Atlas, HMS, Ranger and other services they are dependent on");
-                break;
-            case MEDIUM_DUTY_HA:
-                template = "cdp-sdx-medium-ha";
-                blueprint.setDescription(".2.17 - Medium SDX template with Atlas, HMS, Ranger and other services they are dependent on." +
-                        "  Services like HDFS, HBASE, RANGER, HMS have HA");
-                break;
-            case ENTERPRISE:
-                template = "cdp-sdx-enterprise";
-                blueprint.setDescription(".2.17 - Enterprise SDX template with Atlas, HMS, Ranger and other services they are dependent on. " +
-                        " Services like HDFS, HBASE, RANGER, HMS have HA");
-                break;
-            case MICRO_DUTY:
-                template = "cdp-sdx-micro";
-                blueprint.setDescription("7.2.17 - Micro SDX template with Atlas, HMS, Ranger and other services they are dependent on");
-                break;
-            default:
-                template = "cdp-sdx";
-        }
-        blueprint.setBlueprintText(
-                FileReaderUtils.readFileFromPath(
-                        Path.of(
-                                String.format("../core/src/main/resources/defaults/blueprints/7.2.17/%s.bp", template))));
-
-        Cluster sdxCluster = new Cluster();
-        sdxCluster.setBlueprint(blueprint);
-        return sdxCluster;
-    }
 }

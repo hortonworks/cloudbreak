@@ -78,7 +78,6 @@ class AzureImageFilterTest {
     @Test
     public void testMarketplaceOnlyEntitlementGrantedShouldReturnOnlyImagesWithMarketplaceRegionPresent() {
 
-        when(entitlementService.azureMarketplaceImagesEnabled(ACCOUNT_ID)).thenReturn(true);
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(ACCOUNT_ID)).thenReturn(true);
 
         List<Image> filteredImages = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.filterImages(imageList));
@@ -95,27 +94,8 @@ class AzureImageFilterTest {
     }
 
     @Test
-    public void testMarketplaceEntitlementNotGrantedShouldReturnOnlyVhdImages() {
-
-        when(entitlementService.azureMarketplaceImagesEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        List<Image> filteredImages = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.filterImages(imageList));
-        Set<String> filteredImageUuids = filteredImages.stream().map(Image::getUuid).collect(Collectors.toSet());
-        Set<String> regionSet = getRegionSet(filteredImages);
-
-        assertEquals(3, regionSet.size());
-        assertTrue(regionSet.containsAll(List.of(AN_AZURE_REGION, ANOTHER_AZURE_REGION, THIRD_AZURE_REGION)));
-        assertTrue(filteredImageUuids.contains("1"));
-        assertTrue(filteredImageUuids.contains("2"));
-        assertTrue(filteredImageUuids.contains("3"));
-        assertTrue(filteredImageUuids.contains("4"));
-        assertTrue(filteredImageUuids.contains("5"));
-    }
-
-    @Test
     public void testMarketplaceOnlyEntitlementNotGrantedShouldReturnAllImages() {
 
-        when(entitlementService.azureMarketplaceImagesEnabled(ACCOUNT_ID)).thenReturn(true);
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(ACCOUNT_ID)).thenReturn(false);
 
         List<Image> filteredImages = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.filterImages(imageList));
