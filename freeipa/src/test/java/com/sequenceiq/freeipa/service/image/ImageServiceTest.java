@@ -97,7 +97,6 @@ public class ImageServiceTest {
 
     @Test
     public void testDetermineImageNameFound() {
-        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
         String imageName =  ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName(DEFAULT_PLATFORM, REGION, image));
@@ -107,30 +106,38 @@ public class ImageServiceTest {
     @Test
     public void testDetermineImageNameFoundDefaultPreferred() {
         when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM,
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap("azure",
                 Map.of(
                         REGION, EXISTING_ID,
                         DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
 
-        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName(DEFAULT_PLATFORM, REGION, image));
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName("azure", REGION, image));
         assertEquals("ami-09fea90f257c85514", imageName);
+    }
+
+    @Test
+    public void testDetermineImageNameFoundDefaultMock() {
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap("mock",
+                Map.of(DEFAULT_REGION, "mockimage")));
+
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName("mock", "London", image));
+        assertEquals("mockimage", imageName);
     }
 
     @Test
     public void testDetermineImageNameFoundNoMpEntitlement() {
         when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(false);
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM,
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap("azure",
                 Map.of(
                         REGION, EXISTING_ID,
                         DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
 
-        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName(DEFAULT_PLATFORM, REGION, image));
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName("azure", REGION, image));
         assertEquals("ami-09fea90f257c85513", imageName);
     }
 
     @Test
     public void testDetermineImageNameNotFound() {
-        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
         Exception exception = assertThrows(RuntimeException.class, () ->
@@ -169,7 +176,6 @@ public class ImageServiceTest {
         when(image.getUuid()).thenReturn(IMAGE_UUID);
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
         when(imageConverter.extractLdapAgentVersion(image)).thenReturn("1.2.3");
-        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
 
         ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImage(stack, imageRequest));
 
@@ -192,7 +198,6 @@ public class ImageServiceTest {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
         when(imageConverter.convert(any(), any())).thenReturn(new ImageEntity());
-        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
 
         ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, imageRequest));
 
