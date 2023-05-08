@@ -23,6 +23,7 @@ includedir /var/lib/sss/pubconf/krb5.include.d/
   udp_preference_limit = 0
   default_ccache_name = /tmp/krb5cc_%{uid}
   renew_lifetime = 7d
+  max_retries = 1
 
 [realms]
   {{ salt['pillar.get']('kerberos:realm')|upper }} = {
