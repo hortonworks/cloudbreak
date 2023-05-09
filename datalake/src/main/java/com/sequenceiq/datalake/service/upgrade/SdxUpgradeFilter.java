@@ -7,8 +7,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
 
@@ -26,44 +23,14 @@ public class SdxUpgradeFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeFilter.class);
 
-    @Inject
-    private EntitlementService entitlementService;
-
     public UpgradeV4Response filterSdxUpgradeResponse(String accountId, String clusterName, SdxUpgradeRequest upgradeSdxClusterRequest,
             UpgradeV4Response upgradeV4Response) {
         if (CollectionUtils.isNotEmpty(upgradeV4Response.getUpgradeCandidates()) && Objects.nonNull(upgradeSdxClusterRequest)) {
             UpgradeV4Response filteredResponse =
-                    filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, clusterName, upgradeSdxClusterRequest, upgradeV4Response);
+                    new UpgradeV4Response(upgradeV4Response.getCurrent(), upgradeV4Response.getUpgradeCandidates(), upgradeV4Response.getReason());
             return filterBySdxUpgradeRequestParams(upgradeSdxClusterRequest, filteredResponse);
         }
         return upgradeV4Response;
-    }
-
-    private UpgradeV4Response filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(String accountId, String clusterName, SdxUpgradeRequest sdxUpgradeRequest,
-            UpgradeV4Response upgradeV4Response) {
-        UpgradeV4Response filteredUpgradeResponse =
-                new UpgradeV4Response(upgradeV4Response.getCurrent(), upgradeV4Response.getUpgradeCandidates(), upgradeV4Response.getReason());
-        if (!isRuntimeUpgradeEnabled(accountId)) {
-            if (upgradeV4Response.getCurrent() != null) {
-                List<ImageInfoV4Response> upgradeCandidates = filteredUpgradeResponse.getUpgradeCandidates();
-                String currentCdpVersion = filteredUpgradeResponse.getCurrent().getComponentVersions().getCdp();
-                LOGGER.debug("Only patch upgrade is possible on [{}] cluster for [{}] runtime as CDP_RUNTIME_UPGRADE is disabled in [{}] account.",
-                        clusterName, currentCdpVersion, accountId);
-                upgradeCandidates = upgradeCandidates.stream()
-                        .filter(upgradeCandidate -> upgradeCandidate.getComponentVersions().getCdp().equals(currentCdpVersion))
-                        .collect(Collectors.toList());
-                filteredUpgradeResponse.setUpgradeCandidates(upgradeCandidates);
-                updatePatchUpgradeReasonIfNeeded(accountId, clusterName, filteredUpgradeResponse, sdxUpgradeRequest, currentCdpVersion);
-                LOGGER.debug("Patch upgrade candidates for [{}] cluster: [{}]", clusterName, upgradeCandidates);
-            } else {
-                String message =
-                        String.format("No information about current image, cannot filter patch upgrade candidates based on it on [%s] cluster.", clusterName);
-                LOGGER.debug(message);
-                filteredUpgradeResponse.appendReason(message);
-                filteredUpgradeResponse.setUpgradeCandidates(List.of());
-            }
-        }
-        return filteredUpgradeResponse;
     }
 
     private UpgradeV4Response filterBySdxUpgradeRequestParams(SdxUpgradeRequest upgradeSdxClusterRequest, UpgradeV4Response upgradeV4Response) {
@@ -109,10 +76,6 @@ public class SdxUpgradeFilter {
             LOGGER.info(message);
             upgradeV4Response.setReason(message);
         }
-    }
-
-    public boolean isRuntimeUpgradeEnabled(String accountId) {
-        return entitlementService.runtimeUpgradeEnabled(accountId);
     }
 
 }

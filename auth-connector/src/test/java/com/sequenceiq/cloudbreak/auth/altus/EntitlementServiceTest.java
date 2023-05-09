@@ -70,9 +70,6 @@ class EntitlementServiceTest {
                 {"CDP_CLOUD_STORAGE_VALIDATION", (EntitlementCheckFunction) EntitlementService::cloudStorageValidationEnabled, false},
                 {"CDP_CLOUD_STORAGE_VALIDATION", (EntitlementCheckFunction) EntitlementService::cloudStorageValidationEnabled, true},
 
-                {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, false},
-                {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, true},
-
                 {"CDP_OS_UPGRADE_DATAHUB", (EntitlementCheckFunction) EntitlementService::datahubOsUpgradeEnabled, false},
                 {"CDP_OS_UPGRADE_DATAHUB", (EntitlementCheckFunction) EntitlementService::datahubOsUpgradeEnabled, true},
 
@@ -249,10 +246,10 @@ class EntitlementServiceTest {
     private void setUpUmsClient(String entitlement, boolean entitled) {
         Account.Builder builder = Account.newBuilder();
         if (entitled) {
-                builder.addEntitlements(
-                        Entitlement.newBuilder()
-                                .setEntitlementName(entitlement)
-                                .build());
+            builder.addEntitlements(
+                    Entitlement.newBuilder()
+                            .setEntitlementName(entitlement)
+                            .build());
         }
         when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any()))
                 .thenReturn(builder.build());

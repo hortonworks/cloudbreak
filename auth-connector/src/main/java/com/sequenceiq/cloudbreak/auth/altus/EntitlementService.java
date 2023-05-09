@@ -80,7 +80,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_SALTUSER_PASSWORD;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
@@ -270,10 +269,6 @@ public class EntitlementService {
 
     public boolean enterpriseSdxDisabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DISABLE_ENTERPRISE_SDX);
-    }
-
-    public boolean runtimeUpgradeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_RUNTIME_UPGRADE);
     }
 
     public boolean datahubRuntimeUpgradeEnabled(String accountId) {

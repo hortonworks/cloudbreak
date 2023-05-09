@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.upgrade;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -531,7 +532,7 @@ public class SdxRuntimeUpgradeServiceTest {
         sdxUpgradeRequest.setImageId(null);
         sdxUpgradeRequest.setReplaceVms(REPAIR_AFTER_UPGRADE);
         doThrow(new BadRequestException("The Cloudera Manager license is not valid to authenticate to paywall, "
-                        + "please contact a Cloudera administrator to update it."))
+                + "please contact a Cloudera administrator to update it."))
                 .when(paywallAccessChecker).checkPaywallAccess(any(JsonCMLicense.class), anyString());
 
         try {
@@ -618,7 +619,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is disabled and no current image information is provided in upgrade response")
+    @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is enabled and no current image information is provided in upgrade response")
     public void testCheckForUpgradeByCrnWhenDisabledAndNoCurrentImage() {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -645,13 +646,12 @@ public class SdxRuntimeUpgradeServiceTest {
 
         UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
         assertEquals(actualResponse, expectedResponse);
-        assertTrue(capturedUpgradeV4Response.getReason().contains("No information about current image, cannot filter patch upgrade candidates based on it"));
-        assertTrue(capturedUpgradeV4Response.getUpgradeCandidates().isEmpty());
+        assertFalse(capturedUpgradeV4Response.getUpgradeCandidates().isEmpty());
         assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
-    @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is disabled and patch updates are available")
+    @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is enabled and patch updates are available")
     public void testCheckForUpgradeByCrnWhenDisabledAndPatchUpdatesAvailable() {
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
         currentImageInfo.setImageId(IMAGE_ID);
@@ -685,89 +685,13 @@ public class SdxRuntimeUpgradeServiceTest {
         UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
         assertEquals(expectedResponse, actualResponse);
         assertTrue(StringUtils.isEmpty(capturedUpgradeV4Response.getReason()));
-        assertEquals(1, capturedUpgradeV4Response.getUpgradeCandidates().size());
+        assertEquals(2, capturedUpgradeV4Response.getUpgradeCandidates().size());
         assertEquals(MATCHING_TARGET_RUNTIME, capturedUpgradeV4Response.getUpgradeCandidates().get(0).getComponentVersions().getCdp());
         assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
     @Test
-    @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is disabled and patch updates are not available")
-    public void testCheckForUpgradeByCrnWhenDisabledAndPatchUpdatesNotAvailable() {
-        ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
-        currentImageInfo.setImageId(IMAGE_ID);
-        currentImageInfo.setCreated(1);
-        currentImageInfo.setComponentVersions(creatImageComponentVersions(MATCHING_TARGET_RUNTIME, MATCHING_TARGET_RUNTIME));
-        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
-        imageInfo.setImageId(IMAGE_ID);
-        imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatImageComponentVersions("7.2.0", "7.2.0"));
-        ImageInfoV4Response imageInfo2 = new ImageInfoV4Response();
-        imageInfo2.setImageId(IMAGE_ID_LAST);
-        imageInfo2.setCreated(2);
-        imageInfo2.setComponentVersions(creatImageComponentVersions("7.3.0", "7.3.0"));
-        List<ImageInfoV4Response> candidates = List.of(imageInfo, imageInfo2);
-        response.setCurrent(currentImageInfo);
-        response.setUpgradeCandidates(candidates);
-        SdxUpgradeResponse expectedResponse = new SdxUpgradeResponse(response.getCurrent(), candidates, response.getReason(), response.getFlowIdentifier());
-        SdxUpgradeRequest upgradeRequest = new SdxUpgradeRequest();
-
-        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
-        ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
-        when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
-        when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeRequest)).thenCallRealMethod();
-        ArgumentCaptor<UpgradeV4Response> upgradeV4ResponseCaptor = ArgumentCaptor.forClass(UpgradeV4Response.class);
-        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4ResponseCaptor.capture())).thenReturn(expectedResponse);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        SdxUpgradeResponse actualResponse = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, upgradeRequest, ACCOUNT_ID, false);
-
-        UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
-        assertEquals(expectedResponse, actualResponse);
-        assertEquals(0, capturedUpgradeV4Response.getUpgradeCandidates().size());
-        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
-    }
-
-    @Test
-    @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is disabled and request runtime param is wrong")
-    public void testCheckForUpgradeByCrnWhenDisabledAndRequestRuntimeParamIsWrong() {
-        SdxUpgradeRequest sdxUpgradeRequest = new SdxUpgradeRequest();
-        sdxUpgradeRequest.setRuntime("7.2.0");
-        ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
-        currentImageInfo.setImageId(IMAGE_ID);
-        currentImageInfo.setCreated(1);
-        currentImageInfo.setComponentVersions(creatImageComponentVersions(MATCHING_TARGET_RUNTIME, MATCHING_TARGET_RUNTIME));
-        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
-        imageInfo.setImageId(IMAGE_ID);
-        imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatImageComponentVersions("7.2.0", "7.2.0"));
-        ImageInfoV4Response imageInfo2 = new ImageInfoV4Response();
-        imageInfo2.setImageId(IMAGE_ID_LAST);
-        imageInfo2.setCreated(2);
-        imageInfo2.setComponentVersions(creatImageComponentVersions("7.3.0", "7.3.0"));
-        List<ImageInfoV4Response> candidates = List.of(imageInfo, imageInfo2);
-        response.setCurrent(currentImageInfo);
-        response.setUpgradeCandidates(candidates);
-        SdxUpgradeResponse expectedResponse = new SdxUpgradeResponse(response.getCurrent(), candidates, response.getReason(), response.getFlowIdentifier());
-
-        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
-        ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
-        when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
-        when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(sdxUpgradeRequest)).thenCallRealMethod();
-        ArgumentCaptor<UpgradeV4Response> upgradeV4ResponseCaptor = ArgumentCaptor.forClass(UpgradeV4Response.class);
-        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4ResponseCaptor.capture())).thenReturn(expectedResponse);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        SdxUpgradeResponse actualResponse = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false);
-
-        UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
-        assertEquals(expectedResponse, actualResponse);
-        assertEquals(0, capturedUpgradeV4Response.getUpgradeCandidates().size());
-        assertTrue(capturedUpgradeV4Response.getReason().contains("it is not possible to upgrade from [7.0.2] to [7.2.0] runtime"));
-        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
-    }
-
-    @Test
-    @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is disabled and request imageid param is wrong")
+    @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is enabled and request imageid param is wrong")
     public void testCheckForUpgradeByCrnWhenDisabledAndRequestImageIdParamIsWrong() {
         SdxUpgradeRequest sdxUpgradeRequest = new SdxUpgradeRequest();
         sdxUpgradeRequest.setImageId(IMAGE_ID_LAST);
@@ -800,8 +724,8 @@ public class SdxRuntimeUpgradeServiceTest {
 
         UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
         assertEquals(expectedResponse, actualResponse);
-        assertEquals(0, capturedUpgradeV4Response.getUpgradeCandidates().size());
-        assertTrue(capturedUpgradeV4Response.getReason().contains("The version of target runtime has to be the same as the current one"));
+        assertEquals(2, capturedUpgradeV4Response.getUpgradeCandidates().size());
+        assertNull(capturedUpgradeV4Response.getReason());
         assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
