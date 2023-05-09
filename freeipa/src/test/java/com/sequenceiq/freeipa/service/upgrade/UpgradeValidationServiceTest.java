@@ -9,10 +9,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -25,9 +23,6 @@ import com.sequenceiq.freeipa.entity.StackStatus;
 class UpgradeValidationServiceTest {
 
     public static final String ACCOUNT_ID = "accId";
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @InjectMocks
     private UpgradeValidationService underTest;
@@ -91,20 +86,6 @@ class UpgradeValidationServiceTest {
         instanceMetaData.setInstanceId(id);
         instanceMetaData.setInstanceStatus(InstanceStatus.CREATED);
         return instanceMetaData;
-    }
-
-    @Test
-    public void testEntitlementEnabled() {
-        when(entitlementService.isFreeIpaUpgradeEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
-
-        underTest.validateEntitlement(ACCOUNT_ID);
-    }
-
-    @Test
-    public void testEntitlementDisabled() {
-        when(entitlementService.isFreeIpaUpgradeEnabled(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
-
-        assertThrows(BadRequestException.class, () -> underTest.validateEntitlement(ACCOUNT_ID));
     }
 
     @Test

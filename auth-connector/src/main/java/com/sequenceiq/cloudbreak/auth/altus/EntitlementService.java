@@ -68,7 +68,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
@@ -465,10 +464,6 @@ public class EntitlementService {
 
     public boolean ephemeralDisksForTempDataEnabled(String accountId) {
         return isEntitlementRegistered(accountId, EPHEMERAL_DISKS_FOR_TEMP_DATA);
-    }
-
-    public boolean isFreeIpaUpgradeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_FREEIPA_UPGRADE);
     }
 
     public boolean isDatalakeMediumDutyWithProfilerEnabled(String accountId) {

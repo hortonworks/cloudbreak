@@ -128,7 +128,6 @@ class UpgradeServiceTest {
         assertEquals(triggeredVariant, upgradeEvent.getTriggeredVariant());
         assertNull(upgradeEvent.getVerticalScaleRequest());
 
-        verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
         verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
     }
@@ -184,7 +183,6 @@ class UpgradeServiceTest {
         assertEquals("master", verticalScaleRequest.getGroup());
         assertNull(verticalScaleRequest.getTemplate().getInstanceType());
 
-        verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
         verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
     }
@@ -226,7 +224,6 @@ class UpgradeServiceTest {
         assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
         assertTrue(upgradeEvent.isBackupSet());
 
-        verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
         verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
     }
@@ -288,7 +285,6 @@ class UpgradeServiceTest {
         assertEquals(2, upgradeEvent.getInstanceIds().size());
         assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
 
-        verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
         verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
     }
@@ -309,7 +305,6 @@ class UpgradeServiceTest {
 
         assertThrows(BadRequestException.class, () -> underTest.upgradeFreeIpa(ACCOUNT_ID, request));
 
-        verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
     }
 
@@ -331,7 +326,6 @@ class UpgradeServiceTest {
 
         assertThrows(BadRequestException.class, () -> underTest.upgradeFreeIpa(ACCOUNT_ID, request));
 
-        verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
         verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
     }
