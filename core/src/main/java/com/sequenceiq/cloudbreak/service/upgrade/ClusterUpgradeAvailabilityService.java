@@ -97,12 +97,12 @@ public class ClusterUpgradeAvailabilityService {
         return lockComponents || replaceVms == null || replaceVms;
     }
 
-    public void filterUpgradeOptions(String accountId, UpgradeV4Response upgradeOptions, UpgradeV4Request upgradeRequest, boolean datalake) {
+    public void filterUpgradeOptions(UpgradeV4Response upgradeOptions, UpgradeV4Request upgradeRequest, boolean datalake) {
         List<ImageInfoV4Response> upgradeCandidates = upgradeOptions.getUpgradeCandidates();
         List<ImageInfoV4Response> filteredUpgradeCandidates;
         // We would like to upgrade to the latest available if no request params exist
         if ((Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty()) && datalake) {
-            filteredUpgradeCandidates = filterDatalakeUpgradeCandidates(accountId, upgradeOptions.getCurrent(), upgradeCandidates);
+            filteredUpgradeCandidates = filterDatalakeUpgradeCandidates(upgradeCandidates);
             LOGGER.info("No request param, defaulting to latest image {}", filteredUpgradeCandidates);
         } else {
             String requestImageId = upgradeRequest != null ? upgradeRequest.getImageId() : null;
@@ -123,18 +123,8 @@ public class ClusterUpgradeAvailabilityService {
         upgradeOptions.setUpgradeCandidates(filteredUpgradeCandidates);
     }
 
-    public List<ImageInfoV4Response> filterDatalakeUpgradeCandidates(String accountId, ImageInfoV4Response currentImage,
-            List<ImageInfoV4Response> upgradeCandidates) {
-        if (entitlementService.runtimeUpgradeEnabled(accountId)) {
-            return List.of(upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow());
-        } else if (currentImage != null) {
-            List<ImageInfoV4Response> filteredUpdateCandidates = upgradeCandidates.stream()
-                    .filter(candidate -> candidate.getComponentVersions().getCdp().equals(currentImage.getComponentVersions().getCdp()))
-                    .collect(Collectors.toList());
-            return filteredUpdateCandidates.isEmpty() ? List.of()
-                    : List.of(filteredUpdateCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow());
-        }
-        return upgradeCandidates;
+    public List<ImageInfoV4Response> filterDatalakeUpgradeCandidates(List<ImageInfoV4Response> upgradeCandidates) {
+        return List.of(upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow());
     }
 
     public UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents, InternalUpgradeSettings internalUpgradeSettings, boolean getAllImages) {

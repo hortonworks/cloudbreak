@@ -3,8 +3,6 @@ package com.sequenceiq.datalake.service.upgrade;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -12,13 +10,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -41,9 +37,6 @@ class SdxUpgradeFilterTest {
     private static final String V_7_0_3 = "7.0.3";
 
     private static final String V_7_0_2 = "7.0.2";
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @InjectMocks
     private SdxUpgradeFilter underTest;
@@ -71,7 +64,6 @@ class SdxUpgradeFilterTest {
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         upgradeV4Response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         sdxUpgradeRequest.setDryRun(true);
-        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
 
         UpgradeV4Response actualUpgradeResponse = underTest.filterSdxUpgradeResponse(ACCOUNT_ID, sdxCluster.getClusterName(),
                 sdxUpgradeRequest, upgradeV4Response);
@@ -82,8 +74,6 @@ class SdxUpgradeFilterTest {
 
     @Test
     public void testShowLatestOnlyShouldReturnLatestUpgradeCandidatesPerRuntime() {
-        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
-
         ImageComponentVersions imageComponentVersionsFor702 = new ImageComponentVersions();
         imageComponentVersionsFor702.setCm(V_7_0_2);
         imageComponentVersionsFor702.setCdp(V_7_0_2);

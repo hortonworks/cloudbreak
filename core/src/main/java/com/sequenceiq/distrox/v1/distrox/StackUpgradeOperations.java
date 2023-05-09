@@ -145,7 +145,7 @@ public class StackUpgradeOperations {
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
                 request.getInternalUpgradeSettings(), getAllImages);
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
-            clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
+            clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request, stack.isDatalake());
             populateCandidatesWithPreparedFlag(stack, upgradeResponse);
         }
         validateAttachedDataHubsForDataLake(accountId, stack, upgradeResponse, request);
@@ -162,10 +162,9 @@ public class StackUpgradeOperations {
         });
     }
 
-    private void validateAttachedDataHubsForDataLake(String accountId, Stack stack, UpgradeV4Response upgradeResponse,
-        UpgradeV4Request request) {
+    private void validateAttachedDataHubsForDataLake(String accountId, Stack stack, UpgradeV4Response upgradeResponse, UpgradeV4Request request) {
         InternalUpgradeSettings internalUpgradeSettings = request.getInternalUpgradeSettings();
-        if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()
+        if (StackType.DATALAKE == stack.getType()
                 && (internalUpgradeSettings == null || !internalUpgradeSettings.isUpgradePreparation())) {
             LOGGER.info("Checking that the attached DataHubs of the Data lake are both in stopped state and upgradeable only in case if "
                     + "Data lake runtime upgrade is enabled in [{}] account on [{}] cluster.", accountId, stack.getName());
