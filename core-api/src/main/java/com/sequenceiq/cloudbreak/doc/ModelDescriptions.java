@@ -482,6 +482,8 @@ public class ModelDescriptions {
         public static final String DATABASE_REQUEST_CLUSTER_NAME = "requested cluster name";
         public static final String DATABASE_CONNECTION_TEST_RESULT = "result of RDS connection test";
         public static final String DATABASE_REQUEST = "unsaved RDS config to be tested by connectivity";
+        public static final String AZURE_DATABASE_REQUEST = "Azure Database request.";
+        public static final String AZURE_DATABASE_TYPE = "The type of the azure database: single server / flexible server";
     }
 
     public static class DatabaseServerModelDescription {

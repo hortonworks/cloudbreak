@@ -8,8 +8,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -67,6 +69,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -76,6 +79,7 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
+import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
@@ -215,14 +219,18 @@ public class StackServiceTest {
     @Mock
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image image;
 
+    @Mock
+    private DatabaseService databaseService;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         underTest.nowSupplier = () -> MOCK_NOW;
 
         lenient().when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
         lenient().when(stackAuthentication.passwordAuthenticationRequired()).thenReturn(false);
         lenient().when(stackRepository.save(stack)).thenReturn(stack);
         lenient().when(statedImage.getImage()).thenReturn(image);
+        lenient().when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
 
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
@@ -264,6 +272,8 @@ public class StackServiceTest {
         when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
         String dbVersion = "10";
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);
+        Database database = new Database();
+        when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
         when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any())).thenReturn(calculatedDbVersion);
 
@@ -273,6 +283,7 @@ public class StackServiceTest {
         verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion);
         verify(stack).setExternalDatabaseEngineVersion(calculatedDbVersion);
         verify(stackRepository, times(2)).save(stack);
+        assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
     }
 
     @Test
@@ -293,6 +304,7 @@ public class StackServiceTest {
         verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion);
         verify(stack).setExternalDatabaseEngineVersion(calculatedDbVersion);
         verify(stackRepository, times(2)).save(stack);
+        verify(databaseService, never()).save(any());
     }
 
     @Test
@@ -570,4 +582,25 @@ public class StackServiceTest {
         assertEquals(exception.getMessage(), "Stack '1' not found.");
     }
 
+    @Test
+    void updateExternalDatabaseEngineVersionWhenNoDBEntity() {
+        when(stackRepository.updateExternalDatabaseEngineVersion(1L, "11")).thenReturn(1);
+        when(stackRepository.findDatabaseIdByStackId(1L)).thenReturn(Optional.empty());
+        underTest.updateExternalDatabaseEngineVersion(1L, "11");
+        verify(databaseService, never()).updateExternalDatabaseEngineVersion(anyLong(), anyString());
+    }
+
+    @Test
+    void updateExternalDatabaseEngineVersion() {
+        when(stackRepository.updateExternalDatabaseEngineVersion(1L, "11")).thenReturn(1);
+        when(stackRepository.findDatabaseIdByStackId(1L)).thenReturn(Optional.of(2L));
+        underTest.updateExternalDatabaseEngineVersion(1L, "11");
+        verify(databaseService, times(1)).updateExternalDatabaseEngineVersion(2L, "11");
+    }
+
+    @Test
+    void updateExternalDatabaseEngineVersionStackNotFound() {
+        when(stackRepository.updateExternalDatabaseEngineVersion(1L, "11")).thenReturn(0);
+        assertThrows(NotFoundException.class, () -> underTest.updateExternalDatabaseEngineVersion(1L, "11"));
+    }
 }

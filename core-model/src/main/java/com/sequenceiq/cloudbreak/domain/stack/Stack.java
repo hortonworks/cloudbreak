@@ -86,6 +86,7 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.util.DatabaseParameterFallbackUtil;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -250,6 +251,10 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
      * the original name.
      */
     private String originalName;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "database_id")
+    private Database database;
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -983,7 +988,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     }
 
     public DatabaseAvailabilityType getExternalDatabaseCreationType() {
-        return externalDatabaseCreationType;
+        return DatabaseParameterFallbackUtil.getExternalDatabaseCreationType(database, externalDatabaseCreationType);
     }
 
     public void setExternalDatabaseCreationType(DatabaseAvailabilityType externalDatabaseCreationType) {
@@ -1025,7 +1030,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     }
 
     public String getExternalDatabaseEngineVersion() {
-        return externalDatabaseEngineVersion;
+        return DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(database, externalDatabaseEngineVersion);
     }
 
     @Override
@@ -1082,6 +1087,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return new ArrayList<>(instanceGroups);
     }
 
+    public Database getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(Database database) {
+        this.database = database;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -1131,6 +1144,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", externalDatabaseEngineVersion=" + externalDatabaseEngineVersion +
                 ", originalName=" + originalName +
                 ", javaVersion=" + javaVersion +
+                ", database=" + database +
                 '}';
     }
 

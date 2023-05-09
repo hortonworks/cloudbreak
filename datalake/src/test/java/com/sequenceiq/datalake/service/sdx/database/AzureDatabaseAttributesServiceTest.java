@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
@@ -81,7 +83,7 @@ public class AzureDatabaseAttributesServiceTest {
     void testConfigureAzureDatabaseWithSingleServer() {
         SdxDatabaseRequest databaseRequest = new SdxDatabaseRequest();
         SdxDatabase sdxDatabase = new SdxDatabase();
-        ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.configureAzureDatabase(databaseRequest, sdxDatabase));
+        ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.configureAzureDatabase(null, databaseRequest, sdxDatabase));
 
         assertEquals(AzureDatabaseType.SINGLE_SERVER, service.getAzureDatabaseType(sdxDatabase));
     }
@@ -96,7 +98,22 @@ public class AzureDatabaseAttributesServiceTest {
         SdxDatabase sdxDatabase = new SdxDatabase();
         when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
 
-        ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.configureAzureDatabase(databaseRequest, sdxDatabase));
+        ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.configureAzureDatabase(null, databaseRequest, sdxDatabase));
+
+        assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, service.getAzureDatabaseType(sdxDatabase));
+    }
+
+    @Test
+    void testConfigureAzureDatabaseWithFlexibleServerInternal() {
+        DatabaseRequest internalDatabaseRequest = new DatabaseRequest();
+        DatabaseAzureRequest azureRequest = new DatabaseAzureRequest();
+        azureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
+        internalDatabaseRequest.setDatabaseAzureRequest(azureRequest);
+
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.configureAzureDatabase(internalDatabaseRequest, null, sdxDatabase));
 
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, service.getAzureDatabaseType(sdxDatabase));
     }
@@ -112,7 +129,7 @@ public class AzureDatabaseAttributesServiceTest {
         when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(false);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.configureAzureDatabase(databaseRequest, sdxDatabase)));
+                () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.configureAzureDatabase(null, databaseRequest, sdxDatabase)));
 
         assertEquals("You are not entitled to use Flexible Database Server on Azure for your cluster." +
                 " Please contact Cloudera to enable " + Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER + " for your account", exception.getMessage());

@@ -78,7 +78,7 @@ public class CreateExternalDatabaseHandler implements EventHandler<CreateExterna
                 LOGGER.debug("Getting environment CRN for stack {}", stack.getName());
                 DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
                 environmentValidator.checkValidEnvironment(stack.getName(), externalDatabase, environment);
-                provisionService.provisionDatabase(stack.getCluster(), externalDatabase, environment);
+                provisionService.provisionDatabase(stack, environment);
                 LOGGER.debug("Updating stack {} status from {} to {}",
                         stack.getName(), stack.getStatus().name(), DetailedStackStatus.PROVISION_REQUESTED.name());
                 stackUpdaterService.updateStatus(stack.getId(), DetailedStackStatus.PROVISION_REQUESTED,
