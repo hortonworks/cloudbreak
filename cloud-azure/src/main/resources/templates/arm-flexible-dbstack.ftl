@@ -143,7 +143,7 @@
       "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules",
       "apiVersion": "2022-12-01",
       "dependsOn": [
-        "[concat('Microsoft.DBforPostgreSQL/flexibleServers/',parameters('dbServerName'))]"
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('dbServerName'))]"
       ],
       "properties": {
         "startIpAddress": "0.0.0.0",

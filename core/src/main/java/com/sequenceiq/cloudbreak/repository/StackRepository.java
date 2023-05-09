@@ -476,7 +476,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @Modifying
     @Query("UPDATE Stack s SET s.externalDatabaseEngineVersion = :externalDatabaseEngineVersion WHERE s.id = :stackId")
-    void updateExternalDatabaseEngineVersion(@Param("stackId") Long stackId, @Param("externalDatabaseEngineVersion") String externalDatabaseEngineVersion);
+    int updateExternalDatabaseEngineVersion(@Param("stackId") Long stackId, @Param("externalDatabaseEngineVersion") String externalDatabaseEngineVersion);
 
     @Modifying
     @Query("UPDATE Stack s SET s.stackVersion = :stackVersion WHERE s.id = :stackId")
@@ -488,4 +488,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.region FROM Stack s WHERE s.id = :stackId")
     Optional<String> findRegionByStackId(@Param("stackId") Long stackId);
 
+    @Query("SELECT s.database.id FROM Stack s WHERE s.id = :stackId")
+    Optional<Long> findDatabaseIdByStackId(@Param("stackId") Long stackId);
 }

@@ -3,11 +3,13 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -53,6 +55,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroup
 import com.sequenceiq.cloudbreak.converter.v4.stacks.network.NetworkV4RequestToNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -174,6 +177,9 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private DatabaseRequestToDatabaseConverter databaseRequestToDatabaseConverter;
+
     @BeforeEach
     void setUp() {
         lenient().when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
@@ -192,7 +198,8 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         lenient().when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
         lenient().when(datalakeService.getDatalakeCrn(any(), any())).thenReturn("crn");
         lenient().when(targetedUpscaleSupportService.isUnboundEliminationSupported(anyString())).thenReturn(Boolean.FALSE);
-
+        lenient().when(databaseRequestToDatabaseConverter.convert(any(Stack.class), any(CloudPlatform.class), isNull()))
+                .thenReturn(new Database());
         // GIVEN
         InstanceGroup instanceGroup = new InstanceGroup();
         SecurityGroup securityGroup = new SecurityGroup();
@@ -233,6 +240,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         verify(gatewaySecurityGroupDecorator, times(1))
                 .extendGatewaySecurityGroupWithDefaultGatewayCidrs(any(Stack.class), any(Tunnel.class));
         assertTrue(stack.getCluster().isAutoTlsEnabled());
+        assertNotNull(stack.getDatabase());
     }
 
     @Test

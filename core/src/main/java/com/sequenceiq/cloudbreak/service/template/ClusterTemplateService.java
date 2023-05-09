@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ClusterTemplateVie
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.ClusterTemplateStatusView;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
@@ -62,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
@@ -143,6 +145,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     @Inject
     private InternalClusterTemplateValidator internalClusterTemplateValidator;
 
+    @Inject
+    private DatabaseService databaseService;
+
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
         return clusterTemplateRepository;
@@ -208,6 +213,11 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             if (cluster != null) {
                 cluster.setWorkspace(stackTemplate.getWorkspace());
                 clusterService.saveWithRef(cluster);
+            }
+
+            Database database = stackTemplate.getDatabase();
+            if (database != null) {
+                databaseService.save(database);
             }
 
             stackTemplate.setResourceCrn(createCRN(ThreadBasedUserCrnProvider.getAccountId()));

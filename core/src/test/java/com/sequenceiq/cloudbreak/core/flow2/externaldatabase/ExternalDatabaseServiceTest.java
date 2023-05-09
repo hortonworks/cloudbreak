@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
@@ -147,9 +148,12 @@ class ExternalDatabaseServiceTest {
 
     @Test
     void provisionDatabaseBadRequest() {
+        Stack stack = new Stack();
+        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
+        stack.setCluster(new Cluster());
         when(redbeamsClient.create(any())).thenThrow(BadRequestException.class);
 
-        assertThatThrownBy(() -> underTest.provisionDatabase(new Cluster(), DatabaseAvailabilityType.HA, environmentResponse))
+        assertThatThrownBy(() -> underTest.provisionDatabase(stack, environmentResponse))
                 .isInstanceOf(BadRequestException.class);
     }
 
@@ -163,12 +167,43 @@ class ExternalDatabaseServiceTest {
         Cluster cluster = spy(new Cluster());
         Stack stack = new Stack();
         stack.setResourceCrn(CLUSTER_CRN);
-        cluster.setStack(stack);
+        stack.setExternalDatabaseCreationType(availability);
+        stack.setCluster(cluster);
         when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-        underTest.provisionDatabase(cluster, availability, environmentResponse);
+        underTest.provisionDatabase(stack, environmentResponse);
+
+        ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
+        verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
+        verify(redbeamsClient).create(any(AllocateDatabaseServerV4Request.class));
+        verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
+        verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture());
+        verify(clusterRepository).save(cluster);
+        DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
+        assertThat(paramValue.isHighlyAvailable()).isEqualTo(availability == DatabaseAvailabilityType.HA);
+    }
+
+    @ParameterizedTest
+    @EnumSource(DatabaseAvailabilityType.class)
+    void provisionDatabaseWithDBEntity(DatabaseAvailabilityType availability) throws JsonProcessingException {
+        Assumptions.assumeTrue(!availability.isEmbedded());
+
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(RDBMS_CRN);
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(availability);
+        stack.setDatabase(database);
+        stack.setCluster(cluster);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
+        when(redbeamsClient.create(any())).thenReturn(createResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        underTest.provisionDatabase(stack, environmentResponse);
 
         ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
         verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
@@ -199,45 +234,18 @@ class ExternalDatabaseServiceTest {
     }
 
     @Test
-    void provisionDatabaseWhenStackIsNullOnCluster() throws JsonProcessingException {
-        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
-        createResponse.setResourceCrn(RDBMS_CRN);
-        Cluster cluster = spy(new Cluster());
-        cluster.setStack(null);
-        when(redbeamsClient.create(any())).thenReturn(createResponse);
-        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
-                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-        underTest.provisionDatabase(cluster, DatabaseAvailabilityType.NON_HA, environmentResponse);
-
-        verify(redbeamsClient, never()).getByClusterCrn(nullable(String.class), nullable(String.class));
-        ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
-
-        ArgumentCaptor<AllocateDatabaseServerV4Request> allocateRequestCaptor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
-        verify(redbeamsClient).create(allocateRequestCaptor.capture());
-        AllocateDatabaseServerV4Request allocateRequest = allocateRequestCaptor.getValue();
-        assertThat(allocateRequest).isNotNull();
-        assertThat(allocateRequest.getTags()).isNotNull();
-        assertThat(allocateRequest.getTags()).isEmpty();
-
-        verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
-        verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture());
-        verify(clusterRepository).save(cluster);
-        DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
-        assertThat(paramValue.isHighlyAvailable()).isFalse();
-    }
-
-    @Test
     void provisionDatabaseWhenAlreadyExists() throws JsonProcessingException {
         Cluster cluster = spy(new Cluster());
         Stack stack = new Stack();
         stack.setResourceCrn(CLUSTER_CRN);
-        cluster.setStack(stack);
+        stack.setCluster(cluster);
+        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.NON_HA);
         DatabaseServerV4Response dbServerResponse = new DatabaseServerV4Response();
         dbServerResponse.setCrn(RDBMS_CRN);
         when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(dbServerResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
-        underTest.provisionDatabase(cluster, DatabaseAvailabilityType.NON_HA, environmentResponse);
+        underTest.provisionDatabase(stack, environmentResponse);
 
         verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
         verify(redbeamsClient, never()).create(any(AllocateDatabaseServerV4Request.class));
@@ -266,19 +274,20 @@ class ExternalDatabaseServiceTest {
         Cluster cluster = new Cluster();
         Stack stack = new Stack();
         stack.setResourceCrn(CLUSTER_CRN);
+        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
         Map<String, String> userDefinedTags = Map.ofEntries(entry("key1", "value1"), entry("key2", "value2"));
         StackTags stackTags = new StackTags(userDefinedTags, Map.of(), Map.of());
         stack.setTags(new Json(stackTags));
-        cluster.setStack(stack);
         cluster.setBlueprint(blueprint);
         cluster.setEnvironmentCrn(ENV_CRN);
+        stack.setCluster(cluster);
 
         when(redbeamsClient.getByClusterCrn(ENV_CRN, CLUSTER_CRN)).thenReturn(null);
         when(redbeamsClient.create(any(AllocateDatabaseServerV4Request.class))).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(cluster, DatabaseOperation.CREATION, RDBMS_CRN, true))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
 
-        underTest.provisionDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
+        underTest.provisionDatabase(stack, environmentResponse);
 
         assertThat(cluster.getDatabaseServerCrn()).isEqualTo(RDBMS_CRN);
         verify(clusterRepository).save(cluster);

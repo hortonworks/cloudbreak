@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
+import com.sequenceiq.common.model.AzureDatabaseType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,15 +14,15 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class DistroXDatabaseRequest extends DistroXDatabaseBase implements Serializable {
-    @ApiModelProperty(Database.AZURE_DATABASE_REQUEST)
-    private DistroXDatabaseAzureRequest databaseAzureRequest;
+public class DistroXDatabaseAzureRequest implements Serializable {
+    @ApiModelProperty(Database.AZURE_DATABASE_TYPE)
+    private AzureDatabaseType azureDatabaseType;
 
-    public DistroXDatabaseAzureRequest getDatabaseAzureRequest() {
-        return databaseAzureRequest;
+    public AzureDatabaseType getAzureDatabaseType() {
+        return azureDatabaseType == null ? AzureDatabaseType.SINGLE_SERVER : azureDatabaseType;
     }
 
-    public void setDatabaseAzureRequest(DistroXDatabaseAzureRequest databaseAzureRequest) {
-        this.databaseAzureRequest = databaseAzureRequest;
+    public void setAzureDatabaseType(AzureDatabaseType azureDatabaseType) {
+        this.azureDatabaseType = azureDatabaseType;
     }
 }
