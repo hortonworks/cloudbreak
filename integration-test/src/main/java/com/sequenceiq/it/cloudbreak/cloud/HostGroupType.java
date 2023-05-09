@@ -5,14 +5,25 @@ import com.sequenceiq.it.util.TestParameter;
 
 public enum HostGroupType {
     MASTER("master", InstanceGroupType.GATEWAY, InstanceCountParameter.MASTER_INSTANCE_COUNT.getName()),
+    MASTER_ENT("master", InstanceGroupType.CORE, InstanceCountParameter.MASTER_INSTANCE_COUNT.getName(), 2),
     WORKER("worker", InstanceGroupType.CORE, InstanceCountParameter.WORKER_INSTANCE_COUNT.getName(), 3),
     IDBROKER("idbroker", InstanceGroupType.CORE, InstanceCountParameter.IDBROKER_INSTANCE_COUNT.getName()),
+    IDBROKER_ENT("idbroker", InstanceGroupType.CORE, InstanceCountParameter.IDBROKER_INSTANCE_COUNT.getName(), 2),
     GATEWAY("gateway", InstanceGroupType.CORE, InstanceCountParameter.GATEWAY_INSTANCE_COUNT.getName(), 0),
+    GATEWAY_ENT("gateway", InstanceGroupType.GATEWAY, InstanceCountParameter.GATEWAY_INSTANCE_COUNT.getName(), 2),
     COMPUTE("compute", InstanceGroupType.CORE, InstanceCountParameter.COMPUTE_INSTANCE_COUNT.getName()),
     SERVICES("Services", InstanceGroupType.GATEWAY, InstanceCountParameter.SERVICE_INSTANCE_COUNT.getName()),
     MESSAGING("Messaging", InstanceGroupType.CORE, InstanceCountParameter.NIFI_INSTANCE_COUNT.getName()),
     NIFI("NiFi", InstanceGroupType.CORE, InstanceCountParameter.NIFI_INSTANCE_COUNT.getName()),
-    ZOOKEEPER("ZooKeeper", InstanceGroupType.CORE, InstanceCountParameter.ZOOKEEPER_INSTANCE_COUNT.getName());
+    ZOOKEEPER("ZooKeeper", InstanceGroupType.CORE, InstanceCountParameter.ZOOKEEPER_INSTANCE_COUNT.getName()),
+    AUXILIARY("auxiliary", InstanceGroupType.CORE, InstanceCountParameter.AUXILIARY_INSTANCE_COUNT.getName(), 1),
+    CORE("core", InstanceGroupType.CORE, InstanceCountParameter.CORE_INSTANCE_COUNT.getName(), 3),
+    SOLRHG("solrhg", InstanceGroupType.CORE, InstanceCountParameter.SOLRHG_INSTANCE_COUNT.getName()),
+    STORAGEHG("storagehg", InstanceGroupType.CORE, InstanceCountParameter.STORAGEHG_INSTANCE_COUNT.getName()),
+    KAFKAHG("kafkahg", InstanceGroupType.CORE, InstanceCountParameter.KAFKAHG_INSTANCE_COUNT.getName()),
+    RAZHG("razhg", InstanceGroupType.CORE, InstanceCountParameter.RAZHG_INSTANCE_COUNT.getName(), 0),
+    ATLASHG("atlashg", InstanceGroupType.CORE, InstanceCountParameter.ATLASHG_INSTANCE_COUNT.getName()),
+    HMSHG("hmshg", InstanceGroupType.CORE, InstanceCountParameter.HMSHG_INSTANCE_COUNT.getName());
 
     private final String name;
 

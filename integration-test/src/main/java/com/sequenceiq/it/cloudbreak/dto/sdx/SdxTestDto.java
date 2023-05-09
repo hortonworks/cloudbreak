@@ -208,14 +208,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         }
     }
 
-    public SdxTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses) {
-        return awaitForInstance(statuses, emptyRunningParameter());
-    }
-
-    public SdxTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().awaitForInstance(this, statuses, runningParameter);
-    }
-
     public SdxTestDto withCloudStorage() {
         SdxCloudStorageTestDto cloudStorage = getCloudProvider().cloudStorage(given(SdxCloudStorageTestDto.class));
         if (cloudStorage == null) {

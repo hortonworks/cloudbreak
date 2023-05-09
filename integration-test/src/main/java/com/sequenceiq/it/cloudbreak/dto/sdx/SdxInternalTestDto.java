@@ -59,6 +59,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
@@ -629,5 +630,24 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto withJavaVersion(Integer javaVersion) {
         getRequest().setJavaVersion(javaVersion);
         return this;
+    }
+
+    public SdxInternalTestDto awaitForHostGroups(List<String> hostGroups, InstanceStatus instanceStatus) {
+        if (!getTestContext().getExceptionMap().isEmpty()) {
+            Log.await(LOGGER, String.format("Await for instances is skipped because of previous error. Required status %s, host group(s) %s.",
+                    instanceStatus, hostGroups));
+            return this;
+        }
+        List<InstanceGroupV4Response> instanceGroups = getResponse().getStackV4Response().getInstanceGroups().stream()
+                .filter(instanceGroupV4Response -> hostGroups.contains(instanceGroupV4Response.getName()))
+                .collect(Collectors.toList());
+        if (hostGroups.size() == instanceGroups.size()) {
+            List<String> instanceIds =
+                    instanceGroups.stream().flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
+                            .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList());
+            return awaitForInstance(Map.of(instanceIds, instanceStatus));
+        } else {
+            throw new IllegalStateException("Can't find instance groups with this name: " + hostGroups);
+        }
     }
 }

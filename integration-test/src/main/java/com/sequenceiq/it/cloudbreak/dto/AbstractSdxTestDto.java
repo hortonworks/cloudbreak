@@ -4,12 +4,14 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -109,5 +111,13 @@ public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> exte
         }
         return getTestContext().then((T) this, SdxClient.class, assertions.get(assertions.size() - 1),
                 runningParameters.get(runningParameters.size() - 1));
+    }
+
+    public T awaitForInstance(Map<List<String>, InstanceStatus> statuses) {
+        return awaitForInstance(statuses, emptyRunningParameter());
+    }
+
+    public T awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
+        return getTestContext().awaitForInstance((T) this, statuses, runningParameter);
     }
 }

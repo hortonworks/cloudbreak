@@ -1,10 +1,21 @@
 package com.sequenceiq.it.cloudbreak.dto;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription.RECOVERY_MODE;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.ATLASHG;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.AUXILIARY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.CORE;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY_ENT;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.HMSHG;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER_ENT;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.KAFKAHG;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER_ENT;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.RAZHG;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.SOLRHG;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.STORAGEHG;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
 
 import java.util.List;
@@ -75,6 +86,10 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
 
     public static List<InstanceGroupTestDto> sdxHostGroup(TestContext testContext) {
         return withHostGroup(testContext, MASTER, IDBROKER);
+    }
+
+    public static List<InstanceGroupTestDto> sdxEnterpriseHostGroup(TestContext testContext) {
+        return withHostGroup(testContext, MASTER_ENT, IDBROKER_ENT, GATEWAY_ENT, CORE, AUXILIARY, SOLRHG, STORAGEHG, KAFKAHG, RAZHG, ATLASHG, HMSHG);
     }
 
     public static List<InstanceGroupTestDto> withHostGroup(TestContext testContext, HostGroupType... groupTypes) {

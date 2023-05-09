@@ -8,7 +8,15 @@ public enum InstanceCountParameter {
     COMPUTE_INSTANCE_COUNT("computeInstanceCount"),
     SERVICE_INSTANCE_COUNT("serviceInstanceCount"),
     NIFI_INSTANCE_COUNT("nifiInstanceCount"),
-    ZOOKEEPER_INSTANCE_COUNT("zookeeperInstanceCount");
+    ZOOKEEPER_INSTANCE_COUNT("zookeeperInstanceCount"),
+    AUXILIARY_INSTANCE_COUNT("auxiliaryInstanceCount"),
+    CORE_INSTANCE_COUNT("coreInstanceCount"),
+    SOLRHG_INSTANCE_COUNT("solrhgInstanceCount"),
+    STORAGEHG_INSTANCE_COUNT("storagehgInstanceCount"),
+    KAFKAHG_INSTANCE_COUNT("kafkahgInstanceCount"),
+    RAZHG_INSTANCE_COUNT("razhgInstanceCount"),
+    ATLASHG_INSTANCE_COUNT("atlashgInstanceCount"),
+    HMSHG_INSTANCE_COUNT("hmshgInstanceCount");
 
     private final String name;
 
