@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
@@ -40,11 +42,14 @@ public class AzureDatabaseAttributesService {
         return azureDatabaseType;
     }
 
-    public void configureAzureDatabase(SdxDatabaseRequest databaseRequest, SdxDatabase sdxDatabase) {
+    public void configureAzureDatabase(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest, SdxDatabase sdxDatabase) {
         AzureDatabaseType azureDatabaseType = Optional.ofNullable(databaseRequest)
                 .map(SdxDatabaseRequest::getSdxDatabaseAzureRequest)
                 .map(SdxDatabaseAzureRequest::getAzureDatabaseType)
-                .orElse(AzureDatabaseType.SINGLE_SERVER);
+                .orElse(Optional.ofNullable(internalDatabaseRequest)
+                        .map(DatabaseRequest::getDatabaseAzureRequest)
+                        .map(DatabaseAzureRequest::getAzureDatabaseType)
+                        .orElse(AzureDatabaseType.SINGLE_SERVER));
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (azureDatabaseType == AzureDatabaseType.FLEXIBLE_SERVER && !entitlementService.isAzureDatabaseFlexibleServerEnabled(accountId)) {
             LOGGER.info("Azure Flexible Database Server creation is not entitled for {} account.", accountId);

@@ -60,7 +60,7 @@ public class SdxExternalDatabaseConfigurer {
         String dbEngineVersion =
                 databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(sdxCluster.getRuntime(), os, requestedDbEngineVersion);
         SdxDatabase sdxDatabase = DatabaseParameterFallbackUtil.setupDatabaseInitParams(sdxCluster, databaseAvailabilityType, dbEngineVersion);
-        configureAzureDatabase(cloudPlatform, databaseRequest, sdxDatabase);
+        configureAzureDatabase(cloudPlatform, internalDatabaseRequest, databaseRequest, sdxDatabase);
         LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxCluster.getDatabaseAvailabilityType(),
                 sdxCluster.getDatabaseEngineVersion());
         validate(cloudPlatform, sdxCluster);
@@ -97,14 +97,11 @@ public class SdxExternalDatabaseConfigurer {
     }
 
     private SdxDatabaseAvailabilityType convertAvailabilityType(DatabaseAvailabilityType dbAvailabilityType) {
-        switch (dbAvailabilityType) {
-        case HA:
-            return SdxDatabaseAvailabilityType.HA;
-        case NON_HA:
-            return SdxDatabaseAvailabilityType.NON_HA;
-        default:
-            return SdxDatabaseAvailabilityType.NONE;
-        }
+        return switch (dbAvailabilityType) {
+            case HA -> SdxDatabaseAvailabilityType.HA;
+            case NON_HA -> SdxDatabaseAvailabilityType.NON_HA;
+            default -> SdxDatabaseAvailabilityType.NONE;
+        };
     }
 
     private boolean isCMExternalDbSupported(CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
@@ -136,9 +133,10 @@ public class SdxExternalDatabaseConfigurer {
         }
     }
 
-    private void configureAzureDatabase(CloudPlatform cloudPlatform, SdxDatabaseRequest databaseRequest, SdxDatabase sdxDatabase) {
+    private void configureAzureDatabase(CloudPlatform cloudPlatform, DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest,
+            SdxDatabase sdxDatabase) {
         if (CloudPlatform.AZURE == cloudPlatform) {
-            azureDatabaseAttributesService.configureAzureDatabase(databaseRequest, sdxDatabase);
+            azureDatabaseAttributesService.configureAzureDatabase(internalDatabaseRequest, databaseRequest, sdxDatabase);
         }
     }
 }

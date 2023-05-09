@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.lang.String.format;
@@ -105,6 +106,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
+import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
@@ -249,6 +251,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     @Inject
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
+    @Inject
+    private DatabaseService databaseService;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -581,8 +586,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         }
         setDefaultTags(stack);
 
-        Stack savedStack = measure(() -> stackRepository.save(stack),
-                LOGGER, "Stackrepository save took {} ms for stack {}", stackName);
+        Stack savedStack = measure(() -> save(stack), LOGGER, "Stackrepository save took {} ms for stack {}", stackName);
 
         MDCBuilder.buildMdcContext(savedStack);
 
@@ -632,8 +636,12 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             // happens for base images
             LOGGER.warn("Product component is not present amongst components, runtime could not be set!");
         }
-        stack.setExternalDatabaseEngineVersion(databaseDefaultVersionProvider
-                .calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, stack.getExternalDatabaseEngineVersion()));
+        String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(
+                stackVersion, os, stack.getExternalDatabaseEngineVersion());
+        stack.setExternalDatabaseEngineVersion(dbEngineVersion);
+        if (stack.getDatabase() != null) {
+            stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);
+        }
         stackRepository.save(stack);
     }
 
@@ -1032,7 +1040,15 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {
         LOGGER.info("Updating DB engine version for [{}] to [{}]", stackId, databaseVersion);
-        stackRepository.updateExternalDatabaseEngineVersion(stackId, databaseVersion);
+        int updatedCount = stackRepository.updateExternalDatabaseEngineVersion(stackId, databaseVersion);
+        if (updatedCount < 1) {
+            LOGGER.warn("Stack with id [{}] is not found, update database engine version to [{}] is not possible", stackId, databaseVersion);
+            throw notFoundException("Stack with", stackId + " id");
+        } else {
+            Optional<Long> databaseId = stackRepository.findDatabaseIdByStackId(stackId);
+            databaseId.ifPresent(id -> databaseService.updateExternalDatabaseEngineVersion(id, databaseVersion));
+            LOGGER.info("Updated database engine version for [{}] with [{}]", stackId, databaseVersion);
+        }
     }
 
     public void updateDomainDnsResolverByStackId(Long stackId, DnsResolverType actualDnsResolverType) {

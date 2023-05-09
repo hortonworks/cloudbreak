@@ -29,9 +29,11 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
@@ -107,17 +109,19 @@ public class ExternalDatabaseService {
         this.cmTemplateProcessorFactory = cmTemplateProcessorFactory;
     }
 
-    public void provisionDatabase(Cluster cluster, DatabaseAvailabilityType externalDatabase, DetailedEnvironmentResponse environment) {
-        LOGGER.info("Create external {} database server in environment {} for DataHub {}", externalDatabase.name(), environment.getName(), cluster.getName());
+    public void provisionDatabase(Stack stack, DetailedEnvironmentResponse environment) {
         String databaseCrn;
+        Cluster cluster = stack.getCluster();
+        DatabaseAvailabilityType externalDatabase = stack.getExternalDatabaseCreationType();
+        LOGGER.info("Create external {} database server in environment {} for DataHub {}", externalDatabase.name(), environment.getName(), cluster.getName());
         try {
-            Optional<DatabaseServerV4Response> existingDatabase = findExistingDatabase(cluster, environment.getCrn());
+            Optional<DatabaseServerV4Response> existingDatabase = findExistingDatabase(stack, environment.getCrn());
             if (existingDatabase.isPresent()) {
                 databaseCrn = existingDatabase.get().getCrn();
                 LOGGER.debug("Found existing database with CRN {}", databaseCrn);
             } else {
                 LOGGER.debug("Requesting new database server creation");
-                AllocateDatabaseServerV4Request request = getDatabaseRequest(environment, externalDatabase, cluster);
+                AllocateDatabaseServerV4Request request = getDatabaseRequest(stack, environment);
                 databaseCrn = redbeamsClient.create(request).getResourceCrn();
             }
             updateClusterWithDatabaseServerCrn(cluster, databaseCrn);
@@ -180,22 +184,22 @@ public class ExternalDatabaseService {
                 targetMajorVersion.name(), cluster.getName());
         String databaseCrn = cluster.getDatabaseServerCrn();
 
-            if (externalDatabaseReferenceExist(databaseCrn)) {
-                try {
-                    UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
-                    request.setUpgradeTargetMajorVersion(targetMajorVersion);
-                    UpgradeDatabaseServerV4Response response = redbeamsClient.upgradeByCrn(databaseCrn, request);
-                    if (null == response.getFlowIdentifier()) {
-                        LOGGER.info(response.getReason());
-                    } else {
-                        pollUntilFlowFinished(databaseCrn, response.getFlowIdentifier());
-                    }
-                } catch (NotFoundException notFoundException) {
-                    LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+        if (externalDatabaseReferenceExist(databaseCrn)) {
+            try {
+                UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
+                request.setUpgradeTargetMajorVersion(targetMajorVersion);
+                UpgradeDatabaseServerV4Response response = redbeamsClient.upgradeByCrn(databaseCrn, request);
+                if (null == response.getFlowIdentifier()) {
+                    LOGGER.info(response.getReason());
+                } else {
+                    pollUntilFlowFinished(databaseCrn, response.getFlowIdentifier());
                 }
-            } else {
-                LOGGER.warn("[INVESTIGATE] The external database crn reference was not present");
+            } catch (NotFoundException notFoundException) {
+                LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
             }
+        } else {
+            LOGGER.warn("[INVESTIGATE] The external database crn reference was not present");
+        }
     }
 
     public void rotateDatabaseSecret(String databaseServerCrn, RedbeamsSecretType secretType, RotationFlowExecutionType executionType) {
@@ -254,19 +258,15 @@ public class ExternalDatabaseService {
                 : AttemptResults.finishWith(!flowState.getLatestFlowFinalizedAndFailed());
     }
 
-    private Optional<DatabaseServerV4Response> findExistingDatabase(Cluster cluster, String environmentCrn) {
-        if (cluster.getStack() != null) {
-            String clusterCrn = cluster.getStack().getResourceCrn();
-            LOGGER.debug("Trying to find existing database server for environment {} and cluster {}", environmentCrn, clusterCrn);
-            try {
-                return Optional.ofNullable(redbeamsClient.getByClusterCrn(environmentCrn, clusterCrn));
-            } catch (NotFoundException ignore) {
-                LOGGER.debug("External database in environment {} for cluster {} does not exist.", environmentCrn, cluster);
-                return Optional.empty();
-            }
+    private Optional<DatabaseServerV4Response> findExistingDatabase(Stack stack, String environmentCrn) {
+        String stackCrn = stack.getResourceCrn();
+        LOGGER.debug("Trying to find existing database server for environment {} and cluster {}", environmentCrn, stackCrn);
+        try {
+            return Optional.ofNullable(redbeamsClient.getByClusterCrn(environmentCrn, stackCrn));
+        } catch (NotFoundException ignore) {
+            LOGGER.debug("External database in environment {} for cluster {} does not exist.", environmentCrn, stack.getCluster());
+            return Optional.empty();
         }
-        LOGGER.warn("[INVESTIGATE] Stack is empty for cluster '{}' in environment {}", cluster.getName(), environmentCrn);
-        return Optional.empty();
     }
 
     private boolean externalDatabaseReferenceExist(String databaseCrn) {
@@ -278,20 +278,21 @@ public class ExternalDatabaseService {
         clusterRepository.save(cluster);
     }
 
-    private AllocateDatabaseServerV4Request getDatabaseRequest(DetailedEnvironmentResponse environment, DatabaseAvailabilityType externalDatabase,
-            Cluster cluster) {
+    private AllocateDatabaseServerV4Request getDatabaseRequest(Stack stack, DetailedEnvironmentResponse environment) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(environment.getCrn());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.US));
-        Stack stack = cluster.getStack();
-        String databaseEngineVersion = Optional.ofNullable(stack).map(Stack::getExternalDatabaseEngineVersion).orElse(null);
-        req.setDatabaseServer(getDatabaseServerStackRequest(cloudPlatform, externalDatabase, databaseEngineVersion));
-        if (stack != null) {
-            req.setClusterCrn(stack.getResourceCrn());
-            req.setTags(getUserDefinedTags(stack));
-        }
-        configureSslEnforcement(req, cloudPlatform, cluster);
+        String databaseEngineVersion = stack.getExternalDatabaseEngineVersion();
+        req.setDatabaseServer(getDatabaseServerStackRequest(cloudPlatform, stack.getExternalDatabaseCreationType(), databaseEngineVersion,
+                getAttributes(stack.getDatabase())));
+        req.setClusterCrn(stack.getResourceCrn());
+        req.setTags(getUserDefinedTags(stack));
+        configureSslEnforcement(req, cloudPlatform, stack.getCluster());
         return req;
+    }
+
+    private Map<String, Object> getAttributes(Database database) {
+        return Optional.ofNullable(database).map(Database::getAttributes).map(Json::getMap).orElse(new HashMap<>());
     }
 
     private void configureSslEnforcement(AllocateDatabaseServerV4Request req, CloudPlatform cloudPlatform, Cluster cluster) {
@@ -347,7 +348,7 @@ public class ExternalDatabaseService {
     }
 
     private DatabaseServerV4StackRequest getDatabaseServerStackRequest(CloudPlatform cloudPlatform, DatabaseAvailabilityType externalDatabase,
-            String databaseEngineVersion) {
+            String databaseEngineVersion, Map<String, Object> attributes) {
         DatabaseStackConfig databaseStackConfig = dbConfigs.get(cloudPlatform);
         if (databaseStackConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + " not found");
@@ -359,6 +360,7 @@ public class ExternalDatabaseService {
         DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
                 .withHighlyAvailable(DatabaseAvailabilityType.HA == externalDatabase)
                 .withEngineVersion(databaseEngineVersion)
+                .withAttributes(attributes)
                 .build();
         parameterDecoratorMap.get(cloudPlatform).setParameters(request, serverParameter);
         return request;

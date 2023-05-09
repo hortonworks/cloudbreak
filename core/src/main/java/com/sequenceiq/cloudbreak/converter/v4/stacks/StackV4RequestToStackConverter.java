@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instanceg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.mock.InstanceGroupMockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.yarn.InstanceGroupYarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -171,6 +170,9 @@ public class StackV4RequestToStackConverter {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private DatabaseRequestToDatabaseConverter databaseRequestToDatabaseConverter;
+
     public Stack convert(StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
 
@@ -221,8 +223,7 @@ public class StackV4RequestToStackConverter {
         if (!isTemplate(source) && environment != null) {
             gatewaySecurityGroupDecorator.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, environment.getTunnel());
         }
-        stack.setExternalDatabaseCreationType(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getAvailabilityType));
-        stack.setExternalDatabaseEngineVersion(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getDatabaseEngineVersion));
+        convertDatabase(source, stack);
         stack.setDomainDnsResolver(targetedUpscaleSupportService.isUnboundEliminationSupported(Crn.safeFromString(source.getEnvironmentCrn()).getAccountId()) ?
                 DnsResolverType.FREEIPA_FOR_ENV : DnsResolverType.LOCAL_UNBOUND);
         determineServiceTypeTag(stack, source.getTags());
@@ -232,6 +233,10 @@ public class StackV4RequestToStackConverter {
         stack.setLoadBalancers(loadBalancers);
         stack.setJavaVersion(source.getJavaVersion());
         return stack;
+    }
+
+    private void convertDatabase(StackV4Request source, Stack stack) {
+        stack.setDatabase(databaseRequestToDatabaseConverter.convert(stack, source.getCloudPlatform(), source.getExternalDatabase()));
     }
 
     private void setTimeToLive(StackV4Request source, Stack stack) {
@@ -456,23 +461,13 @@ public class StackV4RequestToStackConverter {
     private void setNetworkByProvider(StackV4Request source, InstanceGroupV4Request instanceGroup,
             InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
         switch (source.getCloudPlatform()) {
-            case AWS:
-                setUpAws(instanceGroup, instanceGroupNetworkV4Request, subnetId);
-                break;
-            case AZURE:
-                setUpAzure(instanceGroup, instanceGroupNetworkV4Request, subnetId);
-                break;
-            case GCP:
-                setUpGcp(instanceGroup, instanceGroupNetworkV4Request, subnetId);
-                break;
-            case YARN:
-                setUpYarn(instanceGroup, instanceGroupNetworkV4Request);
-                break;
-            case MOCK:
-                setUpMock(instanceGroup, instanceGroupNetworkV4Request, subnetId);
-                break;
-            default:
-                break;
+            case AWS -> setUpAws(instanceGroup, instanceGroupNetworkV4Request, subnetId);
+            case AZURE -> setUpAzure(instanceGroup, instanceGroupNetworkV4Request, subnetId);
+            case GCP -> setUpGcp(instanceGroup, instanceGroupNetworkV4Request, subnetId);
+            case YARN -> setUpYarn(instanceGroup, instanceGroupNetworkV4Request);
+            case MOCK -> setUpMock(instanceGroup, instanceGroupNetworkV4Request, subnetId);
+            default -> {
+            }
         }
     }
 

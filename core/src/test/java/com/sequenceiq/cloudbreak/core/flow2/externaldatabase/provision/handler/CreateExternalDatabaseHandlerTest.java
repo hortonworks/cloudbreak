@@ -87,7 +87,7 @@ class CreateExternalDatabaseHandlerTest {
     void acceptCatchErrors(Class<? extends Exception> exceptionClass) {
         doAnswer(a -> {
             throw exceptionClass.getDeclaredConstructor().newInstance();
-        }).when(provisionService).provisionDatabase(any(), any(DatabaseAvailabilityType.class), any());
+        }).when(provisionService).provisionDatabase(any(), any());
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("cloudplatform");
         when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
@@ -99,7 +99,7 @@ class CreateExternalDatabaseHandlerTest {
 
         underTest.accept(event);
 
-        verify(provisionService).provisionDatabase(any(), eq(DatabaseAvailabilityType.HA), eq(environment));
+        verify(provisionService).provisionDatabase(any(), eq(environment));
 
         verify(environmentValidator).checkValidEnvironment(eq(STACK_NAME), eq(DatabaseAvailabilityType.HA), eq(environment));
 
@@ -119,10 +119,10 @@ class CreateExternalDatabaseHandlerTest {
         when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
 
         doAnswer(a -> {
-            Cluster cluster = a.getArgument(0);
-            cluster.setDatabaseServerCrn(DATABASE_CRN);
+            Stack stack = a.getArgument(0);
+            stack.getCluster().setDatabaseServerCrn(DATABASE_CRN);
             return null;
-        }).when(provisionService).provisionDatabase(any(), any(), any());
+        }).when(provisionService).provisionDatabase(any(), any());
 
         when(stackService.getById(anyLong())).thenReturn(buildStack(DatabaseAvailabilityType.HA));
         CreateExternalDatabaseRequest request =
@@ -131,7 +131,7 @@ class CreateExternalDatabaseHandlerTest {
 
         underTest.accept(event);
 
-        verify(provisionService).provisionDatabase(any(), eq(DatabaseAvailabilityType.HA), eq(environment));
+        verify(provisionService).provisionDatabase(any(), eq(environment));
 
         verify(environmentValidator).checkValidEnvironment(eq(STACK_NAME), eq(DatabaseAvailabilityType.HA), eq(environment));
 
