@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_10_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
@@ -715,9 +716,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private void applyHostGroupRolesOnUpscaledHosts(ApiHostRefList body, String hostGroupName) throws ApiException, CloudbreakException {
         if (body.getItems() != null && !body.getItems().isEmpty()) {
             LOGGER.debug("Applying host template on upscaled hosts. Host group: [{}]", hostGroupName);
-            HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v52Client == null ? v31Client : v52Client);
-            ApiCommand applyHostTemplateCommand = hostTemplatesResourceApi
-                    .applyHostTemplate(stack.getName(), hostGroupName, v52Client != null, START_ROLES_ON_UPSCALED_NODES, body);
+            ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
+            ApiCommand applyHostTemplateCommand;
+            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_10_0)) {
+                HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v52Client);
+                applyHostTemplateCommand = hostTemplatesResourceApi
+                        .applyHostTemplate(stack.getName(), hostGroupName, true, START_ROLES_ON_UPSCALED_NODES, body);
+            } else {
+                HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v31Client);
+                applyHostTemplateCommand = hostTemplatesResourceApi
+                        .applyHostTemplate(stack.getName(), hostGroupName, false, START_ROLES_ON_UPSCALED_NODES, body);
+            }
             ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
                     stack, v31Client, applyHostTemplateCommand.getId());
             handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for host template to apply",

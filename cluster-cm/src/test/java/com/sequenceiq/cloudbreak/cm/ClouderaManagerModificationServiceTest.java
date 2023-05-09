@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -423,7 +424,8 @@ class ClouderaManagerModificationServiceTest {
         when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.FALSE),
                 eq(Boolean.TRUE), any(ApiHostRefList.class))).thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v31Client))).thenReturn(hostTemplatesResourceApi);
-
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.9.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
                 .thenReturn(success);
 
@@ -474,6 +476,8 @@ class ClouderaManagerModificationServiceTest {
 
         when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
                 .thenReturn(success);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
 
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(HOST_GROUP_NAME);
@@ -612,7 +616,8 @@ class ClouderaManagerModificationServiceTest {
         when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), eq(Boolean.TRUE), any(ApiHostRefList.class)))
                 .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
-
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
                 .thenReturn(success);
 
@@ -657,7 +662,8 @@ class ClouderaManagerModificationServiceTest {
         when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), eq(Boolean.TRUE), any(ApiHostRefList.class)))
                 .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
-
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
                 .thenReturn(success);
 
@@ -712,7 +718,8 @@ class ClouderaManagerModificationServiceTest {
         when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), eq(Boolean.TRUE), any(ApiHostRefList.class)))
                 .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
-
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
                 .thenReturn(success);
 
