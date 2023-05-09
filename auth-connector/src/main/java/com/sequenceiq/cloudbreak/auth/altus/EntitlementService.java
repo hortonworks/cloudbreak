@@ -63,7 +63,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRON
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
@@ -243,10 +242,6 @@ public class EntitlementService {
 
     public boolean localDevelopment(String accountId) {
         return isEntitlementRegistered(accountId, LOCAL_DEV);
-    }
-
-    public boolean fmsClusterProxyEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_FMS_CLUSTER_PROXY);
     }
 
     public boolean cloudStorageValidationOnVmEnabled(String accountId) {

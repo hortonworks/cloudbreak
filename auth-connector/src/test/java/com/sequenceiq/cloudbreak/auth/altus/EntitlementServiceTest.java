@@ -67,9 +67,6 @@ class EntitlementServiceTest {
                 {"CLOUDERA_INTERNAL_ACCOUNT", (EntitlementCheckFunction) EntitlementService::internalTenant, false},
                 {"CLOUDERA_INTERNAL_ACCOUNT", (EntitlementCheckFunction) EntitlementService::internalTenant, true},
 
-                {"CDP_FMS_CLUSTER_PROXY", (EntitlementCheckFunction) EntitlementService::fmsClusterProxyEnabled, false},
-                {"CDP_FMS_CLUSTER_PROXY", (EntitlementCheckFunction) EntitlementService::fmsClusterProxyEnabled, true},
-
                 {"CDP_CLOUD_STORAGE_VALIDATION", (EntitlementCheckFunction) EntitlementService::cloudStorageValidationEnabled, false},
                 {"CDP_CLOUD_STORAGE_VALIDATION", (EntitlementCheckFunction) EntitlementService::cloudStorageValidationEnabled, true},
 
