@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.service.secret.vault;
 
+import static com.sequenceiq.cloudbreak.service.secret.service.SecretService.BACKUP;
+import static com.sequenceiq.cloudbreak.service.secret.service.SecretService.SECRET;
+
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -18,6 +22,7 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 
 import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
+import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component("VaultKvV1Engine")
@@ -46,9 +51,14 @@ public class VaultKvV1Engine extends AbstractVaultEngine<VaultKvV1Engine> {
 
     @Override
     public String put(String path, String value) {
+        return put(path, Collections.singletonMap(SECRET, value));
+    }
+
+    @Override
+    public String put(String path, Map<String, String> value) {
         LOGGER.info("Storing secret to {}", path);
         VaultSecret secret = convertToVaultSecret(enginePath, appPath + path);
-        template.write(secret.getPath(), Collections.singletonMap("secret", value));
+        template.write(secret.getPath(), value);
         return gson().toJson(secret);
     }
 
@@ -65,8 +75,25 @@ public class VaultKvV1Engine extends AbstractVaultEngine<VaultKvV1Engine> {
     public String get(@NotNull String secret) {
         return Optional.ofNullable(convertToVaultSecret(secret)).map(s -> {
             VaultResponse response = template.read(s.getPath());
-            return response != null && response.getData() != null ? String.valueOf(response.getData().get("secret")) : null;
+            return response != null && response.getData() != null ? String.valueOf(response.getData().get(SECRET)) : null;
         }).orElse(null);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "vaultCache")
+    public RotationSecret getRotation(@NotNull String secret) {
+        return Optional.ofNullable(convertToVaultSecret(secret)).map(s -> {
+            VaultResponse response = template.read(s.getPath());
+            logRotationMeta(response);
+            return response != null && response.getData() != null ?
+                    new RotationSecret(String.valueOf(response.getData().get(SECRET)),
+                            String.valueOf(response.getData().get(BACKUP))) : null;
+        }).orElse(null);
+    }
+
+    private void logRotationMeta(VaultResponse response) {
+        boolean ongoingRotation = response.getData().get(BACKUP) != null;
+        LOGGER.info("Backup value is set: {}. Rotation secret metadata: {}", ongoingRotation, response.getMetadata());
     }
 
     @Override
