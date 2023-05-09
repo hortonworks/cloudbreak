@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -42,6 +44,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContextInfoProvider, IdAware {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackDto.class);
 
     private StackView stack;
 
@@ -311,14 +315,27 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         Set<Node> ret = new HashSet<>();
         getInstanceGroupDtos().forEach(ig -> {
             InstanceGroupView instanceGroup = ig.getInstanceGroup();
-            ig.getNotDeletedAndNotZombieInstanceMetaData().forEach(im -> {
-                if (StringUtils.isNotBlank(im.getDiscoveryFQDN())) {
-                    ret.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
-                            instanceGroup.getTemplate().getInstanceType(), im.getDiscoveryFQDN(), instanceGroup.getGroupName()));
-                }
-            });
+            List<InstanceMetadataView> notDeletedInstanceMetaData = ig.getNotDeletedInstanceMetaData();
+            filterDuplicatedPrivateIPs(notDeletedInstanceMetaData).values().forEach(im -> {
+                        if (StringUtils.isNotBlank(im.getDiscoveryFQDN())) {
+                            ret.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
+                                    instanceGroup.getTemplate().getInstanceType(), im.getDiscoveryFQDN(), instanceGroup.getGroupName()));
+                        }
+                    });
         });
         return ret;
+    }
+
+    private Map<String, InstanceMetadataView> filterDuplicatedPrivateIPs(List<InstanceMetadataView> notDeletedInstanceMetaData) {
+        return notDeletedInstanceMetaData.stream()
+                .collect(Collectors.toMap(InstanceMetadataView::getPrivateIp, instanceMetadataView -> instanceMetadataView, (i1, i2) -> {
+                    LOGGER.warn("We have the same ip address for two nodes, we will return with the newer node! Affected nodes: {}, {}", i1, i2);
+                    if (i1.getStartDate().compareTo(i2.getStartDate()) < 0) {
+                        return i2;
+                    } else {
+                        return i1;
+                    }
+                }));
     }
 
     public Optional<InstanceGroupView> getGatewayGroup() {
