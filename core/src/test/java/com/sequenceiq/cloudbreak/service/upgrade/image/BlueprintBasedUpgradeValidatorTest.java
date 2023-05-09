@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -46,27 +45,12 @@ class BlueprintBasedUpgradeValidatorTest {
     }
 
     @Test
-    public void testIsValidBlueprintShouldReturnInvalidResultWhenTheStackTypeIsDataLakeMediumDutyAndEntitlementIsDisabled() {
+    public void testIsValidBlueprintShouldReturnValidResultWhenTheStackTypeIsDataLakeMediumDuty() {
         ImageFilterParams params = createImageFilterParams("7.2.14 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas", StackType.DATALAKE);
-        when(entitlementService.haUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        BlueprintValidationResult actual = underTest.isValidBlueprint(params, ACCOUNT_ID);
-
-        assertFalse(actual.isValid());
-        assertEquals("The upgrade is not allowed for this template.", actual.getReason());
-        verify(entitlementService).haUpgradeEnabled(ACCOUNT_ID);
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnValidResultWhenTheStackTypeIsDataLakeMediumDutyAndEntitlementIsEnabled() {
-        ImageFilterParams params = createImageFilterParams("7.2.14 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas", StackType.DATALAKE);
-        when(entitlementService.haUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
 
         BlueprintValidationResult actual = underTest.isValidBlueprint(params, ACCOUNT_ID);
 
         assertTrue(actual.isValid());
-        verify(entitlementService).haUpgradeEnabled(ACCOUNT_ID);
         verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
