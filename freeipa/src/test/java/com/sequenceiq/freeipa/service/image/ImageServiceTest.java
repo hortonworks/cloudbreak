@@ -24,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -85,11 +86,14 @@ public class ImageServiceTest {
     @Mock
     private ImageToImageEntityConverter imageConverter;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @Captor
     private ArgumentCaptor<ImageSettingsRequest> imageSettingsRequestCaptor;
 
     @Test
-    public void tesDetermineImageNameFound() {
+    public void testDetermineImageNameFound() {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
         String imageName = underTest.determineImageName(DEFAULT_PLATFORM, REGION, image);
@@ -97,18 +101,40 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void tesDetermineImageNameFoundDefaultPreferred() {
-        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM,
+    public void testDetermineImageNameFoundDefaultPreferred() {
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap("azure",
                 Map.of(
                         REGION, EXISTING_ID,
                         DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
 
-        String imageName = underTest.determineImageName(DEFAULT_PLATFORM, REGION, image);
+        String imageName = underTest.determineImageName("azure", REGION, image);
         assertEquals("ami-09fea90f257c85514", imageName);
     }
 
     @Test
-    public void tesDetermineImageNameNotFound() {
+    public void testDetermineImageNameFoundDefaultMock() {
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap("mock",
+                Map.of(DEFAULT_REGION, "mockimage")));
+
+        String imageName = underTest.determineImageName("mock", "London", image);
+        assertEquals("mockimage", imageName);
+    }
+
+    @Test
+    public void testDetermineImageNameFoundNoMpEntitlement() {
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(false);
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap("azure",
+                Map.of(
+                        REGION, EXISTING_ID,
+                        DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
+
+        String imageName = underTest.determineImageName("azure", REGION, image);
+        assertEquals("ami-09fea90f257c85513", imageName);
+    }
+
+    @Test
+    public void testDetermineImageNameNotFound() {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
         Exception exception = assertThrows(RuntimeException.class, () ->
