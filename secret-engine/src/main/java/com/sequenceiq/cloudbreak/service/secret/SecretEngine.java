@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.secret;
 
 import java.util.List;
+import java.util.Map;
 
+import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 public interface SecretEngine {
@@ -10,9 +12,13 @@ public interface SecretEngine {
 
     String put(String key, String value);
 
+    String put(String key, Map<String, String> value);
+
     boolean exists(String secret);
 
     String get(String secret);
+
+    RotationSecret getRotation(String secret);
 
     void delete(String secret);
 

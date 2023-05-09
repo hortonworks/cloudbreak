@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.secret.service;
 import static java.lang.String.format;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
+import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
@@ -28,6 +30,10 @@ import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 @Service
 @ConditionalOnBean({VaultKvV2Engine.class, VaultKvV1Engine.class, VaultConfig.class})
 public class SecretService {
+
+    public static final String SECRET = "secret";
+
+    public static final String BACKUP = "backup";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretService.class);
 
@@ -73,11 +79,53 @@ public class SecretService {
         return secret;
     }
 
+    public String put(String key, Map<String, String> value) throws Exception {
+        long start = System.currentTimeMillis();
+        String secret = vaultRetryService.tryWritingVault(() -> persistentEngine.put(key, value));
+        long duration = System.currentTimeMillis() - start;
+        metricService.gauge(MetricType.VAULT_WRITE, duration);
+        LOGGER.trace("Secret write took {} ms", duration);
+        metricService.incrementMetricCounter(() -> "secret.write." + convertSecretToMetric(secret));
+        return secret;
+    }
+
+    public String putRotation(String secret, String newValue) throws Exception {
+        String oldSecretRaw = get(secret);
+        return updateRotation(secret, oldSecretRaw, newValue);
+    }
+
     public String update(String secret, String newValue) throws Exception {
         String fullPath = convertToExternal(secret).getSecretPath();
         String result = put(fullPath.split(persistentEngine.appPath(), 2)[1], newValue);
         LOGGER.info("Secret on path {} have been updated.", fullPath);
         return result;
+    }
+
+    public String updateRotation(String secret, String oldValue, String newValue) throws Exception {
+        String fullPath = convertToExternal(secret).getSecretPath();
+        String result = put(fullPath.split(persistentEngine.appPath(), 2)[1],
+                Map.of(SECRET, newValue, BACKUP, oldValue));
+        LOGGER.info("Secret on path {} have been updated.", fullPath);
+        return result;
+    }
+
+    public RotationSecret getRotation(String secret) {
+        if (secret == null) {
+            return null;
+        }
+        metricService.incrementMetricCounter(() -> "secret.read." + convertSecretToMetric(secret));
+        long start = System.currentTimeMillis();
+
+        RotationSecret response = vaultRetryService.tryReadingVault(() -> {
+            return getFirstEngineStream(secret)
+                    .map(e -> e.getRotation(secret))
+                    .filter(Objects::nonNull)
+                    .orElse(null);
+        });
+        long duration = System.currentTimeMillis() - start;
+        metricService.gauge(MetricType.VAULT_READ, duration);
+        LOGGER.trace("Secret read took {} ms", duration);
+        return "null".equals(response) ? null : response;
     }
 
     /**

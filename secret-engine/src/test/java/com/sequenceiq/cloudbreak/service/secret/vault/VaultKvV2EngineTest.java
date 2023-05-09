@@ -18,6 +18,7 @@ import org.springframework.vault.core.VaultVersionedKeyValueOperations;
 import org.springframework.vault.support.Versioned;
 
 import com.google.gson.Gson;
+import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -102,6 +103,18 @@ public class VaultKvV2EngineTest {
         when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
 
         Assert.assertEquals("secret/path", underTest.get(gson.toJson(secret)));
+    }
+
+    @Test
+    public void testGetRotationSecretOk() {
+        when(vaultResponse.getData()).thenReturn(Map.of("secret", "secret/rotation", "backup", "secret/path"));
+        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
+
+        RotationSecret rotationSecret = underTest.getRotation(gson.toJson(secret));
+
+        Assert.assertEquals("secret/rotation", rotationSecret.getSecret());
+        Assert.assertEquals("secret/path", rotationSecret.getBackupSecret());
+        Assert.assertTrue(rotationSecret.isRotation());
     }
 
     @Test
