@@ -64,7 +64,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DEL
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
@@ -545,9 +544,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datahub.instancetypes.enable}")
     private boolean enableDistroxInstanceTypes;
 
-    @Value("${auth.mock.freeipa.upgrade.enable}")
-    private boolean enableFreeIpaUpgrade;
-
     @Value("${auth.mock.saas.enable}")
     private boolean enableSaas;
 
@@ -996,9 +992,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDistroxInstanceTypes) {
             builder.addEntitlements(createEntitlement(CDP_ENABLE_DISTROX_INSTANCE_TYPES));
-        }
-        if (enableFreeIpaUpgrade) {
-            builder.addEntitlements(createEntitlement(CDP_FREEIPA_UPGRADE));
         }
         if (enableFreeipaUsersyncTimeout) {
             builder.addEntitlements(createEntitlement(CDP_FMS_USERSYNC_THREAD_TIMEOUT));

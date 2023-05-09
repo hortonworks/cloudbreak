@@ -5,13 +5,10 @@ import static java.util.function.Predicate.not;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -23,9 +20,6 @@ public class UpgradeValidationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeValidationService.class);
 
     private static final int MAX_NUMBER_OF_INSTANCES_FOR_UPGRADE = 3;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     public void validateStackForUpgrade(Set<InstanceMetaData> allInstances, Stack stack) {
         if (allInstances.isEmpty()) {
@@ -53,13 +47,6 @@ public class UpgradeValidationService {
                 .collect(Collectors.toSet());
         LOGGER.warn("Instances are not available, refusing to upgrade. Instances: {}", notAvailableInstances);
         throw new BadRequestException("Some of the instances is not available. Please fix them first! Instances: " + notAvailableInstances);
-    }
-
-    public void validateEntitlement(String accountId) {
-        boolean freeIpaUpgradeEnabled = entitlementService.isFreeIpaUpgradeEnabled(accountId);
-        if (!freeIpaUpgradeEnabled) {
-            throw new BadRequestException("FreeIPA upgrade is not enabled for account");
-        }
     }
 
     public void validateSelectedImageDifferentFromCurrent(ImageInfoResponse currentImage, ImageInfoResponse selectedImage) {

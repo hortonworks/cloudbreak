@@ -14,7 +14,6 @@ auth:
     event-generation:
       expiration-minutes: 10
     freeipa:
-      upgrade.enable: true
       multiaz.enable: true
       ha:
         repair.enable: true

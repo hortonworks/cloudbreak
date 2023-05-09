@@ -70,7 +70,6 @@ public class UpgradeService {
 
     @SuppressWarnings("IllegalType")
     public FreeIpaUpgradeResponse upgradeFreeIpa(String accountId, FreeIpaUpgradeRequest request) {
-        validationService.validateEntitlement(accountId);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
         Set<InstanceMetaData> allInstances = stack.getNotDeletedInstanceMetaDataSet();
         validationService.validateStackForUpgrade(allInstances, stack);
