@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.auth.altus;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.AUDIT_ARCHIVING_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
@@ -437,10 +436,6 @@ public class EntitlementService {
 
     public boolean haRepairEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_ALLOW_HA_REPAIR);
-    }
-
-    public boolean haUpgradeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_ALLOW_HA_UPGRADE);
     }
 
     public boolean conclusionCheckerSendUserEventEnabled(String accountId) {

@@ -256,7 +256,6 @@ public class ClusterRepairService {
     private boolean isHAClusterAndRepairNotAllowed(StackDto stack) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return !entitlementService.haRepairEnabled(accountId)
-                && !entitlementService.haUpgradeEnabled(accountId)
                 && stack.getTunnel().useClusterProxy()
                 && hasMultipleGatewayInstances(stack);
     }

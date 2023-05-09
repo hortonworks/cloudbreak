@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER;
@@ -366,9 +365,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.ha.repair.enable}")
     private boolean haRepairEnabled;
-
-    @Value("${auth.mock.ha.upgrade.enable}")
-    private boolean haUpgradeEnabled;
 
     @Value("${auth.mock.azure.single.resourcegroup.dedicated.storage.account.enable}")
     private boolean enableAzureSingleResourceGroupDedicatedStorageAccount;
@@ -855,9 +851,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (microDutySdxEnabled) {
             builder.addEntitlements(createEntitlement(CDP_MICRO_DUTY_SDX));
-        }
-        if (haUpgradeEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_ALLOW_HA_UPGRADE));
         }
         if (haRepairEnabled) {
             builder.addEntitlements(createEntitlement(CDP_ALLOW_HA_REPAIR));
