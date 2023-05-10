@@ -53,6 +53,10 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     Json getCustomContainerDefinition();
 
+    Secret getDpAmbariUserSecret();
+
+    Secret getDpAmbariPasswordSecret();
+
     Secret getDpClusterManagerUserSecret();
 
     Secret getDpClusterManagerPasswordSecret();
@@ -60,6 +64,10 @@ public interface ClusterView extends MdcContextInfoProvider {
     Secret getCloudbreakAmbariUserSecret();
 
     Secret getCloudbreakAmbariPasswordSecret();
+
+    Secret getCloudbreakClusterManagerUserSecretObject();
+
+    Secret getCloudbreakClusterManagerPasswordSecretObject();
 
     Secret getCloudbreakClusterManagerMonitoringUserSecret();
 

@@ -89,6 +89,42 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
+    public void createNewUser(String oldUserForAuthRoles, String newUserName, String newPassword, String clientUserName, String clientPassword)
+            throws CloudbreakException {
+        try {
+            ApiClient client = getClient(stack.getGatewayPort(), clientUserName, clientPassword, clientConfig);
+            UsersResourceApi usersResourceApi = clouderaManagerApiFactory.getUserResourceApi(client);
+            ApiUser2List userList = usersResourceApi.readUsers2("SUMMARY");
+            if (getUser(userList, newUserName).isPresent()) {
+                LOGGER.info("CM user {} already exists.", newUserName);
+                return;
+            }
+            Optional<ApiUser2> oldUser = getUser(userList, oldUserForAuthRoles);
+            if (oldUser.isEmpty()) {
+                throw new CloudbreakException(String.format("User %s does not exists in CM, thus we cannot check auth roles for new user.", newUserName));
+            }
+            createNewUser(usersResourceApi, oldUser.get().getAuthRoles(), newUserName, newPassword);
+        } catch (Exception e) {
+            throw new CloudbreakException(String.format("Error occurred during creation of user %s in CM", newUserName), e);
+        }
+    }
+
+    @Override
+    public void deleteUser(String userName, String clientUser, String clientPassword) throws CloudbreakException {
+        try {
+            ApiClient client = getClient(stack.getGatewayPort(), clientUser, clientPassword, clientConfig);
+            UsersResourceApi usersResourceApi = clouderaManagerApiFactory.getUserResourceApi(client);
+            ApiUser2List userList = usersResourceApi.readUsers2("SUMMARY");
+            if (getUser(userList, userName).isPresent()) {
+                usersResourceApi.deleteUser2(userName);
+            }
+        } catch (Exception e) {
+            throw new CloudbreakException(String.format("Error occurred during deletion of user %s in CM", userName), e);
+        }
+
+    }
+
+    @Override
     public void replaceUserNamePassword(String newUserName, String newPassword) throws CloudbreakException {
         ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
@@ -324,32 +360,15 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         }
     }
 
-    @Override
-    public void updateExistingUser(String clientUser, String clientPassword, String user, String password) throws CloudbreakException {
-        ClusterView cluster = stack.getCluster();
-        try {
-            ApiClient client = getClient(stack.getGatewayPort(), clientUser, clientPassword, clientConfig);
-            UsersResourceApi usersResourceApi = clouderaManagerApiFactory.getUserResourceApi(client);
-            ApiUser2List userList = usersResourceApi.readUsers2("SUMMARY");
-            Optional<ApiUser2> updatableUser = getUser(userList, user);
-            if (updatableUser.isEmpty()) {
-                throw new CloudbreakException("CM user does not exists.");
-            }
-            ApiUser2 apiUser2 = updatableUser.get();
-            apiUser2.setPassword(password);
-            usersResourceApi.updateUser2(user, apiUser2);
-        } catch (ClouderaManagerClientInitException e) {
-            throw new CloudbreakException("CM client initalization failed.", e);
-        } catch (ApiException e) {
-            throw new CloudbreakException("CM API call failed.", e);
-        }
-    }
-
     private void createNewUser(UsersResourceApi usersResourceApi, List<ApiAuthRoleRef> authRoles, String userName, String password, ApiUser2List userList)
             throws ApiException {
         if (getUser(userList, userName).isPresent()) {
             return;
         }
+        createNewUser(usersResourceApi, authRoles, userName, password);
+    }
+
+    private void createNewUser(UsersResourceApi usersResourceApi, List<ApiAuthRoleRef> authRoles, String userName, String password) throws ApiException {
         ApiUser2List apiUser2List = new ApiUser2List();
         ApiUser2 newUser = new ApiUser2();
         newUser.setName(userName);
