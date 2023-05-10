@@ -9,7 +9,9 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED
 import static java.lang.Math.abs;
 import static java.lang.String.format;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -39,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -48,6 +51,9 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -477,5 +483,23 @@ public class StackOperationService {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         return flowManager.triggerModifyProxyConfig(stack.getId(), previousProxyConfigCrn);
+    }
+
+    public FlowIdentifier rotateSecrets(String crn, List<String> secrets, RotationFlowExecutionType executionType) {
+        StackView viewByCrn = stackDtoService.getStackViewByCrn(crn);
+        Long stackId = viewByCrn.getId();
+        if (!secrets.stream().anyMatch(secret -> Collections.frequency(secrets, secret) > 1)) {
+            List<SecretType> secretTypes = secrets.stream()
+                    .filter(secret -> Arrays.stream(CloudbreakSecretType.values())
+                            .map(Enum::name)
+                            .toList()
+                            .contains(secret))
+                    .map(CloudbreakSecretType::valueOf)
+                    .collect(Collectors.toList());
+            return flowManager.triggerSecretRotation(stackId, crn, secretTypes, executionType);
+        } else {
+            throw new CloudbreakServiceException("There is at least one duplication in the request!");
+        }
+
     }
 }

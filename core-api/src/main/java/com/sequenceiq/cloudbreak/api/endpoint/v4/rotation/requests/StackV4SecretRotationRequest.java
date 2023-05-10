@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -19,7 +19,7 @@ public class StackV4SecretRotationRequest {
     private String crn;
 
     @NotEmpty
-    private Set<String> secrets;
+    private List<String> secrets;
 
     private RotationFlowExecutionType executionType;
 
@@ -31,11 +31,11 @@ public class StackV4SecretRotationRequest {
         this.crn = crn;
     }
 
-    public Set<String> getSecrets() {
+    public List<String> getSecrets() {
         return secrets;
     }
 
-    public void setSecrets(Set<String> secrets) {
+    public void setSecrets(List<String> secrets) {
         this.secrets = secrets;
     }
 
