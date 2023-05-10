@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.api.v1.distrox.model;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -19,7 +19,7 @@ public class DistroXSecretRotationRequest {
     private String crn;
 
     @NotEmpty
-    private Set<String> secrets;
+    private List<String> secrets;
 
     private RotationFlowExecutionType executionType;
 
@@ -31,11 +31,11 @@ public class DistroXSecretRotationRequest {
         this.crn = crn;
     }
 
-    public Set<String> getSecrets() {
+    public List<String> getSecrets() {
         return secrets;
     }
 
-    public void setSecrets(Set<String> secrets) {
+    public void setSecrets(List<String> secrets) {
         this.secrets = secrets;
     }
 
