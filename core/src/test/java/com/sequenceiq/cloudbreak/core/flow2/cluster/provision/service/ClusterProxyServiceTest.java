@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.clusterproxy.CcmV2Config;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
@@ -53,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.vault.ThreadBasedVaultReadFieldProvider;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 
@@ -96,6 +99,9 @@ class ClusterProxyServiceTest {
 
     @Mock
     private StackUpdater stackUpdater;
+
+    @Mock
+    private ClusterProxyEnablementService clusterProxyEnablementService;
 
     @InjectMocks
     private ClusterProxyService underTest;
@@ -230,6 +236,30 @@ class ClusterProxyServiceTest {
 
         assertFalse(proxyRegistrationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
         assertNull(proxyRegistrationReq.getTunnels(), "CCMV1 tunnel should not be configured.");
+    }
+
+    @Test
+    void testReRegisterClusterForRollbackSecretRotation() throws ClusterProxyException, JsonProcessingException {
+        Stack stack = testStack();
+        stack.setTunnel(Tunnel.CCMV2);
+        stack.setCcmV2AgentCrn("testAgentCrn");
+        Gateway gateway = new Gateway();
+        gateway.setPath("test-cluster");
+        stack.getCluster().setGateway(gateway);
+
+        when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
+        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
+        when(clusterProxyEnablementService.isClusterProxyApplicable(any())).thenReturn(Boolean.TRUE);
+        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(new ConfigRegistrationResponse());
+        ThreadBasedVaultReadFieldProvider.doRollback(Set.of("/cb/test-data/secret/cbpassword"),
+                () -> underTest.reRegisterCluster(stack.getId()));
+
+        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
+        ConfigRegistrationRequest proxyRegistrationReq = captor.getValue();
+        assertTrue(proxyRegistrationReq.getServices().contains(cmServiceConfigWithInstanceIdForSecretRotationRollback(PRIMARY_PRIVATE_IP, PRIMARY_INSTANCE_ID)));
+        assertTrue(proxyRegistrationReq.getServices().contains(cmServiceConfigWithInstanceIdForSecretRotationRollback(OTHER_PRIVATE_IP, OTHER_INSTANCE_ID)));
+        assertTrue(proxyRegistrationReq.getServices().contains(cmInternalServiceConfigForSecretRotationRollback(true)));
     }
 
     @Test
@@ -406,6 +436,17 @@ class ClusterProxyServiceTest {
                 List.of("https://" + ipAddress + ":9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate, null);
     }
 
+    private ClusterServiceConfig cmServiceConfigWithInstanceIdForSecretRotationRollback(String ipAddress, String instanceId) {
+        ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak",
+                "/cb/test-data/secret/cbpassword:backup");
+        ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt",
+                "/cb/test-data/secret/dppassword:secret", true);
+        ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
+                "/cb/test-data/secret/clientCert:secret:base64");
+        return new ClusterServiceConfig("cb-internal-" + instanceId,
+                List.of("https://" + ipAddress + ":9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate, null);
+    }
+
     private ClusterServiceConfig cmServiceConfig() {
         ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
@@ -418,6 +459,18 @@ class ClusterProxyServiceTest {
     private ClusterServiceConfig cmInternalServiceConfig(boolean withPrivateIp) {
         ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
+        ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
+                "/cb/test-data/secret/clientCert:secret:base64");
+        return new ClusterServiceConfig("cb-internal",
+                List.of(withPrivateIp ? "https://10.10.10.10:9443" : "https://1.2.3.4:9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate,
+                null);
+    }
+
+    private ClusterServiceConfig cmInternalServiceConfigForSecretRotationRollback(boolean withPrivateIp) {
+        ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak",
+                "/cb/test-data/secret/cbpassword:backup");
+        ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt",
+                "/cb/test-data/secret/dppassword:secret", true);
         ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
                 "/cb/test-data/secret/clientCert:secret:base64");
         return new ClusterServiceConfig("cb-internal",

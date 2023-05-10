@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.vault.ThreadBasedVaultReadFieldProvider;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -286,8 +287,9 @@ public class ClusterProxyService {
 
     private String vaultPath(String vaultSecretJsonString, boolean base64) {
         try {
-            String path = JsonUtil.readValue(vaultSecretJsonString, VaultSecret.class).getPath() + ":secret";
-            return base64 ? path + ":base64" : path;
+            String path = JsonUtil.readValue(vaultSecretJsonString, VaultSecret.class).getPath();
+            String pathWithField = path + ":" + ThreadBasedVaultReadFieldProvider.getFieldName(path);
+            return base64 ? pathWithField + ":base64" : pathWithField;
         } catch (IOException e) {
             throw new VaultConfigException(String.format("Could not parse vault secret string '%s'", vaultSecretJsonString), e);
         }

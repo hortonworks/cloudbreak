@@ -43,7 +43,8 @@ public class SecretRotationServiceTest {
     public void setup() throws IllegalAccessException {
         FieldUtils.writeDeclaredField(underTest, "rotationExecutorMap",
                 Map.of(SecretRotationStep.VAULT, rotationExecutor,
-                        SecretRotationStep.CM_USER, rotationExecutor), true);
+                        SecretRotationStep.CM_USER, rotationExecutor,
+                        SecretRotationStep.CLUSTER_PROXY, rotationExecutor), true);
         FieldUtils.writeDeclaredField(underTest, "rotationContextProviderMap",
                 Map.of(CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD, rotationContextProvider), true);
     }
@@ -70,33 +71,36 @@ public class SecretRotationServiceTest {
     public void testRotate() {
         when(rotationContextProvider.getContexts(anyString())).thenReturn(Map.of(
                 SecretRotationStep.VAULT, VaultRotationContext.builder().withResourceCrn("resource").withSecretGenerators(Map.of()).build(),
-                SecretRotationStep.CM_USER, new TestRotationContext("resource")));
+                SecretRotationStep.CM_USER, new TestRotationContext("resource"),
+                SecretRotationStep.CLUSTER_PROXY, new TestRotationContext("resource")));
         doNothing().when(rotationExecutor).rotate(any());
 
         underTest.executeRotation(CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD, "resource", null);
 
         verify(rotationContextProvider).getContexts(anyString());
-        verify(rotationExecutor, times(2)).rotate(any());
+        verify(rotationExecutor, times(3)).rotate(any());
     }
 
     @Test
     public void testFinalize() {
         when(rotationContextProvider.getContexts(anyString())).thenReturn(Map.of(
                 SecretRotationStep.VAULT, VaultRotationContext.builder().withResourceCrn("resource").withSecretGenerators(Map.of()).build(),
-                SecretRotationStep.CM_USER, new TestRotationContext("resource")));
+                SecretRotationStep.CM_USER, new TestRotationContext("resource"),
+                SecretRotationStep.CLUSTER_PROXY, new TestRotationContext("resource")));
         doNothing().when(rotationExecutor).finalize(any());
 
         underTest.finalizeRotation(CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD, "resource", null);
 
         verify(rotationContextProvider).getContexts(anyString());
-        verify(rotationExecutor, times(2)).finalize(any());
+        verify(rotationExecutor, times(3)).finalize(any());
     }
 
     @Test
     public void testRollback() {
         when(rotationContextProvider.getContexts(anyString())).thenReturn(Map.of(
                 SecretRotationStep.VAULT, VaultRotationContext.builder().withResourceCrn("resource").withSecretGenerators(Map.of()).build(),
-                SecretRotationStep.CM_USER, new TestRotationContext("resource")));
+                SecretRotationStep.CM_USER, new TestRotationContext("resource"),
+                SecretRotationStep.CLUSTER_PROXY, new TestRotationContext("resource")));
         doNothing().when(rotationExecutor).rollback(any());
 
         underTest.rollbackRotation(CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD, "resource", null, SecretRotationStep.VAULT);
