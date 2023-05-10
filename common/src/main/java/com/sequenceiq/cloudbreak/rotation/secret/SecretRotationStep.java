@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.secret;
 
-public enum SecretLocationType {
+public enum SecretRotationStep {
     VAULT,
     CM_USER
 }

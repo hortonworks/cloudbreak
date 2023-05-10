@@ -104,6 +104,7 @@ auth:
     co2.calculation.enable: true
     enforce.aws.native.single.az.enabled: false
     azure.database.flexibleserver.enabled: true
+    secret.rotation.enabled: true
 crn:
   partition: cdp
   region: us-west-1

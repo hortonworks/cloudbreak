@@ -21,6 +21,7 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackV4SecretRotationRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
@@ -633,5 +634,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
     public void determineDatalakeDataSizes(Long workspaceId, @ResourceName String name, String operationId) {
         stackOperations.determineDatalakeDataSizes(restRequestThreadLocalService.getRequestedWorkspaceId(), NameOrCrn.ofName(name), operationId);
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier rotateSecrets(Long workspaceId, StackV4SecretRotationRequest request, @InitiatorUserCrn String initiatorUserCrn) {
+        return null;
     }
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.controller.sdx;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.UPGRADE_DATALAKE;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 
@@ -82,6 +83,7 @@ import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxSecretRotationRequest;
 import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -500,6 +502,12 @@ public class SdxController implements SdxEndpoint {
             @InitiatorUserCrn String initiatorUserCrn) {
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
         sdxBackupRestoreService.submitDatalakeDataInfo(operationId, dataSizesJson, ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = UPGRADE_DATALAKE)
+    public FlowIdentifier rotateSecrets(@RequestObject SdxSecretRotationRequest request) {
+        return null;
     }
 
     private SdxCluster getSdxClusterByName(String name) {
