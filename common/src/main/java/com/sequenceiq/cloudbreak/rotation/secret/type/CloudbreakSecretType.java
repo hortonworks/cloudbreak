@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.secret.type;
 
+import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.CM_USER;
 import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.VAULT;
 
@@ -9,8 +10,8 @@ import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 
 public enum CloudbreakSecretType implements SecretType {
-    CLOUDBREAK_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER)),
-    MGMT_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER));
+    CLOUDBREAK_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER, CLUSTER_PROXY)),
+    MGMT_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER, CLUSTER_PROXY));
 
     private final List<SecretRotationStep> steps;
 

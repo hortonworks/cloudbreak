@@ -43,7 +43,8 @@ public class SecretRotationServiceTest {
     public void setup() throws IllegalAccessException {
         FieldUtils.writeDeclaredField(underTest, "rotationExecutorMap",
                 Map.of(SecretRotationStep.VAULT, rotationExecutor,
-                        SecretRotationStep.CM_USER, rotationExecutor), true);
+                        SecretRotationStep.CM_USER, rotationExecutor,
+                        SecretRotationStep.CLUSTER_PROXY, rotationExecutor), true);
         FieldUtils.writeDeclaredField(underTest, "rotationContextProviderMap",
                 Map.of(CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD, rotationContextProvider), true);
     }
@@ -74,7 +75,7 @@ public class SecretRotationServiceTest {
         underTest.executeRotation(CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD, "resource", null);
 
         verify(rotationContextProvider).getContexts(anyString());
-        verify(rotationExecutor, times(2)).executeRotate(any());
+        verify(rotationExecutor, times(3)).executeRotate(any());
     }
 
     @Test
@@ -85,7 +86,7 @@ public class SecretRotationServiceTest {
         underTest.finalizeRotation(CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD, "resource", null);
 
         verify(rotationContextProvider).getContexts(anyString());
-        verify(rotationExecutor, times(2)).executeFinalize(any());
+        verify(rotationExecutor, times(3)).executeFinalize(any());
     }
 
     @Test
@@ -102,7 +103,8 @@ public class SecretRotationServiceTest {
     private void generateTestContexts() {
         Map<SecretRotationStep, RotationContext> contextMap = Map.of(
                 SecretRotationStep.VAULT, VaultRotationContext.builder().withResourceCrn("resource").withVaultPathSecretMap(Map.of()).build(),
-                SecretRotationStep.CM_USER, new TestRotationContext("resource"));
+                SecretRotationStep.CM_USER, new TestRotationContext("resource"),
+                SecretRotationStep.CLUSTER_PROXY, new TestRotationContext("resource"));
         when(rotationContextProvider.getContexts(anyString())).thenReturn(contextMap);
     }
 

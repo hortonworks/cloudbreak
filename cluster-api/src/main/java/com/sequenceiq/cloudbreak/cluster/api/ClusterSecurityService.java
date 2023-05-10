@@ -10,7 +10,10 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public interface ClusterSecurityService {
 
-    void updateExistingUser(String clientUser, String clientPassword, String user, String password) throws CloudbreakException;
+    void createNewUser(String oldUserNameForAuthRoles, String newUserName, String newPassword,
+            String clientUserName, String clientPassword) throws CloudbreakException;
+
+    void deleteUser(String userName, String clientUser, String clientPassword) throws CloudbreakException;
 
     void replaceUserNamePassword(String newUserName, String newPassword) throws CloudbreakException;
 

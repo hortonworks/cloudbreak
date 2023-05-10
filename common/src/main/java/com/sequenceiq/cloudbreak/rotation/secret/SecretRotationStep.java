@@ -4,5 +4,6 @@ public enum SecretRotationStep {
     VAULT,
     CM_USER,
     SALT_PILLAR,
-    SALT_STATE_APPLY
+    SALT_STATE_APPLY,
+    CLUSTER_PROXY
 }

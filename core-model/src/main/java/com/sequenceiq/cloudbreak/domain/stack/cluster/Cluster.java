@@ -494,6 +494,16 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         return getIfNotNull(cloudbreakClusterManagerMonitoringUser, Secret::getRaw);
     }
 
+    @Override
+    public Secret getCloudbreakClusterManagerUserSecretObject() {
+        return cloudbreakClusterManagerUser;
+    }
+
+    @Override
+    public Secret getCloudbreakClusterManagerPasswordSecretObject() {
+        return cloudbreakClusterManagerPassword;
+    }
+
     public String getCdpNodeStatusMonitorUser() {
         return getIfNotNull(cdpNodeStatusMonitorUser, Secret::getRaw);
     }
