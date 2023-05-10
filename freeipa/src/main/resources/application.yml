@@ -93,6 +93,7 @@ freeipa:
     capacity.size: 4000
   delayed:
     stop-start-sec: 300
+    scale-sec: 120
     threadpool:
       core:
         size: 25

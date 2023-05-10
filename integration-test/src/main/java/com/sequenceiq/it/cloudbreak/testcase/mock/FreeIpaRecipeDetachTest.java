@@ -26,6 +26,10 @@ import com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 
+/**
+ * To run locally you might need to set the following for freeipa application:
+ * freeipa.delayed.scale-sec=1
+ */
 public class FreeIpaRecipeDetachTest extends AbstractMockTest {
 
     @Inject
