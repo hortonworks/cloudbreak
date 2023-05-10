@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.credential.validation;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 
 import java.util.HashMap;
@@ -72,9 +71,6 @@ public class CredentialValidator {
     private void validateCredentialCloudPlatformInternal(String cloudPlatform, String accountId, CredentialType type) {
         if (!enabledPlatforms.contains(cloudPlatform)) {
             throw new BadRequestException(String.format("There is no such cloud platform as '%s'", cloudPlatform));
-        }
-        if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(accountId)) {
-            throw new BadRequestException("Provisioning in Microsoft Azure is not enabled for this account.");
         }
         if (GCP.name().equalsIgnoreCase(cloudPlatform) && CredentialType.AUDIT.equals(type)
                 && !entitlementService.gcpAuditEnabled(accountId)) {

@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
@@ -1074,7 +1073,6 @@ public class MockUserManagementService extends UserManagementImplBase {
                         .setAccount(builder
                                 .setClouderaManagerLicenseKey(cbLicense)
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
-                                .addEntitlements(createEntitlement(CDP_AZURE))
                                 .addEntitlements(createEntitlement(CDP_GCP))
                                 .addEntitlements(createEntitlement(CDP_CB_AWS_NATIVE))
                                 .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))

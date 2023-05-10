@@ -40,9 +40,6 @@ class EntitlementServiceTest {
         return new Object[][]{
 
                 // entitlementName, function, enabled
-                {"CDP_AZURE", (EntitlementCheckFunction) EntitlementService::azureEnabled, false},
-                {"CDP_AZURE", (EntitlementCheckFunction) EntitlementService::azureEnabled, true},
-
                 {"AUDIT_ARCHIVING_GCP", (EntitlementCheckFunction) EntitlementService::gcpAuditEnabled, false},
                 {"AUDIT_ARCHIVING_GCP", (EntitlementCheckFunction) EntitlementService::gcpAuditEnabled, true},
 

@@ -255,7 +255,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     }
 
     public Set<ClusterTemplateView> findAllByEnvironment(Long workspaceId, String environmentCrn, String cloudPlatform, String runtime,
-        boolean internalTenant) {
+            boolean internalTenant) {
         LOGGER.debug("About to collect cluster definitions by environment: [crn: {}, cloudPlatform: {}, runtime: {}]",
                 environmentCrn, cloudPlatform, runtime);
         return clusterTemplateViewService
@@ -291,7 +291,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @VisibleForTesting
     boolean isClusterTemplateHasValidCloudPlatform(ClusterTemplateViewV4Response response) {
-        return cloudPlatformValidator.isClusterTemplateCloudPlatformValid(response.getCloudPlatform(), ThreadBasedUserCrnProvider.getAccountId());
+        return cloudPlatformValidator.isClusterTemplateCloudPlatformValid(response.getCloudPlatform());
     }
 
     public void updateDefaultClusterTemplates(long workspaceId) {

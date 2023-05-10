@@ -239,49 +239,6 @@ class EnvironmentCreationServiceTest {
     }
 
     @Test
-    void testCreateAzureDisabled() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
-        final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
-                .withName(ENVIRONMENT_NAME)
-                .withCloudPlatform("AZURE")
-                .withCreator(CRN)
-                .withAccountId(ACCOUNT_ID)
-                .withAuthentication(AuthenticationDto.builder().build())
-                .withParameters(parametersDto)
-                .withLocation(LocationDto.builder()
-                        .withName("test")
-                        .withDisplayName("test")
-                        .withLatitude(0.1)
-                        .withLongitude(0.1)
-                        .build())
-                .build();
-        final Environment environment = new Environment();
-        environment.setName(ENVIRONMENT_NAME);
-        environment.setId(1L);
-        environment.setAccountId(ACCOUNT_ID);
-        Credential credential = new Credential();
-        credential.setCloudPlatform("AZURE");
-        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
-        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), any()))
-                .thenReturn(credential);
-        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
-        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
-        when(environmentService.save(any())).thenReturn(environment);
-        when(entitlementService.azureEnabled(eq(ACCOUNT_ID))).thenReturn(false);
-
-        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
-
-        verify(validatorService, Mockito.times(1)).validatePublicKey(any());
-        verify(environmentService, never()).save(any());
-        verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
-        verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
-    }
-
-    @Test
     void testCreate() {
         ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         String environmentCrn = "crn";
@@ -555,7 +512,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(entitlementService.azureEnabled(eq(ACCOUNT_ID))).thenReturn(true);
         when(environmentService.save(any())).thenReturn(environment);
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
@@ -634,7 +590,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(entitlementService.azureEnabled(eq(ACCOUNT_ID))).thenReturn(true);
         when(environmentService.save(any())).thenReturn(environment);
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));

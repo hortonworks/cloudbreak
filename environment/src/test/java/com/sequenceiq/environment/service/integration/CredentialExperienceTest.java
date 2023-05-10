@@ -182,8 +182,6 @@ public class CredentialExperienceTest {
 
     @Test
     public void testAzureEntitlementAllowed() {
-        when(entitlementService.azureEnabled(any())).thenReturn(true);
-
         CredentialPrerequisitesResponse res = testSkeleton("AZURE", Boolean.FALSE);
         Assertions.assertNotNull(res.getAzure().getPolicies());
         Assertions.assertEquals(0, res.getAzure().getPolicies().size());

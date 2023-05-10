@@ -164,7 +164,7 @@ class ClusterTemplateServiceFilterTest {
         ClusterTemplateViewV4Response response = new ClusterTemplateViewV4Response();
         response.setCloudPlatform(AWS);
 
-        when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AWS, ACCOUNT_ID)).thenReturn(cloudPlatformValid);
+        when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AWS)).thenReturn(cloudPlatformValid);
 
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.isClusterTemplateHasValidCloudPlatform(response));
 
@@ -186,8 +186,8 @@ class ClusterTemplateServiceFilterTest {
             when(clusterTemplateViewToClusterTemplateViewV4ResponseConverter.convert(view)).thenReturn(responses.get(index++));
         }
 
-        when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AWS, ACCOUNT_ID)).thenReturn(awsEnabled);
-        when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AZURE, ACCOUNT_ID)).thenReturn(azureEnabled);
+        when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AWS)).thenReturn(awsEnabled);
+        when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AZURE)).thenReturn(azureEnabled);
 
         Set<ClusterTemplateViewV4Response> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.listInWorkspaceAndCleanUpInvalids(WORKSPACE_ID, "accountId"));
