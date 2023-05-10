@@ -27,6 +27,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_VERTICAL_SCALE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_JUMPGATE;
@@ -570,6 +571,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.azure.database.flexibleserver.enabled}")
     private boolean azureDatabaseFlexibleServerEnabled;
 
+    @Value("${auth.mock.secret.rotation.enabled}")
+    private boolean secretRotationEnabled;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -1038,6 +1042,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (azureDatabaseFlexibleServerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_FLEXIBLE_SERVER));
+        }
+        if (secretRotationEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ROTATION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

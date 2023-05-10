@@ -8,5 +8,5 @@ public interface RotationExecutor<C extends RotationContext> {
 
     void finalize(C rotationContext);
 
-    SecretLocationType getType();
+    SecretRotationStep getType();
 }
