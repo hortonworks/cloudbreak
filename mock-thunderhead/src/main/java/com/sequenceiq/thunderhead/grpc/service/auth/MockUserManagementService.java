@@ -47,7 +47,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_ZDU_OS_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
@@ -422,9 +421,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.endpointgateway.enable.gcp}")
     private boolean gcpEndpointGatewayEnabled;
-
-    @Value("${auth.mock.datalake.backup.on.upgrade.enable}")
-    private boolean datalakeBackupOnUpgrade;
 
     @Value("${auth.mock.datalake.backup.on.resize.enable}")
     private boolean datalakeBackupOnResize;
@@ -923,9 +919,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (gcpEndpointGatewayEnabled) {
             builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP));
-        }
-        if (datalakeBackupOnUpgrade) {
-            builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_ON_UPGRADE));
         }
         if (datalakeBackupOnResize) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_ON_RESIZE));

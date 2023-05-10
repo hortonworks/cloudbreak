@@ -103,8 +103,7 @@ class SdxReactorFlowManagerTest {
 
     @Test
     void testSdxBackupOnUpgradeSupportedPlatform() {
-        when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
-        when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any(), eq(true))).thenReturn(true);
+        when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any())).thenReturn(true);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
                         SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
@@ -113,14 +112,13 @@ class SdxReactorFlowManagerTest {
 
     @Test
     void testSdxBackupOnUpgradeUnSupportedRuntimes() {
-        when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
-        when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any(), eq(true))).thenReturn(false);
+        when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any())).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
                         SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
 
-        when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any(), eq(true))).thenReturn(false);
+        when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any())).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
                         SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
@@ -143,7 +141,6 @@ class SdxReactorFlowManagerTest {
         sdxCluster = getValidSdxCluster("7.2.10");
         sdxCluster.setRangerRazEnabled(false);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
-        when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
                         SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT));
