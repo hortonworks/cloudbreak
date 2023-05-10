@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Locale;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -209,18 +207,12 @@ public class EnvironmentCreationService {
         if (environmentTelemetry != null && environmentTelemetry.getLogging() != null && environmentTelemetry.getLogging().getStorageLocation() != null) {
             validationBuilder.merge(validatorService.validateStorageLocation(environmentTelemetry.getLogging().getStorageLocation(), "logging"));
         }
-        validationBuilder.ifError(() -> isCloudPlatformInvalid(creationDto.getCreator(), creationDto.getCloudPlatform()),
-                "Provisioning in " + creationDto.getCloudPlatform() + " is not enabled for this account.");
         ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation());
         validationBuilder.merge(freeIpaCreationValidation);
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
-    }
-
-    private boolean isCloudPlatformInvalid(String userCrn, String cloudPlatform) {
-        return AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(Crn.safeFromString(userCrn).getAccountId());
     }
 
     private ValidationResult validateEncryptionKey(EnvironmentCreationDto creationDto) {

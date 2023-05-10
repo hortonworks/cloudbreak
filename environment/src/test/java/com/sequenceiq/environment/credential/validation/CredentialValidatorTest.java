@@ -79,7 +79,7 @@ class CredentialValidatorTest {
         return new Object[][]{
                 //testCaseName             cloudPlatform   azureEnabled    gcpAuditEnabled  validExpected   credentialType
                 {AWS + AZURE_DISABLED,      AWS,            false,          false,              true,           ENVIRONMENT},
-                {AZURE + AZURE_DISABLED,    AZURE,          false,          false,              false,          ENVIRONMENT},
+                {AZURE + AZURE_DISABLED,    AZURE,          false,          false,              true,          ENVIRONMENT},
                 {FOO + AZURE_DISABLED,      FOO,            false,          false,              false,          ENVIRONMENT},
                 {AWS + AZURE_ENABLED,       AWS,            true,           false,              true,           ENVIRONMENT},
                 {AZURE + AZURE_ENABLED,     AZURE,          true,           false,              true,           ENVIRONMENT},
@@ -95,14 +95,11 @@ class CredentialValidatorTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("validateCredentialCloudPlatformDataProvider")
     void testValidateCredentialCloudPlatform(String testCaseName,
-        String cloudPlatform,
-        boolean azureEnabled,
-        boolean gcpAuditEnabled,
-        boolean validExpected,
-        CredentialType credentialType) {
-        if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
-            when(entitlementService.azureEnabled(ACCOUNT_ID)).thenReturn(azureEnabled);
-        }
+            String cloudPlatform,
+            boolean azureEnabled,
+            boolean gcpAuditEnabled,
+            boolean validExpected,
+            CredentialType credentialType) {
         if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && credentialType.equals(AUDIT)) {
             when(entitlementService.gcpAuditEnabled(ACCOUNT_ID)).thenReturn(gcpAuditEnabled);
         }
@@ -116,14 +113,11 @@ class CredentialValidatorTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("validateCredentialCloudPlatformDataProvider")
     void testIsCredentialCloudPlatformValid(String testCaseName,
-        String cloudPlatform,
-        boolean azureEnabled,
-        boolean gcpAuditEnabled,
-        boolean validExpected,
-        CredentialType credentialType) {
-        if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
-            when(entitlementService.azureEnabled(ACCOUNT_ID)).thenReturn(azureEnabled);
-        }
+            String cloudPlatform,
+            boolean azureEnabled,
+            boolean gcpAuditEnabled,
+            boolean validExpected,
+            CredentialType credentialType) {
         if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && credentialType.equals(AUDIT)) {
             when(entitlementService.gcpAuditEnabled(ACCOUNT_ID)).thenReturn(gcpAuditEnabled);
         }
