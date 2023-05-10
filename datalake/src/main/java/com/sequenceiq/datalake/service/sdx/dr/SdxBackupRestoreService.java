@@ -595,15 +595,12 @@ public class SdxBackupRestoreService {
     /**
      * Checks if Sdx backup can be performed.
      *
-     * @param cluster            Sdx cluster.
-     * @param entitlementEnabled Whether the entitlement required for backups with this operation is enabled.
+     * @param cluster Sdx cluster.
      * @return true if backup can be performed, False otherwise.
      */
-    public boolean shouldSdxBackupBePerformed(SdxCluster cluster, boolean entitlementEnabled) {
+    public boolean shouldSdxBackupBePerformed(SdxCluster cluster) {
         String reason = null;
-        if (!entitlementEnabled) {
-            reason = "Required entitlement for backup during this operation not enabled for this account.";
-        } else if (!datalakeDrConfig.isConfigured()) {
+        if (!datalakeDrConfig.isConfigured()) {
             reason = "Datalake DR is not configured!";
         } else {
             DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(cluster.getEnvName());
@@ -632,13 +629,12 @@ public class SdxBackupRestoreService {
      * Checks if Sdx restore can be performed.
      *
      * @param cluster            Sdx cluster.
-     * @param entitlementEnabled Whether the entitlement required for restore with this operation is enabled.
      * @return true if restore can be performed, False otherwise.
      */
-    public boolean shouldSdxRestoreBePerformed(SdxCluster cluster, boolean entitlementEnabled) {
+    public boolean shouldSdxRestoreBePerformed(SdxCluster cluster) {
         String reason = null;
 
-        if (!shouldSdxBackupBePerformed(cluster, entitlementEnabled)) {
+        if (!shouldSdxBackupBePerformed(cluster)) {
             reason = "Restore not performed as backup is not performed.";
         } else {
             DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(cluster.getEnvName());

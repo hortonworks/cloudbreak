@@ -211,19 +211,19 @@ public class SdxBackupRestoreServiceTest {
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         when(datalakeDrConfig.isConfigured()).thenReturn(true);
 
-        assertTrue(sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster, true));
+        assertTrue(sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster));
 
         sdxCluster = getValidSdxCluster("7.2.0");
-        assertTrue(!sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster, true));
+        assertTrue(!sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster));
 
         sdxCluster = getValidSdxCluster("7.2.0");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.GCS);
-        assertTrue(!sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster, true));
+        assertTrue(!sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster));
 
 
         sdxCluster = getValidSdxCluster("7.2.1");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS_GEN_2);
-        assertTrue(!sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster, true));
+        assertTrue(!sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster));
     }
 
     @Test
@@ -235,45 +235,45 @@ public class SdxBackupRestoreServiceTest {
 
         SdxCluster sdxCluster = getValidSdxCluster("7.2.13");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
-        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster));
 
         sdxCluster = getValidSdxCluster("7.2.14");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
-        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster));
 
         sdxCluster = getValidSdxCluster("7.2.15");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
-        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster));
 
         detailedEnvironmentResponse.setCloudPlatform("AZURE");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS_GEN_2);
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
-        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster));
 
 
         detailedEnvironmentResponse.setCloudPlatform("AWS");
         sdxCluster = getValidSdxCluster("7.2.13");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         sdxCluster.setRangerRazEnabled(true);
-        assertTrue(!sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+        assertTrue(!sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster));
 
         detailedEnvironmentResponse.setCloudPlatform("AWS");
         sdxCluster = getValidSdxCluster("7.2.14");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         sdxCluster.setRangerRazEnabled(true);
-        assertTrue(!sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+        assertTrue(!sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster));
 
         detailedEnvironmentResponse.setCloudPlatform("AWS");
         sdxCluster = getValidSdxCluster("7.2.15");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         sdxCluster.setRangerRazEnabled(true);
-        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster));
 
         detailedEnvironmentResponse.setCloudPlatform("AZURE");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS_GEN_2);
         sdxCluster.setRangerRazEnabled(true);
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
-        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster));
     }
 
     @Test

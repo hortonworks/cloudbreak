@@ -117,16 +117,11 @@ public class SdxReactorFlowManager {
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
     }
 
-    public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster,
-            DatalakeDrSkipOptions skipOptions) {
+    public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster, DatalakeDrSkipOptions skipOptions) {
         LOGGER.info("Trigger Datalake resizing for: {}", sdxClusterId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        boolean performBackup = sdxBackupRestoreService.shouldSdxBackupBePerformed(
-                newSdxCluster, entitlementService.isDatalakeBackupOnResizeEnabled(ThreadBasedUserCrnProvider.getAccountId())
-        );
-        boolean performRestore = sdxBackupRestoreService.shouldSdxRestoreBePerformed(
-                newSdxCluster, entitlementService.isDatalakeBackupOnResizeEnabled(ThreadBasedUserCrnProvider.getAccountId())
-        );
+        boolean performBackup = sdxBackupRestoreService.shouldSdxBackupBePerformed(newSdxCluster);
+        boolean performRestore = sdxBackupRestoreService.shouldSdxRestoreBePerformed(newSdxCluster);
         if (!performBackup) {
             sdxBackupRestoreService.checkExistingBackup(newSdxCluster, userId);
         }
@@ -167,9 +162,7 @@ public class SdxReactorFlowManager {
             DatalakeDrSkipOptions skipOptions, boolean rollingUpgradeEnabled, boolean keepVariant) {
         LOGGER.info("Trigger Datalake runtime upgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(
-                cluster, entitlementService.isDatalakeBackupOnUpgradeEnabled(ThreadBasedUserCrnProvider.getAccountId())
-        )) {
+        if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(cluster)) {
             LOGGER.info("Triggering backup before an upgrade");
             return notify(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT,
                     new DatalakeUpgradeFlowChainStartEvent(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT, cluster.getId(),
@@ -193,9 +186,7 @@ public class SdxReactorFlowManager {
     public FlowIdentifier triggerDatalakeRuntimeUpgradePreparationFlow(SdxCluster cluster, String imageId, boolean skipBackup) {
         LOGGER.info("Trigger Datalake runtime upgrade preparation for: {} with imageId: {}", cluster.getClusterName(), imageId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(
-                cluster, entitlementService.isDatalakeBackupOnUpgradeEnabled(ThreadBasedUserCrnProvider.getAccountId())
-        )) {
+        if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(cluster)) {
             LOGGER.info("Triggering backup/upgrade preparations");
             return notify(DatalakeUpgradePreparationFlowChainStartEvent.DATALAKE_UPGRADE_PREPARATION_FLOW_CHAIN_EVENT,
                     new DatalakeUpgradePreparationFlowChainStartEvent(cluster.getId(), userId, imageId,
