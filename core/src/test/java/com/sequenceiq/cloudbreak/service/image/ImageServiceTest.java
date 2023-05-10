@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -124,6 +125,7 @@ public class ImageServiceTest {
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, "aCatalog")).thenReturn(getImageCatalog());
         CloudConnector connector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.getDefault(Platform.platform(PLATFORM))).thenReturn(connector);
+        when(cloudPlatformConnectors.getDefault(Platform.platform(CloudPlatform.YARN.name()))).thenReturn(connector);
         when(connector.regionToDisplayName(REGION)).thenReturn(REGION);
     }
 
@@ -341,7 +343,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void tesDetermineImageNameFound() throws CloudbreakImageNotFoundException {
+    public void testDetermineImageNameFound() {
         Image image = mock(Image.class);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
 
@@ -359,9 +361,32 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void tesDetermineImageNameFoundDefaultPreferred() throws CloudbreakImageNotFoundException {
+    public void testDetermineImageNameFoundYCloud() {
+        Image image = mock(Image.class);
+        String platform = CloudPlatform.YARN.name().toLowerCase();
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(platform);
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(false);
+
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(platform,
+                Map.of(
+                        REGION, EXISTING_ID,
+                        DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
+
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.determineImageName(platform, imageCatalogPlatform, null, image);
+            } catch (CloudbreakImageNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        assertEquals("ami-09fea90f257c85514", imageName);
+    }
+
+    @Test
+    public void testDetermineImageNameFoundDefaultPreferred() {
         Image image = mock(Image.class);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
 
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM,
                 Map.of(
@@ -379,7 +404,28 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void tesDetermineImageNameNotFound() {
+    public void testDetermineImageNameFoundNoMpEntitlement() {
+        Image image = mock(Image.class);
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(false);
+
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM,
+                Map.of(
+                        REGION, EXISTING_ID,
+                        DEFAULT_REGION, DEFAULT_REGION_EXISTING_ID)));
+
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+            } catch (CloudbreakImageNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        assertEquals("ami-09fea90f257c85513", imageName);
+    }
+
+    @Test
+    public void testDetermineImageNameNotFound() {
         Image image = mock(Image.class);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
 
@@ -393,7 +439,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void tesDetermineImageNameImageForPlatformNotFound() {
+    public void testDetermineImageNameImageForPlatformNotFound() {
         Image image = mock(Image.class);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
 

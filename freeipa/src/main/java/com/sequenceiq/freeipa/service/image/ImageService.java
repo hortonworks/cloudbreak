@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
@@ -51,6 +54,9 @@ public class ImageService {
 
     @Inject
     private ImageRevisionReaderService imageRevisionReaderService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Inject
     private Clock clock;
@@ -190,12 +196,42 @@ public class ImageService {
         }
     }
 
-    private String selectImageByRegionPreferDefault(String platformString, String region, Image imgFromCatalog, Map<String, String> imagesByRegion) {
+    private String selectImageByRegionPreferDefault(String platform, String region, Image imgFromCatalog, Map<String, String> imagesByRegion) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        if (CloudPlatform.AZURE.name().equalsIgnoreCase(platform) && entitlementService.azureMarketplaceImagesEnabled(accountId)) {
+            return selectAzureMarketplaceImage(region, imagesByRegion, platform, accountId);
+        } else {
+            LOGGER.debug("Preferred region is region: {}. Platform: {}", region, platform);
+            return findStringKeyWithEqualsIgnoreCase(region, imagesByRegion)
+                    .or(() -> {
+                        LOGGER.debug("Not found image with region: {}. Attempt to find with 'default' region. Platform: {}",
+                                region, platform);
+                        return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion);
+                    })
+                    .orElseThrow(() -> new ImageNotFoundException(
+                            String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
+                                    imgFromCatalog, platform, region)));
+        }
+    }
+
+    private String selectAzureMarketplaceImage(String region, Map<String, String> imagesByRegion, String platform, String accountId)
+            throws ImageNotFoundException {
+        LOGGER.debug("Preferred region is 'default'. Platform: {}, Azure Marketplace images enabled.", platform);
         return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
-                .or(() -> findStringKeyWithEqualsIgnoreCase(region, imagesByRegion))
+                .or(() -> supplyAlternativeImageWhenEntitlementAllows(region, imagesByRegion, accountId))
                 .orElseThrow(() -> new ImageNotFoundException(
                         String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                                imgFromCatalog, platformString, region)));
+                                imagesByRegion, platform, region)));
+    }
+
+    private Optional<String> supplyAlternativeImageWhenEntitlementAllows(String region, Map<String, String> imagesByRegion, String accountId) {
+        if (entitlementService.azureOnlyMarketplaceImagesEnabled(accountId)) {
+            LOGGER.debug("No Azure Marketplace images found. Only Azure Marketplace images are allowed, skipping search for alternative images.");
+            return Optional.empty();
+        } else {
+            LOGGER.debug("Searching for alternative Azure images in region: {}", region);
+            return findStringKeyWithEqualsIgnoreCase(region, imagesByRegion);
+        }
     }
 
     private String selectImageByRegion(String platformString, String region, Image imgFromCatalog, Map<String, String> imagesByRegion) {

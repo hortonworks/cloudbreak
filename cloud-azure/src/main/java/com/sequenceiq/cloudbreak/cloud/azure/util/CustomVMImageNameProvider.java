@@ -1,9 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CustomVMImageNameProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomVMImageNameProvider.class);
+
     private static final int NAME_MAXIMUM_LENGTH = 80;
 
     private static final char DELIMITER = '-';
@@ -16,6 +21,8 @@ public class CustomVMImageNameProvider {
             int calculatedEndIndexOfVhdName = vhdName.length() - diff;
             name = vhdName.substring(0, calculatedEndIndexOfVhdName) + '-' + region.toLowerCase().replaceAll("\\s", "");
         }
+
+        LOGGER.debug("The following azure Azure image name obtained from the region [{}] and VHD URI [{}]: {}", region, vhdUri, name);
         return name;
     }
 

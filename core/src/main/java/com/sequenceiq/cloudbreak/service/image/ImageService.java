@@ -17,13 +17,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,6 +42,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
@@ -261,18 +260,40 @@ public class ImageService {
     private String selectImageByRegionPreferDefault(String translatedRegion, Map<String, String> imagesByRegion, String platform)
             throws CloudbreakImageNotFoundException {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
-                    .or(supplyAlternativeImageWhenEntitlementAllows(translatedRegion, imagesByRegion, accountId))
+        if (CloudPlatform.AZURE.name().equalsIgnoreCase(platform) && entitlementService.azureMarketplaceImagesEnabled(accountId)) {
+            return selectAzureMarketplaceImage(translatedRegion, imagesByRegion, platform, accountId);
+        } else {
+            LOGGER.debug("Preferred region is translated region: {}. Platform: {}", translatedRegion, platform);
+            return findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion)
+                    .or(() -> {
+                        LOGGER.debug("Not found image with translated region: {}. Attempt to find with 'default' region. Platform: {}",
+                                translatedRegion, platform);
+                        return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion);
+                    })
                     .orElseThrow(() -> new CloudbreakImageNotFoundException(
                             String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
                                     imagesByRegion, platform, translatedRegion)));
+        }
     }
 
-    @NotNull
-    private Supplier<Optional<? extends String>> supplyAlternativeImageWhenEntitlementAllows(String translatedRegion, Map<String, String> imagesByRegion,
-            String accountId) {
-        return () -> entitlementService.azureOnlyMarketplaceImagesEnabled(accountId) ? Optional.empty()
-                : findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion);
+    private String selectAzureMarketplaceImage(String translatedRegion, Map<String, String> imagesByRegion, String platform, String accountId)
+            throws CloudbreakImageNotFoundException {
+        LOGGER.debug("Preferred region is 'default'. Platform: {}, Azure Marketplace images enabled.", platform);
+        return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
+                .or(() -> supplyAlternativeImageWhenEntitlementAllows(translatedRegion, imagesByRegion, accountId))
+                .orElseThrow(() -> new CloudbreakImageNotFoundException(
+                        String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
+                                imagesByRegion, platform, translatedRegion)));
+    }
+
+    private Optional<String> supplyAlternativeImageWhenEntitlementAllows(String translatedRegion, Map<String, String> imagesByRegion, String accountId) {
+        if (entitlementService.azureOnlyMarketplaceImagesEnabled(accountId)) {
+            LOGGER.debug("No Azure Marketplace images found. Only Azure Marketplace images are allowed, skipping search for alternative images.");
+            return Optional.empty();
+        } else {
+            LOGGER.debug("Searching for alternative Azure images in translated region: {}", translatedRegion);
+            return findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion);
+        }
     }
 
     private String selectImageByRegion(String translatedRegion, Map<String, String> imagesByRegion, String platform) throws CloudbreakImageNotFoundException {

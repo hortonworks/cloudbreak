@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.azure.image;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -12,6 +14,8 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 @Service
 public class AzureImageInfoService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureImageInfoService.class);
+
     @Inject
     private AzureResourceIdProviderService azureResourceIdProviderService;
 
@@ -19,12 +23,15 @@ public class AzureImageInfoService {
     private CustomVMImageNameProvider customVMImageNameProvider;
 
     public AzureImageInfo getImageInfo(String resourceGroup, String fromVhdUri, AuthenticatedContext ac, AzureClient client) {
+        LOGGER.debug("About to fetch Azure image info based on the resource group [{}] and name from VHD URI [{}].", resourceGroup, fromVhdUri);
         String region = getRegion(ac);
         String imageNameWithRegion = customVMImageNameProvider.getImageNameWithRegion(region, fromVhdUri);
         String imageName = customVMImageNameProvider.getImageNameFromConnectionString(fromVhdUri);
         String imageId = getImageId(resourceGroup, client, imageNameWithRegion);
 
-        return new AzureImageInfo(imageNameWithRegion, imageName, imageId, region, resourceGroup);
+        AzureImageInfo imageInfo = new AzureImageInfo(imageNameWithRegion, imageName, imageId, region, resourceGroup);
+        LOGGER.debug(AzureImageInfo.class.getSimpleName() + " was created: {}", imageInfo);
+        return imageInfo;
     }
 
     private String getRegion(AuthenticatedContext ac) {
