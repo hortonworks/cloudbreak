@@ -5,9 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -58,6 +62,12 @@ class AwsEnvironmentNetworkConverterTest {
     private static final String PUBLIC_SUBNET_1 = "public-subnet-1";
 
     private static final String PUBLIC_SUBNET_2 = "public-subnet-2";
+
+    private static final String PRIVATE_SUBNET_1 = SUBNET_1 + "-private";
+
+    private static final String PRIVATE_SUBNET_2 = SUBNET_2 + "-private";
+
+    private static final String PRIVATE_SUBNET_3 = SUBNET_3 + "-private";
 
     private static final String PUBLIC_SUBNET_3 = "public-subnet-3";
 
@@ -186,9 +196,9 @@ class AwsEnvironmentNetworkConverterTest {
     }
 
     @Test
-    void testSetProviderSpecificNetworkShouldPopulateTheExistingNetworkWithTheNewNetworkData() {
+    void testSetProviderSpecificNetworkWithOnlyPublicShouldPopulateTheExistingNetworkWithTheNewNetworkData() {
         BaseNetwork awsNetwork = new AwsNetwork();
-        Set<CreatedSubnet> createdSubnets = createCreatedSubnets();
+        Set<CreatedSubnet> createdSubnets = createCreatedPublicSubnets();
         CreatedCloudNetwork createdCloudNetwork = new CreatedCloudNetwork("network-1", VPC_ID, createdSubnets);
 
         AwsNetwork actual = (AwsNetwork) underTest.setCreatedCloudNetwork(awsNetwork, createdCloudNetwork);
@@ -203,7 +213,7 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(SUBNET_CIDR_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getCidr());
         assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_1).isPrivateSubnet());
         assertThat(awsNetwork.getSubnetMetas().get(SUBNET_1).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
+                .containsAll(DeploymentRestriction.ALL);
 
         assertEquals(SUBNET_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getId());
         assertEquals(SUBNET_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getName());
@@ -211,7 +221,7 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(SUBNET_CIDR_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getCidr());
         assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_2).isPrivateSubnet());
         assertThat(awsNetwork.getSubnetMetas().get(SUBNET_3).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
+                .containsAll(DeploymentRestriction.ALL);
 
         assertEquals(SUBNET_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getId());
         assertEquals(SUBNET_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getName());
@@ -219,7 +229,75 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(SUBNET_CIDR_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getCidr());
         assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
         assertThat(awsNetwork.getSubnetMetas().get(SUBNET_3).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
+                .containsAll(DeploymentRestriction.ALL);
+    }
+
+    @Test
+    void testSetProviderSpecificNetworkWithPrivateAndPublicShouldPopulateTheExistingNetworkWithTheNewNetworkData() {
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
+        BaseNetwork awsNetwork = new AwsNetwork();
+        Set<CreatedSubnet> createdSubnets = createCreatedPublicSubnets();
+        createdSubnets.addAll(createCreatedPrivateSubnets());
+        CreatedCloudNetwork createdCloudNetwork = new CreatedCloudNetwork("network-1", VPC_ID, createdSubnets);
+
+        AwsNetwork actual = (AwsNetwork) ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1",
+            () -> underTest.setCreatedCloudNetwork(awsNetwork, createdCloudNetwork));
+        assertEquals(createdCloudNetwork.getStackName(), actual.getName());
+        assertEquals(VPC_ID, actual.getVpcId());
+        Set<String> subnetSet = new HashSet<>();
+        subnetSet.addAll(SUBNET_IDS);
+        subnetSet.add(PRIVATE_SUBNET_1);
+        subnetSet.add(PRIVATE_SUBNET_2);
+        subnetSet.add(PRIVATE_SUBNET_3);
+        assertTrue(subnetSet.containsAll(actual.getSubnetMetas().keySet()));
+
+        assertEquals(SUBNET_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getId());
+        assertEquals(SUBNET_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getName());
+        assertEquals(AZ_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getCidr());
+        assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_1).isPrivateSubnet());
+        assertThat(awsNetwork.getSubnetMetas().get(SUBNET_1).getDeploymentRestrictions())
+                .containsAll(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
+
+        assertEquals(PRIVATE_SUBNET_1, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_1).getId());
+        assertEquals(PRIVATE_SUBNET_1, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_1).getName());
+        assertEquals(AZ_1, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_1).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_1, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_1).getCidr());
+        assertTrue(awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_1).isPrivateSubnet());
+        assertThat(awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_1).getDeploymentRestrictions())
+                .containsAll(DeploymentRestriction.ALL);
+
+        assertEquals(SUBNET_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getId());
+        assertEquals(SUBNET_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getName());
+        assertEquals(AZ_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getCidr());
+        assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_2).isPrivateSubnet());
+        assertThat(awsNetwork.getSubnetMetas().get(SUBNET_3).getDeploymentRestrictions())
+                .containsAll(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
+
+        assertEquals(PRIVATE_SUBNET_2, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_2).getId());
+        assertEquals(PRIVATE_SUBNET_2, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_2).getName());
+        assertEquals(AZ_2, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_2).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_2, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_2).getCidr());
+        assertTrue(awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_2).isPrivateSubnet());
+        assertThat(awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_2).getDeploymentRestrictions())
+                .containsAll(DeploymentRestriction.ALL);
+
+        assertEquals(SUBNET_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getId());
+        assertEquals(SUBNET_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getName());
+        assertEquals(AZ_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getCidr());
+        assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
+        assertThat(awsNetwork.getSubnetMetas().get(SUBNET_3).getDeploymentRestrictions())
+                .containsAll(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
+
+        assertEquals(PRIVATE_SUBNET_3, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_3).getId());
+        assertEquals(PRIVATE_SUBNET_3, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_3).getName());
+        assertEquals(AZ_3, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_3).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_3, awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_3).getCidr());
+        assertTrue(awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_3).isPrivateSubnet());
+        assertThat(awsNetwork.getSubnetMetas().get(PRIVATE_SUBNET_3).getDeploymentRestrictions())
+                .containsAll(DeploymentRestriction.ALL);
     }
 
     @Test
@@ -235,25 +313,56 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(VPC_ID, network.getStringParameter(NetworkConstants.VPC_ID));
     }
 
-    private Set<CreatedSubnet> createCreatedSubnets() {
+    private Set<CreatedSubnet> createCreatedPublicSubnets() {
+        Set<CreatedSubnet> result = new HashSet<>();
         CreatedSubnet createdSubnet1 = new CreatedSubnet();
         createdSubnet1.setSubnetId(SUBNET_1);
         createdSubnet1.setAvailabilityZone(AZ_1);
         createdSubnet1.setCidr(SUBNET_CIDR_1);
         createdSubnet1.setPublicSubnet(true);
+        result.add(createdSubnet1);
 
         CreatedSubnet createdSubnet2 = new CreatedSubnet();
         createdSubnet2.setSubnetId(SUBNET_2);
         createdSubnet2.setAvailabilityZone(AZ_2);
         createdSubnet2.setCidr(SUBNET_CIDR_2);
         createdSubnet2.setPublicSubnet(true);
+        result.add(createdSubnet2);
 
         CreatedSubnet createdSubnet3 = new CreatedSubnet();
         createdSubnet3.setSubnetId(SUBNET_3);
         createdSubnet3.setAvailabilityZone(AZ_3);
         createdSubnet3.setCidr(SUBNET_CIDR_3);
         createdSubnet3.setPublicSubnet(true);
-        return Set.of(createdSubnet1, createdSubnet2, createdSubnet3);
+        result.add(createdSubnet3);
+
+        return result;
+    }
+
+    private Set<CreatedSubnet> createCreatedPrivateSubnets() {
+        Set<CreatedSubnet> result = new HashSet<>();
+        CreatedSubnet createdSubnet1 = new CreatedSubnet();
+        createdSubnet1.setSubnetId(PRIVATE_SUBNET_1);
+        createdSubnet1.setAvailabilityZone(AZ_1);
+        createdSubnet1.setCidr(SUBNET_CIDR_1);
+        createdSubnet1.setPublicSubnet(false);
+        result.add(createdSubnet1);
+
+        CreatedSubnet createdSubnet2 = new CreatedSubnet();
+        createdSubnet2.setSubnetId(PRIVATE_SUBNET_2);
+        createdSubnet2.setAvailabilityZone(AZ_2);
+        createdSubnet2.setCidr(SUBNET_CIDR_2);
+        createdSubnet2.setPublicSubnet(false);
+        result.add(createdSubnet2);
+
+        CreatedSubnet createdSubnet3 = new CreatedSubnet();
+        createdSubnet3.setSubnetId(PRIVATE_SUBNET_3);
+        createdSubnet3.setAvailabilityZone(AZ_3);
+        createdSubnet3.setCidr(SUBNET_CIDR_3);
+        createdSubnet3.setPublicSubnet(false);
+        result.add(createdSubnet3);
+
+        return result;
     }
 
     private AwsNetwork createAwsNetwork() {
