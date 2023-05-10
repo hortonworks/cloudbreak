@@ -748,6 +748,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = UPGRADE_DATAHUB)
     public FlowIdentifier rotateSecrets(@RequestObject DistroXSecretRotationRequest request) {
-        return null;
+        return stackOperationService.rotateSecrets(request.getCrn(), request.getSecrets(), request.getExecutionType());
     }
 }

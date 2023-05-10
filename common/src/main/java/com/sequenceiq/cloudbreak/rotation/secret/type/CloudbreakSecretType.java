@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 
 public enum CloudbreakSecretType implements SecretType {
-
     CLOUDBREAK_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER)),
     MGMT_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER));
 

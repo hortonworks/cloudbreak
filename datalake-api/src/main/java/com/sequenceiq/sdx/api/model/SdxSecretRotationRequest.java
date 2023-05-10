@@ -1,6 +1,6 @@
 package com.sequenceiq.sdx.api.model;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -24,7 +24,7 @@ public class SdxSecretRotationRequest {
 
     @NotEmpty
     @ApiModelProperty("Secrets to be rotated")
-    private Set<String> secrets;
+    private List<String> secrets;
 
     @ApiModelProperty("Execution type if needed")
     private RotationFlowExecutionType executionType;
@@ -37,11 +37,11 @@ public class SdxSecretRotationRequest {
         this.crn = crn;
     }
 
-    public Set<String> getSecrets() {
+    public List<String> getSecrets() {
         return secrets;
     }
 
-    public void setSecrets(Set<String> secrets) {
+    public void setSecrets(List<String> secrets) {
         this.secrets = secrets;
     }
 

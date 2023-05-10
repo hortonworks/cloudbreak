@@ -85,11 +85,15 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OSUpgradeByUpgr
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
+import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.rotation.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.flow.service.FlowCancelService;
 
 /**
@@ -452,6 +456,11 @@ public class ReactorFlowManager {
     public void triggerDetermineDatalakeDataSizes(Long stackId, String operationId) {
         String selector = DETERMINE_DATALAKE_DATA_SIZES_EVENT.event();
         reactorNotifier.notify(stackId, selector, new DetermineDatalakeDataSizesBaseEvent(selector, stackId, operationId));
+    }
+
+    public FlowIdentifier triggerSecretRotation(Long stackId, String crn, List<SecretType> secretTypes, RotationFlowExecutionType executionType) {
+        String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
+        return reactorNotifier.notify(stackId, selector, new SecretRotationFlowChainTriggerEvent(selector, stackId, crn, secretTypes, executionType));
     }
 
     private NetworkScaleDetails getStackNetworkScaleDetails(InstanceGroupAdjustmentV4Request instanceGroupAdjustment) {

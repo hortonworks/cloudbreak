@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
+import static com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,10 +26,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -52,7 +56,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -86,6 +92,8 @@ public class StackOperationServiceTest {
     private static final RotateSaltPasswordReason REASON = RotateSaltPasswordReason.MANUAL;
 
     private static final long STACK_ID = 9876L;
+
+    private static final String CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:878605d9-f9e9-44c6-9da6-e4bce9570ef5";
 
     private static final String TEST_BLUEPRINT_TEXT = "blueprintText";
 
@@ -145,6 +153,9 @@ public class StackOperationServiceTest {
 
     @Mock
     private RotateSaltPasswordValidator rotateSaltPasswordValidator;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @Test
     public void testStartWhenStackAvailable() {
@@ -518,6 +529,42 @@ public class StackOperationServiceTest {
         assertEquals(flowIdentifier, result);
         verify(stackDtoService).getByNameOrCrn(nameOrCrn, ACCOUNT_ID);
         verify(flowManager).triggerModifyProxyConfig(stackId, previousProxyConfigCrn);
+    }
+
+    @Test
+    public void testRotateSecrets() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
+        when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
+        when(flowManager.triggerSecretRotation(anyLong(), anyString(), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "flowchain"));
+
+        underTest.rotateSecrets(CRN, List.of(CLOUDBREAK_CM_ADMIN_PASSWORD.name()), null);
+
+        verify(flowManager).triggerSecretRotation(anyLong(), anyString(), any(), any());
+    }
+
+    @Test
+    public void testRotateSecretsWhenSecretsDuplicated() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
+        when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.rotateSecrets(CRN,
+                List.of(CLOUDBREAK_CM_ADMIN_PASSWORD.name(), CLOUDBREAK_CM_ADMIN_PASSWORD.name()), null));
+
+        verifyNoInteractions(flowManager);
+    }
+
+    @Test
+    public void testRotateSecretsWhenNotEntitled() {
+        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.FALSE);
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.rotateSecrets(CRN,
+                List.of(CLOUDBREAK_CM_ADMIN_PASSWORD.name()), null));
+
+        verifyNoInteractions(flowManager, stackDtoService);
     }
 
     private InstanceMetaData createInstanceMetadataForTest(Long privateId, String instanceGroupName) {
