@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
-import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.GcpNetwork;
@@ -95,7 +94,7 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
                                 subnet.isIgwAvailable(),
                                 subnet.isIgwAvailable() ? PUBLIC : PRIVATE,
                                 subnet.isPublicSubnet()
-                                        ? DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS
+                                        ? getDeploymentRestrictionWhenPublicSubnet(createdCloudNetwork)
                                         : getDeploymentRestrictionForPrivateSubnet(subnet.getType()))
                         )
                 )

@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -25,6 +28,8 @@ import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetworkConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentBaseNetworkConverter.class);
 
     private final EnvironmentViewConverter environmentViewConverter;
 
@@ -95,6 +100,23 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())
                 ? DeploymentRestriction.ALL
                 : DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS;
+    }
+
+    protected boolean isAllSubnetsPublic(CreatedCloudNetwork createdCloudNetwork) {
+        return createdCloudNetwork.getSubnets().stream().allMatch(e -> e.isPublicSubnet());
+    }
+
+    protected  Set<DeploymentRestriction> getDeploymentRestrictionWhenPublicSubnet(CreatedCloudNetwork createdCloudNetwork) {
+        Set<DeploymentRestriction> restrictions = null;
+        if (isAllSubnetsPublic(createdCloudNetwork)) {
+            restrictions = DeploymentRestriction.ALL;
+            LOGGER.info("All subnet is public so deployment restriction will contains all the restriction {}.", restrictions);
+        } else {
+            restrictions = DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS;
+            LOGGER.info("Subnets contain public and private as well so deployment restriction will contains " +
+                    "only endpoint access {}.", restrictions);
+        }
+        return restrictions;
     }
 
     private Map<String, CloudSubnet> setDefaultDeploymentRestrictionsForEndpointAccessGateway(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
