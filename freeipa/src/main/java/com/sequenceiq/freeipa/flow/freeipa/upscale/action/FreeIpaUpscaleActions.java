@@ -30,6 +30,7 @@ import javax.ws.rs.ClientErrorException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
@@ -59,6 +60,7 @@ import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoin
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
+import com.sequenceiq.flow.reactor.api.event.DelayEvent;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
@@ -581,6 +583,9 @@ public class FreeIpaUpscaleActions {
             @Inject
             private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+            @Value("${freeipa.delayed.scale-sec}")
+            private long delayInSec;
+
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
@@ -591,7 +596,12 @@ public class FreeIpaUpscaleActions {
                             () -> {
                                 environmentEndpoint.updateConfigsInEnvironmentByCrn(stack.getEnvironmentCrn());
                             });
-                    sendEvent(context, UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+                    if (isChainedAction(variables) && !isFinalChain(variables)) {
+                        sendEvent(context, new DelayEvent(stack.getId(),
+                                new StackEvent(UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT.selector(), stack.getId()), delayInSec, true));
+                    } else {
+                        sendEvent(context, UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+                    }
                 } catch (ClientErrorException e) {
                     String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                     LOGGER.error("Failed to update the stack config due to {}", errorMessage, e);

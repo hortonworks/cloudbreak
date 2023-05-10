@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -94,6 +96,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -151,6 +154,9 @@ class SaltOrchestratorTest {
 
     @Mock
     private SaltBootstrap saltBootstrap;
+
+    @Mock
+    private Optional<DelayedExecutorService> delayedExecutorService;
 
     @InjectMocks
     private SaltOrchestrator saltOrchestrator;
@@ -549,6 +555,9 @@ class SaltOrchestratorTest {
                 .thenReturn(Map.of())
                 .thenReturn(Map.of())
                 .thenReturn(Map.of());
+        when(delayedExecutorService.isPresent()).thenReturn(Boolean.TRUE);
+        DelayedExecutorService executorService = mock(DelayedExecutorService.class);
+        when(delayedExecutorService.get()).thenReturn(executorService);
         ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerArgumentCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
 
         saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway, replica1Config, replica2Config),
@@ -559,6 +568,7 @@ class SaltOrchestratorTest {
         assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
         assertEquals(Set.of("replica1.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
         assertEquals(Set.of("replica2.example.com"), jobIdTrackers.get(2).getSaltJobRunner().getTargetHostnames());
+        verify(executorService, times(2)).runWithDelay(any(), anyLong(), any());
     }
 
     @Test

@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -103,6 +104,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.utils.GrainsJsonPropertyUtil;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -175,6 +177,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.cloudstorage.validation.retry:3}")
     private int maxCloudStorageValidationRetry;
 
+    @Value("${freeipa.delayed.scale-sec:1}")
+    private long freeipaScaleDelayInSec;
+
     @Inject
     private SaltRunner saltRunner;
 
@@ -201,6 +206,9 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Inject
     private SaltBootstrapFactory saltBootstrapFactory;
+
+    @Inject
+    private Optional<DelayedExecutorService> delayedExecutorService;
 
     @Override
     public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
@@ -740,6 +748,19 @@ public class SaltOrchestrator implements HostOrchestrator {
         for (String existingReplicaHostname : existingFreeIpaReplicaHostnames) {
             LOGGER.debug("Applying changes to FreeIPA replica {}", existingReplicaHostname);
             runNewService(sc, new HighStateRunner(saltStateService, Set.of(existingReplicaHostname), allNodes), exitCriteriaModel);
+            delayFreeIpaReplicaActions(existingFreeIpaReplicaHostnames);
+        }
+    }
+
+    private void delayFreeIpaReplicaActions(Set<String> freeIpaReplicaHostnames) {
+        try {
+            if (delayedExecutorService.isPresent() && freeIpaReplicaHostnames.size() > 1) {
+                LOGGER.debug("Delay FreeIPA replica actions");
+                delayedExecutorService.get().runWithDelay(() -> null, freeipaScaleDelayInSec, TimeUnit.SECONDS);
+                LOGGER.debug("Delaying FreeIPA replica actions is over");
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.warn("Delaying FreeIPA replica actions was interrupted", e);
         }
     }
 
@@ -751,6 +772,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             saltCommandRunner.runModifyGrainCommand(sc,
                     new GrainAddRunner(saltStateService, Set.of(newFreeIpaReplicaHostname), allNodes, FREEIPA_REPLICA_ROLE), exitCriteriaModel, exitCriteria);
             runNewService(sc, new HighStateRunner(saltStateService, Set.of(newFreeIpaReplicaHostname), allNodes), exitCriteriaModel);
+            delayFreeIpaReplicaActions(newFreeIpaReplicaHostnames);
             LOGGER.debug("New Replica FreeIPA installation finished for: [{}]", newFreeIpaReplicaHostname);
         }
     }
