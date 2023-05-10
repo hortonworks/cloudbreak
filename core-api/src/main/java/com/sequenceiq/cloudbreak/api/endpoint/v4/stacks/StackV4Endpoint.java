@@ -83,6 +83,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.authorization.annotation.ResourceName;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackV4SecretRotationRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
@@ -712,4 +713,10 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DETERMINE_DATALAKE_DATA_SIZES, nickname = "determineDatalakeDataSizes")
     void determineDatalakeDataSizes(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("operationId") String operationId);
+
+    @PUT
+    @Path("internal/rotate_secret")
+    @ApiOperation(value = "Rotate Stack secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateStackSecrets", hidden = true)
+    FlowIdentifier rotateSecrets(@PathParam("workspaceId") Long workspaceId, @Valid @NotNull StackV4SecretRotationRequest request,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

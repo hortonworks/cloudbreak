@@ -96,6 +96,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXVerticalScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.MultipleInstanceDeleteRequest;
@@ -586,4 +587,9 @@ public interface DistroXV1Endpoint {
     FlowIdentifier modifyProxyInternal(@ValidCrn(resource = {CrnResourceDescriptor.DATAHUB}) @PathParam("crn") String crn,
             @ValidCrn(resource = {CrnResourceDescriptor.PROXY}) @QueryParam("previousProxyConfigCrn") String previousProxyConfigCrn,
             String initiatorUserCrn);
+
+    @PUT
+    @Path("rotate_secret")
+    @ApiOperation(value = "Rotate DistroX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateDistroXSecrets", hidden = true)
+    FlowIdentifier rotateSecrets(@Valid @NotNull DistroXSecretRotationRequest request);
 }

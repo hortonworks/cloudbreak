@@ -3,19 +3,19 @@ package com.sequenceiq.cloudbreak.service.secret.service.rotation.context;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretGenerator;
 
 public class VaultRotationContext extends RotationContext {
 
-    private final Map<Secret, String> newSecretMap;
+    private Map<String, Class<? extends SecretGenerator>> secretUpdateSupplierMap;
 
-    private VaultRotationContext(String resourceCrn, Map<Secret, String> newSecretMap) {
+    private VaultRotationContext(String resourceCrn, Map<String, Class<? extends SecretGenerator>> secretUpdateSupplierMap) {
         super(resourceCrn);
-        this.newSecretMap = newSecretMap;
+        this.secretUpdateSupplierMap = secretUpdateSupplierMap;
     }
 
-    public Map<Secret, String> getNewSecretMap() {
-        return newSecretMap;
+    public Map<String, Class<? extends SecretGenerator>> getSecretUpdateSupplierMap() {
+        return secretUpdateSupplierMap;
     }
 
     public static VaultRotationContextBuilder builder() {
@@ -26,20 +26,20 @@ public class VaultRotationContext extends RotationContext {
 
         private String resourceCrn;
 
-        private Map<Secret, String> newSecretMap;
+        private Map<String, Class<? extends SecretGenerator>> secretUpdateSupplierMap;
 
         public VaultRotationContextBuilder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
-        public VaultRotationContextBuilder withNewSecretMap(Map<Secret, String> newSecretMap) {
-            this.newSecretMap = newSecretMap;
+        public VaultRotationContextBuilder withSecretUpdateSupplierMap(Map<String, Class<? extends SecretGenerator>> secretUpdateSupplierMap) {
+            this.secretUpdateSupplierMap = secretUpdateSupplierMap;
             return this;
         }
 
         public VaultRotationContext build() {
-            return new VaultRotationContext(resourceCrn, newSecretMap);
+            return new VaultRotationContext(resourceCrn, secretUpdateSupplierMap);
         }
     }
 }

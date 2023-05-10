@@ -24,20 +24,20 @@ public class SecretRotationConfig {
     @Bean
     public Map<SecretType, RotationContextProvider> rotationContextProviderMap() {
         if (rotationContextProviders.isPresent()) {
-            Map<SecretType, RotationContextProvider> bean = new EnumMap<>(SecretType.class);
+            Map<SecretType, RotationContextProvider> beans = Maps.newHashMap();
             for (RotationContextProvider rotationContextProvider : rotationContextProviders.get()) {
-                bean.put(rotationContextProvider.getSecret(), rotationContextProvider);
+                beans.put(rotationContextProvider.getSecret(), rotationContextProvider);
             }
-            return Maps.immutableEnumMap(bean);
+            return beans;
         } else {
             return Map.of();
         }
     }
 
     @Bean
-    public Map<SecretLocationType, RotationExecutor> rotationExecutorMap() {
+    public Map<SecretRotationStep, RotationExecutor> rotationExecutorMap() {
         if (rotationExecutors.isPresent()) {
-            Map<SecretLocationType, RotationExecutor> bean = new EnumMap<>(SecretLocationType.class);
+            Map<SecretRotationStep, RotationExecutor> bean = new EnumMap<>(SecretRotationStep.class);
             for (RotationExecutor rotationExecutor : rotationExecutors.get()) {
                 bean.put(rotationExecutor.getType(), rotationExecutor);
             }
