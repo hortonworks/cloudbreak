@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -95,6 +96,14 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())
                 ? DeploymentRestriction.ALL
                 : DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS;
+    }
+
+    protected boolean isAllSubnetsPublic(CreatedCloudNetwork createdCloudNetwork) {
+        return createdCloudNetwork.getSubnets().stream().allMatch(e -> e.isPublicSubnet());
+    }
+
+    protected  Set<DeploymentRestriction> getDeploymentRestrictionWhenPublicSubnet(CreatedCloudNetwork createdCloudNetwork) {
+        return isAllSubnetsPublic(createdCloudNetwork) ? DeploymentRestriction.ALL : DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS;
     }
 
     private Map<String, CloudSubnet> setDefaultDeploymentRestrictionsForEndpointAccessGateway(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
