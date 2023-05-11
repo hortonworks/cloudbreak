@@ -74,19 +74,27 @@ public interface InstanceMetadataView {
 
     default boolean isRunning() {
         InstanceStatus instanceStatus = getInstanceStatus();
-        return !isTerminated() && (InstanceStatus.CREATED.equals(instanceStatus) || InstanceStatus.SERVICES_RUNNING.equals(instanceStatus)
-                || InstanceStatus.DECOMMISSIONED.equals(instanceStatus) || InstanceStatus.DECOMMISSION_FAILED.equals(instanceStatus)
-                || InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus) || InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus));
+        return !isTerminated() && (InstanceStatus.CREATED.equals(instanceStatus)
+                || InstanceStatus.SERVICES_RUNNING.equals(instanceStatus)
+                || InstanceStatus.DECOMMISSIONED.equals(instanceStatus)
+                || InstanceStatus.DECOMMISSION_FAILED.equals(instanceStatus)
+                || InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus)
+                || InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus));
     }
 
     default boolean isReachable() {
+        InstanceStatus instanceStatus = getInstanceStatus();
+        return isReachableOrStopped()
+                && !InstanceStatus.STOPPED.equals(instanceStatus);
+    }
+
+    default boolean isReachableOrStopped() {
         InstanceStatus instanceStatus = getInstanceStatus();
         return !isTerminated()
                 && !isDeletedOnProvider()
                 && !InstanceStatus.ZOMBIE.equals(instanceStatus)
                 && !InstanceStatus.ORCHESTRATION_FAILED.equals(instanceStatus)
-                && !InstanceStatus.FAILED.equals(instanceStatus)
-                && !InstanceStatus.STOPPED.equals(instanceStatus);
+                && !InstanceStatus.FAILED.equals(instanceStatus);
     }
 
     default boolean isDeletedOnProvider() {

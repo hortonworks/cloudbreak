@@ -50,6 +50,11 @@ public class ComponentLocatorService {
         return getFqdnsByComponents(stackDto, blueprintTextProcessor, componentNames);
     }
 
+    public Map<String, List<String>> getComponentLocationEvenIfStopped(StackDtoDelegate stackDto, BlueprintTextProcessor blueprintTextProcessor,
+            Collection<String> componentNames) {
+        return getFqdnsByComponentsEvenIfStopped(stackDto, blueprintTextProcessor, componentNames);
+    }
+
     private Map<String, List<String>> getFqdnsByComponents(StackDtoDelegate stackDto, Collection<String> componentNames) {
         String blueprintText = stackDto.getBlueprint().getBlueprintText();
         BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
@@ -63,6 +68,17 @@ public class ComponentLocatorService {
             Set<String> hgComponents = new HashSet<>(blueprintTextProcessor.getComponentsInHostGroup(ig.getInstanceGroup().getGroupName()));
             hgComponents.retainAll(componentNames);
             fillList(fqdnsByComponent, ig.getReachableInstanceMetaData(), hgComponents);
+        });
+        return fqdnsByComponent;
+    }
+
+    private Map<String, List<String>> getFqdnsByComponentsEvenIfStopped(StackDtoDelegate stackDto, BlueprintTextProcessor blueprintTextProcessor,
+        Collection<String> componentNames) {
+        Map<String, List<String>> fqdnsByComponent = new HashMap<>();
+        stackDto.getInstanceGroupDtos().forEach(ig -> {
+            Set<String> hgComponents = new HashSet<>(blueprintTextProcessor.getComponentsInHostGroup(ig.getInstanceGroup().getGroupName()));
+            hgComponents.retainAll(componentNames);
+            fillList(fqdnsByComponent, ig.getReachableOrStoppedInstanceMetaData(), hgComponents);
         });
         return fqdnsByComponent;
     }

@@ -117,7 +117,7 @@ public class ServiceEndpointCollector {
                     entitlementService.getEntitlements(stackDto.getTenantName()));
             GatewayView gateway = stackDto.getGateway();
             Optional<String> version = Optional.ofNullable(stackDto.getBlueprint()).map(Blueprint::getStackVersion);
-            Map<String, List<String>> privateIps = componentLocatorService.getComponentLocation(stackDto, processor,
+            Map<String, List<String>> privateIps = componentLocatorService.getComponentLocationEvenIfStopped(stackDto, processor,
                     knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
             LOGGER.debug("The private IPs in the cluster {}", privateIps);
             if (privateIps.containsKey(exposedServiceCollector.getImpalaService().getServiceName())) {
@@ -125,19 +125,20 @@ public class ServiceEndpointCollector {
             }
             if (gateway != null) {
                 for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
-                    generateGatewayTopology(stackDto, managerIp, clusterExposedServiceMap, knownExposedServices, privateIps, gatewayTopology, version);
+                    generateGatewayTopologyFqdnsByComponent(stackDto, managerIp, clusterExposedServiceMap,
+                            knownExposedServices, privateIps, gatewayTopology, version);
                 }
             }
         }
         return clusterExposedServiceMap;
     }
 
-    private void generateGatewayTopology(
+    private void generateGatewayTopologyFqdnsByComponent(
             StackDtoDelegate stackDto,
             String managerIp,
             Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap,
             Collection<ExposedService> knownExposedServices,
-            Map<String, List<String>> privateIps,
+            Map<String, List<String>> fqdnsByComponent,
             GatewayTopology gatewayTopology,
             Optional<String> version) {
         GatewayView gateway = stackDto.getGateway();
@@ -153,26 +154,36 @@ public class ServiceEndpointCollector {
         LOGGER.debug("AutoTls enabled '{}' for the cluster", autoTlsEnabled);
         SecurityConfig securityConfig = stackDto.getSecurityConfig();
         String managerServerUrl = getManagerServerUrl(stackDto, managerIp);
-        for (ExposedService exposedService : knownExposedServices) {
+        for (ExposedService exposedService : filterKnoxServices(knownExposedServices, stackDto.getType())) {
             if (exposedService.isCmProxied()) {
                 List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createCmProxiedServiceEntries(exposedService, gateway,
                         gatewayTopology, managerServerUrl, cluster.getName());
                 uiServices.addAll(uiServiceOnPrivateIps);
             } else {
                 if (!exposedService.isApiOnly()) {
-                    List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
-                            managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled, securityConfig, version);
+                    List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createServiceEntriesFqdnsByComponent(exposedService, gateway, gatewayTopology,
+                            managerIp, fqdnsByComponent, exposedServicesInTopology, false, autoTlsEnabled, securityConfig, version);
                     uiServices.addAll(uiServiceOnPrivateIps);
                 }
                 if (exposedService.isApiIncluded()) {
-                    List<ClusterExposedServiceV4Response> apiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
-                            managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled, securityConfig, version);
+                    List<ClusterExposedServiceV4Response> apiServiceOnPrivateIps = createServiceEntriesFqdnsByComponent(exposedService, gateway, gatewayTopology,
+                            managerIp, fqdnsByComponent, exposedServicesInTopology, true, autoTlsEnabled, securityConfig, version);
                     apiServices.addAll(apiServiceOnPrivateIps);
                 }
             }
         }
         clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), uiServices);
         clusterExposedServiceMap.put(gatewayTopology.getTopologyName() + API_TOPOLOGY_POSTFIX, apiServices);
+    }
+
+    private Collection<ExposedService> filterKnoxServices(Collection<ExposedService> knownExposedServices, StackType stackType) {
+        return knownExposedServices.stream()
+                .filter(e -> isApplicableForClusterType(stackType, e))
+                .collect(Collectors.toSet());
+    }
+
+    private static boolean isApplicableForClusterType(StackType stackType, ExposedService e) {
+        return e.isVisibleForDatahub() && stackType.equals(StackType.WORKLOAD) || e.isVisibleForDatalake() && stackType.equals(StackType.DATALAKE);
     }
 
     private String getBlueprintString(StackDtoDelegate stackDto) {
@@ -204,10 +215,9 @@ public class ServiceEndpointCollector {
 
     public List<GatewayTopologyV4Response> filterByStackType(StackType stackType, List<GatewayTopologyV4Response> topologies) {
         for (GatewayTopologyV4Response topology : topologies) {
-            topology.setExposedServices(topology.getExposedServices()
+            topology.setExposedServices(exposedServiceCollector.getFullServiceListWithDefaultValues(topology.getExposedServices(), Optional.empty())
                     .stream()
-                    .filter(e -> exposedServiceCollector.getByName(e).isVisibleForDatahub() && stackType.equals(StackType.WORKLOAD)
-                            || exposedServiceCollector.getByName(e).isVisibleForDatalake() && stackType.equals(StackType.DATALAKE))
+                    .filter(e -> isApplicableForClusterType(stackType, exposedServiceCollector.getByName(e)))
                     .collect(Collectors.toList()));
         }
         return topologies;
@@ -219,20 +229,20 @@ public class ServiceEndpointCollector {
         privateIps.put(exposedServiceCollector.getImpalaDebugUIService().getServiceName(), impalaCoordinators);
     }
 
-    private List<ClusterExposedServiceV4Response> createServiceEntries(
+    private List<ClusterExposedServiceV4Response> createServiceEntriesFqdnsByComponent(
             ExposedService exposedService,
             GatewayView gateway,
             GatewayTopology gatewayTopology,
             String managerIp,
-            Map<String, List<String>> privateIps,
+            Map<String, List<String>> fqdnsByComponent,
             Set<String> exposedServicesInTopology,
             boolean api,
             boolean autoTlsEnabled,
             SecurityConfig securityConfig,
             Optional<String> version) {
         List<ClusterExposedServiceV4Response> services = new ArrayList<>();
-        List<String> serviceUrlsForService = getServiceUrlsForService(exposedService, managerIp,
-                gateway, gatewayTopology.getTopologyName(), privateIps, api, autoTlsEnabled, version);
+        List<String> serviceUrlsForService = getServiceUrlsForServiceFqdnsByComponent(exposedService, managerIp,
+                gateway, gatewayTopology.getTopologyName(), fqdnsByComponent, api, autoTlsEnabled, version);
         serviceUrlsForService.addAll(getJdbcUrlsForService(exposedService, managerIp, gateway, securityConfig, version));
         if (serviceUrlsForService.isEmpty()) {
             services.add(createExposedServiceResponse(exposedService, gateway, exposedServicesInTopology, api, null));
@@ -327,12 +337,12 @@ public class ServiceEndpointCollector {
     }
 
     //CHECKSTYLE:OFF
-    private List<String> getServiceUrlsForService(
+    private List<String> getServiceUrlsForServiceFqdnsByComponent(
             ExposedService exposedService,
             String managerIp,
             GatewayView gateway,
             String topologyName,
-            Map<String, List<String>> privateIps,
+            Map<String, List<String>> fqdnsByComponent,
             boolean api,
             boolean autoTlsEnabled,
             Optional<String> version) {
@@ -340,13 +350,13 @@ public class ServiceEndpointCollector {
         if (hasKnoxUrl(exposedService) && managerIp != null) {
             switch (exposedService.getName()) {
                 case "NAMENODE":
-                    addNameNodeUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls, version);
+                    addNameNodeUrl(managerIp, gateway, fqdnsByComponent, autoTlsEnabled, urls, version);
                     break;
                 case "HBASE_UI":
-                    addHbaseUrl(managerIp, gateway, privateIps, urls, version);
+                    addHbaseUrl(managerIp, gateway, fqdnsByComponent, urls, version);
                     break;
                 case "HBASEJARS":
-                    addHbaseJarsUrl(managerIp, gateway, privateIps, urls, version);
+                    addHbaseJarsUrl(managerIp, gateway, fqdnsByComponent, urls, version);
                     break;
                 case "RESOURCEMANAGER_WEB":
                     addResourceManagerUrl(exposedService, managerIp, gateway, topologyName, api, urls);
@@ -361,10 +371,13 @@ public class ServiceEndpointCollector {
                     urls.add(buildKnoxUrlWithProtocol("rpc", managerIp, exposedService, autoTlsEnabled));
                     break;
                 case "IMPALA_DEBUG_UI":
-                    addImplaDebugUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls, version);
+                    addImplaDebugUrl(managerIp, gateway, fqdnsByComponent, autoTlsEnabled, urls, version);
                     break;
                 case "KUDU":
-                    addKuduUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls, version);
+                    addKuduUrl(managerIp, gateway, fqdnsByComponent, autoTlsEnabled, urls, version);
+                    break;
+                case "KAFKA_BROKER":
+                    addKafkaBrokerEndpointUrl(exposedService, fqdnsByComponent, urls);
                     break;
                 case "HIVE_SERVER":
                     // there is no HTTP endpoint for Hive server
@@ -533,6 +546,19 @@ public class ServiceEndpointCollector {
         }
     }
 
+    private void addKafkaBrokerEndpointUrl(ExposedService exposedService, Map<String, List<String>> fqdnsByComponent, List<String> urls) {
+        String serviceName = exposedServiceCollector.getKafkaBrokerService().getServiceName();
+        if (!fqdnsByComponent.containsKey(serviceName) || fqdnsByComponent.get(serviceName).isEmpty()) {
+            LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
+        } else {
+            String brokerUrls = fqdnsByComponent.get(serviceName)
+                    .stream()
+                    .map(fqdn -> getKafkaBrokerConnectionUrlFromGatewayTopology(exposedService, fqdn))
+                    .collect(Collectors.joining(", "));
+            urls.add(brokerUrls);
+        }
+    }
+
     private boolean isExposed(ExposedService exposedService, Collection<String> exposedServices) {
         return exposedServices.contains(exposedService.getKnoxService());
     }
@@ -689,6 +715,11 @@ public class ServiceEndpointCollector {
     private Optional<String> getImpalaJdbcUrl(GatewayView gateway, String ambariIp, Optional<String> version) {
         return getGatewayTopology(exposedServiceCollector.getImpalaService(), gateway, version)
                 .map(gt -> getImpalaJdbcUrlFromGatewayTopology(ambariIp, gateway, gt));
+    }
+
+    private String getKafkaBrokerConnectionUrlFromGatewayTopology(ExposedService exposedService, String fqdn) {
+        String kafkaAddressPart = "%s:%s";
+        return String.format(kafkaAddressPart, fqdn, exposedService.getPort());
     }
 
     private String getHiveJdbcUrlFromGatewayTopology(String managerIp, GatewayView gateway, GatewayTopology gt, SecurityConfig securityConfig) {

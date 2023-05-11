@@ -47,6 +47,12 @@ public class InstanceGroupDto {
                 .collect(Collectors.toList());
     }
 
+    public List<InstanceMetadataView> getReachableOrStoppedInstanceMetaData() {
+        return instanceMetadataViews.stream()
+                .filter(metaData -> metaData.isReachableOrStopped())
+                .collect(Collectors.toList());
+    }
+
     public List<InstanceMetadataView> getRunningInstanceMetaData() {
         return instanceMetadataViews.stream()
                 .filter(InstanceMetadataView::isRunning)

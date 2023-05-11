@@ -39,6 +39,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
@@ -192,7 +193,7 @@ public class OpdbServiceEndpointCollectorTest {
         componentPrivateIps.put("PHOENIX_QUERY_SERVER", privateIps);
         componentPrivateIps.put("CM-UI", privateIps);
         componentPrivateIps.put("CM-API", privateIps);
-        when(componentLocatorService.getComponentLocation(any(), any(), any())).thenReturn(componentPrivateIps);
+        when(componentLocatorService.getComponentLocationEvenIfStopped(any(), any(), any())).thenReturn(componentPrivateIps);
     }
 
     @Test
@@ -282,6 +283,7 @@ public class OpdbServiceEndpointCollectorTest {
         when(stackDto.getGateway()).thenReturn(cluster.getGateway());
         when(stackDto.getBlueprint()).thenReturn(cluster.getBlueprint());
         when(stackDto.getOrchestrator()).thenReturn(cluster.getStack().getOrchestrator());
+        when(stackDto.getType()).thenReturn(StackType.WORKLOAD);
         return stackDto;
     }
 }
