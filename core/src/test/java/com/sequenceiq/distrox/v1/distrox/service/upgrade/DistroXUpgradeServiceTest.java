@@ -293,23 +293,6 @@ class DistroXUpgradeServiceTest {
     }
 
     @Test
-    public void testTriggerDistroXUpgradeShouldThrowBadRequestExceptionWhenTheOsUpgradeIsDisabledByEntitlement() {
-        UpgradeV4Request request = createRequest(false, false);
-        request.setLockComponents(true);
-        UpgradeV4Response response = new UpgradeV4Response();
-        response.setReplaceVms(true);
-        response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
-        when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
-        imageInfoV4Response.setImageId("imgId");
-        imageInfoV4Response.setImageCatalogName("catalogName");
-        when(imageSelector.determineImageId(request, response.getUpgradeCandidates())).thenReturn(imageInfoV4Response);
-        when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
-
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
-    }
-
-    @Test
     public void testTriggerFlowWhenReplaceVmsParamIsFalse() {
         // GIVEN
         UpgradeV4Request request = createRequest(false, ROLLING_UPGRADE_ENABLED);

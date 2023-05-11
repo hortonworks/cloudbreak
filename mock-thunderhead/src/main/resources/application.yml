@@ -50,7 +50,6 @@ auth:
     database.wire.encryption.datahub.enable: false
     datahub:
       runtime.upgrade.enable: true
-      os.upgrade.enable: true
       instancetypes.enable: true
     ccmv2.enable: false
     ccmv2jumpgate.enable: false

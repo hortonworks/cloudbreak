@@ -75,14 +75,6 @@ public class DistroXUpgradeAvailabilityService {
         return entitlementService.datahubRuntimeUpgradeEnabled(accountId);
     }
 
-    public boolean isOsUpgradeEnabledByUserCrn(String userCrn) {
-        return entitlementService.datahubOsUpgradeEnabled(getAccountId(userCrn));
-    }
-
-    public boolean isOsUpgradeEnabledByAccountId(String accountId) {
-        return entitlementService.datahubOsUpgradeEnabled(accountId);
-    }
-
     private String getAccountId(String userCrn) {
         try {
             return Crn.safeFromString(userCrn).getAccountId();

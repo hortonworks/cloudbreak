@@ -193,9 +193,6 @@ public class MockUserManagementServiceTest {
                 {"datahubRuntimeUpgradeEnabled false", "datahubRuntimeUpgradeEnabled", false, "CDP_RUNTIME_UPGRADE_DATAHUB", false},
                 {"datahubRuntimeUpgradeEnabled true", "datahubRuntimeUpgradeEnabled", true, "CDP_RUNTIME_UPGRADE_DATAHUB", true},
 
-                {"datahubOsUpgradeEnabled false", "datahubOsUpgradeEnabled", false, "CDP_OS_UPGRADE_DATAHUB", false},
-                {"datahubOsUpgradeEnabled true", "datahubOsUpgradeEnabled", true, "CDP_OS_UPGRADE_DATAHUB", true},
-
                 {"ccmV2Enabled false", "ccmV2Enabled", false, "CDP_CCM_V2", false},
                 {"ccmV2Enabled true", "ccmV2Enabled", true, "CDP_CCM_V2", true},
 

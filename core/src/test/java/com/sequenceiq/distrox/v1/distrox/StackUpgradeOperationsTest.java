@@ -270,7 +270,7 @@ class StackUpgradeOperationsTest {
         doReturn(Optional.of(CLUSTER_ID)).when(clusterService).findClusterIdByStackId(STACK_ID);
         Stack stack = createStack(StackType.DATALAKE);
         UpgradeV4Request request = createUpgradeRequest(null, null);
-        request.setInternalUpgradeSettings(new InternalUpgradeSettings(false, false, false, true, false));
+        request.setInternalUpgradeSettings(new InternalUpgradeSettings(false, false, true, false));
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
@@ -516,7 +516,7 @@ class StackUpgradeOperationsTest {
         UpgradeV4Request upgradeRequest = new UpgradeV4Request();
         upgradeRequest.setReplaceVms(replaceVm);
         upgradeRequest.setSkipDataHubValidation(skipDataHubValidation);
-        upgradeRequest.setInternalUpgradeSettings(new InternalUpgradeSettings(true, true, true));
+        upgradeRequest.setInternalUpgradeSettings(new InternalUpgradeSettings(true, true));
         return upgradeRequest;
     }
 

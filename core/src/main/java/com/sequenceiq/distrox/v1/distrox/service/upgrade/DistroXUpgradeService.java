@@ -102,11 +102,9 @@ public class DistroXUpgradeService {
     private ImageChangeDto deteremineImageChangeDto(NameOrCrn nameOrCrn, String imageId, Stack stack, String accountId) {
         boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(accountId);
         LOGGER.info("DH Runtime Upgrade entitlement: {}", dataHubRuntimeUpgradeEnabled);
-        boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(accountId);
-        LOGGER.info("DH OS Upgrade entitlement: {}", dataHubOsUpgradeEntitled);
         boolean getAllImages = imageId != null;
         UpgradeV4Response upgradeOptions = clusterUpgradeAvailabilityService.checkForUpgrades(stack, true,
-                new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled, dataHubOsUpgradeEntitled), getAllImages);
+                new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled), getAllImages);
         if (upgradeOptions.getUpgradeCandidates().isEmpty()) {
             throw new BadRequestException("There is no available image for upgrade.");
         }
@@ -155,9 +153,7 @@ public class DistroXUpgradeService {
     }
 
     private boolean determineLockComponentsParam(UpgradeV4Request request, ImageInfoV4Response targetImage, StackDto stack) {
-        boolean lockComponents = request.getLockComponents() != null ? request.getLockComponents() : isComponentsLocked(stack, targetImage);
-        validateOsUpgradeEntitled(lockComponents, request);
-        return lockComponents;
+        return request.getLockComponents() != null ? request.getLockComponents() : isComponentsLocked(stack, targetImage);
     }
 
     private ImageChangeDto createImageChangeDto(NameOrCrn cluster, Long workspaceId, ImageInfoV4Response image) {
@@ -165,12 +161,6 @@ public class DistroXUpgradeService {
         stackImageChangeRequest.setImageId(image.getImageId());
         stackImageChangeRequest.setImageCatalogName(image.getImageCatalogName());
         return stackCommonService.createImageChangeDto(cluster, workspaceId, stackImageChangeRequest);
-    }
-
-    private void validateOsUpgradeEntitled(boolean lockComponents, UpgradeV4Request request) {
-        if (lockComponents && !request.getInternalUpgradeSettings().isDataHubOsUpgradeEntitled()) {
-            throw new BadRequestException("The OS upgrade is not allowed for DataHub clusters.");
-        }
     }
 
     private void validateUpgradeCandidates(NameOrCrn cluster, UpgradeV4Response upgradeResponse) {
