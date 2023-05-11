@@ -148,6 +148,12 @@ public class StackImageService {
         }
     }
 
+    public void replaceStackImageComponent(Stack stack, StatedImage targetImage, Image currentImage) {
+        Image newImage = getImageModelFromStatedImage(stack.getStack(), currentImage, targetImage);
+        Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(newImage), stack);
+        componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
+    }
+
     public Optional<Component> findImageComponentByName(Long stackId, String componentName) {
         Component targetImageComponent = componentConfigProviderService.getComponent(stackId, ComponentType.IMAGE, componentName);
         LOGGER.debug("The following target image found for stack {}, {}", stackId, targetImageComponent);

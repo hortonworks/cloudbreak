@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncImageCollectorService;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncImageUpdateService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncerService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationStatus;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
@@ -39,6 +40,9 @@ public class CmSyncHandlerTest {
     private static final String IMAGE_UUID_1 = "imageUuid1";
 
     private static final String USER_CRN = "userCrn";
+
+    @Mock
+    private CmSyncImageUpdateService cmSyncImageUpdateService;
 
     @Mock
     private CmSyncImageCollectorService cmSyncImageCollectorService;

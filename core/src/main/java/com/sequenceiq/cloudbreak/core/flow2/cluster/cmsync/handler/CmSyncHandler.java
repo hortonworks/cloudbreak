@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncImageCollectorService;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncImageUpdateService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncerService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationStatus;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
@@ -34,6 +35,9 @@ public class CmSyncHandler extends ExceptionCatcherEventHandler<CmSyncRequest> {
 
     @Inject
     private CmSyncerService cmSyncerService;
+
+    @Inject
+    private CmSyncImageUpdateService cmSyncImageUpdateService;
 
     @Inject
     private StackService stackService;
@@ -63,6 +67,7 @@ public class CmSyncHandler extends ExceptionCatcherEventHandler<CmSyncRequest> {
                 Exception e = new CloudbreakServiceException(cmSyncOperationStatus.getMessage());
                 return new CmSyncResult(cmSyncOperationStatus.getMessage(), e, request);
             }
+            cmSyncImageUpdateService.updateImageAfterCmSync(stack, cmSyncOperationSummary, candidateImages);
 
             return new CmSyncResult(request, cmSyncOperationStatus.getMessage());
         } catch (Exception e) {

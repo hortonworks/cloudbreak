@@ -129,7 +129,8 @@ public class CmSyncerServiceTest {
 
         assertFalse(cmSyncOperationStatus.hasSucceeded());
         assertEquals(
-                "No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. Please call Cloudera support",
+                "No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. "
+                        + "Please open Cloudera support ticket to investigate the issue",
                 cmSyncOperationStatus.getMessage());
         verify(cmServerQueryService).isCmServerRunning(eq(stack));
         verify(cmInstalledComponentFinderService, never()).findCmRepoComponent(any(), any());
