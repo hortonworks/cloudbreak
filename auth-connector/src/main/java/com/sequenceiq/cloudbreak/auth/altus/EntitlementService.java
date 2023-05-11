@@ -65,7 +65,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
@@ -219,10 +218,6 @@ public class EntitlementService {
 
     public boolean enableDistroxInstanceTypesEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_ENABLE_DISTROX_INSTANCE_TYPES);
-    }
-
-    public boolean freeIpaHaRepairEnabled(String accountID) {
-        return isEntitlementRegistered(accountID, CDP_FREEIPA_HA_REPAIR);
     }
 
     public boolean isFreeIpaRebuildEnabled(String accountID) {
