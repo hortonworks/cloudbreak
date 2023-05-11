@@ -13,25 +13,20 @@ public class InternalUpgradeSettings {
 
     private final boolean dataHubRuntimeUpgradeEntitled;
 
-    private final boolean dataHubOsUpgradeEntitled;
-
     private final boolean upgradePreparation;
 
     private final boolean rollingUpgradeEnabled;
 
-    public InternalUpgradeSettings(boolean skipValidations, boolean dataHubRuntimeUpgradeEntitled, boolean dataHubOsUpgradeEntitled) {
+    public InternalUpgradeSettings(boolean skipValidations, boolean dataHubRuntimeUpgradeEntitled) {
         this.skipValidations = skipValidations;
         this.dataHubRuntimeUpgradeEntitled = dataHubRuntimeUpgradeEntitled;
-        this.dataHubOsUpgradeEntitled = dataHubOsUpgradeEntitled;
         this.rollingUpgradeEnabled = false;
         this.upgradePreparation = false;
     }
 
-    public InternalUpgradeSettings(boolean skipValidations, boolean dataHubRuntimeUpgradeEntitled, boolean dataHubOsUpgradeEntitled,
-            boolean rollingUpgradeEnabled) {
+    public InternalUpgradeSettings(boolean skipValidations, boolean dataHubRuntimeUpgradeEntitled, boolean rollingUpgradeEnabled) {
         this.skipValidations = skipValidations;
         this.dataHubRuntimeUpgradeEntitled = dataHubRuntimeUpgradeEntitled;
-        this.dataHubOsUpgradeEntitled = dataHubOsUpgradeEntitled;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
         this.upgradePreparation = false;
     }
@@ -39,12 +34,10 @@ public class InternalUpgradeSettings {
     @JsonCreator
     public InternalUpgradeSettings(@JsonProperty("skipValidations") boolean skipValidations,
             @JsonProperty("dataHubRuntimeUpgradeEntitled") boolean dataHubRuntimeUpgradeEntitled,
-            @JsonProperty("dataHubOsUpgradeEntitled") boolean dataHubOsUpgradeEntitled,
             @JsonProperty("upgradePreparation") boolean upgradePreparation,
             @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
         this.skipValidations = skipValidations;
         this.dataHubRuntimeUpgradeEntitled = dataHubRuntimeUpgradeEntitled;
-        this.dataHubOsUpgradeEntitled = dataHubOsUpgradeEntitled;
         this.upgradePreparation = upgradePreparation;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
     }
@@ -55,10 +48,6 @@ public class InternalUpgradeSettings {
 
     public boolean isDataHubRuntimeUpgradeEntitled() {
         return dataHubRuntimeUpgradeEntitled;
-    }
-
-    public boolean isDataHubOsUpgradeEntitled() {
-        return dataHubOsUpgradeEntitled;
     }
 
     public boolean isUpgradePreparation() {
@@ -80,13 +69,12 @@ public class InternalUpgradeSettings {
         InternalUpgradeSettings that = (InternalUpgradeSettings) o;
         return skipValidations == that.skipValidations
                 && dataHubRuntimeUpgradeEntitled == that.dataHubRuntimeUpgradeEntitled
-                && dataHubOsUpgradeEntitled == that.dataHubOsUpgradeEntitled
                 && upgradePreparation == that.upgradePreparation;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(skipValidations, dataHubRuntimeUpgradeEntitled, dataHubOsUpgradeEntitled, upgradePreparation);
+        return Objects.hash(skipValidations, dataHubRuntimeUpgradeEntitled, upgradePreparation);
     }
 
     @Override
@@ -94,7 +82,6 @@ public class InternalUpgradeSettings {
         return "InternalUpgradeSettings{" +
                 "skipValidations=" + skipValidations +
                 ", dataHubRuntimeUpgradeEntitled=" + dataHubRuntimeUpgradeEntitled +
-                ", dataHubOsUpgradeEntitled=" + dataHubOsUpgradeEntitled +
                 ", upgradePreparation=" + upgradePreparation +
                 '}';
     }

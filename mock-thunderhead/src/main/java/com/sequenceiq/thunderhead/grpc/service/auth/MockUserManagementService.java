@@ -66,7 +66,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
@@ -341,9 +340,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datahub.runtime.upgrade.enable}")
     private boolean datahubRuntimeUpgradeEnabled;
-
-    @Value("${auth.mock.datahub.os.upgrade.enable}")
-    private boolean datahubOsUpgradeEnabled;
 
     @Value("${auth.mock.ccmv2.enable}")
     private boolean ccmV2Enabled;
@@ -835,9 +831,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (datahubRuntimeUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE_DATAHUB));
-        }
-        if (datahubOsUpgradeEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_OS_UPGRADE_DATAHUB));
         }
         if (ccmV2Enabled) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2));

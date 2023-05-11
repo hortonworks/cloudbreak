@@ -82,7 +82,6 @@ class DistroXUpgradeV1ControllerTest {
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.TRUE);
         when(upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
-        when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, true, true))).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeAvailabilityService.checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN))
@@ -102,7 +101,6 @@ class DistroXUpgradeV1ControllerTest {
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setShowAvailableImages(UpgradeShowAvailableImages.SHOW);
         when(upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
-        when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, true, true))).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeAvailabilityService.checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN))
@@ -122,7 +120,6 @@ class DistroXUpgradeV1ControllerTest {
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
         when(upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
-        when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, true, true))).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeService.triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false)).thenReturn(upgradeV4Response);
@@ -140,7 +137,6 @@ class DistroXUpgradeV1ControllerTest {
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
         when(upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
-        when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, true, true))).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false))
@@ -158,7 +154,6 @@ class DistroXUpgradeV1ControllerTest {
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
         when(upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
-        when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, true, true))).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeService.triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true))
@@ -177,7 +172,6 @@ class DistroXUpgradeV1ControllerTest {
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
         when(upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
-        when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, true, true))).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true))
@@ -195,9 +189,8 @@ class DistroXUpgradeV1ControllerTest {
         distroxUpgradeRequest.setRollingUpgradeEnabled(true);
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
-        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, true, true, true);
+        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, true, true);
         when(upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
-        when(upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(ACCOUNT_ID)).thenReturn(true);
         when(upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings)).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false))

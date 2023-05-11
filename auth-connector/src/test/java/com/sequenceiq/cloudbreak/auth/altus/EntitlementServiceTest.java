@@ -64,9 +64,6 @@ class EntitlementServiceTest {
                 {"CDP_CLOUD_STORAGE_VALIDATION", (EntitlementCheckFunction) EntitlementService::cloudStorageValidationEnabled, false},
                 {"CDP_CLOUD_STORAGE_VALIDATION", (EntitlementCheckFunction) EntitlementService::cloudStorageValidationEnabled, true},
 
-                {"CDP_OS_UPGRADE_DATAHUB", (EntitlementCheckFunction) EntitlementService::datahubOsUpgradeEnabled, false},
-                {"CDP_OS_UPGRADE_DATAHUB", (EntitlementCheckFunction) EntitlementService::datahubOsUpgradeEnabled, true},
-
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, false},
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, true},
 

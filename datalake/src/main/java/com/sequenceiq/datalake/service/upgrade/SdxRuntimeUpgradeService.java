@@ -143,7 +143,7 @@ public class SdxRuntimeUpgradeService {
 
     private UpgradeV4Request createUpgradeV4Request(SdxUpgradeRequest upgradeSdxClusterRequest, boolean upgradePreparation) {
         UpgradeV4Request request = sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest);
-        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, false, false, upgradePreparation,
+        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, false, upgradePreparation,
                 Boolean.TRUE.equals(upgradeSdxClusterRequest.getRollingUpgradeEnabled()));
         request.setInternalUpgradeSettings(internalUpgradeSettings);
         return request;
