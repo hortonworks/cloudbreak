@@ -34,6 +34,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
@@ -305,7 +306,7 @@ public class ServiceEndpointCollectorTest {
         stack.getCluster().getGateway().setGatewayPort(443);
         stack.getCluster().setExtendedBlueprintText("extended-blueprint");
         mockBlueprintTextProcessor();
-        when(componentLocatorService.getComponentLocation(any(), any(), any())).thenReturn(emptyMap());
+        when(componentLocatorService.getComponentLocationEvenIfStopped(any(), any(), any())).thenReturn(emptyMap());
 
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(stack, "10.0.0.1");
@@ -359,7 +360,7 @@ public class ServiceEndpointCollectorTest {
     private void mockComponentLocator(List<String> privateIps) {
         Map<String, List<String>> componentPrivateIps = Maps.newHashMap();
         componentPrivateIps.put("NAMENODE", privateIps);
-        when(componentLocatorService.getComponentLocation(any(), any(), any())).thenReturn(componentPrivateIps);
+        when(componentLocatorService.getComponentLocationEvenIfStopped(any(), any(), any())).thenReturn(componentPrivateIps);
     }
 
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {
@@ -415,6 +416,7 @@ public class ServiceEndpointCollectorTest {
         tenant.setName("tenant");
         workspace.setTenant(tenant);
         cluster.setWorkspace(workspace);
+        stack.setType(StackType.WORKLOAD);
         return stack;
     }
 }

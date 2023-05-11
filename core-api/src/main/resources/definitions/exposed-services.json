@@ -864,6 +864,20 @@
       "visibleForDatalake": false,
       "visibleForDatahub": true,
       "minVersion": "7.2.15"
+    },
+    {
+      "name": "KAFKA_BROKER",
+      "displayName": "Kafka Broker Endpoint(s)",
+      "serviceName": "KAFKA_BROKER",
+      "knoxService": "KAFKA_BROKER",
+      "knoxUrl": "/kafka-broker/",
+      "ssoSupported": false,
+      "port": 9093,
+      "tlsPort": 9093,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": false,
+      "visibleForDatahub": true
     }
   ]
 }

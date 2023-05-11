@@ -70,6 +70,10 @@ public class ExposedServiceCollector {
         return getFirst("HIVE_SERVER");
     }
 
+    public ExposedService getKafkaBrokerService() {
+        return getFirst("KAFKA_BROKER");
+    }
+
     public ExposedService getHueService() {
         return getFirst("HUE");
     }
@@ -128,8 +132,16 @@ public class ExposedServiceCollector {
 
     public Set<String> getFullServiceListBasedOnList(Collection<String> services, Optional<String> bpVersion) {
         Set<String> result = new HashSet<>(services);
-        if (services.contains("ALL")) {
+        if (services.contains(ALL)) {
             result = getAllKnoxExposed(bpVersion);
+        }
+        return result;
+    }
+
+    public Set<String> getFullServiceListWithDefaultValues(Collection<String> services, Optional<String> bpVersion) {
+        Set<String> result = new HashSet<>(services);
+        if (services.contains(ALL)) {
+            result = getAllKnoxExposedByName(bpVersion);
         }
         return result;
     }
@@ -156,6 +168,12 @@ public class ExposedServiceCollector {
     public Set<String> getAllKnoxExposed(Optional<String> bpVersion) {
         return filterSupportedKnoxServices(bpVersion).stream()
                 .map(ExposedService::getKnoxService)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<String> getAllKnoxExposedByName(Optional<String> bpVersion) {
+        return filterSupportedKnoxServices(bpVersion).stream()
+                .map(ExposedService::getName)
                 .collect(Collectors.toSet());
     }
 

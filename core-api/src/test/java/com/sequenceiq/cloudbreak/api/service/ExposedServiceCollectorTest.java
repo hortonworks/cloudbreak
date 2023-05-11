@@ -142,7 +142,8 @@ class ExposedServiceCollectorTest {
                 "QUEUEMANAGER_WEBAPP",
                 "KNOX",
                 "QUERY_PROCESSOR",
-                "RANGER_RAZ_SERVER");
+                "RANGER_RAZ_SERVER",
+                "KAFKA_BROKER");
     }
 
     @Test
@@ -207,7 +208,8 @@ class ExposedServiceCollectorTest {
                 "QUEUEMANAGER_WEBAPP",
                 "KNOX_TOKEN_INTEGRATOR",
                 "QUERY_PROCESSOR",
-                "RANGERRAZ");
+                "RANGERRAZ",
+                "KAFKA_BROKER");
     }
 
     @Test
@@ -265,7 +267,8 @@ class ExposedServiceCollectorTest {
                 "QUEUEMANAGER_WEBAPP",
                 "KNOX_TOKEN_INTEGRATOR",
                 "QUERY_PROCESSOR",
-                "RANGERRAZ");
+                "RANGERRAZ",
+                "KAFKA_BROKER");
     }
 
     @Test
@@ -325,7 +328,8 @@ class ExposedServiceCollectorTest {
                 "KAFKA_CONNECT",
                 "SSB-SSE-API",
                 "QUERY_PROCESSOR",
-                "RANGERRAZ");
+                "RANGERRAZ",
+                "KAFKA_BROKER");
     }
 
     @Test
@@ -386,7 +390,8 @@ class ExposedServiceCollectorTest {
             "KAFKA_CONNECT",
             "SSB-SSE-API",
             "QUERY_PROCESSOR",
-            "RANGERRAZ");
+            "RANGERRAZ",
+            "KAFKA_BROKER");
     }
 
     @Test
@@ -447,7 +452,8 @@ class ExposedServiceCollectorTest {
             "KAFKA_CONNECT",
             "SSB-SSE-API",
             "QUERY_PROCESSOR",
-            "RANGERRAZ");
+            "RANGERRAZ",
+            "KAFKA_BROKER");
     }
 
     @Test
@@ -499,7 +505,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("YARNUIV2", 8088),
                 Map.entry("ZEPPELIN", 8885),
                 Map.entry("QUERY_PROCESSOR", 30700),
-                Map.entry("RANGERRAZ", 6082)
+                Map.entry("RANGERRAZ", 6082),
+                Map.entry("KAFKA_BROKER", 9093)
         );
     }
 
@@ -556,7 +563,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("YARNUIV2", 8088),
                 Map.entry("ZEPPELIN", 8885),
                 Map.entry("QUERY_PROCESSOR", 30700),
-                Map.entry("RANGERRAZ", 6082)
+                Map.entry("RANGERRAZ", 6082),
+                Map.entry("KAFKA_BROKER", 9093)
         );
     }
 
@@ -616,7 +624,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("YARNUIV2", 8088),
                 Map.entry("ZEPPELIN", 8885),
                 Map.entry("QUERY_PROCESSOR", 30700),
-                Map.entry("RANGERRAZ", 6082)
+                Map.entry("RANGERRAZ", 6082),
+                Map.entry("KAFKA_BROKER", 9093)
         );
     }
 
@@ -676,7 +685,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("YARNUIV2", 8088),
                 Map.entry("ZEPPELIN", 8885),
                 Map.entry("QUERY_PROCESSOR", 30700),
-                Map.entry("RANGERRAZ", 6082)
+                Map.entry("RANGERRAZ", 6082),
+                Map.entry("KAFKA_BROKER", 9093)
         );
     }
 
@@ -729,7 +739,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("YARNUIV2", 8090),
                 Map.entry("ZEPPELIN", 8886),
                 Map.entry("QUERY_PROCESSOR", 30700),
-                Map.entry("RANGERRAZ", 6082)
+                Map.entry("RANGERRAZ", 6082),
+                Map.entry("KAFKA_BROKER", 9093)
         );
     }
 
@@ -786,7 +797,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("YARNUIV2", 8090),
                 Map.entry("ZEPPELIN", 8886),
                 Map.entry("QUERY_PROCESSOR", 30700),
-                Map.entry("RANGERRAZ", 6082)
+                Map.entry("RANGERRAZ", 6082),
+                Map.entry("KAFKA_BROKER", 9093)
         );
     }
 
@@ -846,7 +858,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("YARNUIV2", 8090),
                 Map.entry("ZEPPELIN", 8886),
                 Map.entry("QUERY_PROCESSOR", 30700),
-                Map.entry("RANGERRAZ", 6082)
+                Map.entry("RANGERRAZ", 6082),
+                Map.entry("KAFKA_BROKER", 9093)
         );
     }
 
@@ -906,7 +919,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("YARNUIV2", 8090),
                 Map.entry("ZEPPELIN", 8886),
                 Map.entry("QUERY_PROCESSOR", 30700),
-                Map.entry("RANGERRAZ", 6082)
+                Map.entry("RANGERRAZ", 6082),
+                Map.entry("KAFKA_BROKER", 9093)
         );
     }
 
