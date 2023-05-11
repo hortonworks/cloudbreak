@@ -50,20 +50,17 @@ public class CmSyncerService {
      */
     public CmSyncOperationSummary syncFromCmToDb(Stack stack, Set<Image> candidateImages) {
         if (!cmServerQueryService.isCmServerRunning(stack)) {
-            String message = "CM server is down, it is not possible to sync parcels and CM version from the server.";
-            LOGGER.info(message);
-            return buildSummaryWithErrorMessage(message);
+            return buildSummaryWithErrorMessage("CM server is down, it is not possible to sync parcels and CM version from the server.");
         }
         if (candidateImages.isEmpty()) {
-            String message = "No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. " +
-                    "Please call Cloudera support";
-            LOGGER.info(message);
-            return buildSummaryWithErrorMessage(message);
+            return buildSummaryWithErrorMessage("No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. "
+                    + "Please open Cloudera support ticket to investigate the issue");
         }
         return syncInternal(stack, candidateImages);
     }
 
     private CmSyncOperationSummary buildSummaryWithErrorMessage(String message) {
+        LOGGER.warn(message);
         return new CmSyncOperationSummary(CmSyncOperationStatus.builder().withError(message).build());
     }
 
