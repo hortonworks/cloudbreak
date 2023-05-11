@@ -187,9 +187,6 @@ public class MockUserManagementServiceTest {
                 {"enableBaseImages false", "enableBaseImages", false, "CDP_BASE_IMAGE", false},
                 {"enableBaseImages true", "enableBaseImages", true, "CDP_BASE_IMAGE", true},
 
-                {"enableFreeIpaHaRepair false", "enableFreeIpaHaRepair", false, "CDP_FREEIPA_HA_REPAIR", false},
-                {"enableFreeIpaHaRepair true", "enableFreeIpaHaRepair", true, "CDP_FREEIPA_HA_REPAIR", true},
-
                 {"enableCloudStorageValidation false", "enableCloudStorageValidation", false, "CDP_CLOUD_STORAGE_VALIDATION", false},
                 {"enableCloudStorageValidation true", "enableCloudStorageValidation", true, "CDP_CLOUD_STORAGE_VALIDATION", true},
 

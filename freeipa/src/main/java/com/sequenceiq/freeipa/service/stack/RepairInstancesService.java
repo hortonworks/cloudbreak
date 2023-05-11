@@ -97,9 +97,6 @@ public class RepairInstancesService {
             Collection<InstanceMetaData> instancesToRepair) {
         LOGGER.debug("Validating repair for account {} and stack ID {}. Remaining good instances [{}]. Remaining bad instances [{}]. Instances to repair [{}].",
                 accountId, stack.getId(), remainingGoodInstances, remainingBadInstances, instancesToRepair);
-        if (!entitlementService.freeIpaHaRepairEnabled(accountId)) {
-            throwBadRequest("The FreeIPA HA Repair capability is disabled.");
-        }
         if (instancesToRepair.isEmpty()) {
             throwNotFoundException("No unhealthy instances to repair. You can try to use the force option to enforce the repair process.");
         }

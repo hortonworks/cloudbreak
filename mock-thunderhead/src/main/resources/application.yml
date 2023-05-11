@@ -15,8 +15,6 @@ auth:
       expiration-minutes: 10
     freeipa:
       multiaz.enable: true
-      ha:
-        repair.enable: true
       rebuild.enable: true
       batch.call.enable: true
       usersync.thread.timeout.enable: true

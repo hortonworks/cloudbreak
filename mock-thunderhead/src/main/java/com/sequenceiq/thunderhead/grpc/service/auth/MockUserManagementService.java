@@ -61,7 +61,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
@@ -324,9 +323,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.baseimage.enable}")
     private boolean enableBaseImages;
-
-    @Value("${auth.mock.freeipa.ha.repair.enable}")
-    private boolean enableFreeIpaHaRepair;
 
     @Value("${auth.mock.freeipa.rebuild.enable}")
     private boolean enableFreeIpaRebuild;
@@ -821,9 +817,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         Account.Builder builder = Account.newBuilder();
         if (enableBaseImages) {
             builder.addEntitlements(createEntitlement(CDP_BASE_IMAGE));
-        }
-        if (enableFreeIpaHaRepair) {
-            builder.addEntitlements(createEntitlement(CDP_FREEIPA_HA_REPAIR));
         }
         if (enableFreeIpaRebuild) {
             builder.addEntitlements(createEntitlement(CDP_FREEIPA_REBUILD));
