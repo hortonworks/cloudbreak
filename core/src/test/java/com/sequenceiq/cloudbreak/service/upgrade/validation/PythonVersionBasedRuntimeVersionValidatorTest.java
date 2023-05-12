@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -44,15 +46,15 @@ class PythonVersionBasedRuntimeVersionValidatorTest {
     private CurrentImagePackageProvider currentImagePackageProvider;
 
     @ParameterizedTest(name = "Current runtime: {0} contains Python 3.8: {1} current image used on instances: {2}, "
-            + "Target runtime: {3} contains Python 3.8: {4}, Os upgrade: {5}, Permitting upgrade: {6}")
+            + "Stack type: {3}, Target runtime: {4} contains Python 3.8: {5}, Os upgrade: {6}, Permitting upgrade: {7}")
     @MethodSource("testScenariosProvider")
-    public void test(String currentRuntimeVersion, boolean currentImageContainsPython, boolean allInstanceContainsPython,
+    public void test(String currentRuntimeVersion, boolean currentImageContainsPython, boolean allInstanceContainsPython, StackType stackType,
             String targetRuntimeVersion, boolean targetImageContainsPython, boolean osUpgrade, boolean expectedValue) {
         Image currentImage = createImage(currentRuntimeVersion, currentImageContainsPython);
         Image targetImage = createImage(targetRuntimeVersion, targetImageContainsPython);
         lenient().when(lockedComponentService.isComponentsLocked(stack, currentImage, targetImage)).thenReturn(osUpgrade);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getType()).thenReturn(StackType.WORKLOAD);
+        when(stack.getType()).thenReturn(stackType);
         lenient().when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, CDH_IMAGES_FROM_CATALOG, ImagePackageVersion.PYTHON38))
                 .thenReturn(allInstanceContainsPython);
 
@@ -61,33 +63,47 @@ class PythonVersionBasedRuntimeVersionValidatorTest {
 
     private static Object[][] testScenariosProvider() {
         return new Object[][] {
-                { "7.2.12", true, true, "7.2.12", true, false, true },
-                { "7.2.12", true, true, "7.2.12", true, true, true },
-                { "7.2.12", false, true, "7.2.12", true, true, true },
-                { "7.2.12", false, true, "7.2.12", false, true, true },
-                { "7.2.12", true, false, "7.2.12", true, true, true },
+                { "7.2.12", true, true, WORKLOAD, "7.2.12", true, false, true },
+                { "7.2.12", true, true, WORKLOAD,  "7.2.12", true, true, true },
+                { "7.2.12", false, true, WORKLOAD,  "7.2.12", true, true, true },
+                { "7.2.12", false, true, WORKLOAD,  "7.2.12", false, true, true },
+                { "7.2.12", true, false, WORKLOAD,  "7.2.12", true, true, true },
 
-                { "7.2.12", true, true, "7.2.15", true, false, true },
-                { "7.2.12", false, true, "7.2.15", true, false, true },
-                { "7.2.12", true, false, "7.2.15", true, false, true },
-                { "7.2.12", true, true, "7.2.15", false, false, true },
-                { "7.2.12", true, true, "7.2.15", false, false, true },
-                { "7.2.12", false, true, "7.2.15", false, false, true },
-                { "7.2.12", false, false, "7.2.15", false, false, true },
+                { "7.2.12", true, true, WORKLOAD,  "7.2.15", true, false, true },
+                { "7.2.12", false, true, WORKLOAD,  "7.2.15", true, false, true },
+                { "7.2.12", true, false, WORKLOAD,  "7.2.15", true, false, true },
+                { "7.2.12", true, true, WORKLOAD,  "7.2.15", false, false, true },
+                { "7.2.12", true, true, WORKLOAD,  "7.2.15", false, false, true },
+                { "7.2.12", false, true, WORKLOAD,  "7.2.15", false, false, true },
+                { "7.2.12", false, false, WORKLOAD,  "7.2.15", false, false, true },
 
-                { "7.2.15", true, true, "7.2.16", true, false, true },
-                { "7.2.15", false, true, "7.2.16", true, false, false },
-                { "7.2.15", true, false, "7.2.16", true, false, false },
+                { "7.2.15", true, true, WORKLOAD,  "7.2.16", true, false, true },
+                { "7.2.15", false, true, WORKLOAD,  "7.2.16", true, false, false },
+                { "7.2.15", true, false, WORKLOAD,  "7.2.16", true, false, false },
 
-                { "7.2.16", true, true, "7.2.16", true, true, true },
-                { "7.2.16", true, true, "7.2.16", true, false, true },
-                { "7.2.16", false, true, "7.2.16", true, false, false },
-                { "7.2.16", true, false, "7.2.16", true, false, false },
-                { "7.2.16", true, false, "7.2.16", true, true, true },
-                { "7.2.16", false, true, "7.2.16", true, true, true },
+                { "7.2.16", true, true, WORKLOAD,  "7.2.16", true, true, true },
+                { "7.2.16", true, true, WORKLOAD,  "7.2.16", true, false, true },
+                { "7.2.16", false, true, WORKLOAD,  "7.2.16", true, false, false },
+                { "7.2.16", true, false, WORKLOAD,  "7.2.16", true, false, false },
+                { "7.2.16", true, false, WORKLOAD,  "7.2.16", true, true, true },
+                { "7.2.16", false, true, WORKLOAD,  "7.2.16", true, true, true },
 
-                { "7.2.16", true, true, "7.2.17", true, false, true },
-                { "7.2.16", false, true, "7.2.17", true, false, false },
+                { "7.2.16", true, true, WORKLOAD,  "7.2.17", true, false, true },
+                { "7.2.16", false, true, WORKLOAD,  "7.2.17", true, false, false },
+
+                { "7.2.15", true, true, DATALAKE,  "7.2.17", true, false, true },
+                { "7.2.15", false, true, DATALAKE,  "7.2.17", true, false, false },
+                { "7.2.15", true, false, DATALAKE,  "7.2.17", true, false, false },
+
+                { "7.2.17", true, true, DATALAKE,  "7.2.17", true, true, true },
+                { "7.2.17", true, true, DATALAKE,  "7.2.17", true, false, true },
+                { "7.2.17", false, true, DATALAKE,  "7.2.17", true, false, false },
+                { "7.2.17", true, false, DATALAKE,  "7.2.17", true, false, false },
+                { "7.2.17", true, false, DATALAKE,  "7.2.17", true, true, true },
+                { "7.2.17", false, true, DATALAKE,  "7.2.17", true, true, true },
+
+                { "7.2.17", true, true, DATALAKE,  "7.2.18", true, false, true },
+                { "7.2.17", false, true, DATALAKE,  "7.2.18", true, false, false },
         };
     }
 
