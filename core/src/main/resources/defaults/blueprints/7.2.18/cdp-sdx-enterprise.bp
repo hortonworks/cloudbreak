@@ -75,7 +75,8 @@
         "cardinality":0,
         "refName":"solrHG",
         "roleConfigGroupsRefNames":[
-          "solr-SOLR_SERVER-EXTERNAL"
+          "solr-SOLR_SERVER-EXTERNAL",
+          "solr-GATEWAY-BASE"
         ]
       },
       {
@@ -83,14 +84,17 @@
         "refName":"storageHG",
         "roleConfigGroupsRefNames":[
           "hbase-REGIONSERVER-EXTERNAL",
-          "hdfs-DATANODE-EXTERNAL"
+          "hdfs-DATANODE-EXTERNAL",
+          "hbase-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE"
         ]
       },
       {
         "cardinality":0,
         "refName":"kafkaHG",
         "roleConfigGroupsRefNames":[
-          "kafka-KAFKA_BROKER-EXTERNAL"
+          "kafka-KAFKA_BROKER-EXTERNAL",
+          "kafka-GATEWAY-BASE"
         ]
       },
       {
@@ -103,14 +107,17 @@
         "cardinality":0,
         "refName":"atlasHG",
         "roleConfigGroupsRefNames":[
-          "atlas-ATLAS_SERVER-EXTERNAL"
+          "atlas-ATLAS_SERVER-EXTERNAL",
+          "hdfs-GATEWAY-BASE",
+          "hbase-GATEWAY-BASE"
         ]
       },
       {
         "cardinality":0,
         "refName":"hmsHG",
         "roleConfigGroupsRefNames":[
-          "hive-HIVEMETASTORE-EXTERNAL"
+          "hive-HIVEMETASTORE-EXTERNAL",
+          "hive-GATEWAY-BASE"
         ]
       }
     ],
@@ -178,10 +185,10 @@
                 "name":"ranger.audit.solr.max.shards.per.node",
                 "value":"2"
               },
-             {
-               "name":"ranger.audit.solr.config.ttl",
-               "value":"30"
-             }
+              {
+                "name":"ranger.audit.solr.config.ttl",
+                "value":"30"
+              }
             ]
           }
         ],
@@ -268,7 +275,7 @@
               },
               {
                 "name":"atlas_max_heap_size",
-                "value":8192
+                "value":11776
               }
             ],
             "refName":"atlas-ATLAS_SERVER-EXTERNAL",
@@ -334,7 +341,7 @@
               },
               {
                 "name":"solr_java_heapsize",
-                "value":8589934592
+                "value":12348030976
               },
               {
                 "name":"solr_java_direct_memory_size",
@@ -533,7 +540,17 @@
           {
             "base":false,
             "refName":"kafka-KAFKA_BROKER-EXTERNAL",
-            "roleType":"KAFKA_BROKER"
+            "roleType":"KAFKA_BROKER",
+            "configs": [
+              {
+                "name": "broker_max_heap_size",
+                "value": 3072
+              },
+              {
+                "name": "ssl_enabled",
+                "value": "true"
+              }
+            ]
           }
         ],
         "serviceConfigs":[
@@ -595,7 +612,7 @@
             "configs":[
               {
                 "name":"hive_metastore_java_heapsize",
-                "value":8589934592
+                "value":12348030976
               }
             ]
           }
