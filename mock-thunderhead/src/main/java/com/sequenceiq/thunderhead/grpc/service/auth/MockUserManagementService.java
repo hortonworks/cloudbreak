@@ -62,7 +62,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
@@ -1066,7 +1065,6 @@ public class MockUserManagementService extends UserManagementImplBase {
                         .setAccount(builder
                                 .setClouderaManagerLicenseKey(cbLicense)
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
-                                .addEntitlements(createEntitlement(CDP_GCP))
                                 .addEntitlements(createEntitlement(CDP_CB_AWS_NATIVE))
                                 .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))
                                 .addEntitlements(createEntitlement(DATAHUB_AZURE_AUTOSCALING))

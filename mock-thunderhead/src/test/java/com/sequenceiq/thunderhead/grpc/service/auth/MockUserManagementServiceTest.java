@@ -176,7 +176,7 @@ public class MockUserManagementServiceTest {
         assertThat(res.hasAccount()).isTrue();
         Account account = res.getAccount();
         List<String> entitlements = account.getEntitlementsList().stream().map(Entitlement::getEntitlementName).collect(Collectors.toList());
-        assertThat(entitlements).contains("CDP_GCP", "CLOUDERA_INTERNAL_ACCOUNT", "DATAHUB_AZURE_AUTOSCALING",
+        assertThat(entitlements).contains("CLOUDERA_INTERNAL_ACCOUNT", "DATAHUB_AZURE_AUTOSCALING",
                 "DATAHUB_AWS_AUTOSCALING", "DATAHUB_GCP_AUTOSCALING", "LOCAL_DEV", "DATAHUB_FLOW_SCALING", "DATAHUB_STREAMING_SCALING",
                 "CDP_CM_ADMIN_CREDENTIALS");
     }
