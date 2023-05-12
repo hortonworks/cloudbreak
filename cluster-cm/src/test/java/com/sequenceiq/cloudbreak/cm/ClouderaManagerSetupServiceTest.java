@@ -1027,7 +1027,6 @@ public class ClouderaManagerSetupServiceTest {
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(blueprintView.getBlueprintText()).thenReturn(template);
-        when(blueprintView.getVersion()).thenReturn("7.2.17");
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
         doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
@@ -1051,7 +1050,6 @@ public class ClouderaManagerSetupServiceTest {
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(blueprintView.getBlueprintText()).thenReturn(template);
-        when(blueprintView.getVersion()).thenReturn("7.2.17");
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
 
@@ -1100,7 +1098,6 @@ public class ClouderaManagerSetupServiceTest {
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN()).thenReturn(Optional.of("fqdn"));
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
-        when(blueprintView.getVersion()).thenReturn("7.2.17");
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
         doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
