@@ -21,7 +21,9 @@ public class PythonVersionBasedRuntimeVersionValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PythonVersionBasedRuntimeVersionValidator.class);
 
-    private static final String MINIMUM_RUNTIME_VERSION = "7.2.16";
+    private static final String MINIMUM_RUNTIME_VERSION_FOR_DATA_HUB = "7.2.16";
+
+    private static final String MINIMUM_RUNTIME_VERSION_FOR_DATA_LAKE = "7.2.17";
 
     @Inject
     private LockedComponentService lockedComponentService;
@@ -31,7 +33,7 @@ public class PythonVersionBasedRuntimeVersionValidator {
 
     public boolean isUpgradePermittedForRuntime(StackDto stack, List<Image> cdhImagesFromCatalog, Image currentImage, Image targetImage) {
         String targetImageId = targetImage.getUuid();
-        if (isDataHubCluster(stack) && isTargetImageRequiresPython38(targetImage)) {
+        if (isTargetRuntimeRequiresPython38(targetImage, stack)) {
             if (isCurrentImageContainsPython38(stack, cdhImagesFromCatalog, currentImage) || isOsUpgrade(stack, currentImage, targetImage)) {
                 LOGGER.debug("Permitting upgrade for image {} because the required Python version is present on the current image {}", targetImageId,
                         currentImage.getUuid());
@@ -45,21 +47,22 @@ public class PythonVersionBasedRuntimeVersionValidator {
         return true;
     }
 
-    private boolean isDataHubCluster(StackDto stack) {
-        return stack.getType().equals(StackType.WORKLOAD);
-    }
-
     private boolean isOsUpgrade(StackDto stack, Image currentImage, Image targetImage) {
         return currentImage.getStackDetails().getVersion().equals(targetImage.getStackDetails().getVersion()) &&
                 lockedComponentService.isComponentsLocked(stack, currentImage, targetImage);
     }
 
-    private boolean isTargetImageRequiresPython38(Image targetImage) {
-        return isTargetRuntimeRequiresPython38(targetImage.getStackDetails().getVersion());
+    private boolean isTargetRuntimeRequiresPython38(Image targetImage, StackDto stack) {
+        String targetRuntimeVersion = targetImage.getStackDetails().getVersion();
+        return new VersionComparator().compare(() -> targetRuntimeVersion, () -> getMinimumRuntimeVersion(stack)) >= 0;
     }
 
-    private boolean isTargetRuntimeRequiresPython38(String targetRuntimeVersion) {
-        return new VersionComparator().compare(() -> targetRuntimeVersion, () -> MINIMUM_RUNTIME_VERSION) >= 0;
+    private String getMinimumRuntimeVersion(StackDto stack) {
+        return isDataHubCluster(stack) ? MINIMUM_RUNTIME_VERSION_FOR_DATA_HUB : MINIMUM_RUNTIME_VERSION_FOR_DATA_LAKE;
+    }
+
+    private boolean isDataHubCluster(StackDto stack) {
+        return stack.getType().equals(StackType.WORKLOAD);
     }
 
     private boolean isCurrentImageContainsPython38(StackDto stack, List<Image> cdhImagesFromCatalog, Image currentImage) {
