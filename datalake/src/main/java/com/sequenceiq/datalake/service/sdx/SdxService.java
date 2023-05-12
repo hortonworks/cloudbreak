@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.HierarchyAuthResourcePropertyProvider;
@@ -1097,17 +1098,19 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private void validateRuntimeAndImage(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment,
+    @VisibleForTesting
+    void validateRuntimeAndImage(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment,
             ImageSettingsV4Request imageSettingsV4Request, ImageV4Response imageV4Response) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
 
         if (imageV4Response != null) {
-            if (clusterRequest.getRuntime() != null && !Objects.equals(clusterRequest.getRuntime(), imageV4Response.getVersion())) {
+            if (StringUtils.isNotBlank(imageV4Response.getVersion()) && StringUtils.isNotBlank(clusterRequest.getRuntime())
+                    && !Objects.equals(clusterRequest.getRuntime(), imageV4Response.getVersion())) {
                 validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
                         "decides runtime version.");
             }
-        } else if (imageSettingsV4Request != null && clusterRequest.getRuntime() == null) {
+        } else if (imageSettingsV4Request != null && StringUtils.isBlank(clusterRequest.getRuntime())) {
             if (cloudPlatform.equals(MOCK)) {
                 clusterRequest.setRuntime(MEDIUM_DUTY_REQUIRED_VERSION);
             } else {
