@@ -75,7 +75,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 subnet.isIgwAvailable(),
                                 subnet.getType(),
                                 subnet.isPublicSubnet()
-                                        ? DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS
+                                        ? getDeploymentRestrictionWhenPublicSubnet(createdCloudNetwork)
                                         : getDeploymentRestrictionForPrivateSubnet(subnet.getType()))
                         )
                 )
