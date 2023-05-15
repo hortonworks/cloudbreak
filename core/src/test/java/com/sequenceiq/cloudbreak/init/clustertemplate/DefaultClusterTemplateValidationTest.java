@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.init.clustertemplate;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.ENABLED_TYPES;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,7 +24,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.yaml.snakeyaml.Yaml;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -45,7 +43,7 @@ public class DefaultClusterTemplateValidationTest {
     @BeforeEach
     public void before() throws FileNotFoundException {
         loadByResourceDir();
-        loadYaml();
+        loadEnabledInstances();
     }
 
     @Test
@@ -109,40 +107,19 @@ public class DefaultClusterTemplateValidationTest {
                 }).collect(Collectors.toList());
     }
 
-    private void loadYaml() throws FileNotFoundException {
-        InputStream inputStream = new FileInputStream(new File("src/main/resources/application.yml"));
-        Yaml yaml = new Yaml();
-        Map<String, Object> data = yaml.load(inputStream);
-        Map<String, Object> cb = (Map<String, Object>) data.get("cb");
+    private void loadEnabledInstances() throws FileNotFoundException {
 
-        Map<String, Object> aws = (Map<String, Object>) cb.get("aws");
-        Map<String, Object> distrox = (Map<String, Object>) aws.get("distrox");
-        List<String> awsEnabledInstanceTypes = Arrays.stream(ENABLED_TYPES
-                .trim()
-                .split(","))
-                .collect(Collectors.toList())
+        List<String> awsEnabledInstanceTypes = AWS_ENABLED_TYPES_LIST
                 .stream()
                 .map(s -> s.replaceAll(" ", ""))
                 .collect(Collectors.toList());
 
-        Map<String, Object> azure = (Map<String, Object>) cb.get("azure");
-        distrox = (Map<String, Object>) azure.get("distrox");
-        List<String> azureEnabledInstanceTypes = Arrays.stream(distrox.get("enabled.instance.types")
-                .toString()
-                .trim()
-                .split(","))
-                .collect(Collectors.toList())
+        List<String> azureEnabledInstanceTypes = AZURE_ENABLED_TYPES_LIST
                 .stream()
                 .map(s -> s.replaceAll(" ", ""))
                 .collect(Collectors.toList());
 
-        Map<String, Object> gcp = (Map<String, Object>) cb.get("gcp");
-        distrox = (Map<String, Object>) gcp.get("distrox");
-        List<String> gcpEnabledInstanceTypes = Arrays.stream(distrox.get("enabled.instance.types")
-                .toString()
-                .trim()
-                .split(","))
-                .collect(Collectors.toList())
+        List<String> gcpEnabledInstanceTypes = GCP_ENABLED_TYPES_LIST
                 .stream()
                 .map(s -> s.replaceAll(" ", ""))
                 .collect(Collectors.toList());
