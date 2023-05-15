@@ -11,7 +11,7 @@ jar {
 }
 
 dependencies {
-    implementation group: 'org.springframework.kafka',          name: 'spring-kafka',                    version: '2.9.8'
+    implementation group: 'org.springframework.kafka',          name: 'spring-kafka',                    version: '2.9.9'
     implementation group: 'org.skyscreamer',                    name: 'jsonassert',                      version: '1.5.1'
 
     implementation project(':structuredevent-model')
