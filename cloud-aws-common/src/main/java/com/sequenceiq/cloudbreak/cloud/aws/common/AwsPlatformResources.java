@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.ENABLED_TYPES;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
@@ -219,9 +219,6 @@ public class AwsPlatformResources implements PlatformResources {
     @Value("${cb.aws.disabled.instance.types:}")
     private List<String> disabledInstanceTypes;
 
-    @Value("${cb.aws.distrox.enabled.instance.types:" + ENABLED_TYPES + "}")
-    private List<String> enabledDistroxInstanceTypes;
-
     @Value("${cb.aws.fetch.max.items:500}")
     private Integer fetchMaxItems;
 
@@ -232,7 +229,7 @@ public class AwsPlatformResources implements PlatformResources {
             .filter(it -> !it.isEmpty())
             .noneMatch(di -> vmt.value().startsWith(di));
 
-    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
+    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> AWS_ENABLED_TYPES_LIST.stream()
             .filter(it -> !it.isEmpty())
             .anyMatch(di -> vmt.value().equals(di));
 
