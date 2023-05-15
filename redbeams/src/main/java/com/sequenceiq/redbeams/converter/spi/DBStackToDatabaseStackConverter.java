@@ -45,6 +45,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.EnvironmentService;
+import com.sequenceiq.redbeams.service.network.NetworkService;
 
 @Component
 public class DBStackToDatabaseStackConverter {
@@ -54,6 +55,9 @@ public class DBStackToDatabaseStackConverter {
     @Inject
     private EnvironmentService environmentService;
 
+    @Inject
+    private NetworkService networkService;
+
     public DatabaseStack convert(DBStack dbStack) {
         Network network = buildNetwork(dbStack);
         DatabaseServer databaseServer = buildDatabaseServer(dbStack);
@@ -61,13 +65,17 @@ public class DBStackToDatabaseStackConverter {
     }
 
     private Network buildNetwork(DBStack dbStack) {
-        com.sequenceiq.redbeams.domain.stack.Network dbStackNetwork = dbStack.getNetwork();
-        if (dbStackNetwork == null) {
+        if (dbStack.getNetwork() == null) {
             return null;
+        } else {
+            return networkService.findById(dbStack.getNetwork())
+                    .map(network -> {
+                        Json attributes = network.getAttributes();
+                        Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+                        return new Network(null, params);
+                    })
+                    .orElse(null);
         }
-        Json attributes = dbStackNetwork.getAttributes();
-        Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
-        return new Network(null, params);
     }
 
     private DatabaseServer buildDatabaseServer(DBStack dbStack) {
@@ -100,21 +108,10 @@ public class DBStackToDatabaseStackConverter {
     }
 
     private DatabaseEngine getDatabaseEngine(com.sequenceiq.redbeams.domain.stack.DatabaseServer dbStackDatabaseServer) {
-        DatabaseEngine engine;
-        switch (dbStackDatabaseServer.getDatabaseVendor()) {
-            case POSTGRES:
-                engine = DatabaseEngine.POSTGRESQL;
-                break;
-            case MYSQL:
-            case MARIADB:
-            case MSSQL:
-            case ORACLE11:
-            case ORACLE12:
-            case SQLANYWHERE:
-            default:
-                throw new BadRequestException("Unsupported database vendor " + dbStackDatabaseServer.getDatabaseVendor());
-        }
-        return engine;
+        return switch (dbStackDatabaseServer.getDatabaseVendor()) {
+            case POSTGRES -> DatabaseEngine.POSTGRESQL;
+            default -> throw new BadRequestException("Unsupported database vendor " + dbStackDatabaseServer.getDatabaseVendor());
+        };
     }
 
     private boolean determineSslEnforcement(DBStack dbStack) {
@@ -228,10 +225,10 @@ public class DBStackToDatabaseStackConverter {
 
     private String getEncryptionKeyResourceGroupNameFromEnv(DetailedEnvironmentResponse environment) {
         /* There would not be a case where both encryptionKeyResourceGroupName and azure Resource group is null.
-        *  If multiple azure resource groups then encryptionKeyResourceGroupName is mandatorily required to enable encryption with CMK.
-        *  This is already checked during environment start as part of azureEncryptionResources.
-        *  At least one of --resource-group-name or --encryption-key-resource-group-name should be specified.
-        * */
+         *  If multiple azure resource groups then encryptionKeyResourceGroupName is mandatorily required to enable encryption with CMK.
+         *  This is already checked during environment start as part of azureEncryptionResources.
+         *  At least one of --resource-group-name or --encryption-key-resource-group-name should be specified.
+         * */
         String encryptionKeyResourceGroupNameFromEnv = Optional.ofNullable(environment)
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
@@ -246,7 +243,7 @@ public class DBStackToDatabaseStackConverter {
     }
 
     private Optional<String> getEncryptionKeyArnFromEnv(DetailedEnvironmentResponse environment) {
-        return  Optional.ofNullable(environment)
+        return Optional.ofNullable(environment)
                 .map(DetailedEnvironmentResponse::getAws)
                 .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
                 .map(AwsDiskEncryptionParameters::getEncryptionKeyArn);

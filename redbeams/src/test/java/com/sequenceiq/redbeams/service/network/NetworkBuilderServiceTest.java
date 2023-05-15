@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -39,7 +40,6 @@ import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
-import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 @ExtendWith(MockitoExtension.class)
 public class NetworkBuilderServiceTest {
@@ -49,11 +49,10 @@ public class NetworkBuilderServiceTest {
 
     private static final String DATABASE_SERVER_ATTRIBUTES = "{ \"dbVersion\": \"10\", \"this\": \"that\" }";
 
-    @Mock
-    private EnvironmentService environmentService;
+    private static final Long NETWORK_ID = 12L;
 
     @Mock
-    private DBStackService dbStackService;
+    private EnvironmentService environmentService;
 
     @Mock
     private SubnetListerService subnetListerService;
@@ -72,6 +71,9 @@ public class NetworkBuilderServiceTest {
 
     @Mock
     private CloudParameterCache cloudParameterCache;
+
+    @Mock
+    private NetworkService networkService;
 
     @InjectMocks
     private NetworkBuilderService underTest;
@@ -100,6 +102,8 @@ public class NetworkBuilderServiceTest {
         when(subnetListerService.listSubnets(any(), any())).thenReturn(cloudSubnets);
         when(subnetChooserService.chooseSubnets(any(), any(), any())).thenReturn(cloudSubnets);
         when(networkParameterAdder.addSubnetIds(any(), any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
+        when(networkService.save(any(Network.class))).thenAnswer(invocation -> invocation.getArgument(0, Network.class));
+
         // WHEN
         Network network = underTest.buildNetwork(null, environment, AWS_CLOUD_PLATFORM, dbStack);
         // THEN
@@ -126,6 +130,7 @@ public class NetworkBuilderServiceTest {
         AwsNetworkV4Parameters networkParams = new AwsNetworkV4Parameters();
         networkParams.setSubnetId("subnetid");
         when(providerParameterCalculator.get(networkRequest)).thenReturn(networkParams);
+        when(networkService.save(any(Network.class))).thenAnswer(invocation -> invocation.getArgument(0, Network.class));
         // WHEN
         Network network = underTest.buildNetwork(networkRequest, environment, AWS_CLOUD_PLATFORM, dbStack);
         // THEN
@@ -150,11 +155,14 @@ public class NetworkBuilderServiceTest {
         when(subnetListerService.listSubnets(any(), any())).thenReturn(cloudSubnets);
         when(subnetChooserService.chooseSubnets(any(), any(), any())).thenReturn(cloudSubnets);
         when(networkParameterAdder.addSubnetIds(any(), any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
-        when(dbStackService.save(dbStack)).thenReturn(dbStack);
+        createNetworkMock();
+        ArgumentCaptor<Network> networkArgumentCaptor = ArgumentCaptor.forClass(Network.class);
+        when(networkService.save(networkArgumentCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0, Network.class));
 
-        DBStack updatedDbStack = underTest.updateNetworkSubnets(dbStack);
+        underTest.updateNetworkSubnets(dbStack);
 
-        Map<String, Object> networkAttributes = updatedDbStack.getNetwork().getAttributes().getMap();
+        Network network = networkArgumentCaptor.getValue();
+        Map<String, Object> networkAttributes = network.getAttributes().getMap();
         assertEquals("netvalue", networkAttributes.get("netkey"));
         assertEquals("original-subnet", networkAttributes.get("subnetkey"));
 
@@ -170,16 +178,13 @@ public class NetworkBuilderServiceTest {
         DBStack dbStack = getDbStack(Status.AVAILABLE);
         when(cloudParameterCache.isDbSubnetsUpdateEnabled(dbStack.getCloudPlatform())).thenReturn(false);
 
-        DBStack updatedDbStack = underTest.updateNetworkSubnets(dbStack);
+        underTest.updateNetworkSubnets(dbStack);
 
         verify(environmentService, never()).getByCrn(anyString());
         verify(subnetListerService, never()).listSubnets(any(), any());
         verify(subnetChooserService, never()).chooseSubnets(any(), any(), any());
         verify(networkParameterAdder, never()).addSubnetIds(any(), any(), any(), any());
-        verify(dbStackService, never()).save(dbStack);
-
-        Map<String, Object> networkAttributes = updatedDbStack.getNetwork().getAttributes().getMap();
-        assertEquals("original-subnet", networkAttributes.get("subnetkey"));
+        verifyNoInteractions(networkService);
     }
 
     private DBStack getDbStack(Status status) {
@@ -192,9 +197,7 @@ public class NetworkBuilderServiceTest {
         DatabaseServer databaseServer = new DatabaseServer();
         databaseServer.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES));
         dbStack.setDatabaseServer(databaseServer);
-        Network network = new Network();
-        network.setAttributes(new Json(Map.of("subnetkey", "original-subnet")));
-        dbStack.setNetwork(network);
+        dbStack.setNetwork(NETWORK_ID);
         return dbStack;
     }
 
@@ -202,5 +205,12 @@ public class NetworkBuilderServiceTest {
         DBStackStatus dbStackStatus = new DBStackStatus();
         dbStackStatus.setStatus(status);
         return dbStackStatus;
+    }
+
+    private void createNetworkMock() {
+        Network network = new Network();
+        network.setAttributes(new Json(Map.of("subnetkey", "original-subnet")));
+        network.setId(NETWORK_ID);
+        when(networkService.getById(NETWORK_ID)).thenReturn(network);
     }
 }

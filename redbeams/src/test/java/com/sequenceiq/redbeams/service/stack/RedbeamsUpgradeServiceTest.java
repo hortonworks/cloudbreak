@@ -12,7 +12,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -48,7 +47,6 @@ import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
-import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
 import com.sequenceiq.redbeams.dto.Credential;
@@ -115,7 +113,6 @@ public class RedbeamsUpgradeServiceTest {
         DBStack dbStack = getDbStack(Status.AVAILABLE);
         when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
         UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
-        when(networkBuilderService.updateNetworkSubnets(dbStack)).thenReturn(dbStack);
 
         RedbeamsStartUpgradeRequest redbeamsStartUpgradeRequest = new RedbeamsStartUpgradeRequest(dbStack.getId(),
                 upgradeDatabaseRequest.getTargetMajorVersion());
@@ -186,7 +183,6 @@ public class RedbeamsUpgradeServiceTest {
         DBStack dbStack = getDbStack(Status.AVAILABLE);
         when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
         UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
-        when(networkBuilderService.updateNetworkSubnets(dbStack)).thenReturn(dbStack);
 
         underTest.upgradeDatabaseServer(SERVER_CRN_STRING, upgradeDatabaseRequest);
     }
@@ -200,7 +196,6 @@ public class RedbeamsUpgradeServiceTest {
                 thenReturn(getOperationViewWithStatus(OperationProgressStatus.FINISHED));
         RedbeamsStartUpgradeRequest redbeamsStartUpgradeRequest = new RedbeamsStartUpgradeRequest(dbStack.getId(),
                 upgradeDatabaseRequest.getTargetMajorVersion());
-        when(networkBuilderService.updateNetworkSubnets(dbStack)).thenReturn(dbStack);
 
         when(flowManager.notify(RedbeamsUpgradeEvent.REDBEAMS_START_UPGRADE_EVENT.selector(), redbeamsStartUpgradeRequest)).
                 thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
@@ -292,9 +287,6 @@ public class RedbeamsUpgradeServiceTest {
         DatabaseServer databaseServer = new DatabaseServer();
         databaseServer.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES));
         dbStack.setDatabaseServer(databaseServer);
-        Network network = new Network();
-        network.setAttributes(new Json(Collections.emptyMap()));
-        dbStack.setNetwork(network);
         return dbStack;
     }
 

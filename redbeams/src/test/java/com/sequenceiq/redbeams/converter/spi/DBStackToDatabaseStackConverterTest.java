@@ -7,12 +7,14 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +44,7 @@ import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.EnvironmentService;
+import com.sequenceiq.redbeams.service.network.NetworkService;
 
 @ExtendWith(MockitoExtension.class)
 public class DBStackToDatabaseStackConverterTest {
@@ -52,6 +55,8 @@ public class DBStackToDatabaseStackConverterTest {
 
     private static final String STACK_TAGS = "{ \"userDefinedTags\": { \"ukey1\" : \"uvalue1\", \"key1\": \"value1\" }, "
                                             + " \"defaultTags\": { \"dkey1\" : \"dvalue1\", \"key1\": \"shadowed\" } }";
+
+    private static final Long NETWORK_ID = 12L;
 
     private static final String CLOUD_PLATFORM = "AZURE";
 
@@ -67,6 +72,9 @@ public class DBStackToDatabaseStackConverterTest {
     @Mock
     private EnvironmentService environmentService;
 
+    @Mock
+    private NetworkService networkService;
+
     @BeforeEach
     public void setUp() {
         dbStack = new DBStack();
@@ -75,13 +83,14 @@ public class DBStackToDatabaseStackConverterTest {
         dbStack.setDisplayName("My Stack");
         dbStack.setDescription("my stack");
         dbStack.setEnvironmentId("myenv");
+        dbStack.setNetwork(NETWORK_ID);
     }
 
     @Test
     public void testConversionNormal() {
         Network network = new Network();
         network.setAttributes(new Json(NETWORK_ATTRIBUTES));
-        dbStack.setNetwork(network);
+        when(networkService.findById(NETWORK_ID)).thenReturn(Optional.of(network));
 
         DatabaseServer server = new DatabaseServer();
         server.setName("myserver");
@@ -141,13 +150,15 @@ public class DBStackToDatabaseStackConverterTest {
         assertThat(convertedStack.getDatabaseServer()).isNull();
         assertThat(convertedStack.getTemplate()).isNull();
         assertThat(convertedStack.getTags().size()).isEqualTo(0);
+        verifyNoInteractions(networkService);
     }
 
     @Test
     public void testConversionAzureWithMultipleResourceGroups() {
         Network network = new Network();
         network.setAttributes(new Json(NETWORK_ATTRIBUTES));
-        dbStack.setNetwork(network);
+        when(networkService.findById(NETWORK_ID)).thenReturn(Optional.of(network));
+        dbStack.setNetwork(NETWORK_ID);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         dbStack.setParameters(new HashMap<>());
         DatabaseServer server = new DatabaseServer();
@@ -177,7 +188,8 @@ public class DBStackToDatabaseStackConverterTest {
     public void testConversionAzureWithSingleResourceGroups() {
         Network network = new Network();
         network.setAttributes(new Json(NETWORK_ATTRIBUTES));
-        dbStack.setNetwork(network);
+        when(networkService.findById(NETWORK_ID)).thenReturn(Optional.of(network));
+        dbStack.setNetwork(NETWORK_ID);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         dbStack.setParameters(new HashMap<>());
         DatabaseServer server = new DatabaseServer();
@@ -208,7 +220,8 @@ public class DBStackToDatabaseStackConverterTest {
     public void testConversionAzureWithAzureEncryptionResourcesPresentAndNoEncryptionKeyRG() {
         Network network = new Network();
         network.setAttributes(new Json(NETWORK_ATTRIBUTES));
-        dbStack.setNetwork(network);
+        when(networkService.findById(NETWORK_ID)).thenReturn(Optional.of(network));
+        dbStack.setNetwork(NETWORK_ID);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         dbStack.setParameters(new HashMap<>());
         DatabaseServer server = new DatabaseServer();
@@ -242,7 +255,8 @@ public class DBStackToDatabaseStackConverterTest {
     public void testConversionAzureWithAzureEncryptionResourcesPresentAndEncryptionKeyRG() {
         Network network = new Network();
         network.setAttributes(new Json(NETWORK_ATTRIBUTES));
-        dbStack.setNetwork(network);
+        when(networkService.findById(NETWORK_ID)).thenReturn(Optional.of(network));
+        dbStack.setNetwork(NETWORK_ID);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         dbStack.setParameters(new HashMap<>());
         DatabaseServer server = new DatabaseServer();
@@ -273,7 +287,8 @@ public class DBStackToDatabaseStackConverterTest {
     public void testConversionGcpWithGcpEncryptionResourcesPresent() {
         Network network = new Network();
         network.setAttributes(new Json(NETWORK_ATTRIBUTES));
-        dbStack.setNetwork(network);
+        when(networkService.findById(NETWORK_ID)).thenReturn(Optional.of(network));
+        dbStack.setNetwork(NETWORK_ID);
         dbStack.setCloudPlatform("GCP");
         dbStack.setParameters(new HashMap<>());
         DatabaseServer server = new DatabaseServer();
@@ -302,7 +317,8 @@ public class DBStackToDatabaseStackConverterTest {
     public void testConversionAzureWithAzureEncryptionResourcesPresentAndSingleResourceGroup() {
         Network network = new Network();
         network.setAttributes(new Json(NETWORK_ATTRIBUTES));
-        dbStack.setNetwork(network);
+        when(networkService.findById(NETWORK_ID)).thenReturn(Optional.of(network));
+        dbStack.setNetwork(NETWORK_ID);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         dbStack.setParameters(new HashMap<>());
         DatabaseServer server = new DatabaseServer();
@@ -390,7 +406,8 @@ public class DBStackToDatabaseStackConverterTest {
     public void testConversionAwsWithAwsEncryptionResourcesPresent() {
         Network network = new Network();
         network.setAttributes(new Json(NETWORK_ATTRIBUTES));
-        dbStack.setNetwork(network);
+        when(networkService.findById(NETWORK_ID)).thenReturn(Optional.of(network));
+        dbStack.setNetwork(NETWORK_ID);
         dbStack.setCloudPlatform("AWS");
         dbStack.setParameters(new HashMap<>());
         DatabaseServer server = new DatabaseServer();
