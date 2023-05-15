@@ -6,8 +6,10 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -15,9 +17,13 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -57,6 +64,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
@@ -83,7 +91,7 @@ import software.amazon.awssdk.services.ec2.model.TagSpecification;
 import software.amazon.awssdk.services.ec2.model.VolumeState;
 import software.amazon.awssdk.services.ec2.model.VolumeType;
 
-@ExtendWith({MockitoExtension.class})
+@ExtendWith({ MockitoExtension.class })
 class AwsVolumeResourceBuilderTest {
 
     private static final long PRIVATE_ID = 1234L;
@@ -119,8 +127,6 @@ class AwsVolumeResourceBuilderTest {
     private static final Map<String, String> TAGS = Map.ofEntries(entry("key1", "value1"), entry("key2", "value2"));
 
     private static final Collection<Tag> EC2_TAGS = List.of(Tag.builder().key("ec2_key").value("ec2_value").build());
-
-    private static final String SNAPSHOT_ID = "snapshotId";
 
     private static final String ENCRYPTION_KEY_ARN = "encryptionKeyArn";
 
@@ -202,7 +208,7 @@ class AwsVolumeResourceBuilderTest {
 
         List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group, emptyList(), cloudStack);
 
-        assertThat(result).isEmpty();
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -213,7 +219,7 @@ class AwsVolumeResourceBuilderTest {
                 List.of(createVolumeSet(emptyList())), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
-        assertThat(volumes).isEmpty();
+        assertTrue(volumes.isEmpty());
     }
 
     @Test
@@ -327,7 +333,7 @@ class AwsVolumeResourceBuilderTest {
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"))).thenReturn(List.of());
         Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(0L, authenticatedContext, group, List.of(instanceResource));
-        assertThat(actual.isEmpty()).isTrue();
+        assertTrue(actual.isEmpty());
         verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"));
         verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
@@ -346,8 +352,8 @@ class AwsVolumeResourceBuilderTest {
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"))).thenReturn(List.of(volumeSet));
         Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(0L, authenticatedContext, group, List.of(instanceResource));
-        assertThat(actual.isEmpty()).isFalse();
-        assertThat(actual.get()).isEqualTo(volumeSet);
+        assertFalse(actual.isEmpty());
+        assertEquals(volumeSet, actual.get());
         verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"));
         verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
@@ -364,8 +370,8 @@ class AwsVolumeResourceBuilderTest {
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"))).thenReturn(List.of(volumeSet));
         Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(0L, authenticatedContext, group, List.of(instanceResource));
-        assertThat(actual.isEmpty()).isFalse();
-        assertThat(actual.get()).isEqualTo(volumeSet);
+        assertFalse(actual.isEmpty());
+        assertEquals(volumeSet, actual.get());
         verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"));
         verify(resourceRetriever, never()).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
@@ -440,7 +446,7 @@ class AwsVolumeResourceBuilderTest {
 
     @Test()
     @MockitoSettings(strictness = Strictness.LENIENT)
-    void deleteTurnOffDeleteOntermination() throws PreserveResourceException {
+    void deleteTurnOffDeleteOntermination() {
         CloudResource cloudResource = mock(CloudResource.class);
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
@@ -455,12 +461,12 @@ class AwsVolumeResourceBuilderTest {
         verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
         ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
 
-        assertTrue(!modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
+        assertFalse(modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
     }
 
     @Test()
     @MockitoSettings(strictness = Strictness.LENIENT)
-    void skipModifyInstanceAttributeDuringDeleteWhenNoAttachedResourcesFound() throws PreserveResourceException {
+    void skipModifyInstanceAttributeDuringDeleteWhenNoAttachedResourcesFound() {
         CloudResource cloudResource = mock(CloudResource.class);
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
@@ -490,6 +496,50 @@ class AwsVolumeResourceBuilderTest {
                 createGroup(List.of(volume1, volume2), Map.of(), 0L), null);
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testCheckResourcesShouldReturnTheResources() {
+        List<CloudResource> resources = new ArrayList<>();
+        DescribeVolumesResponse response = DescribeVolumesResponse.builder()
+                .volumes(software.amazon.awssdk.services.ec2.model.Volume.builder().state(VolumeState.AVAILABLE).build()).build();
+        when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
+                .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(response);
+
+        List<CloudResourceStatus> actual = underTest.checkResources(ResourceType.AWS_VOLUMESET, awsContext, authenticatedContext, resources);
+
+        assertEquals(ResourceStatus.CREATED, actual.get(0).getStatus());
+        verify(volumeResourceCollector).getVolumeIdsByVolumeResources(any(), any(), any());
+        verify(amazonEC2Client).describeVolumes(any());
+    }
+
+    @Test
+    void testCheckResourcesShouldReturnTheResourcesWithDeletedStatusWhenAwsReturnsNotFoundError() {
+        List<CloudResource> resources = new ArrayList<>();
+        Ec2Exception ec2Exception = (Ec2Exception) Ec2Exception.builder()
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("InvalidVolume.NotFound").build()).build();
+        when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
+                .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
+        when(amazonEC2Client.describeVolumes(any())).thenThrow(ec2Exception);
+
+        List<CloudResourceStatus> actual = underTest.checkResources(ResourceType.AWS_VOLUMESET, awsContext, authenticatedContext, resources);
+
+        assertEquals(ResourceStatus.DELETED, actual.get(0).getStatus());
+        verify(volumeResourceCollector).getVolumeIdsByVolumeResources(any(), any(), any());
+        verify(amazonEC2Client).describeVolumes(any());
+    }
+
+    @Test
+    void testCheckResourcesShouldReturnTheResourcesWithDeletedStatusWhenThereAreNoVolumeIdsFound() {
+        List<CloudResource> resources = new ArrayList<>();
+        when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
+                .thenReturn(Pair.of(Collections.emptyList(), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
+        List<CloudResourceStatus> actual = underTest.checkResources(ResourceType.AWS_VOLUMESET, awsContext, authenticatedContext, resources);
+
+        assertEquals(ResourceStatus.DELETED, actual.get(0).getStatus());
+        verify(volumeResourceCollector).getVolumeIdsByVolumeResources(any(), any(), any());
+        verifyNoInteractions(amazonEC2Client);
     }
 
     @SuppressWarnings("unchecked")

@@ -472,20 +472,22 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 volumeSetAttributes());
 
         DescribeVolumesRequest.Builder describeVolumesRequestBuilder = DescribeVolumesRequest.builder();
-        if (!CollectionUtils.isEmpty(volumes.getFirst())) {
-            describeVolumesRequestBuilder.volumeIds(volumes.getFirst());
-        }
-        DescribeVolumesRequest describeVolumesRequest = describeVolumesRequestBuilder.build();
-        LOGGER.debug("Going to describe volume(s) with id(s): [{}]", String.join(",", describeVolumesRequest.volumeIds()));
         AtomicReference<ResourceStatus> volumeSetStatus = new AtomicReference<>();
-        try {
-            DescribeVolumesResponse response = client.describeVolumes(describeVolumesRequest);
-            volumeSetStatus.set(getResourceStatus(response));
-        } catch (Ec2Exception e) {
-            if (!"InvalidVolume.NotFound".equals(e.awsErrorDetails().errorCode())) {
-                throw e;
+        if (!CollectionUtils.isEmpty(volumes.getFirst())) {
+            DescribeVolumesRequest describeVolumesRequest = describeVolumesRequestBuilder.volumeIds(volumes.getFirst()).build();
+            LOGGER.debug("Going to describe volume(s) with id(s): [{}]", String.join(",", describeVolumesRequest.volumeIds()));
+            try {
+                DescribeVolumesResponse response = client.describeVolumes(describeVolumesRequest);
+                volumeSetStatus.set(getResourceStatus(response));
+            } catch (Ec2Exception e) {
+                if (!"InvalidVolume.NotFound".equals(e.awsErrorDetails().errorCode())) {
+                    throw e;
+                }
+                LOGGER.info("The volume doesn't need to be deleted as it does not exist on the provider side. Reason: {}", e.getMessage());
+                volumeSetStatus.set(DELETED);
             }
-            LOGGER.info("The volume doesn't need to be deleted as it does not exist on the provider side. Reason: {}", e.getMessage());
+        } else {
+            LOGGER.debug("There are no volume ids found for cloud resources.");
             volumeSetStatus.set(DELETED);
         }
         LOGGER.debug("[{}] volume set status is {}", String.join(",", volumes.getFirst()), volumeSetStatus);
