@@ -24,7 +24,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.4xlarge"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
