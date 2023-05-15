@@ -59,27 +59,22 @@ public class RedbeamsTerminationService {
         String crn = server.getResourceCrn().toString();
         if (server.getResourceStatus() != ResourceStatus.SERVICE_MANAGED) {
             return databaseServerConfigService.deleteByCrn(crn);
-        }
-
-        DBStack dbStack = dbStackService.getByCrn(crn);
-        MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
-        if (LOGGER.isDebugEnabled()) {
+        } else {
+            DBStack dbStack = dbStackService.getByCrn(crn);
+            MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
             LOGGER.debug("Terminate called for: {} with force: {}", dbStack, force);
+
+            if (flowLogService.isFlowConfigAlreadyRunning(dbStack.getId(), RedbeamsTerminationFlowConfig.class) || isAlreadyDeleted(server, dbStack)) {
+                LOGGER.debug("DatabaseServer with crn {} is already being deleted", dbStack.getResourceCrn());
+                return server;
+            } else {
+                dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);
+                cancelService.cancelRunningFlows(dbStack.getId());
+                flowManager.notify(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(),
+                        new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(), dbStack.getId(), force));
+                return databaseServerConfigService.getByCrn(crn);
+            }
         }
-
-        if (flowLogService.isFlowConfigAlreadyRunning(dbStack.getId(), RedbeamsTerminationFlowConfig.class) || isAlreadyDeleted(server, dbStack)) {
-            LOGGER.debug("DatabaseServer with crn {} is already being deleted", dbStack.getResourceCrn());
-            return server;
-        }
-
-        dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);
-        // re-fetch to see new status
-        server = databaseServerConfigService.getByCrn(crn);
-
-        cancelService.cancelRunningFlows(dbStack.getId());
-        flowManager.notify(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(),
-                new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(), dbStack.getId(), force));
-        return server;
     }
 
     private boolean isAlreadyDeleted(DatabaseServerConfig server, DBStack dbStack) {

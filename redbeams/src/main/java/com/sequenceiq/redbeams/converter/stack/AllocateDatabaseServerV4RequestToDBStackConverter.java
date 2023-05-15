@@ -144,7 +144,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
             asMap.forEach((key, value) -> parameter.put(key, value.toString()));
             dbStack.setParameters(parameter);
         }
-        dbStack.setNetwork(networkBuilderService.buildNetwork(source.getNetwork(), environment, cloudPlatform, dbStack));
+        dbStack.setNetwork(networkBuilderService.buildNetwork(source.getNetwork(), environment, cloudPlatform, dbStack).getId());
 
         Instant now = clock.getCurrentInstant();
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));

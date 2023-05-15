@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -150,6 +151,8 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private static final int THREE_CERTS = 3;
 
+    private static final Long NETWORK_ID = 12L;
+
     @Mock
     private EnvironmentService environmentService;
 
@@ -260,6 +263,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Network network = new Network();
+        network.setId(NETWORK_ID);
         when(networkBuilderService.buildNetwork(eq(networkRequest), eq(environment), eq(AWS_CLOUD_PLATFORM), any(DBStack.class))).thenReturn(network);
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
@@ -286,7 +290,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals("dbvalue", dbStack.getDatabaseServer().getAttributes().getMap().get("dbkey"));
         assertEquals(REDBEAMS_DB_MAJOR_VERSION, dbStack.getDatabaseServer().getAttributes().getMap().get("engineVersion"));
         assertEquals(securityGroupRequest.getSecurityGroupIds(), dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds());
-        assertEquals(network, dbStack.getNetwork());
+        assertEquals(NETWORK_ID, dbStack.getNetwork());
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
 
         verifySsl(dbStack, Set.of(CERT_PEM_V3), CLOUD_PROVIDER_IDENTIFIER_V3);
@@ -331,6 +335,9 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(userGeneratorService.generateUserName()).thenReturn(USERNAME);
         when(passwordGeneratorService.generatePassword(any())).thenReturn(PASSWORD);
+        Network network = new Network();
+        network.setId(NETWORK_ID);
+        when(networkBuilderService.buildNetwork(isNull(), eq(environment), eq(AWS_CLOUD_PLATFORM), any(DBStack.class))).thenReturn(network);
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
@@ -424,6 +431,9 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
 
         databaseServerRequest.setDatabaseVendor(DATABASE_VENDOR);
+        Network network = new Network();
+        network.setId(NETWORK_ID);
+        when(networkBuilderService.buildNetwork(eq(networkRequest), eq(environment), eq(cloudPlatform), any(DBStack.class))).thenReturn(network);
     }
 
     @Test

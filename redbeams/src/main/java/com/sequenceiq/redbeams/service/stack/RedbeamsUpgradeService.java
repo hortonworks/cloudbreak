@@ -136,7 +136,7 @@ public class RedbeamsUpgradeService {
             return handleAlreadyUpgraded(crn, currentVersion);
         }
 
-        dbStack = networkBuilderService.updateNetworkSubnets(dbStack);
+        networkBuilderService.updateNetworkSubnets(dbStack);
         dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.UPGRADE_REQUESTED);
         RedbeamsStartUpgradeRequest redbeamsStartUpgradeRequest = new RedbeamsStartUpgradeRequest(dbStack.getId(),
                 targetVersion);

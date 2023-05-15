@@ -23,8 +23,6 @@ import com.sequenceiq.redbeams.api.model.common.Status;
 
 public class DBStackTest {
 
-    private static final Network NETWORK = new Network();
-
     private static final DatabaseServer SERVER = new DatabaseServer();
 
     private static final Json TAGS = new Json("{}");
@@ -65,9 +63,6 @@ public class DBStackTest {
 
         dbStack.setAvailabilityZone("us-east-1b");
         assertEquals("us-east-1b", dbStack.getAvailabilityZone());
-
-        dbStack.setNetwork(NETWORK);
-        assertEquals(NETWORK, dbStack.getNetwork());
 
         dbStack.setDatabaseServer(SERVER);
         assertEquals(SERVER, dbStack.getDatabaseServer());

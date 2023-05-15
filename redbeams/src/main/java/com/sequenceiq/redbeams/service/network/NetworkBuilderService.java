@@ -23,7 +23,6 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
-import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 @Component
 public class NetworkBuilderService {
@@ -31,9 +30,6 @@ public class NetworkBuilderService {
 
     @Inject
     private EnvironmentService environmentService;
-
-    @Inject
-    private DBStackService dbStackService;
 
     @Inject
     private SubnetListerService subnetListerService;
@@ -53,6 +49,9 @@ public class NetworkBuilderService {
     @Inject
     private CloudParameterCache cloudParameterCache;
 
+    @Inject
+    private NetworkService networkService;
+
     public Network buildNetwork(NetworkV4StackRequest source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
             DBStack dbStack) {
         Network network = new Network();
@@ -71,21 +70,22 @@ public class NetworkBuilderService {
                 throw new BadRequestException("Invalid network parameters", e);
             }
         }
-        return network;
+        return networkService.save(network);
     }
 
-    public DBStack updateNetworkSubnets(DBStack dbStack) {
+    public void updateNetworkSubnets(DBStack dbStack) {
         String cloudPlatform = dbStack.getCloudPlatform();
         if (cloudParameterCache.isDbSubnetsUpdateEnabled(cloudPlatform)) {
             DetailedEnvironmentResponse environment = environmentService.getByCrn(dbStack.getEnvironmentId());
             Map<String, Object> envSubnets = getSubnetsFromEnvironment(environment, CloudPlatform.valueOf(cloudPlatform), dbStack);
-            Map<String, Object> networkAttributes = dbStack.getNetwork().getAttributes().getMap();
+            Network network = networkService.getById(dbStack.getNetwork());
+            Map<String, Object> networkAttributes = network.getAttributes().getMap();
             networkAttributes.putAll(envSubnets);
-            dbStack.getNetwork().setAttributes(new Json(networkAttributes));
+            network.setAttributes(new Json(networkAttributes));
             LOGGER.info("The subnets of the DB stack [{}] updated with [{}] subnets before db upgrade", dbStack.getName(), envSubnets);
-            return dbStackService.save(dbStack);
+            networkService.save(network);
         } else {
-            return dbStack;
+            LOGGER.info("The subnets of the DB stack [{}] is not enabled", dbStack.getName());
         }
     }
 

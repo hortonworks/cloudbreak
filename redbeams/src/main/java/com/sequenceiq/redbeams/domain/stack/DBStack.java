@@ -57,8 +57,8 @@ public class DBStack {
 
     private String availabilityZone;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Network network;
+    @Column(nullable = false, name = "network_id")
+    private Long networkId;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @SecretValue
@@ -148,12 +148,12 @@ public class DBStack {
         this.availabilityZone = availabilityZone;
     }
 
-    public Network getNetwork() {
-        return network;
+    public Long getNetwork() {
+        return networkId;
     }
 
-    public void setNetwork(Network network) {
-        this.network = network;
+    public void setNetwork(Long networkId) {
+        this.networkId = networkId;
     }
 
     public DatabaseServer getDatabaseServer() {
@@ -328,7 +328,7 @@ public class DBStack {
                 + "',displayName='" + displayName
                 + "',region='" + region
                 + "',availabilityZone='" + availabilityZone
-                + ",network=" + (network != null ? network.toString() : "null")
+                + ",networkId=" + networkId
                 + ",databaseServer=" + (databaseServer != null ? databaseServer.toString() : "null")
                 + ",tags=" + (tags != null ? tags.getValue() : "null")
                 + ",parameters=" + parameters

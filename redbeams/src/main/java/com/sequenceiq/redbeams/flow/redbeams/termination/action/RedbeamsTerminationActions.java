@@ -18,6 +18,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
@@ -34,6 +35,7 @@ import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.Termina
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerSuccess;
 import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
+import com.sequenceiq.redbeams.service.network.NetworkService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 import com.sequenceiq.redbeams.sync.DBStackJobService;
@@ -106,19 +108,35 @@ public class RedbeamsTerminationActions {
     public Action<?, ?> terminationFinished() {
         return new AbstractRedbeamsTerminationAction<>(DeregisterDatabaseServerSuccess.class, false) {
 
+            @Inject
+            private NetworkService networkService;
+
+            @Inject
+            private TransactionService transactionService;
+
             @Override
             protected void prepareExecution(DeregisterDatabaseServerSuccess payload, Map<Object, Object> variables) {
                 dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.DELETE_COMPLETED);
             }
 
             @Override
-            protected void doExecute(RedbeamsContext context, DeregisterDatabaseServerSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(RedbeamsContext context, DeregisterDatabaseServerSuccess payload, Map<Object, Object> variables) {
                 // Delete the DB stack here instead of deregistration so that we can keep track of its status
                 // through the termination
-                Optional<DBStack> dbstack = Optional.ofNullable(context.getDBStack());
-                metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FINISHED, dbstack);
-                dbstack.ifPresentOrElse(db -> dbStackService.delete(db.getId()),
-                        () -> LOGGER.debug("DBStack for {} id is not found, so deletion will be skipped!", payload.getResourceId()));
+                Optional<DBStack> dbStack = Optional.ofNullable(context.getDBStack());
+                metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FINISHED, dbStack);
+                dbStack.ifPresentOrElse(db -> {
+                    try {
+                        transactionService.required(() -> {
+                            Long networkId = db.getNetwork();
+                            dbStackService.delete(db.getId());
+                            networkService.delete(networkId);
+                        });
+                    } catch (TransactionService.TransactionExecutionException e) {
+                        LOGGER.error("Couldn't delete DB stack", e);
+                        throw new TransactionService.TransactionRuntimeExecutionException(e);
+                    }
+                }, () -> LOGGER.debug("DBStack for {} id is not found, so deletion will be skipped!", payload.getResourceId()));
                 sendEvent(context);
             }
 
@@ -153,9 +171,9 @@ public class RedbeamsTerminationActions {
 
             @Override
             protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
-                StateContext<RedbeamsTerminationState,
-                RedbeamsTerminationEvent> stateContext,
-                RedbeamsFailureEvent payload) {
+                    StateContext<RedbeamsTerminationState,
+                            RedbeamsTerminationEvent> stateContext,
+                    RedbeamsFailureEvent payload) {
 
                 Flow flow = getFlow(flowParameters.getFlowId());
                 flow.setFlowFailed(payload.getException());
