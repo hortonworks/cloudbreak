@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.SHARED_PROJECT_ID;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
@@ -104,9 +105,6 @@ public class GcpPlatformResources implements PlatformResources {
     @Value("${cb.gcp.zone.parameter.default:europe-west1}")
     private String gcpZoneParameterDefault;
 
-    @Value("${cb.gcp.distrox.enabled.instance.types:}")
-    private List<String> enabledDistroxInstanceTypes;
-
     @Value("${distrox.restrict.instance.types:true}")
     private boolean restrictInstanceTypes;
 
@@ -130,7 +128,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
 
-    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
+    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> GCP_ENABLED_TYPES_LIST.stream()
             .filter(it -> !it.isEmpty())
             .anyMatch(di -> vmt.value().equals(di));
 
